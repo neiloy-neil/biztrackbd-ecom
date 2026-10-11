@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360" role="img" aria-label="BizTrackBD: the store builder that thinks in taka">
+  <rect width="1280" height="360" fill="#1A1A4E"/>
+  <circle cx="1090" cy="140" r="230" fill="#5B4FE8" fill-opacity="0.22"/>
+  <circle cx="1210" cy="330" r="150" fill="#A9A3FF" fill-opacity="0.10"/>
+  <circle cx="90" cy="360" r="170" fill="#5B4FE8" fill-opacity="0.14"/>
+  <!-- mark: three bars on an indigo tile -->
+  <rect x="80" y="78" width="84" height="84" rx="22" fill="#5B4FE8"/>
+  <path d="M104 146V118M122 146V94M140 146V108" stroke="#fff" stroke-width="10" stroke-linecap="round"/>
+  <text x="188" y="140" font-family="'Plus Jakarta Sans','Segoe UI',Helvetica,Arial,sans-serif" font-size="64" font-weight="800" fill="#fff" letter-spacing="-1.5">BizTrack<tspan fill="#A9A3FF">BD</tspan></text>
+  <text x="80" y="224" font-family="'Plus Jakarta Sans','Segoe UI',Helvetica,Arial,sans-serif" font-size="34" font-weight="600" fill="#E1DEFB">The store builder that thinks in taka.</text>
+  <g font-family="'Plus Jakarta Sans','Segoe UI',Helvetica,Arial,sans-serif" font-size="19" font-weight="700">
+    <rect x="80" y="262" width="150" height="40" rx="20" fill="#5B4FE8"/><text x="155" y="288" text-anchor="middle" fill="#fff">Cash on delivery</text>
+    <rect x="242" y="262" width="92" height="40" rx="20" fill="#D12053"/><text x="288" y="288" text-anchor="middle" fill="#fff">bKash</text>
+    <rect x="346" y="262" width="100" height="40" rx="20" fill="#C2540A"/><text x="396" y="288" text-anchor="middle" fill="#fff">Nagad</text>
+    <rect x="458" y="262" width="270" height="40" rx="20" fill="#2A2A6E"/><text x="593" y="288" text-anchor="middle" fill="#E1DEFB">Pathao · Steadfast · RedX</text>
+  </g>
+</svg>
