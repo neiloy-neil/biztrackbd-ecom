@@ -3,7 +3,7 @@
 //   node tools/supabase-schedule.mjs --admin https://admin.example.com --platform https://platform.example.com           (shows the plan)
 //   node tools/supabase-schedule.mjs --admin ... --platform ... --yes                                                   (installs)
 //   node tools/supabase-schedule.mjs --remove --yes                                                                     (removes the jobs and the secret)
-// Reads SUPABASE_DB_URL (owner login) and CRON_SECRET (the SAME value the Vercel projects have) from the root .env.local.
+// Reads SUPABASE_DB_URL (owner login) from .env.local and CRON_SECRET (the SAME value the Vercel projects have) from .env.production.local.
 // A job only works once the apps are deployed at those addresses; until then each call fails harmlessly and is logged in net._http_response.
 import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 try { process.loadEnvFile(join(root, ".env.local")); } catch { /* use the environment */ }
+try { process.loadEnvFile(join(root, ".env.production.local")); } catch { /* generated production secrets, if any */ }
 const pg = createRequire(join(root, "apps/admin/package.json"))("pg");
 
 const args = process.argv.slice(2);

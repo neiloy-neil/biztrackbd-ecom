@@ -172,12 +172,21 @@ export interface TotpEnrollment {
   qr: string;
 }
 
+/** Supabase returns the SVG unencoded after "data:image/svg+xml;utf-8,": a "#" or quote inside breaks the picture, so encode it ourselves. */
+function qrAddress(raw: string): string {
+  const m = raw.match(/^data:image\/svg\+xml;(?:charset=)?utf-8,([\s\S]*)$/i);
+  return m ? `data:image/svg+xml;charset=utf-8,${encodeURIComponent(decodeURIComponentSafe(m[1]!))}` : raw;
+}
+function decodeURIComponentSafe(v: string): string {
+  try { return decodeURIComponent(v); } catch { return v; }
+}
+
 export async function enrollTotp(accessToken: string, name: string): Promise<TotpEnrollment> {
   const r = await call("/auth/v1/factors", { bearer: accessToken, body: { factor_type: "totp", friendly_name: name.slice(0, 40), issuer: "BizTrackBD" } });
   if (r.status >= 300) throw new AuthFailure(r.status === 429 ? "RATE_LIMITED" : "UNAVAILABLE", msgOf(r.json) || "Could not start two-factor setup");
   const t = (r.json.totp ?? {}) as Record<string, unknown>;
   forgetToken(accessToken);
-  return { factorId: String(r.json.id), secret: String(t.secret ?? ""), uri: String(t.uri ?? ""), qr: String(t.qr_code ?? "") };
+  return { factorId: String(r.json.id), secret: String(t.secret ?? ""), uri: String(t.uri ?? ""), qr: qrAddress(String(t.qr_code ?? "")) };
 }
 
 /** Proves possession of the authenticator. On success the new tokens are at assurance level 2. */
