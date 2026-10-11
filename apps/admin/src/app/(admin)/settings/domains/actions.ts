@@ -47,6 +47,9 @@ export async function makePrimaryAction(domainId: string): Promise<void> {
 
 export async function removeDomainAction(domainId: string): Promise<void> {
   const s = await requireAction("billing", "edit");
+  if (s.actor.isImpersonator) {
+    back({ err: "Removing custom domains is prohibited during super admin impersonation." });
+  }
   try {
     await removeDomain(s.tenantId, s.actor, domainId);
   } catch (e) {

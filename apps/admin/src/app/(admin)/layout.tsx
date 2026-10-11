@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { ROLE_LABELS, can, getStoreSettings, shellCounts, type Area } from "@biztrackbd/core";
+import { ROLE_LABELS, can, getActiveAnnouncementsForTenant, getStoreSettings, shellCounts, type Area } from "@biztrackbd/core";
 import { withTenant } from "@biztrackbd/db";
 import { ChartIcon, CustomersIcon, GearIcon, HomeIcon, MoreIcon, OrdersIcon, ProductsIcon, PuzzleIcon, StoreIcon, TagIcon } from "@/components/icons";
 import { NavLink } from "@/components/nav";
 import { PwaRegister } from "@/components/pwa";
 import { ReadOnlyGuard } from "@/components/read-only";
+import { AnnouncementBanner } from "@/components/announcement-banner";
+import { ImpersonationBanner } from "@/components/impersonation-banner";
 import { CommandPalette, ShellProvider, SideNav, TopActions, type NavGroup, type Page } from "@/components/shell";
 import { ThemeSwitch } from "./theme-switch";
 import { getSession } from "@/lib/session";
@@ -39,11 +41,13 @@ const GROUPS: Group[] = [
   { id: "store", label: "Online store", icon: <StoreIcon />, items: [{ href: "/design", label: "Store design", area: "design" }, { href: "/landing", label: "Landing pages", area: "design" }, { href: "/content", label: "Pages and blog", area: "design" }] },
   { id: "reports", label: "Reports", icon: <ChartIcon />, items: [{ href: "/reports", label: "Reports", area: "reports" }, { href: "/finance/cod", label: "COD payouts", area: "reports" }, { href: "/finance/profit", label: "Profit and loss", area: "reports" }] },
   { id: "apps", label: "Apps", icon: <PuzzleIcon />, items: [{ href: "/settings/integrations", label: "Integrations", area: "billing" }, { href: "/settings/apps", label: "Apps", area: "billing" }] },
-  // One link: the settings pages have their own navigation, so the sidebar does not repeat it.
   {
     id: "settings", label: "Settings", icon: <GearIcon />,
-    items: [{ href: "/settings/store", label: "Settings", area: "design" }],
-    activePrefixes: ["/settings/store", "/settings/domains", "/settings/payments", "/settings/shipping", "/settings/staff", "/settings/audit", "/billing"],
+    items: [
+      { href: "/settings/store", label: "Settings", area: "design" },
+      { href: "/support", label: "Help and support", area: "design" },
+    ],
+    activePrefixes: ["/settings/store", "/settings/domains", "/settings/payments", "/settings/shipping", "/settings/staff", "/settings/audit", "/billing", "/support"],
   },
 ];
 
@@ -56,10 +60,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const s = await getSession();
   const role = s.user.role;
   const lang = asLang((await cookies()).get(LANG_COOKIE)?.value);
-  const [staff, settings, counts] = await Promise.all([
+  const [staff, settings, counts, announcements] = await Promise.all([
     withTenant(s.tenantId, (tx) => tx.tenantUser.findMany({ where: { isActive: true }, orderBy: { createdAt: "asc" }, select: { email: true, name: true, role: true } })),
     can(role, "design") ? getStoreSettings(s.tenantId, s.actor) : Promise.resolve(null),
     shellCounts(s.tenantId, s.actor),
+    getActiveAnnouncementsForTenant(s.tenantId),
   ]);
   const storeName = settings?.storeName ?? s.tenantSubdomain;
   const check = counts.check;
@@ -90,6 +95,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <ShellProvider initial={counts} pages={pages} strings={STRINGS[lang]}>
+      {s.impersonation && (
+        <ImpersonationBanner
+          tenantName={storeName}
+          tenantId={s.tenantId}
+          actorEmail={s.impersonation.actorEmail}
+          expiresAt={s.impersonation.expiresAt}
+        />
+      )}
       <div className="shell">
         <PwaRegister />
         <header className="topbar">
@@ -139,6 +152,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <div className="main-col">
           <div className="dtop"><TopActions storeHref={storeHref} lang={lang} /></div>
           <main className="content" id="main">
+            <AnnouncementBanner announcements={announcements} lang={lang} />
             {banner && can(role, "billing") && (
               <div className={`notice ${banner.tone}`} role="status" style={{ marginBottom: 14 }} data-testid="billing-banner">{banner.text} <Link href="/billing" className="link" prefetch={false}>See plans and pay</Link></div>
             )}

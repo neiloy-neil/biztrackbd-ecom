@@ -1,7 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import {
-  AuthFailure, ForbiddenError, ReadOnlyError, can, decodeClaims, getStoreAccess, getUserFromToken, staffMemberships, type Access, type Area, type AuthUser, type StaffActor, type StaffMembership,
+  AuthFailure, ForbiddenError, ReadOnlyError, can, decodeClaims, getStoreAccess, getUserFromToken, staffMemberships, verifyImpersonationSessionCookie, type Access, type Area, type AuthUser, type StaffActor, type StaffMembership,
 } from "@biztrackbd/core";
 import { resolveTenantByHost, withTenant, type StaffRole } from "@biztrackbd/db";
 import { AT, TENANT, authMode } from "@/lib/auth";
@@ -13,11 +13,53 @@ export interface AdminSession {
   actor: StaffActor;
   /** What the store may do right now: trial, active, overdue, read-only or locked (docs/07 section 21). */
   access: Access;
+  impersonation?: {
+    actorId: string;
+    actorEmail: string;
+    expiresAt: number;
+  };
 }
 
 export const DEV_USER_COOKIE = "dev_user";
 /** Development only: which store to act in, so a store made through signup can be tried. Ignored unless DEV_AUTH=1. */
 export const DEV_TENANT_COOKIE = "dev_tenant";
+export const IMPERSONATION_COOKIE = "impersonator_session";
+
+export async function getImpersonationSession(): Promise<AdminSession | null> {
+  const jar = await cookies();
+  const raw = jar.get(IMPERSONATION_COOKIE)?.value;
+  if (!raw) return null;
+  const verified = verifyImpersonationSessionCookie(raw);
+  if (!verified) return null;
+
+  const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim();
+  return withTenant(verified.tenantId, async (tx) => {
+    const t = await tx.tenant.findUnique({ where: { id: verified.tenantId }, select: { id: true, subdomain: true } });
+    if (!t) return null;
+    const owner = await tx.tenantUser.findFirst({ where: { role: "STORE_OWNER", isActive: true } });
+    if (!owner) return null;
+    return {
+      tenantId: t.id,
+      tenantSubdomain: t.subdomain,
+      user: { id: owner.id, name: owner.name, email: owner.email, role: owner.role },
+      actor: {
+        userId: owner.id,
+        email: owner.email,
+        name: owner.name,
+        role: owner.role,
+        ip,
+        isImpersonator: true,
+        impersonatedBy: verified.actorEmail,
+      },
+      access: await getStoreAccess(t.id),
+      impersonation: {
+        actorId: verified.actorId,
+        actorEmail: verified.actorEmail,
+        expiresAt: verified.expiresAt,
+      },
+    };
+  });
+}
 
 /** Where someone who is not fully signed in should go. */
 export type AuthState =
@@ -55,6 +97,8 @@ export async function resolveAuth(): Promise<AuthState> {
 
 /** Null for anyone who is not signed in to a store (for route handlers that answer 401 instead of redirecting). */
 export async function getSessionOrNull(): Promise<AdminSession | null> {
+  const imp = await getImpersonationSession();
+  if (imp) return imp;
   if (authMode() === "dev") return devSession();
   const a = await resolveAuth();
   if (a.state !== "ok") return null;
@@ -77,6 +121,8 @@ async function buildSession(m: StaffMembership, email: string): Promise<AdminSes
  * staff member chosen by a cookie so each role can be tried; that stand-in refuses to run in production.
  */
 export async function getSession(): Promise<AdminSession> {
+  const imp = await getImpersonationSession();
+  if (imp) return imp;
   if (authMode() === "dev") {
     const s = await devSession();
     if (!s) throw new Error("No active staff account for this store. Run the seed.");
