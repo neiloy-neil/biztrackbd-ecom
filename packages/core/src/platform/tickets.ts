@@ -1,0 +1,481 @@
+import { getPlatformPrisma, withTenant, type PrismaClient } from "@biztrackbd/db";
+import { assertPlatformCan, type PlatformActor } from "./admin";
+import { assertCan, type StaffActor } from "../permissions";
+import { NotFoundError, ValidationError } from "../errors";
+
+export type TicketStatusType = "OPEN" | "WAITING_ON_TENANT" | "SOLVED";
+export type TicketPriority = "LOW" | "NORMAL" | "HIGH";
+
+export interface TicketSummaryView {
+  id: string;
+  code: string;
+  subject: string;
+  status: TicketStatusType;
+  priority: TicketPriority;
+  storeName: string;
+  tenantId: string;
+  planTier: string;
+  ownerName: string | null;
+  assigneeName: string | null;
+  assigneeId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  lastMessageSnippet: string | null;
+  lastMessageAt: Date;
+}
+
+export interface TicketMessageView {
+  id: string;
+  authorType: "TENANT" | "PLATFORM" | "SYSTEM";
+  authorId: string | null;
+  authorName: string;
+  body: string;
+  isInternal: boolean;
+  createdAt: Date;
+}
+
+export interface TicketDetailView {
+  id: string;
+  code: string;
+  subject: string;
+  status: TicketStatusType;
+  priority: TicketPriority;
+  storeName: string;
+  tenantId: string;
+  planTier: string;
+  subdomain: string;
+  ownerName: string | null;
+  ownerEmail: string | null;
+  ownerPhone: string | null;
+  assigneeId: string | null;
+  assigneeName: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  messages: TicketMessageView[];
+}
+
+export interface Deps {
+  db?: PrismaClient;
+  now?: Date;
+}
+
+const dbOf = (d?: Deps) => d?.db ?? getPlatformPrisma();
+const nowOf = (d?: Deps) => d?.now ?? new Date();
+
+// ==========================================
+// 1. Platform Super Admin Operations
+// ==========================================
+
+export async function listPlatformTickets(
+  actor: PlatformActor,
+  filter?: { status?: TicketStatusType | "MINE"; search?: string },
+  deps?: Deps
+): Promise<TicketSummaryView[]> {
+  assertPlatformCan(actor, "tickets", "view");
+  const db = dbOf(deps);
+
+  const where: Record<string, unknown> = {};
+  if (filter?.status === "MINE") {
+    where.assigneeId = actor.id;
+  } else if (filter?.status) {
+    where.status = filter.status;
+  }
+
+  const rows = await db.supportTicket.findMany({
+    where,
+    orderBy: { updatedAt: "desc" },
+    include: {
+      tenant: {
+        select: {
+          id: true,
+          name: true,
+          planTier: true,
+          users: { where: { role: "STORE_OWNER" }, select: { name: true }, take: 1 },
+        },
+      },
+      messages: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: { body: true, createdAt: true },
+      },
+    },
+    take: 100,
+  });
+
+  const assigneeIds = [...new Set(rows.map((r) => r.assigneeId).filter(Boolean))] as string[];
+  const assignees = assigneeIds.length > 0
+    ? await db.platformUser.findMany({ where: { id: { in: assigneeIds } }, select: { id: true, name: true } })
+    : [];
+  const assigneeMap = new Map(assignees.map((a) => [a.id, a.name]));
+
+  return rows.map((r) => {
+    const ownerName = r.tenant.users[0]?.name ?? null;
+    const lastMsg = r.messages[0];
+    return {
+      id: r.id,
+      code: r.code,
+      subject: r.subject,
+      status: r.status as TicketStatusType,
+      priority: r.priority as TicketPriority,
+      storeName: r.tenant.name,
+      tenantId: r.tenant.id,
+      planTier: r.tenant.planTier,
+      ownerName,
+      assigneeId: r.assigneeId,
+      assigneeName: r.assigneeId ? assigneeMap.get(r.assigneeId) ?? null : null,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+      lastMessageSnippet: lastMsg ? lastMsg.body.slice(0, 120) : null,
+      lastMessageAt: lastMsg ? lastMsg.createdAt : r.createdAt,
+    };
+  });
+}
+
+export async function getPlatformTicketDetail(
+  actor: PlatformActor,
+  ticketId: string,
+  deps?: Deps
+): Promise<TicketDetailView> {
+  assertPlatformCan(actor, "tickets", "view");
+  const db = dbOf(deps);
+
+  const ticket = await db.supportTicket.findUnique({
+    where: { id: ticketId },
+    include: {
+      tenant: {
+        select: {
+          id: true,
+          name: true,
+          subdomain: true,
+          planTier: true,
+          users: { where: { role: "STORE_OWNER" }, select: { id: true, name: true, email: true, phone: true }, take: 1 },
+        },
+      },
+      messages: {
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
+
+  if (!ticket) throw new NotFoundError("Support ticket not found");
+
+  const assignee = ticket.assigneeId
+    ? await db.platformUser.findUnique({ where: { id: ticket.assigneeId }, select: { name: true } })
+    : null;
+
+  const owner = ticket.tenant.users[0] ?? null;
+
+  // Resolve author names for messages
+  const platformAuthorIds = [...new Set(ticket.messages.filter((m) => m.authorType === "PLATFORM" && m.authorId).map((m) => m.authorId!))];
+  const platformAuthors = platformAuthorIds.length > 0
+    ? await db.platformUser.findMany({ where: { id: { in: platformAuthorIds } }, select: { id: true, name: true } })
+    : [];
+  const platformAuthorMap = new Map(platformAuthors.map((a) => [a.id, a.name]));
+
+  const messages: TicketMessageView[] = ticket.messages.map((m) => {
+    let authorName = "System";
+    if (m.authorType === "TENANT") {
+      authorName = owner?.name ?? "Merchant";
+    } else if (m.authorType === "PLATFORM") {
+      authorName = m.authorId ? platformAuthorMap.get(m.authorId) ?? "Platform Support" : "Platform Support";
+    }
+
+    return {
+      id: m.id,
+      authorType: m.authorType as "TENANT" | "PLATFORM" | "SYSTEM",
+      authorId: m.authorId,
+      authorName,
+      body: m.body,
+      isInternal: m.isInternal,
+      createdAt: m.createdAt,
+    };
+  });
+
+  return {
+    id: ticket.id,
+    code: ticket.code,
+    subject: ticket.subject,
+    status: ticket.status as TicketStatusType,
+    priority: ticket.priority as TicketPriority,
+    storeName: ticket.tenant.name,
+    tenantId: ticket.tenant.id,
+    planTier: ticket.tenant.planTier,
+    subdomain: ticket.tenant.subdomain,
+    ownerName: owner?.name ?? null,
+    ownerEmail: owner?.email ?? null,
+    ownerPhone: owner?.phone ?? null,
+    assigneeId: ticket.assigneeId,
+    assigneeName: assignee?.name ?? null,
+    createdAt: ticket.createdAt,
+    updatedAt: ticket.updatedAt,
+    messages,
+  };
+}
+
+export async function replyPlatformTicket(
+  actor: PlatformActor,
+  input: {
+    ticketId: string;
+    body: string;
+    isInternal?: boolean;
+    newStatus?: TicketStatusType;
+  },
+  deps?: Deps
+): Promise<TicketMessageView> {
+  assertPlatformCan(actor, "tickets", "edit");
+  const body = input.body?.trim();
+  if (!body) throw new ValidationError("Message body is required");
+
+  const db = dbOf(deps);
+  const isInternal = Boolean(input.isInternal);
+  const newStatus = input.newStatus ?? (isInternal ? undefined : "WAITING_ON_TENANT");
+
+  const [message] = await db.$transaction(async (tx) => {
+    const ticket = await tx.supportTicket.findUnique({ where: { id: input.ticketId }, select: { id: true, tenantId: true } });
+    if (!ticket) throw new NotFoundError("Ticket not found");
+
+    const created = await tx.ticketMessage.create({
+      data: {
+        tenantId: ticket.tenantId,
+        ticketId: ticket.id,
+        authorType: "PLATFORM",
+        authorId: actor.id,
+        body,
+        isInternal,
+      },
+    });
+
+    if (newStatus) {
+      await tx.supportTicket.update({
+        where: { id: ticket.id },
+        data: { status: newStatus as never, updatedAt: new Date() },
+      });
+    }
+
+    await tx.platformAuditLog.create({
+      data: {
+        actorId: actor.id,
+        action: isInternal ? "ticket.internal_note" : "ticket.replied",
+        tenantId: ticket.tenantId,
+        details: { ticketId: ticket.id, isInternal, newStatus },
+        ipAddress: actor.ip ?? null,
+      },
+    });
+
+    return [created];
+  });
+
+  return {
+    id: message.id,
+    authorType: "PLATFORM",
+    authorId: actor.id,
+    authorName: actor.email,
+    body: message.body,
+    isInternal: message.isInternal,
+    createdAt: message.createdAt,
+  };
+}
+
+export async function updateTicketStatus(
+  actor: PlatformActor,
+  ticketId: string,
+  status: TicketStatusType,
+  deps?: Deps
+): Promise<void> {
+  assertPlatformCan(actor, "tickets", "edit");
+  const db = dbOf(deps);
+
+  const ticket = await db.supportTicket.findUnique({ where: { id: ticketId } });
+  if (!ticket) throw new NotFoundError("Ticket not found");
+
+  await db.$transaction(async (tx) => {
+    await tx.supportTicket.update({
+      where: { id: ticketId },
+      data: { status: status as never },
+    });
+
+    await tx.platformAuditLog.create({
+      data: {
+        actorId: actor.id,
+        action: "ticket.status_changed",
+        tenantId: ticket.tenantId,
+        details: { ticketId, from: ticket.status, to: status },
+        ipAddress: actor.ip ?? null,
+      },
+    });
+  });
+}
+
+// ==========================================
+// 2. Merchant Store Admin Operations
+// ==========================================
+
+export async function listTenantTickets(
+  tenantId: string,
+  actor: StaffActor,
+  deps?: Deps
+): Promise<{ id: string; code: string; subject: string; status: TicketStatusType; priority: string; updatedAt: Date }[]> {
+  assertCan(actor, "design", "view"); // all staff can view support
+
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx.supportTicket.findMany({
+      where: { tenantId },
+      orderBy: { updatedAt: "desc" },
+      select: {
+        id: true,
+        code: true,
+        subject: true,
+        status: true,
+        priority: true,
+        updatedAt: true,
+      },
+    });
+
+    return rows.map((r) => ({
+      id: r.id,
+      code: r.code,
+      subject: r.subject,
+      status: r.status as TicketStatusType,
+      priority: r.priority,
+      updatedAt: r.updatedAt,
+    }));
+  });
+}
+
+export async function createTenantTicket(
+  tenantId: string,
+  actor: StaffActor,
+  input: { subject: string; message: string; priority?: TicketPriority },
+  deps?: Deps
+): Promise<{ id: string; code: string }> {
+  assertCan(actor, "design", "edit");
+  const subject = input.subject?.trim();
+  const message = input.message?.trim();
+  if (!subject) throw new ValidationError("Subject is required");
+  if (!message) throw new ValidationError("Message is required");
+
+  const priority = input.priority ?? "NORMAL";
+  const code = `T-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  return withTenant(tenantId, async (tx) => {
+    const tenant = await tx.tenant.findUnique({
+      where: { id: tenantId },
+      select: { planTier: true, customDomain: true },
+    });
+
+    const ticket = await tx.supportTicket.create({
+      data: {
+        tenantId,
+        code,
+        subject,
+        priority,
+        status: "OPEN",
+        openedBy: actor.userId,
+      },
+    });
+
+    await tx.ticketMessage.create({
+      data: {
+        tenantId,
+        ticketId: ticket.id,
+        authorType: "TENANT",
+        authorId: actor.userId,
+        body: message,
+        isInternal: false,
+      },
+    });
+
+    // Automated system diagnostics note for platform staff
+    if (tenant) {
+      await tx.ticketMessage.create({
+        data: {
+          tenantId,
+          ticketId: ticket.id,
+          authorType: "SYSTEM",
+          authorId: null,
+          body: `Store Context: Plan is ${tenant.planTier}. Custom domain: ${tenant.customDomain ?? "none"}.`,
+          isInternal: false,
+        },
+      });
+    }
+
+    return { id: ticket.id, code: ticket.code };
+  });
+}
+
+export async function replyTenantTicket(
+  tenantId: string,
+  actor: StaffActor,
+  input: { ticketId: string; message: string },
+  deps?: Deps
+): Promise<void> {
+  assertCan(actor, "design", "edit");
+  const message = input.message?.trim();
+  if (!message) throw new ValidationError("Message is required");
+
+  return withTenant(tenantId, async (tx) => {
+    const ticket = await tx.supportTicket.findUnique({
+      where: { id: input.ticketId },
+    });
+    if (!ticket) throw new NotFoundError("Ticket not found");
+
+    await tx.ticketMessage.create({
+      data: {
+        tenantId,
+        ticketId: ticket.id,
+        authorType: "TENANT",
+        authorId: actor.userId,
+        body: message,
+        isInternal: false,
+      },
+    });
+
+    // Reopen if waiting or solved
+    await tx.supportTicket.update({
+      where: { id: ticket.id },
+      data: { status: "OPEN", updatedAt: new Date() },
+    });
+  });
+}
+
+export async function getTenantTicketDetail(
+  tenantId: string,
+  actor: StaffActor,
+  ticketId: string,
+  deps?: Deps
+): Promise<{
+  id: string;
+  code: string;
+  subject: string;
+  status: TicketStatusType;
+  priority: string;
+  createdAt: Date;
+  messages: { id: string; authorType: string; body: string; createdAt: Date }[];
+}> {
+  assertCan(actor, "design", "view");
+
+  return withTenant(tenantId, async (tx) => {
+    const ticket = await tx.supportTicket.findUnique({
+      where: { id: ticketId },
+      include: {
+        messages: {
+          where: { isInternal: false }, // Crucial: merchants NEVER see internal notes
+          orderBy: { createdAt: "asc" },
+          select: { id: true, authorType: true, body: true, createdAt: true },
+        },
+      },
+    });
+
+    if (!ticket) throw new NotFoundError("Ticket not found");
+
+    return {
+      id: ticket.id,
+      code: ticket.code,
+      subject: ticket.subject,
+      status: ticket.status as TicketStatusType,
+      priority: ticket.priority,
+      createdAt: ticket.createdAt,
+      messages: ticket.messages,
+    };
+  });
+}

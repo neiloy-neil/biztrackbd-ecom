@@ -26,14 +26,14 @@ export interface Deps {
 const dbOf = (d?: Deps) => d?.db ?? getPlatformPrisma();
 const nowOf = (d?: Deps) => d?.now ?? new Date();
 
-export type PlatformArea = "tenants" | "payments" | "plans" | "audit" | "suspend" | "adjust";
+export type PlatformArea = "tenants" | "payments" | "plans" | "audit" | "suspend" | "adjust" | "tickets" | "announcements";
 type Level = "none" | "view" | "edit";
 const N = "none", V = "view", E = "edit";
 export const PLATFORM_PERMISSIONS: Record<PlatformRole, Record<PlatformArea, Level>> = {
-  OWNER:        { tenants: E, payments: E, plans: E, audit: V, suspend: E, adjust: E },
-  FINANCE:      { tenants: V, payments: E, plans: V, audit: V, suspend: N, adjust: E },
-  SUPPORT_LEAD: { tenants: V, payments: V, plans: V, audit: N, suspend: E, adjust: E },
-  SUPPORT:      { tenants: V, payments: N, plans: N, audit: N, suspend: N, adjust: N },
+  OWNER:        { tenants: E, payments: E, plans: E, audit: V, suspend: E, adjust: E, tickets: E, announcements: E },
+  FINANCE:      { tenants: V, payments: E, plans: V, audit: V, suspend: N, adjust: E, tickets: V, announcements: V },
+  SUPPORT_LEAD: { tenants: V, payments: V, plans: V, audit: N, suspend: E, adjust: E, tickets: E, announcements: E },
+  SUPPORT:      { tenants: V, payments: N, plans: N, audit: N, suspend: N, adjust: N, tickets: E, announcements: V },
 };
 const RANK = { none: 0, view: 1, edit: 2 } as const;
 export const canPlatform = (role: PlatformRole, area: PlatformArea, level: "view" | "edit" = "view") => RANK[PLATFORM_PERMISSIONS[role]?.[area] ?? "none"] >= RANK[level];
@@ -41,7 +41,7 @@ export function assertPlatformCan(actor: PlatformActor, area: PlatformArea, leve
   if (!canPlatform(actor.role, area, level)) throw new ForbiddenError();
 }
 
-type Tx = Prisma.TransactionClient;
+type Tx = Prisma.TransactionClient | PrismaClient;
 async function log(tx: Tx, actor: PlatformActor | "SYSTEM", action: string, tenantId: string | null, details: Record<string, unknown> = {}) {
   await tx.platformAuditLog.create({
     data: { actorId: actor === "SYSTEM" ? "SYSTEM" : actor.id, action, tenantId, details: details as Prisma.InputJsonValue, ipAddress: actor === "SYSTEM" ? null : actor.ip },
@@ -67,30 +67,68 @@ export interface PlatformOverview {
   arr: number;
   payingStores: number;
   activeTrials: number;
+  trialsEndingSoon: number;
   pastDue: number;
   readOnlyOrLocked: number;
+  failingDomains: number;
   /** Stores that have paid at least once, out of stores whose trial is over. */
   trialToPaidPercent: number | null;
   /** Paying stores that lapsed in the last 30 days, out of those plus the ones still paying. */
   churnPercent: number | null;
   pendingPayments: { count: number; amount: number };
+  openTickets: number;
   quarantined: number;
   signups: { date: string; count: number }[];
   byPlan: { tier: string; stores: number }[];
+  newestSignups: {
+    id: string;
+    name: string;
+    subdomain: string;
+    theme: string;
+    status: "Trial" | "Paying" | "Suspended" | "Past due";
+    createdAt: Date;
+  }[];
 }
+
+const THEME_NAMES: Record<string, string> = {
+  kapor: "Kapor",
+  gadgetstudio: "Gadget Studio",
+  "mini-bunny": "Mini Bunny",
+  axionwear: "Axionwear",
+  bindu: "Bindu",
+  berber: "Berber",
+};
 
 export async function getOverview(actor: PlatformActor, deps?: Deps): Promise<PlatformOverview> {
   assertPlatformCan(actor, "tenants", "view");
   const db = dbOf(deps), now = nowOf(deps);
-  const [subs, tenants, pending, quarantined, paidEver] = await Promise.all([
+  const [subs, tenants, pending, quarantined, paidEver, openTicketsCount, failingDomainsCount, recentTenants] = await Promise.all([
     db.subscription.findMany({ select: { tenantId: true, amount: true, interval: true, status: true, planTier: true, currentPeriodEnd: true } }),
     db.tenant.findMany({ where: { isDemo: false }, select: { id: true, status: true, trialEndsAt: true, createdAt: true, suspendedReason: true, planTier: true } }),
     db.paymentProof.aggregate({ where: { status: "PENDING" }, _count: { _all: true }, _sum: { amount: true } }),
     db.tenant.count({ where: { quarantined: true, suspendedReason: null, isDemo: false } }),
     db.paymentProof.groupBy({ by: ["tenantId"], where: { status: "APPROVED" } }),
+    db.supportTicket.count({ where: { status: "OPEN" } }),
+    db.domain.count({ where: { verified: false } }),
+    db.tenant.findMany({
+      where: { isDemo: false },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+      select: {
+        id: true,
+        name: true,
+        subdomain: true,
+        createdAt: true,
+        status: true,
+        trialEndsAt: true,
+        suspendedReason: true,
+        themeInstalls: { where: { isActive: true }, select: { themeId: true }, take: 1 },
+        subscription: { select: { amount: true, currentPeriodEnd: true } },
+      },
+    }),
   ]);
   const subOf = new Map(subs.map((s) => [s.tenantId, s]));
-  let mrr = 0, paying = 0, trials = 0, pastDue = 0, locked = 0, lapsed = 0, trialsOver = 0;
+  let mrr = 0, paying = 0, trials = 0, trialsEndingSoon = 0, pastDue = 0, locked = 0, lapsed = 0, trialsOver = 0;
   const byPlan = new Map<string, number>();
   for (const t of tenants) {
     const s = subOf.get(t.id) ?? null;
@@ -100,7 +138,10 @@ export async function getOverview(actor: PlatformActor, deps?: Deps): Promise<Pl
       mrr += s ? (s.interval === "YEARLY" ? Number(s.amount) / 12 : Number(s.amount)) : 0;
       byPlan.set(t.planTier, (byPlan.get(t.planTier) ?? 0) + 1);
     }
-    if (a.state === "TRIAL") trials++;
+    if (a.state === "TRIAL") {
+      trials++;
+      if (a.daysLeft !== null && a.daysLeft <= 3) trialsEndingSoon++;
+    }
     if (a.state === "GRACE") pastDue++;
     if (a.state === "READ_ONLY" || a.state === "LOCKED") locked++;
     if (a.state !== "TRIAL") trialsOver++;
@@ -110,12 +151,33 @@ export async function getOverview(actor: PlatformActor, deps?: Deps): Promise<Pl
   const counts = new Map<string, number>();
   for (const t of tenants) counts.set(dhakaDate(t.createdAt), (counts.get(dhakaDate(t.createdAt)) ?? 0) + 1);
   const signups = Array.from({ length: 14 }, (_, i) => addDays(today, i - 13)).map((date) => ({ date, count: counts.get(date) ?? 0 }));
+
+  const newestSignups = recentTenants.map((rt) => {
+    const sub = rt.subscription;
+    const a = accessOf(rt, sub, now);
+    const themeRaw = rt.themeInstalls[0]?.themeId ?? "kapor";
+    const status: "Trial" | "Paying" | "Suspended" | "Past due" =
+      rt.suspendedReason ? "Suspended" : a.state === "ACTIVE" ? "Paying" : a.state === "GRACE" ? "Past due" : "Trial";
+    return {
+      id: rt.id,
+      name: rt.name,
+      subdomain: rt.subdomain,
+      theme: THEME_NAMES[themeRaw] ?? themeRaw,
+      status,
+      createdAt: rt.createdAt,
+    };
+  });
+
   return {
-    mrr: money(mrr), arr: money(mrr * 12), payingStores: paying, activeTrials: trials, pastDue, readOnlyOrLocked: locked,
+    mrr: money(mrr), arr: money(mrr * 12), payingStores: paying, activeTrials: trials, trialsEndingSoon, pastDue, readOnlyOrLocked: locked,
+    failingDomains: failingDomainsCount,
     trialToPaidPercent: trialsOver > 0 ? Math.round((paidEver.length / trialsOver) * 1000) / 10 : null,
     churnPercent: paying + lapsed > 0 ? Math.round((lapsed / (paying + lapsed)) * 1000) / 10 : null,
-    pendingPayments: { count: pending._count._all, amount: Number(pending._sum.amount ?? 0) }, quarantined, signups,
+    pendingPayments: { count: pending._count._all, amount: Number(pending._sum.amount ?? 0) },
+    openTickets: openTicketsCount,
+    quarantined, signups,
     byPlan: [...byPlan.entries()].map(([tier, stores]) => ({ tier, stores })),
+    newestSignups,
   };
 }
 
@@ -125,20 +187,32 @@ export interface TenantRow {
   id: string;
   name: string;
   subdomain: string;
+  customDomain?: string | null;
   ownerName: string | null;
   ownerEmail: string | null;
   ownerPhone: string | null;
   tier: string;
   access: Access;
+  mrr?: number;
+  ordersCount?: number;
   quarantined: boolean;
-  /** A template demo store (docs/38). */
   isDemo: boolean;
   createdAt: Date;
+  status?: string;
 }
 
-export type TenantFilter = "all" | "trial" | "paying" | "overdue" | "locked" | "flagged";
+export type TenantFilter = "all" | "trial" | "paying" | "overdue" | "locked" | "flagged" | "suspended" | "cancelled";
 
-export async function listTenants(actor: PlatformActor, opts: { q?: string; filter?: TenantFilter; page?: number; pageSize?: number } = {}, deps?: Deps): Promise<{ rows: TenantRow[]; total: number; page: number; pageSize: number }> {
+export interface TenantCounts {
+  all: number;
+  paying: number;
+  trial: number;
+  overdue: number;
+  suspended: number;
+  cancelled: number;
+}
+
+export async function listTenants(actor: PlatformActor, opts: { q?: string; filter?: TenantFilter; page?: number; pageSize?: number } = {}, deps?: Deps): Promise<{ rows: TenantRow[]; total: number; page: number; pageSize: number; counts: TenantCounts }> {
   assertPlatformCan(actor, "tenants", "view");
   const db = dbOf(deps), now = nowOf(deps);
   const q = opts.q?.trim();
@@ -151,14 +225,74 @@ export async function listTenants(actor: PlatformActor, opts: { q?: string; filt
       ] }
     : {};
   // Access states come from dates, so the filters are applied after the read. A platform with thousands of stores moves this into SQL.
-  const all = await db.tenant.findMany({ where, orderBy: { createdAt: "desc" }, take: 2000, include: { subscription: { select: { amount: true, currentPeriodEnd: true } } } });
+  const all = await db.tenant.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+    take: 2000,
+    include: {
+      subscription: { select: { amount: true, interval: true, currentPeriodEnd: true } },
+      _count: { select: { orders: true } },
+    },
+  });
+
+  const counts: TenantCounts = { all: 0, paying: 0, trial: 0, overdue: 0, suspended: 0, cancelled: 0 };
+
+  const allRows = all.map((t): TenantRow => {
+    const access = accessOf(t, t.subscription, now);
+    const sub = t.subscription;
+    const isPaying = sub && sub.currentPeriodEnd > now && Number(sub.amount) > 0;
+    const mrr = isPaying ? (sub.interval === "YEARLY" ? Math.round(Number(sub.amount) / 12) : Number(sub.amount)) : 0;
+
+    counts.all++;
+    if (t.status === "CANCELLED") counts.cancelled++;
+    else if (t.suspendedReason) counts.suspended++;
+    else if (access.state === "ACTIVE") counts.paying++;
+    else if (access.state === "TRIAL") counts.trial++;
+    else if (access.state === "GRACE") counts.overdue++;
+
+    return {
+      id: t.id,
+      name: t.name,
+      subdomain: t.subdomain,
+      customDomain: t.customDomain,
+      ownerName: t.ownerName,
+      ownerEmail: t.ownerEmail,
+      ownerPhone: t.ownerPhone,
+      tier: t.planTier,
+      access,
+      mrr,
+      ordersCount: t._count.orders,
+      quarantined: t.quarantined,
+      isDemo: t.isDemo,
+      createdAt: t.createdAt,
+      status: t.status,
+    };
+  });
+
   const filter = opts.filter ?? "all";
-  const rows = all.map((t): TenantRow => ({
-    id: t.id, name: t.name, subdomain: t.subdomain, ownerName: t.ownerName, ownerEmail: t.ownerEmail, ownerPhone: t.ownerPhone, tier: t.planTier,
-    access: accessOf(t, t.subscription, now), quarantined: t.quarantined, isDemo: t.isDemo, createdAt: t.createdAt,
-  })).filter((r) => filter === "all" ? true : filter === "trial" ? r.access.state === "TRIAL" : filter === "paying" ? r.access.state === "ACTIVE" : filter === "overdue" ? r.access.state === "GRACE" : filter === "locked" ? r.access.state === "READ_ONLY" || r.access.state === "LOCKED" : r.quarantined);
+  const rows = allRows.filter((r) => {
+    if (filter === "all") return true;
+    if (filter === "trial") return r.access.state === "TRIAL" && !r.access.suspendedByPlatform && r.status !== "CANCELLED";
+    if (filter === "paying") return r.access.state === "ACTIVE" && !r.access.suspendedByPlatform && r.status !== "CANCELLED";
+    if (filter === "overdue") return r.access.state === "GRACE" && !r.access.suspendedByPlatform && r.status !== "CANCELLED";
+    if (filter === "locked") return (r.access.state === "READ_ONLY" || r.access.state === "LOCKED") && r.status !== "CANCELLED";
+    if (filter === "flagged") return r.quarantined;
+    if (filter === "suspended") return Boolean(r.access.suspendedByPlatform);
+    if (filter === "cancelled") return r.status === "CANCELLED";
+    return true;
+  });
+
   const pageSize = opts.pageSize ?? 25, page = Math.max(1, opts.page ?? 1);
-  return { rows: rows.slice((page - 1) * pageSize, page * pageSize), total: rows.length, page, pageSize };
+  return { rows: rows.slice((page - 1) * pageSize, page * pageSize), total: rows.length, page, pageSize, counts };
+}
+
+export interface TenantNoteRow {
+  id: string;
+  tenantId: string;
+  authorId: string;
+  authorName: string | null;
+  body: string;
+  createdAt: Date;
 }
 
 export interface TenantDetail extends TenantRow {
@@ -167,11 +301,40 @@ export interface TenantDetail extends TenantRow {
   suspendedReason: string | null;
   quarantineReason: string | null;
   subscription: { tier: string; interval: string; amount: number; status: string; periodStart: Date; periodEnd: Date } | null;
-  usage: { products: number; staff: number; ordersThisMonth: number; gmv30Days: number; ordersTotal: number; storageMb: number };
+  usage: {
+    products: number;
+    staff: number;
+    ordersThisMonth: number;
+    gmv30Days: number;
+    ordersTotal: number;
+    orders30Days: number;
+    customers: number;
+    smsUsed: number;
+    storageMb: number;
+  };
+  planLimits: {
+    products: number | null;
+    staff: number | null;
+    storageGb: number | null;
+    smsCredits: number | null;
+    ordersPerMonth: number | null;
+  } | null;
   domains: { domain: string; verified: boolean; sslStatus: string; isPrimary: boolean }[];
+  modules: { key: string; label: string; isEnabled: boolean }[];
   proofs: { id: string; plan: string; interval: string; amount: number; provider: string; trxId: string; status: string; createdAt: Date }[];
+  notes: TenantNoteRow[];
+  tickets: { id: string; subject: string; code: string; status: string; priority: string; createdAt: Date }[];
   audit: { id: string; action: string; actorId: string; createdAt: Date; details: unknown }[];
 }
+
+const MODULE_LABELS: Record<string, string> = {
+  bespoke: "Bespoke tailoring",
+  drops: "Drops and launches",
+  baby_profiles: "Baby profiles",
+  loyalty: "Loyalty, VIP & referrals",
+  booking: "Bookings & appointments",
+  wholesale: "Wholesale & B2B",
+};
 
 export async function getTenantDetail(actor: PlatformActor, tenantId: string, deps?: Deps): Promise<TenantDetail> {
   assertPlatformCan(actor, "tenants", "view");
@@ -180,23 +343,81 @@ export async function getTenantDetail(actor: PlatformActor, tenantId: string, de
   if (!t) throw new NotFoundError("Store");
   const since = new Date(now.getTime() - 30 * 86_400_000);
   const month = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-  const [staff, gmv, ordersTotal, usageRow, domains, proofs, audit] = await Promise.all([
+  const [staff, gmv, ordersTotal, orders30Days, customers, smsUsage, usageRow, domains, modules, proofs, notes, tickets, audit, plan] = await Promise.all([
     db.tenantUser.count({ where: { tenantId, isActive: true } }),
     db.order.aggregate({ where: { tenantId, status: "DELIVERED", deliveredAt: { gte: since } }, _sum: { totalAmount: true } }),
     db.order.count({ where: { tenantId } }),
+    db.order.count({ where: { tenantId, createdAt: { gte: since } } }),
+    db.customer.count({ where: { tenantId } }),
+    db.usageCounter.findFirst({ where: { tenantId, metric: "sms", periodStart: { gte: month } }, orderBy: { periodStart: "desc" } }),
     db.usageCounter.findFirst({ where: { tenantId, metric: "orders", periodStart: { gte: month } }, orderBy: { periodStart: "desc" } }),
     db.domain.findMany({ where: { tenantId }, select: { domain: true, verified: true, sslStatus: true, isPrimary: true } }),
+    db.tenantModule.findMany({ where: { tenantId } }),
     db.paymentProof.findMany({ where: { tenantId }, orderBy: { createdAt: "desc" }, take: 20 }),
+    db.tenantNote.findMany({ where: { tenantId }, orderBy: { createdAt: "desc" }, take: 30 }),
+    db.supportTicket.findMany({ where: { tenantId }, orderBy: { createdAt: "desc" }, take: 10 }),
     db.platformAuditLog.findMany({ where: { tenantId }, orderBy: { createdAt: "desc" }, take: 20 }),
+    db.plan.findUnique({ where: { tier: t.planTier } }),
   ]);
+
+  const limits = (plan?.limits ?? {}) as Record<string, number | null>;
+
   return {
     id: t.id, name: t.name, subdomain: t.subdomain, ownerName: t.ownerName, ownerEmail: t.ownerEmail, ownerPhone: t.ownerPhone, tier: t.planTier, access: accessOf(t, t.subscription, now),
     quarantined: t.quarantined, isDemo: t.isDemo, createdAt: t.createdAt, status: t.status, trialEndsAt: t.trialEndsAt, suspendedReason: t.suspendedReason, quarantineReason: t.quarantineReason,
     subscription: t.subscription ? { tier: t.subscription.planTier, interval: t.subscription.interval, amount: Number(t.subscription.amount), status: t.subscription.status, periodStart: t.subscription.currentPeriodStart, periodEnd: t.subscription.currentPeriodEnd } : null,
-    usage: { products: t.productCount, staff, ordersThisMonth: Number(usageRow?.value ?? 0), gmv30Days: Number(gmv._sum.totalAmount ?? 0), ordersTotal, storageMb: Math.round(Number(t.storageBytesUsed) / 1_048_576) },
-    domains, proofs: proofs.map((p) => ({ id: p.id, plan: p.planTier, interval: p.billingPeriod, amount: Number(p.amount), provider: p.mfsProvider, trxId: p.trxId, status: p.status, createdAt: p.createdAt })),
+    usage: {
+      products: t.productCount,
+      staff,
+      ordersThisMonth: Number(usageRow?.value ?? 0),
+      gmv30Days: Number(gmv._sum.totalAmount ?? 0),
+      ordersTotal,
+      orders30Days,
+      customers,
+      smsUsed: Number(smsUsage?.value ?? 0),
+      storageMb: Math.round(Number(t.storageBytesUsed) / 1_048_576),
+    },
+    planLimits: plan ? {
+      products: typeof limits.products === "number" ? limits.products : null,
+      staff: typeof limits.staff === "number" ? limits.staff : null,
+      storageGb: typeof limits.storageGb === "number" ? limits.storageGb : null,
+      smsCredits: typeof limits.smsCredits === "number" ? limits.smsCredits : null,
+      ordersPerMonth: typeof limits.ordersPerMonth === "number" ? limits.ordersPerMonth : null,
+    } : null,
+    domains,
+    modules: modules.map((m) => ({ key: m.moduleKey, label: MODULE_LABELS[m.moduleKey] ?? m.moduleKey, isEnabled: m.isEnabled })),
+    proofs: proofs.map((p) => ({ id: p.id, plan: p.planTier, interval: p.billingPeriod, amount: Number(p.amount), provider: p.mfsProvider, trxId: p.trxId, status: p.status, createdAt: p.createdAt })),
+    notes: notes.map((n) => ({ id: n.id, tenantId: n.tenantId, authorId: n.authorId, authorName: n.authorName, body: n.body, createdAt: n.createdAt })),
+    tickets: tickets.map((tk) => ({ id: tk.id, subject: tk.subject, code: tk.code, status: tk.status, priority: tk.priority, createdAt: tk.createdAt })),
     audit: audit.map((a) => ({ id: a.id, action: a.action, actorId: a.actorId, createdAt: a.createdAt, details: a.details })),
   };
+}
+
+export async function addTenantNote(actor: PlatformActor, tenantId: string, body: string, deps?: Deps): Promise<TenantNoteRow> {
+  assertPlatformCan(actor, "tenants", "view");
+  const text = body.trim();
+  if (text.length < 2) throw new ValidationError("Note cannot be empty");
+  const db = dbOf(deps);
+  const note = await db.tenantNote.create({
+    data: {
+      tenantId,
+      authorId: actor.id,
+      authorName: actor.email,
+      body: text,
+    },
+  });
+  await log(db, actor, "TENANT_NOTE_ADDED", tenantId, { noteId: note.id });
+  return { id: note.id, tenantId: note.tenantId, authorId: note.authorId, authorName: note.authorName, body: note.body, createdAt: note.createdAt };
+}
+
+export async function listTenantNotes(actor: PlatformActor, tenantId: string, deps?: Deps): Promise<TenantNoteRow[]> {
+  assertPlatformCan(actor, "tenants", "view");
+  const db = dbOf(deps);
+  const rows = await db.tenantNote.findMany({
+    where: { tenantId },
+    orderBy: { createdAt: "desc" },
+  });
+  return rows.map((n) => ({ id: n.id, tenantId: n.tenantId, authorId: n.authorId, authorName: n.authorName, body: n.body, createdAt: n.createdAt }));
 }
 
 // ---- Payments ------------------------------------------------------------------------------------------------------

@@ -53,6 +53,9 @@ export interface StaffActor {
   role: StaffRole;
   /** Request IP, recorded in the audit log when known. */
   ip?: string;
+  /** When acting under Platform Super Admin impersonation (docs/12 section 3). */
+  isImpersonator?: boolean;
+  impersonatedBy?: string;
 }
 
 /** Throws unless the actor's role allows this. Call at the top of every admin action. */
