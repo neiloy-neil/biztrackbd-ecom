@@ -21,7 +21,7 @@ Written 11 October 2026 from the code as it stands. **Nothing here has been run 
 3. **Vercel**: create the four projects from the GitHub repository (Import Git Repository), set each project's **Root Directory** as in the table, and set the variables in section 3. Add the domains to the right projects: `biztrack.bd` and `www.biztrack.bd` to marketing, `admin.biztrack.bd` to admin, `platform.biztrack.bd` to platform, `*.biztrack.bd` and `cname.biztrack.bd` to storefront.
 4. **Cloudflare DNS** (see section 4 for the records), then set SSL/TLS mode to **Full (strict)**.
 5. **Supabase**: Authentication, URL Configuration: Site URL `https://admin.biztrack.bd`; add `https://platform.biztrack.bd` to the redirect URLs. Authentication, SMTP settings: Brevo SMTP details (otherwise sign-in emails are rate-limited to a few an hour). Turn the Data API off (or keep Exposed schemas at `public` only).
-6. **GitHub**: the repository is `neiloy-neil/biztrackbd-ecom` (private). Secrets already set: `SUPABASE_DB_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`. Still to add: `BACKUP_ENCRYPTION_KEY_HEX` (make it with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` and **keep a second copy in a password manager**), `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID_ADMIN`, `VERCEL_PROJECT_ID_STOREFRONT`, `VERCEL_PROJECT_ID_MARKETING`, `VERCEL_PROJECT_ID_PLATFORM`. `node tools/github-secrets.mjs neiloy-neil/biztrackbd-ecom --yes` sets any that are in `.env.local`. Create a GitHub Environment named `production` with yourself as required reviewer.
+6. **GitHub**: the repository is `neiloy-neil/biztrackbd-ecom` (public). Secrets already set: `SUPABASE_DB_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`. Still to add: `BACKUP_ENCRYPTION_KEY_HEX` (make it with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` and **keep a second copy in a password manager**), `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID_ADMIN`, `VERCEL_PROJECT_ID_STOREFRONT`, `VERCEL_PROJECT_ID_MARKETING`, `VERCEL_PROJECT_ID_PLATFORM`. `node tools/github-secrets.mjs neiloy-neil/biztrackbd-ecom --yes` sets any that are in `.env.local`. Create a GitHub Environment named `production` with yourself as required reviewer.
 7. **Schedulers**: after the first deploy, `node tools/supabase-schedule.mjs --admin https://admin.biztrack.bd --platform https://platform.biztrack.bd --yes` (needs `CRON_SECRET` in `.env.local`, equal to the value in the Vercel projects).
 8. **First platform admin**: already created in Supabase for `neiloyfarhad@gmail.com`. Open `https://platform.biztrack.bd/login/start`, enter the email, type the emailed code, choose a password, set up the authenticator.
 9. **Smoke test**: sign up a store at `biztrack.bd/start`, sign in at `admin.biztrack.bd`, approve it at `platform.biztrack.bd`, order from `<store>.biztrack.bd`.
@@ -37,7 +37,7 @@ Derived by reading the code (searches for `process.env` in each app and in the s
 
 **biztrack-marketing**: `NEXT_PUBLIC_MARKETING_URL=https://biztrack.bd`, `NEXT_PUBLIC_ADMIN_URL=https://admin.biztrack.bd`, `NEXT_PUBLIC_DEMO_STORE_URL=https://<a demo store>.biztrack.bd`.
 
-**biztrack-admin**: `ADMIN_ORIGIN=https://admin.biztrack.bd`, `NEXT_PUBLIC_ADMIN_URL`, `CRON_SECRET`, `SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `MEDIA_DRIVER=supabase`, `MEDIA_BUCKET=store-media`, `INTEGRATION_VAULT_SECRET`, `INTEGRATION_VAULT_KEY_ID`, `PREVIEW_SECRET` (same as storefront), `CUSTOMER_AUTH_SECRET` (same as storefront), `PHONE_TRUST_SALT` (same everywhere, never changed), `PLATFORM_BKASH_NUMBER`, `PLATFORM_NAGAD_NUMBER`, `PLATFORM_A_RECORD`, `PLATFORM_CNAME_TARGET=cname.biztrack.bd`, `VERCEL_TOKEN`, `VERCEL_PROJECT_ID` (the storefront project), `EDGE_CONFIG`, the SMS and email variables.
+**biztrack-admin**: `ADMIN_ORIGIN=https://admin.biztrack.bd`, `NEXT_PUBLIC_ADMIN_URL`, `CRON_SECRET`, `SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `MEDIA_DRIVER=supabase`, `MEDIA_BUCKET=store-media`, `INTEGRATION_VAULT_SECRET`, `INTEGRATION_VAULT_KEY_ID`, `PREVIEW_SECRET` (same as storefront), `CUSTOMER_AUTH_SECRET` (same as storefront), `PHONE_TRUST_SALT` (same everywhere, never changed), `PLATFORM_BKASH_NUMBER`, `PLATFORM_NAGAD_NUMBER`, `PLATFORM_A_RECORD`, `PLATFORM_CNAME_TARGET=cname.biztrack.bd`, `PLATFORM_VERCEL_TOKEN`, `PLATFORM_VERCEL_PROJECT_ID` (the storefront project), `PLATFORM_VERCEL_TEAM_ID`, `EDGE_CONFIG_ID`, `EDGE_CONFIG`, the SMS and email variables.
 
 **biztrack-platform**: `PLATFORM_DATABASE_URL` (the `biztrack_platform` login), `CRON_SECRET`, `SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `PLATFORM_BKASH_NUMBER`, `PLATFORM_NAGAD_NUMBER`, the SMS variables (payment and billing messages), `PHONE_TRUST_SALT`.
 
@@ -48,19 +48,24 @@ Derived by reading the code (searches for `process.env` in each app and in the s
 
 **Function time limits on Hobby**: the cron routes now declare `maxDuration = 60` (the Hobby ceiling at the time of writing; check the current limit). Every sweep is safe to run again, so one that needs longer simply continues on its next call. Raise it on a paid plan if sweeps need more.
 
-## 4. Cloudflare DNS records
+## 4. Cloudflare DNS records (the values Vercel asked for on 11 October 2026)
 
-| Type | Name | Content | Proxy |
+The four Vercel projects exist (`biztrack-marketing`, `-admin`, `-platform`, `-storefront`, Node 22, connected to the GitHub repository, variables loaded) and the domains are added to them. Vercel reports each as "misconfigured" until these records exist. **Start with the grey cloud (DNS only) on every record; turn the proxy on only after Vercel shows the domain as valid.**
+
+| Type | Name | Content | Proxy at first |
 |---|---|---|---|
-| A or CNAME | `@` | the value Vercel shows for the marketing project | proxied |
-| CNAME | `www` | `cname.vercel-dns.com` (or the value Vercel shows) | proxied |
-| CNAME | `admin` | the value Vercel shows | proxied |
-| CNAME | `platform` | the value Vercel shows | proxied |
-| CNAME | `*` | the value Vercel shows for the storefront | proxied |
-| CNAME | `cname` | the storefront target (what store owners point their own domains at) | **DNS only** (grey cloud): stores' CNAMEs must resolve to the real target |
-| TXT / CNAME | Brevo's SPF, DKIM and DMARC records | as given by Brevo | DNS only |
+| A | `@` | `216.198.79.1` | DNS only |
+| A | `@` | `64.29.17.1` (a second A record) | DNS only |
+| CNAME | `www` | `caaefd15fb4f37b0.vercel-dns-017.com` | DNS only |
+| CNAME | `admin` | `0c7d80dcc5d04b07.vercel-dns-017.com` | DNS only |
+| CNAME | `platform` | `f05fb59817376983.vercel-dns-017.com` | DNS only |
+| CNAME | `cname` | `6e197aa9c3987f81.vercel-dns-017.com` | DNS only (stores point their own domains here) |
+| CNAME | `*` | `6e197aa9c3987f81.vercel-dns-017.com` | DNS only first |
+| Brevo records | as already published | | DNS only |
 
-Do not proxy a record Vercel needs to verify until Vercel shows the domain as valid; then turn the proxy on and set SSL/TLS to Full (strict). Cloudflare's free universal certificate covers `biztrack.bd` and `*.biztrack.bd` (one level), which is what store subdomains use.
+Vercel can show different target values later; if a record is marked invalid, re-read the value in the project's Domains page (or `vercel api /v6/domains/<name>/config`).
+
+**The wildcard and the SSL mode.** `*.biztrack.bd` was accepted on the storefront project without a verification step. Vercel issues a wildcard certificate only when it controls the domain's nameservers, and yours are Cloudflare's. With the orange proxy on, Cloudflare presents its own certificate for `*.biztrack.bd` to visitors, and talks to Vercel over TLS. Set Cloudflare SSL/TLS to **Full** (not **Full (strict)**): strict would reject Vercel's certificate for store subdomains it has no individual certificate for. Full still encrypts the connection but does not validate Vercel's certificate. That is acceptable for a pilot; the alternatives are Vercel's nameservers, or a Cloudflare Configuration Rule that uses strict only for the apex, `admin` and `platform`.
 
 ## 5. If the registrar will not let you use Cloudflare nameservers
 Either keep the registrar's DNS and use Vercel's nameservers for the wildcard (Vercel then issues the wildcard certificate), or move the domain. Ask the registrar this before paying.

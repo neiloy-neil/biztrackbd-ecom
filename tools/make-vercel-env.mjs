@@ -67,8 +67,11 @@ const sms = [
 ];
 const email = [todo("BREVO_API_KEY", "from Brevo: SMTP & API, API keys (make one named biztrack-production)"), L("EMAIL_FROM", `no-reply@${domain}`), L("EMAIL_FROM_NAME", "BizTrackBD")];
 const payments = [
-  L("PLATFORM_BKASH_NUMBER", local.PLATFORM_BKASH_NUMBER, "CHECK: the real bKash number customers pay subscriptions to"),
-  L("PLATFORM_NAGAD_NUMBER", local.PLATFORM_NAGAD_NUMBER, "CHECK: the real Nagad number"),
+  // Production numbers live in .env.production.local (never the test numbers in .env.local).
+  L("PLATFORM_BKASH_NUMBER", gen.PLATFORM_BKASH_NUMBER ?? local.PLATFORM_BKASH_NUMBER, "the bKash number stores pay subscriptions to"),
+  L("PLATFORM_BKASH_KIND", gen.PLATFORM_BKASH_KIND ?? "MERCHANT", "MERCHANT or PERSONAL"),
+  L("PLATFORM_NAGAD_NUMBER", gen.PLATFORM_NAGAD_NUMBER ?? local.PLATFORM_NAGAD_NUMBER, "the Nagad number"),
+  L("PLATFORM_NAGAD_KIND", gen.PLATFORM_NAGAD_KIND ?? "MERCHANT", "MERCHANT or PERSONAL"),
 ];
 const shared = (...ks) => ks.map((k) => L(k, gen[k]));
 
