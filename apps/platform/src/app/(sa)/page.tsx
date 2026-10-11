@@ -55,7 +55,7 @@ export default async function Overview() {
               type="search"
               name="q"
               placeholder="Search tenants, domains, owners"
-              style={{ border: "none", outline: "none", background: "transparent", fontSize: 13.5, width: "100%", color: "#1A1A4E" }}
+              style={{ border: "none", outline: "none", background: "transparent", fontSize: 13.5, width: "100%", minHeight: 40, color: "#1A1A4E" }}
             />
           </div>
         </form>
@@ -77,7 +77,7 @@ export default async function Overview() {
         <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "18px 20px" }}>
           <div style={{ fontSize: 13, color: "#4B4B73", fontWeight: 500 }}>Monthly recurring revenue</div>
           <div style={{ fontSize: 28, fontWeight: 700, marginTop: 6, fontVariantNumeric: "tabular-nums" }} data-testid="mrr">
-            ৳ {taka(o.mrr)}
+            {taka(o.mrr)}
           </div>
           <div style={{ fontSize: 12.5, marginTop: 6, color: "#15803D", fontWeight: 700 }}>
             +9.4% <span style={{ color: "#6B6B8D", fontWeight: 500 }}>vs last month</span>
@@ -125,7 +125,7 @@ export default async function Overview() {
               <div style={{ fontSize: 15, fontWeight: 700, flexGrow: 1 }}>MRR growth</div>
               <div style={{ display: "flex", padding: 3, borderRadius: 15, background: "#EFEFF6", fontSize: 12.5, fontWeight: 600 }}>
                 <div style={{ padding: "4px 12px", borderRadius: 12, background: "#fff", border: "1px solid #E7E7F0" }}>12 months</div>
-                <div style={{ padding: "4px 12px", color: "#6B6B8D" }}>30 days</div>
+                <div style={{ padding: "4px 12px", color: "#4B4B73" }}>30 days</div>
               </div>
             </div>
             <svg viewBox="0 0 700 220" width="100%" height="220" role="img" aria-label="Monthly recurring revenue growing from 1.2 lakh to 4.8 lakh taka over 12 months" preserveAspectRatio="none">
@@ -146,7 +146,7 @@ export default async function Overview() {
           <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, overflow: "hidden" }}>
             <div style={{ padding: "18px 24px", display: "flex", alignItems: "center", borderBottom: "1px solid #E7E7F0" }}>
               <div style={{ fontSize: 15, fontWeight: 700, flexGrow: 1 }}>Newest signups</div>
-              <Link href="/tenants" style={{ fontSize: 13, fontWeight: 600, color: "#5B4FE8", textDecoration: "none" }} prefetch={false}>
+              <Link href="/tenants" style={{ fontSize: 13, fontWeight: 600, color: "#5B4FE8", textDecoration: "none", display: "inline-flex", alignItems: "center", minHeight: 40 }} prefetch={false}>
                 All tenants
               </Link>
             </div>
@@ -186,7 +186,7 @@ export default async function Overview() {
                       {sUp.name.charAt(0)}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <Link href={`/tenants/${sUp.id}`} style={{ fontWeight: 600, color: "#1A1A4E", textDecoration: "none" }} prefetch={false}>
+                      <Link href={`/tenants/${sUp.id}`} style={{ fontWeight: 600, color: "#1A1A4E", textDecoration: "none", display: "inline-flex", alignItems: "center", minHeight: 40 }} prefetch={false}>
                         {sUp.name}
                       </Link>
                       <div style={{ fontSize: 12, color: "#6B6B8D" }}>{sUp.subdomain}.biztrackbd.com</div>

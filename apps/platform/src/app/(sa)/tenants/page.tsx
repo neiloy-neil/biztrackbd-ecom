@@ -14,6 +14,8 @@ const FILTERS: [TenantFilter, string][] = [
   ["paying", "Paying"],
   ["trial", "Trial"],
   ["overdue", "Past due"],
+  ["locked", "Locked"],
+  ["flagged", "Flagged"],
   ["suspended", "Suspended"],
   ["cancelled", "Cancelled"],
 ];
@@ -52,7 +54,7 @@ export default async function Tenants({ searchParams }: { searchParams: Promise<
               name="q"
               defaultValue={q}
               placeholder="Search tenants, domains, owners"
-              style={{ border: "none", outline: "none", background: "transparent", fontSize: 13.5, width: "100%", color: "#1A1A4E" }}
+              style={{ border: "none", outline: "none", background: "transparent", fontSize: 13.5, width: "100%", minHeight: 40, color: "#1A1A4E" }}
             />
           </div>
           <button type="submit" className="btn btn-secondary" style={{ height: 38 }}>Search</button>
@@ -186,7 +188,7 @@ export default async function Tenants({ searchParams }: { searchParams: Promise<
                       <div style={{ minWidth: 0 }}>
                         <Link
                           href={`/tenants/${t.id}`}
-                          style={{ fontWeight: 600, color: "#1A1A4E", textDecoration: "none" }}
+                          style={{ fontWeight: 600, color: "#1A1A4E", textDecoration: "none", display: "inline-flex", alignItems: "center", minHeight: 40 }}
                           prefetch={false}
                         >
                           {t.name}
@@ -219,7 +221,7 @@ export default async function Tenants({ searchParams }: { searchParams: Promise<
                     </div>
 
                     <div style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
-                      ৳ {t.mrr ? taka(t.mrr) : "0"}
+                      {t.mrr ? taka(t.mrr) : "৳ 0"}
                     </div>
 
                     <div style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>

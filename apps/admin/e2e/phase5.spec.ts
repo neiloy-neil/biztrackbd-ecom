@@ -71,12 +71,13 @@ async function pay(page: Page, plan: "STARTER" | "PRO" | "BUSINESS", amountText:
   await expect(page.getByTestId("pending-proof")).toBeVisible();
 }
 
-async function approveFirst(page: Page, sub: string) {
+async function approveFirst(page: Page, sub: string, storeName: string) {
   await page.goto(`${PLAT}/payments`);
+  await page.getByRole("link", { name: new RegExp(storeName) }).first().click();
   const card = page.getByTestId("payment-card").filter({ hasText: sub });
   await expect(card).toBeVisible();
-  await card.getByRole("button", { name: /Approve and switch the plan on/ }).click();
-  await expect(page.getByText("Approved. The plan is live.")).toBeVisible();
+  await card.getByRole("button", { name: /Approve and activate/ }).click();
+  await expect(page.getByText("Payment approved. Plan activated.")).toBeVisible();
 }
 
 async function waitForStore(page: Page, sub: string, status: number) {
@@ -163,12 +164,13 @@ test.describe.serial("signup, billing and the super admin", () => {
   test("finance checks the payment and approves it; the store goes from trial to Pro", async ({ context, page }) => {
     await actOnPlatform(context, "finance");
     await page.goto(`${PLAT}/payments`);
+    await page.getByRole("link", { name: new RegExp(storeName) }).first().click();
     const card = page.getByTestId("payment-card").filter({ hasText: sub });
-    await expect(card).toContainText("Pro · 1 month");
+    await expect(card).toContainText(/pro plan/i);
     await expect(card.getByTestId("amount")).toHaveText("৳ 1,499");
     await expect(card.getByTestId("trx")).toHaveText(/^E5/);
-    await card.getByRole("button", { name: /Approve and switch the plan on/ }).click();
-    await expect(page.getByText("Approved. The plan is live.")).toBeVisible();
+    await card.getByRole("button", { name: /Approve and activate/ }).click();
+    await expect(page.getByText("Payment approved. Plan activated.")).toBeVisible();
     await expect(page.getByTestId("payment-card").filter({ hasText: sub })).toHaveCount(0);
 
     await page.goto(`${PLAT}/tenants?q=${sub}`);
@@ -237,7 +239,7 @@ test.describe.serial("signup, billing and the super admin", () => {
     // Paying works from here, and one approval brings the store back.
     await pay(page, "PRO", "৳ 1,499");
     await actOnPlatform(context, "finance");
-    await approveFirst(page, sub);
+    await approveFirst(page, sub, storeName);
     await page.goto(`${ADMIN}/orders`);
     await expect(page.getByRole("heading", { name: "Orders" })).toBeVisible();
     await page.goto(`${ADMIN}/billing`);
@@ -274,8 +276,8 @@ test.describe.serial("signup, billing and the super admin", () => {
     await expect(row).toContainText("Flagged");
     await row.getByRole("link").first().click();
     await page.getByLabel("Review note").fill("Has permission, letter seen");
-    await page.getByRole("button", { name: "Approve", exact: true }).click();
-    await expect(page.getByText("Flagged store approved.")).toBeVisible();
+    await page.getByRole("button", { name: "Approve store" }).click();
+    await expect(page.getByText("Store brand review approved.")).toBeVisible();
     await page.goto(`${PLAT}/tenants?filter=flagged`);
     await expect(page.getByTestId("tenant-row").filter({ hasText: flagged.sub })).toHaveCount(0);
   });

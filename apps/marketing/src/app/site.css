@@ -99,3 +99,6 @@ table.compare tbody tr:last-child th, table.compare tbody tr:last-child td { bor
 
 /* The header has room for the brand and the main button on a phone; Templates and Pricing stay one tap away in the footer and the page. */
 @media (max-width: 520px) { .site-nav a:not(.btn) { display: none; } }
+
+/* Text links that stand alone are big enough to tap. */
+a.link { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; color: var(--indigo, #5B4FE8); }

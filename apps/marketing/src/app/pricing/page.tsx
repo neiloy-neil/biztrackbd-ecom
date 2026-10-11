@@ -37,7 +37,7 @@ export default async function Pricing() {
         </div>
 
         <h2 style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-.5px", margin: "56px 0 16px" }}>Compare plans</h2>
-        <div className="table-wrap" data-testid="compare">
+        <div className="table-wrap" data-testid="compare" tabIndex={0} role="region" aria-label="Plan comparison">
           <table className="compare">
             <thead>
               <tr><th scope="col">Feature</th>{plans.map((p) => <th scope="col" key={p.tier} className={p.tier === best ? "best" : ""}>{p.name}</th>)}</tr>

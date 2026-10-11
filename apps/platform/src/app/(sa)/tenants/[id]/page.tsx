@@ -190,12 +190,13 @@ export default async function TenantDetail({
             t.suspendedReason ? (
               <form action={reactivateAction.bind(null, t.id)} style={{ margin: 0 }}>
                 <SubmitButton className="btn btn-secondary" style={{ height: 38, padding: "0 16px", borderRadius: 8 }} pending="…">
-                  Reactivate store
+                  Switch back on
                 </SubmitButton>
               </form>
             ) : (
               <form action={suspendAction.bind(null, t.id)} style={{ margin: 0 }}>
-                <input type="hidden" name="reason" value="Suspended by Platform Super Admin" />
+                <label className="sr-only" htmlFor="suspend-reason">Reason</label>
+                <input id="suspend-reason" name="reason" required minLength={5} placeholder="Reason the owner will see" style={{ height: 38, width: 220, border: "1px solid #D5D5E4", borderRadius: 8, padding: "0 12px", fontSize: 13.5, color: "#1A1A4E", marginRight: 8 }} />
                 <SubmitButton
                   style={{
                     height: 38,
@@ -210,7 +211,7 @@ export default async function TenantDetail({
                   }}
                   pending="…"
                 >
-                  Suspend
+                  Suspend store
                 </SubmitButton>
               </form>
             )
@@ -245,7 +246,7 @@ export default async function TenantDetail({
       </div>
 
       {/* Top 4 KPI Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }} data-testid="usage-card">
         <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
           <div style={{ fontSize: 13, color: "#4B4B73" }}>Orders (30 days)</div>
           <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
@@ -255,7 +256,7 @@ export default async function TenantDetail({
         <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
           <div style={{ fontSize: 13, color: "#4B4B73" }}>Sales (GMV)</div>
           <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
-            ৳ {taka(t.usage.gmv30Days)}
+            {taka(t.usage.gmv30Days)}
           </div>
         </div>
         <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
@@ -424,7 +425,7 @@ export default async function TenantDetail({
                           <td>{dateOnly(p.createdAt)}</td>
                           <td>{p.plan} ({p.interval.toLowerCase()})</td>
                           <td>{p.provider} · <code>{p.trxId}</code></td>
-                          <td style={{ textAlign: "right" }}>৳ {taka(p.amount)}</td>
+                          <td style={{ textAlign: "right" }}>{taka(p.amount)}</td>
                           <td>
                             <span className={`pill ${p.status === "APPROVED" ? "ok" : p.status === "REJECTED" ? "bad" : "warn"}`}>
                               {p.status}
@@ -448,7 +449,7 @@ export default async function TenantDetail({
                 <dt>Orders This Month</dt><dd className="num">{t.usage.ordersThisMonth}</dd>
                 <dt>All-time Total Orders</dt><dd className="num">{t.usage.ordersTotal}</dd>
                 <dt>Orders in Last 30 Days</dt><dd className="num">{t.usage.orders30Days}</dd>
-                <dt>Delivered Sales (30 Days)</dt><dd className="num">৳ {taka(t.usage.gmv30Days)}</dd>
+                <dt>Delivered Sales (30 Days)</dt><dd className="num">{taka(t.usage.gmv30Days)}</dd>
                 <dt>Registered Customers</dt><dd className="num">{t.usage.customers}</dd>
                 <dt>SMS Credits Used</dt><dd className="num">{t.usage.smsUsed}</dd>
                 <dt>Storage Consumed</dt><dd className="num">{t.usage.storageMb} MB ({storageUsedGb} GB)</dd>
@@ -566,7 +567,7 @@ export default async function TenantDetail({
               </div>
               <div style={{ display: "flex" }}>
                 <span style={{ flexGrow: 1, color: "#4B4B73" }}>Next invoice</span>
-                <b>৳ {t.subscription && t.subscription.amount > 0 ? taka(t.subscription.amount) : "1,499"}</b>
+                <b>{t.subscription && t.subscription.amount > 0 ? taka(t.subscription.amount) : "৳ 1,499"}</b>
               </div>
             </div>
 
@@ -705,7 +706,7 @@ export default async function TenantDetail({
               <div style={{ fontSize: 15, fontWeight: 700, color: "#B45309", marginBottom: 8 }}>Brand review hold</div>
               <p style={{ margin: "0 0 12px", fontSize: 13, color: "#6B6B8D" }}>{t.quarantineReason}</p>
               <form style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <input className="input" name="note" required minLength={3} maxLength={200} placeholder="What you checked (e.g. verified trade license)" />
+                <input className="input" name="note" aria-label="Review note" required minLength={3} maxLength={200} placeholder="What you checked (e.g. verified trade license)" />
                 <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
                   <SubmitButton formAction={quarantineAction.bind(null, t.id, "APPROVE")} className="btn btn-success btn-sm" pending="…">
                     Approve store

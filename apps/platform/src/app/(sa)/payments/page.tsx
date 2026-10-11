@@ -184,7 +184,7 @@ export default async function Payments({
                   </div>
                   <div style={{ textAlign: "right", flexShrink: 0 }}>
                     <div style={{ fontSize: 14, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
-                      ৳ {taka(p.amount)}
+                      {taka(p.amount)}
                     </div>
                     <div style={{ fontSize: 12, color: age.isLate ? "#DC2626" : "#6B6B8D", fontWeight: 600 }}>
                       {age.text}
@@ -215,7 +215,7 @@ export default async function Payments({
               <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
                 <div style={{ flexGrow: 1 }}>
                   <div style={{ fontSize: 18, fontWeight: 700 }}>
-                    <Link href={`/tenants/${selected.tenantId}`} style={{ color: "#1A1A4E", textDecoration: "none" }} prefetch={false}>
+                    <Link href={`/tenants/${selected.tenantId}`} style={{ color: "#1A1A4E", textDecoration: "none", display: "inline-flex", alignItems: "center", minHeight: 40 }} prefetch={false}>
                       {selected.storeName}
                     </Link>
                   </div>
@@ -242,7 +242,7 @@ export default async function Payments({
                 <div style={{ background: "#FAFAFC", border: "1px solid #E7E7F0", borderRadius: 10, padding: "14px 16px" }}>
                   <div style={{ fontSize: 12, color: "#6B6B8D", fontWeight: 600 }}>Amount claimed</div>
                   <div style={{ fontSize: 20, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }} data-testid="amount">
-                    ৳ {taka(selected.amount)}
+                    {taka(selected.amount)}
                   </div>
                 </div>
                 <div style={{ background: "#FAFAFC", border: "1px solid #E7E7F0", borderRadius: 10, padding: "14px 16px" }}>
@@ -274,12 +274,12 @@ export default async function Payments({
                       boxSizing: "border-box",
                     }}
                   >
-                    <div style={{ fontSize: 12, color: providerColor(selected.provider).bg, fontWeight: 800 }}>
+                    <div style={{ fontSize: 12, color: selected.provider === "NAGAD" ? "#8F3C06" : "#8A1038", fontWeight: 800 }}>
                       {providerColor(selected.provider).name}
                     </div>
                     <div style={{ fontSize: 12, color: "#4B4B73", marginTop: 8 }}>Send Money successful</div>
                     <div style={{ fontSize: 24, fontWeight: 700, margin: "6px 0", fontVariantNumeric: "tabular-nums" }}>
-                      ৳ {taka(selected.amount)}.00
+                      {taka(selected.amount)}.00
                     </div>
                     <div style={{ fontSize: 11.5, color: "#4B4B73", lineHeight: 1.7 }}>
                       Sender: {prettyPhone(selected.senderNumber)}<br />
