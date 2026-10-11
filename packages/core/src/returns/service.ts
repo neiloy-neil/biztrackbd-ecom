@@ -6,6 +6,7 @@ import { InsufficientStockError, NotFoundError, ValidationError } from "../error
 import { transitionOrder } from "../orders/service";
 import { money } from "../orders/pricing";
 import { assertCan, type StaffActor } from "../permissions";
+import { verifyOrderAccess } from "../customers/auth";
 
 /**
  * Returns, exchanges and store credit (docs/07 section 4).
@@ -66,6 +67,8 @@ export interface ReturnRow {
   exchangeLabel: string | null;
   returnTrackingCode: string | null;
   refundMethod: string | null;
+  refundTrxId?: string | null;
+  photos?: string[];
   createdAt: Date;
   decidedAt: Date | null;
   receivedAt: Date | null;
@@ -385,5 +388,354 @@ export async function exchangeOptions(tenantId: string, actor: StaffActor, produ
       include: { product: { select: { title: true } } }, orderBy: [{ productId: "asc" }, { title: "asc" }], take: 300,
     });
     return rows.map((v) => ({ id: v.id, label: `${v.product.title} (${v.title})`, stock: v.stockQuantity, productId: v.productId }));
+  });
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Storefront Customer Return Requests (Phase 5 Section B2)
+// ---------------------------------------------------------------------------------------------------------------------
+
+export const CustomerReturnInput = z.object({
+  orderId: z.string().min(1),
+  reason: z.string().trim().min(3, "Choose or write the reason").max(200),
+  customerNote: z.string().trim().max(1000).optional(),
+  type: z.enum(["REFUND", "EXCHANGE", "STORE_CREDIT"]),
+  items: z.array(z.object({ orderItemId: z.string().min(1), qty: z.number().int().min(1).max(1000) })).min(1, "Pick at least one item"),
+  exchangeVariantId: z.string().min(1).optional(),
+  photos: z.array(z.string().max(500)).max(5).optional(),
+  payoutMethod: z.enum(["BKASH", "NAGAD", "ROCKET"]).optional(),
+  payoutNumber: z.string().trim().max(30).optional(),
+});
+export type CustomerReturnInput = z.infer<typeof CustomerReturnInput>;
+
+export interface CustomerReturnableInfo {
+  eligible: boolean;
+  reasonIfNotEligible?: string;
+  deliveredDaysAgo: number | null;
+  daysRemaining: number | null;
+  activeReturn: ReturnRow | null;
+  items: Array<{
+    id: string;
+    productId: string;
+    variantId: string | null;
+    title: string;
+    variantTitle: string | null;
+    unitPrice: number;
+    purchasedQty: number;
+    returnableQty: number;
+  }>;
+}
+
+export async function customerReturnableItems(
+  tenantId: string,
+  orderId: string,
+  auth: { customerId?: string | null; token?: string | null },
+): Promise<CustomerReturnableInfo> {
+  return withTenant(tenantId, async (tx) => {
+    const order = await tx.order.findFirst({
+      where: { id: orderId },
+      include: { items: true },
+    });
+    if (!order) throw new NotFoundError("Order");
+
+    const hasAccess = verifyOrderAccess(tenantId, order.id, auth.token) || (auth.customerId && order.customerId === auth.customerId);
+    if (!hasAccess) throw new NotFoundError("Order");
+
+    const existingReturns = await tx.returnRequest.findMany({
+      where: { orderId: order.id },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const activePrisma = existingReturns.find((r) => ["PENDING", "APPROVED", "PICKUP_BOOKED", "RECEIVED"].includes(r.status));
+    let activeReturn: ReturnRow | null = null;
+    if (activePrisma) {
+      let exchangeLabel: string | null = null;
+      if (activePrisma.exchangeVariantId) {
+        const v = await tx.productVariant.findFirst({
+          where: { id: activePrisma.exchangeVariantId },
+          include: { product: { select: { title: true } } },
+        });
+        if (v) exchangeLabel = `${v.product.title} (${v.title})`;
+      }
+      activeReturn = {
+        id: activePrisma.id,
+        code: activePrisma.code,
+        orderId: activePrisma.orderId,
+        orderNumber: order.orderNumber,
+        customerName: order.customerName,
+        customerPhone: order.customerPhone,
+        status: activePrisma.status as ReturnStatus,
+        type: activePrisma.type as ReturnType,
+        reason: activePrisma.reason,
+        customerNote: activePrisma.customerNote,
+        adminNote: activePrisma.adminNote,
+        lines: asLines(activePrisma.items),
+        refundAmount: activePrisma.refundAmount == null ? null : Number(activePrisma.refundAmount),
+        exchangeVariantId: activePrisma.exchangeVariantId,
+        exchangeLabel,
+        returnTrackingCode: activePrisma.returnTrackingCode,
+        refundMethod: activePrisma.refundMethod,
+        refundTrxId: activePrisma.refundTrxId,
+        photos: activePrisma.photos,
+        createdAt: activePrisma.createdAt,
+        decidedAt: activePrisma.decidedAt,
+        receivedAt: activePrisma.receivedAt,
+        refundedAt: activePrisma.refundedAt,
+      };
+    }
+
+    const deliveredAt = order.deliveredAt ?? (order.status === "DELIVERED" ? order.updatedAt : null);
+    const deliveredDaysAgo = deliveredAt ? Math.floor((Date.now() - deliveredAt.getTime()) / (1000 * 60 * 60 * 24)) : null;
+    const daysRemaining = deliveredDaysAgo != null ? Math.max(0, 7 - deliveredDaysAgo) : null;
+
+    let eligible = true;
+    let reasonIfNotEligible: string | undefined;
+
+    if (order.status !== "DELIVERED") {
+      eligible = false;
+      reasonIfNotEligible = "Only delivered orders are eligible for return or exchange";
+    } else if (deliveredDaysAgo != null && deliveredDaysAgo > 7) {
+      eligible = false;
+      reasonIfNotEligible = "The 7-day return window has expired for this order";
+    } else if (activeReturn) {
+      eligible = false;
+      reasonIfNotEligible = "A return request is already in progress";
+    }
+
+    const used = new Map<string, number>();
+    for (const r of existingReturns.filter((r) => r.status !== "DECLINED")) {
+      for (const l of asLines(r.items)) {
+        used.set(l.orderItemId, (used.get(l.orderItemId) ?? 0) + l.qty);
+      }
+    }
+
+    const items = order.items.map((i) => {
+      const returnableQty = Math.max(0, i.quantity - (used.get(i.id) ?? 0));
+      return {
+        id: i.id,
+        productId: i.productId,
+        variantId: i.variantId,
+        title: i.productTitle,
+        variantTitle: i.variantTitle,
+        unitPrice: Number(i.unitPrice),
+        purchasedQty: i.quantity,
+        returnableQty,
+      };
+    });
+
+    if (eligible && items.every((i) => i.returnableQty === 0)) {
+      eligible = false;
+      reasonIfNotEligible = "All items from this order have already been returned";
+    }
+
+    return {
+      eligible,
+      reasonIfNotEligible,
+      deliveredDaysAgo,
+      daysRemaining,
+      activeReturn,
+      items,
+    };
+  });
+}
+
+export async function customerExchangeVariants(
+  tenantId: string,
+  orderId: string,
+  auth: { customerId?: string | null; token?: string | null },
+): Promise<Array<{ id: string; productId: string; title: string; stock: number }>> {
+  return withTenant(tenantId, async (tx) => {
+    const order = await tx.order.findFirst({
+      where: { id: orderId },
+      include: { items: true },
+    });
+    if (!order) throw new NotFoundError("Order");
+    const hasAccess = verifyOrderAccess(tenantId, order.id, auth.token) || (auth.customerId && order.customerId === auth.customerId);
+    if (!hasAccess) throw new NotFoundError("Order");
+
+    const productIds = Array.from(new Set(order.items.map((i) => i.productId)));
+    const variants = await tx.productVariant.findMany({
+      where: {
+        productId: { in: productIds },
+        product: { status: "ACTIVE", deletedAt: null },
+      },
+      include: { product: { select: { title: true } } },
+      orderBy: { title: "asc" },
+    });
+
+    return variants.map((v) => ({
+      id: v.id,
+      productId: v.productId,
+      title: `${v.product.title} (${v.title})`,
+      stock: v.stockQuantity,
+    }));
+  });
+}
+
+export async function customerRequestReturn(
+  tenantId: string,
+  raw: unknown,
+  auth: { customerId?: string | null; token?: string | null },
+): Promise<{ id: string; code: string; status: ReturnStatus }> {
+  const parsed = CustomerReturnInput.safeParse(raw);
+  if (!parsed.success) throw new ValidationError(parsed.error.issues[0]?.message ?? "Invalid return request");
+  const input = parsed.data;
+
+  return withTenant(tenantId, async (tx) => {
+    const order = await tx.order.findFirst({
+      where: { id: input.orderId },
+      include: { items: true },
+    });
+    if (!order) throw new NotFoundError("Order");
+
+    const hasAccess = verifyOrderAccess(tenantId, order.id, auth.token) || (auth.customerId && order.customerId === auth.customerId);
+    if (!hasAccess) throw new NotFoundError("Order");
+
+    if (order.status !== "DELIVERED") {
+      throw new ValidationError("Returns can only be requested for delivered orders");
+    }
+
+    const deliveredAt = order.deliveredAt ?? order.updatedAt;
+    const daysSinceDelivery = (Date.now() - deliveredAt.getTime()) / (1000 * 60 * 60 * 24);
+    if (daysSinceDelivery > 7.05) {
+      throw new ValidationError("The 7-day return window for this order has expired");
+    }
+
+    const activeReturn = await tx.returnRequest.findFirst({
+      where: {
+        orderId: order.id,
+        status: { in: ["PENDING", "APPROVED", "PICKUP_BOOKED", "RECEIVED"] },
+      },
+    });
+    if (activeReturn) {
+      throw new ValidationError("An active return request is already in progress for this order");
+    }
+
+    const isDefectClaim = input.reason === "Damaged or defective" || input.reason === "Wrong item sent";
+    if (isDefectClaim && (!input.photos || input.photos.length === 0)) {
+      throw new ValidationError("Please upload at least one photo showing the damage or wrong item received");
+    }
+
+    const earlier = await tx.returnRequest.findMany({ where: { orderId: order.id, status: { not: "DECLINED" } } });
+    const used = new Map<string, number>();
+    for (const r of earlier) for (const l of asLines(r.items)) used.set(l.orderItemId, (used.get(l.orderItemId) ?? 0) + l.qty);
+
+    const lines: ReturnLineSnapshot[] = [];
+    const seen = new Set<string>();
+    for (const want of input.items) {
+      if (seen.has(want.orderItemId)) throw new ValidationError("Each item can be listed once");
+      seen.add(want.orderItemId);
+      const item = order.items.find((i) => i.id === want.orderItemId);
+      if (!item) throw new ValidationError("That item is not on this order");
+      const left = item.quantity - (used.get(item.id) ?? 0);
+      if (want.qty > left) {
+        throw new ValidationError(left <= 0 ? `${item.productTitle} is already returned` : `Only ${left} of ${item.productTitle} can still be returned`);
+      }
+      lines.push({
+        orderItemId: item.id,
+        variantId: item.variantId,
+        productId: item.productId,
+        title: item.productTitle,
+        variantTitle: item.variantTitle,
+        qty: want.qty,
+        unitPrice: Number(item.unitPrice),
+      });
+    }
+
+    if (input.type === "EXCHANGE") {
+      if (!input.exchangeVariantId) throw new ValidationError("Please choose the size or colour you want in exchange");
+      const v = await tx.productVariant.findFirst({ where: { id: input.exchangeVariantId } });
+      if (!v) throw new ValidationError("The selected replacement variant is not available");
+      if (v.stockQuantity < 1) throw new ValidationError("The selected replacement variant is currently out of stock");
+    }
+
+    let customerNote = input.customerNote?.trim() || "";
+    if (input.type === "REFUND" && input.payoutNumber) {
+      const payoutText = `Refund to: ${input.payoutMethod ?? "bKash"} (${input.payoutNumber})`;
+      customerNote = customerNote ? `${payoutText}\n${customerNote}` : payoutText;
+    }
+
+    const value = money(lines.reduce((s, l) => s + l.unitPrice * l.qty, 0));
+    const code = await nextCode(tx, tenantId);
+
+    const row = await tx.returnRequest.create({
+      data: {
+        tenantId,
+        orderId: order.id,
+        code,
+        reason: input.reason,
+        customerNote: customerNote || null,
+        type: input.type,
+        items: lines as unknown as object,
+        refundAmount: input.type === "EXCHANGE" ? null : value,
+        exchangeVariantId: input.type === "EXCHANGE" ? input.exchangeVariantId : null,
+        photos: input.photos ?? [],
+        refundMethod: input.type === "REFUND" && input.payoutMethod ? input.payoutMethod : input.type === "STORE_CREDIT" ? "STORE_CREDIT" : null,
+        status: "PENDING",
+      },
+    });
+
+    await recordOrderEvent(tx, tenantId, order.id, {
+      type: "RETURN",
+      message: `Customer requested ${input.type === "EXCHANGE" ? "exchange" : "return"} (${code}): ${input.reason}`,
+      actor: { name: "Customer" },
+      data: { returnId: row.id, code, type: input.type },
+    });
+
+    return { id: row.id, code, status: "PENDING" };
+  });
+}
+
+export async function getCustomerOrderReturns(
+  tenantId: string,
+  orderId: string,
+  auth: { customerId?: string | null; token?: string | null },
+): Promise<ReturnRow[]> {
+  return withTenant(tenantId, async (tx) => {
+    const order = await tx.order.findFirst({
+      where: { id: orderId },
+      select: { id: true, orderNumber: true, customerName: true, customerPhone: true, customerId: true },
+    });
+    if (!order) throw new NotFoundError("Order");
+    const hasAccess = verifyOrderAccess(tenantId, order.id, auth.token) || (auth.customerId && order.customerId === auth.customerId);
+    if (!hasAccess) throw new NotFoundError("Order");
+
+    const rows = await tx.returnRequest.findMany({
+      where: { orderId },
+      orderBy: { createdAt: "desc" },
+    });
+    const variantIds = rows.map((r) => r.exchangeVariantId).filter((x): x is string => Boolean(x));
+    const variants = variantIds.length
+      ? await tx.productVariant.findMany({ where: { id: { in: variantIds } }, include: { product: { select: { title: true } } } })
+      : [];
+
+    return rows.map((r) => {
+      const v = variants.find((x) => x.id === r.exchangeVariantId);
+      return {
+        id: r.id,
+        code: r.code,
+        orderId: r.orderId,
+        orderNumber: order.orderNumber,
+        customerName: order.customerName,
+        customerPhone: order.customerPhone,
+        status: r.status as ReturnStatus,
+        type: r.type as ReturnType,
+        reason: r.reason,
+        customerNote: r.customerNote,
+        adminNote: r.adminNote,
+        lines: asLines(r.items),
+        refundAmount: r.refundAmount == null ? null : Number(r.refundAmount),
+        exchangeVariantId: r.exchangeVariantId,
+        exchangeLabel: v ? `${v.product.title} (${v.title})` : null,
+        returnTrackingCode: r.returnTrackingCode,
+        refundMethod: r.refundMethod,
+        refundTrxId: r.refundTrxId,
+        photos: r.photos,
+        createdAt: r.createdAt,
+        decidedAt: r.decidedAt,
+        receivedAt: r.receivedAt,
+        refundedAt: r.refundedAt,
+      };
+    });
   });
 }

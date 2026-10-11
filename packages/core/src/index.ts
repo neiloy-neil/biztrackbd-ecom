@@ -59,8 +59,15 @@ export {
   type FlaggedOrder, type FraudOverview, type BlockedRow, type PhoneLookup,
 } from "./fraud/service";
 export {
+  getOrderTrackingTimeline, buildCourierTrackingUrl,
+  type OrderTrackingTimeline, type MilestoneStage, type TrackingCheckpoint,
+} from "./orders/tracking";
+export {
   createReturn, approveReturn, declineReturn, markPickupBooked, receiveReturn, refundReturn, listReturns, returnTabCounts, getReturnMetrics, returnableItems, exchangeOptions,
-  CreateReturnInput, RETURN_REASONS, type ReturnRow, type ReturnTab, type ReturnStatus, type ReturnType, type ReturnMetrics, type ApproveInput, type RefundInput,
+  customerReturnableItems, customerExchangeVariants, customerRequestReturn, getCustomerOrderReturns,
+  CreateReturnInput, CustomerReturnInput, RETURN_REASONS,
+  type ReturnRow, type ReturnTab, type ReturnStatus, type ReturnType, type ReturnMetrics, type ApproveInput, type RefundInput,
+  type CustomerReturnableInfo,
 } from "./returns/service";
 export {
   importStatement, readStatement, getCourierRates, saveCourierRates, getCodDashboard, listReconciliation, listSettlements, acceptShortPayment, raiseDispute, expectedFor, loadRates, StatementInput, OVERDUE_DAYS, DEFAULT_RATES,
@@ -79,10 +86,23 @@ export {
   type PlanView, type BillingOverview, type ProofView, type PayTo,
 } from "./platform/billing";
 export {
-  getOverview, listTenants, getTenantDetail, listPayments, approveSubscriptionPayment, rejectSubscriptionPayment, suspendTenant, reactivateTenant, extendTrial, changePlan, reviewQuarantine,
+  getOverview, listTenants, getTenantDetail, addTenantNote, listTenantNotes, listPayments, approveSubscriptionPayment, rejectSubscriptionPayment, suspendTenant, reactivateTenant, extendTrial, changePlan, reviewQuarantine,
   listPlans, updatePlan, listPlatformAudit, runBillingLifecycle, assertPlatformCan, canPlatform, PLATFORM_PERMISSIONS,
-  type PlatformActor, type PlatformRole, type PlatformArea, type PlatformOverview, type TenantRow, type TenantDetail, type TenantFilter, type PaymentRow, type Approved, type PlanPatch, type LifecycleResult,
+  type PlatformActor, type PlatformRole, type PlatformArea, type PlatformOverview, type TenantRow, type TenantCounts, type TenantDetail, type TenantNoteRow, type TenantFilter, type PaymentRow, type Approved, type PlanPatch, type LifecycleResult,
 } from "./platform/admin";
+export {
+  listAnnouncements, createAnnouncement, getActiveAnnouncementsForTenant, countAudienceReach,
+  type AnnouncementAudience, type AnnouncementAudienceType, type CreateAnnouncementInput, type AnnouncementView,
+} from "./platform/announcements";
+export {
+  createImpersonationTicket, verifyImpersonationTicket, createImpersonationSessionCookie, verifyImpersonationSessionCookie,
+  type ImpersonationTicketPayload, type ImpersonationSessionPayload,
+} from "./platform/impersonation";
+export {
+  listPlatformTickets, getPlatformTicketDetail, replyPlatformTicket, updateTicketStatus,
+  listTenantTickets, createTenantTicket, replyTenantTicket, getTenantTicketDetail,
+  type TicketStatusType, type TicketPriority, type TicketSummaryView, type TicketMessageView, type TicketDetailView,
+} from "./platform/tickets";
 export {
   captureCheckout, markRecoveredByOrder, resolveRecovery, listAbandoned, getAbandoned, abandonedTabCounts, getAbandonedMetrics, logCallOutcome, recoveryText,
   consumeSmsCredit, sendRecoveryMessages, sweepRecoveryMessages, RECOVERY_WAIT_MINUTES,
