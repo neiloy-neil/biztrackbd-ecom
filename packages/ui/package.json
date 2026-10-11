@@ -5,9 +5,18 @@
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "exports": { ".": "./src/index.ts", "./tokens.css": "./src/tokens.css" },
-  "scripts": { "build": "echo \"ui is consumed from source\"", "typecheck": "tsc --noEmit" },
-  "peerDependencies": { "react": "^19.0.0" },
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens.css": "./src/tokens.css",
+    "./kit.css": "./src/kit.css"
+  },
+  "scripts": {
+    "build": "echo \"ui is consumed from source\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
   "devDependencies": {
     "@biztrackbd/tsconfig": "workspace:*",
     "@types/react": "^19.0.0",

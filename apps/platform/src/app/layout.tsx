@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Hind_Siliguri, Plus_Jakarta_Sans } from "next/font/google";
 import "./platform.css";
+import "@biztrackbd/ui/kit.css";
 
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-jakarta", display: "swap" });
 const hind = Hind_Siliguri({ subsets: ["bengali", "latin"], weight: ["400", "500", "600", "700"], variable: "--font-hind", display: "swap" });
