@@ -36,6 +36,8 @@ export interface OrderFilters {
   q?: string;
   payment?: "COD" | "MANUAL_BKASH" | "MANUAL_NAGAD";
   district?: string;
+  /** The courier an order was booked with (STEADFAST, PATHAO, REDX). */
+  courier?: string;
   from?: Date;
   to?: Date;
   page?: number;
@@ -75,6 +77,7 @@ export async function listOrders(tenantId: string, actor: StaffActor, f: OrderFi
     ...tabWhere(f.tab ?? "all"),
     ...(f.payment ? { paymentMethod: f.payment } : {}),
     ...(f.district ? { shippingDistrict: f.district } : {}),
+    ...(f.courier === "STEADFAST" || f.courier === "PATHAO" || f.courier === "REDX" ? { courierProvider: f.courier } : {}),
     ...(f.from || f.to ? { createdAt: { ...(f.from ? { gte: f.from } : {}), ...(f.to ? { lt: f.to } : {}) } } : {}),
     ...(q
       ? {

@@ -89,10 +89,10 @@ test.describe.serial("growth tools", () => {
     await expect(page.getByText("Pixel ID saved.")).toBeVisible();
     await expect(page.getByTestId("pixel-config")).toContainText("Installed");
 
-    await page.goto("/settings/integrations?mode=LIVE");
-    const card = page.locator(".card").filter({ has: page.locator("strong", { hasText: /^Meta Conversions API$/ }) });
-    await card.getByLabel("pixelId").fill(PIXEL);
-    await card.getByLabel("accessToken").fill("e2e-meta-token");
+    await page.goto("/settings/integrations?mode=LIVE&open=META_CAPI");
+    const card = page.getByTestId("drawer-META_CAPI");
+    await card.getByLabel("Pixel ID").fill(PIXEL);
+    await card.getByLabel("Access token").fill("e2e-meta-token");
     await card.getByRole("button", { name: "Save" }).click();
     await expect(card.getByText("Saved.")).toBeVisible();
 

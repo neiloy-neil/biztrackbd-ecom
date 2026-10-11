@@ -7,7 +7,7 @@ import { BellIcon, ChevronIcon, ExternalIcon, SearchIcon } from "@/components/ic
 import { setLangAction } from "@/app/(admin)/lang-actions";
 
 export interface Counts { check: number; newOrders: number; toPack: number; returnsPending: number; lowStock: number; items: { key: string; text: string; href: string; tone: "bad" | "warn" | "info"; count: number }[] }
-export interface NavGroup { id: string; label: string; icon: ReactNode; items: { href: string; label: string; exact?: boolean; badge?: "check" }[] }
+export interface NavGroup { id: string; label: string; icon: ReactNode; items: { href: string; label: string; exact?: boolean; badge?: "check" }[]; /** Pages that also light this group up, for a group that is one link to a section with its own navigation. */ activePrefixes?: string[] }
 export interface Page { href: string; label: string; group: string }
 export interface Strings { search: string; searchPlaceholder: string; goTo: string; noMatches: string; typeToSearch: string; notifications: string; allClear: string; viewStore: string }
 
@@ -46,7 +46,7 @@ export function ShellProvider({ initial, pages, strings, children }: { initial: 
 export function SideNav({ groups }: { groups: NavGroup[] }) {
   const path = usePathname();
   const { counts } = useShell();
-  const inGroup = (g: NavGroup) => g.items.some((i) => (i.exact ? path === i.href : path === i.href || path.startsWith(`${i.href}/`)));
+  const inGroup = (g: NavGroup) => g.items.some((i) => (i.exact ? path === i.href : path === i.href || path.startsWith(`${i.href}/`))) || (g.activePrefixes ?? []).some((p) => path === p || path.startsWith(`${p}/`));
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const isOpen = (g: NavGroup) => open[g.id] ?? inGroup(g);
   return (

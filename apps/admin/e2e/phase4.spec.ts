@@ -13,10 +13,11 @@ const taka = (t: string) => Number(t.replace(/[^\d.-]/g, "").replace(/^-$/, "0")
 let unique = 0;
 
 async function connectSteadfast(page: Page) {
-  await page.goto("/settings/integrations?mode=LIVE");
-  const card = page.locator(".card").filter({ has: page.locator("strong", { hasText: /^Steadfast$/ }) });
-  await card.getByLabel("apiKey").fill("e2e-api-key");
-  await card.getByLabel("secretKey").fill("e2e-secret-key");
+  // Each integration opens in a drawer; ?open= opens it straight away.
+  await page.goto("/settings/integrations?mode=LIVE&open=STEADFAST");
+  const card = page.getByTestId("drawer-STEADFAST");
+  await card.getByLabel("API key").fill("e2e-api-key");
+  await card.getByLabel("Secret key").fill("e2e-secret-key");
   await card.getByRole("button", { name: "Save" }).click();
   await expect(card.getByText("Saved.")).toBeVisible();
   return card;
@@ -70,13 +71,13 @@ test.describe.serial("couriers, returns and money", () => {
   });
 
   test("a wrong key is refused by the courier and the owner is told", async ({ page }) => {
-    await page.goto("/settings/integrations?mode=LIVE");
-    const card = page.locator(".card").filter({ has: page.locator("strong", { hasText: /^Steadfast$/ }) });
-    await card.getByLabel("apiKey").fill("wrong-key");
+    await page.goto("/settings/integrations?mode=LIVE&open=STEADFAST");
+    const card = page.getByTestId("drawer-STEADFAST");
+    await card.getByLabel("API key").fill("wrong-key");
     await card.getByRole("button", { name: "Save" }).click();
     await expect(card.getByText("Saved.")).toBeVisible();
     await card.getByRole("button", { name: "Test connection" }).click();
-    await expect(card.getByRole("alert")).toContainText("did not accept the keys");
+    await expect(card.getByTestId("courier-tools-STEADFAST").getByRole("alert")).toContainText("did not accept the keys");
     await connectSteadfast(page);
   });
 

@@ -92,3 +92,44 @@ html[data-sidebar="light"] { --sb-bg: #fff; --sb-line: #E7E7F0; --sb-ink: #4B4B7
 .palette-list button.on { background: var(--tint); }
 .palette-list button span { font-size: 12.5px; color: var(--ink-3); }
 .palette-hint { padding: 20px 16px; color: var(--ink-3); font-size: 14px; }
+
+/* ---- Integrations: grouped cards that open a drawer (docs/40) */
+.int-group { font-size: 13px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; }
+.int-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.int-card { display: grid; grid-template-columns: 44px 1fr auto auto; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.int-logo { width: 44px; height: 44px; border-radius: 12px; background: var(--tint); color: var(--brand); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; }
+.int-body { min-width: 0; }
+.int-body strong { font-size: 15.5px; }
+.int-body p { margin-top: 2px; font-size: 13.5px; color: var(--ink-3); }
+@media (max-width: 640px) { .int-card { grid-template-columns: 44px 1fr; } .int-card .pill { grid-column: 2; justify-self: start; } .int-card .btn { grid-column: 1 / -1; width: 100%; } }
+
+/* A table that is wider than a phone scrolls inside its own focusable box (see .table-scroll), never by changing how every table displays. */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
+.table-scroll:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 50%, white); outline-offset: 2px; }
+
+/* ---- Lists: live filters, the bulk bar and the quick view (docs/40) */
+.toolbar .live-search { flex: 1 1 320px; min-width: 240px; }
+@media (min-width: 900px) { table.table.only-desktop { display: table; } }
+.chip-filter { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.toolbar .chip { min-height: 40px; }
+.bulk-top { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+.bulkbar { position: sticky; top: 68px; z-index: 22; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 14px; margin-bottom: 10px; border-radius: 12px; background: var(--ink); color: var(--bg); box-shadow: 0 8px 24px rgba(10, 10, 40, .28); }
+.bulkbar strong { font-size: 14px; }
+.bulkbar .bulk-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; flex: 1; }
+.bulkbar .btn-secondary { background: var(--surface); color: var(--ink); }
+.bulk-x { margin-left: auto; width: 40px; height: 40px; border: 0; border-radius: 10px; background: transparent; color: inherit; font-size: 22px; cursor: pointer; }
+.bulk-x:hover { background: rgba(255, 255, 255, .14); }
+.bulkbar select { color: var(--ink); background-color: var(--surface); min-width: 130px; }
+@media (max-width: 899px) {
+  /* On a phone the bar sits above the tab bar and its actions scroll sideways, so the list stays in view. */
+  .bulkbar { position: fixed; left: 8px; right: 8px; top: auto; bottom: calc(var(--nav-h, 64px) + 8px + env(safe-area-inset-bottom)); flex-wrap: nowrap; gap: 8px; padding: 8px 8px 8px 12px; margin: 0; z-index: 45; }
+  .bulkbar strong { flex: none; font-size: 13px; }
+  .bulkbar .bulk-actions { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .bulkbar .bulk-actions > * { flex: none; }
+  .bulk-x { margin-left: 0; flex: none; }
+}
+.quick-btn { margin-top: 2px; min-height: 28px; padding: 0 2px; border: 0; background: transparent; color: var(--ink-3); font: 600 12.5px var(--font); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.quick-btn:hover { color: var(--brand); }
+@media (max-width: 899px) { .quick-btn { min-height: 40px; padding: 0 12px; border: 1px solid var(--line-2); border-radius: 10px; text-decoration: none; color: var(--ink-2); background: var(--surface); } }
+
+@media (max-width: 899px) { .ph-crumbs a { display: inline-flex; align-items: center; min-height: 40px; } }

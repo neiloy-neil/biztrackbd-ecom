@@ -19,7 +19,7 @@ import { switchDevUser } from "./dev-actions";
 export const dynamic = "force-dynamic";
 
 interface Item { href: string; label: string; area: Area; exact?: boolean; badge?: "check" }
-interface Group { id: string; label: string; icon: React.ReactNode; items: Item[] }
+interface Group { id: string; label: string; icon: React.ReactNode; items: Item[]; activePrefixes?: string[] }
 // Nine groups, as in the design canvas' sidebar. Every existing page is still one click away inside its group.
 const GROUPS: Group[] = [
   { id: "home", label: "Home", icon: <HomeIcon />, items: [{ href: "/", label: "Home", area: "orders", exact: true }] },
@@ -39,17 +39,11 @@ const GROUPS: Group[] = [
   { id: "store", label: "Online store", icon: <StoreIcon />, items: [{ href: "/design", label: "Store design", area: "design" }, { href: "/landing", label: "Landing pages", area: "design" }, { href: "/content", label: "Pages and blog", area: "design" }] },
   { id: "reports", label: "Reports", icon: <ChartIcon />, items: [{ href: "/reports", label: "Reports", area: "reports" }, { href: "/finance/cod", label: "COD payouts", area: "reports" }, { href: "/finance/profit", label: "Profit and loss", area: "reports" }] },
   { id: "apps", label: "Apps", icon: <PuzzleIcon />, items: [{ href: "/settings/integrations", label: "Integrations", area: "billing" }, { href: "/settings/apps", label: "Apps", area: "billing" }] },
+  // One link: the settings pages have their own navigation, so the sidebar does not repeat it.
   {
     id: "settings", label: "Settings", icon: <GearIcon />,
-    items: [
-      { href: "/settings/store", label: "Store details", area: "design" },
-      { href: "/settings/domains", label: "Domains", area: "billing" },
-      { href: "/settings/payments", label: "Payments", area: "billing" },
-      { href: "/settings/shipping", label: "Shipping", area: "orders" },
-      { href: "/settings/staff", label: "Team", area: "team" },
-      { href: "/settings/audit", label: "Audit log", area: "team" },
-      { href: "/billing", label: "Plan and usage", area: "billing" },
-    ],
+    items: [{ href: "/settings/store", label: "Settings", area: "design" }],
+    activePrefixes: ["/settings/store", "/settings/domains", "/settings/payments", "/settings/shipping", "/settings/staff", "/settings/audit", "/billing"],
   },
 ];
 
@@ -80,7 +74,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   // What this person may open, translated, for the side menu and the search box.
   const groups: NavGroup[] = GROUPS.flatMap((g) => {
     const items = g.items.filter((it) => can(role, it.area)).map((it) => ({ href: it.href, label: tr(lang, it.label), exact: it.exact, badge: it.badge }));
-    return items.length ? [{ id: g.id, label: tr(lang, g.label), icon: g.icon, items }] : [];
+    return items.length ? [{ id: g.id, label: tr(lang, g.label), icon: g.icon, items, activePrefixes: g.activePrefixes }] : [];
   });
   const pages: Page[] = groups.flatMap((g) => g.items.map((i) => ({ href: i.href, label: i.label, group: g.label })));
 

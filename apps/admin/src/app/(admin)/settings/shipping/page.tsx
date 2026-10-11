@@ -36,6 +36,7 @@ export default async function Shipping({ searchParams }: { searchParams: Promise
 
       <div className="split">
         <div className="col">
+          <div className="table-scroll" tabIndex={0} role="region" aria-label="Delivery zones, scrolls sideways on a small screen">
           <table className="table" data-testid="zones-table">
             <thead><tr><th>Zone</th><th>Areas</th><th className="r">Charge</th><th className="r">Free over</th><th>Time</th>{canEdit && <th></th>}</tr></thead>
             <tbody>
@@ -50,6 +51,7 @@ export default async function Shipping({ searchParams }: { searchParams: Promise
               ))}
             </tbody>
           </table>
+          </div>
           <div className="card" style={{ marginTop: 14 }}>
             <h2>Courier accounts</h2>
             <p className="muted">
