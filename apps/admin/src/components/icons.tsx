@@ -16,3 +16,10 @@ export const BoltIcon = (p: P) => <svg {...base} {...p}><path d="M13 2L4 14h7l-1
 export const PlusIcon = (p: P) => <svg {...base} {...p}><path d="M12 5v14M5 12h14" /></svg>;
 export const CameraIcon = (p: P) => <svg {...base} {...p}><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z" /><circle cx="12" cy="13.5" r="3.5" /></svg>;
 export const PrintIcon = (p: P) => <svg {...base} {...p}><path d="M7 9V3h10v6M7 17H4a1 1 0 01-1-1v-6a1 1 0 011-1h16a1 1 0 011 1v6a1 1 0 01-1 1h-3M7 14h10v7H7z" /></svg>;
+export const SearchIcon = (p: P) => <svg {...base} {...p}><path d="M11 18a7 7 0 100-14 7 7 0 000 14zM20 20l-4-4" /></svg>;
+export const BellIcon = (p: P) => <svg {...base} {...p}><path d="M6 16v-5a6 6 0 0112 0v5l2 2H4zM10 21h4" /></svg>;
+export const ExternalIcon = (p: P) => <svg {...base} {...p}><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" /></svg>;
+export const ChevronIcon = (p: P) => <svg {...base} {...p}><path d="M6 9l6 6 6-6" /></svg>;
+export const StoreIcon = (p: P) => <svg {...base} {...p}><path d="M4 9l1.5-5h13L20 9M4 9v11h16V9M4 9a2.7 2.7 0 005.3 0 2.7 2.7 0 005.4 0A2.7 2.7 0 0020 9M10 20v-6h4v6" /></svg>;
+export const PuzzleIcon = (p: P) => <svg {...base} {...p}><path d="M10 4a2 2 0 114 0v1h4a1 1 0 011 1v4h-1a2 2 0 100 4h1v4a1 1 0 01-1 1h-4v-1a2 2 0 10-4 0v1H6a1 1 0 01-1-1v-4h1a2 2 0 100-4H5V6a1 1 0 011-1h4z" /></svg>;
+export const MegaphoneIcon = (p: P) => <svg {...base} {...p}><path d="M3 11v3a1 1 0 001 1h2l3 5h2l-1.5-5H12l8 4V6l-8 4H4a1 1 0 00-1 1z" /></svg>;

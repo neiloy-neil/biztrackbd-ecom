@@ -31,6 +31,7 @@ export { requestOtp, verifyOtp, setSmsSender, signCustomerSession, readCustomerS
 export { sanitizeProductHtml } from "./storefront/html";
 export { listOrders, orderTabCounts, getOrderDetail, verifyPayment, rejectPayment, addOrderNote, updateShippingAddress, markPacked, shipManually, recordPrinted, type OrderTab, type OrderFilters, type OrderRow, type OrderDetail, type AddressEdit } from "./admin/orders";
 export { recordOrderEvent, type OrderEventType } from "./admin/order-events";
+export { adminSearch, shellCounts, type SearchHit, type ShellCounts } from "./admin/shell";
 export { getDashboard, dhakaDate, addDays, STORE_TZ, type Dashboard, type SetupStep } from "./admin/dashboard";
 export { listInventory, adjustStock, updateStockSettings, listStockHistory, STOCK_REASONS, type InventoryRow, type InventorySummary, type StockFilter, type AdjustInput } from "./admin/inventory";
 export { listCustomers, getCustomerDetail, updateCustomer, createCustomer, setCustomerBlocked, customersCsv, VIP_SPENT, VIP_ORDERS, type CustomerRow, type CustomerSegment } from "./admin/customers";
