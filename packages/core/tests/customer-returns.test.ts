@@ -49,6 +49,7 @@ const fails = async (p: Promise<unknown>, code: string, msg?: RegExp) => {
 };
 
 beforeAll(async () => {
+  process.env.CUSTOMER_AUTH_SECRET ||= "test-secret-test-secret-test-secret-1234";
   process.env.PHONE_TRUST_SALT = "test-salt-test-salt-test-salt-0001";
   process.env.SESSION_SECRET = "test-session-secret-test-session-secret-32b";
   const urls = testUrls();
