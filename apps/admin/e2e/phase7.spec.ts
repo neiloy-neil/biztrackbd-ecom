@@ -171,6 +171,8 @@ test.describe.serial("store design, landing pages and domains", () => {
     await page.getByTestId("tab-history").click();
     await page.getByTestId("publish").click();
     await expect(page.getByTestId("design-notice")).toContainText("version 2");
+    // Publishing reloads the editor; wait for it to finish (the status says "Live: version 2") before touching the tabs again.
+    await expect(page.getByText("Live: version 2")).toBeVisible();
     await v.page.reload();
     await expect(v.page.getByRole("heading", { level: 1 })).toHaveText("Eid sale: free delivery");
 
@@ -179,6 +181,7 @@ test.describe.serial("store design, landing pages and domains", () => {
     await expect(page.getByTestId("version-row")).toHaveCount(2);
     await page.getByRole("button", { name: "Go back to version 1" }).click();
     await expect(page.getByTestId("design-notice")).toContainText("Went back to version 1");
+    await expect(page.getByText("Live: version 3")).toBeVisible(); // the editor has reloaded
     await v.page.reload();
     await expect(v.page.getByRole("heading", { level: 1 })).toHaveText("Eid collection is here");
     await page.getByTestId("tab-history").click();

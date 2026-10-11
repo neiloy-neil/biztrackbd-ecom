@@ -1,6 +1,17 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "stream",
+  "globalPassThroughEnv": [
+    "TEST_DIRECT_URL",
+    "TEST_DATABASE_URL",
+    "PG_BIN",
+    "RUN_LIVE_SUPABASE",
+    "SUPABASE_URL",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "DATABASE_URL",
+    "DIRECT_URL",
+    "PLATFORM_DATABASE_URL"
+  ],
   "tasks": {
     "build": {
       "dependsOn": [
