@@ -1,11 +1,12 @@
-# Browser tests (Playwright). They take about an hour and start four apps, so they run by hand or nightly, not on every push.
+# Browser tests (Playwright). They take about an hour and start four apps, so they run by hand (and nightly once you enable the schedule below), not on every push.
 # Not yet proven on GitHub's runners: the first run may need small fixes (the seed step and the environment below).
 name: E2E
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 20 * * *" # 02:00 in Dhaka
+  # Add a nightly schedule once a manual run has passed on GitHub:
+  # schedule:
+  #   - cron: "0 20 * * *" # 02:00 in Dhaka
 
 permissions:
   contents: read
