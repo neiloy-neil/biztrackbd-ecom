@@ -32,6 +32,12 @@ const JOBS = [
   ["biztrack-domains", "*/5 * * * *", "admin", "/api/cron/domains"],
   ["biztrack-loyalty", "0 20 * * *", "admin", "/api/cron/loyalty"], // 02:00 Dhaka
   ["biztrack-billing", "0 21 * * *", "platform", "/api/cron/billing"], // 03:00 Dhaka
+  // The five template demo stores (docs/38), rebuilt from template data each night, one call per store so each stays inside the 60 second limit.
+  ["biztrack-demo-kapor", "0 22 * * *", "admin", "/api/cron/demo-reset?template=kapor"], // 04:00 Dhaka
+  ["biztrack-demo-gadgetstudio", "2 22 * * *", "admin", "/api/cron/demo-reset?template=gadgetstudio"],
+  ["biztrack-demo-mini-bunny", "4 22 * * *", "admin", "/api/cron/demo-reset?template=mini-bunny"],
+  ["biztrack-demo-axionwear", "6 22 * * *", "admin", "/api/cron/demo-reset?template=axionwear"],
+  ["biztrack-demo-bindu", "8 22 * * *", "admin", "/api/cron/demo-reset?template=bindu"],
 ];
 
 const c = new pg.Client({ connectionString: process.env.SUPABASE_DB_URL, ssl: { rejectUnauthorized: false } });
@@ -55,7 +61,7 @@ if (!secret || secret.length < 16) throw new Error("CRON_SECRET (16+ characters,
 const urlOf = (app, path) => (app === "admin" ? admin : platform) + path;
 
 console.log("plan:");
-for (const [name, sched, app, path] of JOBS) console.log(`  ${name.padEnd(22)} ${sched.padEnd(13)} POST ${urlOf(app, path)}`);
+for (const [name, sched, app, path] of JOBS) console.log(`  ${name.padEnd(28)} ${sched.padEnd(13)} POST ${urlOf(app, path)}`);
 console.log("  the secret is stored in Supabase Vault as biztrack_cron_secret");
 if (!yes) { console.log("\nnothing changed (add --yes to install)"); await c.end(); process.exit(0); }
 
@@ -85,5 +91,5 @@ for (const [name, sched, app, path] of JOBS) {
 }
 const rows = (await q(`SELECT jobname, schedule, active FROM cron.job WHERE jobname LIKE 'biztrack-%' ORDER BY jobname`)).rows;
 console.log("\ninstalled:");
-for (const r of rows) console.log(`  ${r.jobname.padEnd(22)} ${r.schedule.padEnd(13)} active=${r.active}`);
+for (const r of rows) console.log(`  ${r.jobname.padEnd(28)} ${r.schedule.padEnd(13)} active=${r.active}`);
 await c.end();

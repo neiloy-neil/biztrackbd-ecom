@@ -1,0 +1,94 @@
+/* The full-screen store editor (docs/37 phase 3). Layers on the left, the live store in the middle, settings on the right.
+   On a phone: the store on top, a tabbed panel below. Uses the admin's colour tokens so dark mode works. */
+.bld { display: flex; flex-direction: column; height: 100vh; height: 100dvh; background: var(--bg); color: var(--ink); overflow: hidden; }
+
+/* ---- Top bar */
+.bld-top { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 6px 12px; background: var(--surface); border-bottom: 1px solid var(--line); flex: none; }
+.bld-exit { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 10px; border-radius: 10px; font-weight: 700; font-size: 14px; color: var(--ink-2); }
+.bld-exit:hover { background: var(--chip); }
+.bld-title { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+.bld-title b { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bld-chip { flex: none; padding: 2px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; background: var(--chip); color: var(--ink-2); }
+.bld-chip.ok { background: var(--success-bg); color: var(--success); }
+.bld-chip.warn { background: var(--warning-bg); color: var(--warning); }
+.bld-chip.bad { background: var(--danger-bg); color: var(--danger-ink); }
+.bld-tools { display: flex; align-items: center; gap: 8px; flex: none; }
+.bld-seg { display: inline-flex; padding: 3px; border-radius: 10px; background: var(--chip); gap: 2px; }
+.bld-seg button { width: 38px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 8px; background: transparent; color: var(--ink-2); cursor: pointer; }
+.bld-seg button[aria-pressed="true"] { background: var(--surface); color: var(--brand); box-shadow: 0 1px 3px rgba(26, 26, 78, .15); }
+.bld-ib { width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 8px; background: transparent; color: var(--ink-2); cursor: pointer; flex: none; }
+.bld-ib:hover:not(:disabled) { background: var(--chip); }
+.bld-ib:disabled { opacity: .35; cursor: not-allowed; }
+.bld-ib.danger { color: var(--danger); }
+.bld-alerts { padding: 8px 12px 0; flex: none; display: grid; gap: 8px; }
+
+/* ---- Body: three zones */
+.bld-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 300px minmax(0, 1fr) 360px; }
+.bld-left, .bld-right { background: var(--surface); min-height: 0; overflow-y: auto; }
+.bld-left { border-right: 1px solid var(--line); padding: 14px; }
+.bld-right { border-left: 1px solid var(--line); display: flex; flex-direction: column; }
+.bld-stage { position: relative; min-width: 0; min-height: 0; overflow: auto; display: flex; justify-content: center; align-items: flex-start; background: var(--chip); padding: 12px; }
+.bld-device { transform-origin: top center; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 8px 30px rgba(26, 26, 78, .18); flex: none; max-width: 100%; }
+.bld-device iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+/* ---- Layers */
+.bld-layers { display: grid; gap: 12px; }
+.bld-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.bld-row { display: flex; align-items: center; gap: 4px; padding: 2px 4px; border: 1px solid transparent; border-radius: 10px; background: var(--bg); position: relative; }
+.bld-row.on { border-color: var(--brand); background: var(--tint); }
+.bld-row.off .bld-pick { opacity: .55; }
+.bld-row.over-before::before, .bld-row.over-after::after { content: ""; position: absolute; left: 6px; right: 6px; height: 3px; border-radius: 2px; background: var(--brand); }
+.bld-row.over-before::before { top: -3px; }
+.bld-row.over-after::after { bottom: -3px; }
+.bld-grip { display: inline-flex; padding: 0 2px; color: var(--ink-3); cursor: grab; }
+.bld-pick { flex: 1; min-width: 0; min-height: 44px; display: flex; align-items: center; gap: 8px; padding: 0 6px; border: 0; background: transparent; cursor: pointer; text-align: left; font-size: 14px; color: inherit; }
+.bld-pick b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bld-acts { display: inline-flex; gap: 0; }
+.bld-acts .bld-ib { width: 30px; height: 30px; }
+@media (min-width: 900px) { .bld-acts { opacity: 0; } .bld-row:hover .bld-acts, .bld-row:focus-within .bld-acts, .bld-row.on .bld-acts { opacity: 1; } }
+
+/* ---- Right panel: tabs and the inspector */
+.bld-tabs { flex: none; display: flex; gap: 2px; padding: 8px 10px 0; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--surface); z-index: 2; overflow-x: auto; scrollbar-width: none; }
+.bld-tabs button { flex: none; min-height: 40px; padding: 0 12px; border: 0; border-bottom: 3px solid transparent; background: transparent; font-weight: 700; font-size: 14px; color: var(--ink-3); cursor: pointer; }
+.bld-tabs button[aria-selected="true"] { color: var(--brand); border-bottom-color: var(--brand); }
+.bld-panel-body { padding: 14px; }
+.bld-insp-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 14px; }
+.bld-insp-head h2 { font-size: 16px; font-weight: 700; }
+.bld-insp-head p { font-size: 13px; margin-top: 2px; }
+.bld-group { border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+.bld-gh { font-size: 12px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; }
+details.bld-group > summary.bld-gh { cursor: pointer; margin-bottom: 0; list-style: none; display: flex; gap: 6px; align-items: center; min-height: 28px; }
+details.bld-group > summary.bld-gh::-webkit-details-marker { display: none; }
+details.bld-group > summary.bld-gh::after { content: "▾"; margin-left: auto; }
+details.bld-group[open] > summary.bld-gh::after { transform: rotate(180deg); }
+.bld-item { padding: 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; }
+.bld-empty { text-align: center; padding: 40px 12px; }
+
+/* ---- Section library */
+.bld-lib { display: grid; gap: 10px; }
+.bld-card { display: grid; gap: 4px; text-align: left; padding: 14px; border: 1px solid var(--line-2); border-radius: 12px; background: var(--surface); cursor: pointer; color: var(--ink); min-height: 64px; }
+.bld-card:hover:not(:disabled) { border-color: var(--brand); background: var(--tint); }
+.bld-card:disabled { opacity: .5; cursor: not-allowed; }
+.bld-card b { font-size: 15px; }
+.bld-card span { font-size: 13px; color: var(--ink-3); }
+.bld-card em { font-size: 12px; font-style: normal; color: var(--warning); font-weight: 700; }
+
+/* ---- Phone: the store on top, the panel below */
+@media (max-width: 899px) {
+  .bld-exit span { display: none; }
+  .bld-title b { display: none; }
+  .bld-body { grid-template-columns: 1fr; grid-template-rows: minmax(190px, 42%) minmax(0, 1fr); }
+  .bld-stage { padding: 6px; border-bottom: 1px solid var(--line); order: 1; }
+  .bld-right { order: 2; border-left: 0; }
+  .bld-tools { gap: 4px; }
+  .bld-top { padding: 4px 8px; gap: 6px; }
+  .bld-tabs { padding-inline: 6px; }
+  .bld-tabs button { flex: 1; padding: 0 8px; }
+  /* Thumb-sized targets on a phone (40 px at least). */
+  .bld-ib, .bld-acts .bld-ib { width: 40px; height: 40px; }
+  .bld .seg button { min-height: 40px; }
+  details.bld-group > summary.bld-gh { min-height: 40px; }
+}
+
+.bld-page { min-height: 40px; max-width: 190px; padding: 0 30px 0 10px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--surface); color: var(--ink); font-weight: 700; font-size: 14px; }
+@media (max-width: 899px) { .bld-page { max-width: 120px; padding-right: 22px; } }

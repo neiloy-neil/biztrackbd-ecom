@@ -176,7 +176,7 @@ test.describe("tampering and stock", () => {
     await page.goto("/");
     // The cart stores only ids and quantities; there is no price field to edit. Ask for more than is in stock.
     const variantId = await withDb(async (c) => {
-      const id = (await c.query(`SELECT v.id FROM "ProductVariant" v JOIN "Product" p ON p.id = v."productId" WHERE p.slug = 'linen-shirt-sage' AND v.title = 'XL'`)).rows[0].id as string;
+      const id = (await c.query(`SELECT v.id FROM "ProductVariant" v JOIN "Product" p ON p.id = v."productId" WHERE p.slug = 'linen-shirt-sage' AND v.title = 'XL' AND p."tenantId" = (SELECT id FROM "Tenant" WHERE subdomain = 'rongdhonu')`)).rows[0].id as string;
       await c.query(`UPDATE "ProductVariant" SET "stockQuantity" = 3 WHERE id = $1`, [id]);
       return id;
     });

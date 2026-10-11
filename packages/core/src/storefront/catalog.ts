@@ -92,6 +92,12 @@ const THEME_COPY: Record<ThemeId, Partial<KaporSettings>> = {
     heroText: "Performance essentials and limited streetwear, delivered nationwide.", heroTextBn: "পারফরম্যান্স পোশাক ও সীমিত স্ট্রিটওয়্যার, সারা দেশে ডেলিভারি।",
     heroCta: "Enter the drop", heroCtaBn: "ড্রপ দেখুন", newArrivalsTitle: "Latest release", newArrivalsTitleBn: "সর্বশেষ রিলিজ",
   },
+  berber: {
+    heroEyebrow: "NEW COLLECTION", heroEyebrowBn: "নতুন কালেকশন",
+    heroTitle: "Wear your story.", heroTitleBn: "পরুন আপনার গল্প।",
+    heroText: "Modern formalwear for the unapologetic individual.", heroTextBn: "আত্মবিশ্বাসী মানুষের জন্য আধুনিক ফরমালওয়্যার।",
+    heroCta: "Shop now", heroCtaBn: "এখনই কিনুন", newArrivalsTitle: "New arrivals", newArrivalsTitleBn: "নতুন পণ্য",
+  },
   bindu: {
     heroEyebrow: "A RITUAL OF YOUR OWN", heroEyebrowBn: "আপনার নিজের যত্ন",
     heroTitle: "Everyday beauty, thoughtfully selected.", heroTitleBn: "প্রতিদিনের সৌন্দর্য, যত্নে বাছাই করা।",

@@ -2,7 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createBaseClient, setBasePrisma, setPlatformPrisma, withTenant, type PrismaClient } from "@biztrackbd/db";
 import { createOwnerClient, resetDatabase, seedPlans, testUrls } from "@biztrackbd/db/testing";
 import {
-  DomainError, accessState, addDomain, addPeriod, approveSubscriptionPayment, cancelPendingProof, changePlan, checkSubdomain, extendTrial, getBillingOverview, getOverview, getStoreAccess,
+  DEMO_TEMPLATES, DomainError, accessState, addDomain, addPeriod, approveSubscriptionPayment, cancelPendingProof, changePlan, checkSubdomain, extendTrial, getBillingOverview, getOverview, getStoreAccess,
   getTenantDetail, listPayments, listPlans, listPlatformAudit, listPublicPlans, listTenants, reactivateTenant, rejectSubscriptionPayment, reviewQuarantine, runBillingLifecycle, scanBrandRisk,
   setEventPublisher, signupStore, statusFor, submitPaymentProof, suspendTenant, updatePlan, type PlatformActor, type PlatformRole, type StaffActor,
 } from "../src";
@@ -123,7 +123,7 @@ describe("signing up a store", () => {
     const s = await signup({ plan: "PRO", tagline: "Handloom from Narayanganj" });
     expect(s.quarantined).toBe(false);
     const t = await tenant(s.tenantId);
-    expect(t).toMatchObject({ status: "TRIAL", planTier: "PRO", subdomain: s.subdomain, themeId: "kapor", ownerEmail: s.input.email, productCount: 3 });
+    expect(t).toMatchObject({ status: "TRIAL", planTier: "PRO", subdomain: s.subdomain, themeId: "kapor", ownerEmail: s.input.email, productCount: 8 }); // the Kapor template's sample products (docs/38)
     expect(Math.round((t.trialEndsAt.getTime() - t.trialStartsAt.getTime()) / DAY)).toBe(14);
     expect(t.subscription).toMatchObject({ status: "TRIALING", planTier: "PRO" });
     expect(Number(t.subscription!.amount)).toBe(0);
@@ -134,8 +134,9 @@ describe("signing up a store", () => {
     expect(await owner.storeSettings.findFirstOrThrow({ where: { tenantId: s.tenantId } })).toMatchObject({ storeName: s.input.storeName, tagline: "Handloom from Narayanganj" });
     expect(await owner.shippingZone.count({ where: { tenantId: s.tenantId } })).toBe(2);
     expect(await owner.themeInstall.count({ where: { tenantId: s.tenantId, themeId: "kapor", isActive: true } })).toBe(1);
-    expect(await owner.product.count({ where: { tenantId: s.tenantId, status: "ACTIVE" } })).toBe(3);
-    expect(await owner.productVariant.count({ where: { tenantId: s.tenantId } })).toBe(6);
+    const kapor = DEMO_TEMPLATES.find((x) => x.id === "kapor")!;
+    expect(await owner.product.count({ where: { tenantId: s.tenantId, status: "ACTIVE" } })).toBe(kapor.products.length);
+    expect(await owner.productVariant.count({ where: { tenantId: s.tenantId } })).toBe(kapor.products.reduce((n, p) => n + p.variants.length, 0));
     expect((await owner.auditLog.findFirstOrThrow({ where: { tenantId: s.tenantId } })).action).toBe("store.created");
     // The owner can use the store straight away: access is the trial.
     expect(await getStoreAccess(s.tenantId)).toMatchObject({ state: "TRIAL" });
@@ -229,7 +230,7 @@ describe("the owner's billing screen", () => {
     expect(b.plans.map((p) => p.tier)).toEqual(["STARTER", "PRO", "BUSINESS"]);
     expect(b.plans[1]).toMatchObject({ name: "Pro", priceMonthly: 1499, priceYearly: 14990, yearlyMonthsFree: 2 });
     expect(b.access).toMatchObject({ state: "TRIAL", daysLeft: 14 });
-    expect(b.usage.products.used).toBe(3);
+    expect(b.usage.products.used).toBe(8);
     expect(b.payTo).toEqual([{ provider: "BKASH", number: "01800000000", kind: "MERCHANT" }]);
     expect(b.pending).toBeNull();
     expect(b.subscription).toMatchObject({ tier: "STARTER", amount: 0 });
@@ -490,7 +491,7 @@ describe("finding stores and reading the numbers", () => {
     await approveSubscriptionPayment(fin, (await submitPaymentProof(s.tenantId, s.actor, proof())).id);
     await suspendTenant(boss, s.tenantId, "Temporary hold for a check");
     const d = await getTenantDetail(support, s.tenantId);
-    expect(d).toMatchObject({ name: s.input.storeName, tier: "PRO", usage: { products: 3, staff: 1 }, suspendedReason: "Temporary hold for a check" });
+    expect(d).toMatchObject({ name: s.input.storeName, tier: "PRO", usage: { products: 8, staff: 1 }, suspendedReason: "Temporary hold for a check" });
     expect(d.proofs).toHaveLength(1);
     expect(d.audit.map((a) => a.action)).toEqual(expect.arrayContaining(["PAYMENT_APPROVED", "TENANT_SUSPENDED"]));
     await fails(getTenantDetail(support, "nope"), "NOT_FOUND");

@@ -7,6 +7,7 @@ const swatch: Record<ThemeId, string> = {
   "mini-bunny": "linear-gradient(135deg,#FFF0E8 0 50%,#C24173 50%)",
   axionwear: "linear-gradient(135deg,#0B0D0F 0 50%,#D7FF3F 50%)",
   bindu: "linear-gradient(135deg,#FFF2F5 0 50%,#8A2855 50%)",
+  berber: "linear-gradient(135deg,#0D121E 0 50%,#C9A24B 50%)",
 };
 
 export function ThemePicker({ active, canEdit }: { active: ThemeId; canEdit: boolean }) {

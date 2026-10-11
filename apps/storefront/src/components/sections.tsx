@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { PageData, PageJson, PageSection } from "@biztrackbd/core";
 import { productKey } from "@biztrackbd/core/builder-client";
 import { type Lang, type T } from "@/lib/i18n-core";
+import type { PageCtx } from "@/lib/page-ctx";
+import { renderPageBlock } from "./page-blocks";
 import { ProductCard } from "./product-card";
 import { tintFor } from "./product-image";
 
@@ -27,7 +29,7 @@ function Cta({ href, className, children }: { href: string; className: string; c
   return href.startsWith("/") ? <Link href={href} className={className}>{children}</Link> : <a href={href} className={className} rel="noopener noreferrer">{children}</a>;
 }
 
-function Section({ section, data, lang, t, orderForm }: { section: PageSection; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode }) {
+function Section({ section, data, lang, t, orderForm, ctx }: { section: PageSection; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx }) {
   const s = section.settings as S;
   const id = section.id;
   switch (section.type) {
@@ -202,10 +204,11 @@ function Section({ section, data, lang, t, orderForm }: { section: PageSection; 
     case "lp-sticky-cta":
       return <div className="lp-sticky" data-section={id}><a href="#order" className="btn btn-primary btn-round btn-block">{L(s, "text", lang)}</a></div>;
     default:
-      return null;
+      // The product, collection and cart blocks (docs/39) need the page's own data.
+      return <>{renderPageBlock(section.type, id, s, ctx, lang, t)}</>;
   }
 }
 
-export function Sections({ page, data, lang, t, orderForm }: { page: PageJson; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode }) {
-  return <>{page.sections.filter((s) => !s.disabled).map((s) => <Section key={s.id} section={s} data={data} lang={lang} t={t} orderForm={orderForm} />)}</>;
+export function Sections({ page, data, lang, t, orderForm, ctx }: { page: PageJson; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx }) {
+  return <>{page.sections.filter((s) => !s.disabled).map((s) => <Section key={s.id} section={s} data={data} lang={lang} t={t} orderForm={orderForm} ctx={ctx} />)}</>;
 }

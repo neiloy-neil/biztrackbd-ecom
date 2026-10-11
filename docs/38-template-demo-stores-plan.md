@@ -36,3 +36,8 @@
 - Pictures are the biggest effort: about 50 generated images. They are produced as vector or simple illustration files, so size is small.
 - The free Supabase database is small; 5 demos of about 10 products each are tiny.
 - Public demo stores are an abuse target (spam in forms). The guard blocks writes; the nightly reset clears the rest.
+
+## Status (11 October 2026, local)
+Built and verified locally: the `isDemo` flag and migration 17; platform overview, billing sweep and signup exclude or protect demos; the five-template content module and illustration generator; the seeder (`scripts/demo-stores.ts`) and the nightly reset route (`/api/cron/demo-reset`) with five scheduler jobs; the demo guard (orders, sign-in codes, reviews, abandoned carts); template-matched sample products with pictures at signup; the marketing `/templates` cards with previews and live-demo links; tests (`packages/core/tests/demo.test.ts`, 10 tests).
+Found and fixed on the way: the storefront header showed a hardcoded "KAPOR" for any store without a logo.
+Not done yet: applying migration 17 and building the demos on Supabase (waiting on the push and deploy), the demo ribbon wording review, category pictures (the storefront draws category tiles without images; a design gap, not part of this work).

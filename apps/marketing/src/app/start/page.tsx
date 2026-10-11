@@ -15,12 +15,23 @@ export default async function Start({ searchParams }: { searchParams: Promise<Re
   const initialTheme = THEMES.find((t) => t.id === wantedTheme && t.live)?.id ?? "kapor";
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
   return (
-    <div className="wrap">
-      <Wizard
-        rootDomain={rootDomain} initialPlan={initialPlan} initialTheme={initialTheme}
-        themes={THEMES.map((t) => ({ id: t.id, name: t.name, blurb: t.blurb, live: t.live }))}
-        plans={plans.map((p) => ({ tier: p.tier, name: p.name, priceMonthly: p.priceMonthly, blurb: planBullets(p).slice(0, 3).join(", ") }))}
-      />
+    <div className="split-start">
+      <div className="split-form">
+        <Wizard
+          rootDomain={rootDomain} initialPlan={initialPlan} initialTheme={initialTheme}
+          themes={THEMES.map((t) => ({ id: t.id, name: t.name, blurb: t.blurb, live: t.live }))}
+          plans={plans.map((p) => ({ tier: p.tier, name: p.name, priceMonthly: p.priceMonthly, blurb: planBullets(p).slice(0, 3).join(", ") }))}
+        />
+      </div>
+      <aside className="split-side" aria-label="What happens next">
+        <span className="eyebrow">What happens next</span>
+        <ol>
+          <li><span>1</span><div><b>Pick a template</b><p>Choose a look for fashion, gadgets, kids wear, tailoring or beauty. Change it any time without losing your products.</p></div></li>
+          <li><span>2</span><div><b>Add your products</b><p>Take photos on your phone, set prices in taka, and start with sample products if you want to look around first.</p></div></li>
+          <li><span>3</span><div><b>Share your link and sell</b><p>Customers pay by cash on delivery, bKash or Nagad. You book Pathao, Steadfast or RedX from the order.</p></div></li>
+        </ol>
+        <p className="side-foot"><span>14 days free</span><span>No card required</span><span>Bangla and English</span></p>
+      </aside>
     </div>
   );
 }

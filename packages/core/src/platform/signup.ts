@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { Prisma, getBasePrisma, withTenant, type TenantTx } from "@biztrackbd/db";
+import { Prisma, getBasePrisma, withTenant } from "@biztrackbd/db";
 import { z } from "zod";
 import { STORE_THEMES, validateThemeId } from "../builder/theme";
 import { audit } from "../audit/service";
@@ -8,6 +8,8 @@ import { publishEvent } from "../events";
 import { normalizeBdPhone } from "../phone";
 import { validateSubdomain } from "../routing/host";
 import { scanBrandRisk } from "./brand";
+import { demoTemplate } from "../demo/templates";
+import { makeProductPictures, seedCatalog, type DemoDeps } from "../demo/seed";
 
 const EXTERNAL_AUTH = "EXTERNAL_AUTH";
 const MAX_STORES_PER_EMAIL = 3;
@@ -27,7 +29,7 @@ export const SignupInput = z.object({
   storeName: z.string().trim().min(2, "Enter your store name").max(60),
   subdomain: z.string().trim().toLowerCase(),
   plan: z.enum(["STARTER", "PRO", "BUSINESS"]).default("PRO"),
-  theme: z.enum(["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu"]).default("kapor"),
+  theme: z.enum(["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu", "berber"]).default("kapor"),
   tagline: z.string().trim().max(120).optional(),
   locale: z.enum(["bn-BD", "en-US"]).default("bn-BD"),
   demoData: z.boolean().default(true),
@@ -60,24 +62,6 @@ export interface SignedUp {
 }
 
 /** Three sample products so a new owner sees a working store at once. They count against the plan like any product and can be deleted. */
-async function seedDemoCatalog(tx: TenantTx, tenantId: string): Promise<void> {
-  const category = await tx.category.create({ data: { tenantId, name: "Sample products", slug: "sample-products" } });
-  const defs = [
-    { title: "Sample cotton panjabi", slug: "sample-cotton-panjabi", price: 1250, cost: 700, sizes: ["M", "L", "XL"] },
-    { title: "Sample linen shirt", slug: "sample-linen-shirt", price: 950, cost: 520, sizes: ["M", "L"] },
-    { title: "Sample cotton socks, 3 pack", slug: "sample-cotton-socks", price: 300, cost: 140, sizes: ["Free size"] },
-  ];
-  for (const d of defs) {
-    const p = await tx.product.create({
-      data: { tenantId, title: d.title, slug: d.slug, descriptionHtml: "<p>A sample product. Edit or delete it, then add your own.</p>", status: "ACTIVE", basePrice: d.price, costPrice: d.cost, categoryId: category.id },
-    });
-    for (const size of d.sizes) {
-      await tx.productVariant.create({ data: { tenantId, productId: p.id, title: size, sku: `${d.slug}-${size}`.toUpperCase().replace(/\s+/g, "-"), price: d.price, stockQuantity: 20, options: { Size: size } } });
-    }
-  }
-  await tx.$executeRaw`UPDATE "Tenant" SET "productCount" = "productCount" + ${defs.length} WHERE id = ${tenantId}`;
-}
-
 function failureOf(e: unknown): string {
   const msg = e instanceof Prisma.PrismaClientKnownRequestError ? JSON.stringify(e.meta ?? {}) + e.message : e instanceof Error ? e.message : "";
   return msg;
@@ -87,7 +71,7 @@ function failureOf(e: unknown): string {
  * Creates a store, its owner, its trial and its starting settings in one go (docs/16 phase 5, docs/23 onboarding).
  * The owner is created without a password: sign-in is by the platform's auth provider, which is not connected yet.
  */
-export async function signupStore(raw: unknown, opts: { now?: Date } = {}): Promise<SignedUp> {
+export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws and stores the sample products' pictures. Without it the samples have none. */ pictures?: Pick<DemoDeps, "rasterize" | "save"> } = {}): Promise<SignedUp> {
   const parsed = SignupInput.safeParse(raw);
   if (!parsed.success) throw new ValidationError(parsed.error.issues[0]?.message ?? "Check the form", { field: parsed.error.issues[0]?.path[0] });
   const input = parsed.data;
@@ -116,7 +100,17 @@ export async function signupStore(raw: unknown, opts: { now?: Date } = {}): Prom
     throw e;
   }
 
+  // Sample products that fit the chosen template (docs/38). Pictures are made first because they are stored under the store's id.
+  const template = input.demoData ? demoTemplate(input.theme) : undefined;
+  let samples: { template: NonNullable<typeof template>; urls: Map<string, string> } | null = null;
   try {
+    if (template) {
+      let urls = new Map<string, string>();
+      if (opts.pictures) {
+        try { urls = await makeProductPictures(id, template, opts.pictures); } catch (e) { console.error("sample pictures failed", e instanceof Error ? e.name : "unknown"); }
+      }
+      samples = { template, urls };
+    }
     const result = await withTenant(id, async (tx) => {
       const tenant = await tx.tenant.findFirstOrThrow();
       await tx.storeSettings.create({ data: { tenantId: id, storeName: input.storeName, tagline: input.tagline || null, contactPhone: phone, email: input.email } });
@@ -131,7 +125,7 @@ export async function signupStore(raw: unknown, opts: { now?: Date } = {}): Prom
         data: { tenantId: id, planTier: input.plan, interval: "MONTHLY", status: "TRIALING", amount: 0, currentPeriodStart: tenant.trialStartsAt, currentPeriodEnd: tenant.trialEndsAt },
       });
       const owner = await tx.tenantUser.create({ data: { tenantId: id, email: input.email, name: input.ownerName, phone, role: "STORE_OWNER", passwordHash: EXTERNAL_AUTH } });
-      if (input.demoData) await seedDemoCatalog(tx, id);
+      if (input.demoData && samples) await seedCatalog(tx, id, samples.template, samples.urls, { sample: true });
       await audit(tx, id, { userId: owner.id, email: owner.email }, "store.created", { plan: input.plan, theme: input.theme, demoData: input.demoData, quarantined: brand !== null });
       return { tenantId: id, subdomain: sub.label, storeName: input.storeName, plan: input.plan, trialEndsAt: tenant.trialEndsAt, quarantined: brand !== null };
     });

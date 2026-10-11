@@ -84,9 +84,9 @@ export async function getOverview(actor: PlatformActor, deps?: Deps): Promise<Pl
   const db = dbOf(deps), now = nowOf(deps);
   const [subs, tenants, pending, quarantined, paidEver] = await Promise.all([
     db.subscription.findMany({ select: { tenantId: true, amount: true, interval: true, status: true, planTier: true, currentPeriodEnd: true } }),
-    db.tenant.findMany({ select: { id: true, status: true, trialEndsAt: true, createdAt: true, suspendedReason: true, planTier: true } }),
+    db.tenant.findMany({ where: { isDemo: false }, select: { id: true, status: true, trialEndsAt: true, createdAt: true, suspendedReason: true, planTier: true } }),
     db.paymentProof.aggregate({ where: { status: "PENDING" }, _count: { _all: true }, _sum: { amount: true } }),
-    db.tenant.count({ where: { quarantined: true, suspendedReason: null } }),
+    db.tenant.count({ where: { quarantined: true, suspendedReason: null, isDemo: false } }),
     db.paymentProof.groupBy({ by: ["tenantId"], where: { status: "APPROVED" } }),
   ]);
   const subOf = new Map(subs.map((s) => [s.tenantId, s]));
@@ -131,6 +131,8 @@ export interface TenantRow {
   tier: string;
   access: Access;
   quarantined: boolean;
+  /** A template demo store (docs/38). */
+  isDemo: boolean;
   createdAt: Date;
 }
 
@@ -153,7 +155,7 @@ export async function listTenants(actor: PlatformActor, opts: { q?: string; filt
   const filter = opts.filter ?? "all";
   const rows = all.map((t): TenantRow => ({
     id: t.id, name: t.name, subdomain: t.subdomain, ownerName: t.ownerName, ownerEmail: t.ownerEmail, ownerPhone: t.ownerPhone, tier: t.planTier,
-    access: accessOf(t, t.subscription, now), quarantined: t.quarantined, createdAt: t.createdAt,
+    access: accessOf(t, t.subscription, now), quarantined: t.quarantined, isDemo: t.isDemo, createdAt: t.createdAt,
   })).filter((r) => filter === "all" ? true : filter === "trial" ? r.access.state === "TRIAL" : filter === "paying" ? r.access.state === "ACTIVE" : filter === "overdue" ? r.access.state === "GRACE" : filter === "locked" ? r.access.state === "READ_ONLY" || r.access.state === "LOCKED" : r.quarantined);
   const pageSize = opts.pageSize ?? 25, page = Math.max(1, opts.page ?? 1);
   return { rows: rows.slice((page - 1) * pageSize, page * pageSize), total: rows.length, page, pageSize };
@@ -189,7 +191,7 @@ export async function getTenantDetail(actor: PlatformActor, tenantId: string, de
   ]);
   return {
     id: t.id, name: t.name, subdomain: t.subdomain, ownerName: t.ownerName, ownerEmail: t.ownerEmail, ownerPhone: t.ownerPhone, tier: t.planTier, access: accessOf(t, t.subscription, now),
-    quarantined: t.quarantined, createdAt: t.createdAt, status: t.status, trialEndsAt: t.trialEndsAt, suspendedReason: t.suspendedReason, quarantineReason: t.quarantineReason,
+    quarantined: t.quarantined, isDemo: t.isDemo, createdAt: t.createdAt, status: t.status, trialEndsAt: t.trialEndsAt, suspendedReason: t.suspendedReason, quarantineReason: t.quarantineReason,
     subscription: t.subscription ? { tier: t.subscription.planTier, interval: t.subscription.interval, amount: Number(t.subscription.amount), status: t.subscription.status, periodStart: t.subscription.currentPeriodStart, periodEnd: t.subscription.currentPeriodEnd } : null,
     usage: { products: t.productCount, staff, ordersThisMonth: Number(usageRow?.value ?? 0), gmv30Days: Number(gmv._sum.totalAmount ?? 0), ordersTotal, storageMb: Math.round(Number(t.storageBytesUsed) / 1_048_576) },
     domains, proofs: proofs.map((p) => ({ id: p.id, plan: p.planTier, interval: p.billingPeriod, amount: Number(p.amount), provider: p.mfsProvider, trxId: p.trxId, status: p.status, createdAt: p.createdAt })),
@@ -445,7 +447,8 @@ export interface LifecycleResult {
  */
 export async function runBillingLifecycle(deps?: Deps): Promise<LifecycleResult> {
   const db = dbOf(deps), now = nowOf(deps);
-  const tenants = await db.tenant.findMany({ where: { status: { not: "CANCELLED" }, suspendedReason: null }, include: { subscription: true } });
+  // Demo stores (docs/38) are never billed, reminded, put in grace or locked.
+  const tenants = await db.tenant.findMany({ where: { status: { not: "CANCELLED" }, suspendedReason: null, isDemo: false }, include: { subscription: true } });
   const res: LifecycleResult = { checked: tenants.length, changed: 0, toGrace: 0, toReadOnly: 0, toLocked: 0, reminders: 0 };
   const changedIds: string[] = [];
   for (const t of tenants) {

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { PageData, PageJson } from "@biztrackbd/core";
 import { themeCss, validatePage, validateTheme, type PageKind, type ThemeSettings } from "@biztrackbd/core/builder-client";
 import { makeT, type Lang } from "@/lib/i18n-core";
+import type { PageCtx } from "@/lib/page-ctx";
 import { Sections } from "./sections";
 
 /**
@@ -16,7 +17,7 @@ import { Sections } from "./sections";
 export const PREVIEW_MESSAGE = "bt-preview:update";
 export const PREVIEW_READY = "bt-preview:ready";
 
-export function PreviewBridge({ kind, initialPage, initialTheme, data, lang: initialLang, orderForm, adminOrigin }: { kind: PageKind; initialPage: PageJson; initialTheme: ThemeSettings; data: PageData; lang: Lang; orderForm?: React.ReactNode; adminOrigin?: string }) {
+export function PreviewBridge({ kind, initialPage, initialTheme, data, lang: initialLang, orderForm, adminOrigin, ctx }: { kind: PageKind; initialPage: PageJson; initialTheme: ThemeSettings; data: PageData; lang: Lang; orderForm?: React.ReactNode; adminOrigin?: string; /** The page's own data, for product, collection and cart pages. */ ctx?: PageCtx }) {
   const router = useRouter();
   const [page, setPage] = useState(initialPage);
   const [theme, setTheme] = useState(initialTheme);
@@ -61,12 +62,41 @@ export function PreviewBridge({ kind, initialPage, initialTheme, data, lang: ini
     return () => window.removeEventListener("message", onFocus);
   }, [adminOrigin]);
 
+  // Click a section in the preview to edit it: the editor is told which one, and links inside the preview do not navigate away.
+  useEffect(() => {
+    function onClick(e: MouseEvent) {
+      const target = e.target as Element | null;
+      const section = target?.closest("[data-section]");
+      if (!section) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const id = section.getAttribute("data-section");
+      if (id) window.parent.postMessage({ type: "bt-preview:select", id }, adminOrigin || "*");
+    }
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, [adminOrigin]);
+
+  // Outline the section being edited.
+  useEffect(() => {
+    function onFocus(e: MessageEvent) {
+      if (e.source !== window.parent || (adminOrigin && e.origin !== adminOrigin)) return;
+      const m = e.data as { type?: string; id?: string } | null;
+      if (m?.type !== "bt-preview:focus" || typeof m.id !== "string") return;
+      document.querySelectorAll(".bt-selected").forEach((el) => el.classList.remove("bt-selected"));
+      document.querySelector(`[data-section="${CSS.escape(m.id)}"]`)?.classList.add("bt-selected");
+    }
+    window.addEventListener("message", onFocus);
+    return () => window.removeEventListener("message", onFocus);
+  }, [adminOrigin]);
+
   const css = themeCss(theme);
   return (
     <div data-testid="preview-root" data-preview-sections={page.sections.length}>
+      <style id="bt-preview-select">{`[data-section]{cursor:pointer}[data-section]:hover{outline:2px dashed rgba(91,79,232,.55);outline-offset:-2px}[data-section].bt-selected{outline:3px solid #5B4FE8;outline-offset:-3px}`}</style>
       {css && <style id="bt-preview-theme" dangerouslySetInnerHTML={{ __html: css }} />}
       {error && <div role="status" style={{ position: "sticky", top: 0, zIndex: 50, background: "#FEF3E2", color: "#92400E", padding: "8px 16px", fontSize: 13, fontWeight: 600 }}>{error}</div>}
-      <Sections page={page} data={data} lang={lang} t={makeT(lang)} orderForm={orderForm} />
+      <Sections page={page} data={data} lang={lang} t={makeT(lang)} orderForm={orderForm} ctx={ctx} />
     </div>
   );
 }

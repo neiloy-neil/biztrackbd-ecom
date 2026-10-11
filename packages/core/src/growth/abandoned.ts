@@ -1,3 +1,4 @@
+import { isDemoStore } from "../demo/guard";
 import { randomBytes, randomUUID } from "node:crypto";
 import { Prisma, getBasePrisma, withTenant, type TenantTx } from "@biztrackbd/db";
 import { z } from "zod";
@@ -70,7 +71,7 @@ export async function captureCheckout(tenantId: string, raw: unknown): Promise<{
       for (const i of input.items) merged.set(i.variantId, Math.min(50, (merged.get(i.variantId) ?? 0) + i.quantity));
       const variants = await tx.productVariant.findMany({ where: { id: { in: [...merged.keys()] }, product: { status: "ACTIVE", deletedAt: null } }, include: { product: { select: { title: true } } } });
       const lines: CartSnapshotLine[] = variants.map((v) => ({ variantId: v.id, quantity: merged.get(v.id)!, title: v.product.title, variantTitle: v.title, price: Number(v.price) }));
-      if (lines.length === 0) return { captured: false };
+      if (lines.length === 0 || (await isDemoStore(tx))) return { captured: false };
       const total = money(lines.reduce((s, l) => s + l.price * l.quantity, 0));
 
       const open = await tx.abandonedCheckout.findFirst({ where: { phone, status: { in: [...OPEN] } } });

@@ -1,3 +1,4 @@
+import { assertNotDemo } from "../demo/guard";
 import { Prisma, withTenant } from "@biztrackbd/db";
 import { z } from "zod";
 import { audit } from "../audit/service";
@@ -93,6 +94,7 @@ export async function submitReview(tenantId: string, customerId: string, raw: un
   const title = input.title ? cleanText(input.title, 100) || null : null;
   try {
     return await withTenant(tenantId, async (tx) => {
+      await assertNotDemo(tx);
       const delivered = await tx.order.findFirst({ where: { customerId, status: "DELIVERED", items: { some: { productId: input.productId } } }, select: { id: true } });
       if (!delivered) throw new ValidationError("You can review a product after it has been delivered to you.");
       const settings = await tx.storeSettings.findFirst({ select: { reviewsAutoPublish: true } });

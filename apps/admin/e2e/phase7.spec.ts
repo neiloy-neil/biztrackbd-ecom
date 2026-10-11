@@ -41,6 +41,10 @@ async function cleanDesign() {
 
 const frameOf = (page: Page) => page.frameLocator('[data-testid="preview-frame"]');
 const row = (page: Page, type: string) => page.locator(`[data-testid="section-row"][data-type="${type}"]`);
+/** On a phone the section list is its own tab; on a computer it is always on screen. */
+const layers = async (page: Page) => { const t = page.getByRole("tab", { name: "Sections" }); if (await t.count()) await t.click(); };
+/** Adds a section from the library (a sheet that slides up). */
+const addSection = async (page: Page, type: string) => { await layers(page); await page.getByTestId("add-section").click(); await page.getByTestId(`lib-${type}`).click(); };
 const saved = (page: Page) => expect(page.getByTestId("design-status")).toHaveAttribute("data-save", "saved", { timeout: 15_000 });
 
 test.describe.serial("store design, landing pages and domains", () => {
@@ -62,7 +66,8 @@ test.describe.serial("store design, landing pages and domains", () => {
     // A marker on the framed page: if the edit reloaded it, the marker would be gone.
     await frame.locator("body").evaluate(() => { (window as unknown as { __kept: number }).__kept = 1; });
 
-    await row(page, "hero").locator(".pick").click();
+    await layers(page);
+    await row(page, "hero").locator(".bld-pick").click();
     await page.getByLabel("Headline", { exact: true }).fill("Eid collection is here");
     await expect(frame.getByRole("heading", { level: 1 })).toHaveText("Eid collection is here", { timeout: 3000 });
     expect(await frame.locator("body").evaluate(() => (window as unknown as { __kept?: number }).__kept)).toBe(1);
@@ -101,15 +106,16 @@ test.describe.serial("store design, landing pages and domains", () => {
     await expect(frame.getByTestId("preview-root")).toBeVisible();
     // The earlier edits were saved as a draft and are still here after a reload.
     await expect(page.getByTestId("design-status")).toContainText("Not published yet");
-    await row(page, "hero").locator(".pick").click();
+    await layers(page);
+    await row(page, "hero").locator(".bld-pick").click();
     await expect(page.getByLabel("Headline", { exact: true })).toHaveValue("Eid collection is here");
 
-    await page.getByTestId("add-type").selectOption("rich-text");
-    await page.getByTestId("add-section").click();
+    await addSection(page, "rich-text");
     await page.getByLabel("Heading", { exact: true }).fill("Delivery in Dhaka");
     await page.getByLabel("Text", { exact: true }).fill("We deliver inside Dhaka in one to two days.");
     await expect(frame.getByRole("heading", { name: "Delivery in Dhaka" })).toBeVisible({ timeout: 3000 });
 
+    await layers(page);
     await page.getByRole("button", { name: "Move Text block up" }).click();
     await expect(page.getByTestId("section-row")).toHaveCount(5);
     expect(await page.getByTestId("section-row").evaluateAll((els) => els.map((e) => e.getAttribute("data-type")))).toEqual(["hero", "featured-products", "category-grid", "rich-text", "trust-strip"]);
@@ -126,8 +132,7 @@ test.describe.serial("store design, landing pages and domains", () => {
     await page.goto("/design");
     const frame = frameOf(page);
     await expect(frame.getByTestId("preview-root")).toBeVisible();
-    await page.getByTestId("add-type").selectOption("banner");
-    await page.getByTestId("add-section").click();
+    await addSection(page, "banner");
     await page.getByTestId("image-file").setInputFiles({ name: "photo.png", mimeType: "image/png", buffer: await samplePhoto() });
     await expect(page.getByRole("dialog", { name: "Crop your picture" })).toBeVisible();
     await page.getByLabel("Shape").selectOption("16:9");
@@ -165,7 +170,8 @@ test.describe.serial("store design, landing pages and domains", () => {
 
     // A second edit, published as version 2.
     await page.goto("/design");
-    await row(page, "hero").locator(".pick").click();
+    await layers(page);
+    await row(page, "hero").locator(".bld-pick").click();
     await page.getByLabel("Headline", { exact: true }).fill("Eid sale: free delivery");
     await saved(page);
     await page.getByTestId("tab-history").click();
@@ -212,7 +218,8 @@ test.describe.serial("store design, landing pages and domains", () => {
     const v = await visitor(browser);
     expect((await v.page.goto(`/l/${slug}`))?.status()).toBe(404);
 
-    await row(page, "lp-hero").locator(".pick").click();
+    await layers(page);
+    await row(page, "lp-hero").locator(".bld-pick").click();
     await page.getByLabel("Headline", { exact: true }).fill("The panjabi that stays cool");
     await expect(frameOf(page).getByRole("heading", { level: 1 })).toHaveText("The panjabi that stays cool", { timeout: 3000 });
     await saved(page);
@@ -239,6 +246,7 @@ test.describe.serial("store design, landing pages and domains", () => {
     expect(o).toMatchObject({ channel: "LANDING_PAGE", paymentMethod: "COD", utmSource: `landing:${slug}` });
 
     // The owner takes it down, and it stops being public.
+    await page.getByTestId("tab-theme").click(); // the page details (and the live switch) are in the Page tab
     await page.getByTestId("toggle-live").click();
     await expect(page.getByText("The page is no longer live.")).toBeVisible();
     const v2 = await visitor(browser);

@@ -17,6 +17,13 @@ export class ValidationError extends DomainError {
   }
 }
 
+/** A write that a template demo store (docs/38) refuses: no orders, no SMS codes, no reviews. */
+export class DemoStoreError extends DomainError {
+  constructor() {
+    super("DEMO_STORE", "This is a demo store, so it does not take real orders. Start your own store to sell for real.", 403);
+  }
+}
+
 export class InsufficientStockError extends DomainError {
   constructor(message: string, readonly variantId: string, readonly available: number) {
     super("INSUFFICIENT_STOCK", message, 409, { variantId, available });

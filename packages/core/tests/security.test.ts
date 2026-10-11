@@ -38,6 +38,7 @@ describe("who can call each admin and platform action", () => {
     "apps/admin/src/app/(admin)/dev-actions.ts", // development stand-in; refuses to run in production (checked below)
     "apps/platform/src/app/(sa)/dev-actions.ts",
     "apps/admin/src/app/(admin)/theme-actions.ts", // light or dark look on this device: a cookie, no store data
+    "apps/admin/src/app/(admin)/lang-actions.ts", // English or Bangla on this device: a cookie, no store data
     "apps/admin/src/app/login/actions.ts", // these ARE the sign-in: each step that needs a person checks the token itself, and the rest (password, code) is what proves them
     "apps/platform/src/app/login/actions.ts",
   ]);

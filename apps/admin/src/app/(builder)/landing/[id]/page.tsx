@@ -6,8 +6,8 @@ import { SubmitButton } from "@/components/ui";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { storefrontOrigin } from "@/lib/store-url";
-import { Editor } from "../../design/editor";
-import { deleteLandingAction, saveLandingMetaAction, setLandingLiveAction } from "../actions";
+import { Builder } from "../../design/builder";
+import { deleteLandingAction, saveLandingMetaAction, setLandingLiveAction } from "@/app/(admin)/landing/actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Landing page" };
@@ -58,7 +58,7 @@ export default async function LandingEdit({ params, searchParams }: { params: Pr
   );
 
   return (
-    <Editor
+    <Builder
       key={`${id}-${state.publishedVersion}-${state.isDraft}-${versions.length}-${state.stamp}`}
       pageKey={pageKey}
       kind="landing"
@@ -74,6 +74,8 @@ export default async function LandingEdit({ params, searchParams }: { params: Pr
       previewOrigin={origin}
       liveUrl={`${origin}/l/${row.slug}`}
       canEdit={canEdit}
+      exitHref="/landing"
+      initialTab={err || (done && DONE[done]) ? "theme" : undefined}
       header={header}
     />
   );

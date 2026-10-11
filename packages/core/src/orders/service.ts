@@ -1,3 +1,4 @@
+import { assertNotDemo } from "../demo/guard";
 import { randomUUID } from "node:crypto";
 import { Prisma, withTenant, type OrderStatus, type TenantTx } from "@biztrackbd/db";
 import {
@@ -45,6 +46,7 @@ export async function createOrder(tenantId: string, rawInput: unknown): Promise<
 
   try {
     const { placed, usage } = await withTenant(tenantId, async (tx) => {
+      await assertNotDemo(tx);
       const p = await place(tx, tenantId, input, phone);
       // A replay is not a new order, so it does not count against the plan.
       const u = p.replayed ? null : await recordOrderUsage(tx, tenantId);

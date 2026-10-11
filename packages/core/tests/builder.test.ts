@@ -2,7 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createBaseClient, setBasePrisma, type PrismaClient } from "@biztrackbd/db";
 import { createOwnerClient, createTenantFixture, resetDatabase, seedPlans, testUrls } from "@biztrackbd/db/testing";
 import {
-  DomainError, SECTIONS, STORE_THEMES, activateTheme, checkDomain, contrast, createLandingPage, createPreviewToken, defaultHomePage, defaultLandingPage, deleteLandingPage, discardDraft, dnsInstruction, getLive, getPreview,
+  DomainError, SECTIONS, STORE_PAGE_KINDS, allowedOn, defaultPageFor, requiredFor, sectionsFor, STORE_THEMES, activateTheme, checkDomain, contrast, createLandingPage, createPreviewToken, defaultHomePage, defaultLandingPage, deleteLandingPage, discardDraft, dnsInstruction, getLive, getPreview,
   getBuilderAccess, getPublicLanding, listLandingPages, listVersions, loadForEdit, loadPageData, newSection, normalizeSettings, placeLandingOrder, publish, recheckDomain, rollback, safeImage, safeUrl,
   saveDraft, saveThemeDraft, sectionDef, setDnsResolver, setEventPublisher, setLandingLive, setRoutingSync, setVercelClient, sweepDomains, themeCss, validatePage, validateTheme,
   verifyPreviewToken, type DnsResolver, type StaffActor, type VercelDomainClient,
@@ -142,7 +142,7 @@ describe("drafts, publishing and rollback", () => {
     await saveDraft(s.f.tenantId, s.owner, "home", kapor);
     await publish(s.f.tenantId, s.owner, "home");
 
-    expect(STORE_THEMES.map((theme) => theme.id)).toEqual(["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu"]);
+    expect(STORE_THEMES.map((theme) => theme.id)).toEqual(["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu", "berber"]);
     await activateTheme(s.f.tenantId, s.owner, "axionwear");
     expect(await loadForEdit(s.f.tenantId, s.owner, "home")).toMatchObject({ themeId: "axionwear", publishedVersion: null, theme: { accent: "#D7FF3F", background: "#0B0D0F" } });
     expect(await getLive(s.f.tenantId, "home")).toBeNull();
@@ -286,7 +286,9 @@ describe("drafts, publishing and rollback", () => {
   it("rejects page keys that are not pages", async () => {
     const s = await store("ver10");
     await fails(loadForEdit(s.f.tenantId, s.owner, "../../etc"), "VALIDATION_ERROR");
-    await fails(loadForEdit(s.f.tenantId, s.owner, "product"), "VALIDATION_ERROR");
+    await fails(loadForEdit(s.f.tenantId, s.owner, "products"), "VALIDATION_ERROR");
+    await fails(loadForEdit(s.f.tenantId, s.owner, "landing"), "VALIDATION_ERROR");
+    await fails(loadForEdit(s.f.tenantId, s.owner, "cart2"), "VALIDATION_ERROR");
   });
 });
 
@@ -426,7 +428,7 @@ describe("landing pages", () => {
 describe("plan limits", () => {
   it("Starter can restyle the store but not rearrange its home page", async () => {
     const s = await store("plan1", "STARTER");
-    expect(await getBuilderAccess(s.f.tenantId)).toEqual({ tier: "settings", sectionsEditable: false });
+    expect(await getBuilderAccess(s.f.tenantId)).toEqual({ tier: "settings", sectionsEditable: false, allPagesEditable: false });
     // Colours and style: allowed, and publishable.
     await saveThemeDraft(s.f.tenantId, s.owner, { accent: "#0B5FFF" });
     await saveDraft(s.f.tenantId, s.owner, "home", defaultHomePage(), { accent: "#0B5FFF" });
@@ -629,5 +631,94 @@ describe("connecting a domain", () => {
     await withDomain("dom11", "private.example.com");
     const other = await store("dom11b");
     await fails(checkDomain(other.f.tenantId, "private.example.com"), "NOT_FOUND");
+  });
+});
+
+describe("product, collection and cart pages (docs/39)", () => {
+  it("each starts from the layout the storefront has always shown, and every default is valid", () => {
+    for (const kind of STORE_PAGE_KINDS) expect(() => validatePage(kind, defaultPageFor(kind)), kind).not.toThrow();
+    expect(defaultPageFor("product").sections.map((x) => x.type)).toEqual(["product-main", "product-reviews", "product-related"]);
+    expect(defaultPageFor("collection").sections.map((x) => x.type)).toEqual(["collection-header", "collection-products"]);
+    expect(defaultPageFor("cart").sections.map((x) => x.type)).toEqual(["cart-main"]);
+  });
+
+  it("each page has one block it cannot lose, and offers the right sections", () => {
+    expect(requiredFor("product")).toEqual(["product-main"]);
+    expect(requiredFor("collection")).toEqual(["collection-products"]);
+    expect(requiredFor("cart")).toEqual(["cart-main"]);
+    expect(requiredFor("home")).toEqual([]);
+    // The product block belongs on the product page only; generic sections can be used around the blocks.
+    expect(allowedOn(sectionDef("product-main")!, "cart")).toBe(false);
+    expect(allowedOn(sectionDef("banner")!, "cart")).toBe(true);
+    expect(allowedOn(sectionDef("hero")!, "product")).toBe(false);
+    expect(sectionsFor("cart").map((d) => d.type)).toEqual(expect.arrayContaining(["cart-main", "banner", "rich-text", "trust-strip", "featured-products"]));
+    expect(sectionsFor("cart").map((d) => d.type)).not.toContain("product-main");
+  });
+
+  it("refuses a page that loses or hides its required block, or has a section that is not for it", () => {
+    const noMain = defaultPageFor("product");
+    noMain.sections = noMain.sections.filter((x) => x.type !== "product-main");
+    expect(() => validatePage("product", noMain)).toThrow(/needs the "Product details" section/);
+    const hidden = defaultPageFor("cart");
+    hidden.sections[0]!.disabled = true;
+    expect(() => validatePage("cart", hidden)).toThrow(/cannot be hidden/);
+    const wrong = defaultPageFor("collection");
+    wrong.sections.push(newSection("hero"));
+    expect(() => validatePage("collection", wrong)).toThrow(/not one this page can use/);
+    const two = defaultPageFor("cart");
+    two.sections.push(newSection("cart-main"));
+    expect(() => validatePage("cart", two)).toThrow(/Only 1/);
+  });
+
+  it("a Business store edits, previews and publishes each page, and the live lookup is empty until it does", async () => {
+    const s = await store("pg1", "BUSINESS");
+    expect((await getBuilderAccess(s.f.tenantId)).allPagesEditable).toBe(true);
+    for (const kind of ["product", "collection", "cart"] as const) {
+      expect(await getLive(s.f.tenantId, kind)).toBeNull();
+      const start = await loadForEdit(s.f.tenantId, s.owner, kind);
+      expect(start.kind).toBe(kind);
+      expect(start.page.sections.map((x) => x.type)).toEqual(defaultPageFor(kind).sections.map((x) => x.type));
+      const edited = structuredClone(start.page);
+      edited.sections.push(newSection("rich-text"));
+      await saveDraft(s.f.tenantId, s.owner, kind, edited);
+      expect(await getLive(s.f.tenantId, kind)).toBeNull(); // a draft is not live
+      expect(await publish(s.f.tenantId, s.owner, kind, "Test")).toBe(1);
+      expect((await getLive(s.f.tenantId, kind))!.page.sections.map((x) => x.type)).toContain("rich-text");
+    }
+    // Pages are independent: the home page was never touched.
+    expect(await getLive(s.f.tenantId, "home")).toBeNull();
+    expect((await listVersions(s.f.tenantId, s.owner, "cart")).length).toBe(1);
+  });
+
+  it("only the Business plan can rearrange them; Pro can edit the home page but sees the others as they are", async () => {
+    const pro = await store("pg2", "PRO");
+    expect(await getBuilderAccess(pro.f.tenantId)).toMatchObject({ sectionsEditable: true, allPagesEditable: false });
+    const p = defaultPageFor("product");
+    p.sections.push(newSection("rich-text"));
+    await fails(saveDraft(pro.f.tenantId, pro.owner, "product", p), "PLAN_FEATURE");
+    // Saving the layout as it already is stays allowed (the editor autosaves on open), and the home page is still editable.
+    await saveDraft(pro.f.tenantId, pro.owner, "product", defaultPageFor("product"));
+    const h = defaultHomePage();
+    h.sections.push(newSection("rich-text"));
+    await saveDraft(pro.f.tenantId, pro.owner, "home", h);
+  });
+
+  it("a content editor can design these pages; a packer cannot", async () => {
+    const s = await store("pg3", "BUSINESS");
+    await saveDraft(s.f.tenantId, s.content, "cart", defaultPageFor("cart"));
+    await fails(saveDraft(s.f.tenantId, s.packer, "cart", defaultPageFor("cart")), "FORBIDDEN");
+  });
+
+  it("rolling back works per page and does not disturb the theme", async () => {
+    const s = await store("pg4", "BUSINESS");
+    const v1 = structuredClone(defaultPageFor("product"));
+    await saveDraft(s.f.tenantId, s.owner, "product", v1);
+    await publish(s.f.tenantId, s.owner, "product");
+    const v2 = structuredClone(v1);
+    v2.sections.push(newSection("trust-strip"));
+    await saveDraft(s.f.tenantId, s.owner, "product", v2);
+    await publish(s.f.tenantId, s.owner, "product");
+    expect(await rollback(s.f.tenantId, s.owner, "product", 1)).toBe(3);
+    expect((await getLive(s.f.tenantId, "product"))!.page.sections.map((x) => x.type)).not.toContain("trust-strip");
   });
 });

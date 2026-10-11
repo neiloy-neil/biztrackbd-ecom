@@ -1,6 +1,6 @@
-# Production setup for biztrack.bd (Vercel, Supabase, Cloudflare, GitHub)
+# Production setup for biztrack.bd (Vercel, Supabase, GitHub)
 
-Written 11 October 2026 from the code as it stands. **Nothing here has been run yet**: no domain is registered, no Vercel project exists. Work through it top to bottom; each step says how to check it. Read docs/34 first for the free-plan limits (Vercel Hobby is for testing, not for paying merchants).
+Written 11 October 2026 and updated as the setup was done. The domain is registered, the four Vercel projects are live, and the domain's nameservers point at Vercel (section 4). Work through it top to bottom; each step says how to check it. Read docs/34 first for the free-plan limits (Vercel Hobby is for testing, not for paying merchants).
 
 ## 1. Addresses
 
@@ -16,10 +16,10 @@ Written 11 October 2026 from the code as it stands. **Nothing here has been run 
 
 ## 2. Order of work
 
-1. **Register `biztrack.bd`** with an accredited `.bd` registrar. Ask them: can I change the nameservers to Cloudflare's? (If not, keep their DNS and add the records there; wildcard certificates then need Vercel's nameservers or another approach, see section 5.)
-2. **Cloudflare**: add the domain (free plan), switch the nameservers at the registrar, wait until Cloudflare shows the domain Active.
+1. **Register `biztrack.bd`** with an accredited `.bd` registrar. It must let you change the nameservers.
+2. **Nameservers**: at the registrar set `ns1.vercel-dns.com` and `ns2.vercel-dns.com`. `.bd` registries can take hours to publish the change; check with `nslookup -type=NS biztrack.bd dns.bd`. Vercel then serves the DNS and issues the wildcard certificate for `*.biztrack.bd` by itself. (Cloudflare was tried first: it cannot give Vercel a wildcard certificate, which broke store subdomains with a 525 error. See section 4.)
 3. **Vercel**: create the four projects from the GitHub repository (Import Git Repository), set each project's **Root Directory** as in the table, and set the variables in section 3. Add the domains to the right projects: `biztrack.bd` and `www.biztrack.bd` to marketing, `admin.biztrack.bd` to admin, `platform.biztrack.bd` to platform, `*.biztrack.bd` and `cname.biztrack.bd` to storefront.
-4. **Cloudflare DNS** (see section 4 for the records), then set SSL/TLS mode to **Full (strict)**.
+4. **DNS records**: Vercel creates the records for the domains you add to projects. Add the email records yourself (section 4).
 5. **Supabase**: Authentication, URL Configuration: Site URL `https://admin.biztrack.bd`; add `https://platform.biztrack.bd` to the redirect URLs. Authentication, SMTP settings: Brevo SMTP details (otherwise sign-in emails are rate-limited to a few an hour). Turn the Data API off (or keep Exposed schemas at `public` only). **Email templates (required):** under Authentication, Email Templates, edit both **Magic Link** and **Confirm signup** so the body shows the code, not a link: `<h2>{{ .Token }}</h2>`. The apps sign people in with a 6-digit code; the default templates only send a link, which lands on the admin login page and never shows the code.
 6. **GitHub**: the repository is `neiloy-neil/biztrackbd-ecom` (public). Secrets already set: `SUPABASE_DB_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`. Still to add: `BACKUP_ENCRYPTION_KEY_HEX` (make it with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` and **keep a second copy in a password manager**), `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID_ADMIN`, `VERCEL_PROJECT_ID_STOREFRONT`, `VERCEL_PROJECT_ID_MARKETING`, `VERCEL_PROJECT_ID_PLATFORM`. `node tools/github-secrets.mjs neiloy-neil/biztrackbd-ecom --yes` sets any that are in `.env.local`. Create a GitHub Environment named `production` with yourself as required reviewer.
 7. **Schedulers**: after the first deploy, `node tools/supabase-schedule.mjs --admin https://admin.biztrack.bd --platform https://platform.biztrack.bd --yes` (needs `CRON_SECRET` in `.env.local`, equal to the value in the Vercel projects).
@@ -35,7 +35,7 @@ Derived by reading the code (searches for `process.env` in each app and in the s
 - `DB_POOL_MAX=1` (serverless opens many short connections; raise only if you see waits)
 - `NEXT_PUBLIC_ROOT_DOMAIN=biztrack.bd`
 
-**biztrack-marketing**: `NEXT_PUBLIC_MARKETING_URL=https://biztrack.bd`, `NEXT_PUBLIC_ADMIN_URL=https://admin.biztrack.bd`, `NEXT_PUBLIC_DEMO_STORE_URL=https://<a demo store>.biztrack.bd`.
+**biztrack-marketing**: `NEXT_PUBLIC_MARKETING_URL=https://biztrack.bd`, `NEXT_PUBLIC_ADMIN_URL=https://admin.biztrack.bd`, and the picture-storage settings (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `MEDIA_DRIVER=supabase`, `MEDIA_BUCKET=store-media`): signup draws the sample product pictures. The demo links on `/templates` are built from `NEXT_PUBLIC_ROOT_DOMAIN`.
 
 **biztrack-admin**: `ADMIN_ORIGIN=https://admin.biztrack.bd`, `NEXT_PUBLIC_ADMIN_URL`, `CRON_SECRET`, `SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `MEDIA_DRIVER=supabase`, `MEDIA_BUCKET=store-media`, `INTEGRATION_VAULT_SECRET`, `INTEGRATION_VAULT_KEY_ID`, `PREVIEW_SECRET` (same as storefront), `CUSTOMER_AUTH_SECRET` (same as storefront), `PHONE_TRUST_SALT` (same everywhere, never changed), `PLATFORM_BKASH_NUMBER`, `PLATFORM_NAGAD_NUMBER`, `PLATFORM_A_RECORD`, `PLATFORM_CNAME_TARGET=cname.biztrack.bd`, `PLATFORM_VERCEL_TOKEN`, `PLATFORM_VERCEL_PROJECT_ID` (the storefront project), `PLATFORM_VERCEL_TEAM_ID`, `EDGE_CONFIG_ID`, `EDGE_CONFIG`, the SMS and email variables.
 
@@ -44,31 +44,36 @@ Derived by reading the code (searches for `process.env` in each app and in the s
 **biztrack-storefront**: `NEXT_PUBLIC_ADMIN_URL=https://admin.biztrack.bd` (lets the editor frame the preview), `CUSTOMER_AUTH_SECRET`, `PREVIEW_SECRET`, `PHONE_TRUST_SALT`, `EDGE_CONFIG`, `INTEGRATION_VAULT_SECRET` and `INTEGRATION_VAULT_KEY_ID` (server-side ad events), `NEXT_PUBLIC_SUPABASE_URL` (picture addresses), `MEDIA_DRIVER=supabase`, the SMS variables (customer sign-in codes).
 
 **SMS** (admin, platform, storefront): `SMS_PROVIDER=smsnetbd`, `SMS_NET_BD_API_KEY`, optional `SMS_SENDER_ID`. Recharge the sms.net.bd account first: until then it can only send to the account owner's registered number.
-**Email** (admin, platform): `BREVO_API_KEY`, `EMAIL_FROM=no-reply@biztrack.bd`, `EMAIL_FROM_NAME=BizTrackBD`. Verify the sender domain in Brevo (it gives you SPF and DKIM records to add in Cloudflare).
+**Email** (admin, platform): `BREVO_API_KEY`, `EMAIL_FROM=no-reply@biztrack.bd`, `EMAIL_FROM_NAME=BizTrackBD`. Verify the sender domain in Brevo (it gives you SPF and DKIM records to add in Vercel DNS).
 
 **Function time limits on Hobby**: the cron routes now declare `maxDuration = 60` (the Hobby ceiling at the time of writing; check the current limit). Every sweep is safe to run again, so one that needs longer simply continues on its next call. Raise it on a paid plan if sweeps need more.
 
-## 4. Cloudflare DNS records (the values Vercel asked for on 11 October 2026)
+## 4. DNS (Vercel nameservers)
 
-The four Vercel projects exist (`biztrack-marketing`, `-admin`, `-platform`, `-storefront`, Node 22, connected to the GitHub repository, variables loaded) and the domains are added to them. Vercel reports each as "misconfigured" until these records exist. **Start with the grey cloud (DNS only) on every record; turn the proxy on only after Vercel shows the domain as valid.**
+The domain's nameservers are `ns1.vercel-dns.com` and `ns2.vercel-dns.com`, so Vercel is the DNS host. Every domain added to a project (`biztrack.bd`, `www`, `admin`, `platform`, `cname`, `*`) is served automatically, and Vercel issues a certificate for each, including the wildcard. Check with `vercel domains inspect biztrack.bd` (both nameservers should show a tick).
 
-| Type | Name | Content | Proxy at first |
-|---|---|---|---|
-| A | `@` | `216.198.79.1` | DNS only |
-| A | `@` | `64.29.17.1` (a second A record) | DNS only |
-| CNAME | `www` | `caaefd15fb4f37b0.vercel-dns-017.com` | DNS only |
-| CNAME | `admin` | `0c7d80dcc5d04b07.vercel-dns-017.com` | DNS only |
-| CNAME | `platform` | `f05fb59817376983.vercel-dns-017.com` | DNS only |
-| CNAME | `cname` | `6e197aa9c3987f81.vercel-dns-017.com` | DNS only (stores point their own domains here) |
-| CNAME | `*` | `6e197aa9c3987f81.vercel-dns-017.com` | DNS only first |
-| Brevo records | as already published | | DNS only |
+**Records you add yourself** (`vercel dns add biztrack.bd <name> <type> <value>`; `@` is the apex):
 
-Vercel can show different target values later; if a record is marked invalid, re-read the value in the project's Domains page (or `vercel api /v6/domains/<name>/config`).
+| Type | Name | Value |
+|---|---|---|
+| TXT | `@` | `brevo-code:<the code Brevo shows>` |
+| TXT | `_dmarc` | `v=DMARC1; p=none; rua=mailto:rua@dmarc.brevo.com` |
+| CNAME | `brevo1._domainkey` | `b1.biztrack-bd.dkim.brevo.com` |
+| CNAME | `brevo2._domainkey` | `b2.biztrack-bd.dkim.brevo.com` |
 
-**The wildcard and the SSL mode.** `*.biztrack.bd` was accepted on the storefront project without a verification step. Vercel issues a wildcard certificate only when it controls the domain's nameservers, and yours are Cloudflare's. With the orange proxy on, Cloudflare presents its own certificate for `*.biztrack.bd` to visitors, and talks to Vercel over TLS. Set Cloudflare SSL/TLS to **Full** (not **Full (strict)**): strict would reject Vercel's certificate for store subdomains it has no individual certificate for. Full still encrypts the connection but does not validate Vercel's certificate. That is acceptable for a pilot; the alternatives are Vercel's nameservers, or a Cloudflare Configuration Rule that uses strict only for the apex, `admin` and `platform`.
+Check a made-up store name: `https://anything.biztrack.bd/` should answer 404 ("no such store") over valid TLS.
 
-## 5. If the registrar will not let you use Cloudflare nameservers
-Either keep the registrar's DNS and use Vercel's nameservers for the wildcard (Vercel then issues the wildcard certificate), or move the domain. Ask the registrar this before paying.
+**Why not Cloudflare in front.** Cloudflare as the DNS host with the proxy on gave 525 errors for store subdomains: Vercel has no certificate for `<store>.biztrack.bd` unless it controls the nameservers. The three workarounds were a per-store Vercel domain (capped at 50 on Hobby), a Cloudflare rule that rewrites the host (fragile, needs a trusted header), or Vercel nameservers (chosen). Cloudflare can still be used for Turnstile, R2 or Web Analytics without being the DNS host. If you leave Vercel later, Cloudflare for SaaS (custom hostnames) is the route for store domains.
+
+## 5. Store domains and custom domains
+A merchant's own domain (`theirshop.com`) works by a CNAME to `cname.biztrack.bd` (or an A record for a bare domain). The admin adds the domain to the storefront project through the Vercel API, so it needs `PLATFORM_VERCEL_TOKEN`, `PLATFORM_VERCEL_PROJECT_ID`, `EDGE_CONFIG_ID` and `EDGE_CONFIG`. These are not set yet; create them when the first merchant asks. Vercel Hobby caps domains per project; Pro raises it.
+
+## 5b. Template demo stores (docs/38)
+Five public demo stores: `kapor`, `gadgetstudio`, `minibunny`, `axionwear`, `bindu` on `.biztrack.bd`, flagged `isDemo`, left out of revenue, trials and billing, refusing orders, sign-in codes and reviews.
+1. Apply migration 17 (the `isDemo` column): `pnpm --filter @biztrackbd/db exec prisma migrate deploy` with the owner connection (or let the Deploy workflow do it).
+2. Build them: `pnpm --filter @biztrackbd/core exec tsx scripts/demo-stores.ts all --target supabase` (uses `SUPABASE_APP_DB_URL` and the storage keys from `.env.local`). Safe to run again; it rebuilds from scratch and refuses to touch a store that is not a demo.
+3. Nightly refresh: `node tools/supabase-schedule.mjs ... --yes` now also installs five `biztrack-demo-*` jobs (04:00 to 04:08 Dhaka) that call `/api/cron/demo-reset?template=<id>`.
+4. Marketing previews: `node tools/demo-previews.mjs --base https://{host}.biztrack.bd` after the demos are live, then commit `apps/marketing/public/templates/`.
 
 ## 6. Afterwards: day-two checks
 Run the Supabase grant check from docs/17 after every migration. Watch the GitHub Actions Backup run for a week, then do a restore drill. Move Vercel and Supabase to paid plans before the first paying merchant (docs/34).

@@ -25,7 +25,7 @@ export function Header({ info, categories, lang, t, points }: { info: StoreInfo;
           </nav>
         </details>
         <Link href="/" className="logo" aria-label={info.storeName}>
-          {info.logoUrl ? <Image src={info.logoUrl} alt={info.storeName} width={140} height={36} priority /> : "KAPOR"}
+          {info.logoUrl ? <Image src={info.logoUrl} alt={info.storeName} width={140} height={36} priority /> : info.storeName}
         </Link>
         <nav className="nav-desktop" aria-label={t("menu")}>
           {nav.map((n) => <Link key={n.href} href={n.href}>{n.label}</Link>)}

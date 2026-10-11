@@ -114,3 +114,11 @@ details.faq p { margin-top: 10px; color: var(--ink-2); }
 .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .done-box { text-align: center; padding: 24px 0; }
 .done-box .big { font-size: 20px; font-weight: 800; word-break: break-all; }
+
+/* ---- Template cards with a real preview (docs/38) */
+.tpl { padding: 14px 14px 22px; display: flex; flex-direction: column; }
+.tpl > div:last-child { margin-top: auto; padding-top: 16px; }
+.tpl h3, .tpl p, .tpl .row-between, .tpl > div:last-child { margin-left: 8px; margin-right: 8px; }
+.tpl-shot { position: relative; border-radius: 10px; overflow: hidden; background: var(--tint); border: 1px solid var(--line); }
+.tpl-desktop { display: block; width: 100%; height: auto; }
+.tpl-phone { position: absolute; right: 10px; bottom: -22px; width: 22%; height: auto; border-radius: 10px; border: 3px solid #fff; box-shadow: 0 8px 22px rgba(26, 26, 78, .25); }

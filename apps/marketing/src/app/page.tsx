@@ -1,6 +1,9 @@
 import Link from "next/link";
-import { listPublicPlans } from "@biztrackbd/core";
-import { taka } from "@/lib/plans";
+import { THEMES, listPublicPlans } from "@biztrackbd/core";
+import { HeroMock } from "@/components/hero-mock";
+import { PlanCards } from "@/components/plan-cards";
+import { TemplateCard } from "@/components/template-card";
+import { planBullets, taka } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
 
@@ -12,57 +15,104 @@ const FAQ: [string, string][] = [
   ["Which couriers can I use?", "Steadfast, Pathao and RedX, with your own courier account and keys. We encrypt the keys and never show them again."],
 ];
 
+const SHOWCASE = ["kapor", "gadgetstudio", "berber"];
+
 export default async function Home() {
   const plans = await listPublicPlans().catch(() => []);
   const from = plans[0]?.priceMonthly;
+  const best = plans.find((p) => p.tier === "PRO")?.tier;
+  const showcase = SHOWCASE.map((id) => THEMES.find((t) => t.id === id)).filter((t): t is (typeof THEMES)[number] => Boolean(t));
   return (
     <>
-      <section className="hero">
+      <section className="hero hero-center">
         <div className="wrap">
-          <span className="eyebrow">Online stores for Bangladesh</span>
-          <h1>Open your online store today. Know your real profit.</h1>
-          <p className="lead">A store that takes cash on delivery, bKash and Nagad, books your couriers, checks what they owe you, and shows what you actually earn.</p>
+          <span className="eyebrow">Online store software for Bangladesh</span>
+          <h1>Launch your online store in a day. Sell with bKash, Nagad and cash on delivery.</h1>
+          <p className="lead">Pick a template, add your products from your phone, and share your link. Book Pathao or Steadfast pickups straight from each order.</p>
           <div className="cta">
-            <Link href="/start" className="btn btn-primary btn-lg" prefetch={false} data-testid="hero-cta">Start free for 14 days</Link>
-            <Link href="/templates" className="btn btn-secondary btn-lg" prefetch={false}>See the template</Link>
+            <Link href="/start" className="btn btn-primary btn-lg" prefetch={false} data-testid="hero-cta">Start free trial</Link>
+            <Link href="/templates" className="btn btn-secondary btn-lg" prefetch={false}>See templates</Link>
           </div>
-          <p className="fine">No card needed.{from ? ` Plans from ${taka(from)} a month.` : ""} No commission on your sales.</p>
+          <p className="fine">14 days free · No card needed · Bangla and English{from ? ` · Plans from ${taka(from)} a month` : ""}</p>
         </div>
+        <div className="wrap"><HeroMock /></div>
       </section>
 
       <section className="block">
         <div className="wrap">
-          <h2>Built for how Bangladesh actually sells</h2>
-          <p className="sub">Most of your orders are cash on delivery, half arrive by phone or Messenger, and the courier pays you weeks later. We start there.</p>
-          <div className="grid g3">
-            <div className="card"><h3>Checkout customers trust</h3><p>Cash on delivery and manual bKash or Nagad with the TrxID, in Bangla or English, on a page that loads fast on a phone.</p></div>
-            <div className="card"><h3>Couriers and COD, sorted</h3><p>Book Steadfast, Pathao or RedX from the order, follow every parcel, and upload the payout statement to see what was paid short.</p></div>
-            <div className="card"><h3>Fake orders held back</h3><p>A delivery trust score for every phone number, built from parcels across stores. Risky cash orders wait until you have called.</p></div>
-            <div className="card"><h3>Returns and exchanges</h3><p>Approve a return, get the stock back, send the refund or an exchange, and keep a record of every step.</p></div>
-            <div className="card"><h3>Profit, not just sales</h3><p>Sales minus product cost, courier fees, returns, refunds and ads. One screen, and the lines always add up.</p></div>
-            <div className="card"><h3>Runs from your phone</h3><p>Pack, print slips, verify payments and key in phone orders from your mobile. Install it like an app.</p></div>
-          </div>
+          <span className="eyebrow">How it works</span>
+          <h2>From signup to first order in three steps</h2>
+          <ol className="steps3">
+            <li><span>1</span><h3>Choose a template</h3><p>Ready-made stores for fashion, gadgets, kids wear, streetwear, beauty and tailoring. Switch any time without losing your products.</p></li>
+            <li><span>2</span><h3>Add products and your brand</h3><p>Take photos on your phone, set prices in taka, and upload your logo. Prefer to look around first? Start with sample products.</p></li>
+            <li><span>3</span><h3>Share your link and sell</h3><p>Your store is live at yourname.biztrack.bd. Add your own domain whenever you are ready.</p></li>
+          </ol>
         </div>
       </section>
 
       <section className="block soft">
         <div className="wrap">
-          <h2>Ready in three steps</h2>
-          <div className="grid g3">
-            <div className="card"><span className="step">1</span><h3>Tell us about your store</h3><p>Your name, store name and the address you want, like yourshop.biztrackbd.com. It takes about two minutes.</p></div>
-            <div className="card"><span className="step">2</span><h3>Look around a working store</h3><p>We add a few sample products so you see how it works. Replace them with yours.</p></div>
-            <div className="card"><span className="step">3</span><h3>Take your first order</h3><p>Share the link. Pay for a plan when the trial ends, by bKash or Nagad.</p></div>
+          <div className="row-between" style={{ alignItems: "flex-end", gap: 16, flexWrap: "wrap" }}>
+            <div><span className="eyebrow">Templates</span><h2>Real stores you can open and try</h2></div>
+            <Link href="/templates" className="link" prefetch={false}>Browse all templates</Link>
           </div>
-          <div style={{ marginTop: 28 }}><Link href="/start" className="btn btn-primary btn-lg" prefetch={false}>Start free</Link></div>
+          <div className="grid g3" style={{ marginTop: 28 }} data-testid="home-templates">
+            {showcase.map((t) => <TemplateCard key={t.id} t={{ ...t, audience: undefined }} compact />)}
+          </div>
         </div>
       </section>
 
       <section className="block">
         <div className="wrap">
-          <h2>Questions</h2>
-          <div style={{ marginTop: 20, maxWidth: 760 }}>
-            {FAQ.map(([q, a]) => <details key={q} className="faq"><summary>{q}</summary><p>{a}</p></details>)}
+          <div className="bd-panel">
+            <div>
+              <span className="eyebrow">Built for Bangladesh</span>
+              <h2>The way your customers actually pay and receive</h2>
+              <p className="sub">Not a foreign tool with a taka symbol added. Checkout, address fields, SMS and couriers follow how orders work here.</p>
+            </div>
+            <dl className="bd-list">
+              <div><dt>bKash and Nagad checkout</dt><dd>Customers enter their TrxID. You confirm it in one tap.</dd></div>
+              <div><dt>Cash on delivery</dt><dd>With limits, fees and fake-order protection.</dd></div>
+              <div><dt>Pathao, Steadfast, RedX</dt><dd>Book pickups and print labels from the order page.</dd></div>
+              <div><dt>Division, district, upazila</dt><dd>Address fields that match Bangladesh and your courier.</dd></div>
+              <div><dt>SMS in Bangla</dt><dd>Order, payment and tracking messages in your customers' words.</dd></div>
+              <div><dt>Built for your phone</dt><dd>Run the whole shop from an installable mobile app.</dd></div>
+            </dl>
           </div>
+        </div>
+      </section>
+
+      {plans.length > 0 && (
+        <section className="block soft">
+          <div className="wrap" style={{ textAlign: "center" }}>
+            <span className="eyebrow">Pricing</span>
+            <h2 style={{ margin: "0 auto" }}>Start free, pay when you grow</h2>
+            <div style={{ textAlign: "left", marginTop: 28 }}>
+              <PlanCards
+                plans={plans.map((p) => ({ tier: p.tier, name: p.name, priceMonthly: p.priceMonthly, priceYearly: p.priceYearly, monthsFree: p.yearlyMonthsFree, bullets: planBullets(p) }))}
+                best={best}
+                compactBullets={4}
+              />
+            </div>
+            <p style={{ marginTop: 20 }}><Link href="/pricing" className="link" prefetch={false}>Compare all plans</Link></p>
+          </div>
+        </section>
+      )}
+
+      <section className="block">
+        <div className="wrap">
+          <h2 style={{ textAlign: "center", margin: "0 auto" }}>Questions shop owners ask</h2>
+          <dl className="faq-list">
+            {FAQ.map(([q, a]) => <div key={q}><dt>{q}</dt><dd>{a}</dd></div>)}
+          </dl>
+        </div>
+      </section>
+
+      <section className="cta-band">
+        <div className="wrap">
+          <h2>Open your store this week</h2>
+          <p>14 days free. No card. Cancel any time.</p>
+          <Link href="/start" className="btn btn-lg btn-white" prefetch={false}>Start free trial</Link>
         </div>
       </section>
     </>

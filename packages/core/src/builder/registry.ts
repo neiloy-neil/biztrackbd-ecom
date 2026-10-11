@@ -8,7 +8,9 @@ import { ValidationError } from "../errors";
  * `https://` or start with `/`, colours must be hex, images must be `https://` or one of the store's own `/media/` paths.
  */
 
-export type PageKind = "home" | "landing";
+/** The pages the editor can build. product, collection and cart are one layout per store (docs/39); home and landing existed first. */
+export type PageKind = "home" | "landing" | "product" | "collection" | "cart";
+export const STORE_PAGE_KINDS: readonly PageKind[] = ["home", "product", "collection", "cart"];
 
 export interface Field {
   key: string;
@@ -36,7 +38,12 @@ export interface SectionDef {
   type: string;
   label: string;
   description: string;
+  /** The page this section was made for. */
   page: PageKind;
+  /** Other pages it may also be placed on. */
+  pages?: PageKind[];
+  /** The page does not work without it: it cannot be removed or hidden (the product, the product grid, the cart). */
+  required?: boolean;
   /** At most this many of the section on one page. */
   max?: number;
   fields: Field[];
@@ -68,7 +75,7 @@ export const SECTIONS: SectionDef[] = [
     defaults: { eyebrow: "NEW COLLECTION", eyebrowBn: "নতুন কালেকশন", title: "Made well. Delivered across Bangladesh.", titleBn: "যত্নে তৈরি। সারা বাংলাদেশে পৌঁছে দিই।", text: "Shop our latest pieces and pay the way you like.", textBn: "নতুন পণ্য দেখুন, পছন্দের উপায়ে দাম দিন।", ctaText: "Shop the collection", ctaTextBn: "কালেকশন দেখুন", ctaLink: "/search?sort=newest", image: "", align: "left" },
   },
   {
-    type: "featured-products", label: "Product grid", description: "A row of products: newest, on sale, featured, or one category.", page: "home", max: 8,
+    type: "featured-products", label: "Product grid", description: "A row of products: newest, on sale, featured, or one category.", page: "home", pages: ["product", "collection", "cart"], max: 8,
     fields: [
       t("title", "Heading", 60), tb("title", "Heading", 60),
       { key: "source", label: "Show", type: "select", options: [{ value: "new", label: "Newest products" }, { value: "sale", label: "Products on sale" }, { value: "featured", label: "Featured products" }, { value: "category", label: "One category" }] },
@@ -79,12 +86,12 @@ export const SECTIONS: SectionDef[] = [
     defaults: { title: "New arrivals", titleBn: "নতুন পণ্য", source: "new", categorySlug: "", limit: 8, columns: "4" },
   },
   {
-    type: "category-grid", label: "Categories", description: "Big tappable tiles for your categories.", page: "home", max: 2,
+    type: "category-grid", label: "Categories", description: "Big tappable tiles for your categories.", page: "home", pages: ["product", "collection", "cart"], max: 2,
     fields: [t("title", "Heading", 60), tb("title", "Heading", 60), { key: "limit", label: "How many", type: "number", min: 1, max: 6 }],
     defaults: { title: "Shop by category", titleBn: "ক্যাটাগরি অনুযায়ী কিনুন", limit: 3 },
   },
   {
-    type: "banner", label: "Picture banner", description: "A wide picture with a line of text and a button, for a sale or a new arrival.", page: "home", max: 6,
+    type: "banner", label: "Picture banner", description: "A wide picture with a line of text and a button, for a sale or a new arrival.", page: "home", pages: ["product", "collection", "cart"], max: 6,
     fields: [
       image("image", "Picture"), t("heading", "Heading", 80), tb("heading", "Heading", 80), area("text", "Text", 200), areab("text", "Text", 200),
       t("ctaText", "Button text", 30), tb("ctaText", "Button text", 30), link("ctaLink", "Button link"),
@@ -93,13 +100,56 @@ export const SECTIONS: SectionDef[] = [
     defaults: { image: "", heading: "Eid collection", headingBn: "ঈদ কালেকশন", text: "", textBn: "", ctaText: "Shop now", ctaTextBn: "এখনই কিনুন", ctaLink: "/search?sale=1", height: "short" },
   },
   {
-    type: "rich-text", label: "Text block", description: "A heading and a few paragraphs: your story, a delivery note, a size guide.", page: "home", max: 6,
+    type: "rich-text", label: "Text block", description: "A heading and a few paragraphs: your story, a delivery note, a size guide.", page: "home", pages: ["product", "collection", "cart"], max: 6,
     fields: [t("heading", "Heading", 80), tb("heading", "Heading", 80), area("body", "Text", 1200), areab("body", "Text", 1200)],
     defaults: { heading: "About us", headingBn: "আমাদের কথা", body: "Tell your customers who you are and why they can trust you.", bodyBn: "" },
   },
   {
-    type: "trust-strip", label: "Trust strip", description: "Cash on delivery, bKash and Nagad, delivery time and easy exchange, in four short lines.", page: "home", max: 1,
+    type: "trust-strip", label: "Trust strip", description: "Cash on delivery, bKash and Nagad, delivery time and easy exchange, in four short lines.", page: "home", pages: ["product", "collection", "cart"], max: 1,
     fields: [], defaults: {},
+  },
+
+  // ---- Product page (docs/39)
+  {
+    type: "product-main", label: "Product details", description: "The pictures, name, price, size choice, add to cart and the description. Every product page needs it.", page: "product", required: true, max: 1,
+    fields: [
+      { key: "showRating", label: "Show the star rating", type: "checkbox" },
+      { key: "showAssurance", label: "Show delivery, payment and exchange notes", type: "checkbox" },
+      { key: "showDescription", label: "Show the description", type: "checkbox" },
+    ],
+    defaults: { showRating: true, showAssurance: true, showDescription: true },
+  },
+  {
+    type: "product-reviews", label: "Customer reviews", description: "What buyers said about this product.", page: "product", max: 1,
+    fields: [t("title", "Heading", 60), tb("title", "Heading", 60)],
+    defaults: { title: "Customer reviews", titleBn: "ক্রেতাদের রিভিউ" },
+  },
+  {
+    type: "product-related", label: "Goes well with", description: "A row of other products from the same category.", page: "product", max: 1,
+    fields: [t("title", "Heading", 60), tb("title", "Heading", 60), { key: "limit", label: "How many", type: "number", min: 2, max: 8 }],
+    defaults: { title: "Goes well with", titleBn: "এর সাথে মানানসই", limit: 4 },
+  },
+
+  // ---- Collection (category) page
+  {
+    type: "collection-header", label: "Collection heading", description: "The collection name, with its description and how many products it has.", page: "collection", max: 1,
+    fields: [
+      { key: "showDescription", label: "Show the description", type: "checkbox" },
+      { key: "showCount", label: "Show how many products", type: "checkbox" },
+    ],
+    defaults: { showDescription: true, showCount: true },
+  },
+  {
+    type: "collection-products", label: "Product grid with sorting", description: "The products in this collection, with sorting and pages. Every collection page needs it.", page: "collection", required: true, max: 1,
+    fields: [{ key: "showSort", label: "Show the sort choice", type: "checkbox" }],
+    defaults: { showSort: true },
+  },
+
+  // ---- Cart page
+  {
+    type: "cart-main", label: "Cart", description: "The items, the totals and the checkout button. The cart page needs it.", page: "cart", required: true, max: 1,
+    fields: [t("title", "Heading", 60), tb("title", "Heading", 60)],
+    defaults: { title: "Your cart", titleBn: "আপনার কার্ট" },
   },
 
   // ---- Landing page
@@ -148,7 +198,11 @@ export const SECTIONS: SectionDef[] = [
 ];
 
 export const sectionDef = (type: string): SectionDef | undefined => SECTIONS.find((s) => s.type === type);
-export const sectionsFor = (kind: PageKind): SectionDef[] => SECTIONS.filter((s) => s.page === kind);
+/** Whether a section may be placed on this kind of page. */
+export const allowedOn = (def: SectionDef, kind: PageKind): boolean => def.page === kind || (def.pages?.includes(kind) ?? false);
+export const sectionsFor = (kind: PageKind): SectionDef[] => SECTIONS.filter((s) => allowedOn(s, kind));
+/** The sections a page cannot lose. */
+export const requiredFor = (kind: PageKind): string[] => SECTIONS.filter((s) => s.required && s.page === kind).map((s) => s.type);
 
 // ---- The page ------------------------------------------------------------------------------------------------------
 
@@ -257,7 +311,7 @@ export function validatePage(kind: PageKind, raw: unknown): PageJson {
   const sections = list.map((s, i): PageSection => {
     const o = (s && typeof s === "object" ? s : {}) as Record<string, unknown>;
     const def = typeof o.type === "string" ? sectionDef(o.type) : undefined;
-    if (!def || def.page !== kind) throw new ValidationError(`Section ${i + 1} is not one this page can use`);
+    if (!def || !allowedOn(def, kind)) throw new ValidationError(`Section ${i + 1} is not one this page can use`);
     const id = typeof o.id === "string" ? o.id : "";
     if (!ID.test(id)) throw new ValidationError(`Section ${i + 1} has a bad id`);
     if (seen.has(id)) throw new ValidationError(`Two sections share the id ${id}`);
@@ -267,6 +321,12 @@ export function validatePage(kind: PageKind, raw: unknown): PageJson {
     if (def.max && n > def.max) throw new ValidationError(`Only ${def.max} ${def.label.toLowerCase()} ${def.max === 1 ? "section is" : "sections are"} allowed on a page`);
     return { id, type: def.type, ...(o.disabled === true ? { disabled: true } : {}), settings: normalizeSettings(def, o.settings, `${def.label} (section ${i + 1})`) };
   });
+  for (const type of requiredFor(kind)) {
+    const label = sectionDef(type)!.label;
+    const found = sections.find((s) => s.type === type);
+    if (!found) throw new ValidationError(`This page needs the "${label}" section`);
+    if (found.disabled) throw new ValidationError(`The "${label}" section cannot be hidden: this page does not work without it`);
+  }
   return { version: 1, sections };
 }
 
@@ -293,6 +353,19 @@ export function defaultLandingPage(): PageJson {
     version: 1,
     sections: ["lp-hero", "lp-benefits", "lp-gallery", "lp-order-form", "lp-faq", "lp-sticky-cta"].map((type) => ({ id: `${type.replace(/-/g, "_")}_1`, type, settings: normalizeSettings(sectionDef(type)!, {}) })),
   };
+}
+
+const starting = (types: string[]): PageJson => ({ version: 1, sections: types.map((type) => ({ id: `${type.replace(/-/g, "_")}_1`, type, settings: normalizeSettings(sectionDef(type)!, {}) })) });
+const DEFAULT_PAGES: Record<Exclude<PageKind, "landing">, string[]> = {
+  home: ["hero", "featured-products", "category-grid", "trust-strip"],
+  // The layouts the storefront has always had: they are what a store shows until its owner edits them.
+  product: ["product-main", "product-reviews", "product-related"],
+  collection: ["collection-header", "collection-products"],
+  cart: ["cart-main"],
+};
+/** The starting layout of any page kind. Landing pages have their own. */
+export function defaultPageFor(kind: PageKind): PageJson {
+  return kind === "landing" ? defaultLandingPage() : starting(DEFAULT_PAGES[kind]);
 }
 
 /** Which list of products a product-grid section shows ("new", "sale", "featured", "cat:<slug>"). Shared by the server and the live preview. */

@@ -16,7 +16,7 @@ export interface ThemeSettings {
 
 export const DEFAULT_THEME: ThemeSettings = { accent: "#8C5A3C", background: "#FBF8F3", text: "#2B2118", radius: "soft", font: "sans" };
 
-export const THEME_IDS = ["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu"] as const;
+export const THEME_IDS = ["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu", "berber"] as const;
 export type ThemeId = (typeof THEME_IDS)[number];
 
 export interface ThemeDefinition {
@@ -34,6 +34,7 @@ export const STORE_THEMES: readonly ThemeDefinition[] = [
   { id: "mini-bunny", name: "Mini Bunny", blurb: "Playful, soft and friendly for growing families.", audience: "Kids, toys and gifts", defaults: { accent: "#C24173", background: "#FFF8F3", text: "#3D2932", radius: "round", font: "sans" } },
   { id: "axionwear", name: "Axion Wear", blurb: "A dark, high-contrast streetwear storefront.", audience: "Sportswear and streetwear", defaults: { accent: "#D7FF3F", background: "#0B0D0F", text: "#F5F7F8", radius: "sharp", font: "sans" } },
   { id: "bindu", name: "Bindu", blurb: "Polished, calm and premium with jewel-toned accents.", audience: "Beauty and lifestyle", defaults: { accent: "#8A2855", background: "#FFF9F7", text: "#321E28", radius: "round", font: "serif" } },
+  { id: "berber", name: "Berber", blurb: "Dark, editorial and tailored: serif headings, navy and gold, and a made-to-measure section.", audience: "Formalwear and tailoring", defaults: { accent: "#C9A24B", background: "#0D121E", text: "#F1EDE4", radius: "sharp", font: "serif" } },
 ] as const;
 
 export const isThemeId = (value: unknown): value is ThemeId => typeof value === "string" && (THEME_IDS as readonly string[]).includes(value);

@@ -15,7 +15,7 @@ export { claimStorage, releaseStorage, readUsage, reconcileProductCount, monthSt
 export * from "./permissions";
 export { audit, listAudit, redact, type AuditQuery } from "./audit/service";
 export { inviteStaff, revokeInvite, previewInvite, acceptInvite, changeStaffRole, setStaffActive, listTeam, type InviteResult, type TeamView } from "./staff/service";
-export { RESERVED_SUBDOMAINS, normalizeHost, classifyHost, validateSubdomain, validateCustomDomain, type HostClass } from "./routing/host";
+export { RESERVED_SUBDOMAINS, DEMO_SUBDOMAINS, normalizeHost, classifyHost, validateSubdomain, validateCustomDomain, type HostClass } from "./routing/host";
 export { decideRoute, HEADERS, TRUSTED_HEADER_PREFIX, type HostEntry, type RouteDecision, type DecideInput } from "./routing/decide";
 export { CachedDirectory, chainDirectories, dbDirectory, edgeConfigDirectory, edgeKey, HostEntrySchema, type HostDirectory } from "./routing/directory";
 export { pushRoutes, buildTenantRoutes, syncTenantRouting, EdgeSyncError, type RouteChanges } from "./routing/edge-config";
@@ -31,6 +31,9 @@ export { requestOtp, verifyOtp, setSmsSender, signCustomerSession, readCustomerS
 export { sanitizeProductHtml } from "./storefront/html";
 export { listOrders, orderTabCounts, getOrderDetail, verifyPayment, rejectPayment, addOrderNote, updateShippingAddress, markPacked, shipManually, recordPrinted, type OrderTab, type OrderFilters, type OrderRow, type OrderDetail, type AddressEdit } from "./admin/orders";
 export { recordOrderEvent, type OrderEventType } from "./admin/order-events";
+export { DEMO_TEMPLATES, demoTemplate, type DemoTemplate, type DemoProduct, type DemoVariant } from "./demo/templates";
+export { resetDemoStore, DEMO_TEMPLATE_IDS, type DemoDeps, type DemoResult } from "./demo/seed";
+export { productSvg, bannerSvg, ART_KINDS, type ArtKind, type Palette } from "./demo/art";
 export { adminSearch, shellCounts, type SearchHit, type ShellCounts } from "./admin/shell";
 export { getDashboard, dhakaDate, addDays, STORE_TZ, type Dashboard, type SetupStep } from "./admin/dashboard";
 export { listInventory, adjustStock, updateStockSettings, listStockHistory, STOCK_REASONS, type InventoryRow, type InventorySummary, type StockFilter, type AdjustInput } from "./admin/inventory";

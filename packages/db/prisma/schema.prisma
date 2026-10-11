@@ -81,6 +81,7 @@ model Tenant {
   suspendedReason  String?      // set when the platform (not an unpaid bill) switched the store off
   suspendedAt      DateTime?
   quarantined      Boolean      @default(false)   // brand-review hold (docs/12 section 2)
+  isDemo           Boolean      @default(false)   // a template demo store (docs/38): left out of revenue, trials and billing, never suspended, never takes real orders
   quarantineReason String?
   
   createdAt        DateTime     @default(now())
@@ -855,7 +856,7 @@ model IdempotencyRecord {
 model ThemeInstall {
   id          String   @id @default(cuid())
   tenantId    String
-  themeId     String   // "kapor" | "gadgetstudio" | "mini-bunny" | "axionwear" | "bindu", see docs/06 for display names
+  themeId     String   // "kapor" | "gadgetstudio" | "mini-bunny" | "axionwear" | "bindu" | "berber", see docs/06 for display names
   isActive    Boolean  @default(false)
   settings    Json     // Custom color/font/banner tokens
   pagesJson   Json     // Sections & block trees per route

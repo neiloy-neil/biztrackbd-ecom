@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ProductSort, listProducts } from "@biztrackbd/core";
-import type { Lang, T } from "@/lib/i18n";
-import { num } from "@/lib/i18n";
+import type { Lang, T } from "@/lib/i18n-core";
+import { num } from "@/lib/i18n-core";
 import { ProductCard } from "./product-card";
 
 type Page = Awaited<ReturnType<typeof listProducts>>;

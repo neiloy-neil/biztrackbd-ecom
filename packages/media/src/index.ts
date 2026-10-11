@@ -202,3 +202,11 @@ export async function readImage(segments: string[], root = mediaRoot()): Promise
     return null;
   }
 }
+
+/**
+ * Turns an SVG drawn by our own code (the sample product pictures, docs/38) into a PNG that saveImage can take. Never call it with
+ * SVG from a visitor: uploads refuse SVG on purpose, because it can carry scripts.
+ */
+export async function svgToPng(svg: string): Promise<Buffer> {
+  return sharp(Buffer.from(svg)).png().toBuffer();
+}

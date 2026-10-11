@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { DomainError, SUBDOMAIN_MESSAGES, checkSubdomain, signupStore } from "@biztrackbd/core";
+import { samplePictures } from "@/lib/pictures";
 
 export interface SignupState {
   error?: string;
@@ -34,7 +35,7 @@ export async function signupAction(_prev: SignupState, form: FormData): Promise<
       ownerName: String(form.get("ownerName") ?? ""), email: String(form.get("email") ?? ""), phone: String(form.get("phone") ?? ""),
       storeName: String(form.get("storeName") ?? ""), tagline: String(form.get("tagline") ?? "") || undefined, subdomain: String(form.get("subdomain") ?? ""),
       plan: String(form.get("plan") ?? "PRO"), theme: String(form.get("theme") ?? "kapor"), demoData: form.get("demoData") === "on",
-    });
+    }, { pictures: samplePictures() ?? undefined });
   } catch (e) {
     if (e instanceof DomainError) return { error: e.message, field: typeof e.details?.field === "string" ? e.details.field : undefined };
     console.error("signup failed", e instanceof Error ? e.name : "unknown");

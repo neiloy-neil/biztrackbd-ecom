@@ -73,3 +73,25 @@ body[data-store-theme="bindu"] .trust > div { border: 0; text-align: center; }
 @media (prefers-reduced-motion: reduce) {
   body[data-store-theme] .pcard { transition: none; }
 }
+
+/* Berber: dark, editorial and tailored. Serif headings, navy and gold, square corners (docs/38). */
+body[data-store-theme="berber"] {
+  color-scheme: dark;
+  --bg: #0D121E; --surface: #151B2B; --ink: #F1EDE4; --ink-2: #D8D2C4; --muted: #AEA89A; --faint: #8F8A7E;
+  --accent: #C9A24B; --accent-strong: #DDB961; --accent-ink: #0D121E; --hero: #101728;
+  --line: #262E45; --line-2: #333C57; --field: #5B6480; --tint-1: #182036; --tint-2: #15261F; --tint-3: #1B2036; --tint-4: #2A1E22;
+  --success-bg: #153A24; --radius: 2px; --font: Georgia,"Noto Serif Bengali","Times New Roman",serif;
+}
+body[data-store-theme="berber"] .announce { background: #05080F; color: var(--accent); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+body[data-store-theme="berber"] .header { background: rgba(13,18,30,.95); backdrop-filter: blur(12px); }
+body[data-store-theme="berber"] .logo { font-weight: 500; letter-spacing: .26em; text-transform: uppercase; }
+body[data-store-theme="berber"] .hero { background: linear-gradient(115deg,#0D121E 0 58%,#161E33 58%); border-bottom: 1px solid var(--line); }
+body[data-store-theme="berber"] .hero h1, body[data-store-theme="berber"] .section-head h2 { font-weight: 500; letter-spacing: -.01em; }
+body[data-store-theme="berber"] .eyebrow { color: var(--accent); letter-spacing: .3em; }
+body[data-store-theme="berber"] .btn { border-radius: 0; text-transform: uppercase; letter-spacing: .1em; }
+body[data-store-theme="berber"] .pimg { aspect-ratio: 4 / 5; border-radius: 0; }
+body[data-store-theme="berber"] .pcard { padding-bottom: 14px; }
+body[data-store-theme="berber"] .cat { border-radius: 0; border: 1px solid var(--line-2); text-transform: uppercase; letter-spacing: .14em; }
+body[data-store-theme="berber"] .trust > div { border-color: var(--accent); }
+body[data-store-theme="berber"] .footer { background: #05080F; color: var(--ink-2); border-top: 1px solid var(--line); }
+body[data-store-theme="berber"] .footer b, body[data-store-theme="berber"] .footer .brand { color: var(--ink); }

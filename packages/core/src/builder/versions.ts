@@ -2,7 +2,7 @@ import { withTenant, type TenantTx } from "@biztrackbd/db";
 import { audit } from "../audit/service";
 import { DomainError, NotFoundError, PlanFeatureError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
-import { defaultHomePage, defaultLandingPage, validatePage, type PageJson, type PageKind } from "./registry";
+import { STORE_PAGE_KINDS, defaultPageFor, validatePage, type PageJson, type PageKind } from "./registry";
 import { themeDefaults, validateTheme, validateThemeId, type ThemeId, type ThemeSettings } from "./theme";
 
 /**
@@ -40,8 +40,11 @@ export interface PageState {
   unpublished: boolean;
 }
 
+/** The pages every store has one of: home, product, collection and cart (docs/39). Landing pages are made one by one. */
+const isStorePage = (pageKey: string): boolean => (STORE_PAGE_KINDS as readonly string[]).includes(pageKey);
+
 const kindOf = (pageKey: string): PageKind => {
-  if (pageKey === HOME_KEY) return "home";
+  if (isStorePage(pageKey)) return pageKey as PageKind;
   if (/^landing:[A-Za-z0-9]{8,40}$/.test(pageKey)) return "landing";
   throw new ValidationError("Unknown page");
 };
@@ -65,9 +68,9 @@ async function builderTier(tx: TenantTx): Promise<SectionBuilderTier> {
   return v === "all" || v === "home" ? v : "settings";
 }
 
-export async function getBuilderAccess(tenantId: string): Promise<{ tier: SectionBuilderTier; sectionsEditable: boolean }> {
+export async function getBuilderAccess(tenantId: string): Promise<{ tier: SectionBuilderTier; sectionsEditable: boolean; /** Product, collection and cart pages can be rearranged too. */ allPagesEditable: boolean }> {
   const tier = await withTenant(tenantId, builderTier);
-  return { tier, sectionsEditable: tier !== "settings" };
+  return { tier, sectionsEditable: tier !== "settings", allPagesEditable: tier === "all" };
 }
 
 async function activeThemeId(tx: TenantTx): Promise<ThemeId> {
@@ -85,7 +88,7 @@ async function latestPublished(tx: TenantTx, themeId: ThemeId, pageKey: string) 
 const draftRow = (tx: TenantTx, themeId: ThemeId, pageKey: string) => tx.themeVersion.findFirst({ where: { themeId, pageKey, state: "DRAFT", version: 0 } });
 
 async function assertPageExists(tx: TenantTx, pageKey: string) {
-  if (pageKey === HOME_KEY) return;
+  if (isStorePage(pageKey)) return;
   const id = pageKey.slice("landing:".length);
   if (!(await tx.landingPage.findFirst({ where: { id }, select: { id: true } }))) throw new NotFoundError("Landing page");
 }
@@ -108,7 +111,7 @@ export async function loadForEdit(tenantId: string, actor: StaffActor, pageKey: 
     await assertPageExists(tx, pageKey);
     const themeId = await activeThemeId(tx);
     const [draft, live] = await Promise.all([draftRow(tx, themeId, pageKey), latestPublished(tx, themeId, pageKey)]);
-    const start = kind === "home" ? defaultHomePage() : defaultLandingPage();
+    const start = defaultPageFor(kind);
     const page = draft ? asPage(kind, draft.sectionsJson) : live ? asPage(kind, live.sectionsJson) : start;
     const theme = await storeTheme(tx, themeId, true);
     const liveTheme = await storeTheme(tx, themeId, false);
@@ -134,11 +137,16 @@ export async function saveDraft(tenantId: string, actor: StaffActor, pageKey: st
     await tx.$queryRaw`SELECT "id" FROM "Tenant" WHERE "id" = ${tenantId} FOR UPDATE`;
     await assertPageExists(tx, pageKey);
     const themeId = await activeThemeId(tx);
-    // Starter stores can restyle the store but not rearrange its home page: sections must stay as they are.
-    if (pageKey === HOME_KEY && (await builderTier(tx)) === "settings") {
-      const live = await latestPublished(tx, themeId, HOME_KEY);
-      const baseline = live ? asPage("home", live.sectionsJson) : defaultHomePage();
-      if (!same(baseline, page)) throw new PlanFeatureError("sectionBuilder");
+    // The plan decides how much can be rearranged: "settings" restyles only, "home" edits the home page, "all" edits every page. Below its
+    // level, a page's sections must stay as they are (what is live, or the starting layout).
+    if (isStorePage(pageKey)) {
+      const tier = await builderTier(tx);
+      const locked = pageKey === HOME_KEY ? tier === "settings" : tier !== "all";
+      if (locked) {
+        const live = await latestPublished(tx, themeId, pageKey);
+        const baseline = live ? asPage(kind, live.sectionsJson) : defaultPageFor(kind);
+        if (!same(baseline, page)) throw new PlanFeatureError("sectionBuilder");
+      }
     }
     // The theme rides on the home row. A landing draft leaves it alone.
     const settings = pageKey === HOME_KEY ? (theme ?? (await storeTheme(tx, themeId, true))) : (await storeTheme(tx, themeId, true));
@@ -163,7 +171,7 @@ export async function saveThemeDraft(tenantId: string, actor: StaffActor, rawThe
     if (d) await tx.themeVersion.update({ where: { id: d.id }, data: { settings: theme as object, createdBy: actor.userId } });
     else {
       const live = await latestPublished(tx, themeId, HOME_KEY);
-      const page = live ? asPage("home", live.sectionsJson) : defaultHomePage();
+      const page = live ? asPage("home", live.sectionsJson) : defaultPageFor("home");
       await tx.themeVersion.create({ data: { tenantId, themeId, pageKey: HOME_KEY, state: "DRAFT", version: 0, settings: theme as object, sectionsJson: page as object, createdBy: actor.userId } });
     }
   });
@@ -183,7 +191,7 @@ async function writePublished(tx: TenantTx, tenantId: string, themeId: ThemeId, 
   const version = (last?.version ?? 0) + 1;
   await tx.themeVersion.create({ data: { tenantId, themeId, pageKey, state: "PUBLISHED", version, settings: theme as object, sectionsJson: page as object, label, createdBy: actor.userId } });
   // The theme is store-wide: publishing the home page makes the theme live. A landing page uses the store's current theme.
-  if (pageKey !== HOME_KEY) {
+  if (!isStorePage(pageKey)) {
     const id = pageKey.slice("landing:".length);
     await tx.landingPage.update({ where: { id }, data: { sectionsJson: page as object, isPublished: true } });
   }
@@ -272,7 +280,7 @@ export async function getPreview(tenantId: string, pageKey: string): Promise<{ p
     const draft = await draftRow(tx, themeId, pageKey);
     const live = draft ? null : await latestPublished(tx, themeId, pageKey);
     const raw = draft?.sectionsJson ?? live?.sectionsJson;
-    return { page: raw ? asPage(kind, raw) : kind === "home" ? defaultHomePage() : defaultLandingPage(), theme: await storeTheme(tx, themeId, true), themeId };
+    return { page: raw ? asPage(kind, raw) : defaultPageFor(kind), theme: await storeTheme(tx, themeId, true), themeId };
   });
 }
 

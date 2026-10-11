@@ -1,3 +1,4 @@
+import { assertNotDemo } from "../demo/guard";
 import { createHmac, randomInt, timingSafeEqual } from "node:crypto";
 import { randomUUID } from "node:crypto";
 import { withTenant } from "@biztrackbd/db";
@@ -87,6 +88,7 @@ export async function requestOtp(tenantId: string, rawPhone: string, ctx: Reques
 
   const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
   const deliver = await withTenant(tenantId, async (tx) => {
+    await assertNotDemo(tx); // a demo store never sends a text message
     // One query at a time: a transaction owns a single connection, and overlapping queries on it are deprecated in pg.
     const byPhone = await tx.customerOtp.count({ where: { phone, createdAt: { gt: new Date(now - PER_PHONE.windowMs) } } });
     const byIp = ctx.ip ? await tx.customerOtp.count({ where: { ipAddress: ctx.ip, createdAt: { gt: new Date(now - PER_IP.windowMs) } } }) : 0;

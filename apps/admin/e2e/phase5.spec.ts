@@ -132,7 +132,8 @@ test.describe.serial("signup, billing and the super admin", () => {
   test("the new store is already live with sample products", async ({ page }) => {
     const res = await page.goto(storeUrl(sub));
     expect(res?.status()).toBe(200);
-    await expect(page.getByText("Sample cotton panjabi").first()).toBeVisible();
+    // A new store opens in Bangla, so the sample shows its Bangla title; either language proves the template's samples are there.
+    await expect(page.getByText(/Cotton Panjabi, Off-white|সুতির পাঞ্জাবি, অফ-হোয়াইট/).first()).toBeVisible();
   });
 
   test("the owner sees a 14-day trial and no warning", async ({ context, page }) => {
@@ -144,7 +145,7 @@ test.describe.serial("signup, billing and the super admin", () => {
     await expect(page.getByTestId("plan-status")).toContainText("Starter plan");
     // The sample products are there to look at.
     await page.goto(`${ADMIN}/products`);
-    await expect(page.getByText("Sample linen shirt").filter({ visible: true }).first()).toBeVisible();
+    await expect(page.getByText("Linen Shirt, Sage").filter({ visible: true }).first()).toBeVisible();
   });
 
   test("the owner sends a bKash payment for Pro: the TrxID must look right, and the price is the plan's", async ({ context, page }) => {
@@ -314,7 +315,7 @@ test.describe("pricing and templates pages", () => {
 
   test("templates shows every storefront template as ready", async ({ page }) => {
     await page.goto(`${MKT}/templates`);
-    for (const id of ["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu"]) {
+    for (const id of ["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu", "berber"]) {
       await expect(page.getByTestId(`theme-${id}`)).toContainText("Ready");
       await expect(page.getByTestId(`theme-${id}`).getByRole("link", { name: "Use this template" })).toHaveCount(1);
     }

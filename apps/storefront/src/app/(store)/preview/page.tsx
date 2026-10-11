@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
-import { getPreview, loadPageData, verifyPreviewToken } from "@biztrackbd/core";
+import { getKaporSettings, getPreview, listCategories, listProducts, loadPageData, verifyPreviewToken } from "@biztrackbd/core";
 import { PreviewBridge } from "@/components/preview-bridge";
-import { getLang } from "@/lib/i18n";
+import { getLang, pickStrings } from "@/lib/i18n";
+import { loadCollectionCtx, loadProductCtx } from "@/lib/page-layout";
+import { CART_STRINGS } from "@/lib/strings";
+import type { PageCtx } from "@/lib/page-ctx";
 import { getStore } from "@/lib/tenant";
 import { notFound } from "next/navigation";
 
@@ -17,14 +20,35 @@ const adminOrigin = () => {
   }
 };
 
-/** The home page as it is being edited: the saved draft first, then redrawn live from the editor's messages. */
-export default async function Preview({ searchParams }: { searchParams: Promise<{ token?: string }> }) {
-  const { token } = await searchParams;
+const KINDS = ["home", "product", "collection", "cart"] as const;
+type Kind = (typeof KINDS)[number];
+
+/**
+ * A page as it is being edited: the saved draft first, then redrawn live from the editor's messages. Product, collection and cart pages
+ * show a real product, a real collection or a sample cart, because their layouts need something to draw (docs/39).
+ */
+export default async function Preview({ searchParams }: { searchParams: Promise<{ token?: string; page?: string; slug?: string }> }) {
+  const { token, page: wanted, slug } = await searchParams;
   const store = await getStore();
   // The link carries a short-lived signed token for exactly this store. Anything else is a plain 404.
   if (verifyPreviewToken(token) !== store.id) notFound();
+  const kind: Kind = (KINDS as readonly string[]).includes(wanted ?? "") ? (wanted as Kind) : "home";
   const lang = await getLang(store.locale);
-  const { page, theme } = await getPreview(store.id, "home");
+  const { page, theme } = await getPreview(store.id, kind);
   const data = await loadPageData(store.id, page, { everything: true });
-  return <PreviewBridge kind="home" initialPage={page} initialTheme={theme} data={data} lang={lang} adminOrigin={adminOrigin()} />;
+
+  const ctx: PageCtx = { preview: true };
+  if (kind === "product") {
+    const first = slug ?? (await listProducts(store.id, { sort: "newest", page: 1 })).items[0]?.slug;
+    const product = first ? await loadProductCtx(store.id, first) : null;
+    if (product) ctx.product = product;
+  } else if (kind === "collection") {
+    const first = slug ?? (await listCategories(store.id))[0]?.slug;
+    const collection = first ? await loadCollectionCtx(store.id, first, "newest", 1) : null;
+    if (collection) ctx.collection = collection;
+  } else if (kind === "cart") {
+    const settings = await getKaporSettings(store.id);
+    ctx.cart = { freeOver: settings.freeDeliveryOver, s: pickStrings(lang, CART_STRINGS) };
+  }
+  return <PreviewBridge kind={kind} initialPage={page} initialTheme={theme} data={data} lang={lang} adminOrigin={adminOrigin()} ctx={ctx} />;
 }

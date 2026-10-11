@@ -12,6 +12,9 @@ export const RESERVED_SUBDOMAINS = new Set([
   "biztrack", "biztrackbd", "webhook", "webhooks", "hooks", "edge", "vercel", "supabase",
 ]);
 
+/** Addresses of the template demo stores (docs/38). Not in RESERVED_SUBDOMAINS, because those stores must still resolve; only signup may not claim them. */
+export const DEMO_SUBDOMAINS = new Set(["kapor", "gadgetstudio", "minibunny", "axionwear", "bindu", "berber"]);
+
 const LABEL = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
 const IPV4 = /^\d{1,3}(?:\.\d{1,3}){3}$/;
 
@@ -62,7 +65,7 @@ export function validateSubdomain(input: string): SubdomainCheck {
   if (label.length < 3) return { ok: false, reason: "too_short" };
   if (label.length > 40) return { ok: false, reason: "too_long" };
   if (!LABEL.test(label) || label.includes("--")) return { ok: false, reason: "invalid" };
-  if (RESERVED_SUBDOMAINS.has(label)) return { ok: false, reason: "reserved" };
+  if (RESERVED_SUBDOMAINS.has(label) || DEMO_SUBDOMAINS.has(label)) return { ok: false, reason: "reserved" };
   return { ok: true, label };
 }
 
