@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Storefront checkout mobile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:390px;height:2190px;position:relative;overflow:hidden;background:#FBF8F3;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#2B2118">
+
+<div style="height:60px;box-sizing:border-box;background:#fff;border-bottom:1px solid #ECE4D8;display:flex;align-items:center;padding:0 8px">
+<div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2B2118" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-label="Back to cart" role="img"><path d="M15 6l-6 6 6 6"/></svg></div>
+<div style="flex-grow:1;text-align:center;font-size:17px;font-weight:800;letter-spacing:2.6px">KAPOR</div>
+<div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B5E50" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-label="Secure checkout" role="img"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></div>
+</div>
+
+<div style="padding:14px 16px 120px;display:flex;flex-direction:column;gap:14px">
+
+<div style="background:#fff;border:1px solid #ECE4D8;border-radius:12px;padding:0 16px;height:56px;display:flex;align-items:center;gap:10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8C5A3C" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11L21 7H6"/></svg><div style="flex-grow:1;font-size:14px;font-weight:600;color:#8C5A3C">Show order summary (2 items)</div><div style="font-size:16px;font-weight:700;font-variant-numeric:tabular-nums">৳ 2,150</div></div>
+
+<div style="background:#fff;border:1px solid #ECE4D8;border-radius:14px;padding:18px 16px">
+<div style="font-size:16px;font-weight:700;margin-bottom:14px">Contact</div>
+<div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Mobile number</div>
+<div style="display:flex;height:52px;box-sizing:border-box;border:2px solid #8C5A3C;border-radius:10px;overflow:hidden;font-size:16px;margin-bottom:14px"><div style="padding:0 14px;background:#FBF8F3;border-right:1px solid #E3D9CA;display:flex;align-items:center;color:#6B5E50">+880</div><div style="flex:1;padding:0 14px;display:flex;align-items:center;font-variant-numeric:tabular-nums">1712-345678</div></div>
+<div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Full name</div>
+<div style="height:52px;box-sizing:border-box;border:1px solid #D9CEBD;border-radius:10px;padding:0 14px;display:flex;align-items:center;font-size:16px;margin-bottom:14px">Tania Akter</div>
+<div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Email <span style="font-weight:500;color:#9A8C7C">(optional)</span></div>
+<div style="height:52px;box-sizing:border-box;border:1px solid #D9CEBD;border-radius:10px;padding:0 14px;display:flex;align-items:center;font-size:16px;color:#9A8C7C">name@example.com</div>
+</div>
+
+<div style="background:#fff;border:1px solid #ECE4D8;border-radius:14px;padding:18px 16px">
+<div style="font-size:16px;font-weight:700;margin-bottom:14px">Delivery address</div>
+<div style="display:flex;gap:10px;margin-bottom:14px">
+<div style="flex:1"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Division</div><div style="display:flex;height:52px;box-sizing:border-box;border:1px solid #D9CEBD;border-radius:10px;padding:0 14px;align-items:center;font-size:15px"><span style="flex-grow:1">Dhaka</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B5E50" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div></div>
+<div style="flex:1"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">District</div><div style="display:flex;height:52px;box-sizing:border-box;border:1px solid #D9CEBD;border-radius:10px;padding:0 14px;align-items:center;font-size:15px"><span style="flex-grow:1">Dhaka</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B5E50" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div></div>
+</div>
+<div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Upazila or thana</div>
+<div style="display:flex;height:52px;box-sizing:border-box;border:1px solid #D9CEBD;border-radius:10px;padding:0 14px;align-items:center;font-size:15px;margin-bottom:14px"><span style="flex-grow:1">Mirpur</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B5E50" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div>
+<div style="font-size:12.5px;font-weight:700;margin-bottom:6px">House, road and area</div>
+<div style="box-sizing:border-box;border:1px solid #D9CEBD;border-radius:10px;padding:14px;font-size:15px;line-height:1.5;min-height:76px">House 14, Road 7, Block C, Section 10</div>
+<div style="font-size:12.5px;font-weight:700;margin:14px 0 6px">Note for delivery <span style="font-weight:500;color:#9A8C7C">(optional)</span></div>
+<div style="height:52px;box-sizing:border-box;border:1px solid #D9CEBD;border-radius:10px;padding:0 14px;display:flex;align-items:center;font-size:15px;color:#9A8C7C">Please call before delivery</div>
+</div>
+
+<div style="background:#fff;border:1px solid #ECE4D8;border-radius:14px;padding:18px 16px">
+<div style="font-size:16px;font-weight:700;margin-bottom:14px">Delivery</div>
+<div style="display:flex;align-items:center;gap:12px;padding:14px;border:2px solid #8C5A3C;border-radius:12px;background:#FBF8F3;min-height:44px"><div style="width:22px;height:22px;border-radius:11px;border:6px solid #8C5A3C;box-sizing:border-box;background:#fff"></div><div style="flex-grow:1"><div style="font-size:15px;font-weight:700">Inside Dhaka city</div><div style="font-size:12.5px;color:#6B5E50">Arrives in 1 to 2 days</div></div><div style="font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">৳ 80</div></div>
+<div style="display:flex;align-items:center;gap:12px;padding:14px;border:1px solid #E3D9CA;border-radius:12px;margin-top:10px;min-height:44px"><div style="width:22px;height:22px;border-radius:11px;border:1.5px solid #D9CEBD;box-sizing:border-box"></div><div style="flex-grow:1"><div style="font-size:15px;font-weight:600">Outside Dhaka</div><div style="font-size:12.5px;color:#6B5E50">Arrives in 3 to 4 days</div></div><div style="font-size:15px;font-weight:600;font-variant-numeric:tabular-nums">৳ 130</div></div>
+</div>
+
+<div style="background:#fff;border:1px solid #ECE4D8;border-radius:14px;padding:18px 16px">
+<div style="font-size:16px;font-weight:700;margin-bottom:14px">Payment</div>
+<div style="display:flex;align-items:center;gap:12px;padding:14px;border:1px solid #E3D9CA;border-radius:12px;min-height:44px"><div style="width:22px;height:22px;border-radius:11px;border:1.5px solid #D9CEBD;box-sizing:border-box"></div><div style="flex-grow:1"><div style="font-size:15px;font-weight:600">Cash on delivery</div><div style="font-size:12.5px;color:#6B5E50">Pay the courier when it arrives</div></div></div>
+<div style="margin-top:10px;border:2px solid #E2136E;border-radius:12px;overflow:hidden">
+<div style="display:flex;align-items:center;gap:12px;padding:14px;background:#FFF5FA;min-height:44px"><div style="width:22px;height:22px;border-radius:11px;border:6px solid #E2136E;box-sizing:border-box;background:#fff"></div><div style="flex-grow:1"><div style="font-size:15px;font-weight:700">bKash</div><div style="font-size:12.5px;color:#6B5E50">Send money, then enter the TrxID</div></div><div style="width:36px;height:26px;border-radius:6px;background:#E2136E;color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center">bKash</div></div>
+<div style="padding:14px;background:#fff;display:flex;flex-direction:column;gap:12px">
+<div style="background:#FBF8F3;border-radius:10px;padding:12px 14px;font-size:13.5px;line-height:1.65"><b>1.</b> Open bKash and choose Send Money<br><b>2.</b> Send <b>৳ 2,150</b> to <b style="font-variant-numeric:tabular-nums">01712-345678</b><br><b>3.</b> Enter the TrxID from the SMS below</div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Your bKash number</div><div style="height:52px;box-sizing:border-box;border:1px solid #D9CEBD;border-radius:10px;padding:0 14px;display:flex;align-items:center;font-size:16px;font-variant-numeric:tabular-nums">01712-345678</div></div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">TrxID</div><div style="height:52px;box-sizing:border-box;border:2px solid #8C5A3C;border-radius:10px;padding:0 14px;display:flex;align-items:center;font-size:16px;letter-spacing:0.5px">9K4M2PX7QA</div><div style="font-size:12.5px;color:#6B5E50;margin-top:6px">We confirm your payment within 2 hours and send an SMS.</div></div>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:12px;padding:14px;border:1px solid #E3D9CA;border-radius:12px;margin-top:10px;min-height:44px"><div style="width:22px;height:22px;border-radius:11px;border:1.5px solid #D9CEBD;box-sizing:border-box"></div><div style="flex-grow:1"><div style="font-size:15px;font-weight:600">Nagad</div><div style="font-size:12.5px;color:#6B5E50">Send money, then enter the TrxID</div></div><div style="width:36px;height:26px;border-radius:6px;background:#F6921E;color:#fff;font-size:8.5px;font-weight:800;display:flex;align-items:center;justify-content:center">Nagad</div></div>
+</div>
+
+<div style="background:#fff;border:1px solid #ECE4D8;border-radius:14px;padding:18px 16px">
+<div style="display:flex;gap:10px;margin-bottom:16px"><div style="flex:1;height:48px;box-sizing:border-box;border:1px solid #D9CEBD;border-radius:10px;padding:0 14px;display:flex;align-items:center;font-size:15px;font-weight:700;letter-spacing:0.6px">EID10</div><div style="height:48px;padding:0 18px;border-radius:10px;background:#2B2118;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center">Applied</div></div>
+<div style="display:flex;flex-direction:column;gap:10px;font-size:14.5px;font-variant-numeric:tabular-nums"><div style="display:flex;color:#6B5E50"><span style="flex-grow:1">Subtotal (2 items)</span><span>৳ 2,300</span></div><div style="display:flex;color:#6B5E50"><span style="flex-grow:1">Delivery</span><span>৳ 80</span></div><div style="display:flex;color:#15803D"><span style="flex-grow:1">Coupon EID10</span><span>− ৳ 230</span></div><div style="display:flex;font-size:18px;font-weight:700;border-top:1px solid #ECE4D8;padding-top:12px;margin-top:2px"><span style="flex-grow:1">Total</span><span>৳ 2,150</span></div></div>
+</div>
+
+</div>
+
+<div style="position:absolute;left:0;right:0;bottom:0;height:96px;box-sizing:border-box;background:#fff;border-top:1px solid #ECE4D8;padding:14px 16px"><div style="height:58px;border-radius:12px;background:#8C5A3C;color:#fff;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center">Place order · ৳ 2,150</div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2190}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

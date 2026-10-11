@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin reports</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="reports" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+<h1 style="margin:0;font-size:24px;font-weight:700;flex-grow:1">Reports</h1>
+<div style="display:flex;align-items:center;gap:8px;height:38px;box-sizing:border-box;padding:0 14px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600">1 Oct to 10 Oct 2026</div>
+<div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Export CSV</div>
+</div>
+
+<div style="display:flex;gap:28px;border-bottom:1px solid #E7E7F0;overflow-x:auto">
+<div style="padding:6px 0 12px;border-bottom:2.5px solid #5B4FE8;margin-bottom:-1px;font-size:14px;font-weight:600;white-space:nowrap">Sales</div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D;white-space:nowrap">Products</div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D;white-space:nowrap">Customers</div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D;white-space:nowrap">Payments and COD</div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D;white-space:nowrap">Couriers</div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D;white-space:nowrap">Profit</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#4B4B73">Total sales</div><div style="font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">৳ 3,86,420</div><div style="font-size:12.5px;margin-top:4px;color:#15803D;font-weight:700">+22% <span style="color:#6B6B8D;font-weight:500">vs previous period</span></div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#4B4B73">Orders</div><div style="font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">176</div><div style="font-size:12.5px;margin-top:4px;color:#15803D;font-weight:700">+14% <span style="color:#6B6B8D;font-weight:500">vs previous period</span></div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#4B4B73">Average order</div><div style="font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">৳ 2,195</div><div style="font-size:12.5px;margin-top:4px;color:#15803D;font-weight:700">+7% <span style="color:#6B6B8D;font-weight:500">vs previous period</span></div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#4B4B73">Return rate</div><div style="font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">4.1%</div><div style="font-size:12.5px;margin-top:4px;color:#DC2626;font-weight:700">+0.6 pts <span style="color:#6B6B8D;font-weight:500">vs previous period</span></div></div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:999 1 560px;min-width:0;background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="display:flex;align-items:center;margin-bottom:12px"><div style="font-size:15px;font-weight:700;flex-grow:1">Sales over time</div><div style="display:flex;gap:16px;font-size:12.5px;color:#4B4B73"><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:3px;background:#5B4FE8;border-radius:2px"></span>This period</span><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:3px;background:#D5D5E4;border-radius:2px"></span>Previous</span></div></div>
+<svg viewBox="0 0 700 260" width="100%" height="260" role="img" aria-label="Daily sales from 1 to 10 October, peaking at 58,000 taka on 9 October" preserveAspectRatio="none">
+<g stroke="#E7E7F0"><path d="M0 50H700M0 110H700M0 170H700"/></g><path d="M0 230H700" stroke="#D5D5E4"/>
+<path d="M0 190 L78 160 L156 172 L233 130 L311 150 L389 100 L467 120 L544 70 L622 40 L700 80 L700 230 L0 230 Z" fill="#5B4FE8" fill-opacity="0.08"/>
+<path d="M0 190 L78 160 L156 172 L233 130 L311 150 L389 100 L467 120 L544 70 L622 40 L700 80" fill="none" stroke="#5B4FE8" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M0 205 L78 195 L156 180 L233 188 L311 170 L389 160 L467 166 L544 140 L622 130 L700 120" fill="none" stroke="#D5D5E4" stroke-width="2" stroke-dasharray="4 4"/>
+<path d="M622 20V230" stroke="#5B4FE8" stroke-dasharray="3 3"/><circle cx="622" cy="40" r="5" fill="#fff" stroke="#5B4FE8" stroke-width="2.5"/>
+</svg>
+<div style="display:flex;justify-content:space-between;font-size:12px;color:#6B6B8D;margin-top:8px"><span>1 Oct</span><span>3</span><span>5</span><span>7</span><span>9</span><span>10</span></div>
+</div>
+<div style="flex:1 1 300px;min-width:0;background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="font-size:15px;font-weight:700;margin-bottom:16px">Sales by district</div>
+<sc-for list="{{districts}}" as="d" hint-placeholder-count="6">
+<div style="margin-bottom:14px"><div style="display:flex;font-size:13px;margin-bottom:6px"><span style="flex-grow:1;font-weight:600">{{d.name}}</span><span style="color:#4B4B73;font-variant-numeric:tabular-nums">{{d.amt}}</span></div><div style="height:8px;border-radius:4px;background:#F0F0F6"><div style="width:{{d.pct}};height:8px;border-radius:4px;background:#5B4FE8"></div></div></div>
+</sc-for>
+</div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="padding:18px 24px;font-size:15px;font-weight:700;border-bottom:1px solid #E7E7F0">Top products</div>
+<div style="display:grid;grid-template-columns:minmax(0,2fr) 100px 140px 120px;padding:10px 24px;background:#FAFAFC;border-bottom:1px solid #E7E7F0;font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px"><div>PRODUCT</div><div style="text-align:right">UNITS</div><div style="text-align:right">SALES</div><div style="text-align:right">MARGIN</div></div>
+<sc-for list="{{top}}" as="p" hint-placeholder-count="4">
+<div style="display:grid;grid-template-columns:minmax(0,2fr) 100px 140px 120px;padding:0 24px;height:52px;align-items:center;border-bottom:1px solid #F0F0F6;font-size:13.5px"><div style="font-weight:600">{{p.name}}</div><div style="text-align:right;font-variant-numeric:tabular-nums">{{p.units}}</div><div style="text-align:right;font-weight:600;font-variant-numeric:tabular-nums">{{p.sales}}</div><div style="text-align:right;color:#15803D;font-weight:600;font-variant-numeric:tabular-nums">{{p.margin}}</div></div>
+</sc-for>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+return {
+districts: [
+{ name:'Dhaka', amt:'৳ 2,10,400', pct:'100%' },
+{ name:'Chattogram', amt:'৳ 58,900', pct:'28%' },
+{ name:'Sylhet', amt:'৳ 31,200', pct:'15%' },
+{ name:'Rajshahi', amt:'৳ 24,600', pct:'12%' },
+{ name:'Khulna', amt:'৳ 19,800', pct:'9%' },
+{ name:'Other districts', amt:'৳ 41,520', pct:'20%' },
+],
+top: [
+{ name:'Cotton Panjabi, Off-white', units:38, sales:'৳ 43,700', margin:'44%' },
+{ name:'Linen Shirt, Sage', units:27, sales:'৳ 22,950', margin:'41%' },
+{ name:'Slim Chino, Navy', units:22, sales:'৳ 28,380', margin:'38%' },
+{ name:'Printed Kurti, Rose', units:19, sales:'৳ 28,120', margin:'46%' },
+],
+};
+}
+}
+</script>
+</body>
+</html>

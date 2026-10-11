@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mobile admin orders</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:390px;height:844px;position:relative;overflow:hidden;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="position:absolute;left:0;right:0;top:0;bottom:84px;overflow:hidden;box-sizing:border-box">
+
+<div style="background:#fff;border-bottom:1px solid #E7E7F0;padding:20px 16px 0">
+<div style="display:flex;align-items:center;gap:8px"><div style="font-size:24px;font-weight:700;flex-grow:1">Orders</div>
+<div style="width:44px;height:44px;border-radius:22px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A1A4E" stroke-width="1.8" stroke-linecap="round" aria-label="Search" role="img"><path d="M11 18a7 7 0 100-14 7 7 0 000 14zM20 20l-4-4"/></svg></div>
+<div style="width:44px;height:44px;border-radius:22px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A1A4E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-label="Filter" role="img"><path d="M4 5h16l-6 8v6l-4-2v-4L4 5z"/></svg></div></div>
+<div style="display:flex;gap:8px;overflow:hidden;padding:6px 0 14px">
+<div style="padding:9px 16px;border-radius:20px;background:#5B4FE8;color:#fff;font-size:13.5px;font-weight:700;white-space:nowrap">New 12</div>
+<div style="padding:9px 16px;border-radius:20px;border:1px solid #D5D5E4;background:#fff;font-size:13.5px;font-weight:600;color:#4B4B73;white-space:nowrap">To pack 4</div>
+<div style="padding:9px 16px;border-radius:20px;border:1px solid #D5D5E4;background:#fff;font-size:13.5px;font-weight:600;color:#4B4B73;white-space:nowrap">Shipped 9</div>
+<div style="padding:9px 16px;border-radius:20px;border:1px solid #D5D5E4;background:#fff;font-size:13.5px;font-weight:600;color:#4B4B73;white-space:nowrap">Returns 3</div>
+</div>
+</div>
+
+<div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{orders}}" as="o" hint-placeholder-count="4">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:14px;padding:14px 16px">
+<div style="display:flex;align-items:center;gap:8px"><div style="font-size:14px;font-weight:700;color:#5B4FE8;flex-grow:1">{{o.id}}</div><div style="font-size:12px;color:#6B6B8D">{{o.time}}</div></div>
+<div style="display:flex;align-items:center;margin-top:8px;gap:8px"><div style="flex-grow:1"><div style="font-size:15px;font-weight:700">{{o.name}}</div><div style="font-size:12.5px;color:#4B4B73;margin-top:2px">{{o.area}} · {{o.items}}</div></div><div style="font-size:16px;font-weight:700;font-variant-numeric:tabular-nums">{{o.total}}</div></div>
+<div style="display:flex;align-items:center;gap:8px;margin-top:12px"><span style="padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:{{o.payBg}};color:{{o.payColor}}">{{o.pay}}</span><div style="flex-grow:1"></div>
+<div style="height:40px;padding:0 18px;border-radius:10px;display:flex;align-items:center;font-size:13.5px;font-weight:700;background:{{o.btnBg}};color:{{o.btnColor}};border:{{o.btnBorder}}">{{o.btn}}</div></div>
+</div>
+</sc-for>
+</div>
+
+</div>
+<div style="position:absolute;left:0;bottom:0"><dc-import name="MobileTabs" active="orders" hint-size="390px,84px"></dc-import></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const pay = { 'Check bKash': ['#FDF3E3','#B45309'], COD: ['#EFEFF6','#4B4B73'], Paid: ['#E8F6EE','#15803D'], 'Check Nagad': ['#FDF3E3','#B45309'] };
+const d = [
+['BT-10482','10:42 am','Tania Akter','Mirpur, Dhaka','3 items','৳ 2,450','Check bKash','Verify payment',1],
+['BT-10481','9:15 am','Rakib Hasan','Agrabad, Chattogram','2 items','৳ 1,890','COD','Book courier',0],
+['BT-10479','Yesterday','Sabbir Ahmed','Uttara, Dhaka','1 item','৳ 990','Check Nagad','Verify payment',1],
+['BT-10477','Yesterday','Nusrat Sultana','Khulna Sadar','2 items','৳ 1,740','Paid','Book courier',0],
+];
+return { orders: d.map(([id,time,name,area,items,total,p,btn,primary]) => ({ id, time, name, area, items, total, pay: p, btn, payBg: pay[p][0], payColor: pay[p][1], btnBg: primary?'#5B4FE8':'#fff', btnColor: primary?'#fff':'#1A1A4E', btnBorder: primary?'none':'1px solid #D5D5E4' })) };
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin settings shipping and couriers</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="settings" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+<h1 style="margin:0;font-size:24px;font-weight:700">Settings</h1>
+<div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start">
+<div style="flex:0 0 232px"><dc-import name="SettingsNav" active="shipping" hint-size="232px,340px"></dc-import></div>
+<div style="flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:20px">
+
+<div><div style="font-size:18px;font-weight:700">Shipping and couriers</div><div style="font-size:14px;color:#4B4B73;margin-top:4px">Set delivery charges and connect courier accounts to book pickups from your orders.</div></div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="padding:18px 24px;font-size:15px;font-weight:700;border-bottom:1px solid #E7E7F0">Courier accounts</div>
+<sc-for list="{{couriers}}" as="c" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid #F0F0F6;flex-wrap:wrap">
+<div style="width:44px;height:44px;border-radius:10px;background:{{c.bg}};color:#fff;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">{{c.short}}</div>
+<div style="flex:1 1 220px"><div style="font-size:14.5px;font-weight:700">{{c.name}}</div><div style="font-size:12.5px;color:#4B4B73;margin-top:2px">{{c.note}}</div></div>
+<span style="padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:{{c.sBg}};color:{{c.sColor}}">{{c.status}}</span>
+<div style="height:36px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;display:flex;align-items:center;font-size:13.5px;font-weight:600;background:#fff">{{c.action}}</div>
+</div>
+</sc-for>
+<div style="padding:14px 24px;font-size:13px;color:#4B4B73;background:#FAFAFC">API keys are stored encrypted and never shown again after saving.</div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="padding:18px 24px;display:flex;align-items:center;border-bottom:1px solid #E7E7F0"><div style="font-size:15px;font-weight:700;flex-grow:1">Delivery charges</div><div style="font-size:13px;font-weight:600;color:#5B4FE8">Add zone</div></div>
+<div style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1.5fr) 110px 110px;padding:10px 24px;background:#FAFAFC;border-bottom:1px solid #E7E7F0;font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px"><div>ZONE</div><div>AREAS</div><div style="text-align:right">CHARGE</div><div style="text-align:right">FREE OVER</div></div>
+<sc-for list="{{zones}}" as="z" hint-placeholder-count="3">
+<div style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1.5fr) 110px 110px;padding:0 24px;height:58px;align-items:center;border-bottom:1px solid #F0F0F6;font-size:13.5px"><div style="font-weight:600">{{z.name}}</div><div style="color:#4B4B73">{{z.areas}}</div><div style="text-align:right;font-weight:600;font-variant-numeric:tabular-nums">{{z.charge}}</div><div style="text-align:right;color:#4B4B73;font-variant-numeric:tabular-nums">{{z.free}}</div></div>
+</sc-for>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:15px;font-weight:700">When an order is placed</div>
+<div style="display:flex;align-items:center;gap:12px"><div style="width:36px;height:20px;border-radius:10px;background:#5B4FE8;position:relative;flex:0 0 36px"><div style="position:absolute;top:2px;left:18px;width:16px;height:16px;border-radius:8px;background:#fff"></div></div><div style="font-size:13.5px"><b>Ask me before booking.</b> You choose the courier from the order page.</div></div>
+<div style="display:flex;align-items:center;gap:12px"><div style="width:36px;height:20px;border-radius:10px;background:#D5D5E4;position:relative;flex:0 0 36px"><div style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:8px;background:#fff"></div></div><div style="font-size:13.5px"><b>Book Pathao automatically</b> for COD orders inside Dhaka.</div></div>
+<div style="display:flex;align-items:center;gap:12px"><div style="width:36px;height:20px;border-radius:10px;background:#5B4FE8;position:relative;flex:0 0 36px"><div style="position:absolute;top:2px;left:18px;width:16px;height:16px;border-radius:8px;background:#fff"></div></div><div style="font-size:13.5px"><b>Send tracking SMS</b> to the customer when the parcel is booked.</div></div>
+</div>
+
+<div style="display:flex;justify-content:flex-end;gap:10px"><div style="height:40px;padding:0 18px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Discard</div><div style="height:40px;padding:0 22px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Save shipping settings</div></div>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+return {
+couriers: [
+{ name:'Pathao', short:'Pathao', bg:'#E5252A', note:'Merchant ID PA-48213 · Store: Mirpur shop', status:'Connected', sBg:'#E8F6EE', sColor:'#15803D', action:'Manage' },
+{ name:'Steadfast', short:'Steadfast', bg:'#1E6B3A', note:'Account rongdhonu · COD settlement every Tuesday', status:'Connected', sBg:'#E8F6EE', sColor:'#15803D', action:'Manage' },
+{ name:'RedX', short:'RedX', bg:'#D62E2E', note:'Needs your RedX API token', status:'Not connected', sBg:'#EFEFF6', sColor:'#4B4B73', action:'Connect' },
+],
+zones: [
+{ name:'Inside Dhaka city', areas:'Dhaka North, Dhaka South', charge:'৳ 80', free:'৳ 3,000' },
+{ name:'Dhaka suburbs', areas:'Savar, Gazipur, Narayanganj', charge:'৳ 110', free:'৳ 4,000' },
+{ name:'Outside Dhaka', areas:'All other districts', charge:'৳ 130', free:'৳ 5,000' },
+],
+};
+}
+}
+</script>
+</body>
+</html>

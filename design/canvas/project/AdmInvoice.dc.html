@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin invoice and packing slip</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="orders" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:24px 32px 40px;display:flex;flex-direction:column;gap:18px">
+
+<div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#4B4B73"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>BT-10482</div>
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:-6px"><h1 style="margin:0;font-size:24px;font-weight:700;flex-grow:1">Print documents</h1>
+<div style="display:flex;padding:3px;border-radius:19px;background:#EFEFF6;font-size:13px;font-weight:600"><div style="padding:6px 16px;border-radius:16px;background:#fff;border:1px solid #E7E7F0">Invoice</div><div style="padding:6px 16px;color:#6B6B8D">Packing slip</div><div style="padding:6px 16px;color:#6B6B8D">Courier label</div></div>
+<div style="display:flex;padding:3px;border-radius:19px;background:#EFEFF6;font-size:13px;font-weight:600"><div style="padding:6px 14px;border-radius:16px;background:#fff;border:1px solid #E7E7F0">A4</div><div style="padding:6px 14px;color:#6B6B8D">A5</div><div style="padding:6px 14px;color:#6B6B8D">Thermal 80mm</div></div>
+<div style="height:38px;padding:0 20px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6M6 17H4V9h16v8h-2M7 14h10v7H7z"/></svg>Print</div></div>
+
+<div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+<div style="flex:1 1 640px;min-width:0;display:flex;justify-content:center;background:#EFEFF6;border-radius:12px;padding:28px">
+<div style="width:595px;max-width:100%;box-sizing:border-box;background:#fff;box-shadow:0 8px 24px rgba(26,26,78,0.10);padding:40px 44px;color:#1A1A1A">
+<div style="display:flex;align-items:flex-start;gap:16px"><div style="width:48px;height:48px;border-radius:10px;background:#E9DCCB;color:#8C5A3C;font-weight:700;font-size:22px;display:flex;align-items:center;justify-content:center">র</div><div style="flex-grow:1"><div style="font-size:17px;font-weight:700">Rongdhonu Fashion</div><div style="font-size:12px;color:#555;line-height:1.5">House 22, Road 4, Mirpur 10, Dhaka<br>01712-345678 · rongdhonufashion.com</div></div><div style="text-align:right"><div style="font-size:22px;font-weight:700;letter-spacing:1px">INVOICE</div><div style="font-size:12px;color:#555">BT-10482<br>10 Oct 2026</div></div></div>
+<div style="display:flex;gap:30px;margin-top:26px;padding-top:18px;border-top:2px solid #1A1A1A;font-size:12.5px;line-height:1.6"><div style="flex:1"><b style="font-size:11px;letter-spacing:1px;color:#555">BILL TO</b><br>Tania Akter<br>01712-345678</div><div style="flex:1"><b style="font-size:11px;letter-spacing:1px;color:#555">SHIP TO</b><br>House 14, Road 7, Block C<br>Section 10, Mirpur, Dhaka</div><div style="flex:1"><b style="font-size:11px;letter-spacing:1px;color:#555">PAYMENT</b><br>bKash, TrxID 9K4M2PX7QA<br>Status: to be verified</div></div>
+<div style="margin-top:24px;border-top:1px solid #DDD;font-size:12.5px"><div style="display:grid;grid-template-columns:minmax(0,1fr) 40px 80px 80px;padding:8px 0;border-bottom:1px solid #DDD;font-size:11px;font-weight:700;letter-spacing:0.5px;color:#555"><div>ITEM</div><div style="text-align:right">QTY</div><div style="text-align:right">PRICE</div><div style="text-align:right">TOTAL</div></div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 40px 80px 80px;padding:10px 0;border-bottom:1px solid #EEE"><div>Cotton Panjabi, Off-white<br><span style="color:#777">Size L · KP-OW-L</span></div><div style="text-align:right">1</div><div style="text-align:right">1,150</div><div style="text-align:right">1,150</div></div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 40px 80px 80px;padding:10px 0;border-bottom:1px solid #EEE"><div>Linen Shirt, Sage<br><span style="color:#777">Size M · LS-SG-M</span></div><div style="text-align:right">1</div><div style="text-align:right">850</div><div style="text-align:right">850</div></div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 40px 80px 80px;padding:10px 0;border-bottom:1px solid #EEE"><div>Cotton Socks, 3-pack<br><span style="color:#777">Free size · SK-3P</span></div><div style="text-align:right">1</div><div style="text-align:right">300</div><div style="text-align:right">300</div></div></div>
+<div style="margin-left:auto;width:230px;margin-top:16px;font-size:12.5px;line-height:2"><div style="display:flex"><span style="flex-grow:1">Subtotal</span><span>৳ 2,300</span></div><div style="display:flex"><span style="flex-grow:1">Delivery</span><span>৳ 80</span></div><div style="display:flex"><span style="flex-grow:1">Coupon EID10</span><span>− ৳ 230</span></div><div style="display:flex;font-size:15px;font-weight:700;border-top:2px solid #1A1A1A;margin-top:4px;padding-top:6px"><span style="flex-grow:1">Total</span><span>৳ 2,150</span></div></div>
+<div style="margin-top:30px;padding-top:14px;border-top:1px solid #DDD;font-size:11.5px;color:#666;line-height:1.6;display:flex;gap:16px;align-items:center"><div style="flex:1">Thank you for shopping with us. Exchange within 7 days of delivery with this invoice.</div><div style="width:56px;height:56px;border:2px solid #1A1A1A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;text-align:center">QR<br>track</div></div>
+</div>
+</div>
+
+<div style="flex:0 0 300px;background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 22px;display:flex;flex-direction:column;gap:16px">
+<div style="font-size:15px;font-weight:700">Document settings</div>
+<div style="display:flex;flex-direction:column;gap:12px;font-size:13.5px">
+<div style="display:flex;align-items:center;gap:10px"><div style="width:18px;height:18px;border-radius:5px;background:#5B4FE8;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>Show my logo</div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:18px;height:18px;border-radius:5px;background:#5B4FE8;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>Show SKU codes</div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:18px;height:18px;border-radius:5px;background:#5B4FE8;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>Show tracking QR code</div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:18px;height:18px;border-radius:5px;border:1.5px solid #D5D5E4;box-sizing:border-box"></div>Show prices on packing slip</div>
+</div>
+<div><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Footer note</div><div style="box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.5;color:#4B4B73">Thank you for shopping with us. Exchange within 7 days of delivery with this invoice.</div></div>
+<div><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Language</div><div style="display:flex;padding:3px;border-radius:19px;background:#EFEFF6;font-size:13px;font-weight:600"><div style="padding:6px 14px;border-radius:16px;background:#fff;border:1px solid #E7E7F0">English</div><div style="padding:6px 14px;color:#6B6B8D;font-family:'Hind Siliguri',sans-serif">বাংলা</div></div></div>
+<div style="height:1px;background:#F0F0F6"></div>
+<div style="height:40px;border:1px solid #D5D5E4;border-radius:8px;font-size:13.5px;font-weight:600;display:flex;align-items:center;justify-content:center">Print all selected orders (2)</div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

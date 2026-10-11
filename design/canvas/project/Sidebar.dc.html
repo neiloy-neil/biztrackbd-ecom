@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin sidebar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:248px;height:1040px;box-sizing:border-box;background:#fff;border-right:1px solid #E7E7F0;display:flex;flex-direction:column;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="display:flex;align-items:center;gap:10px;padding:16px 20px 0">
+<svg width="28" height="28" viewBox="0 0 44 44" role="img" aria-label="BizTrackBD"><rect width="44" height="44" rx="12" fill="#5B4FE8"/><path d="M13 32V22M22 32V14M31 32V19" stroke="#fff" stroke-width="4.4" stroke-linecap="round"/></svg>
+<div style="font-size:18px;font-weight:700;letter-spacing:-0.2px">BizTrack<span style="color:#5B4FE8">BD</span></div>
+</div>
+<div style="margin:20px 12px 14px;padding:10px 12px;border:1px solid #E7E7F0;border-radius:10px;background:#FAFAFC;display:flex;align-items:center;gap:10px">
+<div style="width:30px;height:30px;border-radius:8px;background:#E9DCCB;color:#8C5A3C;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:15px">র</div>
+<div style="flex-grow:1;min-width:0"><div style="font-size:13px;font-weight:700">Rongdhonu Fashion</div><div style="font-size:11.5px;color:#6B6B8D">rongdhonu.biztrackbd.com</div></div>
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+</div>
+<nav style="display:flex;flex-direction:column;gap:4px;padding:0 12px">
+<sc-for list="{{items}}" as="item" hint-placeholder-count="8">
+<div style="display:flex;align-items:center;gap:12px;height:38px;padding:0 12px;border-radius:8px;background:{{item.bg}}">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{item.color}}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{item.d}}"/></svg>
+<div style="flex-grow:1;font-size:14px;font-weight:{{item.weight}};color:{{item.color}}">{{item.label}}</div>
+<sc-if value="{{item.hasCount}}" hint-placeholder-val="{{false}}"><div style="min-width:24px;height:18px;border-radius:9px;padding:0 6px;box-sizing:border-box;background:{{item.countBg}};color:{{item.countColor}};font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center">{{item.count}}</div></sc-if>
+</div>
+</sc-for>
+</nav>
+<div style="flex-grow:1"></div>
+<div style="margin:0 12px 12px;padding:14px 14px 16px;border-radius:12px;background:#F4F3FF">
+<div style="font-size:12px;font-weight:700;color:#5B4FE8">Free trial</div>
+<div style="font-size:16px;font-weight:700;margin:2px 0 10px">9 days left</div>
+<div style="height:6px;border-radius:3px;background:#E1DEFB"><div style="width:36%;height:6px;border-radius:3px;background:#5B4FE8"></div></div>
+<div style="font-size:12.5px;font-weight:700;color:#5B4FE8;margin-top:10px">Choose a plan</div>
+</div>
+<div style="display:flex;align-items:center;gap:12px;height:38px;margin:0 12px 8px;padding:0 12px;border-radius:8px;background:{{settingsBg}}">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{settingsColor}}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M16 5a2 2 0 100 4 2 2 0 000-4zM8 15a2 2 0 100 4 2 2 0 000-4z"/></svg>
+<div style="font-size:14px;font-weight:{{settingsWeight}};color:{{settingsColor}}">Settings</div>
+</div>
+<div style="display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid #E7E7F0">
+<div style="width:26px;height:26px;border-radius:13px;background:#E9E7FD;color:#5B4FE8;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">NJ</div>
+<div style="flex-grow:1;font-size:12.5px;font-weight:600">Nusrat Jahan</div>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01"/></svg>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","options":["home","orders","products","customers","marketing","store","reports","apps","settings"],"default":"home"},"$preview":{"width":248,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+const a = this.props.active ?? 'home';
+const nav = [
+['home','Home','M3 10.5L12 3l9 7.5M5 9.5V21h5v-6h4v6h5V9.5'],
+['orders','Orders','M5 7h14l-1 13H6L5 7zM9 7V6a3 3 0 016 0v1',12],
+['products','Products','M3 12V4h8l10 10-8 8L3 12zM8 8h.01'],
+['customers','Customers','M9 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM2.5 20c.5-3.5 3.2-5.5 6.5-5.5s6 2 6.5 5.5M16 4.7a3.5 3.5 0 010 6.6M18 14.8c2 .6 3.2 2.3 3.5 5.2'],
+['marketing','Marketing','M4 10v4h3l8 4V6L7 10H4zM18 9a4 4 0 010 6'],
+['store','Online store','M4 9l1.5-5h13L20 9M4 9a2.7 2.7 0 005.3 0 2.7 2.7 0 005.4 0A2.7 2.7 0 0020 9M5 12v8h14v-8'],
+['reports','Reports','M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-6'],
+['apps','Apps & modules','M3 3h7.5v7.5H3zM13.5 3H21v7.5h-7.5zM3 13.5h7.5V21H3zM13.5 13.5H21V21h-7.5z'],
+];
+return {
+items: nav.map(([k,label,d,count]) => ({ label, d, hasCount: !!count, count, bg: k===a?'#F4F3FF':'transparent', color: k===a?'#5B4FE8':'#1A1A4E', weight: k===a?700:500, countBg: k===a?'#5B4FE8':'#E9E7FD', countColor: k===a?'#fff':'#5B4FE8' })),
+settingsBg: a==='settings'?'#F4F3FF':'transparent',
+settingsColor: a==='settings'?'#5B4FE8':'#1A1A4E',
+settingsWeight: a==='settings'?700:500,
+};
+}
+}
+</script>
+</body>
+</html>

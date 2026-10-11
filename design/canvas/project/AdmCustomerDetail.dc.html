@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin customer detail</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="customers" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:24px 32px 40px;display:flex;flex-direction:column;gap:20px">
+
+<div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#4B4B73"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Customers</div>
+<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:-6px">
+<div style="width:56px;height:56px;border-radius:28px;background:#E9E7FD;color:#5B4FE8;font-weight:700;font-size:20px;display:flex;align-items:center;justify-content:center">TA</div>
+<div style="flex-grow:1"><div style="display:flex;align-items:center;gap:10px"><h1 style="margin:0;font-size:24px;font-weight:700">Tania Akter</h1><span style="padding:2px 9px;border-radius:10px;background:#FDF3E3;color:#B45309;font-size:11.5px;font-weight:700">VIP</span></div><div style="font-size:13px;color:#4B4B73;margin-top:3px">Customer since March 2026 · Mirpur, Dhaka</div></div>
+<div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Send SMS</div>
+<div style="height:38px;padding:0 18px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center">Create order</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#4B4B73">Total spent</div><div style="font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">৳ 6,840</div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#4B4B73">Orders</div><div style="font-size:24px;font-weight:700;margin-top:4px">3</div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#4B4B73">Average order</div><div style="font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">৳ 2,280</div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#4B4B73">Delivery success</div><div style="font-size:24px;font-weight:700;margin-top:4px;color:#15803D">100%</div></div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:20px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="padding:18px 24px;font-size:15px;font-weight:700;border-bottom:1px solid #E7E7F0">Orders</div>
+<sc-for list="{{orders}}" as="o" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:14px;padding:0 24px;height:60px;border-bottom:1px solid #F0F0F6;font-size:13.5px"><b style="width:90px;color:#5B4FE8">{{o.id}}</b><span style="width:90px;color:#4B4B73">{{o.date}}</span><span style="flex:1;color:#4B4B73">{{o.items}}</span><span style="padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:{{o.bg}};color:{{o.c}}">{{o.st}}</span><b style="width:90px;text-align:right;font-variant-numeric:tabular-nums">{{o.total}}</b></div>
+</sc-for>
+</div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="font-size:15px;font-weight:700;margin-bottom:14px">Activity</div>
+<div style="display:flex;flex-direction:column;gap:14px;font-size:13.5px">
+<div style="display:flex;gap:12px"><div style="width:8px;height:8px;border-radius:4px;background:#5B4FE8;margin-top:6px;flex:0 0 8px"></div><div style="flex:1">Placed order BT-10482</div><div style="color:#6B6B8D;font-size:12.5px">Today</div></div>
+<div style="display:flex;gap:12px"><div style="width:8px;height:8px;border-radius:4px;background:#9A9AB5;margin-top:6px;flex:0 0 8px"></div><div style="flex:1">Received SMS: order shipped (BT-10231)</div><div style="color:#6B6B8D;font-size:12.5px">22 Sep</div></div>
+<div style="display:flex;gap:12px"><div style="width:8px;height:8px;border-radius:4px;background:#15803D;margin-top:6px;flex:0 0 8px"></div><div style="flex:1">Wrote a 5 star review for Printed Kurti</div><div style="color:#6B6B8D;font-size:12.5px">1 Jun</div></div>
+</div>
+</div>
+</div>
+
+<div style="flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:20px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="font-size:15px;font-weight:700;margin-bottom:12px">Contact</div>
+<div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px"><div style="font-variant-numeric:tabular-nums">01712-345678</div><div>tania.akter@gmail.com</div><div style="color:#4B4B73;line-height:1.5">House 14, Road 7, Block C<br>Section 10, Mirpur, Dhaka</div></div>
+</div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="font-size:15px;font-weight:700;margin-bottom:12px">Tags and credit</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px"><span style="padding:4px 12px;border-radius:14px;background:#F4F3FF;color:#5B4FE8;font-size:12.5px;font-weight:600">VIP</span><span style="padding:4px 12px;border-radius:14px;background:#F4F3FF;color:#5B4FE8;font-size:12.5px;font-weight:600">Eid buyer</span><span style="padding:4px 12px;border-radius:14px;border:1.5px dashed #B9B2F5;color:#5B4FE8;font-size:12.5px;font-weight:700">+ Tag</span></div>
+<div style="display:flex;font-size:13.5px;margin-bottom:6px"><span style="flex-grow:1;color:#4B4B73">Loyalty points</span><b>420</b></div>
+<div style="display:flex;font-size:13.5px"><span style="flex-grow:1;color:#4B4B73">Store credit</span><b style="font-variant-numeric:tabular-nums">৳ 0</b></div>
+</div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="font-size:15px;font-weight:700;margin-bottom:12px">Marketing</div>
+<div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px"><div style="display:flex;align-items:center;gap:10px"><div style="width:18px;height:18px;border-radius:5px;background:#5B4FE8;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>Agreed to receive SMS offers</div><div style="display:flex;align-items:center;gap:10px"><div style="width:18px;height:18px;border-radius:5px;border:1.5px solid #D5D5E4;box-sizing:border-box"></div>Agreed to receive email offers</div></div>
+</div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px;display:flex;align-items:center;gap:10px"><div style="flex:1;font-size:13.5px;font-weight:600;color:#DC2626">Add to blocked list</div><div style="font-size:12.5px;color:#6B6B8D">Stops new orders</div></div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1250}}'>
+class Component extends DCLogic {
+renderVals() {
+const L = ['#FDF3E3','#B45309'], G = ['#E8F6EE','#15803D'];
+return { orders: [['BT-10482','Today','Cotton Panjabi, Linen Shirt + 1','Check bKash',L,'৳ 2,150'],['BT-10231','18 Sep','Slim Chino, Printed Kurti','Delivered',G,'৳ 2,290'],['BT-09870','2 Aug','Printed Kurti, Rose','Delivered',G,'৳ 1,400']].map(([id,date,items,st,c,total]) => ({ id, date, items, st, bg: c[0], c: c[1], total })) };
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mobile pixels and tracking</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:390px;height:844px;position:relative;overflow:hidden;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="position:absolute;left:0;right:0;top:0;bottom:84px;overflow:hidden">
+
+<div style="background:#fff;border-bottom:1px solid #E7E7F0;padding:16px 8px 12px;display:flex;align-items:center;gap:4px"><div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A1A4E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-label="Back" role="img"><path d="M15 6l-6 6 6 6"/></svg></div><div style="flex-grow:1;font-size:17px;font-weight:700">Pixels and tracking</div></div>
+
+<div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:14px;padding:16px">
+<div style="display:flex;align-items:center;gap:12px"><div style="width:44px;height:44px;border-radius:10px;background:#1877F2;color:#fff;font-weight:800;font-size:22px;display:flex;align-items:center;justify-content:center">f</div><div style="flex:1"><div style="font-size:15px;font-weight:700">Facebook Pixel and CAPI</div><div style="font-size:12.5px;color:#4B4B73">Last event 2 minutes ago</div></div><span style="padding:3px 10px;border-radius:11px;background:#E8F6EE;color:#15803D;font-size:12px;font-weight:700">Connected</span></div>
+<div style="margin-top:14px"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Pixel ID</div><div style="height:48px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:10px;padding:0 14px;display:flex;align-items:center;font-size:15px;font-variant-numeric:tabular-nums">482199301127</div></div>
+<div style="margin-top:12px"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Access token</div><div style="display:flex;height:48px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:10px;padding:0 14px;align-items:center;background:#FAFAFC"><span style="flex:1;letter-spacing:2px;color:#4B4B73">••••••••••a91f</span><span style="font-size:13px;font-weight:700;color:#5B4FE8">Replace</span></div></div>
+<div style="height:46px;border:1px solid #D5D5E4;border-radius:10px;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;margin-top:14px">Send a test event</div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:14px;overflow:hidden">
+<div style="padding:14px 16px;display:flex;align-items:center;border-bottom:1px solid #E7E7F0"><div style="font-size:14.5px;font-weight:700;flex:1">Events, last 7 days</div><div style="font-size:12.5px;color:#4B4B73">Match <b style="color:#15803D">Good</b></div></div>
+<sc-for list="{{events}}" as="e" hint-placeholder-count="6"><div style="display:flex;align-items:center;gap:10px;padding:0 16px;height:46px;border-bottom:1px solid #F0F0F6;font-size:13.5px"><b style="flex:1">{{e.n}}</b><span style="color:#4B4B73;font-variant-numeric:tabular-nums">{{e.v}}</span><span style="padding:2px 9px;border-radius:10px;font-size:11.5px;font-weight:600;background:{{e.bg}};color:{{e.c}}">{{e.s}}</span></div></sc-for>
+</div>
+
+<div style="background:#FDF3E3;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.5;color:#4B4B73"><b style="color:#B45309">Add to cart is low.</b> 1 in 6 browser events has no matching server event.</div>
+</div>
+</div>
+<div style="position:absolute;left:0;bottom:0"><dc-import name="MobileTabs" active="more" hint-size="390px,84px"></dc-import></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const ok=['#E8F6EE','#15803D'], w=['#FDF3E3','#B45309'];
+return { events: [['PageView','4,790',ok,'Matched'],['ViewContent','2,091',ok,'Matched'],['AddToCart','322',w,'Check'],['InitiateCheckout','160',ok,'Matched'],['Purchase','96',ok,'Matched']].map(([n,v,c,s]) => ({ n, v, s, bg: c[0], c: c[1] })) };
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin settings notifications and SMS</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="settings" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+<h1 style="margin:0;font-size:24px;font-weight:700">Settings</h1>
+<div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start">
+<div style="flex:0 0 232px"><dc-import name="SettingsNav" active="notifications" hint-size="232px,340px"></dc-import></div>
+<div style="flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:20px">
+
+<div><div style="font-size:18px;font-weight:700">Notifications and SMS</div><div style="font-size:14px;color:#4B4B73;margin-top:4px">Choose what your customers and your team hear about, and edit the wording.</div></div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:18px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+<div style="flex:1 1 200px"><div style="font-size:13px;color:#4B4B73;font-weight:600">SMS credits</div><div style="font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px">412</div></div>
+<div style="flex:2 1 260px"><div style="height:6px;border-radius:3px;background:#E7E7F0"><div style="width:41%;height:6px;border-radius:3px;background:#5B4FE8"></div></div><div style="font-size:12.5px;color:#4B4B73;margin-top:8px">412 of 1,000 left this month. About 9 days at your current pace.</div></div>
+<div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;display:flex;align-items:center;font-size:14px;font-weight:600">Buy more credits</div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="padding:18px 24px;font-size:15px;font-weight:700;border-bottom:1px solid #E7E7F0">Customer messages</div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 80px 80px 70px;padding:10px 24px;background:#FAFAFC;border-bottom:1px solid #E7E7F0;font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px"><div>WHEN</div><div style="text-align:center">SMS</div><div style="text-align:center">EMAIL</div><div></div></div>
+<sc-for list="{{events}}" as="e" hint-placeholder-count="6">
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 80px 80px 70px;padding:0 24px;height:56px;align-items:center;border-bottom:1px solid #F0F0F6;font-size:13.5px;background:{{e.bg}}"><div><div style="font-weight:600">{{e.name}}</div><div style="font-size:12px;color:#6B6B8D">{{e.sub}}</div></div>
+<div style="display:flex;justify-content:center"><div style="width:34px;height:19px;border-radius:10px;background:{{e.smsBg}};position:relative"><div style="position:absolute;top:2px;left:{{e.smsPos}};width:15px;height:15px;border-radius:8px;background:#fff"></div></div></div>
+<div style="display:flex;justify-content:center"><div style="width:34px;height:19px;border-radius:10px;background:{{e.mailBg}};position:relative"><div style="position:absolute;top:2px;left:{{e.mailPos}};width:15px;height:15px;border-radius:8px;background:#fff"></div></div></div>
+<div style="font-size:13px;font-weight:700;color:#5B4FE8;text-align:right">Edit</div></div>
+</sc-for>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="display:flex;align-items:center;margin-bottom:14px;gap:12px;flex-wrap:wrap"><div style="font-size:15px;font-weight:700;flex-grow:1">Edit: Order shipped</div><div style="display:flex;padding:3px;border-radius:17px;background:#EFEFF6;font-size:13px;font-weight:600"><div style="padding:5px 12px;color:#6B6B8D">English</div><div style="padding:5px 12px;border-radius:14px;background:#fff;border:1px solid #E7E7F0;font-family:'Hind Siliguri',sans-serif">বাংলা</div></div></div>
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:1 1 320px"><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Message</div><div style="box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:12px;font-size:14px;line-height:1.7;font-family:'Hind Siliguri',sans-serif;min-height:96px">{customer_name}, আপনার অর্ডার {order_number} পাঠানো হয়েছে। ট্র্যাকিং: {tracking_link}। ধন্যবাদ, {store_name}।</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><span style="padding:3px 10px;border-radius:12px;background:#F4F3FF;color:#5B4FE8;font-size:12px;font-weight:600">customer_name</span><span style="padding:3px 10px;border-radius:12px;background:#F4F3FF;color:#5B4FE8;font-size:12px;font-weight:600">order_number</span><span style="padding:3px 10px;border-radius:12px;background:#F4F3FF;color:#5B4FE8;font-size:12px;font-weight:600">tracking_link</span><span style="padding:3px 10px;border-radius:12px;background:#F4F3FF;color:#5B4FE8;font-size:12px;font-weight:600">store_name</span></div>
+<div style="font-size:12.5px;color:#B45309;font-weight:600;margin-top:10px">Bangla SMS uses more characters: this message is 2 SMS credits.</div></div>
+<div style="flex:0 0 240px;margin:0 auto"><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Preview</div><div style="border:1px solid #E7E7F0;border-radius:18px;background:#FAFAFC;padding:14px"><div style="font-size:11px;color:#6B6B8D;text-align:center;margin-bottom:8px">Rongdhonu</div><div style="background:#fff;border:1px solid #E7E7F0;border-radius:14px 14px 14px 4px;padding:10px 12px;font-size:13px;line-height:1.6;font-family:'Hind Siliguri',sans-serif">তানিয়া, আপনার অর্ডার BT-10482 পাঠানো হয়েছে। ট্র্যাকিং: bt.ly/x9k2। ধন্যবাদ, রংধনু।</div></div></div>
+</div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="font-size:15px;font-weight:700;margin-bottom:12px">Alerts for you and your team</div>
+<div style="display:flex;flex-direction:column;gap:12px;font-size:13.5px">
+<div style="display:flex;align-items:center;gap:12px"><div style="width:18px;height:18px;border-radius:5px;background:#5B4FE8;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>Push notification on your phone for every new order</div>
+<div style="display:flex;align-items:center;gap:12px"><div style="width:18px;height:18px;border-radius:5px;background:#5B4FE8;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>SMS to 01712-345678 when a bKash or Nagad payment needs checking</div>
+<div style="display:flex;align-items:center;gap:12px"><div style="width:18px;height:18px;border-radius:5px;border:1.5px solid #D5D5E4;box-sizing:border-box"></div>Daily sales summary by email at 9 pm</div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+const d = [
+['Order received','Right after checkout',1,1,0],
+['Payment confirmed','When you mark bKash or Nagad as paid',1,1,0],
+['Order shipped','When a courier is booked',1,1,1],
+['Out for delivery','From courier status updates',1,0,0],
+['Delivered','From courier status updates',0,1,0],
+['Order cancelled','When you cancel an order',1,1,0],
+];
+return { events: d.map(([name,sub,sms,mail,sel]) => ({ name, sub, bg: sel?'#F4F3FF':'#fff', smsBg: sms?'#5B4FE8':'#D5D5E4', smsPos: sms?'17px':'2px', mailBg: mail?'#5B4FE8':'#D5D5E4', mailPos: mail?'17px':'2px' })) };
+}
+}
+</script>
+</body>
+</html>

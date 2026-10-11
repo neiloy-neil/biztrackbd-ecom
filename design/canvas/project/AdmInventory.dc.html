@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin inventory</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="products" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+<div style="flex-grow:1"><div style="font-size:13px;font-weight:600;color:#6B6B8D">Products</div><h1 style="margin:2px 0 0;font-size:24px;font-weight:700">Inventory</h1></div>
+<div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Export</div>
+<div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Stock count sheet</div>
+<div style="height:38px;padding:0 18px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Save changes</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#4B4B73">Units in stock</div><div style="font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">1,284</div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#4B4B73">Stock value (at cost)</div><div style="font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">৳ 8,42,600</div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#B45309;font-weight:600">Low stock</div><div style="font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">5</div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#DC2626;font-weight:600">Out of stock</div><div style="font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">2</div></div>
+</div>
+
+<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+<div style="flex:1 1 280px;max-width:420px;display:flex;align-items:center;gap:10px;height:38px;box-sizing:border-box;padding:0 12px;border:1px solid #D5D5E4;border-radius:8px;background:#fff"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 18a7 7 0 100-14 7 7 0 000 14zM20 20l-4-4"/></svg><span style="font-size:13.5px;color:#6B6B8D">Search by product or SKU</span></div>
+<div style="padding:7px 14px;border:1px solid #5B4FE8;border-radius:19px;background:#F4F3FF;font-size:13px;font-weight:600;color:#5B4FE8">Low stock (5)</div>
+<div style="padding:7px 14px;border:1px solid #D5D5E4;border-radius:19px;background:#fff;font-size:13px;font-weight:500;color:#4B4B73">Out of stock (2)</div>
+<div style="padding:7px 14px;border:1px solid #D5D5E4;border-radius:19px;background:#fff;font-size:13px;font-weight:500;color:#4B4B73">Shelf: All</div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="overflow-x:auto"><div style="min-width:900px">
+<div style="display:grid;grid-template-columns:minmax(0,2fr) 130px 130px 110px 110px 150px;padding:11px 20px;background:#FAFAFC;border-bottom:1px solid #E7E7F0;font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px;align-items:center"><div>PRODUCT</div><div>SKU</div><div>SHELF</div><div style="text-align:right">COMMITTED</div><div style="text-align:right">REORDER AT</div><div style="text-align:right">AVAILABLE</div></div>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="9">
+<div style="display:grid;grid-template-columns:minmax(0,2fr) 130px 130px 110px 110px 150px;padding:0 20px;height:62px;align-items:center;border-bottom:1px solid #F0F0F6;font-size:13.5px;background:{{r.bg}}">
+<div style="display:flex;align-items:center;gap:12px;min-width:0"><div style="width:38px;height:38px;border-radius:8px;background:{{r.tone}};flex:0 0 38px"></div><div style="min-width:0"><div style="font-weight:600">{{r.name}}</div><div style="font-size:12px;color:#6B6B8D">{{r.variant}}</div></div></div>
+<div style="color:#4B4B73">{{r.sku}}</div>
+<div style="color:#4B4B73">{{r.loc}}</div>
+<div style="text-align:right;color:#4B4B73;font-variant-numeric:tabular-nums">{{r.committed}}</div>
+<div style="text-align:right;color:#4B4B73;font-variant-numeric:tabular-nums">{{r.reorder}}</div>
+<div style="display:flex;justify-content:flex-end;align-items:center;gap:8px"><span style="font-size:12px;font-weight:700;color:{{r.flagColor}}">{{r.flag}}</span><span style="display:inline-block;min-width:44px;padding:6px 10px;border:1.5px solid {{r.border}};border-radius:8px;text-align:center;font-weight:700;background:#fff;font-variant-numeric:tabular-nums">{{r.avail}}</span></div>
+</div>
+</sc-for>
+</div></div>
+</div>
+
+<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;background:#F4F3FF;font-size:13px;color:#4B4B73"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B4FE8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 100 18 9 9 0 000-18zM12 11v6M12 7.5v.01"/></svg>You will get an SMS and an app notification when a product falls to its reorder level.</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+const data = [
+['Slim Chino, Navy','Size 32','CH-NV-32','A-12',1,5,3,'#E4E6EC'],
+['Cotton Panjabi, Off-white','Size XXL','KP-OW-XXL','A-12',0,5,1,'#F1E9DD'],
+['Cotton Panjabi, Off-white','Size XL','KP-OW-XL','A-12',1,5,3,'#F1E9DD'],
+['Denim Jacket, Indigo','Size L','DJ-IN-L','A-12',0,4,0,'#E1ECF4'],
+['Denim Jacket, Indigo','Size M','DJ-IN-M','A-12',0,4,0,'#E1ECF4'],
+['Linen Shirt, Sage','Size M','LS-SG-M','A-12',1,6,4,'#E3EBE1'],
+['Leather Wallet, Brown','Default','LW-BR','A-12',0,5,5,'#F2E2D8'],
+['Printed Kurti, Rose','Size S','PK-RS-S','B-03',2,6,6,'#F5E4E4'],
+['Slim Chino, Navy','Size 34','CH-NV-34','B-03',0,5,6,'#E4E6EC'],
+];
+return { rows: data.map(([name,variant,sku,loc,committed,reorder,avail,tone]) => {
+const out = avail===0, low = !out && avail<=reorder;
+return { name, variant, sku, loc, committed, reorder, avail, tone, bg: out?'#FFF8F8':'#fff', flag: out?'Out':(low?'Low':''), flagColor: out?'#DC2626':'#B45309', border: out?'#F1C0C0':(low?'#EBD2A8':'#D5D5E4') };
+}) };
+}
+}
+</script>
+</body>
+</html>

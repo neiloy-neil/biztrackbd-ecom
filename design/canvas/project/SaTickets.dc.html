@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Super admin support tickets</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="SaSidebar" active="support" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<div style="height:60px;box-sizing:border-box;background:#fff;border-bottom:1px solid #E7E7F0;display:flex;align-items:center;padding:0 24px"><div style="font-size:13px;color:#4B4B73">Support tickets</div></div>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h1 style="margin:0;font-size:24px;font-weight:700;flex-grow:1">Support tickets</h1><div style="font-size:13.5px;color:#4B4B73">Median first reply today: 38 min</div></div>
+
+<div style="display:flex;flex-wrap:wrap;gap:0;background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden;min-height:760px">
+
+<div style="flex:0 0 380px;border-right:1px solid #E7E7F0;display:flex;flex-direction:column">
+<div style="display:flex;gap:8px;padding:14px 16px;border-bottom:1px solid #E7E7F0;flex-wrap:wrap"><span style="padding:6px 12px;border-radius:16px;background:#5B4FE8;color:#fff;font-size:12.5px;font-weight:700">Open 4</span><span style="padding:6px 12px;border-radius:16px;border:1px solid #D5D5E4;font-size:12.5px;font-weight:600;color:#4B4B73">Mine</span><span style="padding:6px 12px;border-radius:16px;border:1px solid #D5D5E4;font-size:12.5px;font-weight:600;color:#4B4B73">Waiting on tenant</span><span style="padding:6px 12px;border-radius:16px;border:1px solid #D5D5E4;font-size:12.5px;font-weight:600;color:#4B4B73">Solved</span></div>
+<sc-for list="{{tickets}}" as="t" hint-placeholder-count="6">
+<div style="padding:14px 16px;border-bottom:1px solid #F0F0F6;background:{{t.bg}};border-left:3px solid {{t.edge}}">
+<div style="display:flex;align-items:center;gap:8px"><div style="font-size:13.5px;font-weight:700;flex-grow:1">{{t.store}}</div><div style="font-size:12px;color:#6B6B8D">{{t.when}}</div></div>
+<div style="font-size:13.5px;margin-top:3px;font-weight:{{t.weight}}">{{t.subject}}</div>
+<div style="display:flex;align-items:center;gap:8px;margin-top:8px"><span style="padding:2px 9px;border-radius:10px;font-size:11.5px;font-weight:600;background:{{t.pBg}};color:{{t.pColor}}">{{t.priority}}</span><span style="font-size:12px;color:#6B6B8D">T-{{t.id}} · {{t.owner}}</span></div>
+</div>
+</sc-for>
+</div>
+
+<div style="flex:1 1 480px;min-width:0;display:flex;flex-direction:column">
+<div style="padding:18px 24px;border-bottom:1px solid #E7E7F0;display:flex;align-items:center;gap:14px;flex-wrap:wrap"><div style="flex:1 1 280px"><div style="font-size:16px;font-weight:700">Domain not connecting after adding DNS records</div><div style="font-size:13px;color:#4B4B73;margin-top:3px">Rongdhonu Fashion · Pro trial · T-2051 · opened 25 min ago</div></div><span style="padding:3px 11px;border-radius:11px;background:#FCEBEB;color:#DC2626;font-size:12px;font-weight:700">High</span><div style="height:36px;padding:0 14px;border:1px solid #D5D5E4;border-radius:8px;font-size:13.5px;font-weight:600;display:flex;align-items:center">Open tenant</div></div>
+
+<div style="flex:1;padding:22px 24px;display:flex;flex-direction:column;gap:18px;background:#FAFAFC">
+<div style="display:flex;gap:12px"><div style="width:34px;height:34px;border-radius:17px;background:#E9E7FD;color:#5B4FE8;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;flex:0 0 34px">NJ</div><div style="background:#fff;border:1px solid #E7E7F0;border-radius:4px 14px 14px 14px;padding:14px 16px;max-width:520px"><div style="font-size:12px;color:#6B6B8D;margin-bottom:6px"><b style="color:#1A1A4E">Nusrat Jahan</b> · 11:05 am</div><div style="font-size:14px;line-height:1.65">I added the A record and CNAME at my registrar two hours ago but the domain still says waiting for DNS. Can you check?</div></div></div>
+<div style="display:flex;gap:12px"><div style="width:34px;height:34px;border-radius:17px;background:#F0F0F6;color:#4B4B73;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;flex:0 0 34px">SYS</div><div style="background:#FDF3E3;border:1px solid #F0DDB8;border-radius:10px;padding:12px 14px;max-width:520px;font-size:13px;line-height:1.6;color:#4B4B73"><b style="color:#B45309">Domain check</b><br>A record for rongdhonufashion.com points to 103.21.244.5. Expected 76.76.21.21. CNAME for www is correct.</div></div>
+<div style="display:flex;gap:12px;justify-content:flex-end"><div style="background:#F4F3FF;border:1px solid #D9D5FA;border-radius:14px 4px 14px 14px;padding:14px 16px;max-width:520px"><div style="font-size:12px;color:#6B6B8D;margin-bottom:6px"><b style="color:#1A1A4E">You</b> · draft</div><div style="font-size:14px;line-height:1.65">Hi Nusrat, thanks for the details. Your CNAME is correct. The A record still points to an old address (103.21.244.5). Please edit that record to 76.76.21.21 instead of adding a new one, then press Check now.</div></div></div>
+</div>
+
+<div style="padding:16px 24px;border-top:1px solid #E7E7F0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff">
+<div style="flex:1 1 260px;height:44px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 14px;display:flex;align-items:center;font-size:14px;color:#6B6B8D">Write a reply</div>
+<div style="height:44px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;font-size:14px;font-weight:600;display:flex;align-items:center">Saved replies</div>
+<div style="height:44px;padding:0 22px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center">Send and wait</div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+const p = { High: ['#FCEBEB','#DC2626'], Normal: ['#EFEFF6','#4B4B73'], Low: ['#EFEFF6','#4B4B73'] };
+const d = [
+[2051,'Rongdhonu Fashion','Domain not connecting after adding DNS records','25 min','High','Sumi',1,1],
+[2049,'Gadget Ghar','Pathao booking returns an error for Chattogram','1 hr','High','Unassigned',0,1],
+[2047,'Chotomoni Kids','How do I change my bKash number?','3 hr','Normal','Sumi',0,0],
+[2044,'Fashion Hub Sylhet','Request: bulk product import from CSV','Yesterday','Low','Rafi',0,0],
+[2041,'Urban Threads','SMS credits not updated after purchase','Yesterday','Normal','Rafi',0,0],
+[2038,'Little Steps BD','Bangla text looks cut off on product page','2 days','Normal','Sumi',0,0],
+];
+return { tickets: d.map(([id,store,subject,when,priority,owner,sel,unread]) => ({ id, store, subject, when, priority, owner, bg: sel?'#F4F3FF':'#fff', edge: sel?'#5B4FE8':'transparent', weight: unread?600:400, pBg: p[priority][0], pColor: p[priority][1] })) };
+}
+}
+</script>
+</body>
+</html>

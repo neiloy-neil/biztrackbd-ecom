@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin apps and modules</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="apps" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+
+<div><h1 style="margin:0;font-size:24px;font-weight:700">Apps and modules</h1><div style="font-size:14px;color:#4B4B73;margin-top:4px;max-width:640px">Turn on extra features for your kind of business. Each module adds its own pages to your admin and blocks to your store.</div></div>
+
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+<div style="padding:7px 14px;border:1px solid #5B4FE8;border-radius:19px;background:#F4F3FF;font-size:13px;font-weight:600;color:#5B4FE8">All</div>
+<div style="padding:7px 14px;border:1px solid #D5D5E4;border-radius:19px;background:#fff;font-size:13px;font-weight:500;color:#4B4B73">Installed (2)</div>
+<div style="padding:7px 14px;border:1px solid #D5D5E4;border-radius:19px;background:#fff;font-size:13px;font-weight:500;color:#4B4B73">Fashion</div>
+<div style="padding:7px 14px;border:1px solid #D5D5E4;border-radius:19px;background:#fff;font-size:13px;font-weight:500;color:#4B4B73">Kids</div>
+<div style="padding:7px 14px;border:1px solid #D5D5E4;border-radius:19px;background:#fff;font-size:13px;font-weight:500;color:#4B4B73">Marketing</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px">
+<sc-for list="{{modules}}" as="m" hint-placeholder-count="6">
+<div style="background:#fff;border:{{m.border}};border-radius:12px;padding:20px 22px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:14px">
+<div style="width:44px;height:44px;border-radius:10px;background:{{m.bg}};display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{m.fg}}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{m.d}}"/></svg></div>
+<div style="flex-grow:1;min-width:0"><div style="font-size:15px;font-weight:700">{{m.name}}</div><div style="font-size:12px;color:#6B6B8D">{{m.tag}}</div></div>
+<span style="padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:{{m.sBg}};color:{{m.sColor}}">{{m.status}}</span>
+</div>
+<div style="font-size:13.5px;color:#4B4B73;line-height:1.55;min-height:62px">{{m.desc}}</div>
+<div style="display:flex;align-items:center;gap:10px;padding-top:12px;border-top:1px solid #F0F0F6"><div style="font-size:12.5px;color:#6B6B8D;flex-grow:1">{{m.plan}}</div><div style="height:34px;padding:0 16px;border-radius:8px;display:flex;align-items:center;font-size:13.5px;font-weight:600;background:{{m.btnBg}};color:{{m.btnColor}};border:{{m.btnBorder}}">{{m.btn}}</div></div>
+</div>
+</sc-for>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+const mk = (name, tag, desc, plan, d, on, locked) => ({ name, tag, desc, plan, d,
+status: on?'Installed':(locked?'Business plan':'Available'),
+sBg: on?'#E8F6EE':(locked?'#E9E7FD':'#EFEFF6'), sColor: on?'#15803D':(locked?'#5B4FE8':'#4B4B73'),
+bg: on?'#F4F3FF':'#FAFAFC', fg: on?'#5B4FE8':'#4B4B73', border: on?'1.5px solid #5B4FE8':'1px solid #E7E7F0',
+btn: on?'Open settings':(locked?'Upgrade':'Install'), btnBg: on?'#fff':(locked?'#fff':'#5B4FE8'), btnColor: on?'#1A1A4E':(locked?'#5B4FE8':'#fff'), btnBorder: on?'1px solid #D5D5E4':(locked?'1px solid #B9B2F5':'none') });
+return { modules: [
+mk('Bespoke tailoring','Fashion','Save customer measurements, offer fabric choices, track fittings and let customers book appointments before you cut.','Included in Pro','M6 3a3 3 0 100 6 3 3 0 000-6zM6 15a3 3 0 100 6 3 3 0 000-6zM20 4L8.5 15.5M20 20L8.5 8.5',true,false),
+mk('Drops and launches','Streetwear','Run limited releases with a countdown, notify-me sign-ups and per-customer purchase limits.','Included in Pro','M12 3s6 6.5 6 11a6 6 0 01-12 0c0-4.5 6-11 6-11z',true,false),
+mk('Baby and kids profiles','Kids','Save each child’s name and birth month so you can suggest the right size and send milestone offers.','Included in Pro','M12 20s-8-5-8-11a4.5 4.5 0 018-2.5A4.5 4.5 0 0120 9c0 6-8 11-8 11z',false,false),
+mk('Loyalty and referrals','Marketing','Give points for every order, let customers refer friends, and reward repeat buyers with store credit.','Included in Pro','M3 8h18v4H3zM5 12v8h14v-8M12 8v12',false,false),
+mk('Booking and appointments','Services','Take bookings for fittings, pickups or consultations with reminders by SMS.','Included in Pro','M3 5h18v16H3zM3 10h18M8 3v4M16 3v4',false,false),
+mk('Wholesale prices','B2B','Show special prices to approved wholesale customers with minimum order quantities.','Business plan','M3 7.5L12 3l9 4.5v9L12 21l-9-4.5v-9zM3 7.5l9 4.5 9-4.5M12 12v9',false,true),
+] };
+}
+}
+</script>
+</body>
+</html>

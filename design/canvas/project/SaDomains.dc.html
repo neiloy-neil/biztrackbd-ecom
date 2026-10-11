@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Super admin domain health</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="SaSidebar" active="domains" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<div style="height:60px;box-sizing:border-box;background:#fff;border-bottom:1px solid #E7E7F0;display:flex;align-items:center;padding:0 24px"><div style="font-size:13px;color:#4B4B73">Domains</div></div>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h1 style="margin:0;font-size:24px;font-weight:700;flex-grow:1">Domain health</h1><div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Re-check all failing</div></div>
+
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#4B4B73">Custom domains</div><div style="font-size:24px;font-weight:700;margin-top:4px">163</div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#15803D;font-weight:600">Connected</div><div style="font-size:24px;font-weight:700;margin-top:4px">149</div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#B45309;font-weight:600">Waiting for DNS</div><div style="font-size:24px;font-weight:700;margin-top:4px">11</div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#DC2626;font-weight:600">Failing or expiring SSL</div><div style="font-size:24px;font-weight:700;margin-top:4px">3</div></div>
+</div>
+
+<div style="display:flex;gap:28px;border-bottom:1px solid #E7E7F0">
+<div style="padding:6px 0 12px;border-bottom:2.5px solid #5B4FE8;margin-bottom:-1px;font-size:14px;font-weight:600">Needs attention <span style="padding:1px 8px;border-radius:10px;font-size:12px;font-weight:700;background:#E9E7FD;color:#5B4FE8">14</span></div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D">All domains</div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D">Reserved names</div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="overflow-x:auto"><div style="min-width:960px">
+<div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1.2fr) 150px 150px 100px;padding:11px 20px;background:#FAFAFC;border-bottom:1px solid #E7E7F0;font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px"><div>DOMAIN</div><div>STORE</div><div>DNS</div><div>SSL</div><div style="text-align:right">AGE</div></div>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
+<div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1.2fr) 150px 150px 100px;padding:0 20px;height:62px;align-items:center;border-bottom:1px solid #F0F0F6;font-size:13.5px">
+<div><div style="font-weight:600">{{r.d}}</div><div style="font-size:12px;color:#6B6B8D">{{r.note}}</div></div>
+<div style="color:#4B4B73">{{r.s}}</div>
+<div><span style="padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:{{r.dbg}};color:{{r.dc}}">{{r.dns}}</span></div>
+<div><span style="padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:{{r.sbg}};color:{{r.sc}}">{{r.ssl}}</span></div>
+<div style="text-align:right;color:#4B4B73">{{r.age}}</div>
+</div>
+</sc-for>
+</div></div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:16px">
+<div style="flex:1 1 320px;background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 22px"><div style="font-size:15px;font-weight:700;margin-bottom:10px">Platform records</div><div style="font-size:13.5px;line-height:2;color:#4B4B73">A record target <b style="color:#1A1A4E;font-family:ui-monospace,Consolas,monospace">76.76.21.21</b><br>CNAME target <b style="color:#1A1A4E;font-family:ui-monospace,Consolas,monospace">cname.biztrackbd.com</b><br>Wildcard <b style="color:#1A1A4E;font-family:ui-monospace,Consolas,monospace">*.biztrackbd.com</b> active</div></div>
+<div style="flex:1 1 320px;background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 22px"><div style="font-size:15px;font-weight:700;margin-bottom:10px">Automatic checks</div><div style="font-size:13.5px;line-height:2;color:#4B4B73">DNS re-check every 10 minutes for 24 hours, then hourly<br>SSL renewal 30 days before expiry<br>Owner emailed after 48 hours of failures</div></div>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+renderVals() {
+const G=['#E8F6EE','#15803D'], W=['#FDF3E3','#B45309'], R=['#FCEBEB','#DC2626'], N=['#EFEFF6','#4B4B73'];
+const d = [
+['rongdhonufashion.com','A record points to 103.21.244.5','Rongdhonu Fashion',['Wrong A record',W],['Pending',N],'25 min'],
+['gadgetghar.com.bd','CNAME for www missing','Gadget Ghar',['Partly set',W],['Issued',G],'2 days'],
+['streetline.shop','Certificate renewal failed','Streetline BD',['OK',G],['Renewal failed',R],'41 days'],
+['fashionhubsylhet.com','Domain expires in 6 days at registrar','Fashion Hub Sylhet',['OK',G],['Expiring',R],'88 days'],
+['chotomoni.store','Waiting 3 days','Chotomoni Kids',['Waiting',W],['Pending',N],'3 days'],
+['nakshitailors.com','Nameservers not pointed','Nakshi Tailors',['Not found',R],['Pending',N],'5 days'],
+['littlestepsbd.com','Waiting 6 hours','Little Steps BD',['Waiting',W],['Pending',N],'6 hr'],
+];
+return { rows: d.map(([dm,note,s,dn,sl,age]) => ({ d: dm, note, s, dns: dn[0], dbg: dn[1][0], dc: dn[1][1], ssl: sl[0], sbg: sl[1][0], sc: sl[1][1], age })) };
+}
+}
+</script>
+</body>
+</html>

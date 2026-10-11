@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Theme builder theme settings</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-direction:column;min-height:1060px;background:#EFEFF6;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+
+<div style="height:56px;flex:0 0 56px;box-sizing:border-box;background:#fff;border-bottom:1px solid #E7E7F0;display:flex;align-items:center;gap:14px;padding:0 16px">
+<div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#4B4B73"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4B4B73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Exit</div>
+<div style="width:1px;height:24px;background:#E7E7F0"></div>
+<div style="font-size:14.5px;font-weight:700">Kapor</div>
+<div style="padding:3px 10px;border-radius:11px;background:#FDF3E3;color:#B45309;font-size:12px;font-weight:600">Unpublished changes</div>
+<div style="flex-grow:1"></div>
+<div style="display:flex;padding:3px;border-radius:9px;background:#EFEFF6;gap:2px"><div style="width:34px;height:30px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-label="Desktop" role="img"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></div><div style="width:34px;height:30px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-label="Tablet" role="img"><rect x="5" y="3" width="14" height="18" rx="2"/></svg></div><div style="width:34px;height:30px;border-radius:7px;background:#fff;border:1px solid #E7E7F0;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A4E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-label="Phone" role="img"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/></svg></div></div>
+<div style="height:36px;padding:0 14px;border:1px solid #D5D5E4;border-radius:8px;display:flex;align-items:center;font-size:13.5px;font-weight:600">Preview</div>
+<div style="height:36px;padding:0 20px;border-radius:8px;background:#5B4FE8;color:#fff;display:flex;align-items:center;font-size:13.5px;font-weight:700">Publish</div>
+</div>
+
+<div style="flex:1;display:flex;flex-wrap:wrap;min-height:0">
+
+<div style="flex:0 0 320px;background:#fff;border-right:1px solid #E7E7F0;display:flex;flex-direction:column;box-sizing:border-box">
+<div style="display:flex;border-bottom:1px solid #E7E7F0"><div style="flex:1;text-align:center;padding:14px 0;font-size:13.5px;font-weight:600;color:#6B6B8D">Sections</div><div style="flex:1;text-align:center;padding:14px 0;font-size:13.5px;font-weight:700;color:#5B4FE8;border-bottom:2.5px solid #5B4FE8;margin-bottom:-1px">Theme</div></div>
+
+<div style="padding:18px 20px;border-bottom:1px solid #F0F0F6">
+<div style="font-size:14px;font-weight:700;margin-bottom:12px">Colors</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{colors}}" as="c" hint-placeholder-count="5">
+<div style="display:flex;align-items:center;gap:12px"><div style="width:36px;height:36px;border-radius:8px;background:{{c.hex}};border:1px solid #D5D5E4"></div><div style="flex-grow:1"><div style="font-size:13.5px;font-weight:600">{{c.name}}</div><div style="font-size:12px;color:#6B6B8D;font-variant-numeric:tabular-nums">{{c.hex}}</div></div></div>
+</sc-for>
+</div>
+<div style="margin-top:14px;padding:10px 12px;border-radius:8px;background:#E8F6EE;font-size:12.5px;color:#15803D;font-weight:600;display:flex;gap:8px;align-items:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Text is easy to read on all backgrounds</div>
+</div>
+
+<div style="padding:18px 20px;border-bottom:1px solid #F0F0F6">
+<div style="font-size:14px;font-weight:700;margin-bottom:12px">Fonts</div>
+<div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Headings</div>
+<div style="display:flex;height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;align-items:center;font-size:14px;margin-bottom:12px"><span style="flex-grow:1;font-weight:700">Plus Jakarta Sans</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div>
+<div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Body</div>
+<div style="display:flex;height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;align-items:center;font-size:14px;margin-bottom:12px"><span style="flex-grow:1">Plus Jakarta Sans</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div>
+<div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Bangla text</div>
+<div style="display:flex;height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;align-items:center;font-size:14px"><span style="flex-grow:1;font-family:'Hind Siliguri',sans-serif">Hind Siliguri</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div>
+</div>
+
+<div style="padding:18px 20px;border-bottom:1px solid #F0F0F6">
+<div style="font-size:14px;font-weight:700;margin-bottom:12px">Buttons and corners</div>
+<div style="font-size:12.5px;font-weight:600;margin-bottom:8px">Corner style</div>
+<div style="display:flex;padding:3px;border-radius:19px;background:#EFEFF6;font-size:13px;font-weight:600;text-align:center"><div style="flex:1;padding:6px 0;color:#6B6B8D">Square</div><div style="flex:1;padding:6px 0;border-radius:16px;background:#fff;border:1px solid #E7E7F0">Soft</div><div style="flex:1;padding:6px 0;color:#6B6B8D">Round</div></div>
+</div>
+<div style="padding:16px 20px;display:flex;flex-direction:column;gap:2px">
+<div style="display:flex;align-items:center;height:44px;font-size:14px;font-weight:600"><span style="flex-grow:1">Header and menu</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9AB5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
+<div style="display:flex;align-items:center;height:44px;font-size:14px;font-weight:600;border-top:1px solid #F0F0F6"><span style="flex-grow:1">Product cards</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9AB5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
+<div style="display:flex;align-items:center;height:44px;font-size:14px;font-weight:600;border-top:1px solid #F0F0F6"><span style="flex-grow:1">Checkout</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9AB5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
+</div>
+</div>
+
+<div style="flex:1 1 400px;min-width:0;display:flex;justify-content:center;align-items:flex-start;padding:28px 24px">
+<div style="width:390px;background:#FBF8F3;border-radius:28px;border:8px solid #1A1A4E;overflow:hidden;box-sizing:content-box">
+<div style="background:#2B2118;color:#fff;font-size:10.5px;text-align:center;padding:7px">Free delivery in Dhaka over ৳ 3,000</div>
+<div style="display:flex;align-items:center;padding:12px 16px;background:#fff;border-bottom:1px solid #ECECEC"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2B2118" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><div style="font-size:14px;font-weight:800;letter-spacing:2.4px;flex-grow:1;text-align:center;color:#2B2118">KAPOR</div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2B2118" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11L21 7H6"/></svg></div>
+<div style="background:#E9DCCB;padding:26px 20px"><div style="font-size:28px;font-weight:700;line-height:1.1;letter-spacing:-0.6px;color:#2B2118">Eid collection is here</div><div style="font-size:13px;color:#4B4B73;margin:10px 0 18px;line-height:1.5">Handloom cotton panjabi, made for Dhaka summers.</div><div style="display:inline-block;padding:12px 24px;border-radius:8px;background:#8C5A3C;color:#fff;font-size:13.5px;font-weight:700">Shop the collection</div><div style="height:150px;border-radius:12px;background:#F1E9DD;margin-top:20px;display:flex;align-items:center;justify-content:center"><div style="width:80px;height:96px;background:#C9B79C;border-radius:8px 8px 4px 4px"></div></div></div>
+<div style="padding:22px 16px 28px"><div style="font-size:17px;font-weight:700;margin-bottom:12px;color:#2B2118">New arrivals</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><div style="aspect-ratio:1;border-radius:10px;background:#F1E9DD"></div><div style="font-size:12.5px;font-weight:600;margin-top:8px">Cotton Panjabi</div><div style="font-size:12.5px;font-weight:700;color:#8C5A3C">৳ 1,150</div></div><div><div style="aspect-ratio:1;border-radius:10px;background:#E3EBE1"></div><div style="font-size:12.5px;font-weight:600;margin-top:8px">Linen Shirt</div><div style="font-size:12.5px;font-weight:700;color:#8C5A3C">৳ 850</div></div></div></div>
+</div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() {
+return { colors: [
+{ name:'Background', hex:'#FBF8F3' },
+{ name:'Text', hex:'#2B2118' },
+{ name:'Accent (buttons and prices)', hex:'#8C5A3C' },
+{ name:'Hero and banners', hex:'#E9DCCB' },
+{ name:'Announcement bar', hex:'#2B2118' },
+] };
+}
+}
+</script>
+</body>
+</html>

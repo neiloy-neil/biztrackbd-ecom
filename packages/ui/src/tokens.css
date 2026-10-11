@@ -1,0 +1,20 @@
+/* Design tokens from the canvas (docs/29). One sans family, Bangla fallback. */
+:root {
+  --brand: #5B4FE8;
+  --ink: #1A1A4E;
+  --ink-3: #6B6B8D;
+  --tint: #F4F3FF;
+  --surface: #FFFFFF;
+  --bg: #FAFAFC;
+  --line: #E7E7F0;
+  --success: #15803D;
+  --warning: #B45309;
+  --danger: #DC2626;
+  --info: #0369A1;
+  --radius: 10px;
+  --font: "Plus Jakarta Sans", "Hind Siliguri", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font-family: var(--font); color: var(--ink); background: var(--bg); font-size: 15px; line-height: 1.5; }
+a { color: inherit; }

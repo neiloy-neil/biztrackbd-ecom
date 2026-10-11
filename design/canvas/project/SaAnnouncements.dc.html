@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Super admin announcements</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="SaSidebar" active="announcements" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<div style="height:60px;box-sizing:border-box;background:#fff;border-bottom:1px solid #E7E7F0;display:flex;align-items:center;padding:0 24px"><div style="font-size:13px;color:#4B4B73">Announcements</div></div>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h1 style="margin:0;font-size:24px;font-weight:700;flex-grow:1">Announcements</h1><div style="height:38px;padding:0 18px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center">New announcement</div></div>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:1.2 1 520px;min-width:0;background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:24px 26px;display:flex;flex-direction:column;gap:18px">
+<div style="font-size:16px;font-weight:700">Compose</div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Title</div><div style="height:42px;box-sizing:border-box;border:2px solid #5B4FE8;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14.5px">Pathao is changing its API on 20 October</div></div>
+<div style="display:flex;gap:14px;flex-wrap:wrap"><div style="flex:1 1 200px"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Bangla title</div><div style="height:42px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14.5px;font-family:'Hind Siliguri',sans-serif">২০ অক্টোবর পাঠাও এপিআই পরিবর্তন হচ্ছে</div></div></div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Message</div><div style="box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:12px;font-size:14px;line-height:1.65;min-height:110px">If you use Pathao, open Settings, Integrations and re-enter your Pathao password before 20 October. Otherwise parcel booking will pause until you do.</div></div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:8px">Who sees it</div><div style="display:flex;gap:8px;flex-wrap:wrap"><span style="padding:7px 14px;border-radius:18px;border:1px solid #D5D5E4;font-size:13px;font-weight:600;color:#4B4B73">All stores</span><span style="padding:7px 14px;border-radius:18px;border:2px solid #5B4FE8;background:#F4F3FF;font-size:13px;font-weight:700;color:#5B4FE8">Stores with Pathao connected (212)</span><span style="padding:7px 14px;border-radius:18px;border:1px solid #D5D5E4;font-size:13px;font-weight:600;color:#4B4B73">By plan</span><span style="padding:7px 14px;border-radius:18px;border:1px solid #D5D5E4;font-size:13px;font-weight:600;color:#4B4B73">One store</span></div></div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:8px">How to show it</div><div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px"><div style="display:flex;align-items:center;gap:10px"><div style="width:18px;height:18px;border-radius:5px;background:#5B4FE8;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>Banner at the top of the admin</div><div style="display:flex;align-items:center;gap:10px"><div style="width:18px;height:18px;border-radius:5px;background:#5B4FE8;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>Email to the owner</div><div style="display:flex;align-items:center;gap:10px"><div style="width:18px;height:18px;border-radius:5px;border:1.5px solid #D5D5E4;box-sizing:border-box"></div>SMS to the owner (uses platform credits)</div></div></div>
+<div style="display:flex;gap:10px;align-items:center"><div style="height:40px;padding:0 14px;border:1px solid #D5D5E4;border-radius:8px;font-size:13.5px;font-weight:600;display:flex;align-items:center">Show from: now</div><div style="height:40px;padding:0 14px;border:1px solid #D5D5E4;border-radius:8px;font-size:13.5px;font-weight:600;display:flex;align-items:center">Hide on: 21 Oct</div></div>
+<div style="display:flex;gap:10px;border-top:1px solid #F0F0F6;padding-top:18px"><div style="height:42px;padding:0 20px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center">Publish to 212 stores</div><div style="height:42px;padding:0 18px;border:1px solid #D5D5E4;border-radius:8px;font-size:14px;font-weight:600;display:flex;align-items:center">Save draft</div></div>
+</div>
+
+<div style="flex:1 1 360px;min-width:0;display:flex;flex-direction:column;gap:20px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 22px"><div style="font-size:14px;font-weight:700;margin-bottom:12px">How owners will see it</div>
+<div style="border:1px solid #E7E7F0;border-radius:10px;overflow:hidden"><div style="background:#FDF3E3;padding:12px 14px;display:flex;gap:10px;align-items:flex-start"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 18px;margin-top:1px"><path d="M4 10v4h3l8 4V6L7 10H4zM18 9a4 4 0 010 6"/></svg><div style="font-size:13px;line-height:1.5;color:#4B4B73"><b style="color:#B45309">Pathao is changing its API on 20 October.</b> Re-enter your Pathao password in Integrations before then.<br><span style="font-weight:700;color:#5B4FE8">Open Integrations</span></div></div><div style="height:90px;background:#FAFAFC"></div></div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden"><div style="padding:16px 22px;font-size:14px;font-weight:700;border-bottom:1px solid #E7E7F0">Past announcements</div>
+<sc-for list="{{past}}" as="a" hint-placeholder-count="4"><div style="padding:14px 22px;border-bottom:1px solid #F0F0F6;font-size:13.5px"><div style="display:flex;gap:10px"><b style="flex:1">{{a.t}}</b><span style="padding:2px 9px;border-radius:10px;font-size:11.5px;font-weight:600;background:{{a.bg}};color:{{a.c}}">{{a.s}}</span></div><div style="font-size:12px;color:#6B6B8D;margin-top:3px">{{a.d}} · {{a.reach}}</div></div></sc-for></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+renderVals() {
+const L = ['#E8F6EE','#15803D'], S = ['#EFEFF6','#4B4B73'];
+return { past: [['New: abandoned order call list','8 Oct','All stores · 412 read 281',['Live',L]],['Eid delivery deadlines for couriers','2 Oct','All stores · 405 read 330',['Ended',S]],['Scheduled maintenance, Friday 2 am','24 Sep','All stores · 398 read 301',['Ended',S]],['SSLCommerz test mode reminder','12 Sep','Stores with gateway · 61 read 44',['Ended',S]]].map(([t,d,reach,s]) => ({ t, d, reach, s: s[0], bg: s[1][0], c: s[1][1] })) };
+}
+}
+</script>
+</body>
+</html>

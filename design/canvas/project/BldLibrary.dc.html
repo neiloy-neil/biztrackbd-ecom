@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Online store theme library</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:900px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="store" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:22px">
+
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div style="flex-grow:1"><div style="font-size:13px;font-weight:600;color:#6B6B8D">Online store</div><h1 style="margin:2px 0 0;font-size:24px;font-weight:700">Themes</h1></div><div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">View your store</div></div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:14px;padding:22px;display:flex;flex-wrap:wrap;gap:28px">
+<div style="flex:0 0 420px;max-width:100%;height:260px;border-radius:12px;background:#FBF8F3;border:1px solid #E7E7F0;overflow:hidden"><div style="height:28px;background:#fff;border-bottom:1px solid #ECECEC;display:flex;align-items:center;padding:0 14px;font-size:9px;font-weight:800;letter-spacing:2px">KAPOR</div><div style="height:104px;background:#E9DCCB;padding:20px"><div style="width:140px;height:11px;background:#2B2118;border-radius:3px"></div><div style="width:96px;height:11px;background:#2B2118;border-radius:3px;margin-top:7px"></div><div style="width:58px;height:18px;background:#8C5A3C;border-radius:3px;margin-top:13px"></div></div><div style="display:flex;gap:10px;padding:12px"><div style="flex:1;height:84px;background:#F1E9DD;border-radius:7px"></div><div style="flex:1;height:84px;background:#E3EBE1;border-radius:7px"></div><div style="flex:1;height:84px;background:#E4E6EC;border-radius:7px"></div></div></div>
+<div style="flex:1 1 320px;display:flex;flex-direction:column;gap:14px;justify-content:center">
+<div style="display:flex;align-items:center;gap:10px"><span style="padding:3px 11px;border-radius:11px;background:#E8F6EE;color:#15803D;font-size:12px;font-weight:700">Live theme</span><span style="font-size:12.5px;color:#6B6B8D">Last published today, 9:40 am</span></div>
+<div style="font-size:26px;font-weight:700;letter-spacing:-0.5px">Kapor</div>
+<div style="font-size:14.5px;line-height:1.6;color:#4B4B73;max-width:460px">Warm, editorial fashion store with size guide and bespoke-ready product pages. Colors and sections customized by you.</div>
+<div style="display:flex;gap:10px;margin-top:6px"><div style="height:42px;padding:0 22px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center">Customize</div><div style="height:42px;padding:0 18px;border:1px solid #D5D5E4;border-radius:8px;font-size:14px;font-weight:600;display:flex;align-items:center">Version history</div><div style="height:42px;padding:0 18px;border:1px solid #D5D5E4;border-radius:8px;font-size:14px;font-weight:600;display:flex;align-items:center">Duplicate</div></div>
+</div>
+</div>
+
+<div><div style="font-size:18px;font-weight:700">Switch to another template</div><div style="font-size:14px;color:#4B4B73;margin-top:4px">Your products, orders, customers and pages stay as they are. Only the design changes. We keep your current design so you can switch back.</div></div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px">
+<sc-for list="{{others}}" as="t" hint-placeholder-count="4">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:14px;padding:12px">
+<div style="height:150px;border-radius:10px;background:{{t.bg}};border:1px solid #E7E7F0;overflow:hidden"><div style="height:20px;background:{{t.nav}};display:flex;align-items:center;padding:0 10px;font-size:7px;font-weight:800;letter-spacing:1.6px;color:{{t.ink}}">{{t.brand}}</div><div style="height:58px;background:{{t.hero}};padding:10px"><div style="width:80px;height:7px;background:{{t.ink}};border-radius:2px"></div><div style="width:54px;height:7px;background:{{t.ink}};border-radius:2px;margin-top:5px"></div><div style="width:34px;height:11px;background:{{t.acc}};border-radius:2px;margin-top:8px"></div></div><div style="display:flex;gap:6px;padding:8px"><div style="flex:1;height:46px;background:{{t.p1}};border-radius:5px"></div><div style="flex:1;height:46px;background:{{t.p2}};border-radius:5px"></div><div style="flex:1;height:46px;background:{{t.p3}};border-radius:5px"></div></div></div>
+<div style="display:flex;align-items:center;gap:8px;margin:12px 4px 4px"><div style="flex-grow:1"><div style="font-size:15px;font-weight:700">{{t.name}}</div><div style="font-size:12.5px;color:#4B4B73">{{t.sub}}</div></div><div style="height:34px;padding:0 14px;border:1px solid #D5D5E4;border-radius:8px;font-size:13px;font-weight:700;display:flex;align-items:center">Preview</div></div>
+</div>
+</sc-for>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() {
+const t = [
+['Gadget Studio','Gadgets and electronics','GADGET STUDIO','#FFFFFF','#fff','#DFF1EA','#111827','#0F766E','#E4E6EC','#DFF1EA','#E1ECF4'],
+['Mini Bunny','Kids wear','MINI BUNNY','#FFFBF5','#fff','#FCE6D8','#3D2B4F','#E8825B','#F5E4E4','#E1ECF4','#F5EBD0'],
+['Axionwear','Streetwear and lookbook','AXIONWEAR','#0E0E10','#18181B','#1E1E22','#F4F4F5','#D6FF3F','#2A2A30','#34343A','#26262B'],
+['Bindu',"Women's ethnic and drops",'BINDU','#F7F5F0','#fff','#DDE5DA','#1F2A24','#1F4D3A','#DDE5DA','#EFE7D8','#E9DCCB'],
+];
+return { others: t.map(([name,sub,brand,bg,nav,hero,ink,acc,p1,p2,p3]) => ({ name, sub, brand, bg, nav, hero, ink, acc, p1, p2, p3 })) };
+}
+}
+</script>
+</body>
+</html>

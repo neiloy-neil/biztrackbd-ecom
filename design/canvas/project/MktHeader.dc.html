@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Marketing header</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Hind+Siliguri:wght@500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}a{color:inherit;text-decoration:none}</style>
+</helmet>
+<header style="height:72px;box-sizing:border-box;background:#fff;border-bottom:1px solid #E7E7F0;display:flex;align-items:center;gap:36px;padding:0 80px;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="display:flex;align-items:center;gap:10px">
+<svg width="30" height="30" viewBox="0 0 44 44" role="img" aria-label="BizTrackBD"><rect width="44" height="44" rx="12" fill="#5B4FE8"/><path d="M13 32V22M22 32V14M31 32V19" stroke="#fff" stroke-width="4.4" stroke-linecap="round"/></svg>
+<div style="font-size:20px;font-weight:700;letter-spacing:-0.3px">BizTrack<span style="color:#5B4FE8">BD</span></div>
+</div>
+<nav style="display:flex;gap:32px;font-size:14.5px;font-weight:600;margin-left:12px">
+<a href="#" style="color:{{c.t}}">Templates</a><a href="#" style="color:{{c.f}}">Features</a><a href="#" style="color:{{c.p}}">Pricing</a><a href="#" style="color:{{c.h}}">Help</a>
+</nav>
+<div style="flex-grow:1"></div>
+<div style="font-size:14px;font-weight:600;color:#4B4B73;font-family:'Hind Siliguri',sans-serif">বাংলা</div>
+<a href="#" style="font-size:14.5px;font-weight:600">Log in</a>
+<a href="#" style="height:40px;padding:0 22px;border-radius:20px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center">Start free trial</a>
+</header>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","options":["templates","features","pricing","help","none"],"default":"none"},"$preview":{"width":1440,"height":72}}'>
+class Component extends DCLogic {
+renderVals() {
+const a = this.props.active ?? 'none';
+const on = '#5B4FE8', off = '#1A1A4E';
+return { c: { t: a==='templates'?on:off, f: a==='features'?on:off, p: a==='pricing'?on:off, h: a==='help'?on:off } };
+}
+}
+</script>
+</body>
+</html>

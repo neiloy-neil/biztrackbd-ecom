@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin quick order desk</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="orders" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div style="flex-grow:1"><div style="font-size:13px;font-weight:600;color:#6B6B8D">Orders</div><h1 style="margin:2px 0 0;font-size:24px;font-weight:700">Quick order desk</h1><div style="font-size:14px;color:#4B4B73;margin-top:4px">For orders that arrive on Messenger, WhatsApp or the phone. Aim for 15 seconds.</div></div><div style="padding:8px 16px;border-radius:20px;background:#E8F6EE;color:#15803D;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums">Timer 0:12</div><div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Today: 14 quick orders</div></div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px;display:flex;flex-wrap:wrap;gap:14px;align-items:center">
+<div style="flex:1 1 420px"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Paste the customer's message (optional)</div><div style="min-height:44px;box-sizing:border-box;border:1.5px dashed #B9B2F5;border-radius:8px;background:#F4F3FF;padding:10px 12px;font-size:13.5px;line-height:1.5;color:#4B4B73;font-family:'Hind Siliguri','Plus Jakarta Sans',sans-serif">Tania Akter, 01712345678, মিরপুর ১০, ব্লক সি রোড ৭ বাসা ১৪। Panjabi L, 1 pcs. COD</div></div>
+<div style="height:44px;padding:0 18px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;align-self:flex-end">Fill the form</div>
+<div style="flex:0 0 100%;font-size:12.5px;color:#6B6B8D">We find the phone number, name, district and product names. Check each field before you save.</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:1 1 440px;min-width:0;display:flex;flex-direction:column;gap:16px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 22px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:15px;font-weight:700">Customer</div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Mobile number</div><div style="display:flex;height:44px;box-sizing:border-box;border:2px solid #5B4FE8;border-radius:8px;overflow:hidden;font-size:15px"><div style="padding:0 12px;background:#FAFAFC;border-right:1px solid #E7E7F0;display:flex;align-items:center;color:#4B4B73">+880</div><div style="flex:1;padding:0 12px;display:flex;align-items:center;font-variant-numeric:tabular-nums">1712-345678</div></div></div>
+<div style="display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:10px;background:#E8F6EE"><div style="width:32px;height:32px;border-radius:16px;background:#fff;color:#15803D;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center">TA</div><div style="flex:1;font-size:13px;line-height:1.45"><b>Returning customer.</b> 3 orders, ৳ 6,840. 100% delivered.</div><span style="font-size:12.5px;font-weight:700;color:#5B4FE8">Use saved address</span></div>
+<div style="display:flex;gap:12px"><div style="flex:1"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Name</div><div style="height:44px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14.5px">Tania Akter</div></div><div style="flex:1"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">District</div><div style="display:flex;height:44px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;align-items:center;font-size:14.5px"><span style="flex:1">Dhaka · Mirpur</span><span style="font-size:11.5px;font-weight:700;color:#15803D">auto</span></div></div></div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Address</div><div style="box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:10px 12px;font-size:14.5px;line-height:1.5;min-height:62px">House 14, Road 7, Block C, Section 10, Mirpur</div></div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:8px">Where did the order come from?</div><div style="display:flex;gap:8px;flex-wrap:wrap"><span style="padding:8px 14px;border-radius:18px;border:2px solid #5B4FE8;background:#F4F3FF;font-size:13px;font-weight:700;color:#5B4FE8">Messenger</span><span style="padding:8px 14px;border-radius:18px;border:1px solid #D5D5E4;font-size:13px;font-weight:600;color:#4B4B73">WhatsApp</span><span style="padding:8px 14px;border-radius:18px;border:1px solid #D5D5E4;font-size:13px;font-weight:600;color:#4B4B73">Phone call</span><span style="padding:8px 14px;border-radius:18px;border:1px solid #D5D5E4;font-size:13px;font-weight:600;color:#4B4B73">Instagram</span></div></div>
+</div>
+</div>
+
+<div style="flex:1 1 440px;min-width:0;display:flex;flex-direction:column;gap:16px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 22px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:15px;font-weight:700">Products</div>
+<div style="display:flex;align-items:center;gap:10px;height:44px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;background:#FAFAFC"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 18a7 7 0 100-14 7 7 0 000 14zM20 20l-4-4"/></svg><span style="font-size:14px;color:#6B6B8D">Type a name or SKU</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid #E7E7F0;border-radius:10px"><div style="width:44px;height:44px;border-radius:8px;background:#F1E9DD"></div><div style="flex:1;min-width:0"><b style="font-size:14px">Cotton Panjabi, Off-white</b><div style="display:flex;gap:6px;margin-top:6px"><span style="padding:3px 10px;border-radius:12px;border:1px solid #D5D5E4;font-size:12px;font-weight:600">M</span><span style="padding:3px 10px;border-radius:12px;border:2px solid #5B4FE8;background:#F4F3FF;color:#5B4FE8;font-size:12px;font-weight:700">L</span><span style="padding:3px 10px;border-radius:12px;border:1px solid #D5D5E4;font-size:12px;font-weight:600">XL</span></div></div><div style="display:flex;align-items:center;border:1px solid #D5D5E4;border-radius:8px;height:36px"><div style="width:32px;text-align:center;color:#5B4FE8;font-weight:700">−</div><div style="width:24px;text-align:center;font-weight:700">1</div><div style="width:32px;text-align:center;color:#5B4FE8;font-weight:700">+</div></div><b style="width:70px;text-align:right;font-variant-numeric:tabular-nums">৳ 1,150</b></div>
+<div style="font-size:12.5px;color:#6B6B8D">Recent: Linen Shirt, Sage · Slim Chino, Navy · Cotton Socks, 3-pack</div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 22px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;font-size:13.5px;color:#4B4B73"><span style="flex:1">Subtotal</span><span style="font-variant-numeric:tabular-nums">৳ 1,150</span></div>
+<div style="display:flex;font-size:13.5px;color:#4B4B73"><span style="flex:1">Delivery, inside Dhaka (auto)</span><span style="font-variant-numeric:tabular-nums">৳ 80</span></div>
+<div style="display:flex;font-size:13.5px;color:#4B4B73"><span style="flex:1">Discount</span><span style="font-weight:700;color:#5B4FE8">Add</span></div>
+<div style="display:flex;font-size:18px;font-weight:700;border-top:1px solid #E7E7F0;padding-top:12px"><span style="flex:1">Total, cash on delivery</span><span style="font-variant-numeric:tabular-nums">৳ 1,230</span></div>
+<div style="display:flex;padding:3px;border-radius:19px;background:#EFEFF6;font-size:13px;font-weight:600;text-align:center"><div style="flex:1;padding:7px 0;border-radius:16px;background:#fff;border:1px solid #E7E7F0">COD</div><div style="flex:1;padding:7px 0;color:#6B6B8D">Paid by bKash</div><div style="flex:1;padding:7px 0;color:#6B6B8D">Paid by Nagad</div></div>
+<div style="display:flex;gap:10px"><div style="flex:1.4;height:50px;border-radius:10px;background:#5B4FE8;color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center">Create and book Pathao</div><div style="flex:1;height:50px;border:1px solid #D5D5E4;border-radius:10px;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center">Create only</div></div>
+<div style="font-size:12.5px;color:#6B6B8D;text-align:center">Press Ctrl Enter to save and start the next order.</div>
+</div>
+</div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="padding:14px 22px;font-size:14.5px;font-weight:700;border-bottom:1px solid #E7E7F0">Just created</div>
+<sc-for list="{{recent}}" as="r" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:14px;padding:0 22px;height:50px;border-bottom:1px solid #F0F0F6;font-size:13.5px"><b style="width:90px;color:#5B4FE8">{{r.o}}</b><span style="flex:1;font-weight:600">{{r.n}}</span><span style="color:#4B4B73;width:100px">{{r.s}}</span><span style="color:#6B6B8D;width:70px">{{r.t}}</span><b style="width:80px;text-align:right;font-variant-numeric:tabular-nums">{{r.a}}</b></div></sc-for>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+renderVals() {
+return { recent: [['BT-10495','Habib Rahman','WhatsApp','2 min ago','৳ 1,940'],['BT-10494','Sadia Rahman','Messenger','9 min ago','৳ 1,780'],['BT-10493','Anik Das','Phone call','21 min ago','৳ 990']].map(([o,n,s,t,a]) => ({ o, n, s, t, a })) };
+}
+}
+</script>
+</body>
+</html>

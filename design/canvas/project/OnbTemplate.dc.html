@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Setup wizard: choose a template</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="min-height:860px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E;box-sizing:border-box;padding:28px 64px 48px">
+
+<div style="display:flex;align-items:center;gap:10px">
+<svg width="28" height="28" viewBox="0 0 44 44" role="img" aria-label="BizTrackBD"><rect width="44" height="44" rx="12" fill="#5B4FE8"/><path d="M13 32V22M22 32V14M31 32V19" stroke="#fff" stroke-width="4.4" stroke-linecap="round"/></svg>
+<div style="font-size:18px;font-weight:700;flex-grow:1">BizTrack<span style="color:#5B4FE8">BD</span></div>
+<div style="font-size:13.5px;font-weight:600;color:#4B4B73">Save and exit</div>
+</div>
+
+<div style="max-width:1100px;margin:36px auto 0">
+<div style="display:flex;gap:6px;max-width:480px"><div style="flex:1;height:4px;border-radius:2px;background:#5B4FE8"></div><div style="flex:1;height:4px;border-radius:2px;background:#5B4FE8"></div><div style="flex:1;height:4px;border-radius:2px;background:#5B4FE8"></div><div style="flex:1;height:4px;border-radius:2px;background:#E7E7F0"></div></div>
+<div style="font-size:13px;font-weight:700;color:#5B4FE8;margin-top:14px">Step 3 of 4</div>
+<div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin:6px 0 24px">
+<div style="flex:1 1 420px"><h1 style="margin:0 0 8px;font-size:32px;font-weight:700;letter-spacing:-0.6px">Pick a starting look</h1><div style="font-size:15px;color:#4B4B73;line-height:1.6">You can change the template later. Your products, orders and customers stay exactly as they are.</div></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><span style="padding:8px 16px;border-radius:18px;background:#5B4FE8;color:#fff;font-size:13.5px;font-weight:700">All</span><span style="padding:8px 16px;border-radius:18px;border:1px solid #D5D5E4;background:#fff;font-size:13.5px;font-weight:600;color:#4B4B73">Fashion</span><span style="padding:8px 16px;border-radius:18px;border:1px solid #D5D5E4;background:#fff;font-size:13.5px;font-weight:600;color:#4B4B73">Gadgets</span><span style="padding:8px 16px;border-radius:18px;border:1px solid #D5D5E4;background:#fff;font-size:13.5px;font-weight:600;color:#4B4B73">Kids</span><span style="padding:8px 16px;border-radius:18px;border:1px solid #D5D5E4;background:#fff;font-size:13.5px;font-weight:600;color:#4B4B73">Streetwear</span></div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px">
+<sc-for list="{{themes}}" as="t" hint-placeholder-count="5">
+<div style="background:#fff;border:{{t.border}};border-radius:14px;padding:14px;position:relative">
+<div style="height:200px;border-radius:10px;background:{{t.bg}};overflow:hidden;position:relative;border:1px solid #E7E7F0">
+<div style="height:22px;background:{{t.nav}};display:flex;align-items:center;padding:0 12px;gap:8px"><div style="font-size:8px;font-weight:800;letter-spacing:1.5px;color:{{t.ink}}">{{t.brand}}</div><div style="flex-grow:1"></div><div style="width:26px;height:4px;border-radius:2px;background:{{t.ink}};opacity:0.35"></div><div style="width:26px;height:4px;border-radius:2px;background:{{t.ink}};opacity:0.35"></div></div>
+<div style="height:84px;background:{{t.hero}};padding:14px 14px;box-sizing:border-box"><div style="width:96px;height:9px;border-radius:3px;background:{{t.ink}}"></div><div style="width:68px;height:9px;border-radius:3px;background:{{t.ink}};margin-top:6px"></div><div style="width:42px;height:14px;border-radius:3px;background:{{t.acc}};margin-top:10px"></div></div>
+<div style="display:flex;gap:8px;padding:10px 12px"><div style="flex:1;height:64px;border-radius:6px;background:{{t.p1}}"></div><div style="flex:1;height:64px;border-radius:6px;background:{{t.p2}}"></div><div style="flex:1;height:64px;border-radius:6px;background:{{t.p3}}"></div></div>
+</div>
+<div style="display:flex;align-items:center;gap:10px;margin-top:14px"><div style="flex-grow:1"><div style="font-size:16px;font-weight:700">{{t.name}}</div><div style="font-size:12.5px;color:#4B4B73;margin-top:2px">{{t.sub}}</div></div>
+<div style="height:36px;padding:0 16px;border-radius:18px;display:flex;align-items:center;font-size:13.5px;font-weight:700;background:{{t.btnBg}};color:{{t.btnColor}};border:{{t.btnBorder}}">{{t.btn}}</div></div>
+<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap"><span style="padding:2px 9px;border-radius:10px;background:#EFEFF6;color:#4B4B73;font-size:11.5px;font-weight:600">{{t.tag1}}</span><span style="padding:2px 9px;border-radius:10px;background:#EFEFF6;color:#4B4B73;font-size:11.5px;font-weight:600">{{t.tag2}}</span></div>
+</div>
+</sc-for>
+</div>
+
+<div style="display:flex;gap:12px;margin-top:32px;align-items:center">
+<div style="height:52px;padding:0 24px;border:1px solid #D5D5E4;border-radius:26px;display:flex;align-items:center;font-size:15px;font-weight:600;background:#fff">Back</div>
+<div style="height:52px;padding:0 32px;border-radius:26px;background:#5B4FE8;color:#fff;display:flex;align-items:center;font-size:15px;font-weight:700">Continue with Kapor</div>
+<div style="font-size:13.5px;color:#4B4B73;margin-left:8px">Preview any template with your own store name on the next step.</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":860}}'>
+class Component extends DCLogic {
+renderVals() {
+const t = [
+['Kapor','Warm, editorial fashion store','KAPOR','#FBF8F3','#fff','#E9DCCB','#2B2118','#8C5A3C','#F1E9DD','#E3EBE1','#E4E6EC','Fashion','Panjabi and shirts',1],
+['Gadget Studio','Clean gadgets and electronics','GADGET STUDIO','#FFFFFF','#fff','#DFF1EA','#111827','#0F766E','#E4E6EC','#DFF1EA','#E1ECF4','Gadgets','Spec tables',0],
+['Mini Bunny','Soft, playful kids wear','MINI BUNNY','#FFFBF5','#fff','#FCE6D8','#3D2B4F','#E8825B','#F5E4E4','#E1ECF4','#F5EBD0','Kids','Size by age',0],
+['Axionwear','Bold streetwear, lookbook grid','AXIONWEAR','#0E0E10','#18181B','#1E1E22','#F4F4F5','#D6FF3F','#2A2A30','#34343A','#26262B','Streetwear','Lookbook',0],
+['Bindu',"Women's ethnic wear and drops",'BINDU','#F7F5F0','#fff','#DDE5DA','#1F2A24','#1F4D3A','#DDE5DA','#EFE7D8','#E9DCCB','Ethnic wear','Drops',0],
+];
+return { themes: t.map(([name,sub,brand,bg,nav,hero,ink,acc,p1,p2,p3,tag1,tag2,on]) => ({ name, sub, brand, bg, nav, hero, ink, acc, p1, p2, p3, tag1, tag2, border: on?'2px solid #5B4FE8':'1px solid #E7E7F0', btn: on?'Selected':'Select', btnBg: on?'#5B4FE8':'#fff', btnColor: on?'#fff':'#1A1A4E', btnBorder: on?'none':'1px solid #D5D5E4' })) };
+}
+}
+</script>
+</body>
+</html>

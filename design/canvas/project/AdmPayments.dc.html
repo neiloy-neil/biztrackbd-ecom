@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin settings payments</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="settings" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+<h1 style="margin:0;font-size:24px;font-weight:700">Settings</h1>
+<div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start">
+<div style="flex:0 0 232px"><dc-import name="SettingsNav" active="payments" hint-size="232px,340px"></dc-import></div>
+<div style="flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:20px">
+
+<div><div style="font-size:18px;font-weight:700">Payments</div><div style="font-size:14px;color:#4B4B73;margin-top:4px">Choose how customers pay you. Turn methods on or off at any time.</div></div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="display:flex;align-items:center;gap:16px">
+<div style="width:44px;height:44px;border-radius:10px;background:#EFEFF6;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4B4B73" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h11v10H2zM13 9h4l4 4v3h-8M6.5 15.5a2 2 0 100 4 2 2 0 000-4zM17.5 15.5a2 2 0 100 4 2 2 0 000-4z"/></svg></div>
+<div style="flex-grow:1"><div style="font-size:15px;font-weight:700">Cash on delivery</div><div style="font-size:13px;color:#4B4B73;margin-top:2px">Customer pays the courier when the parcel arrives.</div></div>
+<div style="width:36px;height:20px;border-radius:10px;background:#5B4FE8;position:relative"><div style="position:absolute;top:2px;left:18px;width:16px;height:16px;border-radius:8px;background:#fff"></div></div>
+</div>
+<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;padding-top:16px;border-top:1px solid #F0F0F6">
+<div style="flex:1 1 180px"><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Extra COD fee</div><div style="display:flex;height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;overflow:hidden;font-size:14px"><div style="padding:0 12px;background:#FAFAFC;border-right:1px solid #D5D5E4;display:flex;align-items:center;color:#4B4B73">৳</div><div style="padding:0 12px;display:flex;align-items:center">0</div></div></div>
+<div style="flex:1 1 180px"><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Allow COD up to</div><div style="display:flex;height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;overflow:hidden;font-size:14px"><div style="padding:0 12px;background:#FAFAFC;border-right:1px solid #D5D5E4;display:flex;align-items:center;color:#4B4B73">৳</div><div style="padding:0 12px;display:flex;align-items:center">10,000</div></div></div>
+</div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="display:flex;align-items:center;gap:16px">
+<div style="width:44px;height:44px;border-radius:10px;background:#E2136E;color:#fff;font-weight:800;font-size:12.5px;display:flex;align-items:center;justify-content:center">bKash</div>
+<div style="flex-grow:1"><div style="font-size:15px;font-weight:700">bKash personal or merchant</div><div style="font-size:13px;color:#4B4B73;margin-top:2px">Customer sends money, then enters the TrxID at checkout. You confirm it.</div></div>
+<div style="width:36px;height:20px;border-radius:10px;background:#5B4FE8;position:relative"><div style="position:absolute;top:2px;left:18px;width:16px;height:16px;border-radius:8px;background:#fff"></div></div>
+</div>
+<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;padding-top:16px;border-top:1px solid #F0F0F6">
+<div style="flex:1 1 200px"><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">bKash number</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px;font-variant-numeric:tabular-nums">01712-345678</div></div>
+<div style="flex:1 1 200px"><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Account type</div><div style="display:flex;height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;align-items:center;font-size:14px"><span style="flex-grow:1">Personal (send money)</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div></div>
+</div>
+<div style="margin-top:14px"><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Instruction shown to customers</div><div style="box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:10px 12px;font-size:14px;line-height:1.5;color:#1A1A4E">Send the total amount to 01712-345678 using Send Money, then enter the TrxID below. We confirm within 2 hours.</div></div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="display:flex;align-items:center;gap:16px">
+<div style="width:44px;height:44px;border-radius:10px;background:#F6921E;color:#fff;font-weight:800;font-size:12.5px;display:flex;align-items:center;justify-content:center">Nagad</div>
+<div style="flex-grow:1"><div style="font-size:15px;font-weight:700">Nagad</div><div style="font-size:13px;color:#4B4B73;margin-top:2px">Same flow as bKash with your Nagad number.</div></div>
+<div style="width:36px;height:20px;border-radius:10px;background:#5B4FE8;position:relative"><div style="position:absolute;top:2px;left:18px;width:16px;height:16px;border-radius:8px;background:#fff"></div></div>
+</div>
+<div style="margin-top:16px;padding-top:16px;border-top:1px solid #F0F0F6;max-width:300px"><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Nagad number</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px;font-variant-numeric:tabular-nums">01712-345678</div></div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="display:flex;align-items:center;gap:16px">
+<div style="width:44px;height:44px;border-radius:10px;background:#EFEFF6;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4B4B73" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 5h15A2.5 2.5 0 0122 7.5v9a2.5 2.5 0 01-2.5 2.5h-15A2.5 2.5 0 012 16.5v-9A2.5 2.5 0 014.5 5zM2 10h20"/></svg></div>
+<div style="flex-grow:1"><div style="font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px">Cards and mobile banking gateway<span style="padding:2px 9px;border-radius:10px;background:#E9E7FD;color:#5B4FE8;font-size:11.5px;font-weight:700">Business plan</span></div><div style="font-size:13px;color:#4B4B73;margin-top:2px">Automatic payments through SSLCommerz or AamarPay. Orders are marked paid for you.</div></div>
+<div style="height:36px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;display:flex;align-items:center;font-size:13.5px;font-weight:600">Connect</div>
+</div>
+</div>
+
+<div style="display:flex;justify-content:flex-end;gap:10px"><div style="height:40px;padding:0 18px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Discard</div><div style="height:40px;padding:0 22px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Save payment settings</div></div>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

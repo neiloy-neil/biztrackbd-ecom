@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Super admin tenants</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="SaSidebar" active="tenants" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<div style="height:60px;box-sizing:border-box;background:#fff;border-bottom:1px solid #E7E7F0;display:flex;align-items:center;gap:12px;padding:0 24px">
+<div style="display:flex;align-items:center;gap:10px;width:420px;max-width:100%;height:36px;box-sizing:border-box;padding:0 12px;border:1px solid #E7E7F0;border-radius:8px;background:#FAFAFC"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 18a7 7 0 100-14 7 7 0 000 14zM20 20l-4-4"/></svg><div style="font-size:13.5px;color:#6B6B8D">Search tenants, domains, owners</div></div>
+</div>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h1 style="margin:0;font-size:24px;font-weight:700;flex-grow:1">Tenants</h1><div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Export CSV</div></div>
+
+<div style="display:flex;gap:28px;border-bottom:1px solid #E7E7F0;overflow-x:auto">
+<div style="padding:6px 0 12px;border-bottom:2.5px solid #5B4FE8;margin-bottom:-1px;font-size:14px;font-weight:600;white-space:nowrap">All <span style="padding:1px 8px;border-radius:10px;font-size:12px;font-weight:700;background:#E9E7FD;color:#5B4FE8">412</span></div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D;white-space:nowrap">Paying <span style="padding:1px 8px;border-radius:10px;font-size:12px;font-weight:700;background:#EFEFF6;color:#4B4B73">318</span></div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D;white-space:nowrap">Trial <span style="padding:1px 8px;border-radius:10px;font-size:12px;font-weight:700;background:#EFEFF6;color:#4B4B73">74</span></div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D;white-space:nowrap">Past due <span style="padding:1px 8px;border-radius:10px;font-size:12px;font-weight:700;background:#FDF3E3;color:#B45309">9</span></div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D;white-space:nowrap">Suspended <span style="padding:1px 8px;border-radius:10px;font-size:12px;font-weight:700;background:#EFEFF6;color:#4B4B73">5</span></div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D;white-space:nowrap">Cancelled <span style="padding:1px 8px;border-radius:10px;font-size:12px;font-weight:700;background:#EFEFF6;color:#4B4B73">6</span></div>
+</div>
+
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+<div style="padding:7px 14px;border:1px solid #D5D5E4;border-radius:19px;background:#fff;font-size:13px;font-weight:500;color:#4B4B73">Plan: All</div>
+<div style="padding:7px 14px;border:1px solid #D5D5E4;border-radius:19px;background:#fff;font-size:13px;font-weight:500;color:#4B4B73">Theme: All</div>
+<div style="padding:7px 14px;border:1px solid #5B4FE8;border-radius:19px;background:#F4F3FF;font-size:13px;font-weight:600;color:#5B4FE8">Custom domain: Yes</div>
+<div style="padding:7px 14px;border:1px solid #D5D5E4;border-radius:19px;background:#fff;font-size:13px;font-weight:500;color:#4B4B73">Joined: Any time</div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="overflow-x:auto"><div style="min-width:1000px">
+<div style="display:grid;grid-template-columns:minmax(0,2fr) 100px 100px 110px 80px 130px 110px;padding:11px 20px;background:#FAFAFC;border-bottom:1px solid #E7E7F0;font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px;align-items:center"><div>STORE</div><div>PLAN</div><div>STATUS</div><div style="text-align:right">MRR</div><div style="text-align:right">ORDERS</div><div style="text-align:right">GMV (30D)</div><div style="text-align:right">LAST ACTIVE</div></div>
+<sc-for list="{{tenants}}" as="t" hint-placeholder-count="10">
+<div style="display:grid;grid-template-columns:minmax(0,2fr) 100px 100px 110px 80px 130px 110px;padding:0 20px;height:62px;align-items:center;border-bottom:1px solid #F0F0F6;font-size:13.5px;background:{{t.row}}">
+<div style="display:flex;align-items:center;gap:12px;min-width:0"><div style="width:36px;height:36px;border-radius:9px;background:{{t.bg}};font-weight:700;display:flex;align-items:center;justify-content:center;flex:0 0 36px">{{t.ini}}</div><div style="min-width:0"><div style="font-weight:600">{{t.name}}</div><div style="font-size:12px;color:#6B6B8D">{{t.domain}}</div></div></div>
+<div style="font-weight:600">{{t.plan}}</div>
+<div><span style="display:inline-block;padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:{{t.sBg}};color:{{t.sColor}}">{{t.status}}</span></div>
+<div style="text-align:right;font-variant-numeric:tabular-nums">{{t.mrr}}</div>
+<div style="text-align:right;font-variant-numeric:tabular-nums">{{t.orders}}</div>
+<div style="text-align:right;font-weight:600;font-variant-numeric:tabular-nums">{{t.gmv}}</div>
+<div style="text-align:right;color:#4B4B73">{{t.last}}</div>
+</div>
+</sc-for>
+</div></div>
+<div style="display:flex;align-items:center;padding:14px 20px;font-size:13px;color:#4B4B73"><div style="flex-grow:1">Showing 1 to 10 of 163 tenants with a custom domain</div><div style="display:flex;gap:8px"><div style="padding:6px 12px;border:1px solid #D5D5E4;border-radius:7px;font-weight:600;color:#6B6B8D">Previous</div><div style="padding:6px 12px;border:1px solid #D5D5E4;border-radius:7px;font-weight:600">Next</div></div></div>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+const st = { Active: ['#E8F6EE','#15803D'], Trial: ['#E9E7FD','#5B4FE8'], 'Past due': ['#FDF3E3','#B45309'], Suspended: ['#FCEBEB','#DC2626'] };
+const d = [
+['Rongdhonu Fashion','rongdhonufashion.com','Pro','Trial','৳ 0',176,'৳ 3,86,420','2 min ago','#E9DCCB',1],
+['Gadget Ghar','gadgetghar.com.bd','Business','Active','৳ 3,499',642,'৳ 14,20,800','10 min ago','#DFF1EA',0],
+['Streetline BD','streetline.shop','Pro','Active','৳ 1,499',318,'৳ 6,12,300','1 hr ago','#DCDCEB',0],
+['Nakshi Tailors','nakshitailors.com','Pro','Active','৳ 1,499',92,'৳ 2,87,000','3 hr ago','#DDE5DA',0],
+['Chotomoni Kids','chotomoni.store','Starter','Past due','৳ 699',48,'৳ 94,200','Yesterday','#FCE6D8',0],
+['Fashion Hub Sylhet','fashionhubsylhet.com','Pro','Active','৳ 1,499',221,'৳ 4,41,500','Today','#F5E4E4',0],
+['TechMart Dhaka','techmartbd.com','Business','Active','৳ 3,499',510,'৳ 11,05,900','Today','#E1ECF4',0],
+['Bonoful Organic','bonoful.com.bd','Starter','Suspended','৳ 699',0,'৳ 0','6 days ago','#E3EBE1',0],
+['Little Steps BD','littlestepsbd.com','Pro','Active','৳ 1,499',134,'৳ 2,26,700','Today','#F5EBD0',0],
+['Urban Threads','urbanthreads.shop','Pro','Active','৳ 1,499',187,'৳ 3,64,100','Today','#E4E6EC',0],
+];
+return { tenants: d.map(([name,domain,plan,status,mrr,orders,gmv,last,bg,sel]) => ({ name, domain, plan, status, mrr, orders, gmv, last, bg, ini: name[0], row: sel?'#F4F3FF':'#fff', sBg: st[status][0], sColor: st[status][1] })) };
+}
+}
+</script>
+</body>
+</html>

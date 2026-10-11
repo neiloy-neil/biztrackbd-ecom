@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Setup wizard: store address</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:860px;background:#fff;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+
+<div style="flex:1 1 560px;min-width:0;box-sizing:border-box;padding:28px 64px 40px;display:flex;flex-direction:column">
+<div style="display:flex;align-items:center;gap:10px">
+<svg width="28" height="28" viewBox="0 0 44 44" role="img" aria-label="BizTrackBD"><rect width="44" height="44" rx="12" fill="#5B4FE8"/><path d="M13 32V22M22 32V14M31 32V19" stroke="#fff" stroke-width="4.4" stroke-linecap="round"/></svg>
+<div style="font-size:18px;font-weight:700;flex-grow:1">BizTrack<span style="color:#5B4FE8">BD</span></div>
+<div style="font-size:13.5px;font-weight:600;color:#4B4B73">Save and exit</div>
+</div>
+
+<div style="margin-top:44px;max-width:480px">
+<div style="display:flex;gap:6px"><div style="flex:1;height:4px;border-radius:2px;background:#5B4FE8"></div><div style="flex:1;height:4px;border-radius:2px;background:#5B4FE8"></div><div style="flex:1;height:4px;border-radius:2px;background:#E7E7F0"></div><div style="flex:1;height:4px;border-radius:2px;background:#E7E7F0"></div></div>
+<div style="font-size:13px;font-weight:700;color:#5B4FE8;margin-top:14px">Step 2 of 4</div>
+<h1 style="margin:6px 0 8px;font-size:32px;font-weight:700;letter-spacing:-0.6px;line-height:1.2">Choose your store address</h1>
+<div style="font-size:15px;color:#4B4B73;line-height:1.6">This is the free web address customers will visit. You can add your own domain later.</div>
+
+<div style="margin-top:28px">
+<div style="font-size:13px;font-weight:700;margin-bottom:8px">Store address</div>
+<div style="display:flex;height:52px;box-sizing:border-box;border:2px solid #5B4FE8;border-radius:10px;overflow:hidden;font-size:16px">
+<div style="flex:1;padding:0 16px;display:flex;align-items:center;font-weight:600">rongdhonu</div>
+<div style="padding:0 16px;background:#FAFAFC;border-left:1px solid #E7E7F0;display:flex;align-items:center;color:#4B4B73">.biztrackbd.com</div>
+</div>
+<div style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13.5px;font-weight:600;color:#15803D"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>rongdhonu.biztrackbd.com is available</div>
+</div>
+
+<div style="margin-top:22px">
+<div style="font-size:12.5px;color:#6B6B8D;font-weight:600;margin-bottom:8px">Other ideas</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><span style="padding:7px 14px;border-radius:18px;border:1px solid #D5D5E4;font-size:13.5px;font-weight:600">rongdhonu-bd</span><span style="padding:7px 14px;border-radius:18px;border:1px solid #D5D5E4;font-size:13.5px;font-weight:600">rongdhonufashion</span><span style="padding:7px 14px;border-radius:18px;border:1px solid #D5D5E4;font-size:13.5px;font-weight:600">shop-rongdhonu</span></div>
+</div>
+
+<div style="margin-top:24px;padding:14px 16px;border-radius:10px;background:#F4F3FF;font-size:13.5px;color:#4B4B73;line-height:1.55">Use lowercase letters, numbers and hyphens. Some names like <b>admin</b>, <b>www</b> and <b>api</b> are reserved.</div>
+
+<div style="display:flex;gap:12px;margin-top:36px">
+<div style="height:52px;padding:0 24px;border:1px solid #D5D5E4;border-radius:26px;display:flex;align-items:center;font-size:15px;font-weight:600">Back</div>
+<div style="height:52px;padding:0 32px;border-radius:26px;background:#5B4FE8;color:#fff;display:flex;align-items:center;font-size:15px;font-weight:700">Continue</div>
+</div>
+</div>
+</div>
+
+<div style="flex:1 1 560px;min-width:0;background:#F4F3FF;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;box-sizing:border-box;gap:18px">
+<div style="font-size:13px;font-weight:700;color:#4B4B73">Live preview of your store</div>
+<dc-import name="WizardPreview" store-name="Rongdhonu Fashion" sub="rongdhonu" accent="#8C5A3C" hint-size="560px,640px"></dc-import>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":860}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

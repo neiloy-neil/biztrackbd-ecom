@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin product editor</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="products" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:24px 32px 40px;display:flex;flex-direction:column;gap:20px">
+
+<div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#4B4B73"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Products</div>
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:-8px">
+<h1 style="margin:0;font-size:24px;font-weight:700">Cotton Panjabi, Off-white</h1>
+<span style="padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:#E8F6EE;color:#15803D">Active</span>
+<div style="flex-grow:1"></div>
+<div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">View on store</div>
+<div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Discard</div>
+<div style="height:38px;padding:0 20px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Save product</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:20px">
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:center;gap:16px"><div style="font-size:15px;font-weight:700;flex-grow:1">Details</div>
+<div style="display:flex;padding:3px;border-radius:17px;background:#EFEFF6;font-size:13px;font-weight:600"><div style="padding:5px 12px;border-radius:14px;background:#fff;border:1px solid #E7E7F0">English</div><div style="padding:5px 12px;color:#6B6B8D;font-family:'Hind Siliguri',sans-serif">বাংলা</div></div></div>
+<div><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Product name</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px">Cotton Panjabi, Off-white</div></div>
+<div><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Description</div>
+<div style="border:1px solid #D5D5E4;border-radius:8px;overflow:hidden"><div style="display:flex;gap:6px;padding:8px 10px;border-bottom:1px solid #E7E7F0;background:#FAFAFC"><span style="width:28px;height:26px;border-radius:5px;background:#fff;border:1px solid #E7E7F0;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center">B</span><span style="width:28px;height:26px;border-radius:5px;background:#fff;border:1px solid #E7E7F0;font-style:italic;font-size:13px;display:flex;align-items:center;justify-content:center">I</span><span style="width:28px;height:26px;border-radius:5px;background:#fff;border:1px solid #E7E7F0;font-size:13px;display:flex;align-items:center;justify-content:center">•</span></div>
+<div style="padding:12px;font-size:14px;line-height:1.6;color:#1A1A4E;min-height:76px">Soft handloom cotton panjabi with a straight cut and wooden buttons. Breathable for Dhaka summers, dressy enough for Eid. Machine washable.</div></div></div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="display:flex;align-items:center;margin-bottom:14px"><div style="font-size:15px;font-weight:700;flex-grow:1">Photos</div><div style="font-size:12.5px;color:#6B6B8D">First photo is the cover. Drag to reorder.</div></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px">
+<div style="aspect-ratio:1;border-radius:10px;background:#F1E9DD;border:2px solid #5B4FE8;position:relative;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:50px;background:#C9B79C;border-radius:6px 6px 3px 3px"></div><div style="position:absolute;left:8px;top:8px;padding:2px 8px;border-radius:9px;background:#5B4FE8;color:#fff;font-size:11px;font-weight:700">Cover</div></div>
+<div style="aspect-ratio:1;border-radius:10px;background:#EFE5D6;border:1px solid #E7E7F0;display:flex;align-items:center;justify-content:center"><div style="width:40px;height:54px;background:#C9B79C;border-radius:6px"></div></div>
+<div style="aspect-ratio:1;border-radius:10px;background:#E9DCCB;border:1px solid #E7E7F0;display:flex;align-items:center;justify-content:center"><div style="width:52px;height:40px;background:#C9B79C;border-radius:6px"></div></div>
+<div style="aspect-ratio:1;border-radius:10px;border:1.5px dashed #D5D5E4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#5B4FE8"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5B4FE8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg><span style="font-size:12.5px;font-weight:700">Add photo</span></div>
+</div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="font-size:15px;font-weight:700;margin-bottom:14px">Pricing</div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+<div><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Price</div><div style="display:flex;height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;overflow:hidden;font-size:14px"><div style="padding:0 12px;background:#FAFAFC;border-right:1px solid #D5D5E4;display:flex;align-items:center;color:#4B4B73">৳</div><div style="padding:0 12px;display:flex;align-items:center;font-variant-numeric:tabular-nums">1,150</div></div></div>
+<div><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Compare-at price</div><div style="display:flex;height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;overflow:hidden;font-size:14px"><div style="padding:0 12px;background:#FAFAFC;border-right:1px solid #D5D5E4;display:flex;align-items:center;color:#4B4B73">৳</div><div style="padding:0 12px;display:flex;align-items:center;font-variant-numeric:tabular-nums">1,450</div></div></div>
+<div><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Cost per item</div><div style="display:flex;height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;overflow:hidden;font-size:14px"><div style="padding:0 12px;background:#FAFAFC;border-right:1px solid #D5D5E4;display:flex;align-items:center;color:#4B4B73">৳</div><div style="padding:0 12px;display:flex;align-items:center;font-variant-numeric:tabular-nums">640</div></div></div>
+</div>
+<div style="margin-top:12px;font-size:13px;color:#4B4B73">Profit ৳ 510 · Margin 44% · Customers see 21% off.</div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="padding:18px 24px;display:flex;align-items:center;border-bottom:1px solid #E7E7F0"><div style="font-size:15px;font-weight:700;flex-grow:1">Variants</div><div style="font-size:13px;font-weight:600;color:#5B4FE8">Edit options</div></div>
+<div style="padding:14px 24px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;border-bottom:1px solid #E7E7F0"><span style="font-size:13px;color:#4B4B73;font-weight:600">Size</span><span style="padding:4px 12px;border-radius:15px;background:#F4F3FF;color:#5B4FE8;font-size:13px;font-weight:600">M</span><span style="padding:4px 12px;border-radius:15px;background:#F4F3FF;color:#5B4FE8;font-size:13px;font-weight:600">L</span><span style="padding:4px 12px;border-radius:15px;background:#F4F3FF;color:#5B4FE8;font-size:13px;font-weight:600">XL</span><span style="padding:4px 12px;border-radius:15px;background:#F4F3FF;color:#5B4FE8;font-size:13px;font-weight:600">XXL</span></div>
+<div style="display:grid;grid-template-columns:minmax(0,1.4fr) 140px 140px 120px;padding:10px 24px;background:#FAFAFC;border-bottom:1px solid #E7E7F0;font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px"><div>VARIANT</div><div>PRICE</div><div>SKU</div><div style="text-align:right">IN STOCK</div></div>
+<sc-for list="{{variants}}" as="v" hint-placeholder-count="4">
+<div style="display:grid;grid-template-columns:minmax(0,1.4fr) 140px 140px 120px;padding:0 24px;height:52px;align-items:center;border-bottom:1px solid #F0F0F6;font-size:13.5px"><div style="font-weight:600">{{v.name}}</div><div style="font-variant-numeric:tabular-nums">৳ 1,150</div><div style="color:#4B4B73">{{v.sku}}</div><div style="text-align:right"><span style="display:inline-block;min-width:36px;padding:5px 10px;border:1px solid #D5D5E4;border-radius:7px;text-align:center;font-weight:600;color:{{v.color}};font-variant-numeric:tabular-nums">{{v.stock}}</span></div></div>
+</sc-for>
+</div>
+
+</div>
+
+<div style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:20px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="font-size:15px;font-weight:700;margin-bottom:12px">Visibility</div>
+<div style="display:flex;align-items:center;gap:12px"><div style="width:36px;height:20px;border-radius:10px;background:#5B4FE8;position:relative"><div style="position:absolute;top:2px;left:18px;width:16px;height:16px;border-radius:8px;background:#fff"></div></div><div style="font-size:13.5px;font-weight:600">Show on online store</div></div>
+<div style="font-size:12.5px;color:#6B6B8D;margin-top:8px;line-height:1.5">Turn off to keep this product as a draft. Customers will not see it.</div>
+</div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:15px;font-weight:700">Organise</div>
+<div><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Category</div><div style="display:flex;height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;align-items:center;font-size:14px"><span style="flex-grow:1">Panjabi</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div></div>
+<div><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Collections</div><div style="display:flex;gap:8px;flex-wrap:wrap"><span style="padding:4px 12px;border-radius:15px;background:#F4F3FF;color:#5B4FE8;font-size:13px;font-weight:600">Eid 2026</span><span style="padding:4px 12px;border-radius:15px;background:#F4F3FF;color:#5B4FE8;font-size:13px;font-weight:600">Bestsellers</span></div></div>
+<div><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Tags</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px;color:#6B6B8D">cotton, handloom</div></div>
+</div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="font-size:15px;font-weight:700;margin-bottom:12px">Google preview</div>
+<div style="font-size:13px;color:#0369A1;font-weight:600">Cotton Panjabi, Off-white | Rongdhonu Fashion</div>
+<div style="font-size:12px;color:#15803D;margin:2px 0 4px">rongdhonu.biztrackbd.com › products › cotton-panjabi</div>
+<div style="font-size:12.5px;color:#4B4B73;line-height:1.5">Soft handloom cotton panjabi with a straight cut. Breathable for summers, dressy enough for Eid.</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+return { variants: [
+{ name:'Off-white / M', sku:'KP-OW-M', stock:8, color:'#1A1A4E' },
+{ name:'Off-white / L', sku:'KP-OW-L', stock:12, color:'#1A1A4E' },
+{ name:'Off-white / XL', sku:'KP-OW-XL', stock:3, color:'#B45309' },
+{ name:'Off-white / XXL', sku:'KP-OW-XXL', stock:1, color:'#DC2626' },
+] };
+}
+}
+</script>
+</body>
+</html>

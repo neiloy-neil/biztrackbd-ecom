@@ -1,0 +1,56 @@
+{
+  "name": "biztrackbd-ecom",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "eslint . --max-warnings=100000",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test --concurrency=1",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "db:generate": "pnpm --filter @biztrackbd/db db:generate",
+    "db:migrate": "pnpm --filter @biztrackbd/db db:migrate",
+    "db:seed": "pnpm --filter @biztrackbd/db db:seed",
+    "canvas:preview": "pnpm --filter @biztrackbd/canvas-render preview",
+    "canvas:measure": "pnpm --filter @biztrackbd/canvas-render measure",
+    "audit:rls": "pnpm --filter @biztrackbd/db exec tsx scripts/rls-audit.ts",
+    "drill:backup": "pnpm --filter @biztrackbd/core exec tsx scripts/backup-drill.ts",
+    "load:orders": "pnpm --filter @biztrackbd/core exec tsx scripts/load-orders.ts",
+    "audit:vitals": "pnpm --filter @biztrackbd/storefront exec node e2e/vitals.mjs",
+    "check:size": "node tools/check-build-size.mjs",
+    "e2e:admin": "pnpm --filter @biztrackbd/admin e2e",
+    "e2e:storefront": "pnpm --filter @biztrackbd/storefront e2e",
+    "e2e:real": "pnpm --filter @biztrackbd/admin exec playwright test -c playwright.real.config.ts",
+    "e2e": "pnpm e2e:admin && pnpm e2e:storefront",
+    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build && pnpm check:size && pnpm audit --prod",
+    "verify:full": "pnpm verify && pnpm audit:rls && pnpm e2e"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@next/eslint-plugin-next": "^16.4.0",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^17.13.0",
+    "prettier": "^3.5.3",
+    "turbo": "^2.4.4",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.71.1"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/engines",
+      "@prisma/client",
+      "prisma",
+      "esbuild"
+    ],
+    "overrides": {
+      "mysql2": ">=3.23.1",
+      "deepmerge-ts": ">=8.0.0"
+    }
+  }
+}

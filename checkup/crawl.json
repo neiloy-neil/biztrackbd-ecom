@@ -1,0 +1,461 @@
+[
+ {
+  "url": "http://localhost:3002/",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3002/pricing",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3002/start",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3002/templates",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3002/robots.txt",
+  "status": 200,
+  "console": [
+   "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/abandoned",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/billing",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/content",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/customers",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/customers/89ef2ae5-e13c-435a-a3a0-b5c034016072",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/design",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/finance/cod",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/finance/profit",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/fraud",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/inventory",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/landing",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/login",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/login/start",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/marketing/coupons",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/marketing/loyalty",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/marketing/pixels",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/more",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/orders",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/orders/<id>",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/orders/new",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/products",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/products/<id>",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/products/new",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/reports",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/returns",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/returns/new",
+  "status": 404,
+  "console": [
+   "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "pageErrors": [],
+  "badRequests": [
+   "404 GET http://localhost:3001/returns/new"
+  ]
+ },
+ {
+  "url": "http://localhost:3001/reviews",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/security",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/settings/apps",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/settings/audit",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/settings/domains",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/settings/integrations",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/settings/payments",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/settings/shipping",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/settings/staff",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/settings/store",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3001/manifest.webmanifest",
+  "status": 200,
+  "console": [
+   "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3003/",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3003/audit",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3003/domains",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3003/payments",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3003/plans",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3003/tenants",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3003/tenants/<id>",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://localhost:3003/login",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://rongdhonu.localhost:3000/",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://rongdhonu.localhost:3000/account",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://rongdhonu.localhost:3000/blog",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://rongdhonu.localhost:3000/c/gamchha",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://rongdhonu.localhost:3000/cart",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://rongdhonu.localhost:3000/checkout",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://rongdhonu.localhost:3000/products/cotton-panjabi-off-white",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://rongdhonu.localhost:3000/search?q=cotton",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://rongdhonu.localhost:3000/offline",
+  "status": 404,
+  "console": [
+   "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "pageErrors": [],
+  "badRequests": [
+   "404 GET http://rongdhonu.localhost:3000/offline"
+  ]
+ },
+ {
+  "url": "http://rongdhonu.localhost:3000/robots.txt",
+  "status": 200,
+  "console": [
+   "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://rongdhonu.localhost:3000/sitemap.xml",
+  "status": 200,
+  "console": [],
+  "pageErrors": [],
+  "badRequests": []
+ },
+ {
+  "url": "http://rongdhonu.localhost:3000/does-not-exist",
+  "status": 404,
+  "console": [
+   "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "pageErrors": [],
+  "badRequests": [
+   "404 GET http://rongdhonu.localhost:3000/does-not-exist"
+  ]
+ }
+]

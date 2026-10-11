@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin profit and loss</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="reports" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div style="flex-grow:1"><div style="font-size:13px;font-weight:600;color:#6B6B8D">Reports</div><h1 style="margin:2px 0 0;font-size:24px;font-weight:700">Profit and loss</h1><div style="font-size:14px;color:#4B4B73;margin-top:4px">What you really kept after products, couriers, returns and ads.</div></div><div style="height:38px;padding:0 14px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">October 2026</div><div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Export</div></div>
+
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#4B4B73">Sales delivered</div><div style="font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">৳ 3,86,420</div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#4B4B73">Total costs</div><div style="font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">৳ 3,44,340</div></div>
+<div style="background:#E8F6EE;border:1px solid #BFE3CC;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#15803D;font-weight:700">Net profit</div><div style="font-size:24px;font-weight:700;margin-top:4px;color:#15803D;font-variant-numeric:tabular-nums">৳ 42,080</div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#4B4B73">Profit margin</div><div style="font-size:24px;font-weight:700;margin-top:4px">10.9%</div></div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:999 1 560px;min-width:0;background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="padding:18px 24px;font-size:15px;font-weight:700;border-bottom:1px solid #E7E7F0">Where the money went</div>
+<sc-for list="{{lines}}" as="l" hint-placeholder-count="9">
+<div style="display:flex;align-items:center;gap:14px;padding:0 24px;height:{{l.h}}px;border-bottom:1px solid #F0F0F6;font-size:13.5px;background:{{l.bg}}"><div style="flex:1;font-weight:{{l.w}};padding-left:{{l.pad}}px;color:{{l.tc}}">{{l.n}}<div style="font-size:12px;font-weight:400;color:#6B6B8D">{{l.s}}</div></div><div style="width:150px"><div style="height:6px;border-radius:3px;background:#F0F0F6"><div style="width:{{l.pct}};height:6px;border-radius:3px;background:{{l.bar}}"></div></div></div><div style="width:110px;text-align:right;font-weight:{{l.w}};font-variant-numeric:tabular-nums;color:{{l.tc}}">{{l.a}}</div></div>
+</sc-for>
+</div>
+
+<div style="flex:1 1 320px;min-width:300px;display:flex;flex-direction:column;gap:16px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 22px"><div style="font-size:15px;font-weight:700;margin-bottom:12px">Profit by day</div>
+<svg viewBox="0 0 320 150" width="100%" height="150" role="img" aria-label="Daily profit across October, between 1,500 and 5,200 taka" preserveAspectRatio="none"><g stroke="#E7E7F0"><path d="M0 30H320M0 70H320M0 110H320"/></g><path d="M0 140H320" stroke="#D5D5E4"/><g fill="#C7C2F7"><rect x="4" y="90" width="22" height="50" rx="3"/><rect x="36" y="70" width="22" height="70" rx="3"/><rect x="68" y="100" width="22" height="40" rx="3"/><rect x="100" y="60" width="22" height="80" rx="3"/><rect x="132" y="80" width="22" height="60" rx="3"/><rect x="164" y="40" width="22" height="100" rx="3" fill="#5B4FE8"/><rect x="196" y="75" width="22" height="65" rx="3"/><rect x="228" y="55" width="22" height="85" rx="3"/><rect x="260" y="85" width="22" height="55" rx="3"/><rect x="292" y="65" width="22" height="75" rx="3"/></g></svg></div>
+<div style="background:#FDF3E3;border-radius:12px;padding:16px 18px;font-size:13px;line-height:1.55;color:#4B4B73"><b style="color:#B45309">Biggest leak: returns.</b> Returned parcels cost ৳ 21,400 in courier fees and unsold stock. Use the fraud check on high-risk COD orders.</div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 22px"><div style="font-size:15px;font-weight:700;margin-bottom:10px">Add costs we cannot see</div><div style="display:flex;flex-direction:column;gap:8px;font-size:13.5px"><div style="display:flex"><span style="flex:1;color:#4B4B73">Facebook ads</span><b style="font-variant-numeric:tabular-nums">৳ 42,000</b></div><div style="display:flex"><span style="flex:1;color:#4B4B73">Packaging</span><b style="font-variant-numeric:tabular-nums">৳ 6,200</b></div><div style="display:flex"><span style="flex:1;color:#4B4B73">Rent and salaries</span><b style="font-variant-numeric:tabular-nums">৳ 55,000</b></div></div><div style="font-size:13px;font-weight:700;color:#5B4FE8;margin-top:12px">+ Add expense</div></div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1250}}'>
+class Component extends DCLogic {
+renderVals() {
+const mk=(n,s,a,pct,kind)=>({ n, s, a, pct, h: kind==='tot'?60:54, bg: kind==='tot'?'#FAFAFC':'#fff', w: kind==='tot'?700:500, pad: kind==='sub'?18:0, tc: kind==='neg'?'#1A1A4E':'#1A1A4E', bar: kind==='tot'?'#15803D':(kind==='pos'?'#5B4FE8':'#D49C9C') });
+return { lines: [
+mk('Sales delivered','176 orders','৳ 3,86,420','100%','pos'),
+mk('Cost of products','What you paid for the items','− ৳ 1,62,800','42%','neg'),
+mk('Courier fees','Delivery charges not paid by customers','− ৳ 31,900','8%','neg'),
+mk('COD and gateway charges','Courier COD fee, SSLCommerz fees','− ৳ 6,840','2%','neg'),
+mk('Returns','Fees and unsold returned stock','− ৳ 21,400','6%','neg'),
+mk('Discounts and coupons','','− ৳ 18,200','5%','neg'),
+mk('Ads and other costs','Entered by you','− ৳ 1,03,200','27%','neg'),
+mk('Net profit','','৳ 42,080','11%','tot'),
+] };
+}
+}
+</script>
+</body>
+</html>

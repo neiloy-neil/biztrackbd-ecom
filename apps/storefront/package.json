@@ -1,0 +1,35 @@
+{
+  "name": "@biztrackbd/storefront",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "typecheck": "next typegen && tsc --noEmit",
+    "e2e": "playwright test",
+    "perf:lcp": "node scripts/measure-lcp.mjs"
+  },
+  "dependencies": {
+    "@biztrackbd/core": "workspace:*",
+    "@biztrackbd/db": "workspace:*",
+    "@biztrackbd/ui": "workspace:*",
+    "@vercel/edge-config": "^1.5.1",
+    "next": "^16.4.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sharp": "0.35.5",
+    "@biztrackbd/media": "workspace:*"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@biztrackbd/tsconfig": "workspace:*",
+    "@playwright/test": "^1.64.0",
+    "@types/node": "^22.10.0",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "pg": "^8.23.1",
+    "typescript": "^5.8.2"
+  }
+}

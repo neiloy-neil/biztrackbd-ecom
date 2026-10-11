@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin discounts and coupons</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="marketing" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+<div style="flex-grow:1"><div style="font-size:13px;font-weight:600;color:#6B6B8D">Marketing</div><h1 style="margin:2px 0 0;font-size:24px;font-weight:700">Discounts and coupons</h1></div>
+<div style="height:38px;padding:0 18px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Create discount</div>
+</div>
+
+<div style="display:flex;gap:28px;border-bottom:1px solid #E7E7F0">
+<div style="padding:6px 0 12px;border-bottom:2.5px solid #5B4FE8;margin-bottom:-1px;font-size:14px;font-weight:600">Coupon codes</div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D">Automatic discounts</div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D">Flash sales</div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D">Gift cards</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:999 1 560px;min-width:0;background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="overflow-x:auto"><div style="min-width:640px">
+<div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1.5fr) 110px 100px;padding:11px 20px;background:#FAFAFC;border-bottom:1px solid #E7E7F0;font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px"><div>CODE</div><div>DISCOUNT</div><div style="text-align:right">USED</div><div>STATUS</div></div>
+<sc-for list="{{coupons}}" as="c" hint-placeholder-count="7">
+<div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1.5fr) 110px 100px;padding:0 20px;height:62px;align-items:center;border-bottom:1px solid #F0F0F6;font-size:13.5px;background:{{c.bg}}">
+<div><div style="font-weight:700;letter-spacing:0.4px">{{c.code}}</div><div style="font-size:12px;color:#6B6B8D">{{c.when}}</div></div>
+<div><div style="font-weight:600">{{c.what}}</div><div style="font-size:12px;color:#6B6B8D">{{c.rule}}</div></div>
+<div style="text-align:right;font-variant-numeric:tabular-nums">{{c.used}}</div>
+<div><span style="display:inline-block;padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:{{c.sBg}};color:{{c.sColor}}">{{c.status}}</span></div>
+</div>
+</sc-for>
+</div></div>
+</div>
+
+<div style="flex:1 1 340px;max-width:420px;min-width:300px;background:#fff;border:1px solid #E7E7F0;border-radius:12px;box-shadow:0 8px 24px rgba(26,26,78,0.10);padding:22px 24px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:center"><div style="font-size:16px;font-weight:700;flex-grow:1">New coupon</div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+<div><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Code</div><div style="display:flex;gap:8px"><div style="flex:1;height:40px;box-sizing:border-box;border:2px solid #5B4FE8;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px;font-weight:700;letter-spacing:0.5px">EID10</div><div style="height:40px;padding:0 12px;border:1px solid #D5D5E4;border-radius:8px;display:flex;align-items:center;font-size:13px;font-weight:600">Generate</div></div></div>
+<div><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Type</div><div style="display:flex;padding:3px;border-radius:19px;background:#EFEFF6;font-size:13px;font-weight:600;text-align:center"><div style="flex:1;padding:6px 0;border-radius:16px;background:#fff;border:1px solid #E7E7F0">Percent</div><div style="flex:1;padding:6px 0;color:#6B6B8D">Fixed taka</div><div style="flex:1;padding:6px 0;color:#6B6B8D">Free delivery</div></div></div>
+<div style="display:flex;gap:12px"><div style="flex:1"><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Value</div><div style="display:flex;height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;overflow:hidden;font-size:14px"><div style="flex:1;padding:0 12px;display:flex;align-items:center">10</div><div style="padding:0 12px;background:#FAFAFC;border-left:1px solid #D5D5E4;display:flex;align-items:center;color:#4B4B73">%</div></div></div>
+<div style="flex:1"><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Minimum order</div><div style="display:flex;height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;overflow:hidden;font-size:14px"><div style="padding:0 12px;background:#FAFAFC;border-right:1px solid #D5D5E4;display:flex;align-items:center;color:#4B4B73">৳</div><div style="flex:1;padding:0 12px;display:flex;align-items:center">1,500</div></div></div></div>
+<div style="display:flex;gap:12px"><div style="flex:1"><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Total uses</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px">500</div></div>
+<div style="flex:1"><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Per customer</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px">1</div></div></div>
+<div style="display:flex;gap:12px"><div style="flex:1"><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Starts</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px">12 Oct 2026</div></div>
+<div style="flex:1"><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Ends</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px">20 Oct 2026</div></div></div>
+<div style="padding:12px 14px;border-radius:8px;background:#F4F3FF;font-size:13px;line-height:1.5;color:#4B4B73">Customers get 10% off orders above ৳ 1,500 from 12 to 20 October. Each customer can use it once.</div>
+<div style="display:flex;gap:10px"><div style="flex:1;height:40px;border:1px solid #D5D5E4;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600">Cancel</div><div style="flex:1;height:40px;border-radius:8px;background:#5B4FE8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600">Save coupon</div></div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+const st = { Active: ['#E8F6EE','#15803D'], Scheduled: ['#E6F5FD','#0369A1'], Expired: ['#EFEFF6','#4B4B73'] };
+const d = [
+['EID10','Starts 12 Oct','10% off','Orders over ৳ 1,500',0,'Scheduled',1],
+['WELCOME100','No end date','৳ 100 off','First order, over ৳ 800',214,'Active',0],
+['FREESHIP','Until 31 Oct','Free delivery','Dhaka orders over ৳ 3,000',87,'Active',0],
+['PANJABI15','Until 15 Oct','15% off Panjabi','Category: Panjabi',142,'Active',0],
+['RAMADAN20','Ended 20 Mar','20% off','Orders over ৳ 2,500',389,'Expired',0],
+['VIP500','No end date','৳ 500 off','VIP customers only',18,'Active',0],
+['BOGO-SOCKS','Ended 30 Jun','Buy 2 get 1','Cotton Socks',64,'Expired',0],
+];
+return { coupons: d.map(([code,when,what,rule,used,status,sel]) => ({ code, when, what, rule, used, status, bg: sel?'#F4F3FF':'#fff', sBg: st[status][0], sColor: st[status][1] })) };
+}
+}
+</script>
+</body>
+</html>

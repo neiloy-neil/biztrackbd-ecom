@@ -1,0 +1,476 @@
+import { Prisma, getPlatformPrisma, type PrismaClient } from "@biztrackbd/db";
+import { addDays, dhakaDate } from "../admin/dashboard";
+import { ForbiddenError, NotFoundError, ValidationError } from "../errors";
+import { publishEvent } from "../events";
+import { money } from "../orders/pricing";
+import { syncTenantRouting } from "../routing/edge-config";
+import { accessState, addPeriod, statusFor, type Access } from "./lifecycle";
+import { toPlanView, type PlanView } from "./billing";
+
+/**
+ * The super admin's operations (docs/07 section 25). Every function takes the acting platform user first, checks what their
+ * role allows, runs on the platform client (which sees every store), and writes a PlatformAuditLog line in the same transaction.
+ */
+
+export type PlatformRole = "OWNER" | "SUPPORT_LEAD" | "SUPPORT" | "FINANCE";
+export interface PlatformActor {
+  id: string;
+  email: string;
+  role: PlatformRole;
+  ip?: string;
+}
+export interface Deps {
+  db?: PrismaClient;
+  now?: Date;
+}
+const dbOf = (d?: Deps) => d?.db ?? getPlatformPrisma();
+const nowOf = (d?: Deps) => d?.now ?? new Date();
+
+export type PlatformArea = "tenants" | "payments" | "plans" | "audit" | "suspend" | "adjust";
+type Level = "none" | "view" | "edit";
+const N = "none", V = "view", E = "edit";
+export const PLATFORM_PERMISSIONS: Record<PlatformRole, Record<PlatformArea, Level>> = {
+  OWNER:        { tenants: E, payments: E, plans: E, audit: V, suspend: E, adjust: E },
+  FINANCE:      { tenants: V, payments: E, plans: V, audit: V, suspend: N, adjust: E },
+  SUPPORT_LEAD: { tenants: V, payments: V, plans: V, audit: N, suspend: E, adjust: E },
+  SUPPORT:      { tenants: V, payments: N, plans: N, audit: N, suspend: N, adjust: N },
+};
+const RANK = { none: 0, view: 1, edit: 2 } as const;
+export const canPlatform = (role: PlatformRole, area: PlatformArea, level: "view" | "edit" = "view") => RANK[PLATFORM_PERMISSIONS[role]?.[area] ?? "none"] >= RANK[level];
+export function assertPlatformCan(actor: PlatformActor, area: PlatformArea, level: "view" | "edit" = "view"): void {
+  if (!canPlatform(actor.role, area, level)) throw new ForbiddenError();
+}
+
+type Tx = Prisma.TransactionClient;
+async function log(tx: Tx, actor: PlatformActor | "SYSTEM", action: string, tenantId: string | null, details: Record<string, unknown> = {}) {
+  await tx.platformAuditLog.create({
+    data: { actorId: actor === "SYSTEM" ? "SYSTEM" : actor.id, action, tenantId, details: details as Prisma.InputJsonValue, ipAddress: actor === "SYSTEM" ? null : actor.ip },
+  });
+}
+
+const accessOf = (t: { status: never | string; trialEndsAt: Date; suspendedReason: string | null }, sub: { amount: Prisma.Decimal; currentPeriodEnd: Date } | null, now: Date): Access =>
+  accessState({ status: t.status as never, trialEndsAt: t.trialEndsAt, suspendedReason: t.suspendedReason, subscription: sub ? { amount: Number(sub.amount), currentPeriodEnd: sub.currentPeriodEnd } : null }, now);
+
+/** After a status change the storefront router must hear about it (docs/13). Never fails the change: Postgres is already right. */
+async function resync(tenantId: string): Promise<void> {
+  try {
+    await syncTenantRouting(tenantId);
+  } catch (e) {
+    console.error("[platform] routing sync failed", tenantId, e instanceof Error ? e.name : "unknown");
+  }
+}
+
+// ---- Overview ------------------------------------------------------------------------------------------------------
+
+export interface PlatformOverview {
+  mrr: number;
+  arr: number;
+  payingStores: number;
+  activeTrials: number;
+  pastDue: number;
+  readOnlyOrLocked: number;
+  /** Stores that have paid at least once, out of stores whose trial is over. */
+  trialToPaidPercent: number | null;
+  /** Paying stores that lapsed in the last 30 days, out of those plus the ones still paying. */
+  churnPercent: number | null;
+  pendingPayments: { count: number; amount: number };
+  quarantined: number;
+  signups: { date: string; count: number }[];
+  byPlan: { tier: string; stores: number }[];
+}
+
+export async function getOverview(actor: PlatformActor, deps?: Deps): Promise<PlatformOverview> {
+  assertPlatformCan(actor, "tenants", "view");
+  const db = dbOf(deps), now = nowOf(deps);
+  const [subs, tenants, pending, quarantined, paidEver] = await Promise.all([
+    db.subscription.findMany({ select: { tenantId: true, amount: true, interval: true, status: true, planTier: true, currentPeriodEnd: true } }),
+    db.tenant.findMany({ select: { id: true, status: true, trialEndsAt: true, createdAt: true, suspendedReason: true, planTier: true } }),
+    db.paymentProof.aggregate({ where: { status: "PENDING" }, _count: { _all: true }, _sum: { amount: true } }),
+    db.tenant.count({ where: { quarantined: true, suspendedReason: null } }),
+    db.paymentProof.groupBy({ by: ["tenantId"], where: { status: "APPROVED" } }),
+  ]);
+  const subOf = new Map(subs.map((s) => [s.tenantId, s]));
+  let mrr = 0, paying = 0, trials = 0, pastDue = 0, locked = 0, lapsed = 0, trialsOver = 0;
+  const byPlan = new Map<string, number>();
+  for (const t of tenants) {
+    const s = subOf.get(t.id) ?? null;
+    const a = accessOf(t, s, now);
+    if (a.state === "ACTIVE") {
+      paying++;
+      mrr += s ? (s.interval === "YEARLY" ? Number(s.amount) / 12 : Number(s.amount)) : 0;
+      byPlan.set(t.planTier, (byPlan.get(t.planTier) ?? 0) + 1);
+    }
+    if (a.state === "TRIAL") trials++;
+    if (a.state === "GRACE") pastDue++;
+    if (a.state === "READ_ONLY" || a.state === "LOCKED") locked++;
+    if (a.state !== "TRIAL") trialsOver++;
+    if (s && Number(s.amount) > 0 && a.state !== "ACTIVE" && now.getTime() - s.currentPeriodEnd.getTime() < 30 * 86_400_000) lapsed++;
+  }
+  const today = dhakaDate(now);
+  const counts = new Map<string, number>();
+  for (const t of tenants) counts.set(dhakaDate(t.createdAt), (counts.get(dhakaDate(t.createdAt)) ?? 0) + 1);
+  const signups = Array.from({ length: 14 }, (_, i) => addDays(today, i - 13)).map((date) => ({ date, count: counts.get(date) ?? 0 }));
+  return {
+    mrr: money(mrr), arr: money(mrr * 12), payingStores: paying, activeTrials: trials, pastDue, readOnlyOrLocked: locked,
+    trialToPaidPercent: trialsOver > 0 ? Math.round((paidEver.length / trialsOver) * 1000) / 10 : null,
+    churnPercent: paying + lapsed > 0 ? Math.round((lapsed / (paying + lapsed)) * 1000) / 10 : null,
+    pendingPayments: { count: pending._count._all, amount: Number(pending._sum.amount ?? 0) }, quarantined, signups,
+    byPlan: [...byPlan.entries()].map(([tier, stores]) => ({ tier, stores })),
+  };
+}
+
+// ---- Tenants -------------------------------------------------------------------------------------------------------
+
+export interface TenantRow {
+  id: string;
+  name: string;
+  subdomain: string;
+  ownerName: string | null;
+  ownerEmail: string | null;
+  ownerPhone: string | null;
+  tier: string;
+  access: Access;
+  quarantined: boolean;
+  createdAt: Date;
+}
+
+export type TenantFilter = "all" | "trial" | "paying" | "overdue" | "locked" | "flagged";
+
+export async function listTenants(actor: PlatformActor, opts: { q?: string; filter?: TenantFilter; page?: number; pageSize?: number } = {}, deps?: Deps): Promise<{ rows: TenantRow[]; total: number; page: number; pageSize: number }> {
+  assertPlatformCan(actor, "tenants", "view");
+  const db = dbOf(deps), now = nowOf(deps);
+  const q = opts.q?.trim();
+  // Digits only count as a phone number when the search looks like one, so "shop12" does not match every number containing 12.
+  const phoneDigits = q && /^[\d\s+()-]{4,}$/.test(q) ? q.replace(/[^\d]/g, "").replace(/^88/, "") : "";
+  const where: Prisma.TenantWhereInput = q
+    ? { OR: [
+        { name: { contains: q, mode: "insensitive" } }, { subdomain: { contains: q.toLowerCase() } }, { ownerEmail: { contains: q.toLowerCase() } },
+        { ownerPhone: { contains: phoneDigits || "~" } }, { customDomain: { contains: q.toLowerCase() } }, { domains: { some: { domain: { contains: q.toLowerCase() } } } },
+      ] }
+    : {};
+  // Access states come from dates, so the filters are applied after the read. A platform with thousands of stores moves this into SQL.
+  const all = await db.tenant.findMany({ where, orderBy: { createdAt: "desc" }, take: 2000, include: { subscription: { select: { amount: true, currentPeriodEnd: true } } } });
+  const filter = opts.filter ?? "all";
+  const rows = all.map((t): TenantRow => ({
+    id: t.id, name: t.name, subdomain: t.subdomain, ownerName: t.ownerName, ownerEmail: t.ownerEmail, ownerPhone: t.ownerPhone, tier: t.planTier,
+    access: accessOf(t, t.subscription, now), quarantined: t.quarantined, createdAt: t.createdAt,
+  })).filter((r) => filter === "all" ? true : filter === "trial" ? r.access.state === "TRIAL" : filter === "paying" ? r.access.state === "ACTIVE" : filter === "overdue" ? r.access.state === "GRACE" : filter === "locked" ? r.access.state === "READ_ONLY" || r.access.state === "LOCKED" : r.quarantined);
+  const pageSize = opts.pageSize ?? 25, page = Math.max(1, opts.page ?? 1);
+  return { rows: rows.slice((page - 1) * pageSize, page * pageSize), total: rows.length, page, pageSize };
+}
+
+export interface TenantDetail extends TenantRow {
+  status: string;
+  trialEndsAt: Date;
+  suspendedReason: string | null;
+  quarantineReason: string | null;
+  subscription: { tier: string; interval: string; amount: number; status: string; periodStart: Date; periodEnd: Date } | null;
+  usage: { products: number; staff: number; ordersThisMonth: number; gmv30Days: number; ordersTotal: number; storageMb: number };
+  domains: { domain: string; verified: boolean; sslStatus: string; isPrimary: boolean }[];
+  proofs: { id: string; plan: string; interval: string; amount: number; provider: string; trxId: string; status: string; createdAt: Date }[];
+  audit: { id: string; action: string; actorId: string; createdAt: Date; details: unknown }[];
+}
+
+export async function getTenantDetail(actor: PlatformActor, tenantId: string, deps?: Deps): Promise<TenantDetail> {
+  assertPlatformCan(actor, "tenants", "view");
+  const db = dbOf(deps), now = nowOf(deps);
+  const t = await db.tenant.findUnique({ where: { id: tenantId }, include: { subscription: true } });
+  if (!t) throw new NotFoundError("Store");
+  const since = new Date(now.getTime() - 30 * 86_400_000);
+  const month = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  const [staff, gmv, ordersTotal, usageRow, domains, proofs, audit] = await Promise.all([
+    db.tenantUser.count({ where: { tenantId, isActive: true } }),
+    db.order.aggregate({ where: { tenantId, status: "DELIVERED", deliveredAt: { gte: since } }, _sum: { totalAmount: true } }),
+    db.order.count({ where: { tenantId } }),
+    db.usageCounter.findFirst({ where: { tenantId, metric: "orders", periodStart: { gte: month } }, orderBy: { periodStart: "desc" } }),
+    db.domain.findMany({ where: { tenantId }, select: { domain: true, verified: true, sslStatus: true, isPrimary: true } }),
+    db.paymentProof.findMany({ where: { tenantId }, orderBy: { createdAt: "desc" }, take: 20 }),
+    db.platformAuditLog.findMany({ where: { tenantId }, orderBy: { createdAt: "desc" }, take: 20 }),
+  ]);
+  return {
+    id: t.id, name: t.name, subdomain: t.subdomain, ownerName: t.ownerName, ownerEmail: t.ownerEmail, ownerPhone: t.ownerPhone, tier: t.planTier, access: accessOf(t, t.subscription, now),
+    quarantined: t.quarantined, createdAt: t.createdAt, status: t.status, trialEndsAt: t.trialEndsAt, suspendedReason: t.suspendedReason, quarantineReason: t.quarantineReason,
+    subscription: t.subscription ? { tier: t.subscription.planTier, interval: t.subscription.interval, amount: Number(t.subscription.amount), status: t.subscription.status, periodStart: t.subscription.currentPeriodStart, periodEnd: t.subscription.currentPeriodEnd } : null,
+    usage: { products: t.productCount, staff, ordersThisMonth: Number(usageRow?.value ?? 0), gmv30Days: Number(gmv._sum.totalAmount ?? 0), ordersTotal, storageMb: Math.round(Number(t.storageBytesUsed) / 1_048_576) },
+    domains, proofs: proofs.map((p) => ({ id: p.id, plan: p.planTier, interval: p.billingPeriod, amount: Number(p.amount), provider: p.mfsProvider, trxId: p.trxId, status: p.status, createdAt: p.createdAt })),
+    audit: audit.map((a) => ({ id: a.id, action: a.action, actorId: a.actorId, createdAt: a.createdAt, details: a.details })),
+  };
+}
+
+// ---- Payments ------------------------------------------------------------------------------------------------------
+
+export interface PaymentRow {
+  id: string;
+  tenantId: string;
+  storeName: string;
+  subdomain: string;
+  plan: string;
+  interval: string;
+  amount: number;
+  provider: string;
+  senderNumber: string;
+  trxId: string;
+  note: string | null;
+  status: string;
+  rejectionReason: string | null;
+  createdAt: Date;
+  approvedAt: Date | null;
+  /** Other proofs with the same sender number: a hint that one person is paying for several stores, or reusing a number. */
+  senderSeenOnOtherStores: number;
+}
+
+export async function listPayments(actor: PlatformActor, status: "PENDING" | "APPROVED" | "REJECTED" | "ALL" = "PENDING", deps?: Deps): Promise<PaymentRow[]> {
+  assertPlatformCan(actor, "payments", "view");
+  const db = dbOf(deps);
+  const rows = await db.paymentProof.findMany({ where: status === "ALL" ? {} : { status }, orderBy: { createdAt: status === "PENDING" ? "asc" : "desc" }, take: 200, include: { tenant: { select: { name: true, subdomain: true } } } });
+  const senders = [...new Set(rows.map((r) => r.senderNumber))];
+  const others = senders.length ? await db.paymentProof.groupBy({ by: ["senderNumber", "tenantId"], where: { senderNumber: { in: senders } } }) : [];
+  return rows.map((p) => ({
+    id: p.id, tenantId: p.tenantId, storeName: p.tenant.name, subdomain: p.tenant.subdomain, plan: p.planTier, interval: p.billingPeriod, amount: Number(p.amount), provider: p.mfsProvider,
+    senderNumber: p.senderNumber, trxId: p.trxId, note: p.note, status: p.status, rejectionReason: p.rejectionReason, createdAt: p.createdAt, approvedAt: p.approvedAt,
+    senderSeenOnOtherStores: others.filter((o) => o.senderNumber === p.senderNumber && o.tenantId !== p.tenantId).length,
+  }));
+}
+
+export interface Approved {
+  tenantId: string;
+  plan: string;
+  interval: string;
+  periodStart: Date;
+  periodEnd: Date;
+}
+
+/**
+ * The money is in the platform's bKash or Nagad: switch the plan on. Idempotent against double clicks (the proof row is locked,
+ * and only a PENDING one is approved). Paying the same plan again before it runs out adds a period to the end; changing plan
+ * starts a fresh period now (there is no proration yet).
+ */
+export async function approveSubscriptionPayment(actor: PlatformActor, proofId: string, deps?: Deps): Promise<Approved> {
+  assertPlatformCan(actor, "payments", "edit");
+  const db = dbOf(deps), now = nowOf(deps);
+  const out = await db.$transaction(async (tx) => {
+    const locked = await tx.$queryRaw<{ id: string }[]>`SELECT id FROM "PaymentProof" WHERE id = ${proofId} FOR UPDATE`;
+    if (locked.length === 0) throw new NotFoundError("Payment");
+    const proof = await tx.paymentProof.findUniqueOrThrow({ where: { id: proofId } });
+    if (proof.status !== "PENDING") throw new ValidationError(proof.status === "APPROVED" ? "This payment was already approved." : "This payment was already rejected.");
+    await tx.$queryRaw`SELECT id FROM "Tenant" WHERE id = ${proof.tenantId} FOR UPDATE`;
+    const tenant = await tx.tenant.findUniqueOrThrow({ where: { id: proof.tenantId }, include: { subscription: true } });
+    const sub = tenant.subscription;
+    const stillPaid = sub && Number(sub.amount) > 0 && sub.currentPeriodEnd > now && sub.planTier === proof.planTier;
+    const periodStart = stillPaid ? sub!.currentPeriodEnd : now;
+    const periodEnd = addPeriod(periodStart, proof.billingPeriod);
+    const data = { planTier: proof.planTier, interval: proof.billingPeriod, status: "ACTIVE" as const, amount: proof.amount, currentPeriodStart: stillPaid ? sub!.currentPeriodStart : periodStart, currentPeriodEnd: periodEnd, gateway: "MANUAL_MFS", cancelAtPeriodEnd: false, canceledAt: null };
+    await tx.subscription.upsert({ where: { tenantId: tenant.id }, create: { tenantId: tenant.id, ...data }, update: data });
+    await tx.tenant.update({ where: { id: tenant.id }, data: { planTier: proof.planTier, status: tenant.suspendedReason ? "SUSPENDED" : "ACTIVE" } });
+    await tx.paymentProof.update({ where: { id: proof.id }, data: { status: "APPROVED", approvedBy: actor.id, approvedAt: now, appliedFrom: periodStart, appliedTo: periodEnd } });
+    await log(tx, actor, "PAYMENT_APPROVED", tenant.id, { proofId, plan: proof.planTier, interval: proof.billingPeriod, amount: Number(proof.amount), trxId: proof.trxId, periodEnd });
+    return { tenantId: tenant.id, plan: proof.planTier, interval: proof.billingPeriod, periodStart, periodEnd };
+  });
+  await resync(out.tenantId);
+  await publishEvent("billing/payment-approved", { tenantId: out.tenantId, plan: out.plan, interval: out.interval, periodEnd: out.periodEnd.toISOString() });
+  return out;
+}
+
+export async function rejectSubscriptionPayment(actor: PlatformActor, proofId: string, reason: string, deps?: Deps): Promise<void> {
+  assertPlatformCan(actor, "payments", "edit");
+  const why = reason.trim().slice(0, 200);
+  if (why.length < 3) throw new ValidationError("Tell the store why, for example: TrxID not found in our bKash");
+  const db = dbOf(deps), now = nowOf(deps);
+  await db.$transaction(async (tx) => {
+    const locked = await tx.$queryRaw<{ id: string }[]>`SELECT id FROM "PaymentProof" WHERE id = ${proofId} FOR UPDATE`;
+    if (locked.length === 0) throw new NotFoundError("Payment");
+    const proof = await tx.paymentProof.findUniqueOrThrow({ where: { id: proofId } });
+    if (proof.status !== "PENDING") throw new ValidationError("This payment was already decided.");
+    // The TrxID stays on file (and unique), so a rejected number cannot simply be submitted again for another store.
+    await tx.paymentProof.update({ where: { id: proofId }, data: { status: "REJECTED", rejectionReason: why, approvedBy: actor.id, approvedAt: now } });
+    await log(tx, actor, "PAYMENT_REJECTED", proof.tenantId, { proofId, trxId: proof.trxId, reason: why });
+  });
+}
+
+// ---- Store controls ------------------------------------------------------------------------------------------------
+
+async function tenantFor(tx: Tx, id: string) {
+  const t = await tx.tenant.findUnique({ where: { id }, include: { subscription: true } });
+  if (!t) throw new NotFoundError("Store");
+  return t;
+}
+
+/** Switches a store off for a reason that is not an unpaid bill. The store and its admin are locked at once. */
+export async function suspendTenant(actor: PlatformActor, tenantId: string, reason: string, deps?: Deps): Promise<void> {
+  assertPlatformCan(actor, "suspend", "edit");
+  const why = reason.trim().slice(0, 300);
+  if (why.length < 5) throw new ValidationError("Write the reason. The store owner will see it.");
+  const db = dbOf(deps), now = nowOf(deps);
+  await db.$transaction(async (tx) => {
+    const t = await tenantFor(tx, tenantId);
+    await tx.tenant.update({ where: { id: tenantId }, data: { status: "SUSPENDED", suspendedReason: why, suspendedAt: now } });
+    await log(tx, actor, "TENANT_SUSPENDED", tenantId, { reason: why, from: t.status });
+  });
+  await resync(tenantId);
+}
+
+/** Lifts a platform suspension. The status is then worked out from the dates again, so an unpaid store does not come back open. */
+export async function reactivateTenant(actor: PlatformActor, tenantId: string, deps?: Deps): Promise<void> {
+  assertPlatformCan(actor, "suspend", "edit");
+  const db = dbOf(deps), now = nowOf(deps);
+  await db.$transaction(async (tx) => {
+    const t = await tenantFor(tx, tenantId);
+    if (!t.suspendedReason) throw new ValidationError("This store was not suspended by the platform.");
+    const a = accessOf({ ...t, suspendedReason: null }, t.subscription, now);
+    await tx.tenant.update({ where: { id: tenantId }, data: { suspendedReason: null, suspendedAt: null, status: statusFor(a.state, t.status) } });
+    await log(tx, actor, "TENANT_REACTIVATED", tenantId, { now: a.state });
+  });
+  await resync(tenantId);
+}
+
+export async function extendTrial(actor: PlatformActor, tenantId: string, days: number, deps?: Deps): Promise<Date> {
+  assertPlatformCan(actor, "adjust", "edit");
+  if (!Number.isInteger(days) || days < 1 || days > 60) throw new ValidationError("Extend by 1 to 60 days");
+  const db = dbOf(deps), now = nowOf(deps);
+  const end = await db.$transaction(async (tx) => {
+    const t = await tenantFor(tx, tenantId);
+    if (t.subscription && Number(t.subscription.amount) > 0) throw new ValidationError("This store is paying. Extend its plan by approving a payment instead.");
+    // Count from the later of now and the old end, so extending a lapsed trial gives the full days from today.
+    const from = t.trialEndsAt > now ? t.trialEndsAt : now;
+    const trialEndsAt = new Date(from.getTime() + days * 86_400_000);
+    await tx.tenant.update({ where: { id: tenantId }, data: { trialEndsAt } });
+    if (t.subscription) await tx.subscription.update({ where: { tenantId }, data: { currentPeriodEnd: trialEndsAt, status: "TRIALING" } });
+    const a = accessOf({ ...t, trialEndsAt }, t.subscription ? { amount: t.subscription.amount, currentPeriodEnd: trialEndsAt } : null, now);
+    if (!t.suspendedReason) await tx.tenant.update({ where: { id: tenantId }, data: { status: statusFor(a.state, t.status) } });
+    await log(tx, actor, "TRIAL_EXTENDED", tenantId, { days, trialEndsAt });
+    return trialEndsAt;
+  });
+  await resync(tenantId);
+  return end;
+}
+
+export async function changePlan(actor: PlatformActor, tenantId: string, tier: "STARTER" | "PRO" | "BUSINESS", deps?: Deps): Promise<void> {
+  assertPlatformCan(actor, "adjust", "edit");
+  if (!["STARTER", "PRO", "BUSINESS"].includes(tier)) throw new ValidationError("Choose a plan");
+  const db = dbOf(deps);
+  await db.$transaction(async (tx) => {
+    const t = await tenantFor(tx, tenantId);
+    if (t.planTier === tier) return;
+    await tx.tenant.update({ where: { id: tenantId }, data: { planTier: tier } });
+    if (t.subscription) await tx.subscription.update({ where: { tenantId }, data: { planTier: tier } });
+    await log(tx, actor, "PLAN_CHANGED", tenantId, { from: t.planTier, to: tier });
+  });
+}
+
+/** A person has looked at a store flagged by the brand scanner. */
+export async function reviewQuarantine(actor: PlatformActor, tenantId: string, decision: "APPROVE" | "SUSPEND", note: string, deps?: Deps): Promise<void> {
+  assertPlatformCan(actor, "suspend", "edit");
+  const why = note.trim().slice(0, 300);
+  if (why.length < 3) throw new ValidationError("Write what you checked, for example: has a trade licence in the name");
+  const db = dbOf(deps), now = nowOf(deps);
+  await db.$transaction(async (tx) => {
+    const t = await tenantFor(tx, tenantId);
+    if (!t.quarantined) throw new ValidationError("This store is not flagged.");
+    if (decision === "APPROVE") await tx.tenant.update({ where: { id: tenantId }, data: { quarantined: false } });
+    else await tx.tenant.update({ where: { id: tenantId }, data: { quarantined: false, status: "SUSPENDED", suspendedReason: `Brand review: ${why}`, suspendedAt: now } });
+    await log(tx, actor, decision === "APPROVE" ? "QUARANTINE_APPROVED" : "QUARANTINE_SUSPENDED", tenantId, { note: why, matched: t.quarantineReason });
+  });
+  if (decision === "SUSPEND") await resync(tenantId);
+}
+
+// ---- Plans ---------------------------------------------------------------------------------------------------------
+
+export async function listPlans(actor: PlatformActor, deps?: Deps): Promise<(PlanView & { isPublic: boolean; stores: number })[]> {
+  assertPlatformCan(actor, "plans", "view");
+  const db = dbOf(deps);
+  const [plans, counts] = await Promise.all([db.plan.findMany({ orderBy: { sortOrder: "asc" } }), db.tenant.groupBy({ by: ["planTier"], _count: { _all: true } })]);
+  return plans.map((p) => ({ ...toPlanView(p), isPublic: p.isPublic, stores: counts.find((c) => c.planTier === p.tier)?._count._all ?? 0 }));
+}
+
+export interface PlanPatch {
+  priceMonthlyBdt?: number;
+  priceYearlyBdt?: number;
+  trialDays?: number;
+  isPublic?: boolean;
+  /** null means unlimited. */
+  limits?: Partial<Record<"products" | "ordersPerMonth" | "staff" | "storageGb" | "smsCredits" | "landingPages", number | null>>;
+}
+
+/** Prices and limits live in the Plan table (docs/05). A change applies at once to everyone on the plan, because limits are read live. */
+export async function updatePlan(actor: PlatformActor, tier: string, patch: PlanPatch, deps?: Deps): Promise<void> {
+  assertPlatformCan(actor, "plans", "edit");
+  if (!["STARTER", "PRO", "BUSINESS", "ENTERPRISE"].includes(tier)) throw new NotFoundError("Plan");
+  const db = dbOf(deps);
+  const bad = (n: unknown, max: number) => typeof n !== "number" || !Number.isFinite(n) || n < 0 || n > max;
+  if (patch.priceMonthlyBdt !== undefined && bad(patch.priceMonthlyBdt, 1_000_000)) throw new ValidationError("Enter the monthly price in taka");
+  if (patch.priceYearlyBdt !== undefined && bad(patch.priceYearlyBdt, 10_000_000)) throw new ValidationError("Enter the yearly price in taka");
+  if (patch.trialDays !== undefined && (!Number.isInteger(patch.trialDays) || patch.trialDays < 0 || patch.trialDays > 60)) throw new ValidationError("Trial days are 0 to 60");
+  for (const [k, v] of Object.entries(patch.limits ?? {})) if (v !== null && (v === undefined || bad(v, 1_000_000_000))) throw new ValidationError(`Enter a number for ${k}, or leave it unlimited`);
+  await db.$transaction(async (tx) => {
+    const p = await tx.plan.findUnique({ where: { tier: tier as never } });
+    if (!p) throw new NotFoundError("Plan");
+    const limits = { ...((p.limits ?? {}) as Record<string, unknown>), ...(patch.limits ?? {}) };
+    await tx.plan.update({
+      where: { tier: tier as never },
+      data: {
+        ...(patch.priceMonthlyBdt !== undefined ? { priceMonthlyBdt: patch.priceMonthlyBdt } : {}), ...(patch.priceYearlyBdt !== undefined ? { priceYearlyBdt: patch.priceYearlyBdt } : {}),
+        ...(patch.trialDays !== undefined ? { trialDays: patch.trialDays } : {}), ...(patch.isPublic !== undefined ? { isPublic: patch.isPublic } : {}), limits: limits as Prisma.InputJsonValue,
+      },
+    });
+    await log(tx, actor, "PLAN_EDITED", null, { tier, patch, before: { priceMonthlyBdt: Number(p.priceMonthlyBdt), priceYearlyBdt: Number(p.priceYearlyBdt), trialDays: p.trialDays, limits: p.limits } });
+  });
+}
+
+// ---- Audit ---------------------------------------------------------------------------------------------------------
+
+export async function listPlatformAudit(actor: PlatformActor, opts: { tenantId?: string; action?: string; limit?: number } = {}, deps?: Deps) {
+  assertPlatformCan(actor, "audit", "view");
+  const rows = await dbOf(deps).platformAuditLog.findMany({
+    where: { ...(opts.tenantId ? { tenantId: opts.tenantId } : {}), ...(opts.action ? { action: opts.action } : {}) }, orderBy: { createdAt: "desc" }, take: Math.min(opts.limit ?? 100, 500),
+  });
+  return rows.map((r) => ({ id: r.id, action: r.action, actorId: r.actorId, tenantId: r.tenantId, details: r.details, createdAt: r.createdAt }));
+}
+
+// ---- The sweep -----------------------------------------------------------------------------------------------------
+
+export interface LifecycleResult {
+  checked: number;
+  changed: number;
+  toGrace: number;
+  toReadOnly: number;
+  toLocked: number;
+  reminders: number;
+}
+
+/**
+ * Run daily (or more often). Makes each store's stored status match its dates, so the storefront router shows the offline page
+ * from day 4 and the subscription says what it is. Safe to run twice. A store switched off by the platform, or cancelled, is left alone.
+ * Reminders are published once, on the day a milestone is reached (3 and 1 days before, then days 1, 4 and 15 overdue), so the
+ * sweep must run at least daily; messaging subscribes to `billing/reminder`.
+ */
+export async function runBillingLifecycle(deps?: Deps): Promise<LifecycleResult> {
+  const db = dbOf(deps), now = nowOf(deps);
+  const tenants = await db.tenant.findMany({ where: { status: { not: "CANCELLED" }, suspendedReason: null }, include: { subscription: true } });
+  const res: LifecycleResult = { checked: tenants.length, changed: 0, toGrace: 0, toReadOnly: 0, toLocked: 0, reminders: 0 };
+  const changedIds: string[] = [];
+  for (const t of tenants) {
+    const a = accessOf(t, t.subscription, now);
+    const status = statusFor(a.state, t.status);
+    const subStatus = a.state === "TRIAL" ? "TRIALING" : a.state === "ACTIVE" ? "ACTIVE" : a.state === "GRACE" ? "PAST_DUE" : "UNPAID";
+    if (status !== t.status || (t.subscription && t.subscription.status !== subStatus)) {
+      await db.$transaction(async (tx) => {
+        await tx.tenant.update({ where: { id: t.id }, data: { status } });
+        if (t.subscription) await tx.subscription.update({ where: { tenantId: t.id }, data: { status: subStatus } });
+        await log(tx, "SYSTEM", "STATUS_CHANGED", t.id, { from: t.status, to: status, state: a.state });
+      });
+      res.changed++;
+      if (status !== t.status) changedIds.push(t.id);
+      if (a.state === "GRACE") res.toGrace++;
+      if (a.state === "READ_ONLY") res.toReadOnly++;
+      if (a.state === "LOCKED") res.toLocked++;
+    }
+    const kind = a.overdueDays === 1 ? "PAYMENT_OVERDUE" : a.overdueDays === 4 ? "READ_ONLY_STARTED" : a.overdueDays === 15 ? "LOCKED"
+      : a.daysLeft !== null && (a.daysLeft === 3 || a.daysLeft === 1) ? (a.state === "TRIAL" ? "TRIAL_ENDING" : "RENEWAL_DUE") : null;
+    if (kind) {
+      await publishEvent("billing/reminder", { tenantId: t.id, kind, daysLeft: a.daysLeft });
+      res.reminders++;
+    }
+  }
+  for (const id of changedIds) await resync(id);
+  return res;
+}

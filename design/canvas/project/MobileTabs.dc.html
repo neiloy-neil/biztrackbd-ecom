@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mobile tab bar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:390px;height:84px;box-sizing:border-box;background:#fff;border-top:1px solid #E7E7F0;display:flex;padding:8px 4px 0;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;position:relative">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{{t.color}}" stroke-width="{{t.sw}}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{t.d}}"/></svg>
+<sc-if value="{{t.hasBadge}}" hint-placeholder-val="{{false}}"><div style="position:absolute;top:-4px;left:50%;margin-left:4px;min-width:16px;height:16px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-sizing:content-box">{{t.badge}}</div></sc-if>
+<div style="font-size:11px;font-weight:{{t.weight}};color:{{t.color}}">{{t.label}}</div>
+</div>
+</sc-for>
+<div style="position:absolute;left:123px;bottom:8px;width:144px;height:5px;border-radius:3px;background:#1A1A4E"></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","options":["home","orders","products","customers","more"],"default":"home"},"$preview":{"width":390,"height":84}}'>
+class Component extends DCLogic {
+renderVals() {
+const a = this.props.active ?? 'home';
+const tabs = [
+['home','Home','M3 10.5L12 3l9 7.5M5 9.5V21h5v-6h4v6h5V9.5'],
+['orders','Orders','M5 7h14l-1 13H6L5 7zM9 7V6a3 3 0 016 0v1',12],
+['products','Products','M3 12V4h8l10 10-8 8L3 12zM8 8h.01'],
+['customers','Customers','M9 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM2.5 20c.5-3.5 3.2-5.5 6.5-5.5s6 2 6.5 5.5M16 4.7a3.5 3.5 0 010 6.6M18 14.8c2 .6 3.2 2.3 3.5 5.2'],
+['more','More','M4 7h16M4 12h16M4 17h16'],
+];
+return { tabs: tabs.map(([k,label,d,badge]) => ({ label, d, hasBadge: !!badge, badge, color: k===a?'#5B4FE8':'#6B6B8D', weight: k===a?700:500, sw: k===a?2.1:1.8 })) };
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin fraud and risk</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="orders" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div style="flex-grow:1"><div style="font-size:13px;font-weight:600;color:#6B6B8D">Orders</div><h1 style="margin:2px 0 0;font-size:24px;font-weight:700">Fraud and risk</h1></div><div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Risk rules</div><div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Blocked list</div></div>
+
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#4B4B73">Orders flagged (30 days)</div><div style="font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">23</div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#B45309;font-weight:600">Waiting for your decision</div><div style="font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">4</div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#4B4B73">Held or blocked</div><div style="font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">9</div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:16px 20px"><div style="font-size:13px;color:#4B4B73">Returns avoided (estimate)</div><div style="font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">৳ 14,200</div></div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:999 1 600px;min-width:0;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:16px;font-weight:700">Orders that need a decision</div>
+<sc-for list="{{orders}}" as="o" hint-placeholder-count="4">
+<div style="background:#fff;border:1px solid #E7E7F0;border-left:4px solid {{o.edge}};border-radius:12px;padding:18px 20px;display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start">
+<div style="flex:1 1 300px;min-width:0">
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:14px;font-weight:700;color:#5B4FE8">{{o.id}}</span><span style="padding:3px 10px;border-radius:11px;font-size:12px;font-weight:700;background:{{o.rBg}};color:{{o.rColor}}">{{o.risk}} risk · {{o.score}}</span><span style="font-size:12.5px;color:#6B6B8D">{{o.when}}</span></div>
+<div style="font-size:15px;font-weight:700;margin-top:8px">{{o.name}} <span style="font-weight:500;color:#4B4B73;font-variant-numeric:tabular-nums">· {{o.phone}}</span></div>
+<div style="font-size:13px;color:#4B4B73;margin-top:2px">{{o.area}} · COD · {{o.total}}</div>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">
+<sc-for list="{{o.reasons}}" as="r" hint-placeholder-count="3"><span style="padding:3px 10px;border-radius:11px;background:#FDF3E3;color:#B45309;font-size:12px;font-weight:600">{{r}}</span></sc-for>
+</div>
+</div>
+<div style="flex:0 0 220px;display:flex;flex-direction:column;gap:8px">
+<div style="font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px">COURIER HISTORY FOR THIS PHONE</div>
+<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;height:8px;border-radius:4px;background:#FCEBEB"><div style="width:{{o.ok}};height:8px;border-radius:4px;background:#15803D"></div></div><div style="font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">{{o.ok}}</div></div>
+<div style="font-size:12.5px;color:#4B4B73">{{o.hist}}</div>
+</div>
+<div style="flex:0 0 100%;display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid #F0F0F6;padding-top:14px">
+<div style="height:38px;padding:0 16px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:13.5px;font-weight:700;display:flex;align-items:center">Call customer</div>
+<div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;font-size:13.5px;font-weight:600;display:flex;align-items:center">Ask for advance payment</div>
+<div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;font-size:13.5px;font-weight:600;display:flex;align-items:center">Approve</div>
+<div style="height:38px;padding:0 16px;border:1px solid #F1C0C0;border-radius:8px;color:#DC2626;font-size:13.5px;font-weight:600;display:flex;align-items:center">Cancel and block</div>
+</div>
+</div>
+</sc-for>
+</div>
+
+<div style="flex:1 1 340px;min-width:300px;display:flex;flex-direction:column;gap:20px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 22px">
+<div style="font-size:15px;font-weight:700;margin-bottom:14px">When an order looks risky</div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-for list="{{rules}}" as="r" hint-placeholder-count="5">
+<div style="display:flex;gap:12px;align-items:flex-start"><div style="width:36px;height:20px;border-radius:10px;background:{{r.bg}};position:relative;flex:0 0 36px;margin-top:2px"><div style="position:absolute;top:2px;left:{{r.pos}};width:16px;height:16px;border-radius:8px;background:#fff"></div></div><div><div style="font-size:13.5px;font-weight:600;line-height:1.4">{{r.t}}</div><div style="font-size:12.5px;color:#6B6B8D;margin-top:2px;line-height:1.45">{{r.s}}</div></div></div>
+</sc-for>
+</div>
+</div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 22px">
+<div style="display:flex;align-items:center;margin-bottom:12px"><div style="font-size:15px;font-weight:700;flex-grow:1">Blocked numbers</div><div style="font-size:13px;font-weight:700;color:#5B4FE8">Add</div></div>
+<div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px;font-variant-numeric:tabular-nums"><div style="display:flex"><span style="flex-grow:1;font-weight:600">01911-000123</span><span style="color:#6B6B8D">3 failed deliveries</span></div><div style="display:flex"><span style="flex-grow:1;font-weight:600">01611-998877</span><span style="color:#6B6B8D">Fake order</span></div><div style="display:flex"><span style="flex-grow:1;font-weight:600">01511-445566</span><span style="color:#6B6B8D">Refused 2 parcels</span></div></div>
+</div>
+<div style="background:#F4F3FF;border-radius:12px;padding:16px 18px;font-size:13px;line-height:1.55;color:#4B4B73"><b style="color:#1A1A4E">How we check.</b> We read delivery results from your connected courier accounts and from your own past orders. We never show another store's customer names or addresses.</div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1250}}'>
+class Component extends DCLogic {
+renderVals() {
+const c = { High: ['#FCEBEB','#DC2626','#DC2626'], Medium: ['#FDF3E3','#B45309','#B45309'] };
+const d = [
+['BT-10490','Today, 11:02','Habib Rahman','01911-220044','Gazipur Sadar',' ৳ 6,400','High',82,'28%','5 of 7 parcels delivered. 2 returned by customer.',['Low delivery success','High-value COD','Phone used on 3 addresses']],
+['BT-10488','Today, 10:20','Sumon Mia','01611-554433','Narayanganj',' ৳ 3,150','High',74,'40%','2 of 5 parcels delivered. 3 refused at door.',['Refused parcels','New customer']],
+['BT-10486','Today, 9:40','Roksana Begum','01717-889900','Mirpur, Dhaka',' ৳ 2,850','Medium',55,'67%','4 of 6 parcels delivered.',['Address looks incomplete']],
+['BT-10483','Yesterday','Anik Das','01820-334455','Uttara, Dhaka',' ৳ 5,200','Medium',48,'No history','First time we see this phone number.',['New phone number','High-value COD']],
+];
+return {
+orders: d.map(([id,when,name,phone,area,total,risk,score,ok,hist,reasons]) => ({ id, when, name, phone, area, total, risk, score, ok, hist, reasons, edge: c[risk][2], rBg: c[risk][0], rColor: c[risk][1] })),
+rules: [
+{ t:'Hold orders with high risk', s:'We pause booking until you decide.', bg:'#5B4FE8', pos:'18px' },
+{ t:'Flag when delivery success is below 50%', s:'Based on courier results for the phone number.', bg:'#5B4FE8', pos:'18px' },
+{ t:'Ask for advance payment on COD above ৳ 5,000 for risky orders', s:'Shows bKash instructions to the customer.', bg:'#5B4FE8', pos:'18px' },
+{ t:'Limit to 3 orders per phone number per day', s:'Stops repeated fake orders.', bg:'#D5D5E4', pos:'2px' },
+{ t:'Send an SMS to confirm every COD order', s:'Customer replies 1 to confirm. Uses SMS credits.', bg:'#D5D5E4', pos:'2px' },
+],
+};
+}
+}
+</script>
+</body>
+</html>

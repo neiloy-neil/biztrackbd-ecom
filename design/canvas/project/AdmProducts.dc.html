@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin products list</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="products" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+<h1 style="margin:0;font-size:24px;font-weight:700;flex-grow:1">Products</h1>
+<div style="display:flex;align-items:center;gap:8px;height:38px;box-sizing:border-box;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4B4B73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg>Import CSV</div>
+<div style="display:flex;align-items:center;gap:8px;height:38px;box-sizing:border-box;padding:0 18px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add product</div>
+</div>
+
+<div style="display:flex;gap:28px;border-bottom:1px solid #E7E7F0;overflow-x:auto">
+<div style="padding:6px 0 12px;border-bottom:2.5px solid #5B4FE8;margin-bottom:-1px;font-size:14px;font-weight:600;white-space:nowrap">All <span style="padding:1px 8px;border-radius:10px;font-size:12px;font-weight:700;background:#E9E7FD;color:#5B4FE8">64</span></div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D;white-space:nowrap">Active <span style="padding:1px 8px;border-radius:10px;font-size:12px;font-weight:700;background:#EFEFF6;color:#4B4B73">58</span></div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D;white-space:nowrap">Draft <span style="padding:1px 8px;border-radius:10px;font-size:12px;font-weight:700;background:#EFEFF6;color:#4B4B73">4</span></div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D;white-space:nowrap">Out of stock <span style="padding:1px 8px;border-radius:10px;font-size:12px;font-weight:700;background:#FCEBEB;color:#DC2626">2</span></div>
+</div>
+
+<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+<div style="flex:1 1 280px;max-width:420px;display:flex;align-items:center;gap:10px;height:38px;box-sizing:border-box;padding:0 12px;border:1px solid #D5D5E4;border-radius:8px;background:#fff"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 18a7 7 0 100-14 7 7 0 000 14zM20 20l-4-4"/></svg><span style="font-size:13.5px;color:#6B6B8D">Search by name or SKU</span></div>
+<div style="padding:7px 14px;border:1px solid #D5D5E4;border-radius:19px;background:#fff;font-size:13px;font-weight:500;color:#4B4B73">Category: All</div>
+<div style="padding:7px 14px;border:1px solid #D5D5E4;border-radius:19px;background:#fff;font-size:13px;font-weight:500;color:#4B4B73">Collection: All</div>
+<div style="flex-grow:1"></div>
+<div style="display:flex;padding:3px;border-radius:17px;background:#EFEFF6;font-size:13px;font-weight:600"><div style="padding:5px 12px;border-radius:14px;background:#fff;border:1px solid #E7E7F0">List</div><div style="padding:5px 12px;color:#6B6B8D">Grid</div></div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="overflow-x:auto"><div style="min-width:880px">
+<div style="display:grid;grid-template-columns:44px minmax(0,2.2fr) 110px 110px 130px 130px 100px;padding:11px 16px;background:#FAFAFC;border-bottom:1px solid #E7E7F0;font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px;align-items:center"><div></div><div>PRODUCT</div><div>STATUS</div><div>STOCK</div><div>CATEGORY</div><div style="text-align:right">PRICE</div><div style="text-align:right">SOLD (30D)</div></div>
+<sc-for list="{{products}}" as="p" hint-placeholder-count="9">
+<div style="display:grid;grid-template-columns:44px minmax(0,2.2fr) 110px 110px 130px 130px 100px;padding:0 16px;height:66px;align-items:center;border-bottom:1px solid #F0F0F6;font-size:13.5px">
+<div><div style="width:18px;height:18px;border-radius:5px;border:1.5px solid #D5D5E4;box-sizing:border-box"></div></div>
+<div style="display:flex;align-items:center;gap:14px;min-width:0"><div style="width:44px;height:44px;border-radius:8px;background:{{p.bg}};flex:0 0 44px;display:flex;align-items:center;justify-content:center"><div style="width:22px;height:22px;border-radius:5px;background:{{p.fg}};opacity:0.9"></div></div><div style="min-width:0"><div style="font-weight:600">{{p.name}}</div><div style="font-size:12px;color:#6B6B8D">{{p.variants}}</div></div></div>
+<div><span style="display:inline-block;padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:{{p.sBg}};color:{{p.sColor}}">{{p.status}}</span></div>
+<div style="font-weight:600;color:{{p.stockColor}};font-variant-numeric:tabular-nums">{{p.stock}}</div>
+<div style="color:#4B4B73">{{p.cat}}</div>
+<div style="text-align:right;font-weight:600;font-variant-numeric:tabular-nums">{{p.price}}</div>
+<div style="text-align:right;color:#4B4B73;font-variant-numeric:tabular-nums">{{p.sold}}</div>
+</div>
+</sc-for>
+</div></div>
+<div style="display:flex;align-items:center;padding:14px 20px;font-size:13px;color:#4B4B73"><div style="flex-grow:1">Showing 1 to 9 of 64 products</div><div style="display:flex;gap:8px"><div style="padding:6px 12px;border:1px solid #D5D5E4;border-radius:7px;font-weight:600;color:#6B6B8D">Previous</div><div style="padding:6px 12px;border:1px solid #D5D5E4;border-radius:7px;font-weight:600">Next</div></div></div>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+const st = { Active: ['#E8F6EE','#15803D'], Draft: ['#EFEFF6','#4B4B73'], 'Out of stock': ['#FCEBEB','#DC2626'] };
+const rows = [
+['Cotton Panjabi, Off-white','5 sizes · 2 colors','Active','24 in stock','Panjabi','৳ 1,150',38,'#F1E9DD','#C9B79C'],
+['Linen Shirt, Sage','4 sizes','Active','31 in stock','Shirts','৳ 850',27,'#E3EBE1','#9DB596'],
+['Slim Chino, Navy','6 sizes','Active','3 in stock','Trousers','৳ 1,290',22,'#E4E6EC','#8A91A6'],
+['Printed Kurti, Rose','4 sizes','Active','18 in stock','Kurti','৳ 1,480',19,'#F5E4E4','#D49C9C'],
+['Cotton Socks, 3-pack','Free size','Active','120 in stock','Accessories','৳ 300',64,'#E4E6EC','#8A91A6'],
+['Leather Wallet, Brown','1 variant','Active','9 in stock','Accessories','৳ 1,650',11,'#F2E2D8','#D0957A'],
+['Eid Special Fatua','5 sizes','Draft','40 in stock','Panjabi','৳ 1,890',0,'#F5EBD0','#CFAE5E'],
+['Denim Jacket, Indigo','4 sizes','Out of stock','0 in stock','Jackets','৳ 3,200',7,'#E1ECF4','#8FB1CC'],
+['Tote Bag, Canvas','1 variant','Active','52 in stock','Bags','৳ 650',15,'#F1E9DD','#C9B79C'],
+];
+return { products: rows.map(([name,variants,status,stock,cat,price,sold,bg,fg]) => ({ name, variants, status, stock, cat, price, sold, bg, fg, sBg: st[status][0], sColor: st[status][1], stockColor: stock.startsWith('0')?'#DC2626':(parseInt(stock)<=5?'#B45309':'#1A1A4E') })) };
+}
+}
+</script>
+</body>
+</html>

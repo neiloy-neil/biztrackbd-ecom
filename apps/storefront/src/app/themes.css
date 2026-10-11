@@ -1,0 +1,75 @@
+/* Visual template layer. Commerce components remain shared; a tenant theme changes tokens and composition only. */
+
+body[data-store-theme="gadgetstudio"] {
+  --bg: #F6F8FC; --surface: #FFFFFF; --ink: #101828; --ink-2: #344054; --muted: #475467; --faint: #667085;
+  --accent: #155EEF; --accent-strong: #1849A9; --accent-ink: #FFFFFF; --hero: #E9F0FF;
+  --line: #E4E7EC; --line-2: #D0D5DD; --field: #98A2B3; --tint-1: #EDF4FF; --tint-2: #ECFDF3; --tint-3: #F2F4F7; --tint-4: #FFF1F3;
+  --radius: 10px;
+}
+body[data-store-theme="gadgetstudio"] .announce { background: #0B1220; }
+body[data-store-theme="gadgetstudio"] .header { box-shadow: 0 1px 3px rgba(16,24,40,.08); }
+body[data-store-theme="gadgetstudio"] .logo { letter-spacing: -.4px; }
+body[data-store-theme="gadgetstudio"] .hero { background: radial-gradient(circle at 82% 20%,#C7D7FE 0 12%,transparent 35%),linear-gradient(135deg,#F3F7FF,#E5EDFF); }
+body[data-store-theme="gadgetstudio"] .hero h1 { letter-spacing: -2px; }
+body[data-store-theme="gadgetstudio"] .pimg { aspect-ratio: 1 / 1; background: #FFFFFF; border: 1px solid var(--line); }
+body[data-store-theme="gadgetstudio"] .pcard { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px; transition: transform .18s,box-shadow .18s; }
+body[data-store-theme="gadgetstudio"] .pcard:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(21,94,239,.1); }
+body[data-store-theme="gadgetstudio"] .cat { border: 1px solid var(--line); }
+
+body[data-store-theme="mini-bunny"] {
+  --bg: #FFF8F3; --surface: #FFFFFF; --ink: #3D2932; --ink-2: #624956; --muted: #765E69; --faint: #8C727E;
+  --accent: #C24173; --accent-strong: #9D174D; --accent-ink: #FFFFFF; --hero: #FFE8DC;
+  --line: #F2DED4; --line-2: #EBCFC3; --field: #D9B9AE; --tint-1: #FFF0E8; --tint-2: #EAF8F0; --tint-3: #EEF0FF; --tint-4: #FFEAF2;
+  --radius: 18px;
+}
+body[data-store-theme="mini-bunny"] .announce { background: #664153; }
+body[data-store-theme="mini-bunny"] .header { border-bottom: 0; box-shadow: 0 3px 18px rgba(102,65,83,.08); }
+body[data-store-theme="mini-bunny"] .logo { letter-spacing: .5px; }
+body[data-store-theme="mini-bunny"] .hero { background: radial-gradient(circle at 85% 18%,#F8CFE0 0 11%,transparent 12%),radial-gradient(circle at 75% 65%,#CDEEDC 0 9%,transparent 10%),linear-gradient(135deg,#FFF3E9,#FFE4ED); }
+body[data-store-theme="mini-bunny"] .hero h1 { letter-spacing: -1.5px; }
+body[data-store-theme="mini-bunny"] .btn { border-radius: 999px; }
+body[data-store-theme="mini-bunny"] .pimg { aspect-ratio: 1 / 1.08; border-radius: 24px; }
+body[data-store-theme="mini-bunny"] .cat { border-radius: 28px; min-height: 150px; }
+body[data-store-theme="mini-bunny"] .trust > div { border: 0; background: var(--surface); border-radius: 22px; padding: 18px; box-shadow: 0 8px 24px rgba(102,65,83,.06); }
+
+body[data-store-theme="axionwear"] {
+  color-scheme: dark;
+  --bg: #0B0D0F; --surface: #15181C; --ink: #F5F7F8; --ink-2: #D0D5D8; --muted: #A7AFB4; --faint: #8C959B;
+  --accent: #D7FF3F; --accent-strong: #D7FF3F; --accent-ink: #090B0C; --hero: #191D21;
+  --line: #292E33; --line-2: #343A40; --field: #596168; --tint-1: #20252A; --tint-2: #17251F; --tint-3: #1D2029; --tint-4: #2A1D21;
+  --success-bg: #153A24; --radius: 2px;
+}
+body[data-store-theme="axionwear"] .announce { background: var(--accent); color: var(--accent-ink); font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+body[data-store-theme="axionwear"] .header { background: rgba(11,13,15,.94); backdrop-filter: blur(14px); }
+body[data-store-theme="axionwear"] .logo, body[data-store-theme="axionwear"] h1, body[data-store-theme="axionwear"] h2 { text-transform: uppercase; letter-spacing: -.02em; }
+body[data-store-theme="axionwear"] .hero { background: linear-gradient(115deg,#0B0D0F 0 55%,#20262B 55%); border-bottom: 1px solid var(--line); }
+body[data-store-theme="axionwear"] .eyebrow { color: var(--accent); }
+body[data-store-theme="axionwear"] .hero h1 { font-weight: 800; }
+body[data-store-theme="axionwear"] .btn { text-transform: uppercase; letter-spacing: .06em; border-radius: 0; }
+body[data-store-theme="axionwear"] .pimg { aspect-ratio: 4 / 5; border-radius: 0; filter: saturate(.82) contrast(1.05); }
+body[data-store-theme="axionwear"] .pcard { border-bottom: 1px solid var(--line); padding-bottom: 16px; }
+body[data-store-theme="axionwear"] .cat { border-radius: 0; border: 1px solid var(--line-2); text-transform: uppercase; }
+body[data-store-theme="axionwear"] .trust > div { border-color: var(--accent); }
+body[data-store-theme="axionwear"] .footer { background: #050607; color: var(--ink); border-top: 1px solid var(--line); }
+
+body[data-store-theme="bindu"] {
+  --bg: #FFF9F7; --surface: #FFFFFF; --ink: #321E28; --ink-2: #5D414F; --muted: #745D68; --faint: #8B747F;
+  --accent: #8A2855; --accent-strong: #68183D; --accent-ink: #FFFFFF; --hero: #F7E4E8;
+  --line: #EEDDE2; --line-2: #E1CCD3; --field: #C9AEB8; --tint-1: #FBECEF; --tint-2: #EEF4ED; --tint-3: #F2EDF7; --tint-4: #F8E8DE;
+  --radius: 18px; --font: Georgia,"Noto Serif Bengali","Times New Roman",serif;
+}
+body[data-store-theme="bindu"] .announce { background: #54243B; }
+body[data-store-theme="bindu"] .header { background: rgba(255,255,255,.94); backdrop-filter: blur(12px); }
+body[data-store-theme="bindu"] .logo { font-weight: 500; letter-spacing: 4px; }
+body[data-store-theme="bindu"] .nav-desktop, body[data-store-theme="bindu"] .header-tools, body[data-store-theme="bindu"] .pname, body[data-store-theme="bindu"] .price, body[data-store-theme="bindu"] .btn { font-family: var(--font-jakarta),var(--font-hind),system-ui,sans-serif; }
+body[data-store-theme="bindu"] .hero { background: linear-gradient(110deg,#FCEFF1,#F3DBE2); }
+body[data-store-theme="bindu"] .hero h1, body[data-store-theme="bindu"] .section-head h2 { font-weight: 500; }
+body[data-store-theme="bindu"] .btn { border-radius: 999px; }
+body[data-store-theme="bindu"] .pimg { aspect-ratio: 4 / 5; border-radius: 999px 999px 20px 20px; }
+body[data-store-theme="bindu"] .cat { border-radius: 999px 999px 22px 22px; justify-content: center; text-align: center; }
+body[data-store-theme="bindu"] .trust { border-block: 1px solid var(--line); padding-block: 24px; }
+body[data-store-theme="bindu"] .trust > div { border: 0; text-align: center; }
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-store-theme] .pcard { transition: none; }
+}

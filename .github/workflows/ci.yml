@@ -1,0 +1,58 @@
+# Continuous integration: runs on every pull request and on pushes to main.
+# The same commands run on a developer machine as `pnpm verify`.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Typecheck, lint, tests, build, size, audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: biztrack_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # The tests rebuild this throw-away database from the migration files; they refuse any name without "test" in it.
+      TEST_DIRECT_URL: postgresql://postgres:postgres@localhost:5432/biztrack_test
+      TEST_DATABASE_URL: postgresql://biztrack_app:app_password@localhost:5432/biztrack_test
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4 # the version comes from "packageManager" in package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
+      - name: Build size budget
+        run: pnpm check:size
+      - name: Production dependency audit
+        run: pnpm audit --prod
+      - name: Full dependency audit (informational)
+        run: pnpm audit
+        continue-on-error: true

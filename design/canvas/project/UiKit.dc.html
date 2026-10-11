@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BizTrackBD component kit</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="max-width:1440px;margin:0 auto;box-sizing:border-box;padding:64px 80px;background:#fff;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E;display:flex;flex-direction:column;gap:56px">
+
+<div><h1 style="margin:0;font-size:30px;font-weight:700;letter-spacing:-0.5px">Component kit</h1><div style="font-size:14.5px;color:#4B4B73;margin-top:6px;max-width:700px;line-height:1.6">Every screen in this file is built from these parts. Admin controls use 8px corners and 40px height (44px on mobile). Pills are for marketing and signup call-to-actions only.</div></div>
+
+<section>
+<h2 style="margin:0 0 18px;font-size:18px;font-weight:700">Buttons</h2>
+<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:18px">
+<div style="height:40px;padding:0 20px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center">Primary</div>
+<div style="height:40px;padding:0 20px;border-radius:8px;background:#4A3FD1;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center">Primary hover</div>
+<div style="height:40px;padding:0 20px;border-radius:8px;border:1px solid #D5D5E4;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Secondary</div>
+<div style="height:40px;padding:0 20px;border-radius:8px;background:#F4F3FF;color:#5B4FE8;font-size:14px;font-weight:700;display:flex;align-items:center">Tinted</div>
+<div style="height:40px;padding:0 12px;color:#5B4FE8;font-size:14px;font-weight:700;display:flex;align-items:center">Text button</div>
+<div style="height:40px;padding:0 20px;border-radius:8px;border:1px solid #F1C0C0;background:#fff;color:#DC2626;font-size:14px;font-weight:600;display:flex;align-items:center">Destructive</div>
+<div style="height:40px;padding:0 20px;border-radius:8px;background:#15803D;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center">Confirm</div>
+<div style="height:40px;padding:0 20px;border-radius:8px;background:#E7E7F0;color:#6B6B8D;font-size:14px;font-weight:700;display:flex;align-items:center">Disabled</div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center">
+<div style="height:32px;padding:0 14px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center">Small</div>
+<div style="height:44px;padding:0 22px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center">Mobile 44px</div>
+<div style="height:56px;padding:0 28px;border-radius:12px;background:#5B4FE8;color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center">Mobile primary action 56px</div>
+<div style="height:54px;padding:0 32px;border-radius:27px;background:#5B4FE8;color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center">Marketing pill</div>
+<div style="height:54px;padding:0 32px;border-radius:27px;border:1.5px solid #D5D5E4;font-size:16px;font-weight:700;display:flex;align-items:center">Marketing pill secondary</div>
+<div style="height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5D5E4;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4B4B73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>With icon</div>
+</div>
+</section>
+
+<section>
+<h2 style="margin:0 0 18px;font-size:18px;font-weight:700">Form fields</h2>
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px">
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Default</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px">Cotton Panjabi</div><div style="font-size:12px;color:#6B6B8D;margin-top:6px">Helper text sits below</div></div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Focused</div><div style="height:40px;box-sizing:border-box;border:2px solid #5B4FE8;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px">Cotton Pan|</div></div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Error</div><div style="height:40px;box-sizing:border-box;border:2px solid #DC2626;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px;color:#6B6B8D">01712-34</div><div style="font-size:12px;color:#DC2626;margin-top:6px;font-weight:600">Enter an 11-digit mobile number</div></div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Disabled</div><div style="height:40px;box-sizing:border-box;border:1px solid #E7E7F0;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px;background:#FAFAFC;color:#6B6B8D">Bangladeshi taka (৳)</div></div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">With unit</div><div style="display:flex;height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;overflow:hidden;font-size:14px"><div style="padding:0 12px;background:#FAFAFC;border-right:1px solid #D5D5E4;display:flex;align-items:center;color:#4B4B73">৳</div><div style="padding:0 12px;display:flex;align-items:center">1,150</div></div></div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Select</div><div style="display:flex;height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;align-items:center;font-size:14px"><span style="flex-grow:1">Panjabi</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div></div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Search</div><div style="display:flex;align-items:center;gap:10px;height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;background:#FAFAFC"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 18a7 7 0 100-14 7 7 0 000 14zM20 20l-4-4"/></svg><span style="font-size:14px;color:#6B6B8D">Search orders</span></div></div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:10px">Selection</div><div style="display:flex;gap:18px;align-items:center"><div style="width:18px;height:18px;border-radius:5px;background:#5B4FE8;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><div style="width:18px;height:18px;border-radius:5px;border:1.5px solid #D5D5E4;box-sizing:border-box"></div><div style="width:18px;height:18px;border-radius:9px;border:5px solid #5B4FE8;box-sizing:border-box"></div><div style="width:18px;height:18px;border-radius:9px;border:1.5px solid #D5D5E4;box-sizing:border-box"></div><div style="width:36px;height:20px;border-radius:10px;background:#5B4FE8;position:relative"><div style="position:absolute;top:2px;left:18px;width:16px;height:16px;border-radius:8px;background:#fff"></div></div><div style="width:36px;height:20px;border-radius:10px;background:#D5D5E4;position:relative"><div style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:8px;background:#fff"></div></div></div></div>
+</div>
+</section>
+
+<section>
+<h2 style="margin:0 0 18px;font-size:18px;font-weight:700">Status badges</h2>
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+<span style="padding:3px 10px;border-radius:11px;background:#E8F6EE;color:#15803D;font-size:12px;font-weight:600">Paid</span>
+<span style="padding:3px 10px;border-radius:11px;background:#E8F6EE;color:#15803D;font-size:12px;font-weight:600">Delivered</span>
+<span style="padding:3px 10px;border-radius:11px;background:#E8F6EE;color:#15803D;font-size:12px;font-weight:600">Connected</span>
+<span style="padding:3px 10px;border-radius:11px;background:#FDF3E3;color:#B45309;font-size:12px;font-weight:600">Check bKash</span>
+<span style="padding:3px 10px;border-radius:11px;background:#FDF3E3;color:#B45309;font-size:12px;font-weight:600">Waiting for DNS</span>
+<span style="padding:3px 10px;border-radius:11px;background:#FCEBEB;color:#DC2626;font-size:12px;font-weight:600">Out of stock</span>
+<span style="padding:3px 10px;border-radius:11px;background:#FCEBEB;color:#DC2626;font-size:12px;font-weight:600">Suspended</span>
+<span style="padding:3px 10px;border-radius:11px;background:#E9E7FD;color:#5B4FE8;font-size:12px;font-weight:600">New</span>
+<span style="padding:3px 10px;border-radius:11px;background:#E9E7FD;color:#5B4FE8;font-size:12px;font-weight:600">Trial</span>
+<span style="padding:3px 10px;border-radius:11px;background:#E6F5FD;color:#0369A1;font-size:12px;font-weight:600">Shipped</span>
+<span style="padding:3px 10px;border-radius:11px;background:#EFEFF6;color:#4B4B73;font-size:12px;font-weight:600">COD</span>
+<span style="padding:3px 10px;border-radius:11px;background:#EFEFF6;color:#4B4B73;font-size:12px;font-weight:600">Draft</span>
+</div>
+</section>
+
+<section>
+<h2 style="margin:0 0 18px;font-size:18px;font-weight:700">Navigation and filters</h2>
+<div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+<div style="display:flex;gap:28px;border-bottom:1px solid #E7E7F0;min-width:360px"><div style="padding:6px 0 12px;border-bottom:2.5px solid #5B4FE8;margin-bottom:-1px;font-size:14px;font-weight:600">All <span style="padding:1px 8px;border-radius:10px;font-size:12px;font-weight:700;background:#E9E7FD;color:#5B4FE8">128</span></div><div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D">New <span style="padding:1px 8px;border-radius:10px;font-size:12px;font-weight:700;background:#EFEFF6;color:#4B4B73">12</span></div><div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D">To pack</div></div>
+<div style="display:flex;padding:3px;border-radius:19px;background:#EFEFF6;font-size:13px;font-weight:600"><div style="padding:6px 16px;border-radius:16px;background:#fff;border:1px solid #E7E7F0">English</div><div style="padding:6px 16px;color:#6B6B8D;font-family:'Hind Siliguri',sans-serif">বাংলা</div></div>
+<div style="display:flex;gap:8px"><span style="padding:7px 14px;border:1px solid #5B4FE8;border-radius:19px;background:#F4F3FF;font-size:13px;font-weight:600;color:#5B4FE8">Courier: Pathao</span><span style="padding:7px 14px;border:1px solid #D5D5E4;border-radius:19px;font-size:13px;font-weight:500;color:#4B4B73">District: All</span></div>
+<div style="display:flex;gap:10px"><div style="padding:10px 14px;border-radius:8px;background:#F4F3FF;color:#5B4FE8;font-size:14px;font-weight:700;width:150px">Orders</div><div style="padding:10px 14px;border-radius:8px;font-size:14px;font-weight:500;width:150px">Products</div></div>
+</div>
+</section>
+
+<section>
+<h2 style="margin:0 0 18px;font-size:18px;font-weight:700">Messages</h2>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+<div style="display:flex;gap:12px;padding:14px 16px;border-radius:10px;background:#E6F5FD"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 100 18 9 9 0 000-18zM12 11v6M12 7.5v.01"/></svg><div><div style="font-size:14px;font-weight:700;color:#0369A1">Information</div><div style="font-size:13px;color:#4B4B73;margin-top:2px;line-height:1.5">Your store is live on its free address.</div></div></div>
+<div style="display:flex;gap:12px;padding:14px 16px;border-radius:10px;background:#E8F6EE"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><div><div style="font-size:14px;font-weight:700;color:#15803D">Success</div><div style="font-size:13px;color:#4B4B73;margin-top:2px;line-height:1.5">Payment confirmed. We sent an SMS to the customer.</div></div></div>
+<div style="display:flex;gap:12px;padding:14px 16px;border-radius:10px;background:#FDF3E3"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2L12 3zM12 10v5M12 18v.01"/></svg><div><div style="font-size:14px;font-weight:700;color:#B45309">Warning</div><div style="font-size:13px;color:#4B4B73;margin-top:2px;line-height:1.5">Your trial ends in 3 days. Choose a plan to keep your store online.</div></div></div>
+<div style="display:flex;gap:12px;padding:14px 16px;border-radius:10px;background:#FCEBEB"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 100 18 9 9 0 000-18zM12 8v5M12 16v.01"/></svg><div><div style="font-size:14px;font-weight:700;color:#DC2626">Error</div><div style="font-size:13px;color:#4B4B73;margin-top:2px;line-height:1.5">Pathao could not book this parcel. Check the address and try again.</div></div></div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:24px;margin-top:20px;align-items:flex-start">
+<div style="background:#1A1A4E;color:#fff;border-radius:10px;padding:12px 16px;font-size:14px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(26,26,78,0.18)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A9F0C4" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Product saved<span style="font-weight:700;color:#A9A2FF;margin-left:8px">Undo</span></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;box-shadow:0 8px 24px rgba(26,26,78,0.12);padding:20px 22px;width:340px"><div style="font-size:16px;font-weight:700">Mark as paid?</div><div style="font-size:13.5px;color:#4B4B73;line-height:1.55;margin:8px 0 18px">We will send the customer an SMS that payment of ৳ 2,150 was received.</div><div style="display:flex;gap:10px;justify-content:flex-end"><div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;font-size:14px;font-weight:600;display:flex;align-items:center">Cancel</div><div style="height:38px;padding:0 18px;border-radius:8px;background:#15803D;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center">Mark as paid</div></div></div>
+</div>
+</section>
+
+<section>
+<h2 style="margin:0 0 18px;font-size:18px;font-weight:700">Data table, meters and empty state</h2>
+<div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start">
+<div style="flex:1 1 560px;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="display:grid;grid-template-columns:36px minmax(0,1fr) 110px 90px;padding:10px 16px;background:#FAFAFC;border-bottom:1px solid #E7E7F0;font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px"><div></div><div>CUSTOMER</div><div>PAYMENT</div><div style="text-align:right">TOTAL</div></div>
+<div style="display:grid;grid-template-columns:36px minmax(0,1fr) 110px 90px;padding:0 16px;height:56px;align-items:center;border-bottom:1px solid #F0F0F6;background:#F4F3FF;font-size:13.5px"><div style="width:18px;height:18px;border-radius:5px;background:#5B4FE8;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><div><div style="font-weight:600">Tania Akter</div><div style="font-size:12px;color:#6B6B8D">Mirpur, Dhaka</div></div><div><span style="padding:3px 10px;border-radius:11px;background:#FDF3E3;color:#B45309;font-size:12px;font-weight:600">Check bKash</span></div><div style="text-align:right;font-weight:600;font-variant-numeric:tabular-nums">৳ 2,450</div></div>
+<div style="display:grid;grid-template-columns:36px minmax(0,1fr) 110px 90px;padding:0 16px;height:56px;align-items:center;font-size:13.5px"><div style="width:18px;height:18px;border-radius:5px;border:1.5px solid #D5D5E4;box-sizing:border-box"></div><div><div style="font-weight:600">Rakib Hasan</div><div style="font-size:12px;color:#6B6B8D">Agrabad, Chattogram</div></div><div><span style="padding:3px 10px;border-radius:11px;background:#EFEFF6;color:#4B4B73;font-size:12px;font-weight:600">COD</span></div><div style="text-align:right;font-weight:600;font-variant-numeric:tabular-nums">৳ 1,890</div></div>
+</div>
+<div style="flex:1 1 300px;display:flex;flex-direction:column;gap:18px">
+<div><div style="display:flex;font-size:13px;margin-bottom:6px"><span style="flex-grow:1;font-weight:600">Products</span><span style="color:#4B4B73">64 of 100</span></div><div style="height:6px;border-radius:3px;background:#E7E7F0"><div style="width:64%;height:6px;border-radius:3px;background:#5B4FE8"></div></div></div>
+<div><div style="display:flex;font-size:13px;margin-bottom:6px"><span style="flex-grow:1;font-weight:600">Staff accounts (limit reached)</span><span style="color:#4B4B73">2 of 2</span></div><div style="height:6px;border-radius:3px;background:#E7E7F0"><div style="width:100%;height:6px;border-radius:3px;background:#B45309"></div></div></div>
+<div style="border:1px dashed #D5D5E4;border-radius:12px;padding:24px;text-align:center"><div style="font-size:15px;font-weight:700">No orders yet</div><div style="font-size:13.5px;color:#4B4B73;margin:6px 0 14px;line-height:1.5">Share your store link to get your first order.</div><div style="display:inline-flex;height:38px;padding:0 18px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:700;align-items:center">Copy store link</div></div>
+</div>
+</div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1700}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

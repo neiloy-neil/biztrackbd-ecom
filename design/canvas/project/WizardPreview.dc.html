@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Wizard live store preview</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:560px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:14px;background:#fff;overflow:hidden;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="height:40px;background:#FAFAFC;border-bottom:1px solid #E7E7F0;display:flex;align-items:center;gap:8px;padding:0 14px">
+<div style="width:10px;height:10px;border-radius:5px;background:#F0A5A5"></div><div style="width:10px;height:10px;border-radius:5px;background:#F2D28B"></div><div style="width:10px;height:10px;border-radius:5px;background:#A9D9B1"></div>
+<div style="margin-left:12px;flex:1;height:24px;border-radius:12px;background:#fff;border:1px solid #E7E7F0;display:flex;align-items:center;padding:0 12px;font-size:12px;color:#4B4B73"><span style="font-weight:700;color:#1A1A4E">{{sub}}</span>.biztrackbd.com</div>
+</div>
+<div style="background:#FBF8F3">
+<div style="display:flex;align-items:center;padding:14px 22px;background:#fff;border-bottom:1px solid #ECECEC"><div style="font-size:15px;font-weight:800;letter-spacing:1.5px;flex-grow:1;text-transform:uppercase">{{name}}</div><div style="display:flex;gap:16px;font-size:12px;color:#4B4B73"><span>Shop</span><span>New</span><span>About</span></div></div>
+<div style="background:#E9DCCB;padding:28px 22px;display:flex;gap:18px;align-items:center">
+<div style="flex:1"><div style="font-size:26px;font-weight:700;line-height:1.15;letter-spacing:-0.5px">Eid collection is here</div><div style="font-size:12.5px;color:#4B4B73;margin:10px 0 16px;line-height:1.5">Handloom cotton, made for Dhaka summers.</div><div style="display:inline-block;padding:10px 20px;border-radius:6px;background:{{accent}};color:#fff;font-size:13px;font-weight:700">Shop now</div></div>
+<div style="width:150px;height:150px;border-radius:10px;background:#F1E9DD;display:flex;align-items:center;justify-content:center"><div style="width:70px;height:84px;background:#C9B79C;border-radius:8px 8px 4px 4px"></div></div>
+</div>
+<div style="padding:20px 22px 26px"><div style="font-size:14px;font-weight:700;margin-bottom:12px">New arrivals</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+<div><div style="aspect-ratio:1;border-radius:8px;background:#F1E9DD"></div><div style="font-size:12px;font-weight:600;margin-top:8px">Cotton Panjabi</div><div style="font-size:12px;font-weight:700;color:{{accent}}">৳ 1,150</div></div>
+<div><div style="aspect-ratio:1;border-radius:8px;background:#E3EBE1"></div><div style="font-size:12px;font-weight:600;margin-top:8px">Linen Shirt</div><div style="font-size:12px;font-weight:700;color:{{accent}}">৳ 850</div></div>
+<div><div style="aspect-ratio:1;border-radius:8px;background:#E4E6EC"></div><div style="font-size:12px;font-weight:600;margin-top:8px">Slim Chino</div><div style="font-size:12px;font-weight:700;color:{{accent}}">৳ 1,290</div></div>
+</div></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"storeName":{"editor":"text","default":"Rongdhonu Fashion"},"sub":{"editor":"text","default":"rongdhonu"},"accent":{"editor":"color","default":"#8C5A3C"},"$preview":{"width":560,"height":640}}'>
+class Component extends DCLogic {
+renderVals() {
+return { name: this.props.storeName ?? 'Rongdhonu Fashion', sub: this.props.sub ?? 'rongdhonu', accent: this.props.accent ?? '#8C5A3C' };
+}
+}
+</script>
+</body>
+</html>

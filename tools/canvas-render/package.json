@@ -1,0 +1,9 @@
+{
+  "name": "@biztrackbd/canvas-render",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "preview": "node render.cjs",
+    "measure": "node render.cjs --measure"
+  }
+}

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Landing page builder</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-direction:column;min-height:1100px;background:#EFEFF6;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+
+<div style="height:56px;flex:0 0 56px;box-sizing:border-box;background:#fff;border-bottom:1px solid #E7E7F0;display:flex;align-items:center;gap:14px;padding:0 16px">
+<div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#4B4B73"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4B4B73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Landing pages</div>
+<div style="width:1px;height:24px;background:#E7E7F0"></div>
+<div style="font-size:14.5px;font-weight:700">Eid Special Fatua</div>
+<div style="padding:3px 10px;border-radius:11px;background:#FDF3E3;color:#B45309;font-size:12px;font-weight:600">Unpublished changes</div>
+<div style="flex-grow:1"></div>
+<div style="font-size:13px;color:#6B6B8D">rongdhonufashion.com/p/eid-fatua</div>
+<div style="height:36px;padding:0 14px;border:1px solid #D5D5E4;border-radius:8px;display:flex;align-items:center;font-size:13.5px;font-weight:600">Preview</div>
+<div style="height:36px;padding:0 20px;border-radius:8px;background:#5B4FE8;color:#fff;display:flex;align-items:center;font-size:13.5px;font-weight:700">Publish</div>
+</div>
+
+<div style="flex:1;display:flex;flex-wrap:wrap;min-height:0">
+
+<div style="flex:0 0 300px;background:#fff;border-right:1px solid #E7E7F0;padding:14px 12px;display:flex;flex-direction:column;gap:4px;box-sizing:border-box">
+<div style="font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px;padding:0 6px 8px">PAGE BLOCKS</div>
+<sc-for list="{{blocks}}" as="b" hint-placeholder-count="8">
+<div style="display:flex;align-items:center;gap:8px;height:44px;padding:0 10px;border-radius:8px;background:{{b.bg}};border:{{b.border}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9AB5" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01"/></svg><div style="flex-grow:1;font-size:13.5px;font-weight:{{b.weight}};color:{{b.color}}">{{b.label}}</div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{b.eye}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Visible" role="img"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 9a3 3 0 100 6 3 3 0 000-6z"/></svg></div>
+</sc-for>
+<div style="margin-top:8px;height:42px;border:1.5px dashed #B9B2F5;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13.5px;font-weight:700;color:#5B4FE8">+ Add block</div>
+</div>
+
+<div style="flex:1 1 400px;min-width:0;display:flex;justify-content:center;padding:24px">
+<div style="width:390px;background:#fff;border-radius:28px;border:8px solid #1A1A4E;overflow:hidden;box-sizing:content-box;align-self:flex-start">
+<div style="background:#8C5A3C;color:#fff;font-size:12px;font-weight:700;text-align:center;padding:9px;display:flex;justify-content:center;gap:10px"><span>Eid offer ends in</span><span style="font-variant-numeric:tabular-nums">02 : 14 : 38</span></div>
+<div style="background:#E9DCCB;padding:22px 20px;text-align:center"><div style="font-size:28px;font-weight:700;line-height:1.12;letter-spacing:-0.6px;color:#2B2118">Handloom Eid Fatua, ৳ 1,150</div><div style="font-size:13.5px;color:#4A3E31;margin-top:8px;line-height:1.5">Cool cotton. Straight cut. Delivered anywhere in Bangladesh.</div><div style="width:190px;height:220px;border-radius:14px;background:#F1E9DD;margin:18px auto 0;display:flex;align-items:center;justify-content:center"><div style="width:90px;height:116px;background:#C9B79C;border-radius:10px 10px 5px 5px"></div></div></div>
+<div style="padding:18px 20px;outline:2px solid #5B4FE8;outline-offset:-2px;position:relative"><div style="position:absolute;left:0;top:0;background:#5B4FE8;color:#fff;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:0 0 6px 0">Order form</div>
+<div style="font-size:16px;font-weight:700;margin:10px 0 12px">Order now, pay on delivery</div>
+<div style="height:46px;box-sizing:border-box;border:1px solid #D9CEBD;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px;color:#9A8C7C;margin-bottom:10px">Your name</div>
+<div style="height:46px;box-sizing:border-box;border:1px solid #D9CEBD;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px;color:#9A8C7C;margin-bottom:10px">Mobile number</div>
+<div style="height:46px;box-sizing:border-box;border:1px solid #D9CEBD;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px;color:#9A8C7C;margin-bottom:10px">Full address</div>
+<div style="display:flex;gap:8px;margin-bottom:12px"><div style="flex:1;padding:10px;border:2px solid #8C5A3C;border-radius:8px;font-size:12.5px;font-weight:700;background:#FBF8F3">Size L</div><div style="flex:1;padding:10px;border:1px solid #D9CEBD;border-radius:8px;font-size:12.5px;font-weight:600">Size XL</div></div>
+<div style="padding:10px 12px;border-radius:8px;background:#FBF8F3;font-size:13px;display:flex;margin-bottom:12px"><span style="flex-grow:1">Delivery inside Dhaka</span><b>৳ 80</b></div>
+<div style="height:52px;border-radius:8px;background:#8C5A3C;color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center">Confirm order · ৳ 1,230</div></div>
+<div style="padding:18px 20px;background:#FBF8F3"><div style="font-size:16px;font-weight:700;margin-bottom:10px">Why customers love it</div><div style="font-size:13.5px;line-height:1.7;color:#4A3E31">Soft handloom cotton<br>Wooden buttons<br>7-day size exchange</div></div>
+</div>
+</div>
+
+<div style="flex:0 0 320px;background:#fff;border-left:1px solid #E7E7F0;padding:18px 20px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box">
+<div><div style="font-size:12px;color:#6B6B8D;font-weight:600">Selected block</div><div style="font-size:16px;font-weight:700">Order form</div></div>
+<div><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Product</div><div style="display:flex;align-items:center;gap:10px;padding:8px;border:1px solid #D5D5E4;border-radius:8px"><div style="width:36px;height:36px;border-radius:6px;background:#F1E9DD"></div><div style="flex-grow:1;font-size:13.5px;font-weight:600">Eid Special Fatua</div><div style="font-size:13px;font-weight:700;color:#5B4FE8">Change</div></div></div>
+<div style="display:flex;gap:10px"><div style="flex:1"><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Offer price</div><div style="display:flex;height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;overflow:hidden;font-size:14px"><div style="padding:0 10px;background:#FAFAFC;border-right:1px solid #D5D5E4;display:flex;align-items:center;color:#4B4B73">৳</div><div style="padding:0 10px;display:flex;align-items:center">1,150</div></div></div><div style="flex:1"><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Offer ends</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 10px;display:flex;align-items:center;font-size:13.5px">12 Oct, 11:59 pm</div></div></div>
+<div><div style="font-size:12.5px;font-weight:600;margin-bottom:10px">Fields customers fill</div>
+<div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px">
+<div style="display:flex;align-items:center;gap:10px"><div style="width:18px;height:18px;border-radius:5px;background:#5B4FE8;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>Name and mobile (required)</div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:18px;height:18px;border-radius:5px;background:#5B4FE8;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>Full address in one box</div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:18px;height:18px;border-radius:5px;border:1.5px solid #D5D5E4;box-sizing:border-box"></div>Division, district, upazila</div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:18px;height:18px;border-radius:5px;background:#5B4FE8;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>Size selector</div>
+</div></div>
+<div><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Payment options</div><div style="display:flex;gap:8px;flex-wrap:wrap"><span style="padding:5px 12px;border-radius:14px;background:#F4F3FF;color:#5B4FE8;font-size:12.5px;font-weight:700;border:1px solid #D9D5FA">COD</span><span style="padding:5px 12px;border-radius:14px;border:1px solid #D5D5E4;font-size:12.5px;font-weight:600;color:#4B4B73">bKash</span><span style="padding:5px 12px;border-radius:14px;border:1px solid #D5D5E4;font-size:12.5px;font-weight:600;color:#4B4B73">Nagad</span></div></div>
+<div><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">After the order</div><div style="display:flex;height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;align-items:center;font-size:14px"><span style="flex-grow:1">Show thank you message</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div></div>
+<div style="padding:12px 14px;border-radius:8px;background:#F4F3FF;font-size:12.5px;line-height:1.5;color:#4B4B73">Orders from this page skip the cart and go straight to your orders list with source "Landing page".</div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() {
+const d = [['Offer countdown',0],['Hero and price',0],['Order form',1],['Benefits list',0],['Photo gallery',0],['Size chart',0],['Customer reviews',0],['Sticky order button',0]];
+return { blocks: d.map(([label,on]) => ({ label, bg: on?'#F4F3FF':'transparent', border: on?'1.5px solid #5B4FE8':'1.5px solid transparent', weight: on?700:500, color: on?'#5B4FE8':'#1A1A4E', eye: on?'#5B4FE8':'#9A9AB5' })) };
+}
+}
+</script>
+</body>
+</html>

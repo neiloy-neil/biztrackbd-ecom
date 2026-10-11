@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin dashboard</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="home" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:24px">
+
+<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+<div style="flex-grow:1"><h1 style="margin:0;font-size:24px;font-weight:700">Good morning, Nusrat</h1><div style="font-size:14px;color:#4B4B73;margin-top:4px">Saturday, 10 October · 4 orders need packing today</div></div>
+<div style="display:flex;align-items:center;gap:8px;height:38px;box-sizing:border-box;padding:0 14px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4B4B73" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 5h18v16H3zM3 10h18M8 3v4M16 3v4"/></svg>Last 7 days<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div>
+<div style="display:flex;align-items:center;gap:8px;height:38px;box-sizing:border-box;padding:0 18px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add product</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:18px 20px"><div style="font-size:13px;color:#4B4B73;font-weight:500">New orders</div><div style="font-size:28px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums">12</div><div style="font-size:12.5px;margin-top:6px"><span style="color:#15803D;font-weight:700">+4</span> <span style="color:#6B6B8D">vs yesterday</span></div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:18px 20px"><div style="font-size:13px;color:#4B4B73;font-weight:500">To pack and ship</div><div style="font-size:28px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums">4</div><div style="font-size:12.5px;margin-top:6px;color:#B45309;font-weight:600">2 waiting over 24 hours</div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:18px 20px"><div style="font-size:13px;color:#4B4B73;font-weight:500">Sales today</div><div style="font-size:28px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums">৳ 18,450</div><div style="font-size:12.5px;margin-top:6px"><span style="color:#15803D;font-weight:700">+12%</span> <span style="color:#6B6B8D">vs yesterday</span></div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:18px 20px"><div style="font-size:13px;color:#4B4B73;font-weight:500">Awaiting payment check</div><div style="font-size:28px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums">3</div><div style="font-size:12.5px;margin-top:6px;color:#5B4FE8;font-weight:700">Verify bKash and Nagad</div></div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:999 1 600px;min-width:0;display:flex;flex-direction:column;gap:20px">
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="display:flex;align-items:center;gap:12px"><div style="font-size:15px;font-weight:700;flex-grow:1">Sales</div><div style="font-size:13px;font-weight:600;color:#5B4FE8">Open report</div></div>
+<div style="display:flex;align-items:baseline;gap:12px;margin:10px 0 14px"><div style="font-size:26px;font-weight:700;font-variant-numeric:tabular-nums">৳ 1,24,680</div><div style="font-size:13px;color:#15803D;font-weight:700">+18% vs previous 7 days</div></div>
+<svg viewBox="0 0 640 200" width="100%" height="200" role="img" aria-label="Sales over the last 7 days, rising from 9,200 to 18,450 taka per day" preserveAspectRatio="none">
+<g stroke="#E7E7F0" stroke-width="1"><path d="M0 40H640M0 90H640M0 140H640"/></g><path d="M0 180H640" stroke="#D5D5E4"/>
+<path d="M0 150 L107 130 L213 140 L320 100 L427 112 L533 70 L640 44 L640 180 L0 180 Z" fill="#5B4FE8" fill-opacity="0.08"/>
+<path d="M0 150 L107 130 L213 140 L320 100 L427 112 L533 70 L640 44" fill="none" stroke="#5B4FE8" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M0 160 L107 150 L213 148 L320 138 L427 132 L533 120 L640 112" fill="none" stroke="#D5D5E4" stroke-width="2" stroke-linejoin="round" stroke-dasharray="4 4"/>
+<circle cx="640" cy="44" r="5" fill="#fff" stroke="#5B4FE8" stroke-width="2.5"/>
+</svg>
+<div style="display:flex;justify-content:space-between;font-size:12px;color:#6B6B8D;margin-top:8px"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="display:flex;align-items:center;padding:18px 24px 14px"><div style="font-size:15px;font-weight:700;flex-grow:1">Recent orders</div><div style="font-size:13px;font-weight:600;color:#5B4FE8">View all orders</div></div>
+<div style="overflow-x:auto"><div style="min-width:620px">
+<div style="display:grid;grid-template-columns:110px minmax(0,1.6fr) 110px 120px 120px;padding:10px 24px;background:#FAFAFC;border-top:1px solid #E7E7F0;border-bottom:1px solid #E7E7F0;font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px"><div>ORDER</div><div>CUSTOMER</div><div>PAYMENT</div><div>FULFILMENT</div><div style="text-align:right">TOTAL</div></div>
+<sc-for list="{{orders}}" as="o" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:110px minmax(0,1.6fr) 110px 120px 120px;padding:0 24px;height:58px;align-items:center;border-bottom:1px solid #E7E7F0;font-size:13.5px">
+<div style="font-weight:700;color:#5B4FE8">{{o.id}}</div>
+<div><div style="font-weight:600">{{o.name}}</div><div style="font-size:12px;color:#6B6B8D">{{o.area}}</div></div>
+<div><span style="display:inline-block;padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:{{o.payBg}};color:{{o.payColor}}">{{o.pay}}</span></div>
+<div><span style="display:inline-block;padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:{{o.fulBg}};color:{{o.fulColor}}">{{o.ful}}</span></div>
+<div style="text-align:right;font-weight:600;font-variant-numeric:tabular-nums">{{o.total}}</div>
+</div>
+</sc-for>
+</div></div>
+</div>
+</div>
+
+<div style="flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:20px">
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="display:flex;align-items:center"><div style="font-size:15px;font-weight:700;flex-grow:1">Finish setting up</div><div style="font-size:12.5px;color:#6B6B8D;font-weight:600">3 of 6</div></div>
+<div style="height:6px;border-radius:3px;background:#E7E7F0;margin:12px 0 14px"><div style="width:50%;height:6px;border-radius:3px;background:#5B4FE8"></div></div>
+<div style="display:flex;flex-direction:column;gap:2px">
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="6">
+<div style="display:flex;align-items:center;gap:12px;padding:9px 0">
+<div style="width:20px;height:20px;border-radius:10px;box-sizing:border-box;background:{{s.fill}};border:{{s.border}};display:flex;align-items:center;justify-content:center"><sc-if value="{{s.done}}" hint-placeholder-val="{{true}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></sc-if></div>
+<div style="flex-grow:1;font-size:13.5px;font-weight:600;color:{{s.color}};text-decoration:{{s.deco}}">{{s.label}}</div>
+<sc-if value="{{s.next}}" hint-placeholder-val="{{false}}"><div style="font-size:12.5px;font-weight:700;color:#5B4FE8">Start</div></sc-if>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="font-size:15px;font-weight:700;margin-bottom:12px">Low stock</div>
+<sc-for list="{{lowStock}}" as="p" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid #F0F0F6">
+<div style="width:40px;height:40px;border-radius:8px;background:{{p.bg}}"></div>
+<div style="flex-grow:1;min-width:0"><div style="font-size:13.5px;font-weight:600">{{p.name}}</div><div style="font-size:12px;color:#6B6B8D">{{p.variant}}</div></div>
+<div style="font-size:13px;font-weight:700;color:#B45309">{{p.left}} left</div>
+</div>
+</sc-for>
+</div>
+
+<div style="background:#F4F3FF;border-radius:12px;padding:18px 20px;display:flex;gap:14px;align-items:flex-start">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5B4FE8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10v4h3l8 4V6L7 10H4zM18 9a4 4 0 010 6"/></svg>
+<div><div style="font-size:13.5px;font-weight:700">Eid collection tips</div><div style="font-size:13px;color:#4B4B73;line-height:1.5;margin-top:4px">Add a free-delivery banner above ৳ 2,000 to lift basket size before the sale weekend.</div><div style="font-size:13px;font-weight:700;color:#5B4FE8;margin-top:8px">Edit store banner</div></div>
+</div>
+
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+const pay = { Paid: ['#E8F6EE','#15803D'], 'COD': ['#EFEFF6','#4B4B73'], 'Check bKash': ['#FDF3E3','#B45309'], 'Check Nagad': ['#FDF3E3','#B45309'] };
+const ful = { New: ['#E9E7FD','#5B4FE8'], Packed: ['#E6F5FD','#0369A1'], Shipped: ['#E6F5FD','#0369A1'], Delivered: ['#E8F6EE','#15803D'] };
+const rows = [
+['BT-10482','Tania Akter','Mirpur, Dhaka','Check bKash','New','৳ 2,450'],
+['BT-10481','Rakib Hasan','Agrabad, Chattogram','COD','Packed','৳ 1,890'],
+['BT-10480','Farhana Islam','Zindabazar, Sylhet','Paid','Shipped','৳ 3,200'],
+['BT-10479','Sabbir Ahmed','Uttara, Dhaka','Check Nagad','New','৳ 990'],
+['BT-10478','Mehedi Hasan','Rajshahi Sadar','Paid','Delivered','৳ 4,150'],
+];
+const steps = [
+['Add your first products',true],['Set your logo and colors',true],['Choose how customers pay',true],
+['Set delivery charges',false,true],['Connect Pathao or Steadfast',false],['Publish your store',false],
+];
+return {
+orders: rows.map(([id,name,area,p,f,total]) => ({ id, name, area, pay: p, ful: f, total, payBg: pay[p][0], payColor: pay[p][1], fulBg: ful[f][0], fulColor: ful[f][1] })),
+steps: steps.map(([label,done,next]) => ({ label, done, next: !!next, fill: done?'#5B4FE8':'#fff', border: done?'none':'1.5px solid #D5D5E4', color: done?'#6B6B8D':'#1A1A4E', deco: done?'line-through':'none' })),
+lowStock: [
+{ name:'Cotton Panjabi, Off-white', variant:'Size L', left:2, bg:'#F1E9DD' },
+{ name:'Slim Chino, Navy', variant:'Size 32', left:3, bg:'#E4E6EC' },
+{ name:'Linen Shirt, Sage', variant:'Size M', left:4, bg:'#E3EBE1' },
+],
+};
+}
+}
+</script>
+</body>
+</html>

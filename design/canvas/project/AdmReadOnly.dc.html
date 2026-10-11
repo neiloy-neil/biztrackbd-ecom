@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin read-only state after subscription ends</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="home" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<div style="background:#DC2626;color:#fff;padding:12px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2L12 3zM12 10v5M12 18v.01"/></svg><div style="flex:1 1 360px;font-size:14px;line-height:1.5"><b>Your store is paused.</b> Your plan ended on 19 October. Customers cannot order. Your data is safe until 17 January.</div><div style="height:36px;padding:0 18px;border-radius:8px;background:#fff;color:#DC2626;font-size:14px;font-weight:700;display:flex;align-items:center">Choose a plan</div></div>
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div style="flex-grow:1"><h1 style="margin:0;font-size:24px;font-weight:700">Welcome back, Nusrat</h1><div style="font-size:14px;color:#4B4B73;margin-top:4px">You can still view and download everything. Editing is switched off.</div></div></div>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:1 1 420px;min-width:0;background:#fff;border:1px solid #E7E7F0;border-radius:14px;padding:24px 26px">
+<div style="font-size:18px;font-weight:700">Keep your store online</div>
+<div style="font-size:14px;color:#4B4B73;line-height:1.6;margin:6px 0 18px">Pick a plan and your store goes live again within minutes. Nothing is lost.</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;padding:14px 16px;border:1px solid #E7E7F0;border-radius:10px"><div style="flex-grow:1"><div style="font-size:14.5px;font-weight:700">Starter</div><div style="font-size:12.5px;color:#4B4B73">300 products · 500 orders a month</div></div><div style="font-size:16px;font-weight:700;font-variant-numeric:tabular-nums">৳ 699 <span style="font-size:12px;font-weight:500;color:#6B6B8D">/month</span></div></div>
+<div style="display:flex;align-items:center;padding:14px 16px;border:2px solid #5B4FE8;background:#F4F3FF;border-radius:10px"><div style="flex-grow:1"><div style="font-size:14.5px;font-weight:700">Pro</div><div style="font-size:12.5px;color:#4B4B73">2,000 products · 3,000 orders a month · your own domain</div></div><div style="font-size:16px;font-weight:700;font-variant-numeric:tabular-nums">৳ 1,499 <span style="font-size:12px;font-weight:500;color:#6B6B8D">/month</span></div></div>
+<div style="display:flex;align-items:center;padding:14px 16px;border:1px solid #E7E7F0;border-radius:10px"><div style="flex-grow:1"><div style="font-size:14.5px;font-weight:700">Business</div><div style="font-size:12.5px;color:#4B4B73">Unlimited products and orders · section builder</div></div><div style="font-size:16px;font-weight:700;font-variant-numeric:tabular-nums">৳ 3,499 <span style="font-size:12px;font-weight:500;color:#6B6B8D">/month</span></div></div>
+</div>
+<div style="height:50px;border-radius:10px;background:#5B4FE8;color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:18px">Reactivate with Pro</div>
+</div>
+
+<div style="flex:1 1 360px;min-width:0;display:flex;flex-direction:column;gap:16px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:14px;padding:22px 24px">
+<div style="font-size:15px;font-weight:700;margin-bottom:6px">Take your data with you</div>
+<div style="font-size:13.5px;color:#4B4B73;line-height:1.55;margin-bottom:14px">Download a file for each list. Available until 17 January.</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid #E7E7F0;border-radius:8px;font-size:13.5px"><span style="flex:1;font-weight:600">Products (64)</span><span style="font-size:13px;font-weight:700;color:#5B4FE8">Download CSV</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid #E7E7F0;border-radius:8px;font-size:13.5px"><span style="flex:1;font-weight:600">Orders (1,284)</span><span style="font-size:13px;font-weight:700;color:#5B4FE8">Download CSV</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid #E7E7F0;border-radius:8px;font-size:13.5px"><span style="flex:1;font-weight:600">Customers (842)</span><span style="font-size:13px;font-weight:700;color:#5B4FE8">Download CSV</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid #E7E7F0;border-radius:8px;font-size:13.5px"><span style="flex:1;font-weight:600">Product photos</span><span style="font-size:13px;font-weight:700;color:#5B4FE8">Download ZIP</span></div>
+</div>
+</div>
+<div style="background:#FDF3E3;border-radius:14px;padding:16px 20px;font-size:13px;line-height:1.55;color:#4B4B73"><b style="color:#B45309">What happens next.</b> On 17 January your store, data and saved courier keys are permanently deleted.</div>
+</div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden;opacity:0.55">
+<div style="padding:16px 24px;display:flex;align-items:center;border-bottom:1px solid #E7E7F0"><div style="font-size:15px;font-weight:700;flex-grow:1">Recent orders (view only)</div><div style="height:32px;padding:0 14px;border-radius:8px;background:#E7E7F0;color:#6B6B8D;font-size:13px;font-weight:700;display:flex;align-items:center">Create order locked</div></div>
+<div style="display:flex;align-items:center;padding:0 24px;height:54px;border-bottom:1px solid #F0F0F6;font-size:13.5px"><b style="width:100px;color:#5B4FE8">BT-10482</b><span style="flex:1;font-weight:600">Tania Akter</span><span style="font-weight:600;font-variant-numeric:tabular-nums">৳ 2,450</span></div>
+<div style="display:flex;align-items:center;padding:0 24px;height:54px;font-size:13.5px"><b style="width:100px;color:#5B4FE8">BT-10481</b><span style="flex:1;font-weight:600">Rakib Hasan</span><span style="font-weight:600;font-variant-numeric:tabular-nums">৳ 1,890</span></div>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

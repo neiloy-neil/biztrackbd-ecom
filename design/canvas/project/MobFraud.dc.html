@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mobile fraud check</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:390px;height:844px;position:relative;overflow:hidden;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="position:absolute;left:0;right:0;top:0;bottom:84px;overflow:hidden">
+
+<div style="background:#fff;border-bottom:1px solid #E7E7F0;padding:16px 8px 12px;display:flex;align-items:center;gap:4px">
+<div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A1A4E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-label="Back" role="img"><path d="M15 6l-6 6 6 6"/></svg></div>
+<div style="flex-grow:1;font-size:17px;font-weight:700">Fraud check</div>
+<div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A1A4E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-label="Risk rules" role="img"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M16 5a2 2 0 100 4 2 2 0 000-4zM8 15a2 2 0 100 4 2 2 0 000-4z"/></svg></div>
+</div>
+
+<div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:10px">
+<div style="flex:1;background:#FDF3E3;border-radius:12px;padding:12px 14px"><div style="font-size:24px;font-weight:700;color:#B45309">4</div><div style="font-size:12.5px;color:#4B4B73">need your decision</div></div>
+<div style="flex:1;background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:12px 14px"><div style="font-size:24px;font-weight:700;font-variant-numeric:tabular-nums">৳ 14,200</div><div style="font-size:12.5px;color:#4B4B73">returns avoided</div></div>
+</div>
+
+<sc-for list="{{orders}}" as="o" hint-placeholder-count="3">
+<div style="background:#fff;border:1px solid #E7E7F0;border-left:4px solid {{o.edge}};border-radius:14px;padding:14px 16px">
+<div style="display:flex;align-items:center;gap:8px"><span style="font-size:13.5px;font-weight:700;color:#5B4FE8;flex-grow:1">{{o.id}}</span><span style="padding:3px 10px;border-radius:11px;font-size:12px;font-weight:700;background:{{o.bg}};color:{{o.c}}">{{o.risk}} risk · {{o.score}}</span></div>
+<div style="font-size:15px;font-weight:700;margin-top:8px">{{o.name}}</div>
+<div style="font-size:12.5px;color:#4B4B73;margin-top:2px">{{o.area}} · COD {{o.total}}</div>
+<div style="display:flex;align-items:center;gap:10px;margin-top:12px"><div style="flex:1;height:8px;border-radius:4px;background:#FCEBEB"><div style="width:{{o.ok}};height:8px;border-radius:4px;background:#15803D"></div></div><div style="font-size:12.5px;font-weight:700">{{o.ok}} delivered</div></div>
+<div style="font-size:12.5px;color:#4B4B73;margin-top:6px">{{o.hist}}</div>
+<div style="display:flex;gap:8px;margin-top:14px"><div style="flex:1.2;height:44px;border-radius:10px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center">Call</div><div style="flex:1;height:44px;border:1px solid #D5D5E4;border-radius:10px;font-size:13.5px;font-weight:600;display:flex;align-items:center;justify-content:center">Approve</div><div style="flex:1;height:44px;border:1px solid #F1C0C0;border-radius:10px;color:#DC2626;font-size:13.5px;font-weight:600;display:flex;align-items:center;justify-content:center">Block</div></div>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="position:absolute;left:0;bottom:0"><dc-import name="MobileTabs" active="orders" hint-size="390px,84px"></dc-import></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const c = { High: ['#FCEBEB','#DC2626'], Medium: ['#FDF3E3','#B45309'] };
+const d = [
+['BT-10490','Habib Rahman','Gazipur Sadar','৳ 6,400','High',82,'28%','5 of 7 delivered. 2 returned by customer.'],
+['BT-10488','Sumon Mia','Narayanganj','৳ 3,150','High',74,'40%','2 of 5 delivered. 3 refused at door.'],
+['BT-10486','Roksana Begum','Mirpur, Dhaka','৳ 2,850','Medium',55,'67%','4 of 6 delivered.'],
+];
+return { orders: d.map(([id,name,area,total,risk,score,ok,hist]) => ({ id, name, area, total, risk, score, ok, hist, edge: c[risk][1], bg: c[risk][0], c: c[risk][1] })) };
+}
+}
+</script>
+</body>
+</html>

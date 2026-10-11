@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Super admin overview</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="SaSidebar" active="overview" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<div style="height:60px;box-sizing:border-box;background:#fff;border-bottom:1px solid #E7E7F0;display:flex;align-items:center;gap:12px;padding:0 24px">
+<div style="display:flex;align-items:center;gap:10px;width:420px;max-width:100%;height:36px;box-sizing:border-box;padding:0 12px;border:1px solid #E7E7F0;border-radius:8px;background:#FAFAFC"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 18a7 7 0 100-14 7 7 0 000 14zM20 20l-4-4"/></svg><div style="font-size:13.5px;color:#6B6B8D">Search tenants, domains, owners</div></div>
+<div style="flex-grow:1"></div>
+<div style="font-size:13px;color:#4B4B73">Data as of 10 Oct, 11:20 am</div>
+</div>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:22px">
+
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h1 style="margin:0;font-size:24px;font-weight:700;flex-grow:1">Overview</h1><div style="height:38px;padding:0 14px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Last 30 days</div></div>
+
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:18px 20px"><div style="font-size:13px;color:#4B4B73;font-weight:500">Monthly recurring revenue</div><div style="font-size:28px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums">৳ 4,82,300</div><div style="font-size:12.5px;margin-top:6px;color:#15803D;font-weight:700">+9.4% <span style="color:#6B6B8D;font-weight:500">vs last month</span></div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:18px 20px"><div style="font-size:13px;color:#4B4B73;font-weight:500">Paying stores</div><div style="font-size:28px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums">318</div><div style="font-size:12.5px;margin-top:6px;color:#15803D;font-weight:700">+27 <span style="color:#6B6B8D;font-weight:500">net this month</span></div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:18px 20px"><div style="font-size:13px;color:#4B4B73;font-weight:500">Active trials</div><div style="font-size:28px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums">74</div><div style="font-size:12.5px;margin-top:6px;color:#B45309;font-weight:700">11 <span style="color:#6B6B8D;font-weight:500">end within 3 days</span></div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:18px 20px"><div style="font-size:13px;color:#4B4B73;font-weight:500">Monthly churn</div><div style="font-size:28px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums">2.1%</div><div style="font-size:12.5px;margin-top:6px;color:#15803D;font-weight:700">−0.4 pts <span style="color:#6B6B8D;font-weight:500">vs last month</span></div></div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:20px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="display:flex;align-items:center;margin-bottom:12px"><div style="font-size:15px;font-weight:700;flex-grow:1">MRR growth</div><div style="display:flex;padding:3px;border-radius:15px;background:#EFEFF6;font-size:12.5px;font-weight:600"><div style="padding:4px 12px;border-radius:12px;background:#fff;border:1px solid #E7E7F0">12 months</div><div style="padding:4px 12px;color:#6B6B8D">30 days</div></div></div>
+<svg viewBox="0 0 700 220" width="100%" height="220" role="img" aria-label="Monthly recurring revenue growing from 1.2 lakh to 4.8 lakh taka over 12 months" preserveAspectRatio="none">
+<g stroke="#E7E7F0"><path d="M0 40H700M0 90H700M0 140H700"/></g><path d="M0 190H700" stroke="#D5D5E4"/>
+<path d="M0 170 L64 164 L127 158 L191 148 L255 138 L318 128 L382 112 L445 96 L509 80 L573 64 L636 48 L700 30 L700 190 L0 190 Z" fill="#5B4FE8" fill-opacity="0.08"/>
+<path d="M0 170 L64 164 L127 158 L191 148 L255 138 L318 128 L382 112 L445 96 L509 80 L573 64 L636 48 L700 30" fill="none" stroke="#5B4FE8" stroke-width="2.5" stroke-linejoin="round"/>
+<circle cx="700" cy="30" r="5" fill="#fff" stroke="#5B4FE8" stroke-width="2.5"/>
+</svg>
+<div style="display:flex;justify-content:space-between;font-size:12px;color:#6B6B8D;margin-top:8px"><span>Nov</span><span>Jan</span><span>Mar</span><span>May</span><span>Jul</span><span>Sep</span></div>
+</div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="padding:18px 24px;display:flex;align-items:center;border-bottom:1px solid #E7E7F0"><div style="font-size:15px;font-weight:700;flex-grow:1">Newest signups</div><div style="font-size:13px;font-weight:600;color:#5B4FE8">All tenants</div></div>
+<sc-for list="{{signups}}" as="s" hint-placeholder-count="5">
+<div style="display:flex;align-items:center;gap:14px;padding:0 24px;height:58px;border-bottom:1px solid #F0F0F6;font-size:13.5px"><div style="width:34px;height:34px;border-radius:9px;background:{{s.bg}};color:#1A1A4E;font-weight:700;display:flex;align-items:center;justify-content:center">{{s.ini}}</div><div style="flex:1;min-width:0"><div style="font-weight:600">{{s.name}}</div><div style="font-size:12px;color:#6B6B8D">{{s.sub}}.biztrackbd.com</div></div><div style="width:90px;color:#4B4B73">{{s.theme}}</div><span style="padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:{{s.sBg}};color:{{s.sColor}}">{{s.status}}</span><div style="width:84px;text-align:right;color:#6B6B8D;font-size:12.5px">{{s.when}}</div></div>
+</sc-for>
+</div>
+</div>
+
+<div style="flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:20px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="font-size:15px;font-weight:700;margin-bottom:14px">Needs you</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;background:#FDF3E3"><div style="font-size:20px;font-weight:700;color:#B45309;width:30px">7</div><div style="flex-grow:1;font-size:13.5px;font-weight:600">Manual payments to approve</div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
+<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;background:#F4F3FF"><div style="font-size:20px;font-weight:700;color:#5B4FE8;width:30px">4</div><div style="flex-grow:1;font-size:13.5px;font-weight:600">Open support tickets</div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FE8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
+<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;background:#FCEBEB"><div style="font-size:20px;font-weight:700;color:#DC2626;width:30px">3</div><div style="flex-grow:1;font-size:13.5px;font-weight:600">Domains failing verification</div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
+<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;background:#EFEFF6"><div style="font-size:20px;font-weight:700;color:#4B4B73;width:30px">9</div><div style="flex-grow:1;font-size:13.5px;font-weight:600">Payments overdue past grace</div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4B4B73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
+</div>
+</div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="font-size:15px;font-weight:700;margin-bottom:14px">Trial to paid, last 30 days</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div><div style="display:flex;font-size:13px;margin-bottom:6px"><span style="flex-grow:1;font-weight:600">Signed up</span><span style="font-variant-numeric:tabular-nums">412</span></div><div style="height:8px;border-radius:4px;background:#F0F0F6"><div style="width:100%;height:8px;border-radius:4px;background:#5B4FE8"></div></div></div>
+<div><div style="display:flex;font-size:13px;margin-bottom:6px"><span style="flex-grow:1;font-weight:600">Published a store</span><span style="font-variant-numeric:tabular-nums">286</span></div><div style="height:8px;border-radius:4px;background:#F0F0F6"><div style="width:69%;height:8px;border-radius:4px;background:#5B4FE8"></div></div></div>
+<div><div style="display:flex;font-size:13px;margin-bottom:6px"><span style="flex-grow:1;font-weight:600">Received first order</span><span style="font-variant-numeric:tabular-nums">161</span></div><div style="height:8px;border-radius:4px;background:#F0F0F6"><div style="width:39%;height:8px;border-radius:4px;background:#5B4FE8"></div></div></div>
+<div><div style="display:flex;font-size:13px;margin-bottom:6px"><span style="flex-grow:1;font-weight:600">Became paying</span><span style="font-variant-numeric:tabular-nums">98</span></div><div style="height:8px;border-radius:4px;background:#F0F0F6"><div style="width:24%;height:8px;border-radius:4px;background:#15803D"></div></div></div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+const st = { Trial: ['#E9E7FD','#5B4FE8'], Paying: ['#E8F6EE','#15803D'] };
+const d = [
+['Gadget Ghar','gadgetghar','Gadget Studio','Trial','Today','#DFF1EA'],
+['Chotomoni Kids','chotomoni','Mini Bunny','Trial','Yesterday','#FCE6D8'],
+['Streetline BD','streetline','Axionwear','Paying','Yesterday','#DCDCEB'],
+['Nakshi Tailors','nakshi','Bindu','Trial','8 Oct','#DDE5DA'],
+['Rongdhonu Fashion','rongdhonu','Kapor','Trial','5 Oct','#E9DCCB'],
+];
+return { signups: d.map(([name,sub,theme,status,when,bg]) => ({ name, sub, theme, status, when, bg, ini: name[0], sBg: st[status][0], sColor: st[status][1] })) };
+}
+}
+</script>
+</body>
+</html>

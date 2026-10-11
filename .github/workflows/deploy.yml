@@ -1,0 +1,81 @@
+# Continuous deployment. Runs after CI passes on main, or by hand.
+#   1. applies database migrations to Supabase (as the owner login),
+#   2. deploys the four apps to Vercel with the Vercel CLI.
+# If you connect the Vercel Git integration instead, delete the "deploy" job and keep "migrate".
+# Secrets to add under Settings > Secrets and variables > Actions (names only here, values never in the repo):
+#   SUPABASE_DB_URL              the owner connection (session pooler, user postgres.<ref>), used only for `prisma migrate deploy`
+#   VERCEL_TOKEN, VERCEL_ORG_ID  from vercel.com (Account Settings > Tokens) and the team or account id
+#   VERCEL_PROJECT_ID_ADMIN, VERCEL_PROJECT_ID_STOREFRONT, VERCEL_PROJECT_ID_MARKETING, VERCEL_PROJECT_ID_PLATFORM
+# Each Vercel project must have its Root Directory set to apps/<name> (Project Settings > General); the CLI runs from the repo root.
+# The apps' own runtime variables (DATABASE_URL as biztrack_app, CRON_SECRET and so on) belong in each Vercel project, not here.
+# Create a GitHub Environment named "production" with required reviewers to make every deploy wait for a person.
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    name: Apply database migrations
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: prisma migrate deploy
+        env:
+          DIRECT_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: pnpm --filter @biztrackbd/db exec prisma migrate deploy
+      - name: Reminder
+        run: echo "After a migration that adds tables, run the anon/authenticated grant check from docs/17 (Supabase checklist)."
+
+  deploy:
+    name: Deploy ${{ matrix.app }}
+    needs: migrate
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+    strategy:
+      max-parallel: 1
+      matrix:
+        include:
+          - { app: platform, project: VERCEL_PROJECT_ID_PLATFORM }
+          - { app: admin, project: VERCEL_PROJECT_ID_ADMIN }
+          - { app: marketing, project: VERCEL_PROJECT_ID_MARKETING }
+          - { app: storefront, project: VERCEL_PROJECT_ID_STOREFRONT }
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Link the Vercel project
+        run: echo "VERCEL_PROJECT_ID=${{ secrets[matrix.project] }}" >> "$GITHUB_ENV"
+      - name: Build and deploy
+        run: |
+          pnpm dlx vercel@latest pull --yes --environment=production --token "$VERCEL_TOKEN"
+          pnpm dlx vercel@latest build --prod --token "$VERCEL_TOKEN"
+          pnpm dlx vercel@latest deploy --prebuilt --prod --token "$VERCEL_TOKEN"

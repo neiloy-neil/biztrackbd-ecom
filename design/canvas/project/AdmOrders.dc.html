@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin orders list</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="orders" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+<h1 style="margin:0;font-size:24px;font-weight:700;flex-grow:1">Orders</h1>
+<div style="display:flex;align-items:center;gap:8px;height:38px;box-sizing:border-box;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4B4B73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg>Export</div>
+<div style="display:flex;align-items:center;gap:8px;height:38px;box-sizing:border-box;padding:0 18px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Create order</div>
+</div>
+
+<div style="display:flex;gap:28px;border-bottom:1px solid #E7E7F0;overflow-x:auto">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="6">
+<div style="display:flex;align-items:center;gap:8px;padding:6px 0 12px;white-space:nowrap;border-bottom:2.5px solid {{t.line}};margin-bottom:-1px;font-size:14px;font-weight:600;color:{{t.color}}">{{t.label}}<span style="padding:1px 8px;border-radius:10px;font-size:12px;font-weight:700;background:{{t.nbg}};color:{{t.nc}}">{{t.n}}</span></div>
+</sc-for>
+</div>
+
+<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+<div style="flex:1 1 280px;max-width:420px;display:flex;align-items:center;gap:10px;height:38px;box-sizing:border-box;padding:0 12px;border:1px solid #D5D5E4;border-radius:8px;background:#fff"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 18a7 7 0 100-14 7 7 0 000 14zM20 20l-4-4"/></svg><span style="font-size:13.5px;color:#6B6B8D">Order number, name or phone</span></div>
+<div style="padding:7px 14px;border:1px solid #D5D5E4;border-radius:19px;background:#fff;font-size:13px;font-weight:500;color:#4B4B73">Payment: Any</div>
+<div style="padding:7px 14px;border:1px solid #5B4FE8;border-radius:19px;background:#F4F3FF;font-size:13px;font-weight:600;color:#5B4FE8">Courier: Pathao</div>
+<div style="padding:7px 14px;border:1px solid #D5D5E4;border-radius:19px;background:#fff;font-size:13px;font-weight:500;color:#4B4B73">District: All</div>
+<div style="padding:7px 14px;border:1px solid #D5D5E4;border-radius:19px;background:#fff;font-size:13px;font-weight:500;color:#4B4B73">Date: Last 30 days</div>
+</div>
+
+<div style="background:#1A1A4E;color:#fff;border-radius:10px;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+<div style="font-size:13.5px;font-weight:700;flex-grow:1">2 orders selected</div>
+<div style="padding:6px 14px;border-radius:7px;background:#5B4FE8;font-size:13px;font-weight:700">Book courier</div>
+<div style="padding:6px 14px;border-radius:7px;border:1px solid #4B4B9A;font-size:13px;font-weight:600">Print labels</div>
+<div style="padding:6px 14px;border-radius:7px;border:1px solid #4B4B9A;font-size:13px;font-weight:600">Mark as packed</div>
+<div style="padding:6px 14px;border-radius:7px;border:1px solid #4B4B9A;font-size:13px;font-weight:600">Send SMS</div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="overflow-x:auto"><div style="min-width:900px">
+<div style="display:grid;grid-template-columns:44px 104px 110px minmax(0,1.5fr) 120px 118px 130px 112px;padding:11px 16px;background:#FAFAFC;border-bottom:1px solid #E7E7F0;font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px;align-items:center"><div></div><div>ORDER</div><div>DATE</div><div>CUSTOMER</div><div>PAYMENT</div><div>FULFILMENT</div><div>COURIER</div><div style="text-align:right">TOTAL</div></div>
+<sc-for list="{{orders}}" as="o" hint-placeholder-count="10">
+<div style="display:grid;grid-template-columns:44px 104px 110px minmax(0,1.5fr) 120px 118px 130px 112px;padding:0 16px;height:60px;align-items:center;border-bottom:1px solid #F0F0F6;font-size:13.5px;background:{{o.rowBg}}">
+<div><div style="width:18px;height:18px;border-radius:5px;box-sizing:border-box;background:{{o.cbBg}};border:{{o.cbBorder}};display:flex;align-items:center;justify-content:center"><sc-if value="{{o.sel}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></sc-if></div></div>
+<div style="font-weight:700;color:#5B4FE8">{{o.id}}</div>
+<div style="color:#4B4B73">{{o.date}}</div>
+<div><div style="font-weight:600">{{o.name}}</div><div style="font-size:12px;color:#6B6B8D">{{o.area}} · {{o.items}}</div></div>
+<div><span style="display:inline-block;padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:{{o.payBg}};color:{{o.payColor}}">{{o.pay}}</span></div>
+<div><span style="display:inline-block;padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:{{o.fulBg}};color:{{o.fulColor}}">{{o.ful}}</span></div>
+<div style="color:#4B4B73;font-size:13px">{{o.courier}}</div>
+<div style="text-align:right;font-weight:600;font-variant-numeric:tabular-nums">{{o.total}}</div>
+</div>
+</sc-for>
+</div></div>
+<div style="display:flex;align-items:center;padding:14px 20px;font-size:13px;color:#4B4B73"><div style="flex-grow:1">Showing 1 to 10 of 128 orders</div><div style="display:flex;gap:8px"><div style="padding:6px 12px;border:1px solid #D5D5E4;border-radius:7px;font-weight:600;color:#6B6B8D">Previous</div><div style="padding:6px 12px;border:1px solid #D5D5E4;border-radius:7px;font-weight:600">Next</div></div></div>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+const pay = { Paid: ['#E8F6EE','#15803D'], COD: ['#EFEFF6','#4B4B73'], 'Check bKash': ['#FDF3E3','#B45309'], 'Check Nagad': ['#FDF3E3','#B45309'], Refunded: ['#FCEBEB','#DC2626'] };
+const ful = { New: ['#E9E7FD','#5B4FE8'], Packed: ['#E6F5FD','#0369A1'], Shipped: ['#E6F5FD','#0369A1'], Delivered: ['#E8F6EE','#15803D'], Returned: ['#FCEBEB','#DC2626'] };
+const rows = [
+[1,'BT-10482','Today, 10:42','Tania Akter','Mirpur, Dhaka','3 items','Check bKash','New','Not booked','৳ 2,450'],
+[1,'BT-10481','Today, 09:15','Rakib Hasan','Agrabad, Chattogram','2 items','COD','Packed','Pathao','৳ 1,890'],
+[0,'BT-10480','Yesterday','Farhana Islam','Zindabazar, Sylhet','1 item','Paid','Shipped','Steadfast','৳ 3,200'],
+[0,'BT-10479','Yesterday','Sabbir Ahmed','Uttara, Dhaka','1 item','Check Nagad','New','Not booked','৳ 990'],
+[0,'BT-10478','8 Oct','Mehedi Hasan','Rajshahi Sadar','4 items','Paid','Delivered','Pathao','৳ 4,150'],
+[0,'BT-10477','8 Oct','Nusrat Sultana','Khulna Sadar','2 items','COD','Shipped','RedX','৳ 1,740'],
+[0,'BT-10476','7 Oct','Imran Hossain','Gulshan, Dhaka','5 items','Paid','Delivered','Pathao','৳ 6,880'],
+[0,'BT-10475','7 Oct','Shirin Akter','Cumilla Sadar','1 item','COD','Returned','Steadfast','৳ 1,250'],
+[0,'BT-10474','6 Oct','Arif Rahman','Mymensingh Sadar','2 items','Paid','Delivered','Steadfast','৳ 2,300'],
+[0,'BT-10473','6 Oct','Lamia Chowdhury','Dhanmondi, Dhaka','3 items','Refunded','Returned','Pathao','৳ 3,560'],
+];
+return {
+tabs: [['All',128,1],['New',12],['To pack',4],['Shipped',9],['Delivered',96],['Returns',3]].map(([label,n,on]) => ({ label, n, line: on?'#5B4FE8':'transparent', color: on?'#1A1A4E':'#6B6B8D', nbg: on?'#E9E7FD':'#EFEFF6', nc: on?'#5B4FE8':'#4B4B73' })),
+orders: rows.map(([sel,id,date,name,area,items,p,f,courier,total]) => ({ sel: !!sel, id, date, name, area, items, pay: p, ful: f, courier, total, rowBg: sel?'#F4F3FF':'#fff', cbBg: sel?'#5B4FE8':'#fff', cbBorder: sel?'none':'1.5px solid #D5D5E4', payBg: pay[p][0], payColor: pay[p][1], fulBg: ful[f][0], fulColor: ful[f][1] })),
+};
+}
+}
+</script>
+</body>
+</html>

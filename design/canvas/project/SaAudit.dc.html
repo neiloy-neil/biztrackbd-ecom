@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Super admin team and audit log</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="SaSidebar" active="team" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<div style="height:60px;box-sizing:border-box;background:#fff;border-bottom:1px solid #E7E7F0;display:flex;align-items:center;padding:0 24px"><div style="font-size:13px;color:#4B4B73">Team and audit log</div></div>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h1 style="margin:0;font-size:24px;font-weight:700;flex-grow:1">Team and audit log</h1><div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Export log</div><div style="height:38px;padding:0 18px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center">Invite team member</div></div>
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:1 1 320px;background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden"><div style="padding:16px 22px;font-size:15px;font-weight:700;border-bottom:1px solid #E7E7F0">Platform team</div>
+<sc-for list="{{team}}" as="p" hint-placeholder-count="4"><div style="display:flex;align-items:center;gap:12px;padding:12px 22px;border-bottom:1px solid #F0F0F6;font-size:13.5px"><div style="width:34px;height:34px;border-radius:17px;background:#E9E7FD;color:#5B4FE8;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center">{{p.i}}</div><div style="flex:1"><b>{{p.n}}</b><div style="font-size:12px;color:#6B6B8D">{{p.r}}</div></div><span style="font-size:12px;color:#6B6B8D">{{p.l}}</span></div></sc-for></div>
+<div style="flex:2 1 560px;background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden"><div style="padding:16px 22px;font-size:15px;font-weight:700;border-bottom:1px solid #E7E7F0">Audit log</div>
+<sc-for list="{{log}}" as="a" hint-placeholder-count="8"><div style="display:flex;align-items:center;gap:14px;padding:0 22px;height:56px;border-bottom:1px solid #F0F0F6;font-size:13.5px"><div style="width:8px;height:8px;border-radius:4px;background:{{a.c}}"></div><div style="flex:1"><b>{{a.who}}</b> {{a.what}}</div><span style="font-size:12.5px;color:#6B6B8D">{{a.when}}</span></div></sc-for></div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+renderVals() {
+return {
+team: [['AH','Arif Hossain','Owner','Now'],['SM','Sumi Akter','Support lead','9 min ago'],['RK','Rafi Khan','Support','1 hr ago'],['NA','Nadia Ahmed','Finance','Yesterday']].map(([i,n,r,l]) => ({ i, n, r, l })),
+log: [['Arif Hossain','approved a manual payment for Nakshi Tailors (৳ 1,499)','4 min ago','#15803D'],['Sumi Akter','logged in as owner of Rongdhonu Fashion (support T-2051)','25 min ago','#B45309'],['Rafi Khan','extended the trial of Gadget Ghar by 7 days','1 hr ago','#5B4FE8'],['Arif Hossain','released Bindu 1.4.0 to 25% of stores','3 hr ago','#5B4FE8'],['Nadia Ahmed','rejected a payment for Bonoful Organic','Yesterday','#DC2626'],['Sumi Akter','suspended Bonoful Organic','Yesterday','#DC2626'],['Arif Hossain','changed Pro orders limit to 3,000','2 days ago','#5B4FE8'],['System','renewed 12 SSL certificates','2 days ago','#9A9AB5']].map(([who,what,when,c]) => ({ who, what, when, c })),
+};
+}
+}
+</script>
+</body>
+</html>

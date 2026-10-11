@@ -1,0 +1,63 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { DomainError, DraftConflictError, activateTheme, discardDraft, publish, rollback, saveDraft } from "@biztrackbd/core";
+import { requireAction } from "@/lib/session";
+
+export type EditResult = { ok: true; version?: number; stamp?: string } | { ok: false; error: string; conflict?: { stamp: string | null } };
+
+const fail = (e: unknown): EditResult => {
+  if (e instanceof DraftConflictError) return { ok: false, error: e.message, conflict: { stamp: e.stamp } };
+  if (e instanceof DomainError) return { ok: false, error: e.message };
+  console.error("design action failed", e instanceof Error ? e.name : "unknown");
+  return { ok: false, error: "Something went wrong. Your change was not saved." };
+};
+
+/** Autosave from the editor. The page is checked again on the server, so a draft is always publishable. */
+export async function saveDraftAction(pageKey: string, page: unknown, theme: unknown, stamp?: string | null): Promise<EditResult> {
+  const s = await requireAction("design", "edit");
+  try {
+    const saved = await saveDraft(s.tenantId, s.actor, pageKey, page, pageKey === "home" ? theme : undefined, stamp === undefined ? undefined : { stamp });
+    return { ok: true, stamp: saved.stamp };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+export async function publishAction(pageKey: string, label: string): Promise<EditResult> {
+  const s = await requireAction("design", "edit");
+  try {
+    const version = await publish(s.tenantId, s.actor, pageKey, label);
+    revalidatePath("/design");
+    revalidatePath("/landing");
+    return { ok: true, version };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+export async function discardDraftAction(pageKey: string): Promise<EditResult> {
+  const s = await requireAction("design", "edit");
+  try {
+    await discardDraft(s.tenantId, s.actor, pageKey);
+    return { ok: true };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+export async function rollbackAction(pageKey: string, version: number): Promise<EditResult> {
+  const s = await requireAction("design", "edit");
+  try {
+    return { ok: true, version: await rollback(s.tenantId, s.actor, pageKey, version) };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+export async function activateThemeAction(form: FormData): Promise<void> {
+  const s = await requireAction("design", "edit");
+  await activateTheme(s.tenantId, s.actor, form.get("themeId"));
+  revalidatePath("/design");
+  revalidatePath("/", "layout");
+}

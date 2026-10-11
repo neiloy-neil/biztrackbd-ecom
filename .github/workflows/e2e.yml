@@ -1,0 +1,75 @@
+# Browser tests (Playwright). They take about an hour and start four apps, so they run by hand or nightly, not on every push.
+# Not yet proven on GitHub's runners: the first run may need small fixes (the seed step and the environment below).
+name: E2E
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 20 * * *" # 02:00 in Dhaka
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    name: Playwright (admin at 1440 and 390, storefront)
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/biztrack_dev
+      DATABASE_URL: postgresql://biztrack_app:app_password@localhost:5432/biztrack_dev
+      PLATFORM_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/biztrack_dev
+      TEST_DIRECT_URL: postgresql://postgres:postgres@localhost:5432/biztrack_test
+      TEST_DATABASE_URL: postgresql://biztrack_app:app_password@localhost:5432/biztrack_test
+      NEXT_PUBLIC_ROOT_DOMAIN: localhost:3000
+      NEXT_PUBLIC_ADMIN_URL: http://localhost:3001
+      DEV_AUTH: "1"
+      CUSTOMER_AUTH_SECRET: ci-customer-auth-secret-0123456789abcdef
+      INTEGRATION_VAULT_SECRET: ci-vault-secret-0123456789abcdef0123456789abcdef
+      INTEGRATION_VAULT_KEY_ID: ci
+      PREVIEW_SECRET: ci-preview-secret-0123456789
+      CRON_SECRET: ci-cron-secret-0123456789
+      PLATFORM_BKASH_NUMBER: "01800000000"
+      PLATFORM_NAGAD_NUMBER: "01900000000"
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Create the development database and demo store
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -c 'create database biztrack_dev' -c 'create database biztrack_test'
+          for f in packages/db/prisma/migrations/*/migration.sql; do PGPASSWORD=postgres psql -h localhost -U postgres -d biztrack_dev -v ON_ERROR_STOP=1 -q -f "$f"; done
+          PGPASSWORD=postgres psql -h localhost -U postgres -d biztrack_dev -c "ALTER ROLE biztrack_app LOGIN PASSWORD 'app_password'"
+          pnpm db:seed
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Admin, desktop width
+        run: pnpm --filter @biztrackbd/admin exec playwright test --project=desktop-1440
+      - name: Admin, phone width
+        run: pnpm --filter @biztrackbd/admin exec playwright test --project=mobile-390
+      - name: Storefront
+        run: pnpm --filter @biztrackbd/storefront exec playwright test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-failures
+          path: |
+            apps/*/test-results
+            apps/*/playwright-report
+          retention-days: 7

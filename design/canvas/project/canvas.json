@@ -1,0 +1,980 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-10-09T19:40:41Z"
+ },
+ "title": "BizTrackBD UI/UX Design",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [
+  {
+   "id": "found",
+   "name": "Foundations"
+  },
+  {
+   "id": "mkt",
+   "name": "Marketing"
+  },
+  {
+   "id": "onb",
+   "name": "Signup and onboarding"
+  },
+  {
+   "id": "admin",
+   "name": "Owner admin (desktop)"
+  },
+  {
+   "id": "mob",
+   "name": "Owner admin (mobile)"
+  },
+  {
+   "id": "build",
+   "name": "Theme builder"
+  },
+  {
+   "id": "store",
+   "name": "Storefront and checkout"
+  },
+  {
+   "id": "sa",
+   "name": "Super admin"
+  },
+  {
+   "id": "comp",
+   "name": "Shared components"
+  }
+ ],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1500,
+   "title": "Foundations: color, type, spacing",
+   "page": "found",
+   "expand": "fill"
+  },
+  "UiKit.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 2000,
+   "title": "Component kit",
+   "page": "found",
+   "expand": "fill"
+  },
+  "MktHome.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 4450,
+   "title": "Marketing: Home",
+   "page": "mkt",
+   "expand": "fill"
+  },
+  "MktTemplates.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 2400,
+   "title": "Marketing: Template gallery",
+   "page": "mkt",
+   "expand": "fill"
+  },
+  "MktPricing.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 2600,
+   "title": "Marketing: Pricing",
+   "page": "mkt",
+   "expand": "fill"
+  },
+  "MktHomeMobile.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 390,
+   "h": 3000,
+   "title": "Marketing: Home (mobile)",
+   "page": "mkt"
+  },
+  "OnbSignup.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 860,
+   "title": "Signup",
+   "page": "onb",
+   "expand": "fill"
+  },
+  "OnbSubdomain.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 860,
+   "title": "Wizard 2/4: Subdomain",
+   "page": "onb",
+   "expand": "fill"
+  },
+  "OnbTemplate.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 1300,
+   "title": "Wizard 3/4: Template",
+   "page": "onb",
+   "expand": "fill"
+  },
+  "OnbBrand.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 960,
+   "title": "Wizard 4/4: Brand",
+   "page": "onb",
+   "expand": "fill"
+  },
+  "OnbMobile.dc.html": {
+   "x": 7600,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Wizard (mobile)",
+   "page": "onb",
+   "is_interactive": false
+  },
+  "AdmDashboard.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1100,
+   "title": "Admin: Dashboard",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmOrders.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1100,
+   "title": "Admin: Orders",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmOrderDetail.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1250,
+   "title": "Admin: Order detail",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmProducts.dc.html": {
+   "x": 0,
+   "y": 1370,
+   "w": 1440,
+   "h": 1080,
+   "title": "Admin: Products",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmProductEditor.dc.html": {
+   "x": 1520,
+   "y": 1370,
+   "w": 1440,
+   "h": 1800,
+   "title": "Admin: Product editor",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmInventory.dc.html": {
+   "x": 3040,
+   "y": 1370,
+   "w": 1440,
+   "h": 1100,
+   "title": "Admin: Inventory",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmCustomers.dc.html": {
+   "x": 0,
+   "y": 3290,
+   "w": 1440,
+   "h": 1100,
+   "title": "Admin: Customers",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmCoupons.dc.html": {
+   "x": 1520,
+   "y": 3290,
+   "w": 1440,
+   "h": 1080,
+   "title": "Admin: Discounts and coupons",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmReports.dc.html": {
+   "x": 3040,
+   "y": 3290,
+   "w": 1440,
+   "h": 1250,
+   "title": "Admin: Reports",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmPayments.dc.html": {
+   "x": 0,
+   "y": 4660,
+   "w": 1440,
+   "h": 1400,
+   "title": "Admin: Settings",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmShipping.dc.html": {
+   "x": 1520,
+   "y": 4660,
+   "w": 1440,
+   "h": 1300,
+   "title": "Admin: Settings",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmNotifications.dc.html": {
+   "x": 3040,
+   "y": 4660,
+   "w": 1440,
+   "h": 1550,
+   "title": "Admin: Settings",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmDomains.dc.html": {
+   "x": 0,
+   "y": 6330,
+   "w": 1440,
+   "h": 1300,
+   "title": "Admin: Settings",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmBilling.dc.html": {
+   "x": 1520,
+   "y": 6330,
+   "w": 1440,
+   "h": 1850,
+   "title": "Admin: Settings",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmStaff.dc.html": {
+   "x": 3040,
+   "y": 6330,
+   "w": 1440,
+   "h": 1150,
+   "title": "Admin: Settings",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmApps.dc.html": {
+   "x": 0,
+   "y": 8300,
+   "w": 1440,
+   "h": 1080,
+   "title": "Admin: Apps and modules",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "MobDashboard.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Mobile: Home",
+   "page": "mob"
+  },
+  "MobOrders.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Mobile: Orders",
+   "page": "mob"
+  },
+  "MobOrderBn.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Mobile: Order detail (Bangla)",
+   "page": "mob"
+  },
+  "MobAddProduct.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Mobile: Add product",
+   "page": "mob"
+  },
+  "MobCourier.dc.html": {
+   "x": 1880,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Mobile: Book courier",
+   "page": "mob"
+  },
+  "MobBkash.dc.html": {
+   "x": 2350,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Mobile: Verify bKash payment",
+   "page": "mob"
+  },
+  "MobMore.dc.html": {
+   "x": 2820,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Mobile: More menu",
+   "page": "mob"
+  },
+  "BldEditor.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Builder: Section editor",
+   "page": "build",
+   "expand": "fill"
+  },
+  "BldTheme.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1060,
+   "title": "Builder: Theme settings",
+   "page": "build",
+   "expand": "fill"
+  },
+  "BldLibrary.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1080,
+   "title": "Builder: Theme library",
+   "page": "build",
+   "expand": "fill"
+  },
+  "StrHome.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 2150,
+   "title": "Storefront: Home (desktop)",
+   "page": "store",
+   "expand": "fill"
+  },
+  "StrHomeMobile.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 390,
+   "h": 2150,
+   "title": "Storefront: Home (mobile)",
+   "page": "store"
+  },
+  "StrProduct.dc.html": {
+   "x": 1990,
+   "y": 0,
+   "w": 390,
+   "h": 1700,
+   "title": "Storefront: Product (mobile)",
+   "page": "store"
+  },
+  "StrCheckout.dc.html": {
+   "x": 2460,
+   "y": 0,
+   "w": 390,
+   "h": 2190,
+   "title": "Storefront: Checkout (mobile)",
+   "page": "store"
+  },
+  "StrSuccess.dc.html": {
+   "x": 2930,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Storefront: Order placed (mobile)",
+   "page": "store"
+  },
+  "StrAccount.dc.html": {
+   "x": 3400,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Storefront: My orders (mobile)",
+   "page": "store"
+  },
+  "SaOverview.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1100,
+   "title": "Super admin: Overview",
+   "page": "sa",
+   "expand": "fill"
+  },
+  "SaTenants.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1050,
+   "title": "Super admin: Tenants",
+   "page": "sa",
+   "expand": "fill"
+  },
+  "SaTenant.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1200,
+   "title": "Super admin: Tenant detail",
+   "page": "sa",
+   "expand": "fill"
+  },
+  "SaPayments.dc.html": {
+   "x": 0,
+   "y": 1320,
+   "w": 1440,
+   "h": 1100,
+   "title": "Super admin: Payment approvals",
+   "page": "sa",
+   "expand": "fill"
+  },
+  "SaTickets.dc.html": {
+   "x": 1520,
+   "y": 1320,
+   "w": 1440,
+   "h": 1050,
+   "title": "Super admin: Support tickets",
+   "page": "sa",
+   "expand": "fill"
+  },
+  "Sidebar.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 248,
+   "h": 1040,
+   "title": "Sidebar",
+   "page": "comp"
+  },
+  "Topbar.dc.html": {
+   "x": 328,
+   "y": 0,
+   "w": 1192,
+   "h": 60,
+   "title": "Topbar",
+   "page": "comp"
+  },
+  "MobileTabs.dc.html": {
+   "x": 1600,
+   "y": 0,
+   "w": 390,
+   "h": 84,
+   "title": "Mobile tab bar",
+   "page": "comp"
+  },
+  "WizardPreview.dc.html": {
+   "x": 2070,
+   "y": 0,
+   "w": 560,
+   "h": 640,
+   "title": "Wizard live preview",
+   "page": "comp"
+  },
+  "MktHeader.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1440,
+   "h": 72,
+   "title": "Marketing header",
+   "page": "comp"
+  },
+  "MktFooter.dc.html": {
+   "x": 1520,
+   "y": 1160,
+   "w": 1440,
+   "h": 360,
+   "title": "Marketing footer",
+   "page": "comp"
+  },
+  "SettingsNav.dc.html": {
+   "x": 3040,
+   "y": 1160,
+   "w": 232,
+   "h": 400,
+   "title": "Settings navigation",
+   "page": "comp"
+  },
+  "SaSidebar.dc.html": {
+   "x": 3352,
+   "y": 1160,
+   "w": 248,
+   "h": 1040,
+   "title": "Super admin sidebar",
+   "page": "comp"
+  },
+  "OnbStore.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 860,
+   "title": "Wizard 1/4: About your shop",
+   "page": "onb",
+   "expand": "fill"
+  },
+  "AdmFraud.dc.html": {
+   "x": 1520,
+   "y": 8300,
+   "w": 1440,
+   "h": 1250,
+   "title": "Admin: Fraud and risk",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmAbandoned.dc.html": {
+   "x": 3040,
+   "y": 8300,
+   "w": 1440,
+   "h": 1100,
+   "title": "Admin: Abandoned orders and call list",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmPixels.dc.html": {
+   "x": 0,
+   "y": 9670,
+   "w": 1440,
+   "h": 1300,
+   "title": "Admin: Pixels and conversion tracking",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmLanding.dc.html": {
+   "x": 1520,
+   "y": 9670,
+   "w": 1440,
+   "h": 1050,
+   "title": "Admin: Landing pages",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmIntegrations.dc.html": {
+   "x": 3040,
+   "y": 9670,
+   "w": 1440,
+   "h": 1300,
+   "title": "Admin: Settings: Integrations (key entry)",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmReturns.dc.html": {
+   "x": 0,
+   "y": 11090,
+   "w": 1440,
+   "h": 1100,
+   "title": "Admin: Returns",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmReviews.dc.html": {
+   "x": 1520,
+   "y": 11090,
+   "w": 1440,
+   "h": 1180,
+   "title": "Admin: Reviews",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmPagesBlog.dc.html": {
+   "x": 3040,
+   "y": 11090,
+   "w": 1440,
+   "h": 1080,
+   "title": "Admin: Pages and blog",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmInvoice.dc.html": {
+   "x": 0,
+   "y": 12390,
+   "w": 1440,
+   "h": 1200,
+   "title": "Admin: Invoice and packing slip",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmStoreDetails.dc.html": {
+   "x": 1520,
+   "y": 12390,
+   "w": 1440,
+   "h": 1430,
+   "title": "Admin: Settings: Store details",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmCustomerDetail.dc.html": {
+   "x": 3040,
+   "y": 12390,
+   "w": 1440,
+   "h": 1250,
+   "title": "Admin: Customer detail",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmReadOnly.dc.html": {
+   "x": 0,
+   "y": 13940,
+   "w": 1440,
+   "h": 1100,
+   "title": "Admin: Read-only state (subscription ended)",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmLimit.dc.html": {
+   "x": 1520,
+   "y": 13940,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Plan limit reached",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "BldLanding.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 1100,
+   "title": "Builder: One-product landing page",
+   "page": "build",
+   "expand": "fill"
+  },
+  "StrOffline.dc.html": {
+   "x": 3870,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Storefront: Store paused",
+   "page": "store"
+  },
+  "SaPlans.dc.html": {
+   "x": 3040,
+   "y": 1320,
+   "w": 1440,
+   "h": 1300,
+   "title": "Super admin: Plans and entitlements",
+   "page": "sa",
+   "expand": "fill"
+  },
+  "SaAnnouncements.dc.html": {
+   "x": 0,
+   "y": 2740,
+   "w": 1440,
+   "h": 1100,
+   "title": "Super admin: Announcements",
+   "page": "sa",
+   "expand": "fill"
+  },
+  "SaDomains.dc.html": {
+   "x": 1520,
+   "y": 2740,
+   "w": 1440,
+   "h": 1100,
+   "title": "Super admin: Domain health",
+   "page": "sa",
+   "expand": "fill"
+  },
+  "SaThemes.dc.html": {
+   "x": 3040,
+   "y": 2740,
+   "w": 1440,
+   "h": 1220,
+   "title": "Super admin: Themes and modules",
+   "page": "sa",
+   "expand": "fill"
+  },
+  "SaAudit.dc.html": {
+   "x": 0,
+   "y": 4080,
+   "w": 1440,
+   "h": 1100,
+   "title": "Super admin: Team and audit log",
+   "page": "sa",
+   "expand": "fill"
+  },
+  "MobFraud.dc.html": {
+   "x": 3290,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Mobile: Fraud check",
+   "page": "mob"
+  },
+  "MobAbandoned.dc.html": {
+   "x": 3760,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Mobile: Abandoned orders call list",
+   "page": "mob"
+  },
+  "MobPixels.dc.html": {
+   "x": 4230,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Mobile: Pixels and tracking",
+   "page": "mob"
+  },
+  "MobLanding.dc.html": {
+   "x": 4700,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Mobile: Landing pages",
+   "page": "mob"
+  },
+  "AdmCodRecon.dc.html": {
+   "x": 3040,
+   "y": 13940,
+   "w": 1440,
+   "h": 1300,
+   "title": "Admin: COD settlement and reconciliation",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmQuickOrder.dc.html": {
+   "x": 0,
+   "y": 15360,
+   "w": 1440,
+   "h": 1180,
+   "title": "Admin: Quick order desk",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmLoyalty.dc.html": {
+   "x": 1520,
+   "y": 15360,
+   "w": 1440,
+   "h": 1250,
+   "title": "Admin: Loyalty, VIP tiers and referrals",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "AdmProfit.dc.html": {
+   "x": 3040,
+   "y": 15360,
+   "w": 1440,
+   "h": 1250,
+   "title": "Admin: Profit and loss",
+   "page": "admin",
+   "expand": "fill"
+  },
+  "MobQuickOrder.dc.html": {
+   "x": 5170,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Mobile: Quick order",
+   "page": "mob"
+  },
+  "MobCodRecon.dc.html": {
+   "x": 5640,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Mobile: COD settlement",
+   "page": "mob"
+  },
+  "DarkDashboard.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1000,
+   "title": "Dark mode: Admin dashboard",
+   "page": "found",
+   "expand": "fill"
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "UiKit.dc.html",
+  "MktHome.dc.html",
+  "MktTemplates.dc.html",
+  "MktPricing.dc.html",
+  "MktHomeMobile.dc.html",
+  "OnbSignup.dc.html",
+  "OnbStore.dc.html",
+  "OnbSubdomain.dc.html",
+  "OnbTemplate.dc.html",
+  "OnbBrand.dc.html",
+  "OnbMobile.dc.html",
+  "AdmDashboard.dc.html",
+  "AdmOrders.dc.html",
+  "AdmOrderDetail.dc.html",
+  "AdmProducts.dc.html",
+  "AdmProductEditor.dc.html",
+  "AdmInventory.dc.html",
+  "AdmCustomers.dc.html",
+  "AdmCoupons.dc.html",
+  "AdmReports.dc.html",
+  "AdmPayments.dc.html",
+  "AdmShipping.dc.html",
+  "AdmNotifications.dc.html",
+  "AdmDomains.dc.html",
+  "AdmBilling.dc.html",
+  "AdmStaff.dc.html",
+  "AdmApps.dc.html",
+  "MobDashboard.dc.html",
+  "MobOrders.dc.html",
+  "MobOrderBn.dc.html",
+  "MobAddProduct.dc.html",
+  "MobCourier.dc.html",
+  "MobBkash.dc.html",
+  "MobMore.dc.html",
+  "BldEditor.dc.html",
+  "BldTheme.dc.html",
+  "BldLibrary.dc.html",
+  "StrHome.dc.html",
+  "StrHomeMobile.dc.html",
+  "StrProduct.dc.html",
+  "StrCheckout.dc.html",
+  "StrSuccess.dc.html",
+  "StrAccount.dc.html",
+  "SaOverview.dc.html",
+  "SaTenants.dc.html",
+  "SaTenant.dc.html",
+  "SaPayments.dc.html",
+  "SaTickets.dc.html",
+  "Sidebar.dc.html",
+  "Topbar.dc.html",
+  "MobileTabs.dc.html",
+  "WizardPreview.dc.html",
+  "MktHeader.dc.html",
+  "MktFooter.dc.html",
+  "SettingsNav.dc.html",
+  "SaSidebar.dc.html",
+  "AdmFraud.dc.html",
+  "AdmAbandoned.dc.html",
+  "AdmPixels.dc.html",
+  "AdmLanding.dc.html",
+  "AdmIntegrations.dc.html",
+  "AdmReturns.dc.html",
+  "AdmReviews.dc.html",
+  "AdmPagesBlog.dc.html",
+  "AdmInvoice.dc.html",
+  "AdmStoreDetails.dc.html",
+  "AdmCustomerDetail.dc.html",
+  "AdmReadOnly.dc.html",
+  "AdmLimit.dc.html",
+  "BldLanding.dc.html",
+  "StrOffline.dc.html",
+  "SaPlans.dc.html",
+  "SaAnnouncements.dc.html",
+  "SaDomains.dc.html",
+  "SaThemes.dc.html",
+  "SaAudit.dc.html",
+  "MobFraud.dc.html",
+  "MobAbandoned.dc.html",
+  "MobPixels.dc.html",
+  "MobLanding.dc.html",
+  "AdmCodRecon.dc.html",
+  "AdmQuickOrder.dc.html",
+  "AdmLoyalty.dc.html",
+  "AdmProfit.dc.html",
+  "MobQuickOrder.dc.html",
+  "MobCodRecon.dc.html",
+  "DarkDashboard.dc.html"
+ ],
+ "notes": {
+  "t_found": {
+   "x": 0,
+   "y": -300,
+   "text": "Foundations",
+   "kind": "title1",
+   "maxW": 1440,
+   "page": "found"
+  },
+  "t_mkt": {
+   "x": 0,
+   "y": -300,
+   "text": "Marketing site",
+   "kind": "title1",
+   "maxW": 1440,
+   "page": "mkt"
+  },
+  "t_onb": {
+   "x": 0,
+   "y": -300,
+   "text": "Signup and onboarding wizard",
+   "kind": "title1",
+   "maxW": 1440,
+   "page": "onb"
+  },
+  "t_admin": {
+   "x": 0,
+   "y": -300,
+   "text": "Store owner admin (desktop)",
+   "kind": "title1",
+   "maxW": 1440,
+   "page": "admin"
+  },
+  "t_mob": {
+   "x": 0,
+   "y": -300,
+   "text": "Store owner admin (mobile, 390 x 844)",
+   "kind": "title1",
+   "maxW": 1440,
+   "page": "mob"
+  },
+  "t_build": {
+   "x": 0,
+   "y": -300,
+   "text": "Theme and section builder",
+   "kind": "title1",
+   "maxW": 1440,
+   "page": "build"
+  },
+  "t_store": {
+   "x": 0,
+   "y": -300,
+   "text": "Storefront and checkout (theme: Kapor)",
+   "kind": "title1",
+   "maxW": 1440,
+   "page": "store"
+  },
+  "t_sa": {
+   "x": 0,
+   "y": -300,
+   "text": "Platform super admin",
+   "kind": "title1",
+   "maxW": 1440,
+   "page": "sa"
+  },
+  "t_comp": {
+   "x": 0,
+   "y": -300,
+   "text": "Shared components",
+   "kind": "title1",
+   "maxW": 1440,
+   "page": "comp"
+  }
+ },
+ "designSystems": []
+}

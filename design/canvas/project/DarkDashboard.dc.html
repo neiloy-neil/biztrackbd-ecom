@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dark mode admin dashboard</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#0F0F2A}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1000px;background:#0F0F2A;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#ECECFA">
+
+<div style="flex:0 0 248px;box-sizing:border-box;background:#171738;border-right:1px solid #2A2A5A;padding:16px 12px;display:flex;flex-direction:column;min-height:1000px">
+<div style="display:flex;align-items:center;gap:10px;padding:0 8px"><svg width="28" height="28" viewBox="0 0 44 44" role="img" aria-label="BizTrackBD"><rect width="44" height="44" rx="12" fill="#6F64F2"/><path d="M13 32V22M22 32V14M31 32V19" stroke="#fff" stroke-width="4.4" stroke-linecap="round"/></svg><div style="font-size:18px;font-weight:700">BizTrack<span style="color:#A9A2FF">BD</span></div></div>
+<div style="margin:18px 0 14px;padding:10px 12px;border:1px solid #2A2A5A;border-radius:10px;background:#1E1E48;display:flex;align-items:center;gap:10px"><div style="width:30px;height:30px;border-radius:8px;background:#3A3260;color:#E9DCCB;font-weight:700;display:flex;align-items:center;justify-content:center">র</div><div><div style="font-size:13px;font-weight:700">Rongdhonu Fashion</div><div style="font-size:11.5px;color:#8888B4">rongdhonu.biztrackbd.com</div></div></div>
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="8"><div style="display:flex;align-items:center;gap:12px;height:38px;padding:0 12px;border-radius:8px;margin-bottom:4px;background:{{n.bg}}"><div style="width:16px;height:16px;border-radius:4px;background:{{n.ic}};opacity:0.9"></div><div style="font-size:14px;font-weight:{{n.w}};color:{{n.c}}">{{n.t}}</div></div></sc-for>
+<div style="flex:1"></div>
+<div style="padding:14px;border-radius:12px;background:#24245A"><div style="font-size:12px;font-weight:700;color:#A9A2FF">Free trial</div><div style="font-size:16px;font-weight:700;margin:2px 0 10px">9 days left</div><div style="height:6px;border-radius:3px;background:#3A3A78"><div style="width:36%;height:6px;border-radius:3px;background:#8B83F5"></div></div></div>
+</div>
+
+<div style="flex:999 1 560px;min-width:0">
+<div style="height:60px;box-sizing:border-box;background:#171738;border-bottom:1px solid #2A2A5A;display:flex;align-items:center;gap:12px;padding:0 24px"><div style="width:420px;max-width:100%;height:36px;box-sizing:border-box;border:1px solid #2A2A5A;border-radius:8px;background:#1E1E48;padding:0 12px;display:flex;align-items:center;font-size:13.5px;color:#8888B4">Search orders, products, customers</div><div style="flex:1"></div><div style="display:flex;padding:3px;border-radius:19px;background:#24245A;font-size:13px;font-weight:600"><div style="padding:5px 12px;color:#8888B4">Light</div><div style="padding:5px 12px;border-radius:16px;background:#3A3A78">Dark</div></div><div style="width:32px;height:32px;border-radius:16px;background:#3A3A78;color:#C9C4FF;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">NJ</div></div>
+
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;align-items:center;gap:12px"><div style="flex:1"><h1 style="margin:0;font-size:24px;font-weight:700">Good evening, Nusrat</h1><div style="font-size:14px;color:#B4B4DA;margin-top:4px">4 orders need packing today</div></div><div style="height:38px;padding:0 18px;border-radius:8px;background:#6F64F2;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center">Add product</div></div>
+
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+<div style="background:#171738;border:1px solid #2A2A5A;border-radius:12px;padding:18px 20px"><div style="font-size:13px;color:#B4B4DA">New orders</div><div style="font-size:28px;font-weight:700;margin-top:6px">12</div><div style="font-size:12.5px;margin-top:6px"><b style="color:#5FD38D">+4</b> <span style="color:#8888B4">vs yesterday</span></div></div>
+<div style="background:#171738;border:1px solid #2A2A5A;border-radius:12px;padding:18px 20px"><div style="font-size:13px;color:#B4B4DA">To pack and ship</div><div style="font-size:28px;font-weight:700;margin-top:6px">4</div><div style="font-size:12.5px;margin-top:6px;color:#F0A94A;font-weight:600">2 waiting over 24 hours</div></div>
+<div style="background:#171738;border:1px solid #2A2A5A;border-radius:12px;padding:18px 20px"><div style="font-size:13px;color:#B4B4DA">Sales today</div><div style="font-size:28px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums">৳ 18,450</div><div style="font-size:12.5px;margin-top:6px"><b style="color:#5FD38D">+12%</b> <span style="color:#8888B4">vs yesterday</span></div></div>
+<div style="background:#171738;border:1px solid #2A2A5A;border-radius:12px;padding:18px 20px"><div style="font-size:13px;color:#B4B4DA">Payments to check</div><div style="font-size:28px;font-weight:700;margin-top:6px">3</div><div style="font-size:12.5px;margin-top:6px;color:#A9A2FF;font-weight:700">Verify bKash and Nagad</div></div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:20px">
+<div style="background:#171738;border:1px solid #2A2A5A;border-radius:12px;padding:20px 24px"><div style="font-size:15px;font-weight:700">Sales</div><div style="font-size:26px;font-weight:700;margin:8px 0 12px;font-variant-numeric:tabular-nums">৳ 1,24,680 <span style="font-size:13px;color:#5FD38D">+18%</span></div>
+<svg viewBox="0 0 640 180" width="100%" height="180" role="img" aria-label="Sales over the last 7 days, rising" preserveAspectRatio="none"><g stroke="#2A2A5A"><path d="M0 40H640M0 90H640M0 130H640"/></g><path d="M0 160H640" stroke="#3A3A78"/><path d="M0 130 L107 112 L213 120 L320 86 L427 96 L533 60 L640 36 L640 160 L0 160 Z" fill="#8B83F5" fill-opacity="0.14"/><path d="M0 130 L107 112 L213 120 L320 86 L427 96 L533 60 L640 36" fill="none" stroke="#8B83F5" stroke-width="2.5" stroke-linejoin="round"/><circle cx="640" cy="36" r="5" fill="#171738" stroke="#8B83F5" stroke-width="2.5"/></svg></div>
+<div style="background:#171738;border:1px solid #2A2A5A;border-radius:12px;overflow:hidden"><div style="padding:16px 24px;font-size:15px;font-weight:700;border-bottom:1px solid #2A2A5A">Recent orders</div>
+<sc-for list="{{orders}}" as="o" hint-placeholder-count="4"><div style="display:flex;align-items:center;gap:14px;padding:0 24px;height:56px;border-bottom:1px solid #22224F;font-size:13.5px"><b style="width:90px;color:#A9A2FF">{{o.id}}</b><div style="flex:1"><b>{{o.n}}</b><div style="font-size:12px;color:#8888B4">{{o.a}}</div></div><span style="padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:{{o.bg}};color:{{o.c}}">{{o.p}}</span><b style="width:90px;text-align:right;font-variant-numeric:tabular-nums">{{o.t}}</b></div></sc-for></div>
+</div>
+<div style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:20px">
+<div style="background:#171738;border:1px solid #2A2A5A;border-radius:12px;padding:20px 24px"><div style="font-size:15px;font-weight:700;margin-bottom:12px">Finish setting up</div><div style="height:6px;border-radius:3px;background:#2A2A5A;margin-bottom:14px"><div style="width:50%;height:6px;border-radius:3px;background:#8B83F5"></div></div><div style="font-size:13.5px;line-height:2.2"><span style="color:#8888B4;text-decoration:line-through">Add your first products</span><br><span style="color:#8888B4;text-decoration:line-through">Set your logo and colors</span><br><b>Set delivery charges</b> <span style="color:#A9A2FF;font-weight:700;float:right">Start</span><br>Connect Pathao or Steadfast<br>Publish your store</div></div>
+<div style="background:#171738;border:1px solid #2A2A5A;border-radius:12px;padding:20px 24px"><div style="font-size:15px;font-weight:700;margin-bottom:10px">Low stock</div><div style="font-size:13.5px;display:flex;flex-direction:column;gap:12px"><div style="display:flex"><span style="flex:1">Cotton Panjabi, L</span><b style="color:#F0A94A">2 left</b></div><div style="display:flex"><span style="flex:1">Slim Chino, 32</span><b style="color:#F0A94A">3 left</b></div><div style="display:flex"><span style="flex:1">Denim Jacket, M</span><b style="color:#FF8A8A">Out</b></div></div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+renderVals() {
+const names = ['Home','Orders','Products','Customers','Marketing','Online store','Reports','Apps and modules'];
+return {
+nav: names.map((t,i) => ({ t, bg: i===0?'#2B2B66':'transparent', c: i===0?'#C9C4FF':'#B4B4DA', w: i===0?700:500, ic: i===0?'#8B83F5':'#6666A0' })),
+orders: [['BT-10482','Tania Akter','Mirpur, Dhaka','Check bKash','#3A2D14','#F0A94A','৳ 2,450'],['BT-10481','Rakib Hasan','Agrabad, Chattogram','COD','#2A2A5A','#B4B4DA','৳ 1,890'],['BT-10480','Farhana Islam','Zindabazar, Sylhet','Paid','#14341F','#5FD38D','৳ 3,200'],['BT-10479','Sabbir Ahmed','Uttara, Dhaka','Check Nagad','#3A2D14','#F0A94A','৳ 990']].map(([id,n,a,p,bg,c,t]) => ({ id, n, a, p, bg, c, t })),
+};
+}
+}
+</script>
+</body>
+</html>

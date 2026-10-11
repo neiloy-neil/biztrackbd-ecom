@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Super admin payment approvals</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="SaSidebar" active="payments" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<div style="height:60px;box-sizing:border-box;background:#fff;border-bottom:1px solid #E7E7F0;display:flex;align-items:center;padding:0 24px"><div style="font-size:13px;color:#4B4B73">Payments and plans</div></div>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h1 style="margin:0;font-size:24px;font-weight:700;flex-grow:1">Payment approvals</h1><div style="font-size:13.5px;color:#4B4B73">Target: approve within 4 working hours</div></div>
+
+<div style="display:flex;gap:28px;border-bottom:1px solid #E7E7F0">
+<div style="padding:6px 0 12px;border-bottom:2.5px solid #5B4FE8;margin-bottom:-1px;font-size:14px;font-weight:600">Waiting <span style="padding:1px 8px;border-radius:10px;font-size:12px;font-weight:700;background:#E9E7FD;color:#5B4FE8">7</span></div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D">Approved</div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D">Rejected</div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D">Gateway payments</div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D">Failed and overdue</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:1 1 400px;min-width:0;background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<sc-for list="{{queue}}" as="q" hint-placeholder-count="7">
+<div style="display:flex;align-items:center;gap:12px;padding:0 20px;height:72px;border-bottom:1px solid #F0F0F6;background:{{q.bg}};border-left:3px solid {{q.edge}}">
+<div style="width:38px;height:38px;border-radius:19px;background:{{q.mark}};color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 38px">{{q.method}}</div>
+<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700">{{q.name}}</div><div style="font-size:12.5px;color:#4B4B73">{{q.plan}} · {{q.trx}}</div></div>
+<div style="text-align:right"><div style="font-size:14px;font-weight:700;font-variant-numeric:tabular-nums">{{q.amt}}</div><div style="font-size:12px;color:{{q.ageColor}};font-weight:600">{{q.age}}</div></div>
+</div>
+</sc-for>
+</div>
+
+<div style="flex:1.3 1 480px;min-width:0;background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:center;gap:12px"><div style="flex-grow:1"><div style="font-size:18px;font-weight:700">Rongdhonu Fashion</div><div style="font-size:13px;color:#4B4B73;margin-top:2px">Pro plan, monthly · Submitted today, 10:58 am · 52 min ago</div></div><span style="padding:3px 11px;border-radius:11px;background:#FDF3E3;color:#B45309;font-size:12px;font-weight:700">Waiting</span></div>
+
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+<div style="background:#FAFAFC;border:1px solid #E7E7F0;border-radius:10px;padding:14px 16px"><div style="font-size:12px;color:#6B6B8D;font-weight:600">Amount claimed</div><div style="font-size:20px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">৳ 1,499</div></div>
+<div style="background:#FAFAFC;border:1px solid #E7E7F0;border-radius:10px;padding:14px 16px"><div style="font-size:12px;color:#6B6B8D;font-weight:600">Method</div><div style="font-size:16px;font-weight:700;margin-top:6px">bKash</div></div>
+<div style="background:#FAFAFC;border:1px solid #E7E7F0;border-radius:10px;padding:14px 16px"><div style="font-size:12px;color:#6B6B8D;font-weight:600">TrxID</div><div style="font-size:16px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums">8J2L5QW9RT</div></div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px">
+<div style="flex:1 1 220px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Payment screenshot</div><div style="height:240px;border-radius:12px;background:#FFF5FA;border:1px solid #E7E7F0;padding:18px;box-sizing:border-box"><div style="font-size:11px;color:#E2136E;font-weight:800">bKash</div><div style="font-size:12px;color:#4B4B73;margin-top:10px">Send Money successful</div><div style="font-size:26px;font-weight:700;margin:6px 0;font-variant-numeric:tabular-nums">৳ 1,499.00</div><div style="font-size:11.5px;color:#4B4B73;line-height:1.7">To: 01898-765432<br>TrxID: 8J2L5QW9RT<br>10 Oct 2026 10:55 AM</div></div></div>
+<div style="flex:1 1 220px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Check against your bKash merchant account</div><div style="display:flex;flex-direction:column;gap:12px;font-size:13.5px">
+<div style="display:flex;align-items:center;gap:10px"><div style="width:22px;height:22px;border-radius:11px;background:#E8F6EE;display:flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>Amount equals plan price</div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:22px;height:22px;border-radius:11px;background:#E8F6EE;display:flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>TrxID not used before</div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:22px;height:22px;border-radius:11px;background:#FDF3E3;display:flex;align-items:center;justify-content:center;font-weight:700;color:#B45309;font-size:13px">!</div>Confirm the TrxID in your merchant history</div>
+</div></div>
+</div>
+
+<div><div style="font-size:13px;font-weight:700;margin-bottom:6px">Note to tenant (optional)</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px;color:#6B6B8D">Shown if you reject the payment</div></div>
+
+<div style="display:flex;gap:10px"><div style="height:44px;padding:0 24px;border-radius:8px;background:#15803D;color:#fff;font-size:14.5px;font-weight:700;display:flex;align-items:center">Approve and activate Pro</div><div style="height:44px;padding:0 20px;border:1px solid #F1C0C0;border-radius:8px;color:#DC2626;font-size:14.5px;font-weight:600;display:flex;align-items:center">Reject</div><div style="height:44px;padding:0 20px;border:1px solid #D5D5E4;border-radius:8px;font-size:14.5px;font-weight:600;display:flex;align-items:center">Ask for more details</div></div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+const d = [
+['bKash','#E2136E','Rongdhonu Fashion','Pro','8J2L5QW9RT','৳ 1,499','52 min ago',1,0],
+['Nagad','#F6921E','Nakshi Tailors','Pro','NG44A9X01Z','৳ 1,499','1 hr ago',0,0],
+['Bank','#1A1A4E','Fashion Hub Sylhet','Business','TRF-20931','৳ 3,499','2 hr ago',0,0],
+['bKash','#E2136E','Little Steps BD','Pro','7H1K3VB6NM','৳ 1,499','3 hr ago',0,0],
+['bKash','#E2136E','Urban Threads','Starter','5G9F2DS8LP','৳ 699','5 hr ago',0,1],
+['Nagad','#F6921E','Bonoful Organic','Starter','NG18B2Q77C','৳ 699','Yesterday',0,1],
+['bKash','#E2136E','TechMart Dhaka','Business','4F6D8AX2KJ','৳ 3,499','Yesterday',0,1],
+];
+return { queue: d.map(([method,mark,name,plan,trx,amt,age,sel,late]) => ({ method, mark, name, plan, trx, amt, age, bg: sel?'#F4F3FF':'#fff', edge: sel?'#5B4FE8':'transparent', ageColor: late?'#DC2626':'#6B6B8D' })) };
+}
+}
+</script>
+</body>
+</html>

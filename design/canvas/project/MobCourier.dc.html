@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mobile book courier sheet</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:390px;height:844px;position:relative;overflow:hidden;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+
+<div style="padding:20px 16px;opacity:0.6">
+<div style="font-size:24px;font-weight:700;margin-bottom:16px">Orders</div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:14px;padding:14px 16px;margin-bottom:12px"><div style="font-size:14px;font-weight:700;color:#5B4FE8">BT-10481</div><div style="font-size:15px;font-weight:700;margin-top:6px">Rakib Hasan</div><div style="font-size:12.5px;color:#4B4B73">Agrabad, Chattogram · 2 items</div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:14px;padding:14px 16px"><div style="font-size:14px;font-weight:700;color:#5B4FE8">BT-10477</div><div style="font-size:15px;font-weight:700;margin-top:6px">Nusrat Sultana</div><div style="font-size:12.5px;color:#4B4B73">Khulna Sadar · 2 items</div></div>
+</div>
+<div style="position:absolute;inset:0;background:rgba(26,26,78,0.45)"></div>
+
+<div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:20px 20px 0 0;padding:10px 16px 20px;box-shadow:0 -8px 24px rgba(26,26,78,0.12)">
+<div style="width:40px;height:5px;border-radius:3px;background:#D5D5E4;margin:0 auto 14px"></div>
+<div style="display:flex;align-items:center"><div style="flex-grow:1"><div style="font-size:18px;font-weight:700">Book courier</div><div style="font-size:13px;color:#4B4B73">BT-10481 · Rakib Hasan · Agrabad, Chattogram</div></div></div>
+
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
+<sc-for list="{{couriers}}" as="c" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:12px;padding:14px;border:{{c.border}};border-radius:14px;background:{{c.bg}};min-height:44px">
+<div style="width:22px;height:22px;border-radius:11px;box-sizing:border-box;border:{{c.radio}};background:#fff"></div>
+<div style="width:40px;height:40px;border-radius:10px;background:{{c.logo}};color:#fff;font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center">{{c.short}}</div>
+<div style="flex-grow:1"><div style="font-size:15px;font-weight:700">{{c.name}}</div><div style="font-size:12.5px;color:#4B4B73">{{c.eta}}</div></div>
+<div style="text-align:right"><div style="font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">{{c.fee}}</div><div style="font-size:11.5px;color:#6B6B8D">courier fee</div></div>
+</div>
+</sc-for>
+</div>
+
+<div style="display:flex;gap:10px;margin-top:14px">
+<div style="flex:1"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Weight</div><div style="display:flex;height:48px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:12px;overflow:hidden;font-size:15px"><div style="flex:1;padding:0 14px;display:flex;align-items:center">0.5</div><div style="padding:0 14px;background:#FAFAFC;border-left:1px solid #D5D5E4;display:flex;align-items:center;color:#4B4B73">kg</div></div></div>
+<div style="flex:1"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Collect on delivery</div><div style="display:flex;height:48px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:12px;overflow:hidden;font-size:15px"><div style="padding:0 14px;background:#FAFAFC;border-right:1px solid #D5D5E4;display:flex;align-items:center;color:#4B4B73">৳</div><div style="flex:1;padding:0 14px;display:flex;align-items:center;font-variant-numeric:tabular-nums">1,890</div></div></div>
+</div>
+
+<div style="display:flex;align-items:center;gap:10px;margin-top:14px"><div style="width:20px;height:20px;border-radius:5px;background:#5B4FE8;display:flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><div style="font-size:13.5px">Send tracking SMS to customer</div></div>
+
+<div style="height:56px;border-radius:12px;background:#5B4FE8;color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:16px">Book Pathao pickup</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const d = [['Pathao','Pathao','#E5252A','Pickup today · delivery in 2 days','৳ 110',1],['Steadfast','Steadfast','#1E6B3A','Pickup tomorrow · delivery in 2 to 3 days','৳ 100',0],['RedX','RedX','#D62E2E','Pickup today · delivery in 3 days','৳ 105',0]];
+return { couriers: d.map(([name,short,logo,eta,fee,on]) => ({ name, short, logo, eta, fee, border: on?'2px solid #5B4FE8':'1px solid #E7E7F0', bg: on?'#F4F3FF':'#fff', radio: on?'6px solid #5B4FE8':'1.5px solid #D5D5E4' })) };
+}
+}
+</script>
+</body>
+</html>

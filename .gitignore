@@ -1,0 +1,40 @@
+node_modules
+.next
+.turbo
+dist
+coverage
+*.log
+.DS_Store
+
+# secrets: never commit real env files
+.env
+.env.*
+!.env.example
+
+# local databases and tooling output
+*.db
+.vercel
+tools/canvas-render/.out/
+apps/storefront/test-results/
+apps/storefront/playwright-report/
+apps/storefront/e2e/.sms-outbox.jsonl
+.uploads/
+apps/admin/test-results/
+apps/admin/playwright-report/
+apps/admin/e2e/.dns.json
+packages/core/.drill-work
+packages/core/.drill-store
+
+# The project checkup: ids and a test authenticator secret (the screenshots and REPORT.md are meant to be read)
+checkup/state.json
+checkup/run1-as-postgres/
+
+checkup/screens/actual/*enroll-secret*
+.claude/settings.local.json
+
+# Generated per-project Vercel environment files (contain secrets)
+deploy-env/
+.env.production.local
+
+# Test message outboxes (written by the end-to-end runs)
+*.jsonl

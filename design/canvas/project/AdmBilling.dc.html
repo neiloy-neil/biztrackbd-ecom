@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin settings plan and billing</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="settings" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+<h1 style="margin:0;font-size:24px;font-weight:700">Settings</h1>
+<div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start">
+<div style="flex:0 0 232px"><dc-import name="SettingsNav" active="billing" hint-size="232px,340px"></dc-import></div>
+<div style="flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:20px">
+
+<div><div style="font-size:18px;font-weight:700">Plan and billing</div><div style="font-size:14px;color:#4B4B73;margin-top:4px">Your trial ends on 19 October. Pick a plan to keep your store online.</div></div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px;display:flex;flex-wrap:wrap;gap:24px;align-items:center">
+<div style="flex:1 1 220px"><div style="font-size:13px;color:#4B4B73;font-weight:600">Current plan</div><div style="font-size:22px;font-weight:700;margin-top:2px">Free trial</div><div style="font-size:13px;color:#B45309;font-weight:600;margin-top:2px">9 days left</div></div>
+<div style="flex:2 1 320px;display:flex;flex-direction:column;gap:14px">
+<div><div style="display:flex;font-size:13px;margin-bottom:6px"><span style="flex-grow:1;font-weight:600">Products</span><span style="color:#4B4B73;font-variant-numeric:tabular-nums">64 of 100</span></div><div style="height:6px;border-radius:3px;background:#E7E7F0"><div style="width:64%;height:6px;border-radius:3px;background:#5B4FE8"></div></div></div>
+<div><div style="display:flex;font-size:13px;margin-bottom:6px"><span style="flex-grow:1;font-weight:600">Staff accounts</span><span style="color:#4B4B73;font-variant-numeric:tabular-nums">2 of 2</span></div><div style="height:6px;border-radius:3px;background:#E7E7F0"><div style="width:100%;height:6px;border-radius:3px;background:#B45309"></div></div></div>
+<div><div style="display:flex;font-size:13px;margin-bottom:6px"><span style="flex-grow:1;font-weight:600">Storage</span><span style="color:#4B4B73;font-variant-numeric:tabular-nums">0.8 of 2 GB</span></div><div style="height:6px;border-radius:3px;background:#E7E7F0"><div style="width:40%;height:6px;border-radius:3px;background:#5B4FE8"></div></div></div>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:16px">
+<sc-for list="{{plans}}" as="p" hint-placeholder-count="3">
+<div style="flex:1 1 220px;min-width:0;background:#fff;border:{{p.border}};border-radius:12px;padding:20px 22px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:8px"><div style="font-size:16px;font-weight:700">{{p.name}}</div><sc-if value="{{p.rec}}" hint-placeholder-val="{{false}}"><span style="padding:2px 9px;border-radius:10px;background:#E9E7FD;color:#5B4FE8;font-size:11.5px;font-weight:700">Most chosen</span></sc-if></div>
+<div><span style="font-size:28px;font-weight:700;font-variant-numeric:tabular-nums">{{p.price}}</span><span style="font-size:13px;color:#4B4B73"> /month</span></div>
+<div style="font-size:12.5px;color:#4B4B73;line-height:1.7">{{p.l1}}<br>{{p.l2}}<br>{{p.l3}}<br>{{p.l4}}</div>
+<div style="height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;background:{{p.btnBg}};color:{{p.btnColor}};border:{{p.btnBorder}}">{{p.btn}}</div>
+</div>
+</sc-for>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 24px">
+<div style="font-size:15px;font-weight:700;margin-bottom:4px">Pay for Pro, ৳ 1,499 per month</div>
+<div style="font-size:13px;color:#4B4B73;margin-bottom:16px">Choose a payment method. Your plan starts as soon as we confirm payment.</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:12px;padding:14px;border:1px solid #E7E7F0;border-radius:10px"><div style="width:18px;height:18px;border-radius:9px;border:1.5px solid #D5D5E4;box-sizing:border-box"></div><div style="flex-grow:1"><div style="font-size:14px;font-weight:600">Card or mobile banking, automatic</div><div style="font-size:12.5px;color:#6B6B8D">SSLCommerz: bKash, Nagad, Visa, Mastercard · renews with a payment link</div></div></div>
+<div style="display:flex;align-items:center;gap:12px;padding:14px;border:1px solid #E7E7F0;border-radius:10px"><div style="width:18px;height:18px;border-radius:9px;border:1.5px solid #D5D5E4;box-sizing:border-box"></div><div style="flex-grow:1"><div style="font-size:14px;font-weight:600">International card</div><div style="font-size:12.5px;color:#6B6B8D">Stripe · charged in USD · renews automatically</div></div></div>
+<div style="padding:14px;border:1.5px solid #5B4FE8;border-radius:10px;background:#F4F3FF">
+<div style="display:flex;align-items:center;gap:12px"><div style="width:18px;height:18px;border-radius:9px;border:5px solid #5B4FE8;box-sizing:border-box;background:#fff"></div><div style="flex-grow:1"><div style="font-size:14px;font-weight:700">Send money manually</div><div style="font-size:12.5px;color:#4B4B73">bKash, Nagad or bank transfer · we approve within 4 working hours</div></div></div>
+<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid #D9D5FA">
+<div style="flex:1 1 200px;font-size:13px;line-height:1.7"><b>Send ৳ 1,499 to</b><br>bKash Merchant 01898-765432<br>Reference: <b>rongdhonu</b></div>
+<div style="flex:1 1 150px"><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Your TrxID</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;background:#fff;padding:0 12px;display:flex;align-items:center;font-size:14px;color:#6B6B8D">e.g. 9K4M2PX7QA</div></div>
+<div style="flex:1 1 150px"><div style="font-size:12.5px;font-weight:600;margin-bottom:6px">Screenshot (optional)</div><div style="height:40px;box-sizing:border-box;border:1.5px dashed #B9B2F5;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#5B4FE8">Upload image</div></div>
+</div>
+<div style="margin-top:14px;height:40px;width:200px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center">Submit payment</div>
+</div>
+</div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="padding:18px 24px;font-size:15px;font-weight:700;border-bottom:1px solid #E7E7F0">Invoices</div>
+<div style="padding:30px 24px;text-align:center;font-size:13.5px;color:#4B4B73">No invoices yet. Your first invoice appears after you subscribe.</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+const mk = (name, price, l, rec, btn) => ({ name, price, l1:l[0], l2:l[1], l3:l[2], l4:l[3], rec, btn, border: rec?'2px solid #5B4FE8':'1px solid #E7E7F0', btnBg: rec?'#5B4FE8':'#fff', btnColor: rec?'#fff':'#1A1A4E', btnBorder: rec?'none':'1px solid #D5D5E4' });
+return { plans: [
+mk('Starter','৳ 699',['300 products','500 orders a month','2 staff accounts','Free address (your-name.biztrackbd.com)','COD, bKash and Nagad'],false,'Choose Starter'),
+mk('Pro','৳ 1,499',['2,000 products','3,000 orders a month','5 staff accounts','Your own domain','Courier booking and SMS credits'],true,'Choose Pro'),
+mk('Business','৳ 3,499',['Unlimited products and orders','15 staff accounts','Section builder and all modules','Priority support on WhatsApp'],false,'Choose Business'),
+] };
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin pixels and conversion tracking</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="marketing" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px;max-width:1000px">
+
+<div><div style="font-size:13px;font-weight:600;color:#6B6B8D">Marketing</div><h1 style="margin:2px 0 4px;font-size:24px;font-weight:700">Pixels and conversion tracking</h1><div style="font-size:14px;color:#4B4B73;line-height:1.55;max-width:680px">Send visits and purchases to Facebook so your ads find buyers. We send events from the browser and from our server, and remove duplicates automatically.</div></div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:22px 24px">
+<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><div style="width:44px;height:44px;border-radius:10px;background:#1877F2;color:#fff;font-weight:800;font-size:22px;display:flex;align-items:center;justify-content:center">f</div><div style="flex-grow:1"><div style="font-size:16px;font-weight:700">Facebook Pixel and Conversions API</div><div style="font-size:13px;color:#4B4B73;margin-top:2px">Pixel ID 4821 9930 1127 · Last event 2 minutes ago</div></div><span style="padding:3px 11px;border-radius:11px;background:#E8F6EE;color:#15803D;font-size:12px;font-weight:700">Connected</span></div>
+
+<div style="display:flex;flex-wrap:wrap;gap:18px;margin-top:22px;padding-top:20px;border-top:1px solid #F0F0F6">
+<div style="flex:1 1 240px"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Pixel ID</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px;font-variant-numeric:tabular-nums">482199301127</div><div style="font-size:12px;color:#6B6B8D;margin-top:6px">Find it in Facebook Events Manager.</div></div>
+<div style="flex:1 1 300px"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Conversions API access token</div><div style="display:flex;height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;align-items:center;font-size:14px;background:#FAFAFC"><span style="flex-grow:1;letter-spacing:2px;color:#4B4B73">••••••••••••••a91f</span><span style="font-size:13px;font-weight:700;color:#5B4FE8">Replace</span></div><div style="font-size:12px;color:#6B6B8D;margin-top:6px">Stored encrypted. We cannot show it again.</div></div>
+<div style="flex:1 1 200px"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Test event code (optional)</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px;color:#6B6B8D">TEST12345</div></div>
+</div>
+<div style="display:flex;gap:10px;margin-top:18px"><div style="height:40px;padding:0 18px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center">Save</div><div style="height:40px;padding:0 18px;border:1px solid #D5D5E4;border-radius:8px;font-size:14px;font-weight:600;display:flex;align-items:center">Send a test event</div></div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="padding:18px 24px;display:flex;align-items:center;border-bottom:1px solid #E7E7F0"><div style="font-size:15px;font-weight:700;flex-grow:1">Events from your store (last 7 days)</div><div style="font-size:13px;color:#4B4B73">Match quality <b style="color:#15803D">Good</b></div></div>
+<div style="display:grid;grid-template-columns:minmax(0,1.4fr) 100px 100px 110px 120px;padding:10px 24px;background:#FAFAFC;border-bottom:1px solid #E7E7F0;font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px"><div>EVENT</div><div style="text-align:right">BROWSER</div><div style="text-align:right">SERVER</div><div style="text-align:right">DEDUPED</div><div>STATUS</div></div>
+<sc-for list="{{events}}" as="e" hint-placeholder-count="6">
+<div style="display:grid;grid-template-columns:minmax(0,1.4fr) 100px 100px 110px 120px;padding:0 24px;height:52px;align-items:center;border-bottom:1px solid #F0F0F6;font-size:13.5px"><div style="font-weight:600">{{e.name}}</div><div style="text-align:right;font-variant-numeric:tabular-nums">{{e.b}}</div><div style="text-align:right;font-variant-numeric:tabular-nums">{{e.s}}</div><div style="text-align:right;color:#4B4B73;font-variant-numeric:tabular-nums">{{e.d}}</div><div><span style="padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:{{e.bg}};color:{{e.c}}">{{e.st}}</span></div></div>
+</sc-for>
+</div>
+
+<div style="background:#FDF3E3;border-radius:12px;padding:14px 18px;display:flex;gap:12px;align-items:flex-start"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 20px;margin-top:1px"><path d="M12 3l10 18H2L12 3zM12 10v5M12 18v.01"/></svg><div style="font-size:13.5px;line-height:1.55;color:#4B4B73"><b style="color:#B45309">Add to cart is low.</b> 1 in 6 browser events has no matching server event. Check that your customers' phone numbers are being sent, this improves ad matching.</div></div>
+
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:18px 20px"><div style="display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:10px;background:#111;color:#fff;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">TikTok</div><div style="flex-grow:1"><div style="font-size:14.5px;font-weight:700">TikTok Pixel</div><div style="font-size:12.5px;color:#6B6B8D">Business plan</div></div><div style="height:34px;padding:0 14px;border:1px solid #B9B2F5;border-radius:8px;color:#5B4FE8;font-size:13px;font-weight:700;display:flex;align-items:center">Upgrade</div></div></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:18px 20px"><div style="display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:10px;background:#F9AB00;color:#fff;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">GA4</div><div style="flex-grow:1"><div style="font-size:14.5px;font-weight:700">Google Analytics 4</div><div style="font-size:12.5px;color:#6B6B8D">Measurement ID only</div></div><div style="height:34px;padding:0 14px;border:1px solid #D5D5E4;border-radius:8px;font-size:13px;font-weight:600;display:flex;align-items:center">Connect</div></div></div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:18px 24px;display:flex;align-items:center;gap:14px"><div style="width:36px;height:20px;border-radius:10px;background:#5B4FE8;position:relative;flex:0 0 36px"><div style="position:absolute;top:2px;left:18px;width:16px;height:16px;border-radius:8px;background:#fff"></div></div><div style="font-size:13.5px;line-height:1.5"><b>Show a short cookie notice to visitors.</b> Events start after the visitor accepts.</div></div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+renderVals() {
+const ok = ['#E8F6EE','#15803D'], warn = ['#FDF3E3','#B45309'];
+const d = [['PageView','4,812','4,790','4,790','Matched',ok],['ViewContent','2,106','2,091','2,091','Matched',ok],['AddToCart','388','322','322','Check',warn],['InitiateCheckout','164','160','160','Matched',ok],['AddPaymentInfo','121','119','119','Matched',ok],['Purchase','96','96','96','Matched',ok]];
+return { events: d.map(([name,b,s,dd,st,c]) => ({ name, b, s, d: dd, st, bg: c[0], c: c[1] })) };
+}
+}
+</script>
+</body>
+</html>

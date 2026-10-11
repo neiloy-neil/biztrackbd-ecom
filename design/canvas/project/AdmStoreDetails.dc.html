@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin settings store details</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="settings" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+<h1 style="margin:0;font-size:24px;font-weight:700">Settings</h1>
+<div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start">
+<div style="flex:0 0 232px"><dc-import name="SettingsNav" active="general" hint-size="232px,380px"></dc-import></div>
+<div style="flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:20px">
+
+<div><div style="font-size:18px;font-weight:700">Store details</div><div style="font-size:14px;color:#4B4B73;margin-top:4px">This information appears on invoices, emails and your store footer.</div></div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:22px 24px;display:flex;flex-direction:column;gap:18px">
+<div style="font-size:15px;font-weight:700">Brand</div>
+<div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap"><div style="width:72px;height:72px;border-radius:16px;background:#E9DCCB;color:#8C5A3C;font-weight:700;font-size:32px;display:flex;align-items:center;justify-content:center">র</div><div style="display:flex;gap:8px"><div style="height:36px;padding:0 14px;border:1px solid #D5D5E4;border-radius:8px;font-size:13.5px;font-weight:600;display:flex;align-items:center">Change logo</div><div style="height:36px;padding:0 14px;border:1px solid #D5D5E4;border-radius:8px;font-size:13.5px;font-weight:600;display:flex;align-items:center">Change favicon</div></div></div>
+<div style="display:flex;gap:16px;flex-wrap:wrap"><div style="flex:1 1 240px"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Store name</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px">Rongdhonu Fashion</div></div><div style="flex:1 1 240px"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Store name in Bangla</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px;font-family:'Hind Siliguri',sans-serif">রংধনু ফ্যাশন</div></div></div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Short description (search engines and social previews)</div><div style="box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:10px 12px;font-size:14px;line-height:1.5;min-height:60px">Handloom cotton panjabi, linen shirts and trousers. Delivery across Bangladesh.</div></div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:22px 24px;display:flex;flex-direction:column;gap:18px">
+<div style="font-size:15px;font-weight:700">Contact and address</div>
+<div style="display:flex;gap:16px;flex-wrap:wrap"><div style="flex:1 1 240px"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Customer phone</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px;font-variant-numeric:tabular-nums">01712-345678</div></div><div style="flex:1 1 240px"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">WhatsApp number</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px;font-variant-numeric:tabular-nums">01712-345678</div></div></div>
+<div style="display:flex;gap:16px;flex-wrap:wrap"><div style="flex:1 1 240px"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Email for customers</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px">hello@rongdhonufashion.com</div></div><div style="flex:1 1 240px"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Facebook page</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px">facebook.com/rongdhonufashion</div></div></div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Pickup address (used for couriers)</div><div style="box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:10px 12px;font-size:14px;line-height:1.5;min-height:60px">House 22, Road 4, Mirpur 10, Dhaka 1216</div></div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:22px 24px;display:flex;flex-direction:column;gap:18px">
+<div style="font-size:15px;font-weight:700">Language, currency and orders</div>
+<div style="display:flex;gap:16px;flex-wrap:wrap"><div style="flex:1 1 240px"><div style="font-size:12.5px;font-weight:700;margin-bottom:8px">Store languages</div><div style="display:flex;gap:8px"><div style="padding:9px 14px;border-radius:10px;border:2px solid #5B4FE8;background:#F4F3FF;font-size:13.5px;font-weight:700">English</div><div style="padding:9px 14px;border-radius:10px;border:2px solid #5B4FE8;background:#F4F3FF;font-size:13.5px;font-weight:700;font-family:'Hind Siliguri',sans-serif">বাংলা</div></div></div><div style="flex:1 1 240px"><div style="font-size:12.5px;font-weight:700;margin-bottom:8px">Default language</div><div style="display:flex;height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;align-items:center;font-size:14px"><span style="flex-grow:1">English</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div></div></div>
+<div style="display:flex;gap:16px;flex-wrap:wrap"><div style="flex:1 1 240px"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Currency</div><div style="height:40px;box-sizing:border-box;border:1px solid #E7E7F0;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px;background:#FAFAFC;color:#4B4B73">Bangladeshi taka (৳)</div></div><div style="flex:1 1 240px"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Order number prefix</div><div style="height:40px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px">BT-</div></div></div>
+<div style="display:flex;align-items:center;gap:12px"><div style="width:36px;height:20px;border-radius:10px;background:#D5D5E4;position:relative;flex:0 0 36px"><div style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:8px;background:#fff"></div></div><div style="font-size:13.5px">Show prices with Bangla digits (১,১৫০)</div></div>
+<div style="display:flex;align-items:center;gap:12px"><div style="width:36px;height:20px;border-radius:10px;background:#5B4FE8;position:relative;flex:0 0 36px"><div style="position:absolute;top:2px;left:18px;width:16px;height:16px;border-radius:8px;background:#fff"></div></div><div style="font-size:13.5px">Prices include VAT</div></div>
+</div>
+
+<div style="background:#fff;border:1px solid #F1C0C0;border-radius:12px;padding:20px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div style="flex:1 1 280px"><div style="font-size:15px;font-weight:700;color:#DC2626">Pause or close your store</div><div style="font-size:13px;color:#4B4B73;margin-top:4px;line-height:1.5">Pausing hides your store from customers. You can export your data at any time.</div></div><div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;font-size:13.5px;font-weight:600;display:flex;align-items:center">Export my data</div><div style="height:38px;padding:0 16px;border:1px solid #F1C0C0;border-radius:8px;color:#DC2626;font-size:13.5px;font-weight:600;display:flex;align-items:center">Pause store</div></div>
+
+<div style="display:flex;justify-content:flex-end;gap:10px"><div style="height:40px;padding:0 18px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Discard</div><div style="height:40px;padding:0 22px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Save details</div></div>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

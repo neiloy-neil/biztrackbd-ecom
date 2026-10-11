@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin plan limit reached</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="position:relative;display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="products" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h1 style="margin:0;font-size:24px;font-weight:700;flex-grow:1">Products</h1><div style="height:38px;padding:0 18px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Add product</div></div>
+<div style="background:#FDF3E3;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;font-size:13.5px;color:#4B4B73"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2L12 3zM12 10v5M12 18v.01"/></svg><div style="flex:1"><b style="color:#B45309">100 of 100 products used.</b> You cannot add more on your current plan.</div><span style="font-size:13px;font-weight:700;color:#5B4FE8">See plans</span></div>
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="display:grid;grid-template-columns:minmax(0,2fr) 120px 120px 120px;padding:11px 20px;background:#FAFAFC;border-bottom:1px solid #E7E7F0;font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px"><div>PRODUCT</div><div>STATUS</div><div>STOCK</div><div style="text-align:right">PRICE</div></div>
+<div style="display:grid;grid-template-columns:minmax(0,2fr) 120px 120px 120px;padding:0 20px;height:62px;align-items:center;border-bottom:1px solid #F0F0F6;font-size:13.5px"><div style="display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:8px;background:#F1E9DD"></div><b>Cotton Panjabi, Off-white</b></div><div>Active</div><div>24 in stock</div><div style="text-align:right;font-weight:600">৳ 1,150</div></div>
+<div style="display:grid;grid-template-columns:minmax(0,2fr) 120px 120px 120px;padding:0 20px;height:62px;align-items:center;border-bottom:1px solid #F0F0F6;font-size:13.5px"><div style="display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:8px;background:#E3EBE1"></div><b>Linen Shirt, Sage</b></div><div>Active</div><div>31 in stock</div><div style="text-align:right;font-weight:600">৳ 850</div></div>
+<div style="display:grid;grid-template-columns:minmax(0,2fr) 120px 120px 120px;padding:0 20px;height:62px;align-items:center;font-size:13.5px"><div style="display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:8px;background:#E4E6EC"></div><b>Slim Chino, Navy</b></div><div>Active</div><div>3 in stock</div><div style="text-align:right;font-weight:600">৳ 1,290</div></div>
+</div>
+</div>
+</div>
+</div>
+
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;background:rgba(26,26,78,0.45)"></div>
+<div style="position:absolute;left:50%;top:150px;margin-left:-290px;width:580px;max-width:94%;background:#fff;border-radius:16px;box-shadow:0 16px 48px rgba(26,26,78,0.28);overflow:hidden">
+<div style="padding:26px 28px 6px"><div style="display:flex;align-items:center;gap:12px"><div style="width:44px;height:44px;border-radius:12px;background:#FDF3E3;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2L12 3zM12 10v5M12 18v.01"/></svg></div><div style="flex-grow:1;font-size:19px;font-weight:700">You have used all 100 products on your trial</div></div>
+<div style="font-size:14px;color:#4B4B73;line-height:1.6;margin-top:14px">Your store keeps working and customers can still order. To add new products, move to a plan with a higher limit.</div></div>
+<div style="padding:16px 28px;display:flex;flex-direction:column;gap:14px">
+<div><div style="display:flex;font-size:13px;margin-bottom:6px"><span style="flex-grow:1;font-weight:600">Products</span><span style="color:#B45309;font-weight:700">100 of 100</span></div><div style="height:6px;border-radius:3px;background:#E7E7F0"><div style="width:100%;height:6px;border-radius:3px;background:#B45309"></div></div></div>
+<div><div style="display:flex;font-size:13px;margin-bottom:6px"><span style="flex-grow:1;font-weight:600">Orders this month</span><span style="color:#4B4B73">176 of 500</span></div><div style="height:6px;border-radius:3px;background:#E7E7F0"><div style="width:35%;height:6px;border-radius:3px;background:#5B4FE8"></div></div></div>
+</div>
+<div style="margin:6px 28px 0;border:2px solid #5B4FE8;background:#F4F3FF;border-radius:12px;padding:16px 18px;display:flex;align-items:center;gap:14px"><div style="flex:1"><div style="font-size:15px;font-weight:700">Pro</div><div style="font-size:12.5px;color:#4B4B73;margin-top:2px">2,000 products · 3,000 orders a month · 5 staff · own domain</div></div><div style="font-size:18px;font-weight:700;font-variant-numeric:tabular-nums">৳ 1,499</div></div>
+<div style="display:flex;gap:10px;padding:20px 28px 24px;justify-content:flex-end"><div style="height:44px;padding:0 20px;border:1px solid #D5D5E4;border-radius:8px;font-size:14px;font-weight:600;display:flex;align-items:center">Not now</div><div style="height:44px;padding:0 22px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center">Upgrade to Pro</div></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

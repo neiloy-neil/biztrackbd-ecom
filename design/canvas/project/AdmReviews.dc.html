@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin reviews</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="products" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div style="flex-grow:1"><div style="font-size:13px;font-weight:600;color:#6B6B8D">Products</div><h1 style="margin:2px 0 0;font-size:24px;font-weight:700">Reviews</h1></div><div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Ask past customers for reviews</div></div>
+
+<div style="display:flex;flex-wrap:wrap;gap:16px">
+<div style="flex:0 0 220px;background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:18px 20px"><div style="font-size:13px;color:#4B4B73">Average rating</div><div style="font-size:30px;font-weight:700;margin-top:4px">4.7 <span style="font-size:16px;color:#B45309;letter-spacing:1px">★★★★★</span></div><div style="font-size:12.5px;color:#6B6B8D;margin-top:2px">412 reviews</div></div>
+<div style="flex:1 1 360px;background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:18px 22px;display:flex;flex-direction:column;gap:7px;justify-content:center">
+<div style="display:flex;align-items:center;gap:10px;font-size:12.5px"><span style="width:20px">5 ★</span><div style="flex:1;height:8px;border-radius:4px;background:#F0F0F6"><div style="width:74%;height:8px;border-radius:4px;background:#5B4FE8"></div></div><span style="width:34px;text-align:right;color:#4B4B73">74%</span></div>
+<div style="display:flex;align-items:center;gap:10px;font-size:12.5px"><span style="width:20px">4 ★</span><div style="flex:1;height:8px;border-radius:4px;background:#F0F0F6"><div style="width:16%;height:8px;border-radius:4px;background:#5B4FE8"></div></div><span style="width:34px;text-align:right;color:#4B4B73">16%</span></div>
+<div style="display:flex;align-items:center;gap:10px;font-size:12.5px"><span style="width:20px">3 ★</span><div style="flex:1;height:8px;border-radius:4px;background:#F0F0F6"><div style="width:6%;height:8px;border-radius:4px;background:#5B4FE8"></div></div><span style="width:34px;text-align:right;color:#4B4B73">6%</span></div>
+<div style="display:flex;align-items:center;gap:10px;font-size:12.5px"><span style="width:20px">2 ★</span><div style="flex:1;height:8px;border-radius:4px;background:#F0F0F6"><div style="width:2%;height:8px;border-radius:4px;background:#B45309"></div></div><span style="width:34px;text-align:right;color:#4B4B73">2%</span></div>
+<div style="display:flex;align-items:center;gap:10px;font-size:12.5px"><span style="width:20px">1 ★</span><div style="flex:1;height:8px;border-radius:4px;background:#F0F0F6"><div style="width:2%;height:8px;border-radius:4px;background:#DC2626"></div></div><span style="width:34px;text-align:right;color:#4B4B73">2%</span></div>
+</div>
+<div style="flex:0 0 240px;background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:18px 20px"><div style="font-size:13px;color:#B45309;font-weight:600">Waiting for approval</div><div style="font-size:30px;font-weight:700;margin-top:4px">5</div><div style="font-size:12.5px;color:#6B6B8D;margin-top:2px">Reviews are held until you approve them</div></div>
+</div>
+
+<div style="display:flex;gap:28px;border-bottom:1px solid #E7E7F0">
+<div style="padding:6px 0 12px;border-bottom:2.5px solid #5B4FE8;margin-bottom:-1px;font-size:14px;font-weight:600">Waiting <span style="padding:1px 8px;border-radius:10px;font-size:12px;font-weight:700;background:#E9E7FD;color:#5B4FE8">5</span></div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D">Published</div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D">Hidden</div>
+<div style="padding:6px 0 12px;font-size:14px;font-weight:600;color:#6B6B8D">With photos</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{reviews}}" as="r" hint-placeholder-count="5">
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:18px 22px;display:flex;flex-wrap:wrap;gap:20px">
+<div style="flex:1 1 440px;min-width:0">
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="color:{{r.sc}};letter-spacing:1px;font-size:15px">{{r.stars}}</span><span style="font-size:14px;font-weight:700">{{r.name}}</span><span style="padding:2px 9px;border-radius:10px;background:#E8F6EE;color:#15803D;font-size:11.5px;font-weight:700">Verified buyer</span><span style="font-size:12.5px;color:#6B6B8D">{{r.when}}</span></div>
+<div style="font-size:13px;color:#5B4FE8;font-weight:600;margin-top:6px">{{r.product}}</div>
+<div style="font-size:14px;line-height:1.65;margin-top:8px;font-family:'Hind Siliguri','Plus Jakarta Sans',sans-serif">{{r.text}}</div>
+</div>
+<div style="flex:0 0 200px;display:flex;flex-direction:column;gap:8px;justify-content:center">
+<div style="height:38px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:13.5px;font-weight:700;display:flex;align-items:center;justify-content:center">Approve</div>
+<div style="display:flex;gap:8px"><div style="flex:1;height:36px;border:1px solid #D5D5E4;border-radius:8px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center">Reply</div><div style="flex:1;height:36px;border:1px solid #F1C0C0;border-radius:8px;color:#DC2626;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center">Hide</div></div>
+</div>
+</div>
+</sc-for>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+renderVals() {
+const d = [
+[5,'Tania Akter','Today','Cotton Panjabi, Off-white','খুব সুন্দর কাপড়, গরমে পরতে আরাম। সাইজ একদম ঠিক ছিল।'],
+[4,'Rakib Hasan','Yesterday','Linen Shirt, Sage','Good quality. Colour is slightly lighter than the photo.'],
+[5,'Farhana Islam','Yesterday','Printed Kurti, Rose','Delivery was on time and packing was neat. Will order again.'],
+[2,'Sabbir Ahmed','8 Oct','Slim Chino, Navy','Size 32 was tighter than the chart says. Had to exchange.'],
+[5,'Mehedi Hasan','7 Oct','Cotton Panjabi, Off-white','Eid এর জন্য কিনেছি, সবাই প্রশংসা করেছে।'],
+];
+return { reviews: d.map(([n,name,when,product,text]) => ({ name, when, product, text, stars: '★★★★★'.slice(0,n) + '☆☆☆☆☆'.slice(0,5-n), sc: n>=4?'#B45309':(n===3?'#B45309':'#DC2626') })) };
+}
+}
+</script>
+</body>
+</html>

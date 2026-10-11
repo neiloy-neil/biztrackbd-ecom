@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Super admin sidebar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:248px;height:1040px;box-sizing:border-box;background:#1A1A4E;display:flex;flex-direction:column;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#fff">
+<div style="display:flex;align-items:center;gap:10px;padding:18px 20px 0">
+<svg width="28" height="28" viewBox="0 0 44 44" role="img" aria-label="BizTrackBD"><rect width="44" height="44" rx="12" fill="#5B4FE8"/><path d="M13 32V22M22 32V14M31 32V19" stroke="#fff" stroke-width="4.4" stroke-linecap="round"/></svg>
+<div style="font-size:18px;font-weight:700">BizTrack<span style="color:#A9A2FF">BD</span></div>
+</div>
+<div style="margin:16px 20px 18px;display:inline-flex;align-self:flex-start;padding:4px 10px;border-radius:6px;background:#34347F;font-size:11px;font-weight:700;letter-spacing:1px;color:#D6D6F5">PLATFORM ADMIN</div>
+<nav style="display:flex;flex-direction:column;gap:4px;padding:0 12px">
+<sc-for list="{{items}}" as="item" hint-placeholder-count="9">
+<div style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:8px;background:{{item.bg}}">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{item.color}}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{item.d}}"/></svg>
+<div style="flex-grow:1;font-size:14px;font-weight:{{item.weight}};color:{{item.color}}">{{item.label}}</div>
+<sc-if value="{{item.hasCount}}" hint-placeholder-val="{{false}}"><div style="min-width:24px;height:18px;border-radius:9px;padding:0 6px;box-sizing:border-box;background:#5B4FE8;color:#fff;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center">{{item.count}}</div></sc-if>
+</div>
+</sc-for>
+</nav>
+<div style="flex-grow:1"></div>
+<div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid #34347F">
+<div style="width:30px;height:30px;border-radius:15px;background:#5B4FE8;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">AH</div>
+<div style="flex-grow:1"><div style="font-size:13px;font-weight:600">Arif Hossain</div><div style="font-size:11.5px;color:#A8A8D8">Platform owner</div></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","options":["overview","tenants","payments","domains","themes","support","announcements","usage","team"],"default":"overview"},"$preview":{"width":248,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+const a = this.props.active ?? 'overview';
+const n = [
+['overview','Overview','M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-6'],
+['tenants','Tenants','M4 9l1.5-5h13L20 9M4 9a2.7 2.7 0 005.3 0 2.7 2.7 0 005.4 0A2.7 2.7 0 0020 9M5 12v8h14v-8'],
+['payments','Payments and plans','M4.5 5h15A2.5 2.5 0 0122 7.5v9a2.5 2.5 0 01-2.5 2.5h-15A2.5 2.5 0 012 16.5v-9A2.5 2.5 0 014.5 5zM2 10h20',7],
+['domains','Domains','M12 3a9 9 0 100 18 9 9 0 000-18zM3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18'],
+['themes','Themes and modules','M3 3h7.5v7.5H3zM13.5 3H21v7.5h-7.5zM3 13.5h7.5V21H3zM13.5 13.5H21V21h-7.5z'],
+['support','Support tickets','M4 5h16v11H9l-5 4V5z',4],
+['announcements','Announcements','M4 10v4h3l8 4V6L7 10H4zM18 9a4 4 0 010 6'],
+['usage','Usage and limits','M12 3a9 9 0 100 18 9 9 0 000-18zM12 7v5l3 2'],
+['team','Team and audit log','M9 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM2.5 20c.5-3.5 3.2-5.5 6.5-5.5s6 2 6.5 5.5'],
+];
+return { items: n.map(([k,label,d,count]) => ({ label, d, hasCount: !!count, count, bg: k===a?'#34347F':'transparent', color: k===a?'#fff':'#B9B9E3', weight: k===a?700:500 })) };
+}
+}
+</script>
+</body>
+</html>

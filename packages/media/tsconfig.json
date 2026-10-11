@@ -1,0 +1,5 @@
+{
+  "extends": "@biztrackbd/tsconfig/library.json",
+  "compilerOptions": { "types": ["node"] },
+  "include": ["src", "tests", "vitest.config.ts"]
+}

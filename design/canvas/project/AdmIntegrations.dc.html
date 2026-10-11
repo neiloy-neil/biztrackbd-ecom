@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin settings integrations</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="position:relative;display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="Sidebar" active="settings" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<dc-import name="Topbar" hint-size="100%,60px"></dc-import>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+<h1 style="margin:0;font-size:24px;font-weight:700">Settings</h1>
+<div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start">
+<div style="flex:0 0 232px"><dc-import name="SettingsNav" active="integrations" hint-size="232px,380px"></dc-import></div>
+<div style="flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:20px">
+
+<div><div style="font-size:18px;font-weight:700">Integrations and keys</div><div style="font-size:14px;color:#4B4B73;margin-top:4px;line-height:1.55;max-width:640px">Connect your own courier and payment accounts. Your keys are encrypted and are used only to talk to that service for your store. We never show them again after you save.</div></div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="padding:16px 24px;font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px;background:#FAFAFC;border-bottom:1px solid #E7E7F0">COURIERS</div>
+<sc-for list="{{couriers}}" as="c" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid #F0F0F6;flex-wrap:wrap"><div style="width:44px;height:44px;border-radius:10px;background:{{c.bg}};color:#fff;font-weight:800;font-size:10.5px;display:flex;align-items:center;justify-content:center">{{c.short}}</div><div style="flex:1 1 240px"><div style="font-size:14.5px;font-weight:700">{{c.name}}</div><div style="font-size:12.5px;color:#4B4B73;margin-top:2px">{{c.note}}</div></div><span style="padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:{{c.sBg}};color:{{c.sColor}}">{{c.status}}</span><div style="height:36px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;display:flex;align-items:center;font-size:13.5px;font-weight:600;background:#fff">{{c.action}}</div></div>
+</sc-for>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="padding:16px 24px;font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px;background:#FAFAFC;border-bottom:1px solid #E7E7F0">PAYMENTS</div>
+<div style="display:flex;align-items:center;gap:16px;padding:16px 24px;flex-wrap:wrap"><div style="width:44px;height:44px;border-radius:10px;background:#1A1A4E;color:#fff;font-weight:800;font-size:9.5px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1">SSL<br>Commerz</div><div style="flex:1 1 240px"><div style="font-size:14.5px;font-weight:700">SSLCommerz</div><div style="font-size:12.5px;color:#4B4B73;margin-top:2px">Cards, bKash, Nagad and bank accounts. Needs your own SSLCommerz merchant account.</div></div><span style="padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:#EFEFF6;color:#4B4B73">Not connected</span><div style="height:36px;padding:0 16px;border-radius:8px;background:#5B4FE8;color:#fff;display:flex;align-items:center;font-size:13.5px;font-weight:700">Connect</div></div>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="padding:16px 24px;font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px;background:#FAFAFC;border-bottom:1px solid #E7E7F0">MESSAGING AND MARKETING</div>
+<div style="display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid #F0F0F6;flex-wrap:wrap"><div style="width:44px;height:44px;border-radius:10px;background:#E9E7FD;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5B4FE8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5z"/></svg></div><div style="flex:1 1 240px"><div style="font-size:14.5px;font-weight:700">SMS and email by BizTrackBD</div><div style="font-size:12.5px;color:#4B4B73;margin-top:2px">Included. 588 SMS credits left this month. Emails go out as "Rongdhonu Fashion".</div></div><span style="padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:#E8F6EE;color:#15803D">Active</span><div style="height:36px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;display:flex;align-items:center;font-size:13.5px;font-weight:600">Use my own keys</div></div>
+<div style="display:flex;align-items:center;gap:16px;padding:16px 24px;flex-wrap:wrap"><div style="width:44px;height:44px;border-radius:10px;background:#1877F2;color:#fff;font-weight:800;font-size:22px;display:flex;align-items:center;justify-content:center">f</div><div style="flex:1 1 240px"><div style="font-size:14.5px;font-weight:700">Facebook Pixel and Conversions API</div><div style="font-size:12.5px;color:#4B4B73;margin-top:2px">Set up under Marketing, Pixels.</div></div><span style="padding:3px 10px;border-radius:11px;font-size:12px;font-weight:600;background:#E8F6EE;color:#15803D">Connected</span><div style="height:36px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;display:flex;align-items:center;font-size:13.5px;font-weight:600">Open</div></div>
+</div>
+
+<div style="padding:14px 18px;border-radius:10px;background:#F4F3FF;font-size:13px;line-height:1.55;color:#4B4B73"><b style="color:#1A1A4E">Who can see this page?</b> Only the owner. Staff and managers cannot view or change keys.</div>
+
+</div>
+</div>
+</div>
+</div>
+
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;background:rgba(26,26,78,0.45)"></div>
+<div style="position:absolute;left:50%;top:96px;margin-left:-300px;width:600px;max-width:94%;background:#fff;border-radius:16px;box-shadow:0 16px 48px rgba(26,26,78,0.28);overflow:hidden">
+<div style="display:flex;align-items:center;gap:14px;padding:20px 26px;border-bottom:1px solid #E7E7F0"><div style="width:44px;height:44px;border-radius:10px;background:#1A1A4E;color:#fff;font-weight:800;font-size:9.5px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1">SSL<br>Commerz</div><div style="flex-grow:1"><div style="font-size:18px;font-weight:700">Connect SSLCommerz</div><div style="font-size:13px;color:#4B4B73">Customers pay into your own merchant account</div></div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" stroke-width="2" stroke-linecap="round" aria-label="Close" role="img"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+<div style="padding:22px 26px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;padding:3px;border-radius:19px;background:#EFEFF6;font-size:13px;font-weight:600;align-self:flex-start"><div style="padding:6px 16px;border-radius:16px;background:#fff;border:1px solid #E7E7F0">Test mode</div><div style="padding:6px 16px;color:#6B6B8D">Live mode</div></div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Store ID</div><div style="height:44px;box-sizing:border-box;border:2px solid #5B4FE8;border-radius:8px;padding:0 14px;display:flex;align-items:center;font-size:14.5px">rongdhonu0a1b2c</div></div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Store password</div><div style="display:flex;height:44px;box-sizing:border-box;border:1px solid #D5D5E4;border-radius:8px;padding:0 14px;align-items:center;font-size:14.5px"><span style="flex-grow:1;letter-spacing:3px">••••••••••••</span><span style="font-size:13px;font-weight:700;color:#5B4FE8">Show</span></div><div style="font-size:12px;color:#6B6B8D;margin-top:6px">Use the Store Password, not your SSLCommerz login password.</div></div>
+<div><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">Paste this into your SSLCommerz dashboard as the IPN URL</div><div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #E7E7F0;border-radius:8px;background:#FAFAFC"><div style="flex:1;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;color:#1A1A4E;word-break:break-all">https://app.biztrackbd.com/api/webhooks/sslcommerz/k7Qx92mTa</div><div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#5B4FE8"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B4FE8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></svg>Copy</div></div></div>
+<div style="display:flex;gap:12px;padding:12px 14px;border-radius:10px;background:#F4F3FF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B4FE8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 18px;margin-top:1px"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg><div style="font-size:12.5px;line-height:1.55;color:#4B4B73">Your password is encrypted before it is saved. You cannot read it again. To change it, enter a new one.</div></div>
+</div>
+<div style="display:flex;align-items:center;gap:10px;padding:16px 26px;border-top:1px solid #E7E7F0;background:#FAFAFC"><div style="font-size:13px;font-weight:700;color:#5B4FE8;flex-grow:1">How to get these details</div><div style="height:40px;padding:0 18px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Cancel</div><div style="height:40px;padding:0 20px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center">Check and save</div></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+renderVals() {
+return { couriers: [
+{ name:'Steadfast', short:'Steadfast', bg:'#1E6B3A', note:'API key ending a91f · Checked 2 hours ago', status:'Connected', sBg:'#E8F6EE', sColor:'#15803D', action:'Manage' },
+{ name:'Pathao', short:'Pathao', bg:'#E5252A', note:'Login expired. Enter your Pathao password again.', status:'Needs attention', sBg:'#FDF3E3', sColor:'#B45309', action:'Fix' },
+{ name:'RedX', short:'RedX', bg:'#D62E2E', note:'Needs your RedX API token.', status:'Not connected', sBg:'#EFEFF6', sColor:'#4B4B73', action:'Connect' },
+] };
+}
+}
+</script>
+</body>
+</html>

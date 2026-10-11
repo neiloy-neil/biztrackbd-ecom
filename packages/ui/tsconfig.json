@@ -1,0 +1,5 @@
+{
+  "extends": "@biztrackbd/tsconfig/nextjs.json",
+  "compilerOptions": { "plugins": [] },
+  "include": ["src"]
+}

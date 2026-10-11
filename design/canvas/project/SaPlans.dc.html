@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Super admin plans and entitlements</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:1040px;background:#FAFAFC;font-family:'Plus Jakarta Sans','Hind Siliguri',sans-serif;color:#1A1A4E">
+<div style="flex:0 0 248px"><dc-import name="SaSidebar" active="payments" hint-size="248px,1040px"></dc-import></div>
+<div style="flex:999 1 560px;min-width:0">
+<div style="height:60px;box-sizing:border-box;background:#fff;border-bottom:1px solid #E7E7F0;display:flex;align-items:center;padding:0 24px;gap:10px"><div style="font-size:13px;color:#4B4B73">Payments and plans</div><div style="font-size:13px;color:#9A9AB5">/</div><div style="font-size:13px;font-weight:700">Plans and entitlements</div></div>
+<div style="padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px">
+
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div style="flex-grow:1"><h1 style="margin:0;font-size:24px;font-weight:700">Plans and entitlements</h1><div style="font-size:14px;color:#4B4B73;margin-top:4px">Changes apply to new subscribers. Existing stores keep their limits until you move them.</div></div><div style="height:38px;padding:0 16px;border:1px solid #D5D5E4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Add plan</div><div style="height:38px;padding:0 20px;border-radius:8px;background:#5B4FE8;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center">Publish changes</div></div>
+
+<div style="background:#FDF3E3;border-radius:10px;padding:12px 16px;font-size:13.5px;color:#4B4B73;line-height:1.5"><b style="color:#B45309">3 unpublished changes.</b> Pro orders per month 3,000, Business products unlimited, Starter landing pages 3.</div>
+
+<div style="background:#fff;border:1px solid #E7E7F0;border-radius:12px;overflow:hidden">
+<div style="overflow-x:auto"><div style="min-width:900px">
+<div style="display:grid;grid-template-columns:minmax(0,1.6fr) repeat(4,minmax(0,1fr));background:#FAFAFC;border-bottom:1px solid #E7E7F0">
+<div style="padding:16px 24px;font-size:12px;font-weight:700;color:#6B6B8D;letter-spacing:0.3px">ENTITLEMENT</div>
+<div style="padding:14px 16px"><div style="font-size:12px;color:#6B6B8D;font-weight:600">Trial</div><div style="font-size:15px;font-weight:700;margin-top:2px">14 days</div></div>
+<div style="padding:14px 16px"><div style="font-size:12px;color:#6B6B8D;font-weight:600">Starter</div><div style="font-size:15px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums">৳ 699</div></div>
+<div style="padding:14px 16px"><div style="font-size:12px;color:#5B4FE8;font-weight:700">Pro</div><div style="font-size:15px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums">৳ 1,499</div></div>
+<div style="padding:14px 16px"><div style="font-size:12px;color:#6B6B8D;font-weight:600">Business</div><div style="font-size:15px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums">৳ 3,499</div></div>
+</div>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="14">
+<div style="display:grid;grid-template-columns:minmax(0,1.6fr) repeat(4,minmax(0,1fr));border-bottom:1px solid #F0F0F6;font-size:13.5px;align-items:center;min-height:52px;background:{{r.bg}}">
+<div style="padding:0 24px"><div style="font-weight:600">{{r.l}}</div><div style="font-size:12px;color:#6B6B8D">{{r.s}}</div></div>
+<div style="padding:0 16px"><span style="display:inline-block;min-width:60px;padding:6px 10px;border:1px solid #D5D5E4;border-radius:7px;font-weight:600;font-variant-numeric:tabular-nums;color:{{r.c0}}">{{r.v0}}</span></div>
+<div style="padding:0 16px"><span style="display:inline-block;min-width:60px;padding:6px 10px;border:1px solid #D5D5E4;border-radius:7px;font-weight:600;font-variant-numeric:tabular-nums;color:{{r.c1}}">{{r.v1}}</span></div>
+<div style="padding:0 16px"><span style="display:inline-block;min-width:60px;padding:6px 10px;border:{{r.b2}};border-radius:7px;font-weight:600;font-variant-numeric:tabular-nums;color:{{r.c2}}">{{r.v2}}</span></div>
+<div style="padding:0 16px"><span style="display:inline-block;min-width:60px;padding:6px 10px;border:1px solid #D5D5E4;border-radius:7px;font-weight:600;font-variant-numeric:tabular-nums;color:{{r.c3}}">{{r.v3}}</span></div>
+</div>
+</sc-for>
+</div></div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:16px">
+<div style="flex:1 1 320px;background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 22px"><div style="font-size:15px;font-weight:700;margin-bottom:8px">When a store reaches a limit</div><div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px"><div style="display:flex;align-items:center;gap:10px"><div style="width:18px;height:18px;border-radius:9px;border:5px solid #5B4FE8;box-sizing:border-box;background:#fff"></div>Block new items, keep selling</div><div style="display:flex;align-items:center;gap:10px"><div style="width:18px;height:18px;border-radius:9px;border:1.5px solid #D5D5E4;box-sizing:border-box"></div>Allow 10% overage then block</div><div style="display:flex;align-items:center;gap:10px"><div style="width:18px;height:18px;border-radius:9px;border:1.5px solid #D5D5E4;box-sizing:border-box"></div>Warn only</div></div></div>
+<div style="flex:1 1 320px;background:#fff;border:1px solid #E7E7F0;border-radius:12px;padding:20px 22px"><div style="font-size:15px;font-weight:700;margin-bottom:8px">Lifecycle after payment fails</div><div style="font-size:13.5px;color:#4B4B73;line-height:1.8">Grace period <b style="color:#1A1A4E">5 days</b><br>Read-only after grace for <b style="color:#1A1A4E">7 days</b><br>Store paused, data kept for <b style="color:#1A1A4E">90 days</b><br>Then delete store and saved keys</div></div>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+renderVals() {
+const ch = '#5B4FE8', n = '#1A1A4E';
+const d = [
+['Products','Active products in the catalog','100','300','2,000','Unlimited',0,[n,n,n,n]],
+['Orders per month','Counted when an order is placed','500','500','3,000','Unlimited',1,[n,n,ch,n]],
+['Staff accounts','Owner not counted','2','2','5','15',0,[n,n,n,n]],
+['Storage','Product photos and files','2 GB','5 GB','20 GB','100 GB',0,[n,n,n,n]],
+['SMS credits per month','Bangla SMS may use 2 credits','100','200','1,000','3,000',0,[n,n,n,n]],
+['Landing pages','One-product pages','3','3','20','Unlimited',1,[n,ch,n,n]],
+['Custom domain','Connect your own domain','No','No','Yes','Yes',0,[n,n,n,n]],
+['Courier booking','Pathao, Steadfast, RedX','Yes','Manual','Yes','Yes',0,[n,n,n,n]],
+['Fraud and risk check','Courier history and rules','Basic','Basic','Full','Full',0,[n,n,n,n]],
+['Abandoned order call list','Saved checkouts','Yes','No','Yes','Yes',0,[n,n,n,n]],
+['Pixel and Conversions API','Facebook server events','Yes','Yes','Yes','Yes',0,[n,n,n,n]],
+['Industry modules','Bespoke, Drops, Kids','None','None','3','All',0,[n,n,n,n]],
+['Section builder','Edit sections on pages','Home','Settings only','Home','Every page',0,[n,n,n,n]],
+['Payment gateway','SSLCommerz and cards','No','No','No','Yes',0,[n,n,n,n]],
+];
+return { rows: d.map(([l,s,v0,v1,v2,v3,chg,c]) => ({ l, s, v0, v1, v2, v3, c0: c[0], c1: c[1], c2: c[2], c3: c[3], bg: chg?'#FBFAFF':'#fff', b2: chg?'1.5px solid #5B4FE8':'1px solid #D5D5E4' })) };
+}
+}
+</script>
+</body>
+</html>
