@@ -133,6 +133,7 @@ model Tenant {
   trackingEvents   TrackingEvent[]
   tickets          SupportTicket[]
   settlements      CourierSettlementInvoice[]
+  notes            TenantNote[]
 
   @@index([subdomain])
   @@index([customDomain])
@@ -1406,6 +1407,19 @@ model TicketMessage {
   createdAt  DateTime      @default(now())
 
   @@index([ticketId, createdAt])
+}
+
+model TenantNote {
+  id         String    @id @default(cuid())
+  tenantId   String
+  authorId   String    // PlatformUser id
+  authorName String?
+  body       String    @db.Text
+  createdAt  DateTime  @default(now())
+
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
 }
 
 // ==========================================

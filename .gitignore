@@ -41,3 +41,6 @@ deploy-env/
 
 # Regenerable UX capture images and measurements (node tools/ux-capture.mjs)
 checkup/ux/
+checkup/_*
+checkup/logs/
+*.tsbuildinfo
