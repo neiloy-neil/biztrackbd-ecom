@@ -2,11 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { verifyOrderAccess } from "@biztrackbd/core";
+import {
+  customerExchangeVariants,
+  customerReturnableItems,
+  getOrderTrackingTimeline,
+  verifyOrderAccess,
+} from "@biztrackbd/core";
 import { withTenant } from "@biztrackbd/db";
 import { CheckIcon } from "@/components/icons";
 import { tintFor } from "@/components/product-image";
 import { PurchaseTracker } from "@/components/tracker";
+import { OrderTrackingTimelineComponent } from "@/components/order-tracking-timeline";
+import { ReturnStatusTrackerComponent } from "@/components/return-status-tracker";
+import { CustomerReturnFormComponent } from "@/components/customer-return-form";
 import { getLang, makeT, money, num, toBnDigits } from "@/lib/i18n";
 import { getCustomerSession } from "@/lib/session";
 import { getStore } from "@/lib/tenant";
@@ -30,16 +38,40 @@ export default async function OrderPlaced({ params, searchParams }: { params: Pr
   const lang = await getLang(store.locale);
   const t = makeT(lang);
   const found = await withTenant(store.id, async (tx) => {
-    const order = await tx.order.findFirst({ relationLoadStrategy: "join", where: { id: orderId }, include: { items: { include: { variant: { select: { imageUrl: true } }, product: { select: { slug: true, titleBn: true, images: { orderBy: { sortOrder: "asc" }, take: 1 } } } } } } });
+    const order = await tx.order.findFirst({
+      relationLoadStrategy: "join",
+      where: { id: orderId },
+      include: {
+        items: {
+          include: {
+            variant: { select: { imageUrl: true } },
+            product: { select: { slug: true, titleBn: true, images: { orderBy: { sortOrder: "asc" }, take: 1 } } },
+          },
+        },
+      },
+    });
     if (!order) return null;
     const zone = await tx.shippingZone.findFirst({ where: { name: order.deliveryZone } });
     return { order, zone };
   });
   if (!found) notFound();
   const { order, zone } = found;
+
   // Open to whoever holds the signed link, or to the signed-in customer who placed it. Everyone else sees a plain 404.
   const session = await getCustomerSession(store.id);
+  const auth = { customerId: session?.customerId, token: k };
   if (!verifyOrderAccess(store.id, orderId, k) && !(session && order.customerId === session.customerId)) notFound();
+
+  // Load live tracking timeline and returns eligibility
+  const [timeline, returnable] = await Promise.all([
+    getOrderTrackingTimeline(store.id, orderId, auth),
+    customerReturnableItems(store.id, orderId, auth),
+  ]);
+
+  const exchangeVariants = returnable.eligible && !returnable.activeReturn
+    ? await customerExchangeVariants(store.id, orderId, auth)
+    : [];
+
   const first = order.customerName.trim().split(/\s+/)[0] ?? "";
   const phone = lang === "bn" ? toBnDigits(order.customerPhone) : order.customerPhone;
   const isMfs = order.paymentMethod !== "COD";
@@ -56,6 +88,9 @@ export default async function OrderPlaced({ params, searchParams }: { params: Pr
           <p style={{ marginTop: 8 }}>{t("orderPlaced", { number: lang === "bn" ? toBnDigits(order.orderNumber) : order.orderNumber })}</p>
           <p className="muted" style={{ marginTop: 4 }}>{t("sentDetails", { phone })}</p>
         </div>
+
+        {/* Live Courier Tracking Timeline */}
+        <OrderTrackingTimelineComponent timeline={timeline} lang={lang} />
 
         {isMfs && order.paymentStatus === "PENDING_VERIFICATION" ? (
           <div className="card" style={{ borderColor: "var(--bkash)", background: "#FFF9FC" }}>
@@ -87,6 +122,19 @@ export default async function OrderPlaced({ params, searchParams }: { params: Pr
           </div>
           {zone && <p className="muted" style={{ marginTop: 12, fontSize: 13.5 }}>{t("expectedDelivery")}: <b style={{ color: "var(--ink)" }}>{dateRange(order.createdAt, zone.etaMinDays, zone.etaMaxDays, lang)}</b></p>}
         </div>
+
+        {/* Return Lifecycle: Active Status Card OR Return Request Form */}
+        {returnable.activeReturn ? (
+          <ReturnStatusTrackerComponent returnRow={returnable.activeReturn} lang={lang} />
+        ) : returnable.eligible ? (
+          <CustomerReturnFormComponent
+            orderId={order.id}
+            token={k}
+            returnable={returnable}
+            exchangeVariants={exchangeVariants}
+            lang={lang}
+          />
+        ) : null}
 
         <div style={{ display: "grid", gap: 10 }}>
           <Link href="/account" className="btn btn-primary btn-block btn-round">{t("trackOrder")}</Link>
