@@ -9,7 +9,7 @@ import type { HostEntry } from "./decide";
  * PATCH /v1/edge-config/{id}/items API and is covered by tests against a fake fetch.
  */
 
-/** Reads EDGE_CONFIG_ID, VERCEL_AUTH_TOKEN, VERCEL_TEAM_ID and NEXT_PUBLIC_ROOT_DOMAIN. Accepts process.env as is. */
+/** Reads EDGE_CONFIG_ID, PLATFORM_VERCEL_TOKEN (or the older VERCEL_AUTH_TOKEN), PLATFORM_VERCEL_TEAM_ID (or VERCEL_TEAM_ID) and NEXT_PUBLIC_ROOT_DOMAIN. Accepts process.env as is. */
 export type EdgeConfigEnv = Record<string, string | undefined>;
 
 export class EdgeSyncError extends Error {
@@ -30,17 +30,19 @@ export async function pushRoutes(
   env: EdgeConfigEnv = process.env,
   fetchImpl: typeof fetch = fetch,
 ): Promise<{ skipped: boolean; items: number }> {
-  if (!env.EDGE_CONFIG_ID || !env.VERCEL_AUTH_TOKEN) return { skipped: true, items: 0 };
+  const token = env.PLATFORM_VERCEL_TOKEN ?? env.VERCEL_AUTH_TOKEN ?? env.VERCEL_TOKEN;
+  if (!env.EDGE_CONFIG_ID || !token) return { skipped: true, items: 0 };
   const items = [
     ...Object.entries(changes.upsert).map(([host, value]) => ({ operation: "upsert", key: edgeKey(host), value })),
     ...changes.remove.map((host) => ({ operation: "delete", key: edgeKey(host) })),
   ];
   if (items.length === 0) return { skipped: false, items: 0 };
 
-  const team = env.VERCEL_TEAM_ID ? `?teamId=${encodeURIComponent(env.VERCEL_TEAM_ID)}` : "";
+  const teamId = env.PLATFORM_VERCEL_TEAM_ID ?? env.VERCEL_TEAM_ID;
+  const team = teamId ? `?teamId=${encodeURIComponent(teamId)}` : "";
   const res = await fetchImpl(`https://api.vercel.com/v1/edge-config/${encodeURIComponent(env.EDGE_CONFIG_ID)}/items${team}`, {
     method: "PATCH",
-    headers: { Authorization: `Bearer ${env.VERCEL_AUTH_TOKEN}`, "Content-Type": "application/json" },
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({ items }),
   });
   if (!res.ok) {

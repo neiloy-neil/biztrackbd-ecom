@@ -43,7 +43,8 @@ if (created.length) {
 }
 
 const L = (k, v, note) => `${k}="${v ?? ""}"${note ? `  # ${note}` : ""}`;
-const todo = (k, note) => `${k}=""  # TODO: ${note}`;
+// A TODO line is filled from .env.local when you have added the value there (BREVO_API_KEY, SMS_SENDER_ID, PLATFORM_VERCEL_TOKEN, PLATFORM_VERCEL_PROJECT_ID, EDGE_CONFIG_ID, EDGE_CONFIG ...).
+const todo = (k, note) => (local[k] ? `${k}="${local[k]}"` : `${k}=""  # TODO: ${note}`);
 const need = (k) => { if (!local[k]) console.log(`  missing in .env.local: ${k}`); return local[k]; };
 const site = `https://${domain}`, admin = `https://admin.${domain}`, platform = `https://platform.${domain}`;
 
@@ -78,12 +79,14 @@ const files = {
     L("INTEGRATION_VAULT_KEY_ID", "v1"), L("ADMIN_ORIGIN", admin), L("NEXT_PUBLIC_ADMIN_URL", admin),
     L("MEDIA_DRIVER", "supabase"), L("MEDIA_BUCKET", "store-media"), ...payments,
     L("PLATFORM_A_RECORD", local.PLATFORM_A_RECORD || "76.76.21.21"), L("PLATFORM_CNAME_TARGET", `cname.${domain}`),
-    todo("VERCEL_TOKEN", "vercel.com, Account Settings, Tokens: used to add stores' custom domains to the storefront project"), todo("VERCEL_PROJECT_ID", "the biztrack-storefront project's id"), todo("EDGE_CONFIG", "Vercel Storage, Edge Config connection string (optional at first)"),
+    todo("PLATFORM_VERCEL_TOKEN", "vercel.com, Account Settings, Tokens: lets the app add stores' custom domains and update routing (Vercel refuses variable names starting VERCEL_)"), todo("PLATFORM_VERCEL_PROJECT_ID", "the biztrack-storefront project's id"), todo("PLATFORM_VERCEL_TEAM_ID", "optional: only for a team-owned project"), todo("EDGE_CONFIG_ID", "Vercel Storage, Edge Config: the id (ecfg_...)"), todo("EDGE_CONFIG", "the Edge Config connection string"),
     ...sms, ...email,
   ],
   platform: [
     ...common, L("PLATFORM_DATABASE_URL", need("SUPABASE_PLATFORM_DB_URL"), "the biztrack_platform login"), ...supabase, ...shared("CRON_SECRET", "PHONE_TRUST_SALT"),
-    ...payments, ...sms, ...email,
+    ...payments,
+    todo("PLATFORM_VERCEL_TOKEN", "same token as the admin project"), todo("PLATFORM_VERCEL_PROJECT_ID", "the storefront project's id"), todo("EDGE_CONFIG_ID", "same Edge Config id as the admin project"),
+    ...sms, ...email,
   ],
   storefront: [
     ...common, ...shared("CUSTOMER_AUTH_SECRET", "INTEGRATION_VAULT_SECRET", "PREVIEW_SECRET", "PHONE_TRUST_SALT"), L("INTEGRATION_VAULT_KEY_ID", "v1"),

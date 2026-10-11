@@ -59,12 +59,16 @@ export function setVercelClient(c: VercelDomainClient | null): void {
   vercel = c;
 }
 
-/** The real client, used when VERCEL_TOKEN and VERCEL_PROJECT_ID are set. Without them nothing is called and the domain stays "waiting for the certificate". */
+/**
+ * The real client, used when PLATFORM_VERCEL_TOKEN and PLATFORM_VERCEL_PROJECT_ID are set. Without them nothing is called and the domain stays "waiting for the certificate".
+ * The names do not start with VERCEL_ because Vercel's dashboard refuses variables with that prefix; the old VERCEL_* names still work as a fallback (local use, tests).
+ */
 export function vercelFromEnv(env = process.env): VercelDomainClient | null {
-  const token = env.VERCEL_TOKEN, project = env.VERCEL_PROJECT_ID;
+  const token = env.PLATFORM_VERCEL_TOKEN ?? env.VERCEL_TOKEN ?? env.VERCEL_AUTH_TOKEN, project = env.PLATFORM_VERCEL_PROJECT_ID ?? env.VERCEL_PROJECT_ID;
   if (!token || !project) return null;
-  const team = env.VERCEL_TEAM_ID ? `?teamId=${encodeURIComponent(env.VERCEL_TEAM_ID)}` : "";
-  const base = env.VERCEL_API_URL ?? "https://api.vercel.com";
+  const teamId = env.PLATFORM_VERCEL_TEAM_ID ?? env.VERCEL_TEAM_ID;
+  const team = teamId ? `?teamId=${encodeURIComponent(teamId)}` : "";
+  const base = env.PLATFORM_VERCEL_API_URL ?? env.VERCEL_API_URL ?? "https://api.vercel.com";
   const call = async (method: string, path: string, body?: unknown) => {
     const res = await fetch(`${base}${path}${team}`, { method, headers: { authorization: `Bearer ${token}`, "content-type": "application/json" }, body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(15_000) });
     const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
