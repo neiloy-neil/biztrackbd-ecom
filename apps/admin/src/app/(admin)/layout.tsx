@@ -7,7 +7,9 @@ import { NavLink } from "@/components/nav";
 import { PwaRegister } from "@/components/pwa";
 import { ReadOnlyGuard } from "@/components/read-only";
 import { AnnouncementBanner } from "@/components/announcement-banner";
+import { DemoBanner } from "@/components/demo-banner";
 import { ImpersonationBanner } from "@/components/impersonation-banner";
+import { trialHref } from "@/lib/demo";
 import { CommandPalette, ShellProvider, SideNav, TopActions, type NavGroup, type Page } from "@/components/shell";
 import { ThemeSwitch } from "./theme-switch";
 import { getSession } from "@/lib/session";
@@ -95,6 +97,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <ShellProvider initial={counts} pages={pages} strings={STRINGS[lang]}>
+      {s.demo && <DemoBanner expiresAt={s.demo.expiresAt} keepHref={trialHref()} />}
       {s.impersonation && (
         <ImpersonationBanner
           tenantName={storeName}

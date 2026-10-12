@@ -1,10 +1,10 @@
 import { cookies, headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import {
-  AuthFailure, ForbiddenError, ReadOnlyError, can, decodeClaims, getStoreAccess, getUserFromToken, staffMemberships, verifyImpersonationSessionCookie, type Access, type Area, type AuthUser, type StaffActor, type StaffMembership,
+  AuthFailure, ForbiddenError, ReadOnlyError, can, decodeClaims, loadDemoTenant, verifyDemoCookie, getStoreAccess, getUserFromToken, staffMemberships, verifyImpersonationSessionCookie, type Access, type Area, type AuthUser, type StaffActor, type StaffMembership,
 } from "@biztrackbd/core";
 import { resolveTenantByHost, withTenant, type StaffRole } from "@biztrackbd/db";
-import { AT, TENANT, authMode } from "@/lib/auth";
+import { AT, DEMO, TENANT, authMode } from "@/lib/auth";
 
 export interface AdminSession {
   tenantId: string;
@@ -13,6 +13,8 @@ export interface AdminSession {
   actor: StaffActor;
   /** What the store may do right now: trial, active, overdue, read-only or locked (docs/07 section 21). */
   access: Access;
+  /** Set when this is a visitor's private demo copy: what to show in the banner, and what to lock. */
+  demo?: { expiresAt: number; template: string; subdomain: string };
   impersonation?: {
     actorId: string;
     actorEmail: string;
@@ -24,6 +26,26 @@ export const DEV_USER_COOKIE = "dev_user";
 /** Development only: which store to act in, so a store made through signup can be tried. Ignored unless DEV_AUTH=1. */
 export const DEV_TENANT_COOKIE = "dev_tenant";
 export const IMPERSONATION_COOKIE = "impersonator_session";
+
+/** A visitor's demo admin: the cookie must be ours, unexpired, and name a store that is still a visitor copy. */
+export async function getDemoSession(): Promise<AdminSession | null> {
+  const jar = await cookies();
+  const raw = jar.get(DEMO)?.value;
+  if (!raw) return null;
+  const c = verifyDemoCookie(raw);
+  if (!c) return null;
+  const t = await loadDemoTenant(c.tenantId);
+  if (!t) return null;
+  const owner = await withTenant(t.id, (tx) => tx.tenantUser.findFirst({ where: { role: "STORE_OWNER", isActive: true } }));
+  if (!owner) return null;
+  return {
+    tenantId: t.id, tenantSubdomain: t.subdomain,
+    user: { id: owner.id, name: owner.name, email: owner.email, role: owner.role },
+    actor: { userId: owner.id, email: owner.email, name: owner.name, role: owner.role },
+    access: await getStoreAccess(t.id),
+    demo: { expiresAt: t.expiresAt.getTime(), template: t.template, subdomain: t.subdomain },
+  };
+}
 
 export async function getImpersonationSession(): Promise<AdminSession | null> {
   const jar = await cookies();
@@ -97,6 +119,8 @@ export async function resolveAuth(): Promise<AuthState> {
 
 /** Null for anyone who is not signed in to a store (for route handlers that answer 401 instead of redirecting). */
 export async function getSessionOrNull(): Promise<AdminSession | null> {
+  const demo = await getDemoSession();
+  if (demo) return demo;
   const imp = await getImpersonationSession();
   if (imp) return imp;
   if (authMode() === "dev") return devSession();
@@ -121,6 +145,8 @@ async function buildSession(m: StaffMembership, email: string): Promise<AdminSes
  * staff member chosen by a cookie so each role can be tried; that stand-in refuses to run in production.
  */
 export async function getSession(): Promise<AdminSession> {
+  const demo = await getDemoSession();
+  if (demo) return demo;
   const imp = await getImpersonationSession();
   if (imp) return imp;
   if (authMode() === "dev") {

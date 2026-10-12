@@ -82,6 +82,11 @@ model Tenant {
   suspendedAt      DateTime?
   quarantined      Boolean      @default(false)   // brand-review hold (docs/12 section 2)
   isDemo           Boolean      @default(false)   // a template demo store (docs/38): left out of revenue, trials and billing, never suspended, never takes real orders
+  demoKind         String?       // TEMPLATE (a public demo store) or SESSION (a visitor's private, temporary copy: docs/41)
+  demoTemplate     String?       // the template a SESSION copy was made from
+  demoExpiresAt    DateTime?     // when a SESSION copy is deleted
+  demoLastOrderAt  DateTime?     // the last sample order dropped into a SESSION copy
+  demoCreator      String?       // hash of who started it (never an address), for the per-visitor limit
   quarantineReason String?
   
   createdAt        DateTime     @default(now())
@@ -138,6 +143,7 @@ model Tenant {
   @@index([subdomain])
   @@index([customDomain])
   @@index([status])
+  @@index([demoKind, demoExpiresAt])
 }
 
 model Subscription {

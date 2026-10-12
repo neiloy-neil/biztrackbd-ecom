@@ -39,6 +39,7 @@ const JOBS = [
   ["biztrack-demo-axionwear", "6 22 * * *", "admin", "/api/cron/demo-reset?template=axionwear"],
   ["biztrack-demo-bindu", "8 22 * * *", "admin", "/api/cron/demo-reset?template=bindu"],
   ["biztrack-demo-berber", "10 22 * * *", "admin", "/api/cron/demo-reset?template=berber"],
+  ["biztrack-demo-sweep", "*/15 * * * *", "admin", "/api/cron/demo-sweep"], // visitor demo copies past their 3 hours (docs/41)
 ];
 
 const c = new pg.Client({ connectionString: process.env.SUPABASE_DB_URL, ssl: { rejectUnauthorized: false } });

@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 /** Customer list as a CSV download. Needs customers access (the service checks it again). */
 export async function GET() {
   const s = await getSession();
+  if (s.demo) return new NextResponse("Exports are not available in the demo.", { status: 403 });
   if (s.actor.isImpersonator) {
     return new NextResponse("Customer bulk export is prohibited during super admin impersonation.", { status: 403 });
   }

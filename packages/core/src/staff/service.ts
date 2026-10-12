@@ -1,3 +1,4 @@
+import { assertNotInDemo } from "../demo/guard";
 import { createHash, randomBytes } from "node:crypto";
 import { Prisma, getBasePrisma, withTenant, type StaffRole, type TenantTx } from "@biztrackbd/db";
 import { z } from "zod";
@@ -46,6 +47,7 @@ export interface InviteResult {
 }
 
 export async function inviteStaff(tenantId: string, actor: StaffActor, rawInput: { email: string; role: string }): Promise<InviteResult> {
+  await assertNotInDemo(tenantId, "Managing the team");
   assertCan(actor, "team", "edit");
   const parsed = InviteInput.safeParse(rawInput);
   if (!parsed.success) throw new ValidationError("Enter a valid email and choose a role", { issues: parsed.error.issues });
@@ -72,6 +74,7 @@ export async function inviteStaff(tenantId: string, actor: StaffActor, rawInput:
 }
 
 export async function revokeInvite(tenantId: string, actor: StaffActor, inviteId: string): Promise<void> {
+  await assertNotInDemo(tenantId, "Managing the team");
   assertCan(actor, "team", "edit");
   await withTenant(tenantId, async (tx) => {
     const inv = await tx.staffInvite.findFirst({ where: { id: inviteId, acceptedAt: null } });
@@ -159,6 +162,7 @@ async function targetUser(tx: TenantTx, actor: StaffActor, userId: string) {
 }
 
 export async function changeStaffRole(tenantId: string, actor: StaffActor, userId: string, newRole: string): Promise<void> {
+  await assertNotInDemo(tenantId, "Managing the team");
   assertCan(actor, "team", "edit");
   const parsed = InviteInput.shape.role.safeParse(newRole);
   if (!parsed.success) throw new ValidationError("Choose a valid role");
@@ -171,6 +175,7 @@ export async function changeStaffRole(tenantId: string, actor: StaffActor, userI
 }
 
 export async function setStaffActive(tenantId: string, actor: StaffActor, userId: string, active: boolean): Promise<void> {
+  await assertNotInDemo(tenantId, "Managing the team");
   assertCan(actor, "team", "edit");
   await withTenant(tenantId, async (tx) => {
     await lockTenant(tx, tenantId);

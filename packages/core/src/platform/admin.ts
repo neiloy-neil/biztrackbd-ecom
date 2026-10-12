@@ -218,12 +218,14 @@ export async function listTenants(actor: PlatformActor, opts: { q?: string; filt
   const q = opts.q?.trim();
   // Digits only count as a phone number when the search looks like one, so "shop12" does not match every number containing 12.
   const phoneDigits = q && /^[\d\s+()-]{4,}$/.test(q) ? q.replace(/[^\d]/g, "").replace(/^88/, "") : "";
+  // Visitors' private demo copies (docs/41) come and go every few hours; they are not stores anyone needs to manage.
+  const notCopies: Prisma.TenantWhereInput = { OR: [{ demoKind: null }, { demoKind: { not: "SESSION" } }] };
   const where: Prisma.TenantWhereInput = q
-    ? { OR: [
+    ? { AND: [notCopies, { OR: [
         { name: { contains: q, mode: "insensitive" } }, { subdomain: { contains: q.toLowerCase() } }, { ownerEmail: { contains: q.toLowerCase() } },
         { ownerPhone: { contains: phoneDigits || "~" } }, { customDomain: { contains: q.toLowerCase() } }, { domains: { some: { domain: { contains: q.toLowerCase() } } } },
-      ] }
-    : {};
+      ] }] }
+    : notCopies;
   // Access states come from dates, so the filters are applied after the read. A platform with thousands of stores moves this into SQL.
   const all = await db.tenant.findMany({
     where,

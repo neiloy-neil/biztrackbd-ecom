@@ -1,3 +1,4 @@
+import { demoTick } from "@/lib/demo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BD_GEO, addDays, can, listConnectedCouriers, listOrders, orderTabCounts, type OrderTab } from "@biztrackbd/core";
@@ -26,6 +27,7 @@ const DISTRICTS = BD_GEO.flatMap((d) => d.districts.map((x) => x.name)).sort();
 export default async function Orders({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
   const s = await requireAccess("orders");
+  await demoTick(s);
   const tab = (TABS.find((t) => t.key === one(sp.tab))?.key ?? "all") as OrderTab;
   const q = one(sp.q)?.trim() ?? "";
   const payment = (["COD", "MANUAL_BKASH", "MANUAL_NAGAD"] as const).find((p) => p === one(sp.payment));

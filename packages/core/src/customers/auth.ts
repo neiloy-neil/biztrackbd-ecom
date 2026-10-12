@@ -1,4 +1,4 @@
-import { assertNotDemo } from "../demo/guard";
+import { assertNotDemo, isDemoTenantId } from "../demo/guard";
 import { createHmac, randomInt, timingSafeEqual } from "node:crypto";
 import { randomUUID } from "node:crypto";
 import { withTenant } from "@biztrackbd/db";
@@ -50,8 +50,14 @@ export function setSmsSender(s: SmsSender): void {
   smsSender = s;
 }
 
+/** The sender every message goes through. For a demo store it quietly sends nothing, so a demo can never text a real person or use a credit. */
 export function currentSmsSender(): SmsSender {
-  return smsSender;
+  return {
+    async send(tenantId, to, text) {
+      if (await isDemoTenantId(tenantId)) return;
+      return smsSender.send(tenantId, to, text);
+    },
+  };
 }
 
 const CODE_TTL_MS = 5 * 60_000;

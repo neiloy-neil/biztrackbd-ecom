@@ -24,6 +24,13 @@ export class DemoStoreError extends DomainError {
   }
 }
 
+/** Something a visitor's demo copy does not allow: changing the account, plan, domains, team or integration keys. */
+export class DemoLockedError extends DomainError {
+  constructor(what = "This") {
+    super("DEMO_LOCKED", `${what} is not available in the demo. Start your free trial to use it for real.`, 403);
+  }
+}
+
 export class InsufficientStockError extends DomainError {
   constructor(message: string, readonly variantId: string, readonly available: number) {
     super("INSUFFICIENT_STOCK", message, 409, { variantId, available });

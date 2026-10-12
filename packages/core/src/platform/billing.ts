@@ -1,3 +1,4 @@
+import { assertNotInDemo } from "../demo/guard";
 import { Prisma, getBasePrisma, withTenant } from "@biztrackbd/db";
 import { z } from "zod";
 import { audit } from "../audit/service";
@@ -134,6 +135,7 @@ export type ProofInput = z.input<typeof ProofInput>;
  * Allowed while the store is read-only or locked: paying is the way out.
  */
 export async function submitPaymentProof(tenantId: string, actor: StaffActor, raw: unknown): Promise<ProofView> {
+  await assertNotInDemo(tenantId, "Paying for a plan");
   assertCan(actor, "billing", "edit");
   const parsed = ProofInput.safeParse(raw);
   if (!parsed.success) throw new ValidationError(parsed.error.issues[0]?.message ?? "Check the form");
@@ -171,6 +173,7 @@ export async function submitPaymentProof(tenantId: string, actor: StaffActor, ra
 
 /** The owner changed their mind or made a typo before anyone looked. */
 export async function cancelPendingProof(tenantId: string, actor: StaffActor, proofId: string): Promise<void> {
+  await assertNotInDemo(tenantId, "Paying for a plan");
   assertCan(actor, "billing", "edit");
   await withTenant(tenantId, async (tx) => {
     const { count } = await tx.paymentProof.deleteMany({ where: { id: proofId, status: "PENDING" } });

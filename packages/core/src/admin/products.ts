@@ -1,3 +1,4 @@
+import { assertNotInDemo } from "../demo/guard";
 import { Prisma, withTenant } from "@biztrackbd/db";
 import { z } from "zod";
 import { audit } from "../audit/service";
@@ -344,6 +345,7 @@ export interface ProductImportResult {
  * through saveProduct, so the same checks and the plan's product limit apply as when adding a product by hand.
  */
 export async function importProductsCsv(tenantId: string, actor: StaffActor, text: string): Promise<ProductImportResult> {
+  await assertNotInDemo(tenantId, "Importing products");
   assertCan(actor, "products", "edit");
   const rows = parseCsv(text.replace(/^\uFEFF/, "")).filter((r) => r.some((c) => c.trim() !== ""));
   if (rows.length < 2) throw new ValidationError("The file has no products. Use the template: one product per row under the header.");

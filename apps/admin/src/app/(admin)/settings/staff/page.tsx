@@ -1,3 +1,5 @@
+import { DemoLocked } from "@/components/demo-locked";
+import { trialHref } from "@/lib/demo";
 import { ASSIGNABLE_ROLES, AREAS, PERMISSIONS, ROLE_LABELS, listTeam } from "@biztrackbd/core";
 import { Button } from "@biztrackbd/ui";
 import { Chip } from "@/lib/chips";
@@ -14,6 +16,7 @@ const AREA_LABEL: Record<(typeof AREAS)[number], string> = {
 
 export default async function Staff() {
   const s = await requireAccess("team", "edit");
+  if (s.demo) return <DemoLocked what="Team" keepHref={trialHref()} />;
   const team = await listTeam(s.tenantId, s.actor);
   const full = team.seats.limit != null && team.seats.used >= team.seats.limit;
   const roles = ASSIGNABLE_ROLES.map((r) => ({ value: r, label: ROLE_LABELS[r] }));

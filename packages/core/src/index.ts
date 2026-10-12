@@ -148,3 +148,11 @@ export {
   listMessageTemplates, saveMessageTemplate, resetMessageTemplate, notifyOrder,
   type MessageEvent, type MessageLocale, type MessageVar, type MessageTemplateView, type NotifyResult,
 } from "./messaging/templates";
+
+export {
+  DEMO_SESSION_HOURS, DEMO_MAX_ACTIVE, DemoBusyError, DemoLimitError, createDemoCookie, verifyDemoCookie, demoCreatorKey, createDemoSession, maybeDropDemoOrder, sweepDemoSessions, loadDemoTenant,
+  type DemoCookiePayload,
+} from "./demo/session";
+export { isDemoSessionId } from "./demo/guard";
+export { DemoLockedError } from "./errors";
+export { assertNotInDemo } from "./demo/guard";

@@ -1,3 +1,5 @@
+import { isDemoSessionId } from "../demo/guard";
+import { createDemoCourier } from "./demo";
 import { createHash } from "node:crypto";
 import { Prisma, getBasePrisma, withTenant, type TenantTx } from "@biztrackbd/db";
 import { recordOrderEvent } from "../admin/order-events";
@@ -40,6 +42,8 @@ export interface ConnectedCourier {
 
 /** Couriers the owner has entered keys for. If both a test and a live account exist, live wins. */
 export async function listConnectedCouriers(tenantId: string): Promise<ConnectedCourier[]> {
+  // A visitor's demo copy has two pretend couriers, so booking can be tried without keys.
+  if (await isDemoSessionId(tenantId)) return (["STEADFAST", "PATHAO"] as const).map((p) => ({ provider: p, label: `${labelOf(p)} (demo)`, mode: "TEST" as const, status: "CONNECTED" }));
   const rows = await withTenant(tenantId, (tx) =>
     tx.tenantIntegration.findMany({ where: { provider: { in: COURIER_PROVIDERS }, status: { not: "DISABLED" } }, select: { provider: true, mode: true, status: true } }),
   );
@@ -53,6 +57,7 @@ export async function listConnectedCouriers(tenantId: string): Promise<Connected
 }
 
 async function adapterFor(tenantId: string, provider: CourierProviderKey, forceMode?: "TEST" | "LIVE"): Promise<{ adapter: CourierAdapter; mode: "TEST" | "LIVE" }> {
+  if (await isDemoSessionId(tenantId)) return { adapter: createDemoCourier(provider), mode: "TEST" };
   const connected = (await listConnectedCouriers(tenantId)).find((c) => c.provider === provider);
   if (!connected && !forceMode) throw new ValidationError(`${labelOf(provider)} is not connected. Add its keys in Settings, Integrations.`);
   const mode = forceMode ?? connected!.mode;

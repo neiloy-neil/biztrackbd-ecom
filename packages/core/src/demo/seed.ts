@@ -112,7 +112,7 @@ export async function resetDemoStore(templateId: string, deps: DemoDeps): Promis
   const bannerUrl = await store(bannerSvg({ ...t.palette, bg: t.palette.main === "#1B1F24" ? "#F1F3F5" : t.palette.bg }, t.banner.art));
 
   const owner = await withTenant(id, async (tx) => {
-    await tx.tenant.update({ where: { id }, data: { isDemo: true, status: "ACTIVE", trialEndsAt: FAR_FUTURE, themeId: t.id, locale: "en-BD" } });
+    await tx.tenant.update({ where: { id }, data: { isDemo: true, demoKind: "TEMPLATE", status: "ACTIVE", trialEndsAt: FAR_FUTURE, themeId: t.id, locale: "en-BD" } });
     await tx.storeSettings.create({
       data: {
         tenantId: id, storeName: t.storeName, storeNameBn: t.storeNameBn, tagline: t.tagline, contactPhone: PHONE, email,

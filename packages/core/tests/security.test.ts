@@ -70,13 +70,18 @@ describe("who can call each admin and platform action", () => {
     expect(routes.length).toBeGreaterThan(5);
     const open: string[] = [];
     // Public on purpose: store photos, which the public storefront shows anyway (random ids, path shape checked, read-only).
-    const PUBLIC_ROUTES = new Set(["apps/admin/src/app/media/[...path]/route.ts"]);
+    // The demo admin's door (docs/41): starting is limited per visitor and capped for everyone, and a demo copy can reach nothing but itself;
+    // leaving only forgets a cookie.
+    const PUBLIC_ROUTES = new Set(["apps/admin/src/app/media/[...path]/route.ts", "apps/admin/src/app/demo/start/route.ts", "apps/admin/src/app/demo/exit/route.ts"]);
     for (const f of routes.filter((r) => !PUBLIC_ROUTES.has(rel(r)))) {
       const text = readFileSync(f, "utf8");
       const guarded = /getSession(OrNull)?\(|requireAccess\(|requireAction\(|authorised\(|CRON_SECRET|verify|signature|token/i.test(text);
       if (!guarded) open.push(rel(f));
     }
     expect(open).toEqual([]);
+    // The one public route that creates something must be the one that enforces the limits.
+    expect(readFileSync(join(ROOT, "apps/admin/src/app/demo/start/route.ts"), "utf8")).toMatch(/createDemoSession\(/);
+    expect(readFileSync(join(ROOT, "packages/core/src/demo/session.ts"), "utf8")).toMatch(/DemoLimitError[\s\S]*DemoBusyError/);
   });
 
   it("the development sign-in stand-ins refuse to run in production, and real sign-in is the default", () => {

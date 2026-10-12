@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 /** The report as a CSV download. Needs reports access (the service checks it again). */
 export async function GET(req: NextRequest) {
   const s = await getSession();
+  if (s.demo) return new Response("Exports are not available in the demo.", { status: 403 });
   const u = req.nextUrl.searchParams;
   const range = u.get("from") && u.get("to") ? { from: u.get("from")!, to: u.get("to")! } : lastDays(30);
   try {

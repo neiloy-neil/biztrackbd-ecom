@@ -1,3 +1,4 @@
+import { assertNotInDemo } from "../demo/guard";
 import { randomBytes } from "node:crypto";
 import { getBasePrisma, withTenant } from "@biztrackbd/db";
 import { audit } from "../audit/service";
@@ -94,6 +95,7 @@ function toView(row: IntegrationRow, ring: KeyRing): IntegrationView {
 
 /** Creates or updates one integration for a store. Secrets are encrypted before they touch the database. */
 export async function saveIntegration(tenantId: string, input: SaveIntegrationInput, ring: KeyRing = loadKeyRing(), actor?: StaffActor): Promise<IntegrationView> {
+  await assertNotInDemo(tenantId, "Changing integration keys");
   if (actor) assertCan(actor, "billing", "edit");
   const { provider, mode } = parseTarget(input.provider, input.mode);
   const spec = PROVIDERS[provider];
@@ -153,6 +155,7 @@ export async function loadCredentials(tenantId: string, provider: string, mode: 
 }
 
 export async function removeIntegration(tenantId: string, provider: string, mode: string, actor?: StaffActor): Promise<void> {
+  await assertNotInDemo(tenantId, "Changing integration keys");
   if (actor) assertCan(actor, "billing", "edit");
   const t = parseTarget(provider, mode);
   await withTenant(tenantId, async (tx) => {
@@ -177,6 +180,7 @@ export async function recordVerification(tenantId: string, provider: string, mod
 
 /** Issues a new webhook token, which invalidates the old webhook URL. For a leaked URL. */
 export async function rotateWebhookToken(tenantId: string, provider: string, mode: string, actor?: StaffActor): Promise<string> {
+  await assertNotInDemo(tenantId, "Changing integration keys");
   if (actor) assertCan(actor, "billing", "edit");
   const t = parseTarget(provider, mode);
   const token = randomBytes(24).toString("hex");

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { DASHBOARD_RANGES, can, changePercent, getDashboard, type SetupStep } from "@biztrackbd/core";
 import { PlusIcon } from "@/components/icons";
 import { friendlyDate, taka } from "@/lib/format";
+import { demoTick } from "@/lib/demo";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { OrderPill, PaymentPill } from "@/lib/status";
@@ -27,6 +28,7 @@ function greeting(now: Date) {
 export default async function Dashboard({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
   const s = await requireAccess("orders");
+  await demoTick(s);
   const now = new Date();
   const range = Number(one(sp.range)) || 7;
   const d = await getDashboard(s.tenantId, s.actor, now, { range });

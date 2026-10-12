@@ -1,3 +1,4 @@
+import { assertNotInDemo } from "../demo/guard";
 import { Prisma, withTenant, type TenantTx } from "@biztrackbd/db";
 import { audit } from "../audit/service";
 import { NotFoundError, PlanFeatureError, ValidationError } from "../errors";
@@ -45,6 +46,7 @@ async function customDomainsAllowed(tx: TenantTx): Promise<boolean> {
  * Verification (a DNS check) belongs to the platform, not to this call; see confirmDomainVerified.
  */
 export async function addDomain(tenantId: string, actor: StaffActor, input: string) {
+  await assertNotInDemo(tenantId, "Connecting a domain");
   assertCan(actor, "billing", "edit");
   const check = validateCustomDomain(input, rootDomain());
   if (!check.ok) {
@@ -94,6 +96,7 @@ export async function confirmDomainVerified(tenantId: string, host: string) {
 }
 
 export async function setPrimaryDomain(tenantId: string, actor: StaffActor, domainId: string): Promise<void> {
+  await assertNotInDemo(tenantId, "Connecting a domain");
   assertCan(actor, "billing", "edit");
   await withTenant(tenantId, async (tx) => {
     await lockTenant(tx, tenantId);
@@ -109,6 +112,7 @@ export async function setPrimaryDomain(tenantId: string, actor: StaffActor, doma
 }
 
 export async function removeDomain(tenantId: string, actor: StaffActor, domainId: string): Promise<void> {
+  await assertNotInDemo(tenantId, "Connecting a domain");
   assertCan(actor, "billing", "edit");
   const removed = await withTenant(tenantId, async (tx) => {
     await lockTenant(tx, tenantId);

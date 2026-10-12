@@ -1,3 +1,4 @@
+import { assertNotInDemo } from "../demo/guard";
 import { Prisma, withTenant } from "@biztrackbd/db";
 import { audit } from "../audit/service";
 import { NotFoundError, ValidationError } from "../errors";
@@ -180,6 +181,7 @@ export async function saveInvoiceSettings(tenantId: string, actor: StaffActor, i
 
 /** Pause or reopen the store. While paused, customers see a notice and cannot place orders. */
 export async function setOrdersPaused(tenantId: string, actor: StaffActor, paused: boolean): Promise<void> {
+  await assertNotInDemo(tenantId, "Pausing the store");
   assertCan(actor, "design", "edit");
   await withTenant(tenantId, async (tx) => {
     await upsertSettings(tx, tenantId, { ordersPaused: paused });

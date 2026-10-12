@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { DomainError, acceptShortPayment, importStatement, raiseDispute, syncCourierStatuses } from "@biztrackbd/core";
-import { requireAction } from "@/lib/session";
+import { getSession, requireAction } from "@/lib/session";
 
 const MAX_FILE = 1_500_000;
 
@@ -13,6 +13,7 @@ function go(params: Record<string, string | number>): never {
 
 /** The statement arrives as a file picked in the browser; its text goes straight to the importer and is not kept. */
 export async function importAction(form: FormData): Promise<void> {
+  if ((await getSession()).demo) go({ err: "Importing a statement is not available in the demo." });
   const s = await requireAction("reports", "edit");
   const file = form.get("file");
   if (!(file instanceof File) || file.size === 0) go({ err: "Choose the statement file from your courier first." });

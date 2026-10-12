@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
 
   const s = await getSessionOrNull();
   if (!s) return NextResponse.json({ error: "Please sign in again." }, { status: 401 });
+  if (s.demo) return NextResponse.json({ error: "Uploads are not available in the demo. Your own store can upload photos." }, { status: 403 });
   if (!can(s.user.role, "products", "edit") && !can(s.user.role, "design", "edit")) return NextResponse.json({ error: "You do not have access to this." }, { status: 403 });
   if (s.access.state === "READ_ONLY" || s.access.state === "LOCKED") return NextResponse.json({ error: "Your store is read-only until the plan is paid." }, { status: 403 });
   if (tooMany(s.user.id)) return NextResponse.json({ error: "Too many uploads. Wait a minute and try again." }, { status: 429 });

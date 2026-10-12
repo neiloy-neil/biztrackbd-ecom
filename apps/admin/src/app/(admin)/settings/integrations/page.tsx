@@ -1,3 +1,5 @@
+import { DemoLocked } from "@/components/demo-locked";
+import { trialHref } from "@/lib/demo";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { COURIER_PROVIDERS, PROVIDER_KEYS, PROVIDERS, listIntegrations, loadCredentials, type CourierProviderKey, type ProviderKey } from "@biztrackbd/core";
@@ -43,6 +45,7 @@ export default async function Integrations({ searchParams }: { searchParams: Pro
   const mode = sp.mode === "TEST" ? "TEST" : "LIVE";
   const open = PROVIDER_KEYS.find((k) => k === sp.open);
   const s = await requireAccess("billing", "edit");
+  if (s.demo) return <DemoLocked what="Integrations" keepHref={trialHref()} />;
   const saved = await listIntegrations(s.tenantId);
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3001";

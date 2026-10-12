@@ -164,3 +164,8 @@ div.tabs[role="tablist"] { overflow-x: auto; margin: 0 0 14px; padding: 0; } div
 .inv-grid > * { min-width: 0; }
 @media (min-width: 1000px) { .inv-grid { grid-template-columns: minmax(300px, 420px) minmax(0, 1fr); } .inv-side { position: sticky; top: 16px; } }
 .inv-frame { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+
+/* The demo banner (docs/41) */
+.demo-banner { position: sticky; top: 0; z-index: 99998; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 8px 16px; background: #EEF2FF; border-bottom: 1px solid #C7D2FE; color: #1A1A4E; font-size: 13.5px; }
+.demo-banner .demo-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.demo-banner .btn { min-height: 40px; }
