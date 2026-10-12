@@ -170,3 +170,7 @@ export {
 
 export * from "./catalog/import-parser";
 
+
+export { notifyOwner, emailStaffInvite, setMailSender, formatMailDate, type MailSendResult, type OwnerMailExtra } from "./mail/send";
+export { buildMail, buildAuthMail, authMailsForTests as AUTH_MAILS_FOR_TESTS, MAIL_KIND_LIST, URGENT_KINDS, type MailKind, type MailVars } from "./mail/templates";
+export { esc as escapeMailText, type MailLang } from "./mail/layout";

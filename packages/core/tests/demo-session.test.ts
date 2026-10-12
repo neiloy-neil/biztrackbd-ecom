@@ -246,9 +246,10 @@ describe("keep this store", () => {
     // It is a real store: on the plan they chose, in trial, and not a demo.
     const t = await owner.tenant.findUniqueOrThrow({ where: { id: r.tenantId } });
     expect([t.isDemo, t.demoKind, t.planTier, t.status]).toEqual([false, null, "PRO", "TRIAL"]);
-    // The demo is untouched, and its code is spent.
-    expect(await owner.product.count({ where: { tenantId: d.tenantId } })).toBe(demoProducts);
-    expect((await loadDemoTenant(d.tenantId))!.keepCode).toBeNull();
+    // The store was kept, so the demo is over: its copy is gone and the visitor's demo session no longer opens anything.
+    expect(await loadDemoTenant(d.tenantId)).toBeNull();
+    expect(await owner.tenant.count({ where: { id: d.tenantId } })).toBe(0);
+    expect(await readKeptStore(code)).toBeNull();
   });
 
   it("works once: the same code later gives the template's sample products instead", async () => {

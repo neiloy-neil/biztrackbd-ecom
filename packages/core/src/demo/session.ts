@@ -226,7 +226,7 @@ export async function maybeDropDemoOrder(tenantId: string, now = new Date()): Pr
 }
 
 /** Deletes a visitor's demo copy. Orders go first: their items point at products, so the store cannot be removed in one step while orders exist. */
-async function deleteDemoTenant(tenantId: string): Promise<void> {
+export async function deleteDemoTenant(tenantId: string): Promise<void> {
   await withTenant(tenantId, async (tx) => {
     await tx.order.deleteMany({});
     await tx.tenant.delete({ where: { id: tenantId } });

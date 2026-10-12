@@ -140,6 +140,7 @@ model Tenant {
   tickets          SupportTicket[]
   settlements      CourierSettlementInvoice[]
   notes            TenantNote[]
+  platformMessages PlatformMessage[]
 
   @@index([subdomain])
   @@index([customDomain])
@@ -1755,4 +1756,20 @@ model PhoneTrustEvent {
 
   @@id([phoneHash, orderKey])
   @@index([phoneHash, occurredAt])
+}
+
+// An email or text the platform sent to a store (docs/44). The unique key is what stops a reminder going out twice.
+model PlatformMessage {
+  id         String   @id @default(cuid())
+  tenantId   String
+  kind       String   // WELCOME, TRIAL_ENDING, PAYMENT_APPROVED ...
+  channel    String   // EMAIL | SMS
+  dedupeKey  String   // the moment it is about, e.g. the payment's id or the date a trial ends
+  status     String   // SENT | FAILED | SKIPPED
+  createdAt  DateTime @default(now())
+
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, kind, channel, dedupeKey])
+  @@index([tenantId, createdAt])
 }

@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { verifyOnboardingPassTicket } from "@biztrackbd/core";
 import { DEV_TENANT_COOKIE } from "@/lib/session";
-import { TENANT } from "@/lib/auth";
+import { DEMO, DEMO_PREV, TENANT } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +29,8 @@ export async function GET(req: NextRequest) {
 
   // Set the tenant cookies so the admin session immediately activates for this store
   jar.set(TENANT, payload.tenantId, cookieOpts);
+  jar.delete(DEMO);
+  jar.delete(DEMO_PREV);
   jar.set(DEV_TENANT_COOKIE, payload.subdomain, cookieOpts);
 
   return NextResponse.redirect(new URL("/?welcome=1", req.nextUrl.origin));

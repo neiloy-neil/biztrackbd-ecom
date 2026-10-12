@@ -17,7 +17,7 @@ export default async function Done({ searchParams }: { searchParams: Promise<Rec
   const ticket = one(sp.ticket);
   const adminEntryUrl = ticket
     ? `${adminUrl}/api/auth/start-pass?ticket=${encodeURIComponent(ticket)}`
-    : adminUrl;
+    : `${adminUrl.replace(/\/$/, "")}/login`;
   const ends = one(sp.ends) ? new Date(one(sp.ends)!) : null;
   const endsText = ends && !Number.isNaN(ends.getTime()) ? new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Dhaka" }).format(ends) : null;
   const review = one(sp.review) === "1";

@@ -1,3 +1,4 @@
+import { notifyOwner } from "../mail/send";
 import { copyKeptPage, copyKeptPictures, finishKeep, keptPageJson, keptPictureUrls, readKeptStore, writeKeptCatalog, type KeptStore } from "../demo/keep";
 import { randomUUID } from "node:crypto";
 import { Prisma, getBasePrisma, withTenant } from "@biztrackbd/db";
@@ -161,6 +162,7 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
       await finishKeep(kept.demoTenantId);
     }
     await publishEvent("store/created", { tenantId: id, subdomain: sub.label, plan: input.plan });
+    await notifyOwner(id, "WELCOME", { trialEndsDate: result.trialEndsAt }, { dedupeKey: id });
     const { ownerId: _o, ...out } = result;
     return { ...out, keptPage };
   } catch (e) {

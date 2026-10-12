@@ -1,0 +1,1 @@
+Your BizTrackBD confirmation code: {{ .Token }} | নিশ্চিতকরণ কোড

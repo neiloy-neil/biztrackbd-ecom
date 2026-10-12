@@ -1,3 +1,4 @@
+import { notifyOwner } from "../mail/send";
 import { Prisma, getPlatformPrisma, type PrismaClient } from "@biztrackbd/db";
 import { addDays, dhakaDate } from "../admin/dashboard";
 import { ForbiddenError, NotFoundError, ValidationError } from "../errors";
@@ -493,6 +494,7 @@ export async function approveSubscriptionPayment(actor: PlatformActor, proofId: 
   });
   await resync(out.tenantId);
   await publishEvent("billing/payment-approved", { tenantId: out.tenantId, plan: out.plan, interval: out.interval, periodEnd: out.periodEnd.toISOString() });
+  await notifyOwner(out.tenantId, "PAYMENT_APPROVED", { plan: out.plan.charAt(0) + out.plan.slice(1).toLowerCase(), paidUntilDate: out.periodEnd }, { dedupeKey: proofId });
   return out;
 }
 
@@ -501,15 +503,18 @@ export async function rejectSubscriptionPayment(actor: PlatformActor, proofId: s
   const why = reason.trim().slice(0, 200);
   if (why.length < 3) throw new ValidationError("Tell the store why, for example: TrxID not found in our bKash");
   const db = dbOf(deps), now = nowOf(deps);
+  let storeId = "";
   await db.$transaction(async (tx) => {
     const locked = await tx.$queryRaw<{ id: string }[]>`SELECT id FROM "PaymentProof" WHERE id = ${proofId} FOR UPDATE`;
     if (locked.length === 0) throw new NotFoundError("Payment");
     const proof = await tx.paymentProof.findUniqueOrThrow({ where: { id: proofId } });
     if (proof.status !== "PENDING") throw new ValidationError("This payment was already decided.");
+    storeId = proof.tenantId;
     // The TrxID stays on file (and unique), so a rejected number cannot simply be submitted again for another store.
     await tx.paymentProof.update({ where: { id: proofId }, data: { status: "REJECTED", rejectionReason: why, approvedBy: actor.id, approvedAt: now } });
     await log(tx, actor, "PAYMENT_REJECTED", proof.tenantId, { proofId, trxId: proof.trxId, reason: why });
   });
+  if (storeId) await notifyOwner(storeId, "PAYMENT_REJECTED", { reason: why }, { dedupeKey: proofId });
 }
 
 // ---- Store controls ------------------------------------------------------------------------------------------------
@@ -694,6 +699,9 @@ export async function runBillingLifecycle(deps?: Deps): Promise<LifecycleResult>
       : a.daysLeft !== null && (a.daysLeft === 3 || a.daysLeft === 1) ? (a.state === "TRIAL" ? "TRIAL_ENDING" : "RENEWAL_DUE") : null;
     if (kind) {
       await publishEvent("billing/reminder", { tenantId: t.id, kind, daysLeft: a.daysLeft });
+      // The owner is told by email, and by text message when missing it could take the store offline. The key is the milestone in this
+      // billing period, so running the sweep twice a day, or again after a failure, never tells them twice.
+      await notifyOwner(t.id, kind, { daysLeft: a.daysLeft }, { dedupeKey: `${kind}:${(a.paidThrough ? new Date(a.paidThrough) : now).toISOString().slice(0, 10)}:${a.daysLeft ?? a.overdueDays ?? 0}` });
       res.reminders++;
     }
   }

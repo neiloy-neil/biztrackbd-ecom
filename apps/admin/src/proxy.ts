@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { AuthFailure, decodeClaims, refreshSession } from "@biztrackbd/core";
-import { AT, RT, TENANT, authMode, cookieOptions } from "@/lib/auth";
+import { AT, DEMO, DEMO_PREV, RT, TENANT, authMode, cookieOptions } from "@/lib/auth";
 
 /**
  * Keeps a signed-in person signed in. Supabase access tokens last an hour; when one is about to run out (or already has) this
@@ -14,7 +14,21 @@ export const config = {
 
 const LEEWAY_SECONDS = 90;
 
+/** The pages of signing in. Reaching one means the person wants their own store, so a demo session (docs/41) ends here. */
+const isSignIn = (path: string) => path === "/login" || path.startsWith("/login/") || path === "/choose-store";
+
 export async function proxy(req: NextRequest): Promise<NextResponse> {
+  const demo = req.cookies.get(DEMO)?.value;
+  if (demo && isSignIn(req.nextUrl.pathname)) {
+    // The page being built must not see the demo cookie either, so it is dropped from the request as well as the browser.
+    // A copy is kept for 20 minutes (only on the sign-in page) so it can offer "keep the demo store you were trying".
+    req.cookies.delete(DEMO);
+    req.cookies.set(DEMO_PREV, demo);
+    const res = NextResponse.next({ request: { headers: req.headers } });
+    res.cookies.delete(DEMO);
+    res.cookies.set(DEMO_PREV, demo, cookieOptions(20 * 60));
+    return res;
+  }
   if (authMode() === "dev") return NextResponse.next();
   const rt = req.cookies.get(RT)?.value;
   if (!rt) return NextResponse.next();

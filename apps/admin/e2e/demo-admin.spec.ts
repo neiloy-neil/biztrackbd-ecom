@@ -27,7 +27,7 @@ test.describe.serial("the demo admin", () => {
   test("one click opens a private admin with products, orders and a demo banner", async () => {
     await page.goto("/demo/start?template=kapor");
     await expect(page).toHaveURL(/\/$/);
-    await expect(page.getByTestId("demo-banner")).toContainText("deleted in");
+    await expect(page.getByTestId("demo-banner")).toContainText(/deleted in/i);
     await expect(page.getByTestId("dash-stats")).toBeVisible();
     await expect(page.getByTestId("sales-chart")).toBeVisible();
     await page.goto("/orders");
@@ -71,7 +71,21 @@ test.describe.serial("the demo admin", () => {
     expect(await count()).toBe(before + 1); // asked again at once: no second order
   });
 
+  test("signing in ends the demo: the banner offers it, and the sign-in page forgets the demo session", async ({ baseURL }) => {
+    await page.goto("/");
+    await expect(page.getByTestId("demo-signin")).toHaveAttribute("href", "/login");
+    expect((await context.cookies(baseURL!)).some((c) => c.name === "bt_demo")).toBe(true);
+    await page.goto("/login");
+    const names = (await context.cookies(baseURL!)).map((c) => c.name);
+    expect(names).not.toContain("bt_demo");
+    expect(names).toContain("bt_demo_prev"); // kept for a few minutes so the sign-in page can offer to keep that demo store
+    await page.goto("/");
+    await expect(page.getByTestId("demo-banner")).toHaveCount(0);
+  });
+
   test("exiting leaves the demo", async ({ baseURL }) => {
+    await page.goto("/demo/start?template=kapor");
+    await expect(page.getByTestId("demo-banner")).toBeVisible({ timeout: 90_000 });
     const res = await page.request.get("/demo/exit", { maxRedirects: 0 });
     expect(res.status()).toBe(303);
     await context.clearCookies({ name: "bt_demo" });

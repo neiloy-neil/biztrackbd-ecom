@@ -12,6 +12,8 @@ export const RT = "bt_rt";
 export const TENANT = "bt_tenant";
 /** A visitor's demo admin (docs/41): a signed value naming their private demo store. Opens nothing else. */
 export const DEMO = "bt_demo";
+/** The demo cookie as it was when the person opened a sign-in page, kept a few minutes so that page can offer to keep that demo store. */
+export const DEMO_PREV = "bt_demo_prev";
 
 /** Real sign-in is the default. The development stand-in only exists when DEV_AUTH=1 and never in production. */
 export const authMode = (): "dev" | "supabase" => (process.env.DEV_AUTH === "1" && process.env.NODE_ENV !== "production" ? "dev" : "supabase");

@@ -20,6 +20,7 @@ export function DemoBanner({ expiresAt, keepHref, now }: { expiresAt: number; ke
       <span><b>Demo</b> · nothing here is real. Deleted in {h > 0 ? `${h} h ` : ""}{m} min unless you keep it</span>
       <span className="demo-actions">
         <a className="btn btn-primary btn-sm" href={keepHref} data-testid="demo-keep">Keep this store</a>
+        <a className="btn btn-secondary btn-sm" href="/login" data-testid="demo-signin">I have a store: sign in</a>
         <a className="btn btn-secondary btn-sm" href="/demo/exit" data-testid="demo-exit">Exit demo</a>
       </span>
     </div>

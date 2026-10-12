@@ -19,7 +19,7 @@ export function InviteForm({ roles, disabled }: { roles: { value: string; label:
       {state.error && <div role="alert" style={{ flexBasis: "100%", color: "var(--danger)" }}>{state.error}</div>}
       {state.link && (
         <div style={{ flexBasis: "100%" }}>
-          <p style={{ margin: "4px 0", color: "var(--success)" }}>Invite ready for {state.email}. Send them this link. It works once and is shown only now.</p>
+          <p style={{ margin: "4px 0", color: "var(--success)" }}>{state.emailed ? <>We emailed the invite to {state.email}. </> : <>Invite ready for {state.email}. We could not email it, so send them this link. </>}You can also send this link yourself (for example on WhatsApp). It works once and is shown only now.</p>
           <input readOnly value={state.link} style={{ ...box, width: "100%" }} onFocus={(e) => e.currentTarget.select()} />
         </div>
       )}

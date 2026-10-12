@@ -1,3 +1,4 @@
+import { notifyOwner } from "../mail/send";
 import { getPlatformPrisma, withTenant, type PrismaClient } from "@biztrackbd/db";
 import { assertPlatformCan, type PlatformActor } from "./admin";
 import { assertCan, type StaffActor } from "../permissions";
@@ -230,9 +231,11 @@ export async function replyPlatformTicket(
   const isInternal = Boolean(input.isInternal);
   const newStatus = input.newStatus ?? (isInternal ? undefined : "WAITING_ON_TENANT");
 
+  const box: { replied?: { id: string; tenantId: string; code: string | null } } = {};
   const [message] = await db.$transaction(async (tx) => {
-    const ticket = await tx.supportTicket.findUnique({ where: { id: input.ticketId }, select: { id: true, tenantId: true } });
+    const ticket = await tx.supportTicket.findUnique({ where: { id: input.ticketId }, select: { id: true, tenantId: true, code: true } });
     if (!ticket) throw new NotFoundError("Ticket not found");
+    box.replied = { id: ticket.id, tenantId: ticket.tenantId, code: ticket.code };
 
     const created = await tx.ticketMessage.create({
       data: {
@@ -264,6 +267,13 @@ export async function replyPlatformTicket(
 
     return [created];
   });
+
+  // A reply the store should see (not an internal note) is also emailed to the owner, so they do not have to keep checking.
+  const replied = box.replied;
+  if (replied && !isInternal) {
+    const admin = (process.env.ADMIN_ORIGIN || process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3001").replace(/\/$/, "");
+    await notifyOwner(replied.tenantId, "TICKET_REPLY", { ticketCode: replied.code ?? undefined, excerpt: body.length > 400 ? `${body.slice(0, 400)}...` : body, ticketUrl: `${admin}/support/${replied.id}` }, { dedupeKey: message.id });
+  }
 
   return {
     id: message.id,

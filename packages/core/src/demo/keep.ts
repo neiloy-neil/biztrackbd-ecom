@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { withTenant, type TenantTx } from "@biztrackbd/db";
 import { getLive, publish, saveDraft } from "../builder/versions";
+import { deleteDemoTenant } from "./session";
 import type { StaffActor } from "../permissions";
 
 /**
@@ -132,7 +133,8 @@ export async function copyKeptPage(demoTenantId: string, newTenantId: string, ac
   }
 }
 
-/** The code has done its job. Clears it so the link cannot be used again. */
+/** The store was kept, so the demo is over: its copy is deleted, which also ends the visitor's demo session and makes the code useless. */
 export async function finishKeep(demoTenantId: string): Promise<void> {
   await withTenant(demoTenantId, (tx) => tx.tenant.updateMany({ where: { id: demoTenantId }, data: { demoKeepToken: null } })).catch(() => undefined);
+  await deleteDemoTenant(demoTenantId).catch((e) => console.error("[keep] demo copy not deleted", e instanceof Error ? e.name : "unknown"));
 }
