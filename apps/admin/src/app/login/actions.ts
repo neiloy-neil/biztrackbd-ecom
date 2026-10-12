@@ -37,8 +37,19 @@ const clientIp = async () => (await headers()).get("x-forwarded-for")?.split(","
 const fail = (e: unknown): string => {
   if (e instanceof AuthFailure) return e.message;
   console.error("sign-in failed", e instanceof Error ? e.name : "unknown");
-  return "Something went wrong. Please try again.";
+  return e instanceof Error && /^(PrismaClient|P\d{4})/.test(e.name + (e as { code?: string }).code) ? BUSY : "Something went wrong. Please try again.";
 };
+
+const BUSY = "We are busy right now. Please wait a minute and try again.";
+/** The team check needs the database, which can be briefly full: try once more, and say so plainly rather than failing the page. */
+async function knownEmail(email: string): Promise<boolean> {
+  try {
+    return await staffEmailKnown(email);
+  } catch {
+    await new Promise((r) => setTimeout(r, 800));
+    return await staffEmailKnown(email);
+  }
+}
 
 /** After any successful step: has this person got a store, and still to do two-factor? Sets the cookies and moves on. */
 async function finish(t: TokenSet, next: string): Promise<never> {
@@ -100,7 +111,14 @@ export async function requestCodeAction(_prev: LoginState, form: FormData): Prom
   if (!/^\S+@\S+\.\S+$/.test(email)) return { error: "Enter your email address.", step: "email" };
   if (tooMany(`code:${await clientIp()}`, 10, 3_600_000) || tooMany(`codeem:${email}`, 4, 3_600_000)) return { error: "Too many codes asked for. Please wait a while and try again.", step: "email", email };
   // A code is only sent to an address that is on a team; anyone else gets the same screen and no email.
-  if (await staffEmailKnown(email)) {
+  let known: boolean;
+  try {
+    known = await knownEmail(email);
+  } catch (e) {
+    console.error("sign-in code: team check failed", e instanceof Error ? e.name : "unknown");
+    return { error: BUSY, step: "email", email };
+  }
+  if (known) {
     const l = (await cookies()).get("bt_lang")?.value;
     await sendSignInCode(email, l === "bn" ? "bn" : l === "en" ? "en" : "both");
   }
@@ -116,7 +134,7 @@ export async function completeSetupAction(_prev: LoginState, form: FormData): Pr
   if (blocked(`setup:${email}`, 8)) return { error: "Too many tries. Please wait a few minutes and try again.", step: "code", email };
   let t: TokenSet;
   try {
-    if (!(await staffEmailKnown(email))) throw new AuthFailure("INVALID_CODE", "That code is not right, or it has expired. Ask for a new one.");
+    if (!(await knownEmail(email))) throw new AuthFailure("INVALID_CODE", "That code is not right, or it has expired. Ask for a new one.");
     t = await verifyEmailCode(email, String(form.get("code") ?? ""));
     await setOwnPassword(t.accessToken, password);
   } catch (e) {

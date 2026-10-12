@@ -31,8 +31,8 @@ function expectText(text, ...needles) {
 
 // ---- marketing
 await check("marketing home", async () => { const r = await get(MKT + "/"); expectStatus(r, 200); expectText(await r.text(), "Start free trial", "Try the admin"); });
-await check("marketing pricing", async () => { const r = await get(MKT + "/pricing"); expectStatus(r, 200); expectText(await r.text(), "Compare plans"); });
-await check("marketing templates", async () => { const r = await get(MKT + "/templates"); expectStatus(r, 200); expectText(await r.text(), "admin-demo-kapor"); });
+await check("marketing pricing", async () => { const r = await get(MKT + "/pricing"); expectStatus(r, 200); expectText(await r.text(), "Compare plan features"); });
+await check("marketing templates", async () => { const r = await get(MKT + "/templates"); expectStatus(r, 200); expectText(await r.text(), "templates-demo-admin"); });
 await check("signup page", async () => { const r = await get(MKT + "/start"); expectStatus(r, 200); });
 
 // ---- storefronts (the demo stores are real tenants, so this goes through host routing and the database)
