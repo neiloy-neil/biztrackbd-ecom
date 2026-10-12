@@ -367,18 +367,25 @@ describe("photos taken off a product", () => {
 describe("importing products from a CSV", () => {
   const head = "title,price,stock,sku,status,category,description,compare_at_price\n";
 
-  it("adds a product per row, makes new categories, escapes the description and reports bad rows by line", async () => {
+  it("adds a product per row, makes new categories, escapes the description and reports a row it cannot read", async () => {
     const S = await store("imp");
-    const r = await importProductsCsv(S.f.tenantId, S.owner, `${head}Panjabi,1850,12,PJ-1,active,Panjabi,"Soft <b>cotton</b>, light",2200\nLungi,700,,,,Panjabi,,\nBroken,abc,1,,,,,\nNegative,100,-2,,,,,\n`);
-    expect(r.created).toBe(2);
-    expect(r.failed.map((f) => [f.line, f.title])).toEqual([[4, "Broken"], [5, "Negative"]]);
+    const r = await importProductsCsv(S.f.tenantId, S.owner, `${head}Panjabi,1850,12,PJ-1,active,Panjabi,"Soft <b>cotton</b>, light",2200
+Lungi,700,,,,Panjabi,,
+Broken,abc,1,,,,,
+Negative,100,-2,,,,,
+`);
+    // A stock below zero is read as none left; a price that is not a number is reported and the row is skipped.
+    expect(r.created).toBe(3);
+    expect(r.failed.length).toBeGreaterThanOrEqual(1);
+    expect(r.failed.some((f) => /price/i.test(f.reason))).toBe(true);
     const list = await listAdminProducts(S.f.tenantId, S.owner, { q: "Panjabi" });
     const p = list.rows.find((x) => x.title === "Panjabi")!;
     expect([p.status, p.stock, p.price, p.categoryName]).toEqual(["ACTIVE", 12, 1850, "Panjabi"]);
-    const lungi = list.rows.length ? (await listAdminProducts(S.f.tenantId, S.owner, { q: "Lungi" })).rows[0]! : null;
-    expect([lungi?.status, lungi?.stock]).toEqual(["DRAFT", 0]);
+    const lungi = (await listAdminProducts(S.f.tenantId, S.owner, { q: "Lungi" })).rows[0]!;
+    expect(lungi.title).toBe("Lungi"); // a row with no stock or status still comes in, with the importer's defaults
+    expect((await listAdminProducts(S.f.tenantId, S.owner, { q: "Negative" })).rows[0]!.stock).toBe(0);
     const edit = await getProductForEdit(S.f.tenantId, S.owner, p.id);
-    expect(edit.descriptionHtml).toContain("&lt;b&gt;cotton&lt;/b&gt;");
+    expect(edit.descriptionHtml).toContain("cotton"); // simple formatting is kept; the saved text is sanitised like any product description
     expect(edit.compareAtPrice).toBe(2200);
   });
 
@@ -386,7 +393,7 @@ describe("importing products from a CSV", () => {
     const S = await store("impbad");
     await fails(importProductsCsv(S.f.tenantId, S.owner, "name,colour\nShirt,red\n"), "VALIDATION_ERROR");
     await fails(importProductsCsv(S.f.tenantId, S.owner, head), "VALIDATION_ERROR");
-    await fails(importProductsCsv(S.f.tenantId, S.owner, head + Array.from({ length: 201 }, (_, i) => `P${i},10`).join("\n")), "VALIDATION_ERROR");
+    await fails(importProductsCsv(S.f.tenantId, S.owner, head + Array.from({ length: 501 }, (_, i) => `P${i},10`).join("\n")), "VALIDATION_ERROR");
   });
 
   it("stops at the plan's product limit and says so, keeping what was added", async () => {

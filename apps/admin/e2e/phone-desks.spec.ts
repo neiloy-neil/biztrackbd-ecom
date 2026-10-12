@@ -32,7 +32,7 @@ test.describe.serial("phone desks: check payments and book couriers", () => {
     await expect(page.getByTestId("open-desk")).toContainText("Book them one by one");
   });
 
-  test("check payments shows one payment big, with copy buttons, and is accessible with big tap targets", async ({}, info) => {
+  test("check payments shows one payment big, with copy buttons, and is accessible with big tap targets", async (_f, info) => {
     await page.goto("/orders/check");
     const card = page.getByTestId("check-card");
     await expect(card).toBeVisible();
@@ -71,7 +71,7 @@ test.describe.serial("phone desks: check payments and book couriers", () => {
     await expect(page.getByTestId("check-done")).toContainText(`Marked as not received for ${num}`);
   });
 
-  test("book couriers shows who, where and the cash to collect, and is accessible", async ({}, info) => {
+  test("book couriers shows who, where and the cash to collect, and is accessible", async (_f, info) => {
     await page.goto("/orders/ship");
     await expect(page.getByTestId("ship-card")).toBeVisible();
     await expect(page.getByTestId("ship-address")).toContainText(",");

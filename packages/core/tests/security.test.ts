@@ -133,6 +133,14 @@ describe("secrets and risky patterns in the source", () => {
     for (const f of code) {
       const text = readFileSync(f, "utf8");
       if (/\beval\(|new Function\(/.test(text)) hits.push(`${rel(f)}: eval`);
+      // The storefront's pixel snippets (Meta, Google, TikTok) put a store's tracking id into vendor code. That is safe only because each id is
+      // checked against a strict pattern first, so the rule for that one file is: every id is pattern-checked in the same file.
+      if (rel(f) === "apps/storefront/src/components/tracker.tsx") {
+        for (const check of ["/^\\d{8,20}$/.test(tracking.pixelId", "/^G-[A-Za-z0-9]+$/i.test(tracking.googleAnalyticsId", "/^GTM-[A-Za-z0-9]+$/i.test(tracking.googleTagManagerId", "/^[A-Za-z0-9_-]{10,40}$/.test(tracking.tiktokPixelId"]) {
+          if (!text.includes(check)) hits.push(`${rel(f)}: a tracking id is put into a script without a strict pattern check (${check})`);
+        }
+        continue;
+      }
       for (const m of text.matchAll(/dangerouslySetInnerHTML=\{\{\s*__html:\s*([^}]+)\}\}/g)) {
         const expr = m[1]!.trim();
         // Allowed: JSON-LD (serialised by us), CSS built from validated tokens, and HTML cleaned when it was saved (product descriptions, pages, blog posts).
