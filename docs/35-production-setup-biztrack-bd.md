@@ -32,7 +32,7 @@ Derived by reading the code (searches for `process.env` in each app and in the s
 
 **All four projects**
 - `DATABASE_URL`: the `biztrack_app` login on the Supabase session pooler (`postgresql://biztrack_app.<ref>:<password>@aws-0-ap-south-1.pooler.supabase.com:5432/postgres`). **Never the owner login.**
-- `DB_POOL_MAX=1` (serverless opens many short connections; raise only if you see waits)
+- `DB_POOL_MAX=3` (the code never goes below 3: a page runs several queries at once and one connection made store pages answer 500)
 - `NEXT_PUBLIC_ROOT_DOMAIN=biztrack.bd`
 
 **biztrack-marketing**: `NEXT_PUBLIC_MARKETING_URL=https://biztrack.bd`, `NEXT_PUBLIC_ADMIN_URL=https://admin.biztrack.bd`, and the picture-storage settings (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `MEDIA_DRIVER=supabase`, `MEDIA_BUCKET=store-media`): signup draws the sample product pictures. The demo links on `/templates` are built from `NEXT_PUBLIC_ROOT_DOMAIN`.

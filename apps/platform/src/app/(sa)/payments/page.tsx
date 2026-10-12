@@ -186,7 +186,7 @@ export default async function Payments({
                     <div style={{ fontSize: 14, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
                       {taka(p.amount)}
                     </div>
-                    <div style={{ fontSize: 12, color: age.isLate ? "#DC2626" : "#6B6B8D", fontWeight: 600 }}>
+                    <div style={{ fontSize: 12, color: age.isLate ? "#B91C1C" : "#4B4B73", fontWeight: 600 }}>
                       {age.text}
                     </div>
                   </div>

@@ -1,10 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
-// One pooled client per process. In serverless, keep max small and use the transaction pooler (port 6543).
+// One pooled client per process. In serverless keep max small, but never below 3: a page runs several tenant transactions at once, and with
+// one connection they queue until Prisma gives up (P2028) and the page answers 500.
 const globalForDb = globalThis as unknown as { __biztrackBase?: PrismaClient };
 
-export function createBaseClient(connectionString: string, max = Number(process.env.DB_POOL_MAX ?? 5)): PrismaClient {
+export function createBaseClient(connectionString: string, max = Math.max(3, Number(process.env.DB_POOL_MAX ?? 5))): PrismaClient {
   return new PrismaClient({
     adapter: new PrismaPg({ connectionString, max }),
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],

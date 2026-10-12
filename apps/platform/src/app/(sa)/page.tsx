@@ -80,7 +80,7 @@ export default async function Overview() {
             {taka(o.mrr)}
           </div>
           <div style={{ fontSize: 12.5, marginTop: 6, color: "#15803D", fontWeight: 700 }}>
-            +9.4% <span style={{ color: "#6B6B8D", fontWeight: 500 }}>vs last month</span>
+            {taka(o.arr)} <span style={{ color: "#4B4B73", fontWeight: 500 }}>a year at this rate</span>
           </div>
         </div>
 
@@ -90,7 +90,7 @@ export default async function Overview() {
             {o.payingStores}
           </div>
           <div style={{ fontSize: 12.5, marginTop: 6, color: "#15803D", fontWeight: 700 }}>
-            +27 <span style={{ color: "#6B6B8D", fontWeight: 500 }}>net this month</span>
+            {o.pastDue} <span style={{ color: "#4B4B73", fontWeight: 500 }}>past due</span>
           </div>
         </div>
 
@@ -100,17 +100,17 @@ export default async function Overview() {
             {o.activeTrials}
           </div>
           <div style={{ fontSize: 12.5, marginTop: 6, color: "#B45309", fontWeight: 700 }}>
-            {o.trialsEndingSoon} <span style={{ color: "#6B6B8D", fontWeight: 500 }}>end within 3 days</span>
+            {o.trialsEndingSoon} <span style={{ color: "#4B4B73", fontWeight: 500 }}>end within 3 days</span>
           </div>
         </div>
 
         <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "18px 20px" }}>
           <div style={{ fontSize: 13, color: "#4B4B73", fontWeight: 500 }}>Monthly churn</div>
           <div style={{ fontSize: 28, fontWeight: 700, marginTop: 6, fontVariantNumeric: "tabular-nums" }}>
-            {o.churnPercent !== null ? `${o.churnPercent}%` : "2.1%"}
+            {o.churnPercent !== null ? `${o.churnPercent}%` : "None yet"}
           </div>
           <div style={{ fontSize: 12.5, marginTop: 6, color: "#15803D", fontWeight: 700 }}>
-            −0.4 pts <span style={{ color: "#6B6B8D", fontWeight: 500 }}>vs last month</span>
+            {o.trialToPaidPercent !== null ? `${o.trialToPaidPercent}%` : "None yet"} <span style={{ color: "#4B4B73", fontWeight: 500 }}>trials become paid</span>
           </div>
         </div>
       </div>
@@ -119,26 +119,20 @@ export default async function Overview() {
       <div style={{ display: "flex", flexWrap: "wrap", gap: 20, alignItems: "flex-start" }}>
         {/* Left Column (MRR Area Chart + Newest Signups) */}
         <div style={{ flex: "999 1 560px", minWidth: 0, display: "flex", flexDirection: "column", gap: 20 }}>
-          {/* MRR Growth Chart Card */}
-          <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
+          {/* Signups, last 14 days (real counts) */}
+          <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }} data-testid="signups-chart">
             <div style={{ display: "flex", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ fontSize: 15, fontWeight: 700, flexGrow: 1 }}>MRR growth</div>
-              <div style={{ display: "flex", padding: 3, borderRadius: 15, background: "#EFEFF6", fontSize: 12.5, fontWeight: 600 }}>
-                <div style={{ padding: "4px 12px", borderRadius: 12, background: "#fff", border: "1px solid #E7E7F0" }}>12 months</div>
-                <div style={{ padding: "4px 12px", color: "#4B4B73" }}>30 days</div>
-              </div>
+              <div style={{ fontSize: 15, fontWeight: 700, flexGrow: 1 }}>New stores, last 14 days</div>
+              <div style={{ fontSize: 13, color: "#4B4B73" }}>{o.signups.reduce((n, d) => n + d.count, 0)} in total</div>
             </div>
-            <svg viewBox="0 0 700 220" width="100%" height="220" role="img" aria-label="Monthly recurring revenue growing from 1.2 lakh to 4.8 lakh taka over 12 months" preserveAspectRatio="none">
-              <g stroke="#E7E7F0">
-                <path d="M0 40H700M0 90H700M0 140H700" />
-              </g>
-              <path d="M0 190H700" stroke="#D5D5E4" />
-              <path d="M0 170 L64 164 L127 158 L191 148 L255 138 L318 128 L382 112 L445 96 L509 80 L573 64 L636 48 L700 30 L700 190 L0 190 Z" fill="#5B4FE8" fillOpacity="0.08" />
-              <path d="M0 170 L64 164 L127 158 L191 148 L255 138 L318 128 L382 112 L445 96 L509 80 L573 64 L636 48 L700 30" fill="none" stroke="#5B4FE8" strokeWidth="2.5" strokeLinejoin="round" />
-              <circle cx="700" cy="30" r="5" fill="#fff" stroke="#5B4FE8" strokeWidth="2.5" />
-            </svg>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#6B6B8D", marginTop: 8 }}>
-              <span>Nov</span><span>Jan</span><span>Mar</span><span>May</span><span>Jul</span><span>Sep</span>
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 160 }} role="img" aria-label={`New stores per day for the last 14 days: ${o.signups.map((d) => d.count).join(", ")}`}>
+              {o.signups.map((d) => {
+                const top = Math.max(1, ...o.signups.map((x) => x.count));
+                return <div key={d.date} title={`${d.date}: ${d.count}`} style={{ flex: 1, height: `${Math.max(3, (d.count / top) * 100)}%`, background: d.count ? "#5B4FE8" : "#E7E7F0", borderRadius: "4px 4px 0 0" }} />;
+              })}
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#4B4B73", marginTop: 8 }}>
+              <span>{o.signups[0]?.date.slice(5)}</span><span>{o.signups[o.signups.length - 1]?.date.slice(5)}</span>
             </div>
           </div>
 
