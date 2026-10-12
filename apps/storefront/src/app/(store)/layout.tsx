@@ -5,6 +5,7 @@ import { Footer } from "@/components/footer";
 import { Announcement, Header } from "@/components/header";
 import { ThemeStyle } from "@/components/theme-style";
 import { ReferralBanner } from "@/components/referral-banner";
+import { DemoRibbon } from "@/components/demo-ribbon";
 import { Pixel } from "@/components/tracker";
 import { getLang, makeT } from "@/lib/i18n";
 import { getOrigin } from "@/lib/origin";
@@ -41,6 +42,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   return (
     <CartProvider>
       <ThemeStyle tenantId={store.id} />
+      {store.isDemo && <DemoRibbon themeId={store.themeId} lang={lang} />}
       {pixelId && <Pixel pixelId={pixelId} />}
       <Announcement info={info} lang={lang} />
       <ReferralBanner tenantId={store.id} lang={lang} t={t} />

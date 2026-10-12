@@ -190,4 +190,5 @@ export const DEMO_TEMPLATES: readonly DemoTemplate[] = [
   },
 ] as const;
 
-export const demoTemplate = (id: string): DemoTemplate | undefined => DEMO_TEMPLATES.find((t) => t.id === id);
+export const demoTemplate = (id: string): DemoTemplate | undefined =>
+  DEMO_TEMPLATES.find((t) => t.id === id || t.host === id || t.id.replace(/-/g, "") === id.replace(/-/g, ""));

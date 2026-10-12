@@ -172,11 +172,17 @@ export function signCustomerSession(s: Omit<CustomerSession, "exp">, nowMs = Dat
  * Returns the session only if the signature is valid, it has not expired, and it was issued for THIS store.
  * The tenant check stops a cookie from one store being replayed on another.
  */
-export function readCustomerSession(token: string | undefined | null, expectedTenantId: string, nowMs = Date.now(), key = secret()): CustomerSession | null {
+export function readCustomerSession(token: string | undefined | null, expectedTenantId: string, nowMs = Date.now(), key?: string): CustomerSession | null {
   if (!token || token.length > 2000) return null;
+  let secretKey: string;
+  try {
+    secretKey = key ?? secret();
+  } catch {
+    return null;
+  }
   const [payload, sig] = token.split(".");
   if (!payload || !sig) return null;
-  const expected = b64(createHmac("sha256", key).update(`session|${payload}`).digest());
+  const expected = b64(createHmac("sha256", secretKey).update(`session|${payload}`).digest());
   if (!safeEqual(sig, expected)) return null;
   try {
     const s = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as CustomerSession;
@@ -196,9 +202,15 @@ export function signOrderAccess(tenantId: string, orderId: string, key = secret(
   return createHmac("sha256", key).update(`order|${tenantId}|${orderId}`).digest("base64url").slice(0, 27);
 }
 
-export function verifyOrderAccess(tenantId: string, orderId: string, token: string | undefined | null, key = secret()): boolean {
+export function verifyOrderAccess(tenantId: string, orderId: string, token: string | undefined | null, key?: string): boolean {
   if (!token || token.length > 64) return false;
-  return safeEqual(token, signOrderAccess(tenantId, orderId, key));
+  let secretKey: string;
+  try {
+    secretKey = key ?? secret();
+  } catch {
+    return false;
+  }
+  return safeEqual(token, signOrderAccess(tenantId, orderId, secretKey));
 }
 
 // ---- Account data

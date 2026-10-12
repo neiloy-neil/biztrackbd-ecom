@@ -35,10 +35,12 @@ export interface StoreSettingsView {
   nagadInstruction: string | null;
   paymentNote: string | null;
   invoiceFooter: string | null;
-  invoiceOptions: { showLogo: boolean; showSku: boolean; showQr: boolean; showPricesOnSlip: boolean };
+  invoiceOptions: { showLogo: boolean; showSku: boolean; showQr: boolean; showPricesOnSlip: boolean; paper: InvoicePaper };
 }
 
-const INVOICE_DEFAULTS = { showLogo: true, showSku: true, showQr: false, showPricesOnSlip: false };
+export type InvoicePaper = "a4" | "a5" | "thermal";
+export const INVOICE_PAPERS: InvoicePaper[] = ["a4", "a5", "thermal"];
+const INVOICE_DEFAULTS = { showLogo: true, showSku: true, showQr: false, showPricesOnSlip: false, paper: "a4" as InvoicePaper };
 
 export async function getStoreSettings(tenantId: string, actor: StaffActor): Promise<StoreSettingsView> {
   assertCan(actor, "design", "view");
@@ -144,10 +146,35 @@ export async function saveStoreDetails(tenantId: string, actor: StaffActor, i: S
       facebookUrl: httpsOrNull(i.facebookUrl, "Facebook page"), instagramUrl: httpsOrNull(i.instagramUrl, "Instagram"),
       addressLine: blank(i.addressLine)?.slice(0, 200), pickupAddress: blank(i.pickupAddress)?.slice(0, 250), logoUrl: logo,
       announcement: blank(i.announcement)?.slice(0, 200), announcementBn: blank(i.announcementBn)?.slice(0, 200),
-      invoiceFooter: blank(i.invoiceFooter)?.slice(0, 200), invoiceOptions: opts,
+      ...(i.invoiceFooter !== undefined ? { invoiceFooter: blank(i.invoiceFooter)?.slice(0, 200) } : {}), invoiceOptions: opts,
     });
     if (prefix !== undefined) await tx.tenant.update({ where: { id: tenantId }, data: { orderPrefix: prefix } });
     await audit(tx, tenantId, actor, "settings.store_details_changed", { fields: Object.keys(i) });
+  });
+}
+
+export interface InvoiceSettingsInput {
+  footer?: string | null;
+  showLogo?: boolean;
+  showSku?: boolean;
+  showPricesOnSlip?: boolean;
+  paper?: string;
+}
+
+/** How invoices and packing slips look (AdmInvoice): the logo, SKU codes, prices on the slip, a footer note and the usual paper size. */
+export async function saveInvoiceSettings(tenantId: string, actor: StaffActor, i: InvoiceSettingsInput): Promise<void> {
+  assertCan(actor, "design", "edit");
+  if (i.paper !== undefined && !INVOICE_PAPERS.includes(i.paper as InvoicePaper)) throw new ValidationError("Choose A4, A5 or thermal paper", { field: "paper" });
+  const footer = i.footer === undefined ? undefined : blank(i.footer)?.slice(0, 200) ?? null;
+  await withTenant(tenantId, async (tx) => {
+    const current = await tx.storeSettings.findFirst();
+    const opts: Record<string, unknown> = { ...INVOICE_DEFAULTS, ...((current?.invoiceOptions && typeof current.invoiceOptions === "object" ? current.invoiceOptions : {}) as object) };
+    if (i.showLogo !== undefined) opts.showLogo = i.showLogo;
+    if (i.showSku !== undefined) opts.showSku = i.showSku;
+    if (i.showPricesOnSlip !== undefined) opts.showPricesOnSlip = i.showPricesOnSlip;
+    if (i.paper !== undefined) opts.paper = i.paper;
+    await upsertSettings(tx, tenantId, { ...(footer !== undefined ? { invoiceFooter: footer } : {}), invoiceOptions: opts as Prisma.InputJsonValue });
+    await audit(tx, tenantId, actor, "settings.invoice_changed", { fields: Object.keys(i) });
   });
 }
 

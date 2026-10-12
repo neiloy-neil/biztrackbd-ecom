@@ -9,6 +9,7 @@
     ".": "./src/index.ts",
     "./geo": "./src/geo/bd-geo.ts",
     "./builder-client": "./src/builder/client.ts",
+    "./messages-client": "./src/messaging/shared.ts",
     "./backup": "./src/backup/index.ts"
   },
   "scripts": {

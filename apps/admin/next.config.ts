@@ -23,7 +23,11 @@ const config: NextConfig = {
   transpilePackages: ["@biztrackbd/core", "@biztrackbd/db", "@biztrackbd/ui", "@biztrackbd/media"],
   serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg", "pg", "sharp"],
   async headers() {
-    return [{ source: "/:path*", headers: [...securityHeaders("'none'"), { key: "X-Frame-Options", value: "DENY" }] }];
+    return [
+      // The print preview in settings (Invoices) is shown in a frame on our own pages. Every other page refuses to be framed.
+      { source: "/orders/print", headers: [...securityHeaders("'self'"), { key: "X-Frame-Options", value: "SAMEORIGIN" }] },
+      { source: "/:path((?!orders/print$).*)", headers: [...securityHeaders("'none'"), { key: "X-Frame-Options", value: "DENY" }] },
+    ];
   },
 };
 

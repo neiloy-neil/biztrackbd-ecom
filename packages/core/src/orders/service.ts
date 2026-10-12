@@ -7,6 +7,7 @@ import {
 import { audit } from "../audit/service";
 import { recordOrderEvent } from "../admin/order-events";
 import { publishEvent } from "../events";
+import { notifyOrder } from "../messaging/templates";
 import { assertCan, type StaffActor } from "../permissions";
 import { assertCouponUsable, deliveryFor, discountFor, money, pickZone } from "./pricing";
 import { recordOrderUsage, type OrderThreshold } from "../limits/plan";
@@ -53,6 +54,7 @@ export async function createOrder(tenantId: string, rawInput: unknown): Promise<
       return { placed: p, usage: u };
     });
     if (!placed.replayed) {
+      await notifyOrder(tenantId, placed.orderId, "ORDER_RECEIVED");
       await publishEvent("order/created", { tenantId, orderId: placed.orderId, orderNumber: placed.orderNumber, totalAmount: placed.totalAmount });
       for (const percent of usage?.crossed ?? ([] as OrderThreshold[])) {
         await publishEvent("usage/threshold-crossed", { tenantId, metric: "orders", percent, used: usage!.used, limit: usage!.limit! });
@@ -357,13 +359,16 @@ export async function transitionOrder(tenantId: string, orderId: string, to: Ord
   });
   // Messages go out after the change is saved; a failed message never undoes a delivery.
   await sendNotices(tenantId, notices);
+  const told = to === "SHIPPED" ? "ORDER_SHIPPED" : to === "DELIVERED" ? "DELIVERED" : to === "CANCELLED" ? "ORDER_CANCELLED" : null;
+  if (told) await notifyOrder(tenantId, orderId, told);
   return updated;
 }
 
 /** Staff confirm a manual bKash/Nagad/Rocket payment (or cash received). */
 export async function markPaid(tenantId: string, orderId: string, actorId: string, staff?: StaffActor) {
   if (staff) assertCan(staff, "orders", "edit");
-  return withTenant(tenantId, async (tx) => {
+  let changed = false;
+  const result = await withTenant(tenantId, async (tx) => {
     const order = await tx.order.findFirst({ where: { id: orderId } });
     if (!order) throw new NotFoundError("Order");
     if (order.status === "CANCELLED" || order.status === "REFUNDED") throw new ValidationError("A closed order cannot be marked paid");
@@ -380,6 +385,9 @@ export async function markPaid(tenantId: string, orderId: string, actorId: strin
       type: "PAYMENT_VERIFIED", message: order.mfsTrxId ? `Payment confirmed (TrxID ${order.mfsTrxId})` : "Marked as paid",
       actor: { id: actorId, name: staff?.email ?? "Staff" }, data: { trxId: order.mfsTrxId },
     });
+    changed = true;
     return updated;
   });
+  if (changed) await notifyOrder(tenantId, orderId, "PAYMENT_CONFIRMED");
+  return result;
 }

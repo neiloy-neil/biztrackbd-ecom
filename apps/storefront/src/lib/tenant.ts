@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { HEADERS } from "@biztrackbd/core";
+import { DEMO_SUBDOMAINS, HEADERS } from "@biztrackbd/core";
 
 export interface StoreContext {
   id: string;
@@ -9,6 +9,7 @@ export interface StoreContext {
   themeId: string;
   locale: string;
   status: string;
+  isDemo: boolean;
 }
 
 /**
@@ -20,12 +21,15 @@ export const findStore = cache(async (): Promise<StoreContext | null> => {
   if (h.get(HEADERS.route) !== "store") return null;
   const id = h.get(HEADERS.tenantId);
   if (!id) return null;
+  const subdomain = h.get(HEADERS.subdomain) ?? "";
+  const isDemo = DEMO_SUBDOMAINS.has(subdomain);
   return {
     id,
-    subdomain: h.get(HEADERS.subdomain) ?? "",
+    subdomain,
     themeId: h.get(HEADERS.theme) ?? "kapor",
     locale: h.get(HEADERS.locale) ?? "bn-BD",
     status: h.get(HEADERS.status) ?? "ACTIVE",
+    isDemo,
   };
 });
 

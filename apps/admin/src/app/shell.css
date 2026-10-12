@@ -148,3 +148,18 @@ html[data-sidebar="light"] { --sb-bg: #fff; --sb-line: #E7E7F0; --sb-ink: #4B4B7
 .plan-foot { margin-top: 18px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
 .chip[aria-current="true"] { background: var(--tint); border-color: var(--brand); color: var(--brand); }
 div.tabs[role="tablist"] { overflow-x: auto; margin: 0 0 14px; padding: 0; } div.tabs[role="tablist"] .tabbtn { flex: none; white-space: nowrap; }
+
+/* Customer messages (settings) */
+.msg-card { display: grid; gap: 12px; }
+.msg-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.msg-switch { min-height: 44px; font-weight: 700; }
+.msg-switch input { width: 22px; height: 22px; }
+.msg-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.msg-chips .chip { min-height: 40px; font-family: ui-monospace, monospace; font-size: 13px; }
+.msg-preview { margin-top: 12px; padding: 12px; border-radius: 12px; background: var(--tint); }
+.msg-preview .bubble { padding: 10px 12px; border-radius: 14px 14px 14px 4px; background: var(--surface); border: 1px solid var(--line); white-space: pre-wrap; word-break: break-word; max-width: 440px; }
+
+/* Invoices (settings): options on the left, the real printed page on the right */
+.inv-grid { display: grid; gap: 16px; align-items: start; }
+@media (min-width: 1000px) { .inv-grid { grid-template-columns: minmax(300px, 420px) 1fr; } .inv-side { position: sticky; top: 16px; } }
+.inv-frame { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: #fff; }

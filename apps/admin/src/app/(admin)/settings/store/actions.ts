@@ -15,8 +15,7 @@ export async function saveStoreAction(_prev: FormState, f: FormData): Promise<Fo
       storeName: text(f, "storeName"), storeNameBn: text(f, "storeNameBn"), tagline: text(f, "tagline"), description: text(f, "description"),
       contactPhone: text(f, "contactPhone"), whatsappNumber: text(f, "whatsappNumber"), email: text(f, "email"), facebookUrl: text(f, "facebookUrl"), instagramUrl: text(f, "instagramUrl"),
       addressLine: text(f, "addressLine"), pickupAddress: text(f, "pickupAddress"), logoUrl: text(f, "logoUrl"), announcement: text(f, "announcement"), announcementBn: text(f, "announcementBn"),
-      orderPrefix: text(f, "orderPrefix"), invoiceFooter: text(f, "invoiceFooter"),
-      invoiceOptions: { showLogo: f.get("showLogo") === "on", showSku: f.get("showSku") === "on", showPricesOnSlip: f.get("showPricesOnSlip") === "on" },
+      orderPrefix: text(f, "orderPrefix"),
     });
   } catch (e) {
     if (e instanceof DomainError) return { error: e.message, field: typeof e.details?.field === "string" ? e.details.field : undefined };

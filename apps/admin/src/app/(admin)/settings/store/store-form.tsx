@@ -1,16 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
 import { SaveBar } from "@biztrackbd/ui";
 import { saveStoreAction, type FormState } from "./actions";
 
 export interface StoreValues {
   storeName: string; storeNameBn: string; tagline: string; description: string; contactPhone: string; whatsappNumber: string; email: string; facebookUrl: string; instagramUrl: string;
-  addressLine: string; pickupAddress: string; logoUrl: string; announcement: string; announcementBn: string; orderPrefix: string; invoiceFooter: string;
-  showLogo: boolean; showSku: boolean; showPricesOnSlip: boolean;
+  addressLine: string; pickupAddress: string; logoUrl: string; announcement: string; announcementBn: string; orderPrefix: string;
 }
 
-const TABS = [["brand", "Brand"], ["contact", "Contact and address"], ["banner", "Announcement bar"], ["orders", "Orders and documents"]] as const;
+const TABS = [["brand", "Brand"], ["contact", "Contact and address"], ["banner", "Announcement bar"], ["orders", "Orders"]] as const;
 type Tab = (typeof TABS)[number][0];
 /** Which tab holds the field the server complained about, so the message is never hidden behind another tab. */
 const FIELD_TAB: Record<string, Tab> = { storeName: "brand", "customer phone": "contact", "WhatsApp number": "contact", email: "contact", "Facebook page": "contact", Instagram: "contact", orderPrefix: "orders" };
@@ -96,16 +96,13 @@ export function StoreForm({ initial }: { initial: StoreValues }) {
       </section>
 
       <section className="card" role="tabpanel" id="panel-orders" aria-labelledby="tab-orders" hidden={tab !== "orders"}>
-        <h2>Orders and documents</h2>
+        <h2>Orders</h2>
         <label className="field">
           <span className="label">Order number prefix</span>
           <input className="input" name="orderPrefix" defaultValue={initial.orderPrefix} maxLength={7} style={{ maxWidth: 160, textTransform: "uppercase" }} {...bad("orderPrefix")} data-testid="s-prefix" />
           <span className="hint">New orders are numbered like {initial.orderPrefix || "BT-"}10482. Existing orders keep their numbers.</span>
         </label>
-        <label className="field"><span className="label">Invoice footer note</span><input className="input" name="invoiceFooter" defaultValue={initial.invoiceFooter} maxLength={200} placeholder="Exchange within 7 days of delivery with this invoice." /></label>
-        <label className="check"><input type="checkbox" name="showLogo" defaultChecked={initial.showLogo} /><span>Show my logo on invoices</span></label>
-        <label className="check"><input type="checkbox" name="showSku" defaultChecked={initial.showSku} /><span>Show SKU codes</span></label>
-        <label className="check"><input type="checkbox" name="showPricesOnSlip" defaultChecked={initial.showPricesOnSlip} /><span>Show prices on the packing slip</span></label>
+        <p className="muted" style={{ margin: 0, fontSize: 13.5 }}>The look of invoices and packing slips is in <Link href="/settings/invoices" className="link" prefetch={false}>Invoices</Link>.</p>
       </section>
 
       {state.error && <div className="notice bad" role="alert" data-testid="store-error">{state.error}</div>}

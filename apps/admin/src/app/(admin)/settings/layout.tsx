@@ -9,6 +9,8 @@ const ITEMS: { href: string; label: string; area: Area }[] = [
   { href: "/settings/shipping", label: "Shipping", area: "orders" },
   { href: "/settings/domains", label: "Domains", area: "billing" },
   { href: "/settings/integrations", label: "Integrations", area: "billing" },
+  { href: "/settings/notifications", label: "Customer messages", area: "design" },
+  { href: "/settings/invoices", label: "Invoices", area: "design" },
   { href: "/settings/apps", label: "Apps", area: "billing" },
   { href: "/settings/staff", label: "Team", area: "team" },
   { href: "/settings/audit", label: "Audit log", area: "team" },

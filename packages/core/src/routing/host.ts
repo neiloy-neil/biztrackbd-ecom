@@ -13,7 +13,7 @@ export const RESERVED_SUBDOMAINS = new Set([
 ]);
 
 /** Addresses of the template demo stores (docs/38). Not in RESERVED_SUBDOMAINS, because those stores must still resolve; only signup may not claim them. */
-export const DEMO_SUBDOMAINS = new Set(["kapor", "gadgetstudio", "minibunny", "axionwear", "bindu", "berber"]);
+export const DEMO_SUBDOMAINS = new Set(["kapor", "gadgetstudio", "minibunny", "mini-bunny", "axionwear", "bindu", "berber"]);
 
 const LABEL = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
 const IPV4 = /^\d{1,3}(?:\.\d{1,3}){3}$/;

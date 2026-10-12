@@ -146,27 +146,54 @@ function Label({ o, st }: { o: OrderDetail; st: StoreSettingsView }) {
   );
 }
 
+/** A made-up order for the invoice preview in settings, so a store sees its layout before it has any orders. */
+function sampleOrder(): OrderDetail {
+  const items = [
+    { id: "s1", title: "Cotton Panjabi", variantTitle: "Off-white · M", sku: "PJ-001", unitPrice: 1850, quantity: 1, total: 1850 },
+    { id: "s2", title: "Handloom Gamchha", variantTitle: "Default", sku: "GM-014", unitPrice: 450, quantity: 2, total: 900 },
+  ];
+  return {
+    id: "sample", orderNumber: "BT-10482", status: "CONFIRMED", paymentStatus: "UNPAID", paymentMethod: "COD", channel: "STOREFRONT", createdAt: new Date(),
+    customerName: "Rina Akter", customerPhone: "01712345678", customerEmail: null,
+    address: { line: "House 12, Road 5, Dhanmondi", area: "Dhanmondi", district: "Dhaka", division: "Dhaka", zone: "Dhaka" },
+    notes: "Please call before delivery.",
+    totals: { subtotal: 2750, delivery: 80, codFee: 0, discount: 0, couponCode: null, tierDiscount: 0, referralDiscount: 0, pointsDiscount: 0, pointsUsed: 0, total: 2830 },
+    mfs: { trxId: null, sender: null, verifiedAt: null, verifiedBy: null },
+    courier: { provider: null, trackingCode: "SF-884201", consignmentId: null, trackingUrl: null, bookedAt: null, status: null, statusLabel: null, statusAt: null, syncedAt: null, fee: null },
+    items: items.map((i) => ({ ...i, productId: i.id, slug: null, imageUrl: null })),
+    events: [],
+  } as unknown as OrderDetail;
+}
+
+const flag = (v: string | undefined, fallback: boolean) => (v === "1" ? true : v === "0" ? false : fallback);
+
 export default async function PrintPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
   const s = await requireAccess("orders");
   const raw = sp.ids;
   const ids = [...new Set((Array.isArray(raw) ? raw : [raw ?? ""]).flatMap((v) => v.split(",")).map((v) => v.trim()).filter(Boolean))].slice(0, 50);
   const doc = (DOCS.find(([d]) => d === one(sp.doc))?.[0] ?? "invoice") as Doc;
-  const size = (SIZES.find(([z]) => z === one(sp.size))?.[0] ?? (doc === "label" ? "thermal" : "a4")) as Size;
-  const st = await getPrintSettings(s.tenantId, s.actor).catch(() => null);
-  const orders = (await Promise.all(ids.map((id) => getOrderDetail(s.tenantId, s.actor, id).catch(() => null)))).filter((o): o is OrderDetail => o !== null);
+  const saved = await getPrintSettings(s.tenantId, s.actor).catch(() => null);
+  const size = (SIZES.find(([z]) => z === one(sp.size))?.[0] ?? (doc === "label" ? "thermal" : saved?.invoiceOptions.paper ?? "a4")) as Size;
+  // Preview mode (settings, Invoices): a made-up order, with the options being edited laid over the saved ones. Nothing is saved or marked printed.
+  const sample = one(sp.sample) === "1";
+  const st = saved && sample
+    ? { ...saved, invoiceFooter: sp.footer !== undefined ? one(sp.footer)?.slice(0, 200) || null : saved.invoiceFooter,
+        invoiceOptions: { ...saved.invoiceOptions, showLogo: flag(one(sp.showLogo), saved.invoiceOptions.showLogo), showSku: flag(one(sp.showSku), saved.invoiceOptions.showSku), showPricesOnSlip: flag(one(sp.prices), saved.invoiceOptions.showPricesOnSlip) } }
+    : saved;
+  const orders = sample ? [sampleOrder()] : (await Promise.all(ids.map((id) => getOrderDetail(s.tenantId, s.actor, id).catch(() => null)))).filter((o): o is OrderDetail => o !== null);
   const link = (over: Partial<{ doc: Doc; size: Size }>) => `/orders/print?ids=${ids.join(",")}&doc=${over.doc ?? doc}&size=${over.size ?? size}`;
 
   return (
     <>
       <style>{css(size)}</style>
-      <div className="toolbar-print">
+      {!sample && <div className="toolbar-print">
         <div className="group" role="group" aria-label="Document">{DOCS.map(([d, l]) => <Link key={d} href={link({ doc: d })} aria-current={d === doc} prefetch={false}>{l}</Link>)}</div>
         <div className="group" role="group" aria-label="Paper size">{SIZES.map(([z, l]) => <Link key={z} href={link({ size: z })} aria-current={z === size} prefetch={false}>{l}</Link>)}</div>
         <span style={{ flex: 1 }} />
         <span className="muted">{orders.length} {orders.length === 1 ? "order" : "orders"}</span>
         {orders.length > 0 && <PrintButton ids={orders.map((o) => o.id)} doc={doc} />}
-      </div>
+      </div>}
       {orders.length === 0 || !st ? (
         <div className="empty">Choose at least one order to print.</div>
       ) : (

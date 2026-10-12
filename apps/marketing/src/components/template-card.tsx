@@ -4,6 +4,9 @@ import { demoTemplate } from "@biztrackbd/core";
 
 /** Where a template's demo store lives: <name>.<root domain>. Local development uses http and the dev port. */
 export function demoUrl(host: string): string {
+  if (process.env.NEXT_PUBLIC_DEMO_URL_FORMAT === "path") {
+    return `/demo/${host}`;
+  }
   const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
   return `${root.includes("localhost") ? "http" : "https"}://${host}.${root}`;
 }

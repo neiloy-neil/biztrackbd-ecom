@@ -33,6 +33,7 @@ export { listOrders, orderTabCounts, getOrderDetail, verifyPayment, rejectPaymen
 export { recordOrderEvent, type OrderEventType } from "./admin/order-events";
 export { DEMO_TEMPLATES, demoTemplate, type DemoTemplate, type DemoProduct, type DemoVariant } from "./demo/templates";
 export { resetDemoStore, DEMO_TEMPLATE_IDS, type DemoDeps, type DemoResult } from "./demo/seed";
+export { isDemoStore, assertNotDemo } from "./demo/guard";
 export { productSvg, bannerSvg, ART_KINDS, type ArtKind, type Palette } from "./demo/art";
 export { adminSearch, shellCounts, type SearchHit, type ShellCounts } from "./admin/shell";
 export { getDashboard, DASHBOARD_RANGES, type DashboardRange, dhakaDate, addDays, STORE_TZ, type Dashboard, type SetupStep } from "./admin/dashboard";
@@ -41,7 +42,7 @@ export { listCustomers, getCustomerDetail, updateCustomer, createCustomer, setCu
 export { listCoupons, saveCoupon, setCouponActive, deleteCoupon, couponStatus, CouponInput, type CouponStatus } from "./admin/coupons";
 export { listAdminProducts, bulkProductAction, importProductsCsv, IMPORT_TEMPLATE, IMPORT_MAX_ROWS, type ProductImportResult, saveProduct, getProductForEdit, setProductStatus, listCategoriesAdmin, saveCategory, deleteCategory, slugify, SaveProductInput, type AdminProductRow, type ProductTab } from "./admin/products";
 export { getSalesReport, salesReportCsv, lastDays, changePercent, type SalesReport, type PeriodTotals } from "./admin/reports";
-export { getStoreSettings, getPrintSettings, saveStoreDetails, setOrdersPaused, savePaymentSettings, listZones, saveZone, deleteZone, ALL_OTHER_DISTRICTS, type StoreSettingsView, type StoreDetailsInput, type PaymentSettingsInput, type ZoneInput } from "./admin/settings";
+export { getStoreSettings, getPrintSettings, saveStoreDetails, saveInvoiceSettings, INVOICE_PAPERS, type InvoicePaper, type InvoiceSettingsInput, setOrdersPaused, savePaymentSettings, listZones, saveZone, deleteZone, ALL_OTHER_DISTRICTS, type StoreSettingsView, type StoreDetailsInput, type PaymentSettingsInput, type ZoneInput } from "./admin/settings";
 export { parseOrderMessage, findCustomerForOrder, searchVariantsForOrder, createQuickOrder, QUICK_SOURCES, QuickOrderInput, type ParsedMessage, type CatalogVariant, type QuickSource } from "./admin/quick-order";
 export * from "./couriers/types";
 export { setAdapterFactory, defaultAdapterFactory, type AdapterFactory } from "./couriers/factory";
@@ -141,3 +142,9 @@ export { saveContent, deleteContent, listContent, getContent, bodyToHtml, slugOf
 export * from "./auth/supabase";
 export * from "./auth/membership";
 export { MODULES, isModuleOn, listModules, setModule, type ModuleDef, type ModuleView } from "./modules/service";
+
+export {
+  MESSAGE_EVENTS, MESSAGE_LOCALES, DEFAULT_MESSAGES, VAR_HELP, MESSAGE_MAX_LENGTH, renderMessage, sampleVars, smsParts, validateMessage,
+  listMessageTemplates, saveMessageTemplate, resetMessageTemplate, notifyOrder,
+  type MessageEvent, type MessageLocale, type MessageVar, type MessageTemplateView, type NotifyResult,
+} from "./messaging/templates";

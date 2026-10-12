@@ -21,8 +21,7 @@ export default async function StoreDetails() {
           <StoreForm initial={{
             storeName: st.storeName, storeNameBn: st.storeNameBn ?? "", tagline: st.tagline ?? "", description: st.description ?? "", contactPhone: st.contactPhone ?? "", whatsappNumber: st.whatsappNumber ?? "",
             email: st.email ?? "", facebookUrl: st.facebookUrl ?? "", instagramUrl: st.instagramUrl ?? "", addressLine: st.addressLine ?? "", pickupAddress: st.pickupAddress ?? "", logoUrl: st.logoUrl ?? "",
-            announcement: st.announcement ?? "", announcementBn: st.announcementBn ?? "", orderPrefix: st.orderPrefix, invoiceFooter: st.invoiceFooter ?? "",
-            showLogo: st.invoiceOptions.showLogo, showSku: st.invoiceOptions.showSku, showPricesOnSlip: st.invoiceOptions.showPricesOnSlip,
+            announcement: st.announcement ?? "", announcementBn: st.announcementBn ?? "", orderPrefix: st.orderPrefix,
           }} />
           <section className="card" style={{ marginTop: 14 }} data-testid="pause-card">
             <h2>Pause or reopen your store</h2>

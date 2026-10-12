@@ -33,6 +33,8 @@ const PAGES = [
   "/finance/profit",
   "/settings/integrations",
   "/settings/store",
+  "/settings/notifications",
+  "/settings/invoices",
   "/settings/payments",
   "/settings/shipping",
   "/settings/staff",
