@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     return res;
   } catch (e) {
     if (e instanceof DomainError) return back(req, `/demo?msg=${encodeURIComponent(e.message)}`);
-    console.error("demo start failed", e instanceof Error ? e.name : "unknown");
+    console.error("demo start failed", e instanceof Error ? `${e.name}: ${e.message}` : "unknown");
     return back(req, `/demo?msg=${encodeURIComponent("Something went wrong starting the demo. Please try again.")}`);
   }
 }

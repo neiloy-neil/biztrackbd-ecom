@@ -41,7 +41,8 @@ export async function signupAction(_prev: SignupState, form: FormData): Promise<
     }, { pictures: samplePictures() ?? undefined, ...(keepCode && copier ? { keep: { code: keepCode, copyImage: copier } } : {}) });
   } catch (e) {
     if (e instanceof DomainError) return { error: e.message, field: typeof e.details?.field === "string" ? e.details.field : undefined };
-    console.error("signup failed", e instanceof Error ? e.name : "unknown");
+    // The full error goes to the server log only; visitors never see database or internal messages.
+    console.error("signup failed", e instanceof Error ? `${e.name}: ${e.message}` : "unknown");
     return { error: "We could not create your store. Nothing was charged. Please try again." };
   }
 
