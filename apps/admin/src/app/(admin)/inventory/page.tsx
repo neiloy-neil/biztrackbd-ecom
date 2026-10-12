@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { STOCK_REASONS, can, listInventory, type InventoryRow, type StockFilter } from "@biztrackbd/core";
+import { ActionDrawer } from "@/components/adjust-drawer";
+import { LiveSearch, SelectFilter } from "@/components/live-filters";
 import { Pager, SubmitButton, Tabs } from "@/components/ui";
 import { taka } from "@/lib/format";
 import { one, pageOf, qs } from "@/lib/query";
@@ -17,10 +19,11 @@ function StatePill({ r }: { r: InventoryRow }) {
 }
 
 function AdjustForm({ r, back }: { r: InventoryRow; back: string }) {
+  const name = `${r.productTitle}${r.variantTitle.toLowerCase() !== "default" ? ` · ${r.variantTitle}` : ""}`;
   return (
-    <details>
-      <summary className="link" style={{ cursor: "pointer" }} data-testid={`adjust-${r.sku ?? r.variantId}`}>Adjust</summary>
-      <div className="card" style={{ marginTop: 8, minWidth: 260 }}>
+    <ActionDrawer label="Adjust" title={name} testId={`adjust-${r.sku ?? r.variantId}`}>
+      <div className="stack" style={{ gap: 16 }}>
+        <p className="muted" style={{ margin: 0 }}><b className="num">{r.available}</b> available now · {r.committed} committed to orders</p>
         <form action={adjustAction.bind(null, r.variantId)} className="stack">
           <input type="hidden" name="back" value={back} />
           <div className="row-2">
@@ -33,14 +36,17 @@ function AdjustForm({ r, back }: { r: InventoryRow; back: string }) {
           <label className="field" style={{ marginBottom: 0 }}><span className="label">Note <span className="opt">(optional)</span></span><input className="input" name="note" maxLength={200} /></label>
           <SubmitButton className="btn btn-primary btn-block" pending="Saving…">Save change</SubmitButton>
         </form>
-        <form action={stockSettingsAction.bind(null, r.variantId)} className="row" style={{ marginTop: 12, alignItems: "flex-end" }}>
+        <form action={stockSettingsAction.bind(null, r.variantId)} className="stack" style={{ borderTop: "1px solid var(--line)", paddingTop: 14 }}>
           <input type="hidden" name="back" value={back} />
-          <label className="field" style={{ marginBottom: 0, flex: 1 }}><span className="label">Reorder at</span><input className="input input-sm" name="reorder" inputMode="numeric" defaultValue={r.reorderLevel} /></label>
-          <label className="field" style={{ marginBottom: 0, flex: 1 }}><span className="label">Shelf</span><input className="input input-sm" name="shelf" defaultValue={r.shelf ?? ""} maxLength={20} /></label>
-          <SubmitButton className="btn btn-secondary btn-sm" pending="…">Save</SubmitButton>
+          <div className="muted" style={{ fontSize: 12.5, fontWeight: 700 }}>SHELF AND REORDER LEVEL</div>
+          <div className="row-2">
+            <label className="field" style={{ marginBottom: 0 }}><span className="label">Reorder at</span><input className="input" name="reorder" inputMode="numeric" defaultValue={r.reorderLevel} /></label>
+            <label className="field" style={{ marginBottom: 0 }}><span className="label">Shelf</span><input className="input" name="shelf" defaultValue={r.shelf ?? ""} maxLength={20} /></label>
+          </div>
+          <SubmitButton className="btn btn-secondary" pending="…">Save</SubmitButton>
         </form>
       </div>
-    </details>
+    </ActionDrawer>
   );
 }
 
@@ -78,9 +84,9 @@ export default async function Inventory({ searchParams }: { searchParams: Promis
       ]} />
       <form className="toolbar" method="get" role="search">
         {filter !== "all" && <input type="hidden" name="filter" value={filter} />}
-        <label className="grow"><span className="sr-only">Search</span><input className="input" type="search" name="q" defaultValue={q} placeholder="Search by product or SKU" /></label>
-        {list.shelves.length > 0 && <label><span className="sr-only">Shelf</span><select className="select" name="shelf" defaultValue={shelf ?? ""}><option value="">Shelf: all</option>{list.shelves.map((x) => <option key={x}>{x}</option>)}</select></label>}
-        <button className="btn btn-secondary" type="submit">Search</button>
+        <LiveSearch name="q" label="Search" placeholder="Search by product or SKU" defaultValue={q} />
+        {list.shelves.length > 0 && <SelectFilter name="shelf" label="Shelf" value={shelf ?? ""} options={[{ value: "", label: "Shelf: all" }, ...list.shelves.map((x) => ({ value: x, label: x }))]} />}
+        <button className="sr-only" type="submit">Search</button>
       </form>
 
       {list.rows.length === 0 ? <div className="card empty">Nothing here.</div> : (

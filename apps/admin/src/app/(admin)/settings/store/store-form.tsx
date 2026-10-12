@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { SubmitButton } from "@/components/ui";
+import { useActionState, useEffect, useState } from "react";
+import { SaveBar } from "@biztrackbd/ui";
 import { saveStoreAction, type FormState } from "./actions";
 
 export interface StoreValues {
@@ -10,8 +10,17 @@ export interface StoreValues {
   showLogo: boolean; showSku: boolean; showPricesOnSlip: boolean;
 }
 
+const TABS = [["brand", "Brand"], ["contact", "Contact and address"], ["banner", "Announcement bar"], ["orders", "Orders and documents"]] as const;
+type Tab = (typeof TABS)[number][0];
+/** Which tab holds the field the server complained about, so the message is never hidden behind another tab. */
+const FIELD_TAB: Record<string, Tab> = { storeName: "brand", "customer phone": "contact", "WhatsApp number": "contact", email: "contact", "Facebook page": "contact", Instagram: "contact", orderPrefix: "orders" };
+
 export function StoreForm({ initial }: { initial: StoreValues }) {
-  const [state, action] = useActionState<FormState, FormData>(saveStoreAction, {});
+  const [state, action, pending] = useActionState<FormState, FormData>(saveStoreAction, {});
+  const [tab, setTab] = useState<Tab>("brand");
+  const [dirty, setDirty] = useState(false);
+  useEffect(() => { if (state.ok) setDirty(false); }, [state]);
+  useEffect(() => { const t = state.field ? FIELD_TAB[state.field] : undefined; if (t) setTab(t); }, [state]);
   const [logo, setLogo] = useState(initial.logoUrl);
   const [uploadError, setUploadError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -36,9 +45,12 @@ export function StoreForm({ initial }: { initial: StoreValues }) {
   }
 
   return (
-    <form action={action} className="stack" data-testid="store-form">
+    <form action={action} className="stack" data-testid="store-form" onChange={() => setDirty(true)} onInput={() => setDirty(true)}>
+      <div className="tabs" role="tablist" aria-label="Store details sections">
+        {TABS.map(([k, l]) => <button key={k} type="button" role="tab" id={`tab-${k}`} aria-selected={tab === k} aria-controls={`panel-${k}`} className="tabbtn" onClick={() => setTab(k)} data-testid={`store-tab-${k}`}>{l}</button>)}
+      </div>
       <input type="hidden" name="logoUrl" value={logo} />
-      <section className="card">
+      <section className="card" role="tabpanel" id="panel-brand" aria-labelledby="tab-brand" hidden={tab !== "brand"}>
         <h2>Brand</h2>
         <div className="row" style={{ marginBottom: 14 }}>
           <span className="thumb" style={{ width: 64, height: 64, borderRadius: 12 }}>
@@ -62,7 +74,7 @@ export function StoreForm({ initial }: { initial: StoreValues }) {
         <label className="field" style={{ marginBottom: 0 }}><span className="label">Description for search engines and social previews</span><textarea className="textarea" name="description" defaultValue={initial.description} maxLength={300} /></label>
       </section>
 
-      <section className="card">
+      <section className="card" role="tabpanel" id="panel-contact" aria-labelledby="tab-contact" hidden={tab !== "contact"}>
         <h2>Contact and address</h2>
         <div className="row-2">
           <label className="field"><span className="label">Customer phone</span><input className="input" name="contactPhone" inputMode="tel" defaultValue={initial.contactPhone} {...bad("customer phone")} data-testid="s-phone" /></label>
@@ -77,13 +89,13 @@ export function StoreForm({ initial }: { initial: StoreValues }) {
         <label className="field" style={{ marginBottom: 0 }}><span className="label">Pickup address (invoices and couriers)</span><input className="input" name="pickupAddress" defaultValue={initial.pickupAddress} maxLength={250} /></label>
       </section>
 
-      <section className="card">
+      <section className="card" role="tabpanel" id="panel-banner" aria-labelledby="tab-banner" hidden={tab !== "banner"}>
         <h2>Announcement bar</h2>
         <label className="field"><span className="label">Text above your store header <span className="opt">(optional)</span></span><input className="input" name="announcement" defaultValue={initial.announcement} maxLength={200} /></label>
         <label className="field" style={{ marginBottom: 0 }}><span className="label">Same text in Bangla <span className="opt">(optional)</span></span><input className="input" name="announcementBn" lang="bn" defaultValue={initial.announcementBn} maxLength={200} /></label>
       </section>
 
-      <section className="card">
+      <section className="card" role="tabpanel" id="panel-orders" aria-labelledby="tab-orders" hidden={tab !== "orders"}>
         <h2>Orders and documents</h2>
         <label className="field">
           <span className="label">Order number prefix</span>
@@ -98,7 +110,7 @@ export function StoreForm({ initial }: { initial: StoreValues }) {
 
       {state.error && <div className="notice bad" role="alert" data-testid="store-error">{state.error}</div>}
       {state.ok && <div className="notice good" role="status" data-testid="store-saved">Saved.</div>}
-      <SubmitButton className="btn btn-primary btn-lg" disabled={busy}>Save store details</SubmitButton>
+      <SaveBar dirty={dirty && !busy} pending={pending} saveLabel="Save store details" />
     </form>
   );
 }

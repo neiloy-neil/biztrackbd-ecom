@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { can, listCustomers, type CustomerSegment } from "@biztrackbd/core";
+import { CustomerQuickButton, CustomerQuickHost } from "@/components/customer-quick-view";
+import { LiveSearch } from "@/components/live-filters";
 import { Pager, Tabs } from "@/components/ui";
 import { friendlyDate, prettyPhone, taka } from "@/lib/format";
 import { one, pageOf, qs } from "@/lib/query";
@@ -40,23 +42,26 @@ export default async function Customers({ searchParams }: { searchParams: Promis
       <Tabs tabs={SEGMENTS.map((x) => ({ href: `/customers${qs({ ...base, segment: x.key === "all" ? undefined : x.key })}`, label: x.label, current: x.key === segment }))} />
       <form className="toolbar" method="get" role="search">
         {segment !== "all" && <input type="hidden" name="segment" value={segment} />}
-        <label className="grow"><span className="sr-only">Search customers</span><input className="input" type="search" name="q" defaultValue={q} placeholder="Name, phone or email" /></label>
-        <button className="btn btn-secondary" type="submit">Search</button>
+        <LiveSearch name="q" label="Search customers" placeholder="Name, phone or email" defaultValue={q} />
+        <button className="sr-only" type="submit">Search</button>
       </form>
 
       {list.rows.length === 0 ? <div className="card empty">{q || segment !== "all" ? "No customers match." : "Customers appear here after their first order."}</div> : (
-        <>
+        <CustomerQuickHost>
           <div className="only-mobile">
             {list.rows.map((c) => (
-              <Link key={c.id} href={`/customers/${c.id}`} className="list-card" prefetch={false} data-testid="customer-row">
+              <div key={c.id} className="list-card" data-testid="customer-row">
+                <Link href={`/customers/${c.id}`} prefetch={false} style={{ display: "block" }}>
                 <div className="top"><b>{c.name}</b>{c.isVip && <span className="pill info">VIP</span>}{c.isBlocked && <span className="pill bad">Blocked</span>}</div>
                 <div className="muted num" style={{ fontSize: 13 }}>{prettyPhone(c.phone)}{c.area ? ` · ${c.area}` : ""}</div>
                 <div className="muted" style={{ fontSize: 13, marginTop: 4 }}>{c.orders} {c.orders === 1 ? "order" : "orders"} · {taka(c.spent)}{c.lastOrderAt ? ` · ${friendlyDate(c.lastOrderAt)}` : ""}</div>
-              </Link>
+                </Link>
+                <div style={{ marginTop: 8 }}><CustomerQuickButton id={c.id} label={c.name} /></div>
+              </div>
             ))}
           </div>
           <table className="table only-desktop">
-            <thead><tr><th>Customer</th><th>Phone</th><th>Location</th><th className="r">Orders</th><th className="r">Spent</th><th>Last order</th></tr></thead>
+            <thead><tr><th>Customer</th><th>Phone</th><th>Location</th><th className="r">Orders</th><th className="r">Spent</th><th>Last order</th><th><span className="sr-only">Quick view</span></th></tr></thead>
             <tbody>
               {list.rows.map((c) => (
                 <tr key={c.id} data-testid="customer-row">
@@ -65,12 +70,13 @@ export default async function Customers({ searchParams }: { searchParams: Promis
                     <span><b>{c.name}</b>{c.isVip && <> <span className="pill info">VIP</span></>}{c.isBlocked && <> <span className="pill bad">Blocked</span></>}<br /><span className="muted" style={{ fontSize: 12.5 }}>{c.email ?? ""}</span></span></Link></td>
                   <td className="num">{prettyPhone(c.phone)}</td><td className="muted">{c.area ?? "—"}</td>
                   <td className="r num">{c.orders}</td><td className="r num">{taka(c.spent)}</td><td className="muted">{c.lastOrderAt ? friendlyDate(c.lastOrderAt) : "—"}</td>
+                  <td><CustomerQuickButton id={c.id} label={c.name} /></td>
                 </tr>
               ))}
             </tbody>
           </table>
           <Pager page={list.page} pageSize={list.pageSize} total={list.total} path="/customers" params={base} />
-        </>
+        </CustomerQuickHost>
       )}
     </>
   );

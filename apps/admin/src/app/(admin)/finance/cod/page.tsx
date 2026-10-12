@@ -11,6 +11,8 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "COD payouts" };
 
 const FILTERS: [ReconFilter, string][] = [["attention", "Needs checking"], ["matched", "Matched"], ["unpaid", "Not paid yet"], ["returns", "Returns"], ["all", "All"]];
+const VIEWS = [["recon", "Parcels"], ["import", "Import a statement"], ["history", "Payout history"]] as const;
+type View = (typeof VIEWS)[number][0];
 const COURIERS: Record<string, string> = { STEADFAST: "Steadfast", PATHAO: "Pathao", REDX: "RedX" };
 const STATE: Record<string, [string, string]> = {
   MATCHED: ["Matched", "ok"], SHORT_PAID: ["Paid short", "bad"], RETURNED: ["Returned", "grey"], MISSING: ["Missing", "bad"], NOT_PAID: ["Not paid yet", "warn"],
@@ -79,11 +81,13 @@ export default async function CodRecon({ searchParams }: { searchParams: Promise
   const filter = (FILTERS.find((f) => f[0] === one(sp.filter))?.[0] ?? "attention") as ReconFilter;
   const courier = COURIER_PROVIDERS.find((c) => c === one(sp.courier));
   const canEdit = can(s.user.role, "reports", "edit");
+  const asked = one(sp.view);
+  const view = ((VIEWS.find(([k]) => k === asked && (k !== "import" || canEdit))?.[0]) ?? "recon") as View;
   const [dash, rows, payouts] = await Promise.all([getCodDashboard(s.tenantId, s.actor), listReconciliation(s.tenantId, s.actor, { filter, courier }), listSettlements(s.tenantId, s.actor)]);
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Dhaka" }).format(new Date());
   const q = (over: Record<string, string | undefined>) => {
     const u = new URLSearchParams();
-    const merged = { filter, courier, ...over };
+    const merged = { view: view === "recon" ? undefined : view, filter, courier, ...over };
     for (const [k, v] of Object.entries(merged)) if (v && !(k === "filter" && v === "attention")) u.set(k, v);
     const t = u.toString();
     return `/finance/cod${t ? `?${t}` : ""}`;
@@ -119,7 +123,13 @@ export default async function CodRecon({ searchParams }: { searchParams: Promise
         <div className="stat"><div className="k">Does not match</div><div className={`v num${dash.mismatch.parcels > 0 ? " bad" : ""}`} data-testid="mismatch">{dash.mismatch.parcels}</div><div className="d">{dash.mismatch.parcels > 0 ? `${taka(dash.mismatch.shortfall)} short` : "All payouts add up"}{dash.overdue.parcels > 0 ? ` · ${dash.overdue.parcels} overdue` : ""}</div></div>
       </div>
 
-      <nav className="tabs" aria-label="Courier" style={{ marginTop: 14 }}>
+      <nav className="tabs" aria-label="COD sections" style={{ marginTop: 14 }} data-testid="cod-tabs">
+        {VIEWS.filter(([k]) => k !== "import" || canEdit).map(([k, l]) => <Link key={k} href={k === "recon" ? "/finance/cod" : `/finance/cod?view=${k}`} aria-current={k === view ? "page" : undefined} prefetch={false}>{l}</Link>)}
+      </nav>
+
+      {view === "recon" && (
+        <>
+      <nav className="tabs" aria-label="Courier" >
         <Link href={q({ courier: undefined })} aria-current={!courier ? "page" : undefined} prefetch={false}>All couriers</Link>
         {COURIER_PROVIDERS.map((c) => <Link key={c} href={q({ courier: c })} aria-current={courier === c ? "page" : undefined} prefetch={false}>{COURIERS[c]}</Link>)}
       </nav>
@@ -139,8 +149,11 @@ export default async function CodRecon({ searchParams }: { searchParams: Promise
         </>
       )}
 
-      <div className="grid grid-2" style={{ marginTop: 14 }}>
-        {canEdit && (
+        </>
+      )}
+
+      <div style={{ maxWidth: 680 }}>
+        {canEdit && view === "import" && (
           <form action={importAction} className="card stack" data-testid="import-form">
             <h2>Import a payout statement</h2>
             <p className="muted" style={{ fontSize: 13.5 }}>Download the CSV from your courier's merchant portal. We read the consignment IDs, what was collected and what was paid.</p>
@@ -157,7 +170,7 @@ export default async function CodRecon({ searchParams }: { searchParams: Promise
             <div><SubmitButton className="btn btn-primary" pending="Reading the statement…">Import and match</SubmitButton></div>
           </form>
         )}
-        <section className="card">
+        {view === "history" && <section className="card">
           <h2>Payout history</h2>
           {payouts.length === 0 ? <p className="muted">No statements imported yet.</p> : (
             <table className="table" data-testid="payouts-table" style={{ boxShadow: "none" }}>
@@ -165,11 +178,11 @@ export default async function CodRecon({ searchParams }: { searchParams: Promise
               <tbody>{payouts.map((p) => <tr key={p.id}><td>{p.invoiceNumber}<div className="muted" style={{ fontSize: 12.5 }}>{COURIERS[p.courier] ?? p.courier} · {dateOnly(p.disbursedAt)}</div></td><td className="r num">{p.parcels}</td><td className="r num">{taka(p.disbursedAmount)}</td></tr>)}</tbody>
             </table>
           )}
-        </section>
+        </section>}
       </div>
-      <p className="muted" style={{ marginTop: 14, fontSize: 12.5 }}>
+      {view === "recon" && <p className="muted" style={{ marginTop: 14, fontSize: 12.5 }}>
         "Should pay" is the cash collected minus the courier's delivery charge and COD fee, using the charges set in <Link href="/settings/shipping" className="link" prefetch={false}>Delivery charges</Link> unless the courier told us the real figure.
-      </p>
+      </p>}
     </>
   );
 }

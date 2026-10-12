@@ -143,7 +143,7 @@ test.describe.serial("couriers, returns and money", () => {
       `${b.consignment},${b.orderNumber},${b.total},70,${(b.total * 0.01).toFixed(2)},${(Number(net(b.total)) - 30).toFixed(2)},Delivered`,
       `55555,BT-NOT-MINE,500,70,5,425,Delivered`,
     ].join("\n");
-    await page.goto("/finance/cod");
+    await page.goto("/finance/cod?view=import");
     const form = page.getByTestId("import-form");
     await form.getByLabel("Payout invoice number").fill(`E2E-${Date.now()}-${++unique}`);
     await form.locator("input[type=file]").setInputFiles({ name: "steadfast-payout.csv", mimeType: "text/csv", buffer: Buffer.from(csv) });
@@ -166,12 +166,13 @@ test.describe.serial("couriers, returns and money", () => {
     await page.getByRole("button", { name: "Mark matched. I accept this" }).click();
     await expect(page.getByText("Marked as matched.")).toBeVisible();
     await expect(recon(page, b.orderNumber)).toHaveCount(0);
+    await page.getByRole("link", { name: "Payout history" }).click();
     await expect(page.getByTestId("payouts-table")).toContainText("Steadfast");
   });
 
   test("a parcel that is already settled is not counted again by a later statement", async ({ page }) => {
     const csv = ["Consignment ID,COD Amount,Payable", `${a.consignment},${a.total},${a.total}`].join("\n");
-    await page.goto("/finance/cod");
+    await page.goto("/finance/cod?view=import");
     const form = page.getByTestId("import-form");
     await form.getByLabel("Payout invoice number").fill(`E2E-DUP-${Date.now()}`);
     await form.locator("input[type=file]").setInputFiles({ name: "p.csv", mimeType: "text/csv", buffer: Buffer.from(csv) });
