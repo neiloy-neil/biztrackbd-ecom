@@ -97,7 +97,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <ShellProvider initial={counts} pages={pages} strings={STRINGS[lang]}>
-      {s.demo && <DemoBanner expiresAt={s.demo.expiresAt} keepHref={trialHref(s.demo.keep)} />}
+      {s.demo && <DemoBanner expiresAt={s.demo.expiresAt} keepHref={trialHref(s.demo.keep)} now={Date.now()} />}
       {s.impersonation && (
         <ImpersonationBanner
           tenantName={storeName}

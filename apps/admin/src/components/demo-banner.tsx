@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 
 /** Says this is a demo, counts down to when it is deleted, and offers the way out and the way in. */
-export function DemoBanner({ expiresAt, keepHref }: { expiresAt: number; keepHref: string }) {
-  const [left, setLeft] = useState(() => Math.max(0, expiresAt - Date.now()));
+export function DemoBanner({ expiresAt, keepHref, now }: { expiresAt: number; keepHref: string; /** The server's clock when the page was built, so the first paint matches what the server sent. */ now: number }) {
+  const [left, setLeft] = useState(() => Math.max(0, expiresAt - now));
   useEffect(() => {
+    setLeft(Math.max(0, expiresAt - Date.now()));
     const t = setInterval(() => {
       const l = Math.max(0, expiresAt - Date.now());
       setLeft(l);

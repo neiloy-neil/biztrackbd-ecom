@@ -1,0 +1,39 @@
+# Smoke test of the live site (tools/smoke.mjs): is every app answering, can a signed-in admin open its pages, do the storefronts load.
+# Runs after each production deployment Vercel reports, and every hour, so a bad deploy or a database problem is noticed within minutes
+# instead of by a customer. A failed run emails the repository owner through GitHub's normal notifications.
+# No secrets are needed. It starts one demo admin per run (a temporary private store the cleanup job deletes).
+name: Smoke
+
+on:
+  deployment_status:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: smoke
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Live site
+    # Vercel posts a status per project; only a finished production one is worth a run.
+    if: ${{ github.event_name != 'deployment_status' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # A fresh deploy needs a moment to take traffic.
+      - name: Wait for the deployment to settle
+        if: ${{ github.event_name == 'deployment_status' }}
+        run: sleep 45
+      - name: Smoke test
+        run: node tools/smoke.mjs
+        env:
+          SMOKE_ROOT: biztrack.bd

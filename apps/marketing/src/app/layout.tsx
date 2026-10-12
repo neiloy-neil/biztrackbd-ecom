@@ -37,6 +37,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Link href="/templates" prefetch={false}>Templates</Link>
                 <Link href="/pricing" prefetch={false}>Pricing</Link>
                 <Link href="/start" prefetch={false}>Start free</Link>
+                <Link href="/privacy" prefetch={false}>Privacy</Link>
+                <Link href="/terms" prefetch={false}>Terms</Link>
+                <Link href="/contact" prefetch={false}>Contact</Link>
               </nav>
             </div>
           </div>

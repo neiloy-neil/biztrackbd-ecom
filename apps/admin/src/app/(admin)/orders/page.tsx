@@ -59,6 +59,11 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
       {msg === "none" && <div className="notice" role="status" style={{ marginBottom: 12 }}>Select at least one order first.</div>}
 
       <Tabs tabs={TABS.map((t) => ({ href: `/orders${qs({ ...base, tab: t.key === "all" ? undefined : t.key })}`, label: t.label, count: counts[t.key], alert: t.alert, current: t.key === tab }))} />
+      {canEdit && list.rows.length > 0 && (tab === "check" || tab === "to_pack") && (
+        <p style={{ margin: "0 0 12px" }}>
+          <Link href={tab === "check" ? "/orders/check" : "/orders/ship"} className="btn btn-primary" prefetch={false} data-testid="open-desk">{tab === "check" ? "Check them one by one" : "Book them one by one"}</Link>
+        </p>
+      )}
 
       {/* Filters apply as you type or choose. The form and its Search button are what a browser without scripts uses. */}
       <form className="toolbar" method="get" role="search">

@@ -107,3 +107,10 @@ a.link { display: inline-flex; align-items: center; min-height: 44px; font-weigh
 .demo-band { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; padding: 28px; border-radius: 20px; background: #EEEDFD; border: 1px solid #D4D1F8; }
 .demo-band h2 { margin: 6px 0 8px; }
 .demo-band p { margin: 0; max-width: 62ch; color: #3A3A63; }
+
+/* Plain pages: privacy, terms, contact */
+.prose { max-width: 760px; }
+.prose h1 { font-size: clamp(30px, 5vw, 42px); letter-spacing: -1px; line-height: 1.1; margin: 6px 0 8px; }
+.prose h2 { font-size: 20px; margin: 28px 0 6px; }
+.prose p, .prose li { color: #3A3A63; line-height: 1.7; }
+.prose a { color: #4B3FD6; text-decoration: underline; text-underline-offset: 2px; }

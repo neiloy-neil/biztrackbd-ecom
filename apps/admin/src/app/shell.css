@@ -169,3 +169,36 @@ div.tabs[role="tablist"] { overflow-x: auto; margin: 0 0 14px; padding: 0; } div
 .demo-banner { position: sticky; top: 0; z-index: 99998; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 8px 16px; background: #EEF2FF; border-bottom: 1px solid #C7D2FE; color: #1A1A4E; font-size: 13.5px; }
 .demo-banner .demo-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .demo-banner .btn { min-height: 40px; }
+
+/* Phone desks: check payments, book couriers (one order at a time, big buttons) */
+.desk { max-width: 560px; margin: 0 auto; display: grid; gap: 12px; }
+.desk-title { margin: 0; font-size: 22px; }
+.desk-progress { display: grid; gap: 6px; font-size: 14px; }
+.desk-bar { display: block; height: 6px; border-radius: 99px; background: var(--chip); overflow: hidden; }
+.desk-bar i { display: block; height: 100%; background: var(--brand); border-radius: 99px; }
+.desk-card { display: grid; gap: 14px; }
+.desk-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: space-between; }
+.desk-field { display: grid; gap: 4px; }
+.desk-k { font-size: 12.5px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .3px; }
+.desk-v { font-size: 17px; }
+.desk-big { font-size: 28px; font-weight: 800; line-height: 1.2; word-break: break-all; }
+.desk-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.desk-row .btn { min-height: 44px; }
+.desk-hint { margin: 0; font-size: 14px; }
+.desk-actions { display: grid; gap: 10px; }
+.btn-xl { min-height: 56px; font-size: 17px; width: 100%; justify-content: center; }
+.desk-reject > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.desk-reject > summary::-webkit-details-marker { display: none; }
+.desk-reasons, .desk-chips { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.desk-reasons { display: grid; gap: 4px; }
+.desk-reasons legend, .desk-chips legend { width: 100%; padding: 0; margin-bottom: 6px; }
+.desk-reasons .check { min-height: 44px; }
+.chip-radio { position: relative; }
+.chip-radio input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; cursor: pointer; margin: 0; }
+.chip-radio span { display: inline-flex; align-items: center; min-height: 48px; padding: 0 18px; border-radius: 99px; border: 1.5px solid var(--line-2); background: var(--surface); font-weight: 600; }
+.chip-radio input:checked + span { background: var(--tint); border-color: var(--brand); color: var(--brand); }
+.chip-radio input:focus-visible + span { outline: 2px solid var(--brand); outline-offset: 2px; }
+.desk-items { margin: 0; padding-left: 18px; font-size: 14.5px; }
+.desk-links { display: flex; gap: 8px; flex-wrap: wrap; }
+.desk-links .btn, .desk-skip { flex: 1; justify-content: center; min-height: 48px; }
+.mono { font-family: ui-monospace, Menlo, Consolas, monospace; }

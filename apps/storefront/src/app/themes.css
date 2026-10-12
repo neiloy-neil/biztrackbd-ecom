@@ -95,3 +95,6 @@ body[data-store-theme="berber"] .cat { border-radius: 0; border: 1px solid var(-
 body[data-store-theme="berber"] .trust > div { border-color: var(--accent); }
 body[data-store-theme="berber"] .footer { background: #05080F; color: var(--ink-2); border-top: 1px solid var(--line); }
 body[data-store-theme="berber"] .footer b, body[data-store-theme="berber"] .footer .brand { color: var(--ink); }
+
+/* Orders paused by the owner */
+.paused-banner { background: var(--ink, #1A1A1A); color: #fff; text-align: center; padding: 10px 16px; font-size: 14px; font-weight: 600; }

@@ -23,6 +23,8 @@ export interface StoreInfo {
   nagadKind: string;
   paymentNote: string | null;
   offlineMessage: string | null;
+  /** The owner has paused orders: customers can look around but cannot place one. */
+  ordersPaused: boolean;
 }
 
 export async function getStoreInfo(tenantId: string): Promise<StoreInfo> {
@@ -34,7 +36,7 @@ export async function getStoreInfo(tenantId: string): Promise<StoreInfo> {
     return {
       storeName: t.name, tagline: null, contactPhone: null, whatsappNumber: null, facebookUrl: null, instagramUrl: null, addressLine: null,
       logoUrl: null, announcement: null, announcementBn: null, bkashNumber: null, bkashKind: "PERSONAL", nagadNumber: null, nagadKind: "PERSONAL",
-      paymentNote: null, offlineMessage: null,
+      paymentNote: null, offlineMessage: null, ordersPaused: false,
     };
   });
 }

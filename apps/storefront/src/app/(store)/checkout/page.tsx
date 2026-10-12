@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { getAccountView, getLoyaltyPublic, getReferralOffer, getStoreInfo, resolveRecovery } from "@biztrackbd/core";
 import { CheckoutForm } from "@/components/checkout-form";
-import { getLang, pickStrings } from "@/lib/i18n";
+import { PausedCard } from "@/components/paused-notice";
+import { getLang, makeT, pickStrings } from "@/lib/i18n";
 import { getCustomerSession } from "@/lib/session";
 import { CHECKOUT_STRINGS, LOYALTY_STRINGS } from "@/lib/strings";
 import { getStore } from "@/lib/tenant";
@@ -28,6 +29,15 @@ export default async function Checkout({ searchParams }: { searchParams: Promise
   const store = await getStore();
   const lang = await getLang(store.locale);
   const info = await getStoreInfo(store.id);
+  // The owner paused orders: show the "short break" notice instead of a form that could not be sent.
+  if (info.ordersPaused) {
+    return (
+      <div className="wrap">
+        <h1 className="page-title" style={{ paddingBottom: 4 }}>{lang === "bn" ? "চেকআউট" : "Checkout"}</h1>
+        <PausedCard info={info} t={makeT(lang)} />
+      </div>
+    );
+  }
   // The secret in the SMS link restores the cart that customer left. Anything else is ignored.
   const pub = await getLoyaltyPublic(store.id);
   const session = await getCustomerSession(store.id);

@@ -76,14 +76,14 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         <section className="stack" style={{ marginTop: 16 }} aria-label="Needs your attention">
           <h2 style={{ fontSize: 16 }}>Needs your attention</h2>
           {d.awaitingCheck.count > 0 && (
-            <Link href="/orders?tab=check" className="attention" prefetch={false}>
+            <Link href="/orders/check" className="attention" prefetch={false}>
               <span className="n" style={{ color: "var(--warning)" }}>{d.awaitingCheck.count}</span>
               <span className="t"><b>bKash and Nagad payments to check</b><span className="muted">{d.awaitingCheck.oldestHours != null ? `Oldest waiting ${d.awaitingCheck.oldestHours === 0 ? "less than an hour" : `${d.awaitingCheck.oldestHours} hours`}` : ""}</span></span>
               <span className="link">Check</span>
             </Link>
           )}
           {d.toPack.count > 0 && (
-            <Link href="/orders?tab=to_pack" className="attention" prefetch={false}>
+            <Link href="/orders/ship" className="attention" prefetch={false}>
               <span className="n">{d.toPack.count}</span>
               <span className="t"><b>Orders to pack and ship</b><span className="muted">{d.toPack.waitingOver24h > 0 ? `${d.toPack.waitingOver24h} are over 24 hours old` : "All fresh"}</span></span>
               <span className="link">Open</span>

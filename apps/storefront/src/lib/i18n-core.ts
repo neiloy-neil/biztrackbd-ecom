@@ -55,7 +55,7 @@ const en = {
   pay_PENDING_VERIFICATION: "Checking payment", pay_PAID: "Paid", pay_UNPAID: "Pay on delivery",
   // offline / errors
   offlineTitle: "We are taking a short break", offlineText: "Orders are paused for now. Please check back soon, or message us and we will help you directly.",
-  callUs: "Call {phone}", whatsapp: "Message on WhatsApp", facebook: "Visit our Facebook page", notFound: "Page not found", notFoundS: "We could not find what you were looking for.",
+  pausedBanner: "We are taking a short break: orders are paused for now. You can still look around.", callUs: "Call {phone}", whatsapp: "Message on WhatsApp", facebook: "Visit our Facebook page", notFound: "Page not found", notFoundS: "We could not find what you were looking for.",
   rateLimited: "Too many tries. Please wait a few minutes and try again.",
   reviewsTitle: "Reviews", reviewsAverage: "{avg} out of 5", verifiedBuyer: "Verified buyer", storeReply: "Reply from the store",
   rateYourItems: "Review your items", writeReview: "Write a review", yourRating: "Your rating", reviewTitleOpt: "Headline (optional)", reviewBody: "Your review",
@@ -108,6 +108,7 @@ const bn: Record<Key, string> = {
   st_PENDING: "অর্ডার হয়েছে", st_CONFIRMED: "নিশ্চিত", st_PROCESSING: "প্যাক হচ্ছে", st_SHIPPED: "পথে আছে", st_DELIVERED: "পৌঁছেছে", st_CANCELLED: "বাতিল", st_RETURNED: "ফেরত", st_REFUNDED: "টাকা ফেরত",
   pay_PENDING_VERIFICATION: "পেমেন্ট যাচাই চলছে", pay_PAID: "পরিশোধিত", pay_UNPAID: "ডেলিভারিতে দেবেন",
   offlineTitle: "আমরা অল্প সময়ের বিরতিতে আছি", offlineText: "এখন অর্ডার বন্ধ আছে। একটু পরে আবার দেখুন, অথবা আমাদের মেসেজ করুন, সরাসরি সাহায্য করব।",
+  pausedBanner: "আমরা অল্প সময়ের বিরতিতে আছি: এখন অর্ডার বন্ধ আছে। আপনি পণ্য দেখতে পারেন।",
   callUs: "ফোন করুন {phone}", whatsapp: "হোয়াটসঅ্যাপে মেসেজ করুন", facebook: "আমাদের ফেসবুক পেজ", notFound: "পাতা পাওয়া যায়নি", notFoundS: "আপনি যা খুঁজছেন তা পাইনি।",
   rateLimited: "অনেকবার চেষ্টা হয়েছে। কয়েক মিনিট পর আবার চেষ্টা করুন।",
   reviewsTitle: "রিভিউ", reviewsAverage: "৫ এর মধ্যে {avg}", verifiedBuyer: "যাচাইকৃত ক্রেতা", storeReply: "দোকানের উত্তর",
