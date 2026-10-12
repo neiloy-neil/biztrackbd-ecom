@@ -3,7 +3,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
-  AuthFailure, enrollTotp, getUserFromToken, platformEmailKnown, platformMemberFor, recordPlatformLogin, sendEmailCode, setOwnPassword, signInWithPassword, signOutToken, verifyEmailCode, verifyTotp,
+  AuthFailure, enrollTotp, getUserFromToken, platformEmailKnown, platformMemberFor, recordPlatformLogin, sendSignInCode, setOwnPassword, signInWithPassword, signOutToken, verifyEmailCode, verifyTotp,
   type TokenSet,
 } from "@biztrackbd/core";
 import { AT, clearSessionCookies, safeNext, setSessionCookies } from "@/lib/auth";
@@ -95,7 +95,7 @@ export async function requestCodeAction(_prev: LoginState, form: FormData): Prom
   const email = String(form.get("email") ?? "").trim().toLowerCase();
   if (!/^\S+@\S+\.\S+$/.test(email)) return { error: "Enter your email address.", step: "email" };
   if (tooMany(`code:${await clientIp()}`, 8, 3_600_000) || tooMany(`codeem:${email}`, 3, 3_600_000)) return { error: "Too many codes asked for. Please wait a while and try again.", step: "email", email };
-  if (await platformEmailKnown(email)) await sendEmailCode(email);
+  if (await platformEmailKnown(email)) await sendSignInCode(email, "en");
   return { step: "code", email };
 }
 

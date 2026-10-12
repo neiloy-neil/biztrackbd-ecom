@@ -7,7 +7,7 @@ import { renderMail, type MailBody, type MailLang } from "./layout";
 
 export type MailKind =
   | "WELCOME" | "STAFF_INVITE" | "TRIAL_ENDING" | "RENEWAL_DUE" | "PAYMENT_APPROVED" | "PAYMENT_REJECTED"
-  | "PAYMENT_OVERDUE" | "READ_ONLY_STARTED" | "LOCKED" | "TICKET_REPLY";
+  | "PAYMENT_OVERDUE" | "READ_ONLY_STARTED" | "LOCKED" | "TICKET_REPLY" | "SIGN_IN_CODE";
 
 export interface MailVars {
   storeName: string;
@@ -27,6 +27,10 @@ export interface MailVars {
   ticketCode?: string;
   excerpt?: string;
   ticketUrl?: string;
+  /** The one-time sign-in code. */
+  code?: string;
+  /** Say it in English and Bangla together (when the person's language is not known). */
+  both?: boolean;
 }
 
 export interface MailOut { subject: string; body: MailBody; sms?: string }
@@ -124,6 +128,24 @@ export const MAIL: Record<MailKind, Builder> = {
         paragraphs: ["Because payment has been missing for a long time, your admin is locked and only the billing page is open.", "Your products, orders and customers are safe. Paying brings everything back."], button: { text: "Open billing", url: v.billingUrl ?? "" } },
         sms: `${v.storeName}: your admin is locked. Your data is safe. Pay to unlock: ${v.billingUrl ?? ""}` },
 
+  // The code is the same words whichever page asked; when the language is not known the email says it in both.
+  SIGN_IN_CODE: (lang, v) => {
+    const en = ["Type this code to continue. It works once, for a short time. Never share it with anyone."];
+    const bnp = ["এই কোডটি লিখে এগিয়ে যান। এটি একবারই কাজ করবে, অল্প সময়ের জন্য। কাউকে কোডটি বলবেন না।"];
+    const wide = v.both === true;
+    const l: MailLang = lang;
+    return {
+      subject: l === "bn" && !wide ? `আপনার BizTrackBD কোড: ${v.code}` : wide ? `Your BizTrackBD code: ${v.code} | আপনার কোড` : `Your BizTrackBD code: ${v.code}`,
+      body: {
+        lang: l, preheader: l === "bn" && !wide ? "আপনার এককালীন কোড।" : "Your one-time code.",
+        heading: wide ? "Your sign-in code | আপনার সাইন-ইন কোড" : l === "bn" ? "আপনার সাইন-ইন কোড" : "Your sign-in code",
+        paragraphs: wide ? [...en, ...bnp] : l === "bn" ? bnp : en,
+        facts: [{ label: wide ? "Code | কোড" : l === "bn" ? "কোড" : "Code", value: v.code ?? "" }],
+        note: wide ? "If you did not ask for this, ignore this email. | আপনি না চেয়ে থাকলে উপেক্ষা করুন।" : l === "bn" ? "আপনি না চেয়ে থাকলে এই মেইল উপেক্ষা করুন।" : "If you did not ask for this, ignore this email.",
+      },
+    };
+  },
+
   TICKET_REPLY: (lang, v) => lang === "bn"
     ? { subject: `সাপোর্টের উত্তর: ${v.ticketCode ?? ""}`, body: { lang, preheader: "আপনার সাপোর্ট অনুরোধে উত্তর এসেছে।", heading: "আপনার সাপোর্ট অনুরোধে উত্তর এসেছে",
         paragraphs: [v.excerpt ?? ""], facts: [...(v.ticketCode ? [{ label: "অনুরোধ", value: v.ticketCode }] : [])], button: { text: "উত্তর দেখুন", url: v.ticketUrl ?? "" } } }
@@ -134,8 +156,9 @@ export const MAIL: Record<MailKind, Builder> = {
 export const MAIL_KIND_LIST = Object.keys(MAIL) as MailKind[];
 
 /** One email, ready to send: subject, HTML and plain text, plus the short text message when the kind has one. */
-export function buildMail(kind: MailKind, lang: MailLang, v: MailVars, storeName: string | null = v.storeName): { subject: string; html: string; text: string; sms?: string } {
-  const out = MAIL[kind](lang, v);
+export function buildMail(kind: MailKind, lang: MailLang | "both", v: MailVars, storeName: string | null = v.storeName): { subject: string; html: string; text: string; sms?: string } {
+  const wide = lang === "both";
+  const out = MAIL[kind](wide ? "en" : lang, wide ? { ...v, both: true } : v);
   const { html, text } = renderMail(out.body, storeName);
   return { subject: out.subject.replace(/\s+/g, " ").replace(/:\s*,/g, ",").trim(), html, text, ...(out.sms ? { sms: out.sms } : {}) };
 }

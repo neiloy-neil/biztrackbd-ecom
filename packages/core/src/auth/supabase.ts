@@ -281,6 +281,20 @@ export async function setOwnPassword(accessToken: string, password: string): Pro
   throw new AuthFailure("UNAVAILABLE", "We could not save the password. Please try again.");
 }
 
+/**
+ * A one-time sign-in code for this address, WITHOUT Supabase emailing it: the caller sends it in BizTrackBD's own email. Supabase makes the
+ * account if it does not exist yet (as `sendEmailCode` does) and checks the code when it is typed back in. Null if Supabase could not make one.
+ */
+export async function issueEmailCode(email: string): Promise<string | null> {
+  try {
+    const r = await call("/auth/v1/admin/generate_link", { key: "service", body: { type: "magiclink", email: email.trim().toLowerCase() } });
+    const otp = String(r.json.email_otp ?? (r.json.properties as Record<string, unknown> | undefined)?.email_otp ?? "");
+    return /^\d{6,8}$/.test(otp) ? otp : null;
+  } catch {
+    return null;
+  }
+}
+
 /** For tests and support tooling only: the one-time code Supabase would have emailed, without sending anything. */
 export async function adminGenerateEmailCode(email: string): Promise<string> {
   const r = await call("/auth/v1/admin/generate_link", { key: "service", body: { type: "magiclink", email: email.trim().toLowerCase() } });

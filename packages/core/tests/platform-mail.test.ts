@@ -2,7 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createBaseClient, setBasePrisma, setPlatformPrisma, type PrismaClient } from "@biztrackbd/db";
 import { createOwnerClient, resetDatabase, seedPlans, testUrls } from "@biztrackbd/db/testing";
 import {
-  AUTH_MAILS_FOR_TESTS, MAIL_KIND_LIST, URGENT_KINDS, approveSubscriptionPayment, buildMail, createTenantTicket, emailStaffInvite, escapeMailText, notifyOwner, rejectSubscriptionPayment,
+  AUTH_MAILS_FOR_TESTS, MAIL_KIND_LIST, URGENT_KINDS, approveSubscriptionPayment, buildMail, createTenantTicket, emailStaffInvite, escapeMailText, notifyOwner, sendSignInCode, setCodeHooks, rejectSubscriptionPayment,
   replyPlatformTicket, runBillingLifecycle, setEventPublisher, setMailSender, setSmsSender, signupStore, submitPaymentProof, type MailKind, type PlatformActor, type StaffActor,
 } from "../src";
 
@@ -60,7 +60,7 @@ describe("the email templates", () => {
   it("every email exists in English and Bangla, with a subject, a plain-text part, and the links it needs", () => {
     for (const kind of MAIL_KIND_LIST) {
       for (const lang of ["en", "bn"] as const) {
-        const m = buildMail(kind, lang, sample, sample.storeName);
+        const m = buildMail(kind, lang, { ...sample, code: "123456" }, sample.storeName);
         expect(m.subject.length, `${kind} ${lang} subject`).toBeGreaterThan(5);
         expect(m.html).toContain(`<html lang="${lang}"`);
         expect(m.text.length).toBeGreaterThan(20);
@@ -68,7 +68,7 @@ describe("the email templates", () => {
         expect(m.text).not.toContain("undefined");
         if (lang === "bn") expect(m.subject + m.text).toMatch(/[ঀ-৿]/);
         const links = { WELCOME: sample.adminUrl, PAYMENT_APPROVED: sample.adminUrl, STAFF_INVITE: sample.link, TICKET_REPLY: sample.ticketUrl } as Partial<Record<MailKind, string>>;
-        expect(m.html, `${kind} link`).toContain(links[kind] ?? sample.billingUrl);
+        if (kind !== "SIGN_IN_CODE") expect(m.html, `${kind} link`).toContain(links[kind] ?? sample.billingUrl);
       }
     }
   });
@@ -213,5 +213,59 @@ describe("where the emails are sent from", () => {
     expect(mails.at(-1)!.to).toBe("New.Person@Example.test");
     expect(mails.at(-1)!.html).toContain("https://admin.example.test/join/tok123");
     expect(mails.at(-1)!.subject).toMatch(/[ঀ-৿]/);
+  });
+});
+
+describe("sign-in codes sent in our own email", () => {
+  const known: string[] = [];
+  const supabaseSent: string[] = [];
+  beforeEach(() => {
+    known.length = 0;
+    supabaseSent.length = 0;
+    setCodeHooks({ issue: async (email) => { known.push(email); return "482913"; }, fallback: async (email) => { supabaseSent.push(email); } });
+  });
+  afterAll(() => setCodeHooks(undefined));
+
+  it("emails the code itself, in the person's language, and does not ask Supabase to send one as well", async () => {
+    expect(await sendSignInCode("rina@example.test", "bn")).toBe("sent");
+    expect(mails).toHaveLength(1);
+    expect(mails[0]!.subject).toContain("482913");
+    expect(mails[0]!.subject).toMatch(/[ঀ-৿]/);
+    expect(mails[0]!.html).toContain("482913");
+    expect(mails[0]!.text).toContain("482913");
+    expect(supabaseSent).toEqual([]);
+  });
+
+  it("says it in both languages when the language is not known", async () => {
+    await sendSignInCode("rina@example.test");
+    expect(mails[0]!.html).toMatch(/Your sign-in code[^<]*\|/);
+    expect(mails[0]!.html).toMatch(/[ঀ-৿]/);
+    expect(mails[0]!.html).toContain("482913");
+  });
+
+  it("falls back to Supabase's own email when we have no email provider, when it is down, or when no code could be made", async () => {
+    setMailSender(null);
+    expect(await sendSignInCode("a@example.test", "en")).toBe("skipped");
+    setMailSender({ async send() { throw new Error("down"); } });
+    expect(await sendSignInCode("b@example.test", "en")).toBe("failed");
+    setMailSender({ async send(to, subject, html) { mails.push({ to, subject, html }); } });
+    setCodeHooks({ issue: async () => null, fallback: async (email) => { supabaseSent.push(email); } });
+    expect(await sendSignInCode("c@example.test", "en")).toBe("failed");
+    expect(supabaseSent).toEqual(["a@example.test", "b@example.test", "c@example.test"]);
+    expect(mails).toHaveLength(0);
+  });
+
+  it("never puts the code in anything but the email: it is not logged", async () => {
+    const logged: string[] = [];
+    const orig = console.log, err = console.error;
+    console.log = (...a: unknown[]) => { logged.push(a.join(" ")); };
+    console.error = (...a: unknown[]) => { logged.push(a.join(" ")); };
+    setMailSender(null);
+    await sendSignInCode("d@example.test", "en");
+    setMailSender({ async send() { throw new Error("down 482913"); } });
+    await sendSignInCode("e@example.test", "en");
+    console.log = orig;
+    console.error = err;
+    expect(logged.join("\n")).not.toContain("482913");
   });
 });

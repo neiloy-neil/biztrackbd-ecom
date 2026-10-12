@@ -1,4 +1,5 @@
 import { withTenant } from "@biztrackbd/db";
+import { issueEmailCode, sendEmailCode } from "../auth/supabase";
 import { currentSmsSender } from "../customers/auth";
 import { isDemoTenantId } from "../demo/guard";
 import { emailSenderFromEnv, type EmailSender } from "../growth/email";
@@ -17,6 +18,14 @@ export function setMailSender(s: EmailSender | null | undefined): void {
   override = s;
 }
 const emailer = (): EmailSender | null => (override !== undefined ? override : emailSenderFromEnv());
+
+let issuer: ((email: string) => Promise<string | null>) | undefined;
+let fallback: ((email: string) => Promise<void>) | undefined;
+/** Tests: where the code comes from, and what happens when we cannot send it ourselves. */
+export function setCodeHooks(h: { issue?: (email: string) => Promise<string | null>; fallback?: (email: string) => Promise<void> } | undefined): void {
+  issuer = h?.issue;
+  fallback = h?.fallback;
+}
 
 export type MailSendResult = "sent" | "duplicate" | "skipped" | "failed";
 
@@ -133,6 +142,28 @@ export async function emailStaffInvite(tenantId: string, i: { to: string; roleLa
     return r;
   } catch (e) {
     console.error("[mail] invite failed", e instanceof Error ? e.name : "unknown");
+    return "failed";
+  }
+}
+
+/**
+ * Sends a sign-in code (first sign-in, or a forgotten password) in BizTrackBD's own email, instead of Supabase's. The caller has already
+ * checked the address belongs to someone on a team and is rate limiting. If we cannot send it ourselves (no email provider set up, or it
+ * is down) Supabase's own sender is asked to, so signing in never depends on only one of the two. The code is never logged.
+ */
+export async function sendSignInCode(email: string, lang: MailLang | "both" = "both"): Promise<MailSendResult> {
+  const viaSupabase = () => (fallback ?? sendEmailCode)(email).catch(() => undefined);
+  try {
+    if (!emailer()) { await viaSupabase(); return "skipped"; }
+    const code = await (issuer ?? issueEmailCode)(email);
+    if (!code) { await viaSupabase(); return "failed"; }
+    const mail = buildMail("SIGN_IN_CODE", lang, { storeName: "", code }, null);
+    const r = await deliver(email, mail.subject, mail.html, mail.text);
+    if (r !== "sent") await viaSupabase();
+    return r;
+  } catch (e) {
+    console.error("[mail] sign-in code failed", e instanceof Error ? e.name : "unknown");
+    await viaSupabase();
     return "failed";
   }
 }

@@ -3,7 +3,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
-  AuthFailure, enrollTotp, getUserFromToken, recordStaffLogin, removeFactor, sendEmailCode, setOwnPassword, signInWithPassword, signOutToken, staffEmailKnown, staffMemberships, verifyEmailCode, verifyTotp,
+  AuthFailure, enrollTotp, getUserFromToken, recordStaffLogin, removeFactor, sendSignInCode, setOwnPassword, signInWithPassword, signOutToken, staffEmailKnown, staffMemberships, verifyEmailCode, verifyTotp,
   type TokenSet,
 } from "@biztrackbd/core";
 import { AT, TENANT, clearSessionCookies, cookieOptions, safeNext, setSessionCookies } from "@/lib/auth";
@@ -100,7 +100,10 @@ export async function requestCodeAction(_prev: LoginState, form: FormData): Prom
   if (!/^\S+@\S+\.\S+$/.test(email)) return { error: "Enter your email address.", step: "email" };
   if (tooMany(`code:${await clientIp()}`, 10, 3_600_000) || tooMany(`codeem:${email}`, 4, 3_600_000)) return { error: "Too many codes asked for. Please wait a while and try again.", step: "email", email };
   // A code is only sent to an address that is on a team; anyone else gets the same screen and no email.
-  if (await staffEmailKnown(email)) await sendEmailCode(email);
+  if (await staffEmailKnown(email)) {
+    const l = (await cookies()).get("bt_lang")?.value;
+    await sendSignInCode(email, l === "bn" ? "bn" : l === "en" ? "en" : "both");
+  }
   return { step: "code", email };
 }
 
