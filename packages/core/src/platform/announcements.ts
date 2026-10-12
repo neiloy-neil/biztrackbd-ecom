@@ -180,7 +180,8 @@ export async function getActiveAnnouncementsForTenant(
   tenantId: string,
   deps?: Deps
 ): Promise<{ id: string; title: string; titleBn: string | null; body: string; bodyBn: string | null; startsAt: Date }[]> {
-  const db = dbOf(deps);
+  // Runs in the store admin, which has no platform credential: everything below goes through the store's own restricted connection.
+  void deps;
   const now = nowOf(deps);
 
   return withTenant(tenantId, async (tx) => {

@@ -84,6 +84,16 @@ describe("who can call each admin and platform action", () => {
     expect(readFileSync(join(ROOT, "packages/core/src/demo/session.ts"), "utf8")).toMatch(/DemoLimitError[\s\S]*DemoBusyError/);
   });
 
+  it("code the store admin runs on every page never needs the platform database credential (the admin project does not have it)", () => {
+    // Store-side functions of platform/announcements.ts run in apps/admin's layout. Building the platform client there throws and every admin page answers 500.
+    const text = readFileSync(join(ROOT, "packages/core/src/platform/announcements.ts"), "utf8");
+    const start = text.indexOf("export async function getActiveAnnouncementsForTenant");
+    expect(start).toBeGreaterThan(0);
+    const next = text.indexOf("\nexport ", start + 10);
+    const body = text.slice(start, next === -1 ? undefined : next);
+    expect(body).not.toMatch(/dbOf\(|getPlatformPrisma\(/);
+  });
+
   it("the development sign-in stand-ins refuse to run in production, and real sign-in is the default", () => {
     for (const f of ["apps/admin/src/lib/auth.ts", "apps/platform/src/lib/auth.ts"]) {
       const text = readFileSync(join(ROOT, f), "utf8");
