@@ -160,6 +160,7 @@ div.tabs[role="tablist"] { overflow-x: auto; margin: 0 0 14px; padding: 0; } div
 .msg-preview .bubble { padding: 10px 12px; border-radius: 14px 14px 14px 4px; background: var(--surface); border: 1px solid var(--line); white-space: pre-wrap; word-break: break-word; max-width: 440px; }
 
 /* Invoices (settings): options on the left, the real printed page on the right */
-.inv-grid { display: grid; gap: 16px; align-items: start; }
-@media (min-width: 1000px) { .inv-grid { grid-template-columns: minmax(300px, 420px) 1fr; } .inv-side { position: sticky; top: 16px; } }
+.inv-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
+.inv-grid > * { min-width: 0; }
+@media (min-width: 1000px) { .inv-grid { grid-template-columns: minmax(300px, 420px) minmax(0, 1fr); } .inv-side { position: sticky; top: 16px; } }
 .inv-frame { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: #fff; }

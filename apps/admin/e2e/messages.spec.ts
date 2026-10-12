@@ -56,10 +56,13 @@ test.describe.serial("customer messages and invoices", () => {
     await expect(page.getByTestId("msg-saved-ORDER_SHIPPED")).toBeVisible();
   });
 
-  test("the language tabs edit Bangla separately", async ({ page }) => {
+  test("the language buttons switch which text you edit", async ({ page }) => {
     await page.goto("/settings/notifications");
     const card = page.getByTestId("msg-DELIVERED");
-    await card.getByRole("radio", { name: "Bangla" }).check({ force: true }).catch(async () => { await card.getByText("Bangla", { exact: true }).click(); });
+    await expect(page.locator('[data-testid="msg-DELIVERED"][data-ready="1"]')).toBeVisible();
+    await card.getByRole("button", { name: "English", exact: true }).click();
+    await expect(page.getByTestId("msg-text-DELIVERED")).toHaveValue(/delivered/);
+    await card.getByRole("button", { name: "Bangla", exact: true }).click();
     await expect(page.getByTestId("msg-text-DELIVERED")).toHaveValue(/[ঀ-৿]/);
   });
 
@@ -73,7 +76,7 @@ test.describe.serial("customer messages and invoices", () => {
     await page.getByTestId("inv-footer").fill(`Exchange within 7 days ${Date.now().toString(36)}`);
     const footer = await page.getByTestId("inv-footer").inputValue();
     await expect(frame.getByText(footer)).toBeVisible();
-    await page.getByRole("radio", { name: "Packing slip" }).check({ force: true }).catch(async () => { await page.getByText("Packing slip", { exact: true }).click(); });
+    await page.getByRole("button", { name: "Packing slip", exact: true }).click();
     await expect(frame.getByText("PACKING SLIP")).toBeVisible();
     await page.getByRole("button", { name: "Save invoice settings" }).click();
     await expect(page.getByTestId("inv-saved")).toBeVisible();
