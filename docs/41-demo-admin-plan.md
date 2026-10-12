@@ -31,3 +31,7 @@ Decisions (owner, 12 October 2026): one click, no signup. Each visitor gets a **
 ## Notes
 - Another session already added a demo ribbon and `/demo/[template]` fallback paths on the storefront and marketing app (commit f5408d7). This plan reuses the ribbon and replaces those fallback paths once the real addresses are used everywhere.
 - Real merchants are unaffected: demo tenants are excluded from platform revenue, tenant counts and the super admin lists by `isDemo` (the super admin tenants list already shows a Demo marker).
+
+## Operational notes (12 October 2026)
+- All four apps now run their functions in Mumbai (`bom1`, set in each app's `vercel.json`), next to the Supabase database. They ran in US East before, so every query paid a long round trip: starting a demo took over 60 seconds on the live site (about 3 seconds locally), and pages that run several queries were slow and hit connection limits.
+- Starting a demo is capped at 60 seconds (`maxDuration` on `/demo/start`). If it ever gets close again, reduce the starter orders in `seedStarterOrders` (`packages/core/src/demo/session.ts`).
