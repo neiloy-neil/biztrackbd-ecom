@@ -32,12 +32,13 @@ const JOBS = [
   ["biztrack-domains", "*/5 * * * *", "admin", "/api/cron/domains"],
   ["biztrack-loyalty", "0 20 * * *", "admin", "/api/cron/loyalty"], // 02:00 Dhaka
   ["biztrack-billing", "0 21 * * *", "platform", "/api/cron/billing"], // 03:00 Dhaka
-  // The five template demo stores (docs/38), rebuilt from template data each night, one call per store so each stays inside the 60 second limit.
+  // The six template demo stores (docs/38), rebuilt from template data each night, one call per store so each stays inside the 60 second limit.
   ["biztrack-demo-kapor", "0 22 * * *", "admin", "/api/cron/demo-reset?template=kapor"], // 04:00 Dhaka
   ["biztrack-demo-gadgetstudio", "2 22 * * *", "admin", "/api/cron/demo-reset?template=gadgetstudio"],
   ["biztrack-demo-mini-bunny", "4 22 * * *", "admin", "/api/cron/demo-reset?template=mini-bunny"],
   ["biztrack-demo-axionwear", "6 22 * * *", "admin", "/api/cron/demo-reset?template=axionwear"],
   ["biztrack-demo-bindu", "8 22 * * *", "admin", "/api/cron/demo-reset?template=bindu"],
+  ["biztrack-demo-berber", "10 22 * * *", "admin", "/api/cron/demo-reset?template=berber"],
 ];
 
 const c = new pg.Client({ connectionString: process.env.SUPABASE_DB_URL, ssl: { rejectUnauthorized: false } });
