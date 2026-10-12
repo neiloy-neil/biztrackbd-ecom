@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { demoTemplate } from "@biztrackbd/core";
+import { demoAdminUrl } from "@/lib/demo-admin";
 
 /** Where a template's demo store lives: <name>.<root domain>. Local development uses http and the dev port. */
 export function demoUrl(host: string): string {
@@ -27,6 +28,7 @@ export function TemplateCard({ t, compact }: { t: TemplateInfo; compact?: boolea
       {t.live && (
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           {demo && <a href={demoUrl(demo.host)} className="btn btn-secondary btn-sm" target="_blank" rel="noopener noreferrer" data-testid={`demo-${t.id}`}>View live demo</a>}
+          {demo && <a href={demoAdminUrl(t.id)} className="btn btn-secondary btn-sm" rel="nofollow" data-testid={`admin-demo-${t.id}`} aria-label={`Try the admin with the ${t.name} template`}>Try the admin</a>}
           <Link href={`/start?theme=${t.id}`} className="btn btn-primary btn-sm" prefetch={false}>Use this template</Link>
         </div>
       )}

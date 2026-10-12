@@ -3,6 +3,7 @@ import { THEMES, listPublicPlans } from "@biztrackbd/core";
 import { HeroMock } from "@/components/hero-mock";
 import { PlanCards } from "@/components/plan-cards";
 import { TemplateCard } from "@/components/template-card";
+import { demoAdminUrl } from "@/lib/demo-admin";
 import { planBullets, taka } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +35,7 @@ export default async function Home() {
             <Link href="/templates" className="btn btn-secondary btn-lg" prefetch={false}>See templates</Link>
           </div>
           <p className="fine">14 days free · No card needed · Bangla and English{from ? ` · Plans from ${taka(from)} a month` : ""}</p>
+          <p className="fine"><a href={demoAdminUrl()} className="link" data-testid="hero-demo-admin">Or try the admin first: no signup</a></p>
         </div>
         <div className="wrap"><HeroMock /></div>
       </section>
@@ -58,6 +60,19 @@ export default async function Home() {
           </div>
           <div className="grid g3" style={{ marginTop: 28 }} data-testid="home-templates">
             {showcase.map((t) => <TemplateCard key={t.id} t={{ ...t, audience: undefined }} compact />)}
+          </div>
+        </div>
+      </section>
+
+      <section className="block">
+        <div className="wrap">
+          <div className="demo-band" data-testid="demo-admin-band">
+            <div>
+              <span className="eyebrow">Try it before you sign up</span>
+              <h2>Run a store from the admin, with nothing to sign up for</h2>
+              <p>Open a private store with products and orders. Check a bKash payment, pack an order, book a courier and see your sales. It is yours to change for three hours, then it is deleted. Nothing reaches real customers.</p>
+            </div>
+            <a href={demoAdminUrl()} className="btn btn-primary btn-lg" data-testid="demo-admin-cta">Try the admin</a>
           </div>
         </div>
       </section>

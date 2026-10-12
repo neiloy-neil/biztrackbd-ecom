@@ -102,3 +102,8 @@ table.compare tbody tr:last-child th, table.compare tbody tr:last-child td { bor
 
 /* Text links that stand alone are big enough to tap. */
 a.link { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; color: var(--indigo, #5B4FE8); }
+
+/* Try the admin (docs/41) */
+.demo-band { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; padding: 28px; border-radius: 20px; background: #EEEDFD; border: 1px solid #D4D1F8; }
+.demo-band h2 { margin: 6px 0 8px; }
+.demo-band p { margin: 0; max-width: 62ch; color: #3A3A63; }

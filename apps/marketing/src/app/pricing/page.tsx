@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { listPublicPlans, type PlanView } from "@biztrackbd/core";
 import { PlanCards } from "@/components/plan-cards";
+import { demoAdminUrl } from "@/lib/demo-admin";
 import { planBullets } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
@@ -35,6 +36,8 @@ export default async function Pricing() {
         <div style={{ marginTop: 28 }}>
           <PlanCards plans={plans.map((p) => ({ tier: p.tier, name: p.name, priceMonthly: p.priceMonthly, priceYearly: p.priceYearly, monthsFree: p.yearlyMonthsFree, bullets: planBullets(p) }))} best={best} />
         </div>
+
+        <p className="fine" style={{ textAlign: "center", marginTop: 20 }}>Not sure yet? <a href={demoAdminUrl()} className="link" data-testid="pricing-demo-admin">Try the admin first, with no signup</a>.</p>
 
         <h2 style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-.5px", margin: "56px 0 16px" }}>Compare plans</h2>
         <div className="table-wrap" data-testid="compare" tabIndex={0} role="region" aria-label="Plan comparison">
