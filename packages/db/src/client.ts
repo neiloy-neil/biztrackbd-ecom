@@ -1,11 +1,12 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
-// One pooled client per process. In serverless keep max small, but never below 3: a page runs several tenant transactions at once, and with
-// one connection they queue until Prisma gives up (P2028) and the page answers 500.
+// One pooled client per process. In serverless keep it small: in the pooler's session mode every open connection counts against a small
+// shared limit (15 on the free plan), and idle instances keep theirs. Functions run next to the database (bom1), so even one connection
+// serves a page's queries quickly. Set DB_POOL_MAX to change it; Vercel has it at 1.
 const globalForDb = globalThis as unknown as { __biztrackBase?: PrismaClient };
 
-export function createBaseClient(connectionString: string, max = Math.max(3, Number(process.env.DB_POOL_MAX ?? 5))): PrismaClient {
+export function createBaseClient(connectionString: string, max = Math.max(1, Number(process.env.DB_POOL_MAX ?? 5))): PrismaClient {
   return new PrismaClient({
     // Serverless instances idle between requests. In the pooler's session mode every open connection counts against a small shared limit
     // (15 on the free plan), so an idle one is closed after a few seconds instead of being held for the life of the instance.
