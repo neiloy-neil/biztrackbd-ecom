@@ -7,7 +7,9 @@ const globalForDb = globalThis as unknown as { __biztrackBase?: PrismaClient };
 
 export function createBaseClient(connectionString: string, max = Math.max(3, Number(process.env.DB_POOL_MAX ?? 5))): PrismaClient {
   return new PrismaClient({
-    adapter: new PrismaPg({ connectionString, max }),
+    // Serverless instances idle between requests. In the pooler's session mode every open connection counts against a small shared limit
+    // (15 on the free plan), so an idle one is closed after a few seconds instead of being held for the life of the instance.
+    adapter: new PrismaPg({ connectionString, max, idleTimeoutMillis: Number(process.env.DB_IDLE_MS ?? 4000), connectionTimeoutMillis: 10_000 }),
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
   });
 }
