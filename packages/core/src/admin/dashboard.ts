@@ -28,6 +28,9 @@ export interface SetupStep {
   done: boolean;
 }
 
+export type DashboardRange = 7 | 30 | 90;
+export const DASHBOARD_RANGES: DashboardRange[] = [7, 30, 90];
+
 export interface Dashboard {
   today: DayTotals;
   yesterday: DayTotals;
@@ -36,6 +39,8 @@ export interface Dashboard {
   toPack: { count: number; waitingOver24h: number };
   awaitingCheck: { count: number; oldestHours: number | null };
   week: { days: { date: string; sales: number; orders: number }[]; total: number; previousTotal: number };
+  /** The sales chart: the chosen number of days, each with the matching day of the period before for the comparison line. */
+  series: { range: DashboardRange; days: { date: string; sales: number; orders: number; previousSales: number }[]; total: number; previousTotal: number; orders: number; previousOrders: number };
   recent: Pick<OrderRow, "id" | "orderNumber" | "customerName" | "district" | "area" | "paymentMethod" | "paymentStatus" | "status" | "totalAmount">[];
   lowStock: { variantId: string; productTitle: string; variantTitle: string; stock: number }[];
   outOfStock: { count: number; examples: string[] };
@@ -44,10 +49,11 @@ export interface Dashboard {
 
 interface DayRow { d: string; orders: number; sales: number }
 
-export async function getDashboard(tenantId: string, actor: StaffActor, now = new Date()): Promise<Dashboard> {
+export async function getDashboard(tenantId: string, actor: StaffActor, now = new Date(), opts: { range?: number } = {}): Promise<Dashboard> {
   assertCan(actor, "orders", "view");
   const today = dhakaDate(now);
-  const from = addDays(today, -13); // 7 days plus the 7 before, for the comparison
+  const range = (DASHBOARD_RANGES.find((r) => r === opts.range) ?? 7) as DashboardRange;
+  const from = addDays(today, -(2 * range - 1)); // the chosen days plus the same number before, for the comparison
 
   return withTenant(tenantId, async (tx) => {
     const byDay = await tx.$queryRaw<DayRow[]>`
@@ -63,6 +69,18 @@ export async function getDashboard(tenantId: string, actor: StaffActor, now = ne
     };
     const days = Array.from({ length: 7 }, (_, i) => addDays(today, i - 6)).map((date) => ({ date, ...get(date) }));
     const previousTotal = Array.from({ length: 7 }, (_, i) => get(addDays(today, i - 13)).sales).reduce((a, b) => a + b, 0);
+    const chartDays = Array.from({ length: range }, (_, i) => addDays(today, i - (range - 1))).map((date, i) => {
+      const prev = get(addDays(today, i - (2 * range - 1)));
+      return { date, ...get(date), previousSales: prev.sales, previousOrders: prev.orders };
+    });
+    const series = {
+      range,
+      days: chartDays.map((d) => ({ date: d.date, sales: d.sales, orders: d.orders, previousSales: d.previousSales })),
+      total: chartDays.reduce((a, d) => a + d.sales, 0),
+      previousTotal: chartDays.reduce((a, d) => a + d.previousSales, 0),
+      orders: chartDays.reduce((a, d) => a + d.orders, 0),
+      previousOrders: chartDays.reduce((a, d) => a + d.previousOrders, 0),
+    };
 
     const h24 = new Date(now.getTime() - 24 * 3_600_000);
     const h48 = new Date(now.getTime() - 48 * 3_600_000);
@@ -108,6 +126,7 @@ export async function getDashboard(tenantId: string, actor: StaffActor, now = ne
       toPack: { count: toPack, waitingOver24h: toPackLate },
       awaitingCheck: { count: checkCount, oldestHours: oldest ? Math.max(0, Math.floor((now.getTime() - oldest.createdAt.getTime()) / 3_600_000)) : null },
       week: { days, total: days.reduce((a, d) => a + d.sales, 0), previousTotal },
+      series,
       recent: recent.map((o) => ({
         id: o.id, orderNumber: o.orderNumber, customerName: o.customerName, district: o.shippingDistrict, area: o.shippingCity,
         paymentMethod: o.paymentMethod, paymentStatus: o.paymentStatus, status: o.status, totalAmount: Number(o.totalAmount),

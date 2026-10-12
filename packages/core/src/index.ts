@@ -35,11 +35,11 @@ export { DEMO_TEMPLATES, demoTemplate, type DemoTemplate, type DemoProduct, type
 export { resetDemoStore, DEMO_TEMPLATE_IDS, type DemoDeps, type DemoResult } from "./demo/seed";
 export { productSvg, bannerSvg, ART_KINDS, type ArtKind, type Palette } from "./demo/art";
 export { adminSearch, shellCounts, type SearchHit, type ShellCounts } from "./admin/shell";
-export { getDashboard, dhakaDate, addDays, STORE_TZ, type Dashboard, type SetupStep } from "./admin/dashboard";
+export { getDashboard, DASHBOARD_RANGES, type DashboardRange, dhakaDate, addDays, STORE_TZ, type Dashboard, type SetupStep } from "./admin/dashboard";
 export { listInventory, adjustStock, updateStockSettings, listStockHistory, STOCK_REASONS, type InventoryRow, type InventorySummary, type StockFilter, type AdjustInput } from "./admin/inventory";
 export { listCustomers, getCustomerDetail, updateCustomer, createCustomer, setCustomerBlocked, customersCsv, VIP_SPENT, VIP_ORDERS, type CustomerRow, type CustomerSegment } from "./admin/customers";
 export { listCoupons, saveCoupon, setCouponActive, deleteCoupon, couponStatus, CouponInput, type CouponStatus } from "./admin/coupons";
-export { listAdminProducts, saveProduct, getProductForEdit, setProductStatus, listCategoriesAdmin, saveCategory, deleteCategory, slugify, SaveProductInput, type AdminProductRow, type ProductTab } from "./admin/products";
+export { listAdminProducts, bulkProductAction, importProductsCsv, IMPORT_TEMPLATE, IMPORT_MAX_ROWS, type ProductImportResult, saveProduct, getProductForEdit, setProductStatus, listCategoriesAdmin, saveCategory, deleteCategory, slugify, SaveProductInput, type AdminProductRow, type ProductTab } from "./admin/products";
 export { getSalesReport, salesReportCsv, lastDays, changePercent, type SalesReport, type PeriodTotals } from "./admin/reports";
 export { getStoreSettings, getPrintSettings, saveStoreDetails, setOrdersPaused, savePaymentSettings, listZones, saveZone, deleteZone, ALL_OTHER_DISTRICTS, type StoreSettingsView, type StoreDetailsInput, type PaymentSettingsInput, type ZoneInput } from "./admin/settings";
 export { parseOrderMessage, findCustomerForOrder, searchVariantsForOrder, createQuickOrder, QUICK_SOURCES, QuickOrderInput, type ParsedMessage, type CatalogVariant, type QuickSource } from "./admin/quick-order";

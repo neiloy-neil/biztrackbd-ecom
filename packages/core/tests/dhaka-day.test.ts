@@ -50,6 +50,15 @@ describe("a Dhaka day starts at 18:00 UTC", () => {
     expect(d.today).toEqual({ orders: 2, sales: early.totalAmount + evening.totalAmount });
     expect(d.yesterday).toEqual({ orders: 1, sales: lateYesterday.totalAmount });
     expect(d.week.days.at(-1)).toMatchObject({ date: "2026-10-11", orders: 2 });
+    // The chart: any of 7, 30 or 90 days (anything else is 7), each day with the same day of the period before.
+    expect(d.series.range).toBe(7);
+    expect(d.series.days).toHaveLength(7);
+    expect(d.series.days.at(-1)).toMatchObject({ date: "2026-10-11", orders: 2, previousSales: 0 });
+    const m = await getDashboard(f.tenantId, actor(), new Date("2026-10-11T02:00:00Z"), { range: 30 });
+    expect(m.series.days).toHaveLength(30);
+    expect(m.series.days[0]!.date).toBe("2026-09-12");
+    expect(m.series.total).toBe(early.totalAmount + evening.totalAmount + lateYesterday.totalAmount);
+    expect((await getDashboard(f.tenantId, actor(), new Date("2026-10-11T02:00:00Z"), { range: 45 })).series.range).toBe(7);
 
     const r = await getSalesReport(f.tenantId, actor(), { from: "2026-10-11", to: "2026-10-11" });
     expect(r.current.orders).toBe(2);

@@ -2,7 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createBaseClient, setBasePrisma, type PrismaClient } from "@biztrackbd/db";
 import { createOwnerClient, createTenantFixture, resetDatabase, seedPlans, testUrls, type TenantFixture } from "@biztrackbd/db/testing";
 import {
-  DomainError, claimStorage, releaseStorage, adjustStock, couponStatus, createOrder, deleteCategory, deleteCoupon, getProductForEdit, listAdminProducts, listCategoriesAdmin,
+  DomainError, bulkProductAction, importProductsCsv, claimStorage, releaseStorage, adjustStock, couponStatus, createOrder, deleteCategory, deleteCoupon, getProductForEdit, listAdminProducts, listCategoriesAdmin,
   listCoupons, listInventory, listStockHistory, saveCategory, saveCoupon, saveProduct, setCouponActive, setEventPublisher, setProductStatus, slugify,
   updateStockSettings, type StaffActor,
 } from "../src";
@@ -361,5 +361,70 @@ describe("photos taken off a product", () => {
     await releaseStorage(S.f.tenantId, -5);
     await releaseStorage(S.f.tenantId, 0);
     expect(Number((await owner.tenant.findUniqueOrThrow({ where: { id: S.f.tenantId } })).storageBytesUsed)).toBe(0);
+  });
+});
+
+describe("importing products from a CSV", () => {
+  const head = "title,price,stock,sku,status,category,description,compare_at_price\n";
+
+  it("adds a product per row, makes new categories, escapes the description and reports bad rows by line", async () => {
+    const S = await store("imp");
+    const r = await importProductsCsv(S.f.tenantId, S.owner, `${head}Panjabi,1850,12,PJ-1,active,Panjabi,"Soft <b>cotton</b>, light",2200\nLungi,700,,,,Panjabi,,\nBroken,abc,1,,,,,\nNegative,100,-2,,,,,\n`);
+    expect(r.created).toBe(2);
+    expect(r.failed.map((f) => [f.line, f.title])).toEqual([[4, "Broken"], [5, "Negative"]]);
+    const list = await listAdminProducts(S.f.tenantId, S.owner, { q: "Panjabi" });
+    const p = list.rows.find((x) => x.title === "Panjabi")!;
+    expect([p.status, p.stock, p.price, p.categoryName]).toEqual(["ACTIVE", 12, 1850, "Panjabi"]);
+    const lungi = list.rows.length ? (await listAdminProducts(S.f.tenantId, S.owner, { q: "Lungi" })).rows[0]! : null;
+    expect([lungi?.status, lungi?.stock]).toEqual(["DRAFT", 0]);
+    const edit = await getProductForEdit(S.f.tenantId, S.owner, p.id);
+    expect(edit.descriptionHtml).toContain("&lt;b&gt;cotton&lt;/b&gt;");
+    expect(edit.compareAtPrice).toBe(2200);
+  });
+
+  it("refuses a file without the needed columns, an empty file and too many rows", async () => {
+    const S = await store("impbad");
+    await fails(importProductsCsv(S.f.tenantId, S.owner, "name,colour\nShirt,red\n"), "VALIDATION_ERROR");
+    await fails(importProductsCsv(S.f.tenantId, S.owner, head), "VALIDATION_ERROR");
+    await fails(importProductsCsv(S.f.tenantId, S.owner, head + Array.from({ length: 201 }, (_, i) => `P${i},10`).join("\n")), "VALIDATION_ERROR");
+  });
+
+  it("stops at the plan's product limit and says so, keeping what was added", async () => {
+    const S = await store("implimit", 5); // 3 already counted
+    const r = await importProductsCsv(S.f.tenantId, S.owner, `${head}A1,10\nA2,10\nA3,10\nA4,10\n`);
+    expect(r.created).toBe(2);
+    expect(r.stoppedByPlan).toBe(true);
+  });
+
+  it("only a person who can edit products may import", async () => {
+    const S = await store("impperm");
+    await fails(importProductsCsv(S.f.tenantId, S.support, `${head}A1,10\n`), "FORBIDDEN");
+  });
+});
+
+describe("bulk product actions and the collection filter", () => {
+  it("publishes, unpublishes and archives many at once, skipping the ones already so", async () => {
+    const S = await store("bulk");
+    const ids: string[] = [];
+    for (const t of ["B1", "B2", "B3"]) ids.push((await saveProduct(S.f.tenantId, S.owner, newProduct({ title: t, status: "DRAFT" }))).id);
+    expect(await bulkProductAction(S.f.tenantId, S.owner, ids, "publish")).toEqual({ done: 3, skipped: 0 });
+    expect(await bulkProductAction(S.f.tenantId, S.owner, ids, "publish")).toEqual({ done: 0, skipped: 3 });
+    expect((await listAdminProducts(S.f.tenantId, S.owner, { tab: "active", q: "B" })).rows.length).toBeGreaterThanOrEqual(3);
+    expect(await bulkProductAction(S.f.tenantId, S.owner, ids.slice(0, 1), "unpublish")).toEqual({ done: 1, skipped: 0 });
+    expect(await bulkProductAction(S.f.tenantId, S.owner, ids, "archive")).toEqual({ done: 3, skipped: 0 });
+    expect(await bulkProductAction(S.f.tenantId, S.owner, ids, "archive")).toEqual({ done: 0, skipped: 3 });
+    expect((await listAdminProducts(S.f.tenantId, S.owner, { q: "B1" })).rows).toHaveLength(0);
+    await fails(bulkProductAction(S.f.tenantId, S.support, ids, "publish"), "FORBIDDEN");
+  });
+
+  it("filters the list by collection", async () => {
+    const S = await store("coll");
+    const a = await saveProduct(S.f.tenantId, S.owner, newProduct({ title: "InColl" }));
+    await saveProduct(S.f.tenantId, S.owner, newProduct({ title: "OutColl" }));
+    const c = await owner.collection.create({ data: { tenantId: S.f.tenantId, title: "Eid", slug: "eid" } });
+    await owner.collectionProduct.create({ data: { tenantId: S.f.tenantId, collectionId: c.id, productId: a.id } });
+    const list = await listAdminProducts(S.f.tenantId, S.owner, { collectionId: c.id });
+    expect(list.rows.map((r) => r.title)).toEqual(["InColl"]);
+    expect(list.collections.map((x) => x.title)).toContain("Eid");
   });
 });

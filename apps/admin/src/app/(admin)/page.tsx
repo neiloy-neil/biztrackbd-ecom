@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { can, changePercent, getDashboard, type SetupStep } from "@biztrackbd/core";
+import { DASHBOARD_RANGES, can, changePercent, getDashboard, type SetupStep } from "@biztrackbd/core";
 import { PlusIcon } from "@/components/icons";
 import { friendlyDate, taka } from "@/lib/format";
+import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { OrderPill, PaymentPill } from "@/lib/status";
 
@@ -23,14 +24,25 @@ function greeting(now: Date) {
   return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
 }
 
-export default async function Dashboard() {
+export default async function Dashboard({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const sp = await searchParams;
   const s = await requireAccess("orders");
   const now = new Date();
-  const d = await getDashboard(s.tenantId, s.actor, now);
+  const range = Number(one(sp.range)) || 7;
+  const d = await getDashboard(s.tenantId, s.actor, now, { range });
   const showMoney = can(s.user.role, "reports");
   const salesChange = changePercent(d.today.sales, d.yesterday.sales);
-  const weekChange = changePercent(d.week.total, d.week.previousTotal);
-  const max = Math.max(1, ...d.week.days.map((x) => x.sales));
+  const chg = changePercent(d.series.total, d.series.previousTotal);
+  const ser = d.series;
+  const max = Math.max(1, ...ser.days.map((x) => Math.max(x.sales, x.previousSales)));
+  const W = 700, H = 200, bw = W / ser.days.length;
+  const y = (v: number) => H - Math.max(2, (v / max) * (H - 8));
+  const prevLine = ser.days.map((x, i) => `${(i * bw + bw / 2).toFixed(1)},${(x.previousSales > 0 ? y(x.previousSales) : H).toFixed(1)}`).join(" ");
+  const shortDate = (date: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`));
+  const tips: { text: string; href: string; cta: string }[] = [];
+  if (d.setup.steps.some((st) => st.key === "courier" && !st.done)) tips.push({ text: "Connect a courier and book parcels from the orders list in one tap.", href: "/settings/integrations", cta: "Connect" });
+  if (d.lowStock.length + d.outOfStock.count > 0) tips.push({ text: "Products that run out lose sales. Restock the ones below their reorder level.", href: "/inventory?filter=low", cta: "Open inventory" });
+  tips.push({ text: "Share your store link in your Facebook page and WhatsApp status. Most first orders come from there.", href: "/settings/store", cta: "See your link" });
   const dayName = (date: string) => new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`));
   const today = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Dhaka", weekday: "long", day: "numeric", month: "long" }).format(now);
 
@@ -88,15 +100,26 @@ export default async function Dashboard() {
       <div className="split" style={{ marginTop: 16 }}>
         <div className="col stack">
           {showMoney && (
-            <section className="card">
-              <div className="card-head"><h2>Sales, last 7 days</h2><Link href="/reports" className="link" prefetch={false}>Open report</Link></div>
-              <div className="num" style={{ fontSize: 24, fontWeight: 800 }}>{taka(d.week.total)}</div>
-              <div className="muted" style={{ fontSize: 13, marginBottom: 12 }}>{weekChange == null ? "No earlier week to compare" : `${weekChange >= 0 ? "+" : ""}${weekChange}% vs the previous 7 days`}</div>
-              <div className="bars" role="img" aria-label={`Sales per day: ${d.week.days.map((x) => `${dayName(x.date)} ${taka(x.sales)}`).join(", ")}`}>
-                {d.week.days.map((x) => (
-                  <div className="bar" key={x.date}><i style={{ height: `${Math.max(3, Math.round((x.sales / max) * 100))}%`, opacity: x.date === d.week.days.at(-1)!.date ? 1 : 0.55 }} /><span>{dayName(x.date)}</span></div>
-                ))}
+            <section className="card" data-testid="sales-chart">
+              <div className="card-head">
+                <h2>Sales, last {ser.range} days</h2>
+                <div className="view-toggle" role="group" aria-label="Date range">
+                  {DASHBOARD_RANGES.map((r) => <Link key={r} href={r === 7 ? "/" : `/?range=${r}`} className="chip" aria-current={ser.range === r ? "true" : undefined} prefetch={false} data-testid={`range-${r}`}>{r} days</Link>)}
+                </div>
               </div>
+              <div className="num" style={{ fontSize: 24, fontWeight: 800 }} data-testid="sales-total">{taka(ser.total)}</div>
+              <div className="muted" style={{ fontSize: 13, marginBottom: 12 }}>{ser.orders} {ser.orders === 1 ? "order" : "orders"} · {chg == null ? "No earlier period to compare" : `${chg >= 0 ? "+" : ""}${chg}% vs the previous ${ser.range} days (${taka(ser.previousTotal)})`}</div>
+              <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="200" preserveAspectRatio="none" role="img" aria-label={`Sales per day for the last ${ser.range} days, with the previous ${ser.range} days as a dashed line. Total ${taka(ser.total)}, before ${taka(ser.previousTotal)}.`}>
+                <path d={`M0 ${H - 0.5}H${W}`} stroke="var(--line)" />
+                {ser.days.map((x, i) => <rect key={x.date} x={i * bw + bw * 0.15} width={bw * 0.7} y={y(x.sales)} height={H - y(x.sales)} rx={2} fill="var(--brand)" opacity={i === ser.days.length - 1 ? 1 : 0.6}><title>{`${shortDate(x.date)}: ${taka(x.sales)}`}</title></rect>)}
+                <polyline points={prevLine} fill="none" stroke="var(--ink-3)" strokeWidth={2} strokeDasharray="5 4" vectorEffect="non-scaling-stroke" />
+              </svg>
+              <div className="row" style={{ justifyContent: "space-between", fontSize: 12.5, marginTop: 6 }} aria-hidden="true">
+                <span className="muted">{shortDate(ser.days[0]!.date)}</span>
+                <span className="muted"><span style={{ display: "inline-block", width: 10, height: 10, background: "var(--brand)", borderRadius: 2, marginRight: 4 }} />This period <span style={{ display: "inline-block", width: 16, borderTop: "2px dashed var(--ink-3)", margin: "0 4px 3px 10px" }} />Before</span>
+                <span className="muted">{shortDate(ser.days.at(-1)!.date)}</span>
+              </div>
+              <Link href="/reports" className="link" prefetch={false} style={{ display: "inline-flex", alignItems: "center", minHeight: 40 }}>Open report</Link>
             </section>
           )}
 
@@ -149,6 +172,15 @@ export default async function Dashboard() {
               </div>
             </section>
           )}
+          <section className="card" data-testid="tips-card">
+            <div className="card-head"><h2>Tips</h2></div>
+            {tips.slice(0, 3).map((t) => (
+              <div key={t.text} style={{ padding: "8px 0", borderTop: "1px solid var(--line)" }}>
+                <p style={{ margin: "0 0 4px", fontSize: 14 }}>{t.text}</p>
+                <Link href={t.href} className="link" prefetch={false} style={{ display: "inline-flex", alignItems: "center", minHeight: 40 }}>{t.cta}</Link>
+              </div>
+            ))}
+          </section>
           {d.lowStock.length > 0 && (
             <section className="card">
               <div className="card-head"><h2>Low stock</h2><Link href="/inventory?filter=low" className="link" prefetch={false}>See all</Link></div>

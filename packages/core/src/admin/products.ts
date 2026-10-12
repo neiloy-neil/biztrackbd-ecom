@@ -3,8 +3,10 @@ import { z } from "zod";
 import { audit } from "../audit/service";
 import { NotFoundError, ValidationError } from "../errors";
 import { claimProductSlot } from "../limits/plan";
+import { archiveProduct } from "../products/service";
 import { assertCan, type StaffActor } from "../permissions";
 import { sanitizeProductHtml } from "../storefront/html";
+import { headerKey, parseCsv, parseMoney } from "../finance/csv";
 
 export type ProductTab = "all" | "active" | "draft" | "out";
 
@@ -29,7 +31,7 @@ export function slugify(title: string): string {
 }
 
 export async function listAdminProducts(
-  tenantId: string, actor: StaffActor, opts: { tab?: ProductTab; q?: string; categoryId?: string; page?: number; pageSize?: number } = {},
+  tenantId: string, actor: StaffActor, opts: { tab?: ProductTab; q?: string; categoryId?: string; collectionId?: string; page?: number; pageSize?: number } = {},
 ) {
   assertCan(actor, "products", "view");
   const pageSize = Math.min(Math.max(opts.pageSize ?? 25, 1), 100);
@@ -43,6 +45,7 @@ export async function listAdminProducts(
   const where: Prisma.ProductWhereInput = {
     ...base, ...tabWhere,
     ...(opts.categoryId ? { categoryId: opts.categoryId } : {}),
+    ...(opts.collectionId ? { collections: { some: { collectionId: opts.collectionId } } } : {}),
     ...(q ? { OR: [{ title: { contains: like, mode: "insensitive" } }, { titleBn: { contains: like } }, { variants: { some: { sku: { contains: like, mode: "insensitive" } } } }] } : {}),
   };
 
@@ -69,6 +72,8 @@ export async function listAdminProducts(
     };
     const categories = await tx.category.findMany({ orderBy: [{ sortOrder: "asc" }, { name: "asc" }], select: { id: true, name: true } });
 
+    const collections = await tx.collection.findMany({ orderBy: [{ sortOrder: "asc" }, { title: "asc" }], select: { id: true, title: true } });
+
     const rows = products.map<AdminProductRow>((p) => {
       const names = new Set<string>();
       for (const v of p.variants) for (const k of Object.keys((v.options ?? {}) as Record<string, string>)) names.add(k);
@@ -80,7 +85,7 @@ export async function listAdminProducts(
         sold30d: sold.find((s) => s.id === p.id)?.n ?? 0,
       };
     });
-    return { rows, total, counts, categories, page, pageSize };
+    return { rows, total, counts, categories, collections, page, pageSize };
   });
 }
 
@@ -299,4 +304,82 @@ export async function deleteCategory(tenantId: string, actor: StaffActor, catego
     if (count === 0) throw new NotFoundError("Category");
     await audit(tx, tenantId, actor, "category.deleted", { categoryId });
   });
+}
+
+/** Publish, unpublish or archive many products at once. Ones that are already archived or missing are skipped. Returns how many changed. */
+export async function bulkProductAction(tenantId: string, actor: StaffActor, ids: string[], action: "publish" | "unpublish" | "archive"): Promise<{ done: number; skipped: number }> {
+  assertCan(actor, "products", "edit");
+  const unique = [...new Set(ids)].slice(0, 200);
+  if (action === "archive") {
+    let done = 0;
+    for (const id of unique) {
+      const before = await withTenant(tenantId, (tx) => tx.product.findFirst({ where: { id, deletedAt: null }, select: { id: true } }));
+      if (!before) continue;
+      await archiveProduct(tenantId, id, actor);
+      done++;
+    }
+    return { done, skipped: unique.length - done };
+  }
+  const status = action === "publish" ? "ACTIVE" : "DRAFT";
+  return withTenant(tenantId, async (tx) => {
+    const { count } = await tx.product.updateMany({ where: { id: { in: unique }, deletedAt: null, status: { not: status } }, data: { status } });
+    await audit(tx, tenantId, actor, "product.bulk_status", { status, count, ids: unique });
+    return { done: count, skipped: unique.length - count };
+  });
+}
+
+export const IMPORT_MAX_ROWS = 200;
+export const IMPORT_TEMPLATE = "title,price,stock,sku,status,category,description,compare_at_price\nCotton Panjabi,1850,12,PJ-001,active,Panjabi,Soft cotton for Eid,2200\n";
+
+export interface ProductImportResult {
+  created: number;
+  failed: { line: number; title: string; reason: string }[];
+  /** True when the plan's product limit stopped the import part way. */
+  stoppedByPlan: boolean;
+}
+
+/**
+ * Creates one product (with a single variant) for each row of a CSV. Columns: title, price, stock, sku, status (active or draft),
+ * category (made if new), description, compare_at_price. Rows that fail are reported by line and the rest still go in. Each row goes
+ * through saveProduct, so the same checks and the plan's product limit apply as when adding a product by hand.
+ */
+export async function importProductsCsv(tenantId: string, actor: StaffActor, text: string): Promise<ProductImportResult> {
+  assertCan(actor, "products", "edit");
+  const rows = parseCsv(text.replace(/^\uFEFF/, "")).filter((r) => r.some((c) => c.trim() !== ""));
+  if (rows.length < 2) throw new ValidationError("The file has no products. Use the template: one product per row under the header.");
+  const head = rows[0]!.map(headerKey);
+  const col = (...names: string[]) => head.findIndex((h) => names.includes(h));
+  const ix = { title: col("title", "name", "productname"), price: col("price", "baseprice"), stock: col("stock", "quantity", "qty"), sku: col("sku"), status: col("status"), category: col("category"), desc: col("description", "details"), compare: col("compareatprice", "compareat", "mrp") };
+  if (ix.title < 0 || ix.price < 0) throw new ValidationError("The first row must have the columns title and price.");
+  const body = rows.slice(1);
+  if (body.length > IMPORT_MAX_ROWS) throw new ValidationError(`Import up to ${IMPORT_MAX_ROWS} products at a time. This file has ${body.length}.`);
+  const at = (r: string[], i: number) => (i >= 0 ? (r[i] ?? "").trim() : "");
+  const out: ProductImportResult = { created: 0, failed: [], stoppedByPlan: false };
+  for (let n = 0; n < body.length; n++) {
+    const r = body[n]!;
+    const line = n + 2, title = at(r, ix.title);
+    const price = parseMoney(at(r, ix.price));
+    const stockRaw = at(r, ix.stock);
+    const stock = stockRaw === "" ? 0 : Number(stockRaw);
+    if (price == null || !(price > 0)) { out.failed.push({ line, title, reason: "Price must be a number above 0" }); continue; }
+    if (!Number.isInteger(stock) || stock < 0) { out.failed.push({ line, title, reason: "Stock must be a whole number" }); continue; }
+    const compare = parseMoney(at(r, ix.compare));
+    const category = at(r, ix.category);
+    const status = at(r, ix.status).toLowerCase() === "active" ? "ACTIVE" : "DRAFT";
+    const desc = at(r, ix.desc).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    try {
+      await saveProduct(tenantId, actor, {
+        title, basePrice: price, compareAtPrice: compare && compare > price ? compare : null, status, descriptionHtml: desc ? `<p>${desc}</p>` : "",
+        ...(category ? { newCategoryName: category } : {}),
+        variants: [{ title: "Default", sku: at(r, ix.sku) || null, price, compareAtPrice: compare && compare > price ? compare : null, stockQuantity: stock, options: {} }],
+      });
+      out.created++;
+    } catch (e) {
+      const code = (e as { code?: string }).code;
+      if (code === "PLAN_LIMIT") { out.stoppedByPlan = true; out.failed.push({ line, title, reason: (e as Error).message }); break; }
+      if (e instanceof ValidationError || e instanceof NotFoundError) out.failed.push({ line, title, reason: e.message });
+      else throw e;
+    }
+  }
+  return out;
 }
