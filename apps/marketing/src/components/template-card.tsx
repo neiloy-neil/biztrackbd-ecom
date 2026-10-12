@@ -1,7 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
-import { demoTemplate } from "@biztrackbd/core";
 import { demoAdminUrl } from "@/lib/demo-admin";
+
+const THEME_HOSTS: Record<string, string> = {
+  kapor: "kapor",
+  gadgetstudio: "gadgetstudio",
+  "mini-bunny": "minibunny",
+  axionwear: "axionwear",
+  bindu: "bindu",
+  berber: "berber",
+};
 
 /** Where a template's demo store lives: <name>.<root domain>. Local development uses http and the dev port. */
 export function demoUrl(host: string): string {
@@ -16,7 +24,7 @@ export interface TemplateInfo { id: string; name: string; blurb: string; audienc
 
 /** A template with a real preview of its demo store (desktop, and a phone overlapping the corner), and links to open the demo or start with it. */
 export function TemplateCard({ t, compact }: { t: TemplateInfo; compact?: boolean }) {
-  const demo = demoTemplate(t.id);
+  const host = THEME_HOSTS[t.id] ?? t.id;
   return (
     <div className={`card tpl${compact ? " compact" : ""}`} data-testid={`theme-${t.id}`}>
       <div className="tpl-shot">
@@ -27,8 +35,8 @@ export function TemplateCard({ t, compact }: { t: TemplateInfo; compact?: boolea
       <p>{compact && t.audience ? t.audience : t.blurb}</p>
       {t.live && (
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          {demo && <a href={demoUrl(demo.host)} className="btn btn-secondary btn-sm" target="_blank" rel="noopener noreferrer" data-testid={`demo-${t.id}`}>View live demo</a>}
-          {demo && <a href={demoAdminUrl(t.id)} className="btn btn-secondary btn-sm" rel="nofollow" data-testid={`admin-demo-${t.id}`} aria-label={`Try the admin with the ${t.name} template`}>Try the admin</a>}
+          <a href={demoUrl(host)} className="btn btn-secondary btn-sm" target="_blank" rel="noopener noreferrer" data-testid={`demo-${t.id}`}>View live demo</a>
+          <a href={demoAdminUrl(t.id)} className="btn btn-secondary btn-sm" rel="nofollow" data-testid={`admin-demo-${t.id}`} aria-label={`Try the admin with the ${t.name} template`}>Try the admin</a>
           <Link href={`/start?theme=${t.id}`} className="btn btn-primary btn-sm" prefetch={false}>Use this template</Link>
         </div>
       )}

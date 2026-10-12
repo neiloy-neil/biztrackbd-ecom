@@ -14,6 +14,10 @@ export default async function Done({ searchParams }: { searchParams: Promise<Rec
   const proto = root.startsWith("localhost") ? "http" : "https";
   const storeUrl = `${proto}://${store}.${root}`;
   const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? "http://localhost:3001";
+  const ticket = one(sp.ticket);
+  const adminEntryUrl = ticket
+    ? `${adminUrl}/api/auth/start-pass?ticket=${encodeURIComponent(ticket)}`
+    : adminUrl;
   const ends = one(sp.ends) ? new Date(one(sp.ends)!) : null;
   const endsText = ends && !Number.isNaN(ends.getTime()) ? new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Dhaka" }).format(ends) : null;
   const review = one(sp.review) === "1";
@@ -29,7 +33,7 @@ export default async function Done({ searchParams }: { searchParams: Promise<Rec
           <div className="big" data-testid="store-url">{storeUrl}</div>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 16 }}>
             <a className="btn btn-primary btn-lg" href={storeUrl} data-testid="open-store">Open my store</a>
-            <a className="btn btn-secondary btn-lg" href={adminUrl} data-testid="open-admin">Go to my admin</a>
+            <a className="btn btn-secondary btn-lg" href={adminEntryUrl} data-testid="open-admin">Go to my admin</a>
           </div>
         </div>
         {review && <div className="notice" style={{ textAlign: "left", marginBottom: 16 }}>Your store name looks like a well-known brand, so a person will check it. Your store works as normal. Connecting your own domain opens once the check is done, usually within a day.</div>}

@@ -9,12 +9,13 @@ import { switchDevUser } from "./dev-actions";
 
 export const dynamic = "force-dynamic";
 
-const ITEMS: { href: string; label: string; area: PlatformArea; exact?: boolean; iconPath: string; isTickets?: boolean; isPayments?: boolean }[] = [
+const ITEMS: { href: string; label: string; area: PlatformArea; exact?: boolean; iconPath: string; isTickets?: boolean; isPayments?: boolean; isInquiries?: boolean }[] = [
   { href: "/", label: "Overview", area: "tenants", exact: true, iconPath: "M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-6" },
   { href: "/tenants", label: "Tenants", area: "tenants", iconPath: "M4 9l1.5-5h13L20 9M4 9a2.7 2.7 0 005.3 0 2.7 2.7 0 005.4 0A2.7 2.7 0 0020 9M5 12v8h14v-8" },
   { href: "/payments", label: "Payments and plans", area: "payments", iconPath: "M4.5 5h15A2.5 2.5 0 0122 7.5v9a2.5 2.5 0 01-2.5 2.5h-15A2.5 2.5 0 012 16.5v-9A2.5 2.5 0 014.5 5zM2 10h20", isPayments: true },
   { href: "/domains", label: "Domains", area: "tenants", iconPath: "M12 3a9 9 0 100 18 9 9 0 000-18zM3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" },
   { href: "/themes", label: "Themes and modules", area: "tenants", iconPath: "M3 3h7.5v7.5H3zM13.5 3H21v7.5h-7.5zM3 13.5h7.5V21H3zM13.5 13.5H21V21h-7.5z" },
+  { href: "/inquiries", label: "Inquiries", area: "tickets", iconPath: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", isInquiries: true },
   { href: "/tickets", label: "Support tickets", area: "tickets", iconPath: "M4 5h16v11H9l-5 4V5z", isTickets: true },
   { href: "/announcements", label: "Announcements", area: "announcements", iconPath: "M4 10v4h3l8 4V6L7 10H4zM18 9a4 4 0 010 6" },
   { href: "/usage", label: "Usage and limits", area: "tenants", iconPath: "M12 3a9 9 0 100 18 9 9 0 000-18zM12 7v5l3 2" },
@@ -29,6 +30,7 @@ export default async function SaLayout({ children }: { children: React.ReactNode
   const overview = await getOverview(s.actor);
   const pending = overview.pendingPayments.count;
   const openTickets = overview.openTickets;
+  const newInquiries = await getPlatformPrisma().platformInquiry.count({ where: { status: "NEW" } }).catch(() => 0);
   const items = ITEMS.filter((i) => canPlatform(s.user.role, i.area));
   const initials = s.user.name.split(" ").map((w) => w[0]).filter(Boolean).slice(0, 2).join("").toUpperCase() || "SA";
 
@@ -58,6 +60,7 @@ export default async function SaLayout({ children }: { children: React.ReactNode
               <span>{i.label}</span>
               {i.isPayments && pending > 0 && <span className="count" aria-label={`${pending} payments to check`}>{pending}</span>}
               {i.isTickets && openTickets > 0 && <span className="count" aria-label={`${openTickets} open support tickets`}>{openTickets}</span>}
+              {i.isInquiries && newInquiries > 0 && <span className="count" aria-label={`${newInquiries} new inquiries`}>{newInquiries}</span>}
             </NavLink>
           ))}
         </nav>

@@ -2,13 +2,30 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { DomainError, savePixelId, sendTestEvent } from "@biztrackbd/core";
+import { DomainError, savePixelId, saveTrackingConfig, sendTestEvent } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 
 export async function savePixelAction(form: FormData): Promise<void> {
   const s = await requireAction("marketing", "edit");
   try {
     await savePixelId(s.tenantId, s.actor, String(form.get("pixelId") ?? ""));
+  } catch (e) {
+    if (e instanceof DomainError) redirect(`/marketing/pixels?err=${encodeURIComponent(e.message)}`);
+    throw e;
+  }
+  revalidatePath("/marketing/pixels");
+  redirect("/marketing/pixels?done=saved");
+}
+
+export async function saveAllTrackingAction(form: FormData): Promise<void> {
+  const s = await requireAction("marketing", "edit");
+  try {
+    await saveTrackingConfig(s.tenantId, s.actor, {
+      pixelId: String(form.get("pixelId") ?? ""),
+      googleAnalyticsId: String(form.get("googleAnalyticsId") ?? ""),
+      googleTagManagerId: String(form.get("googleTagManagerId") ?? ""),
+      tiktokPixelId: String(form.get("tiktokPixelId") ?? ""),
+    });
   } catch (e) {
     if (e instanceof DomainError) redirect(`/marketing/pixels?err=${encodeURIComponent(e.message)}`);
     throw e;

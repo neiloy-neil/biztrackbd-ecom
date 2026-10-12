@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { DomainError, SUBDOMAIN_MESSAGES, checkSubdomain, signupStore } from "@biztrackbd/core";
+import { DomainError, SUBDOMAIN_MESSAGES, checkSubdomain, signupStore, createOnboardingPassTicket } from "@biztrackbd/core";
 import { keepPictureCopier, samplePictures } from "@/lib/pictures";
 
 export interface SignupState {
@@ -44,7 +44,28 @@ export async function signupAction(_prev: SignupState, form: FormData): Promise<
     console.error("signup failed", e instanceof Error ? e.name : "unknown");
     return { error: "We could not create your store. Nothing was charged. Please try again." };
   }
-  const q = new URLSearchParams({ store: signed.subdomain, name: signed.storeName, ends: signed.trialEndsAt.toISOString(), plan: signed.plan, ...(signed.quarantined ? { review: "1" } : {}), ...(signed.kept ? { kept: String(signed.kept) } : {}) });
+
+  let ticket = "";
+  try {
+    ticket = createOnboardingPassTicket({
+      tenantId: signed.tenantId,
+      subdomain: signed.subdomain,
+      ownerEmail: signed.ownerEmail,
+      ownerName: signed.ownerName,
+    });
+  } catch {
+    // If ticket creation fails (e.g. dev secret length), fallback to regular flow
+  }
+
+  const q = new URLSearchParams({
+    store: signed.subdomain,
+    name: signed.storeName,
+    ends: signed.trialEndsAt.toISOString(),
+    plan: signed.plan,
+    ...(ticket ? { ticket } : {}),
+    ...(signed.quarantined ? { review: "1" } : {}),
+    ...(signed.kept ? { kept: String(signed.kept) } : {}),
+  });
   redirect(`/start/done?${q.toString()}`);
 }
 

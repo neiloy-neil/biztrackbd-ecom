@@ -4,43 +4,48 @@ import { planBullets } from "@/lib/plans";
 import { Wizard } from "./wizard";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Open your store", description: "Start a free 14-day trial. No card needed.", robots: { index: false } };
 
-export default async function Start({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+export const metadata: Metadata = {
+  title: "Open Your Online Store: 14-Day Free Trial",
+  description: "Start a free 14-day trial for your Bangladeshi online store. Sell with bKash, Nagad, and Cash on Delivery. No credit card required.",
+  robots: { index: false },
+};
+
+export default async function Start({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const sp = await searchParams;
   const plans = await listPublicPlans();
   const wantedPlan = typeof sp.plan === "string" ? sp.plan : "";
   const wantedTheme = typeof sp.theme === "string" ? sp.theme : "";
-  const initialPlan = plans.find((p) => p.tier === wantedPlan)?.tier ?? plans.find((p) => p.tier === "PRO")?.tier ?? plans[0]!.tier;
+  const initialPlan =
+    plans.find((p) => p.tier === wantedPlan)?.tier ??
+    plans.find((p) => p.tier === "PRO")?.tier ??
+    plans[0]!.tier;
+
   // Coming from a demo: its store comes with the visitor, in the template they were trying.
   const from = typeof sp.from === "string" ? sp.from.slice(0, 120) : "";
   const kept = from ? await readKeptStore(from).catch(() => null) : null;
-  const initialTheme = THEMES.find((t) => t.id === (kept?.template || wantedTheme) && t.live)?.id ?? "kapor";
+  const initialTheme =
+    THEMES.find((t) => t.id === (kept?.template || wantedTheme) && t.live)?.id ?? "kapor";
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+
   return (
-    <div className="split-start">
-      <div className="split-form">
-        {kept && (
-          <div className="notice good" role="status" data-testid="keep-note" style={{ marginBottom: 16 }}>
-            Your demo store comes with you: {kept.products.length} {kept.products.length === 1 ? "product" : "products"}, the pictures and the home page you were looking at. Finish signing up to keep it.
-          </div>
-        )}
-        <Wizard
-          keepCode={kept ? from : ""}
-          rootDomain={rootDomain} initialPlan={initialPlan} initialTheme={initialTheme}
-          themes={THEMES.map((t) => ({ id: t.id, name: t.name, blurb: t.blurb, live: t.live }))}
-          plans={plans.map((p) => ({ tier: p.tier, name: p.name, priceMonthly: p.priceMonthly, blurb: planBullets(p).slice(0, 3).join(", ") }))}
-        />
-      </div>
-      <aside className="split-side" aria-label="What happens next">
-        <span className="eyebrow">What happens next</span>
-        <ol>
-          <li><span>1</span><div><b>Pick a template</b><p>Choose a look for fashion, gadgets, kids wear, tailoring or beauty. Change it any time without losing your products.</p></div></li>
-          <li><span>2</span><div><b>Add your products</b><p>Take photos on your phone, set prices in taka, and start with sample products if you want to look around first.</p></div></li>
-          <li><span>3</span><div><b>Share your link and sell</b><p>Customers pay by cash on delivery, bKash or Nagad. You book Pathao, Steadfast or RedX from the order.</p></div></li>
-        </ol>
-        <p className="side-foot"><span>14 days free</span><span>No card required</span><span>Bangla and English</span></p>
-      </aside>
-    </div>
+    <Wizard
+      keepCode={kept ? from : ""}
+      keptProductsCount={kept?.products.length}
+      rootDomain={rootDomain}
+      initialPlan={initialPlan}
+      initialTheme={initialTheme}
+      themes={THEMES.map((t) => ({ id: t.id, name: t.name, blurb: t.blurb, live: t.live }))}
+      plans={plans.map((p) => ({
+        tier: p.tier,
+        name: p.name,
+        priceMonthly: p.priceMonthly,
+        blurb: planBullets(p).slice(0, 3).join(", "),
+      }))}
+    />
   );
 }

@@ -38,6 +38,9 @@ export const purchaseEventId = (orderId: string) => `purchase_${orderId}`;
 
 export interface TrackingConfig {
   pixelId: string | null;
+  googleAnalyticsId: string | null;
+  googleTagManagerId: string | null;
+  tiktokPixelId: string | null;
   capiConnected: boolean;
   capiMode: "TEST" | "LIVE" | null;
   capiStatus: string | null;
@@ -45,9 +48,36 @@ export interface TrackingConfig {
   lastError: string | null;
 }
 
-/** What the storefront may know: the public pixel id. The token never leaves the server. */
+export interface StorefrontTracking {
+  pixelId: string | null;
+  googleAnalyticsId: string | null;
+  googleTagManagerId: string | null;
+  tiktokPixelId: string | null;
+}
+
+/** What the storefront may know: public pixel and container IDs. Access tokens never leave the server. */
+export async function getStorefrontTracking(tenantId: string): Promise<StorefrontTracking> {
+  return withTenant(tenantId, async (tx) => {
+    const s = await tx.storeSettings.findFirst({
+      select: {
+        metaPixelId: true,
+        googleAnalyticsId: true,
+        googleTagManagerId: true,
+        tiktokPixelId: true,
+      },
+    });
+    return {
+      pixelId: s?.metaPixelId ?? null,
+      googleAnalyticsId: s?.googleAnalyticsId ?? null,
+      googleTagManagerId: s?.googleTagManagerId ?? null,
+      tiktokPixelId: s?.tiktokPixelId ?? null,
+    };
+  });
+}
+
+/** Legacy alias for backwards compatibility */
 export async function getPixelId(tenantId: string): Promise<string | null> {
-  return withTenant(tenantId, async (tx) => (await tx.storeSettings.findFirst({ select: { metaPixelId: true } }))?.metaPixelId ?? null);
+  return (await getStorefrontTracking(tenantId)).pixelId;
 }
 
 async function capiRow(tenantId: string) {
@@ -57,19 +87,124 @@ async function capiRow(tenantId: string) {
 
 export async function getTrackingConfig(tenantId: string, actor: StaffActor): Promise<TrackingConfig> {
   assertCan(actor, "marketing", "view");
-  const [pixelId, row] = await Promise.all([getPixelId(tenantId), capiRow(tenantId)]);
-  return { pixelId, capiConnected: Boolean(row), capiMode: (row?.mode as "TEST" | "LIVE" | undefined) ?? null, capiStatus: row?.status ?? null, lastVerifiedAt: row?.lastVerifiedAt ?? null, lastError: row?.lastError ?? null };
+  const [sf, row] = await Promise.all([getStorefrontTracking(tenantId), capiRow(tenantId)]);
+  return {
+    pixelId: sf.pixelId,
+    googleAnalyticsId: sf.googleAnalyticsId,
+    googleTagManagerId: sf.googleTagManagerId,
+    tiktokPixelId: sf.tiktokPixelId,
+    capiConnected: Boolean(row),
+    capiMode: (row?.mode as "TEST" | "LIVE" | undefined) ?? null,
+    capiStatus: row?.status ?? null,
+    lastVerifiedAt: row?.lastVerifiedAt ?? null,
+    lastError: row?.lastError ?? null,
+  };
 }
 
 export async function savePixelId(tenantId: string, actor: StaffActor, input: string): Promise<void> {
+  await saveTrackingConfig(tenantId, actor, { pixelId: input });
+}
+
+export async function saveTrackingConfig(
+  tenantId: string,
+  actor: StaffActor,
+  input: {
+    pixelId?: string | null;
+    googleAnalyticsId?: string | null;
+    googleTagManagerId?: string | null;
+    tiktokPixelId?: string | null;
+  },
+): Promise<void> {
   assertCan(actor, "marketing", "edit");
-  const id = input.trim();
-  if (id !== "" && !/^\d{8,20}$/.test(id)) throw new ValidationError("A Pixel ID is 8 to 20 digits. Copy it from Meta Events Manager.");
+  const pixelId = input.pixelId?.trim() || null;
+  if (pixelId && !/^\d{8,20}$/.test(pixelId)) throw new ValidationError("A Meta Pixel ID is 8 to 20 digits. Copy it from Meta Events Manager.");
+  const ga4 = input.googleAnalyticsId?.trim() || null;
+  if (ga4 && !/^G-[A-Za-z0-9]+$/i.test(ga4)) throw new ValidationError("A Google Analytics 4 ID starts with G-, like G-ABC123XYZ.");
+  const gtm = input.googleTagManagerId?.trim() || null;
+  if (gtm && !/^GTM-[A-Za-z0-9]+$/i.test(gtm)) throw new ValidationError("A Google Tag Manager Container ID starts with GTM-, like GTM-ABC123X.");
+  const tiktok = input.tiktokPixelId?.trim() || null;
+  if (tiktok && !/^[A-Za-z0-9_-]{10,40}$/.test(tiktok)) throw new ValidationError("Enter a valid TikTok Pixel ID (10 to 40 characters).");
+
   await withTenant(tenantId, async (tx) => {
-    const { count } = await tx.storeSettings.updateMany({ data: { metaPixelId: id === "" ? null : id } });
+    const { count } = await tx.storeSettings.updateMany({
+      data: {
+        metaPixelId: pixelId,
+        googleAnalyticsId: ga4,
+        googleTagManagerId: gtm,
+        tiktokPixelId: tiktok,
+      },
+    });
     if (count === 0) throw new NotFoundError("Store settings");
-    await audit(tx, tenantId, actor, "tracking.pixel_saved", { pixelId: id || null });
+    await audit(tx, tenantId, actor, "tracking.config_saved", {
+      pixelId,
+      googleAnalyticsId: ga4,
+      googleTagManagerId: gtm,
+      tiktokPixelId: tiktok,
+    });
   });
+}
+
+// ---- Facebook Graph API OAuth & Ad Account Helpers ---------------------------------
+
+export function buildMetaOAuthUrl(clientId: string, redirectUri: string, state: string): string {
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    state,
+    scope: "ads_management,business_management",
+    response_type: "code",
+  });
+  return `https://www.facebook.com/v21.0/dialog/oauth?${params.toString()}`;
+}
+
+export async function exchangeMetaOAuthCode(
+  clientId: string,
+  clientSecret: string,
+  redirectUri: string,
+  code: string,
+): Promise<{ accessToken: string; expiresIn: number }> {
+  const params = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    redirect_uri: redirectUri,
+    code,
+  });
+  const res = await fetch(`https://graph.facebook.com/v21.0/oauth/access_token?${params.toString()}`);
+  if (!res.ok) {
+    const err = (await res.json().catch(() => ({}))) as { error?: { message?: string } };
+    throw new ValidationError(err.error?.message ?? "Failed to authorize Facebook account");
+  }
+  const data = (await res.json()) as { access_token: string; expires_in?: number };
+  return { accessToken: data.access_token, expiresIn: data.expires_in ?? 5184000 };
+}
+
+export interface MetaAdAccountPixel {
+  adAccountId: string;
+  adAccountName: string;
+  pixelId: string;
+  pixelName: string;
+}
+
+export async function fetchMetaPixels(accessToken: string): Promise<MetaAdAccountPixel[]> {
+  const res = await fetch(
+    `https://graph.facebook.com/v21.0/me/adaccounts?fields=id,name,account_id,adspixels{id,name}&access_token=${accessToken}`,
+  );
+  if (!res.ok) return [];
+  const body = (await res.json().catch(() => ({}))) as {
+    data?: { id: string; name: string; account_id: string; adspixels?: { data?: { id: string; name: string }[] } }[];
+  };
+  const list: MetaAdAccountPixel[] = [];
+  for (const acc of body.data ?? []) {
+    for (const px of acc.adspixels?.data ?? []) {
+      list.push({
+        adAccountId: acc.account_id || acc.id,
+        adAccountName: acc.name,
+        pixelId: px.id,
+        pixelName: px.name,
+      });
+    }
+  }
+  return list;
 }
 
 // ---- Sending -------------------------------------------------------------------------------------------------------
@@ -220,6 +355,39 @@ export async function recordBrowserPurchase(tenantId: string, orderId: string): 
   const eventId = purchaseEventId(orderId);
   await remember(tenantId, { name: "Purchase", eventId, origin: "BROWSER", orderId, status: "SENT", payload: { value: f.total, currency: "BDT" } });
   return { eventId, value: f.total, contentIds: f.ids, numItems: f.qty };
+}
+
+/**
+ * When an order is cancelled or marked returned by courier, fire a cancellation/reversal event to Meta CAPI.
+ * This instructs Meta's ad algorithm to optimize away from serial COD returners and fraudulent numbers.
+ */
+export async function sendServerCancellation(
+  tenantId: string,
+  orderId: string,
+  reason = "Courier return or cancelled",
+): Promise<{ sent: boolean }> {
+  try {
+    const pixelId = await getPixelId(tenantId);
+    if (!pixelId || !(await capiRow(tenantId))) return { sent: false };
+    const f = await purchaseFacts(tenantId, orderId);
+    if (!f) return { sent: false };
+    const eventId = `cancel_${orderId}`;
+    const payload = { value: f.total, currency: "BDT", reason, contentIds: f.ids, numItems: f.qty };
+    if (!(await remember(tenantId, { name: "Purchase", eventId, origin: "SERVER", orderId, status: "CANCELLED", payload }))) return { sent: false };
+    const r = await sendCapi(tenantId, pixelId, {
+      name: "Purchase",
+      eventId,
+      time: new Date(),
+      user: { phoneLocal: f.phoneLocal, email: f.email, customerId: f.customerId },
+      value: 0,
+      contentIds: f.ids,
+      numItems: f.qty,
+    });
+    return { sent: r.ok };
+  } catch (e) {
+    console.error("[tracking] server cancellation failed", e instanceof Error ? e.name : "unknown");
+    return { sent: false };
+  }
 }
 
 // ---- The owner's screen --------------------------------------------------------------------------------------------

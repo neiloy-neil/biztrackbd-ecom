@@ -14,27 +14,212 @@ export interface PlanCardData {
 
 const taka = (n: number) => `৳ ${n.toLocaleString("en-IN")}`;
 
-/** The plan cards with a Monthly or Yearly choice. The first view is monthly, which is what the page shows without scripts. */
-export function PlanCards({ plans, best, compactBullets }: { plans: PlanCardData[]; best?: string; compactBullets?: number }) {
+const PLAN_FOR: Record<string, string> = {
+  STARTER: "For new brands starting to take online orders.",
+  PRO: "For growing stores with daily Pathao & Steadfast shipments.",
+  BUSINESS: "For established brands managing large order volumes.",
+};
+
+/** The plan cards matching MktPricing.dc.html with Monthly or Yearly toggle. */
+export function PlanCards({
+  plans,
+  best,
+  compactBullets,
+}: {
+  plans: PlanCardData[];
+  best?: string;
+  compactBullets?: number;
+}) {
   const [yearly, setYearly] = useState(false);
   const free = Math.max(0, ...plans.map((p) => p.monthsFree));
+
   return (
     <>
-      <div className="billing-toggle" role="group" aria-label="Billing period">
-        <button type="button" aria-pressed={!yearly} onClick={() => setYearly(false)}>Monthly</button>
-        <button type="button" aria-pressed={yearly} onClick={() => setYearly(true)}>Yearly{free > 0 && <span className="pill live">{free} months free</span>}</button>
+      {/* Canvas Billing Period Switch */}
+      <div
+        className="billing-toggle"
+        role="group"
+        aria-label="Billing period"
+        style={{
+          display: "inline-flex",
+          padding: 4,
+          borderRadius: 22,
+          background: "#EFEFF6",
+          fontSize: 14,
+          fontWeight: 700,
+          margin: "0 auto 36px",
+        }}
+      >
+        <button
+          type="button"
+          aria-pressed={!yearly}
+          onClick={() => setYearly(false)}
+          style={{
+            padding: "8px 22px",
+            borderRadius: 18,
+            border: !yearly ? "1px solid #E7E7F0" : "1px solid transparent",
+            background: !yearly ? "#FFFFFF" : "transparent",
+            color: !yearly ? "var(--ink)" : "var(--ink-2)",
+            fontWeight: 700,
+            cursor: "pointer",
+            transition: "all 0.15s ease",
+          }}
+        >
+          Monthly
+        </button>
+        <button
+          type="button"
+          aria-pressed={yearly}
+          onClick={() => setYearly(true)}
+          style={{
+            padding: "8px 22px",
+            borderRadius: 18,
+            border: yearly ? "1px solid #E7E7F0" : "1px solid transparent",
+            background: yearly ? "#FFFFFF" : "transparent",
+            color: yearly ? "var(--ink)" : "var(--ink-2)",
+            fontWeight: 700,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            cursor: "pointer",
+            transition: "all 0.15s ease",
+          }}
+        >
+          Yearly
+          {free > 0 && (
+            <span
+              style={{
+                padding: "2px 8px",
+                borderRadius: 9,
+                background: "#E8F6EE",
+                color: "#15803D",
+                fontSize: 11.5,
+                fontWeight: 700,
+              }}
+            >
+              {free} months free
+            </span>
+          )}
+        </button>
       </div>
+
+      {/* Canvas Cards Grid */}
       <div className="grid g3" data-testid="plans">
-        {plans.map((p) => (
-          <div key={p.tier} className={`card plan${p.tier === best ? " featured" : ""}`} data-testid={`plan-${p.tier}`}>
-            {p.tier === best && <span className="pill" style={{ alignSelf: "flex-start", marginBottom: 8 }}>Most stores start here</span>}
-            <h3>{p.name}</h3>
-            <div className="price num">{taka(yearly ? Math.round(p.priceYearly / 12) : p.priceMonthly)}<small> / month</small></div>
-            <p className="muted" style={{ fontSize: 14 }}>{yearly ? `${taka(p.priceYearly)} billed once a year` : `${taka(p.priceYearly)} a year${p.monthsFree > 0 ? `, ${p.monthsFree} months free` : ""}`}</p>
-            <ul>{(compactBullets ? p.bullets.slice(0, compactBullets) : p.bullets).map((b) => <li key={b}>{b}</li>)}</ul>
-            <Link href={`/start?plan=${p.tier}`} className={`btn ${p.tier === best ? "btn-primary" : "btn-secondary"}`} prefetch={false}>Start free with {p.name}</Link>
-          </div>
-        ))}
+        {plans.map((p) => {
+          const isBest = p.tier === best;
+          const displayPrice = yearly ? Math.round(p.priceYearly / 12) : p.priceMonthly;
+          const bulletsToShow = compactBullets ? p.bullets.slice(0, compactBullets) : p.bullets;
+          const subText = PLAN_FOR[p.tier] || "Storefront and admin desk included.";
+
+          return (
+            <div
+              key={p.tier}
+              className={`card plan${isBest ? " featured" : ""}`}
+              data-testid={`plan-${p.tier}`}
+              style={{
+                border: isBest ? "2px solid #5B4FE8" : "1px solid #E7E7F0",
+                borderRadius: 18,
+                padding: "32px 28px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 16,
+                background: "#FFFFFF",
+                boxShadow: isBest ? "0 8px 24px rgba(91, 79, 232, 0.12)" : "none",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>{p.name}</h3>
+                {isBest && (
+                  <span
+                    style={{
+                      padding: "3px 11px",
+                      borderRadius: 11,
+                      background: "#E9E7FD",
+                      color: "#5B4FE8",
+                      fontSize: 12,
+                      fontWeight: 700,
+                    }}
+                  >
+                    Most chosen
+                  </span>
+                )}
+              </div>
+
+              <div style={{ fontSize: 14.5, color: "var(--ink-2)", lineHeight: 1.55, minHeight: 44 }}>
+                {subText}
+              </div>
+
+              <div>
+                <span
+                  style={{
+                    fontSize: 44,
+                    fontWeight: 800,
+                    letterSpacing: "-1px",
+                    fontVariantNumeric: "tabular-nums",
+                    color: "var(--ink)",
+                  }}
+                >
+                  {taka(displayPrice)}
+                </span>
+                <span style={{ fontSize: 15, color: "var(--ink-2)", marginLeft: 6 }}>
+                  /month
+                </span>
+                <div style={{ fontSize: 13, color: "var(--ink-3)", marginTop: 4 }}>
+                  {yearly
+                    ? `${taka(p.priceYearly)} billed once a year`
+                    : `${taka(p.priceMonthly * 12)} /year if paid monthly`}
+                </div>
+              </div>
+
+              <Link
+                href={`/start?plan=${p.tier}`}
+                className={`btn btn-lg ${isBest ? "btn-primary" : "btn-secondary"}`}
+                style={{
+                  height: 48,
+                  borderRadius: 24,
+                  fontSize: 15,
+                  fontWeight: 700,
+                  marginTop: 6,
+                }}
+                prefetch={false}
+              >
+                Start free trial
+              </Link>
+
+              <div
+                style={{
+                  borderTop: "1px solid #E7E7F0",
+                  paddingTop: 20,
+                  marginTop: 6,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                  fontSize: 14.5,
+                }}
+              >
+                {bulletsToShow.map((b) => (
+                  <div key={b} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#15803D"
+                      strokeWidth="2.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                      style={{ flex: "0 0 18px", marginTop: 2 }}
+                    >
+                      <path d="M5 12.5l4.5 4.5L19 7.5" />
+                    </svg>
+                    <span style={{ color: "var(--ink)" }}>{b}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </>
   );

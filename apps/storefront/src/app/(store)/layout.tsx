@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getPixelId, getPointsSummary, listCategories, getStoreInfo, listFooterPages, listPublishedPosts } from "@biztrackbd/core";
+import { getStorefrontTracking, getPointsSummary, listCategories, getStoreInfo, listFooterPages, listPublishedPosts } from "@biztrackbd/core";
 import { CartProvider } from "@/components/cart-provider";
 import { Footer } from "@/components/footer";
 import { Announcement, Header } from "@/components/header";
@@ -7,7 +7,7 @@ import { ThemeStyle } from "@/components/theme-style";
 import { ReferralBanner } from "@/components/referral-banner";
 import { DemoRibbon } from "@/components/demo-ribbon";
 import { PausedBanner } from "@/components/paused-notice";
-import { Pixel } from "@/components/tracker";
+import { StorefrontTracker } from "@/components/tracker";
 import { getLang, makeT } from "@/lib/i18n";
 import { getOrigin } from "@/lib/origin";
 import { getCustomerSession } from "@/lib/session";
@@ -39,12 +39,17 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   const t = makeT(lang);
   const session = await getCustomerSession(store.id);
   const [footerPages, blog] = await Promise.all([listFooterPages(store.id), listPublishedPosts(store.id, { pageSize: 1 })]);
-  const [info, categories, pixelId, points] = await Promise.all([getStoreInfo(store.id), listCategories(store.id), getPixelId(store.id), session ? getPointsSummary(store.id, session.customerId) : Promise.resolve(null)]);
+  const [info, categories, tracking, points] = await Promise.all([
+    getStoreInfo(store.id),
+    listCategories(store.id),
+    getStorefrontTracking(store.id),
+    session ? getPointsSummary(store.id, session.customerId) : Promise.resolve(null),
+  ]);
   return (
     <CartProvider>
       <ThemeStyle tenantId={store.id} />
       {store.isDemo && <DemoRibbon themeId={store.themeId} lang={lang} />}
-      {pixelId && <Pixel pixelId={pixelId} />}
+      <StorefrontTracker tracking={tracking} />
       {info.ordersPaused && <PausedBanner t={t} />}
       <Announcement info={info} lang={lang} />
       <ReferralBanner tenantId={store.id} lang={lang} t={t} />

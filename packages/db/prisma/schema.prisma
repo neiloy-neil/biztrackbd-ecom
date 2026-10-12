@@ -1528,6 +1528,32 @@ model Announcement {
   createdAt  DateTime  @default(now())
 }
 
+enum InquiryStatus {
+  NEW
+  CONTACTED
+  CONVERTED
+  ARCHIVED
+}
+
+model PlatformInquiry {
+  id        String        @id @default(cuid())
+  name      String
+  phone     String        // 01XXXXXXXXX
+  email     String
+  topic     String        // "setup" | "courier" | "bkash" | "shopify" | "billing" | "enterprise"
+  message   String        @db.Text
+  status    InquiryStatus @default(NEW)
+  notes     String?       @db.Text
+  ipAddress String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([status, createdAt])
+  @@index([phone])
+  @@index([topic])
+}
+
+
 model PlatformDailyMetrics {
   id               String   @id @default(cuid())
   date             DateTime @unique @db.Date
@@ -1603,6 +1629,9 @@ model StoreSettings {
   reviewsAutoPublish     Boolean @default(false)   // off: a new review waits for the owner (AdmReviews)
   abandonedSmsEnabled    Boolean @default(true)    // send the 30-minute recovery SMS
   metaPixelId            String?   // the public Meta (Facebook) Pixel id; the server-side token lives in the vault as META_CAPI
+  googleAnalyticsId      String?   // GA4 Measurement ID (e.g. G-XXXXXXXXXX)
+  googleTagManagerId     String?   // GTM Container ID (e.g. GTM-XXXXXXX)
+  tiktokPixelId          String?   // TikTok Pixel ID (e.g. CXXXXXXXXXXXXX)
   // Loyalty points, VIP tiers and referrals (docs/26)
   loyaltyEnabled         Boolean @default(false)
   loyaltySpendPerPoint   Int     @default(100)   // every ৳ this much of a delivered order earns 1 point (before the tier multiplier)

@@ -117,3 +117,41 @@ export function verifyImpersonationSessionCookie(cookieValue: string): Impersona
     return null;
   }
 }
+
+export interface OnboardingPassPayload {
+  tenantId: string;
+  subdomain: string;
+  ownerEmail: string;
+  ownerName: string;
+  timestamp: number;
+}
+
+const ONBOARDING_PASS_TTL_MS = 15 * 60_000; // 15 minutes
+
+/** Generates a secure, signed 1-time onboarding pass ticket for a newly created store. */
+export function createOnboardingPassTicket(payload: { tenantId: string; subdomain: string; ownerEmail: string; ownerName: string }): string {
+  getSecret();
+  const data: OnboardingPassPayload = {
+    ...payload,
+    timestamp: Date.now(),
+  };
+  const json = Buffer.from(JSON.stringify(data)).toString("base64url");
+  const sig = sign(json);
+  return `${json}.${sig}`;
+}
+
+/** Verifies a 1-time onboarding pass ticket. Returns null if invalid or expired. */
+export function verifyOnboardingPassTicket(ticket: string): OnboardingPassPayload | null {
+  getSecret();
+  try {
+    const [json, sig] = ticket.split(".");
+    if (!json || !sig) return null;
+    if (!verify(json, sig)) return null;
+
+    const payload: OnboardingPassPayload = JSON.parse(Buffer.from(json, "base64url").toString("utf-8"));
+    if (Date.now() - payload.timestamp > ONBOARDING_PASS_TTL_MS) return null;
+    return payload;
+  } catch {
+    return null;
+  }
+}

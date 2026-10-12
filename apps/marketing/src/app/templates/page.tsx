@@ -1,21 +1,56 @@
 import type { Metadata } from "next";
-import { THEMES } from "@biztrackbd/core";
-import { TemplateCard } from "@/components/template-card";
+import { TemplateGallery } from "@/components/template-gallery";
 import { demoAdminUrl } from "@/lib/demo-admin";
 
-export const metadata: Metadata = { title: "Templates", description: "Store templates for Bangladeshi businesses, each with a live demo store you can open and try." };
+export const metadata: Metadata = {
+  title: "eCommerce Store Templates: Ready-to-Use Bangladeshi Storefronts",
+  description:
+    "Explore responsive storefront templates for Bangladeshi businesses. Complete with bKash checkout, size guides, spec tables, and mobile-optimized carts.",
+};
 
-export default function Templates() {
+export default function TemplatesPage() {
   return (
     <section className="block">
       <div className="wrap">
-        <span className="eyebrow">Templates</span>
-        <h1 style={{ fontSize: "clamp(32px, 6vw, 48px)", letterSpacing: "-1.2px", lineHeight: 1.1, fontWeight: 800 }}>Start from a store that already works</h1>
-        <p className="sub">Open a live demo, add things to the cart and look around. Pick the one that suits your products, then change the look whenever you want. Products, orders and content stay in place.</p>
-        <p className="sub" style={{ marginTop: -4 }}><a href={demoAdminUrl()} className="link" data-testid="templates-demo-admin">Want to see how you would run one? Try the admin on any template</a>. Each card also has a Try the admin button.</p>
-        <div className="grid g3" data-testid="templates">
-          {THEMES.map((t) => <TemplateCard key={t.id} t={t} />)}
+        <div>
+          <span className="eyebrow">Storefronts &amp; Designs</span>
+          <h1
+            style={{
+              fontSize: "clamp(34px, 5.5vw, 50px)",
+              letterSpacing: "-1.2px",
+              lineHeight: 1.1,
+              fontWeight: 800,
+            }}
+          >
+            Templates
+          </h1>
+          <p
+            className="lead"
+            style={{
+              marginTop: 14,
+              fontSize: 18,
+              color: "var(--ink-2)",
+              maxWidth: 720,
+              lineHeight: 1.6,
+            }}
+          >
+            Every template is a complete, functioning store: home page, product pages, shopping cart, and local bKash/Nagad checkout. Open a live demo, test the flow, and start your trial with the design that fits your brand.
+          </p>
+          <p className="fine" style={{ marginTop: 10, fontSize: 14.5 }}>
+            Want to see how you would manage orders?{" "}
+            <a
+              href={demoAdminUrl()}
+              className="link"
+              data-testid="templates-demo-admin"
+              style={{ fontWeight: 600 }}
+            >
+              Try the admin desk on any template with sample products (no signup)
+            </a>
+            .
+          </p>
         </div>
+
+        <TemplateGallery />
       </div>
     </section>
   );

@@ -97,7 +97,8 @@ export {
 } from "./platform/announcements";
 export {
   createImpersonationTicket, verifyImpersonationTicket, createImpersonationSessionCookie, verifyImpersonationSessionCookie,
-  type ImpersonationTicketPayload, type ImpersonationSessionPayload,
+  createOnboardingPassTicket, verifyOnboardingPassTicket,
+  type ImpersonationTicketPayload, type ImpersonationSessionPayload, type OnboardingPassPayload,
 } from "./platform/impersonation";
 export {
   listPlatformTickets, getPlatformTicketDetail, replyPlatformTicket, updateTicketStatus,
@@ -110,8 +111,9 @@ export {
   type AbandonedRow, type AbandonedTab, type AbandonedMetrics, type CallOutcome, type RecoverySummary, type CartSnapshotLine,
 } from "./growth/abandoned";
 export {
-  getPixelId, getTrackingConfig, savePixelId, trackBrowserEvent, sendServerPurchase, recordBrowserPurchase, getTrackingOverview, sendTestEvent, setPixelFetchForTests, purchaseEventId, EVENT_NAMES,
-  type TrackingConfig, type TrackingOverview, type EventStat, type UserContext, type EventName, type SendResult,
+  getPixelId, getStorefrontTracking, getTrackingConfig, savePixelId, saveTrackingConfig, trackBrowserEvent, sendServerPurchase, sendServerCancellation, recordBrowserPurchase, getTrackingOverview, sendTestEvent, setPixelFetchForTests, purchaseEventId, EVENT_NAMES,
+  buildMetaOAuthUrl, exchangeMetaOAuthCode, fetchMetaPixels,
+  type TrackingConfig, type StorefrontTracking, type TrackingOverview, type EventStat, type UserContext, type EventName, type SendResult, type MetaAdAccountPixel,
 } from "./growth/tracking";
 export {
   getReviewSummary, listPublicReviews, reviewableItems, submitReview, listReviews, reviewTabCounts, setReviewPublished, replyToReview, setReviewsAutoPublish, reviewsAutoPublish, displayName, cleanText,
@@ -153,7 +155,18 @@ export {
   DEMO_SESSION_HOURS, DEMO_MAX_ACTIVE, DemoBusyError, DemoLimitError, createDemoCookie, verifyDemoCookie, demoCreatorKey, createDemoSession, maybeDropDemoOrder, sweepDemoSessions, loadDemoTenant,
   type DemoCookiePayload,
 } from "./demo/session";
-export { isDemoSessionId } from "./demo/guard";
+export { isDemoSessionId, assertNotInDemo } from "./demo/guard";
 export { DemoLockedError } from "./errors";
-export { assertNotInDemo } from "./demo/guard";
 export { parseKeepCode, readKeptStore, KEEP_MAX_PRODUCTS, type KeptStore } from "./demo/keep";
+
+export {
+  submitPlatformInquiry,
+  listPlatformInquiries,
+  updateInquiryStatus,
+  type InquiryStatus,
+  type InquiryInput,
+  type InquiryView,
+} from "./platform/inquiry";
+
+export * from "./catalog/import-parser";
+

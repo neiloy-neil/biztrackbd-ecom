@@ -56,6 +56,8 @@ export interface SignedUp {
   tenantId: string;
   subdomain: string;
   storeName: string;
+  ownerEmail: string;
+  ownerName: string;
   plan: "STARTER" | "PRO" | "BUSINESS";
   trialEndsAt: Date;
   /** Waiting for a person to look at the name before a custom domain can be connected. */
@@ -159,7 +161,7 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
       await finishKeep(kept.demoTenantId);
     }
     await publishEvent("store/created", { tenantId: id, subdomain: sub.label, plan: input.plan });
-    const { ownerId: _o, ownerEmail: _e, ownerName: _n, ...out } = result;
+    const { ownerId: _o, ...out } = result;
     return { ...out, keptPage };
   } catch (e) {
     // Never leave a half-made store behind: it would hold the address and the email's quota.

@@ -329,59 +329,93 @@ export async function bulkProductAction(tenantId: string, actor: StaffActor, ids
   });
 }
 
-export const IMPORT_MAX_ROWS = 200;
+import { parseCatalogCsv, type DetectedPlatform } from "../catalog/import-parser";
+
+export const IMPORT_MAX_ROWS = 500;
 export const IMPORT_TEMPLATE = "title,price,stock,sku,status,category,description,compare_at_price\nCotton Panjabi,1850,12,PJ-001,active,Panjabi,Soft cotton for Eid,2200\n";
 
 export interface ProductImportResult {
+  platform: DetectedPlatform;
   created: number;
+  totalVariants: number;
   failed: { line: number; title: string; reason: string }[];
   /** True when the plan's product limit stopped the import part way. */
   stoppedByPlan: boolean;
 }
 
 /**
- * Creates one product (with a single variant) for each row of a CSV. Columns: title, price, stock, sku, status (active or draft),
- * category (made if new), description, compare_at_price. Rows that fail are reported by line and the rest still go in. Each row goes
- * through saveProduct, so the same checks and the plan's product limit apply as when adding a product by hand.
+ * Creates products from a CSV file. Automatically detects Shopify, WooCommerce, BizTrackBD,
+ * or generic spreadsheets. Supports multi-variant options (Size/Color) and external product image URLs.
  */
 export async function importProductsCsv(tenantId: string, actor: StaffActor, text: string): Promise<ProductImportResult> {
   await assertNotInDemo(tenantId, "Importing products");
   assertCan(actor, "products", "edit");
-  const rows = parseCsv(text.replace(/^\uFEFF/, "")).filter((r) => r.some((c) => c.trim() !== ""));
-  if (rows.length < 2) throw new ValidationError("The file has no products. Use the template: one product per row under the header.");
-  const head = rows[0]!.map(headerKey);
-  const col = (...names: string[]) => head.findIndex((h) => names.includes(h));
-  const ix = { title: col("title", "name", "productname"), price: col("price", "baseprice"), stock: col("stock", "quantity", "qty"), sku: col("sku"), status: col("status"), category: col("category"), desc: col("description", "details"), compare: col("compareatprice", "compareat", "mrp") };
-  if (ix.title < 0 || ix.price < 0) throw new ValidationError("The first row must have the columns title and price.");
-  const body = rows.slice(1);
-  if (body.length > IMPORT_MAX_ROWS) throw new ValidationError(`Import up to ${IMPORT_MAX_ROWS} products at a time. This file has ${body.length}.`);
-  const at = (r: string[], i: number) => (i >= 0 ? (r[i] ?? "").trim() : "");
-  const out: ProductImportResult = { created: 0, failed: [], stoppedByPlan: false };
-  for (let n = 0; n < body.length; n++) {
-    const r = body[n]!;
-    const line = n + 2, title = at(r, ix.title);
-    const price = parseMoney(at(r, ix.price));
-    const stockRaw = at(r, ix.stock);
-    const stock = stockRaw === "" ? 0 : Number(stockRaw);
-    if (price == null || !(price > 0)) { out.failed.push({ line, title, reason: "Price must be a number above 0" }); continue; }
-    if (!Number.isInteger(stock) || stock < 0) { out.failed.push({ line, title, reason: "Stock must be a whole number" }); continue; }
-    const compare = parseMoney(at(r, ix.compare));
-    const category = at(r, ix.category);
-    const status = at(r, ix.status).toLowerCase() === "active" ? "ACTIVE" : "DRAFT";
-    const desc = at(r, ix.desc).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  const parsed = parseCatalogCsv(text);
+  if (parsed.products.length === 0) {
+    const msg = parsed.errors[0]?.message ?? "The file has no valid products. Use the template or an export from Shopify/WooCommerce.";
+    throw new ValidationError(msg);
+  }
+
+  if (parsed.products.length > IMPORT_MAX_ROWS) {
+    throw new ValidationError(`Import up to ${IMPORT_MAX_ROWS} products at a time. This file has ${parsed.products.length}.`);
+  }
+
+  const out: ProductImportResult = {
+    platform: parsed.platform,
+    created: 0,
+    totalVariants: 0,
+    failed: [...parsed.errors.map((e) => ({ line: e.line, title: "", reason: e.message }))],
+    stoppedByPlan: false,
+  };
+
+  for (let n = 0; n < parsed.products.length; n++) {
+    const p = parsed.products[n]!;
+    const line = n + 2;
+
     try {
+      const validImages = p.imageUrls
+        .filter((u) => u.startsWith("https://") || u.startsWith("/media/"))
+        .slice(0, 10)
+        .map((url) => ({ url, alt: p.title }));
+
+      const variantsPayload = p.variants.map((v) => ({
+        title: v.title || "Default",
+        sku: v.sku || null,
+        price: v.price > 0 ? v.price : p.basePrice,
+        compareAtPrice: v.compareAtPrice && v.compareAtPrice > (v.price || p.basePrice) ? v.compareAtPrice : null,
+        stockQuantity: Math.max(0, v.stockQuantity),
+        options: v.options || {},
+      }));
+
       await saveProduct(tenantId, actor, {
-        title, basePrice: price, compareAtPrice: compare && compare > price ? compare : null, status, descriptionHtml: desc ? `<p>${desc}</p>` : "",
-        ...(category ? { newCategoryName: category } : {}),
-        variants: [{ title: "Default", sku: at(r, ix.sku) || null, price, compareAtPrice: compare && compare > price ? compare : null, stockQuantity: stock, options: {} }],
+        title: p.title,
+        basePrice: p.basePrice,
+        compareAtPrice: p.compareAtPrice && p.compareAtPrice > p.basePrice ? p.compareAtPrice : null,
+        status: p.status,
+        descriptionHtml: p.descriptionHtml || "",
+        tags: p.tags.slice(0, 20),
+        images: validImages,
+        ...(p.categoryName ? { newCategoryName: p.categoryName.slice(0, 60) } : {}),
+        variants: variantsPayload,
       });
+
       out.created++;
+      out.totalVariants += variantsPayload.length;
     } catch (e) {
       const code = (e as { code?: string }).code;
-      if (code === "PLAN_LIMIT") { out.stoppedByPlan = true; out.failed.push({ line, title, reason: (e as Error).message }); break; }
-      if (e instanceof ValidationError || e instanceof NotFoundError) out.failed.push({ line, title, reason: e.message });
-      else throw e;
+      if (code === "PLAN_LIMIT") {
+        out.stoppedByPlan = true;
+        out.failed.push({ line, title: p.title, reason: (e as Error).message });
+        break;
+      }
+      if (e instanceof ValidationError || e instanceof NotFoundError) {
+        out.failed.push({ line, title: p.title, reason: e.message });
+      } else {
+        throw e;
+      }
     }
   }
+
   return out;
 }

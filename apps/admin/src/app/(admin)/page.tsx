@@ -61,6 +61,12 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         </div>
       </div>
 
+      {one(sp.welcome) === "1" && (
+        <div className="notice good" role="status" style={{ marginBottom: 16 }}>
+          <b>Welcome to BizTrackBD!</b> Your store is open and ready. Complete the checklist below to connect your bKash/Nagad wallet and Steadfast/Pathao courier pickups.
+        </div>
+      )}
+
       <div className="grid grid-4" data-testid="dash-stats">
         <div className="stat"><div className="k">New orders</div><div className="v num">{d.newOrders.count}</div><div className={`d ${d.newOrders.count >= d.newOrders.previous ? "up" : "down"}`}>{d.newOrders.count - d.newOrders.previous >= 0 ? "+" : ""}{d.newOrders.count - d.newOrders.previous} vs the 24 hours before</div></div>
         <div className="stat"><div className="k">To pack and ship</div><div className="v num">{d.toPack.count}</div><div className="d">{d.toPack.waitingOver24h > 0 ? `${d.toPack.waitingOver24h} waiting over 24 hours` : "None waiting long"}</div></div>
