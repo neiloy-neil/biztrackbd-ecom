@@ -14,7 +14,7 @@ export const metadata: Metadata = { title: "Apps" };
 export default async function Apps({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
   const s = await requireAccess("billing");
-  if (s.demo) return <DemoLocked what="Apps" keepHref={trialHref()} />;
+  if (s.demo) return <DemoLocked what="Apps" keepHref={trialHref(s.demo.keep)} />;
   const canEdit = can(s.user.role, "billing", "edit");
   const l = await listModules(s.tenantId, s.actor);
   const err = one(sp.err);

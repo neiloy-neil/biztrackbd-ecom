@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { DomainError, SUBDOMAIN_MESSAGES, checkSubdomain, signupStore } from "@biztrackbd/core";
-import { samplePictures } from "@/lib/pictures";
+import { keepPictureCopier, samplePictures } from "@/lib/pictures";
 
 export interface SignupState {
   error?: string;
@@ -29,19 +29,22 @@ export async function signupAction(_prev: SignupState, form: FormData): Promise<
   const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
   if (tooMany(ip)) return { error: "Too many stores started from this connection. Please try again in an hour." };
 
+  // A demo the visitor chose to keep: its secret code arrives as a hidden field. The core checks it; a wrong or used code just means sample products.
+  const keepCode = String(form.get("from") ?? "").slice(0, 120);
+  const copier = keepPictureCopier();
   let signed;
   try {
     signed = await signupStore({
       ownerName: String(form.get("ownerName") ?? ""), email: String(form.get("email") ?? ""), phone: String(form.get("phone") ?? ""),
       storeName: String(form.get("storeName") ?? ""), tagline: String(form.get("tagline") ?? "") || undefined, subdomain: String(form.get("subdomain") ?? ""),
       plan: String(form.get("plan") ?? "PRO"), theme: String(form.get("theme") ?? "kapor"), demoData: form.get("demoData") === "on",
-    }, { pictures: samplePictures() ?? undefined });
+    }, { pictures: samplePictures() ?? undefined, ...(keepCode && copier ? { keep: { code: keepCode, copyImage: copier } } : {}) });
   } catch (e) {
     if (e instanceof DomainError) return { error: e.message, field: typeof e.details?.field === "string" ? e.details.field : undefined };
     console.error("signup failed", e instanceof Error ? e.name : "unknown");
     return { error: "We could not create your store. Nothing was charged. Please try again." };
   }
-  const q = new URLSearchParams({ store: signed.subdomain, name: signed.storeName, ends: signed.trialEndsAt.toISOString(), plan: signed.plan, ...(signed.quarantined ? { review: "1" } : {}) });
+  const q = new URLSearchParams({ store: signed.subdomain, name: signed.storeName, ends: signed.trialEndsAt.toISOString(), plan: signed.plan, ...(signed.quarantined ? { review: "1" } : {}), ...(signed.kept ? { kept: String(signed.kept) } : {}) });
   redirect(`/start/done?${q.toString()}`);
 }
 

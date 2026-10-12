@@ -1,3 +1,4 @@
+import { copyKeptPage, copyKeptPictures, finishKeep, keptPageJson, keptPictureUrls, readKeptStore, writeKeptCatalog, type KeptStore } from "../demo/keep";
 import { randomUUID } from "node:crypto";
 import { Prisma, getBasePrisma, withTenant } from "@biztrackbd/db";
 import { z } from "zod";
@@ -59,6 +60,9 @@ export interface SignedUp {
   trialEndsAt: Date;
   /** Waiting for a person to look at the name before a custom domain can be connected. */
   quarantined: boolean;
+  /** Products carried over from a demo the visitor chose to keep, and whether its home page came too (docs/41). */
+  kept?: number;
+  keptPage?: boolean;
 }
 
 /** Three sample products so a new owner sees a working store at once. They count against the plan like any product and can be deleted. */
@@ -71,7 +75,7 @@ function failureOf(e: unknown): string {
  * Creates a store, its owner, its trial and its starting settings in one go (docs/16 phase 5, docs/23 onboarding).
  * The owner is created without a password: sign-in is by the platform's auth provider, which is not connected yet.
  */
-export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws and stores the sample products' pictures. Without it the samples have none. */ pictures?: Pick<DemoDeps, "rasterize" | "save"> } = {}): Promise<SignedUp> {
+export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws and stores the sample products' pictures. Without it the samples have none. */ pictures?: Pick<DemoDeps, "rasterize" | "save">; /** A demo's "keep this store" code, and how to copy one of its pictures into the new store (docs/41). */ keep?: { code: string; copyImage: (tenantId: string, url: string) => Promise<string> } } = {}): Promise<SignedUp> {
   const parsed = SignupInput.safeParse(raw);
   if (!parsed.success) throw new ValidationError(parsed.error.issues[0]?.message ?? "Check the form", { field: parsed.error.issues[0]?.path[0] });
   const input = parsed.data;
@@ -100,8 +104,21 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
     throw e;
   }
 
+  // A demo the visitor wants to keep: its products, pictures and home page come along, instead of the template's untouched samples (docs/41).
+  let kept: KeptStore | null = null;
+  let keptPictures = new Map<string, string>();
+  if (opts.keep) {
+    try {
+      kept = await readKeptStore(opts.keep.code);
+      if (kept) keptPictures = await copyKeptPictures(id, keptPictureUrls(kept, await keptPageJson(kept.demoTenantId)), opts.keep.copyImage);
+    } catch (e) {
+      console.error("keep this store failed, using samples", e instanceof Error ? e.name : "unknown");
+      kept = null;
+    }
+  }
+
   // Sample products that fit the chosen template (docs/38). Pictures are made first because they are stored under the store's id.
-  const template = input.demoData ? demoTemplate(input.theme) : undefined;
+  const template = input.demoData && !kept ? demoTemplate(input.theme) : undefined;
   let samples: { template: NonNullable<typeof template>; urls: Map<string, string> } | null = null;
   try {
     if (template) {
@@ -113,7 +130,12 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
     }
     const result = await withTenant(id, async (tx) => {
       const tenant = await tx.tenant.findFirstOrThrow();
-      await tx.storeSettings.create({ data: { tenantId: id, storeName: input.storeName, tagline: input.tagline || null, contactPhone: phone, email: input.email } });
+      await tx.storeSettings.create({
+        data: {
+          tenantId: id, storeName: input.storeName, tagline: input.tagline || kept?.settings?.tagline || null, contactPhone: phone, email: input.email,
+          ...(kept?.settings ? { description: kept.settings.description, announcement: kept.settings.announcement, announcementBn: kept.settings.announcementBn, storeNameBn: kept.settings.storeNameBn } : {}),
+        },
+      });
       await tx.shippingZone.createMany({
         data: [
           { tenantId: id, name: "Inside Dhaka city", districts: ["Dhaka"], rate: 80, freeOverAmount: 3000, etaMinDays: 1, etaMaxDays: 2 },
@@ -125,12 +147,20 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
         data: { tenantId: id, planTier: input.plan, interval: "MONTHLY", status: "TRIALING", amount: 0, currentPeriodStart: tenant.trialStartsAt, currentPeriodEnd: tenant.trialEndsAt },
       });
       const owner = await tx.tenantUser.create({ data: { tenantId: id, email: input.email, name: input.ownerName, phone, role: "STORE_OWNER", passwordHash: EXTERNAL_AUTH } });
-      if (input.demoData && samples) await seedCatalog(tx, id, samples.template, samples.urls, { sample: true });
+      let keptCount = 0;
+      if (kept) keptCount = await writeKeptCatalog(tx, id, kept, keptPictures);
+      else if (input.demoData && samples) await seedCatalog(tx, id, samples.template, samples.urls, { sample: true });
       await audit(tx, id, { userId: owner.id, email: owner.email }, "store.created", { plan: input.plan, theme: input.theme, demoData: input.demoData, quarantined: brand !== null });
-      return { tenantId: id, subdomain: sub.label, storeName: input.storeName, plan: input.plan, trialEndsAt: tenant.trialEndsAt, quarantined: brand !== null };
+      return { tenantId: id, subdomain: sub.label, storeName: input.storeName, plan: input.plan, trialEndsAt: tenant.trialEndsAt, quarantined: brand !== null, kept: keptCount, ownerId: owner.id, ownerEmail: owner.email, ownerName: owner.name };
     });
+    let keptPage = false;
+    if (kept) {
+      keptPage = await copyKeptPage(kept.demoTenantId, id, { userId: result.ownerId, email: result.ownerEmail, name: result.ownerName, role: "STORE_OWNER" }, keptPictures);
+      await finishKeep(kept.demoTenantId);
+    }
     await publishEvent("store/created", { tenantId: id, subdomain: sub.label, plan: input.plan });
-    return result;
+    const { ownerId: _o, ownerEmail: _e, ownerName: _n, ...out } = result;
+    return { ...out, keptPage };
   } catch (e) {
     // Never leave a half-made store behind: it would hold the address and the email's quota.
     await withTenant(id, (tx) => tx.tenant.delete({ where: { id } })).catch(() => undefined);

@@ -87,6 +87,7 @@ model Tenant {
   demoExpiresAt    DateTime?     // when a SESSION copy is deleted
   demoLastOrderAt  DateTime?     // the last sample order dropped into a SESSION copy
   demoCreator      String?       // hash of who started it (never an address), for the per-visitor limit
+  demoKeepToken    String?       // secret code that lets a signup carry this SESSION copy into a real store; cleared once used
   quarantineReason String?
   
   createdAt        DateTime     @default(now())

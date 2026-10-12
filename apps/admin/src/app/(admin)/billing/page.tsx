@@ -19,7 +19,7 @@ const TIER: Record<string, string> = { STARTER: "Starter", PRO: "Pro", BUSINESS:
 export default async function Billing({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
   const s = await requireAccess("billing");
-  if (s.demo) return <DemoLocked what="Plan and billing" keepHref={trialHref()} />;
+  if (s.demo) return <DemoLocked what="Plan and billing" keepHref={trialHref(s.demo.keep)} />;
   const b = await getBillingOverview(s.tenantId, s.actor);
   const a = b.access;
   const notes = [limitNote("products", b.usage.products), limitNote("orders", b.usage.orders)].filter(Boolean);

@@ -16,9 +16,9 @@ export function DemoBanner({ expiresAt, keepHref }: { expiresAt: number; keepHre
   const h = Math.floor(left / 3_600_000), m = Math.floor((left % 3_600_000) / 60_000);
   return (
     <div role="status" data-testid="demo-banner" className="demo-banner">
-      <span><b>Demo</b> · nothing here is real, and it is deleted in {h > 0 ? `${h} h ` : ""}{m} min</span>
+      <span><b>Demo</b> · nothing here is real. Deleted in {h > 0 ? `${h} h ` : ""}{m} min unless you keep it</span>
       <span className="demo-actions">
-        <a className="btn btn-primary btn-sm" href={keepHref} data-testid="demo-keep">Start your free trial</a>
+        <a className="btn btn-primary btn-sm" href={keepHref} data-testid="demo-keep">Keep this store</a>
         <a className="btn btn-secondary btn-sm" href="/demo/exit" data-testid="demo-exit">Exit demo</a>
       </span>
     </div>

@@ -16,7 +16,7 @@ const AREA_LABEL: Record<(typeof AREAS)[number], string> = {
 
 export default async function Staff() {
   const s = await requireAccess("team", "edit");
-  if (s.demo) return <DemoLocked what="Team" keepHref={trialHref()} />;
+  if (s.demo) return <DemoLocked what="Team" keepHref={trialHref(s.demo.keep)} />;
   const team = await listTeam(s.tenantId, s.actor);
   const full = team.seats.limit != null && team.seats.used >= team.seats.limit;
   const roles = ASSIGNABLE_ROLES.map((r) => ({ value: r, label: ROLE_LABELS[r] }));

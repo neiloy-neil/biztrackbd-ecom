@@ -23,6 +23,7 @@ export default async function Done({ searchParams }: { searchParams: Promise<Rec
       <div className="wizard done-box" data-testid="done">
         <h1>Your store is open</h1>
         <p className="muted" style={{ marginTop: 8 }}>{one(sp.name) ? `${one(sp.name)?.slice(0, 60)} is ready.` : "Your store is ready."}{endsText ? ` Your free trial runs until ${endsText}.` : ""}</p>
+        {Number(one(sp.kept)) > 0 && <p className="notice good" role="status" data-testid="kept-done" style={{ marginTop: 12 }}>Your demo store came with you: {one(sp.kept)} products with their pictures and your home page. Everything can be edited.</p>}
         <div className="card" style={{ margin: "24px 0", textAlign: "left" }}>
           <div className="muted" style={{ fontSize: 14 }}>Your store address</div>
           <div className="big" data-testid="store-url">{storeUrl}</div>

@@ -25,7 +25,7 @@ function statusOf(d: { verified: boolean; dnsStatus: string; sslStatus: string }
 export default async function Domains({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
   const s = await requireAccess("billing");
-  if (s.demo) return <DemoLocked what="Domains" keepHref={trialHref()} />;
+  if (s.demo) return <DemoLocked what="Domains" keepHref={trialHref(s.demo.keep)} />;
   const canEdit = can(s.user.role, "billing", "edit");
   const rows = await listDomains(s.tenantId, s.actor);
   const err = one(sp.err);

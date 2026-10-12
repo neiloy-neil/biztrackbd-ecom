@@ -11,7 +11,7 @@ const FIELD_STEP: Record<string, number> = { ownerName: 0, email: 0, phone: 0, s
 const taka = (n: number) => `৳ ${n.toLocaleString("en-IN")}`;
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 30);
 
-export function Wizard({ plans, themes, rootDomain, initialPlan, initialTheme }: { plans: Plan[]; themes: Theme[]; rootDomain: string; initialPlan: string; initialTheme: string }) {
+export function Wizard({ plans, themes, rootDomain, initialPlan, initialTheme, keepCode = "" }: { keepCode?: string; plans: Plan[]; themes: Theme[]; rootDomain: string; initialPlan: string; initialTheme: string }) {
   const [state, action, pending] = useActionState<SignupState, FormData>(signupAction, {});
   const [step, setStep] = useState(0);
   const [v, setV] = useState({ ownerName: "", email: "", phone: "", storeName: "", tagline: "", subdomain: "", plan: initialPlan, theme: initialTheme, demoData: true });
@@ -74,6 +74,7 @@ export function Wizard({ plans, themes, rootDomain, initialPlan, initialTheme }:
 
       {/* Every value is posted from hidden fields, so the steps can be shown one at a time and nothing is lost. */}
       {Object.entries(v).map(([k, val]) => (k === "demoData" ? (val ? <input key={k} type="hidden" name={k} value="on" /> : null) : <input key={k} type="hidden" name={k} value={String(val)} />))}
+      {keepCode && <input type="hidden" name="from" value={keepCode} />}
       <div className="hp" aria-hidden="true"><label>Website<input name="website" tabIndex={-1} autoComplete="off" /></label></div>
 
       {step === 0 && (

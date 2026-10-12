@@ -112,7 +112,7 @@ export async function createDemoSession(templateId: string, creator: string, now
     const owner = await withTenant(id, async (tx) => {
       await tx.tenant.update({
         where: { id },
-        data: { isDemo: true, demoKind: "SESSION", demoTemplate: t.id, demoExpiresAt: expiresAt, demoCreator: creator, status: "ACTIVE", trialEndsAt: FAR_FUTURE, themeId: t.id, locale: "en-BD" },
+        data: { isDemo: true, demoKind: "SESSION", demoTemplate: t.id, demoExpiresAt: expiresAt, demoCreator: creator, demoKeepToken: randomBytes(18).toString("base64url"), status: "ACTIVE", trialEndsAt: FAR_FUTURE, themeId: t.id, locale: "en-BD" },
       });
       const s = src.settings;
       await tx.storeSettings.create({
@@ -249,8 +249,8 @@ export async function sweepDemoSessions(): Promise<{ deleted: number }> {
 }
 
 /** What the admin needs to know about a demo tenant from its cookie: still there, still a visitor copy, not expired. */
-export async function loadDemoTenant(tenantId: string, now = new Date()): Promise<{ id: string; subdomain: string; template: string; expiresAt: Date } | null> {
-  const t = await withTenant(tenantId, (tx) => tx.tenant.findFirst({ where: { id: tenantId, demoKind: "SESSION" }, select: { id: true, subdomain: true, demoTemplate: true, demoExpiresAt: true } })).catch(() => null);
+export async function loadDemoTenant(tenantId: string, now = new Date()): Promise<{ id: string; subdomain: string; template: string; expiresAt: Date; keepCode: string | null } | null> {
+  const t = await withTenant(tenantId, (tx) => tx.tenant.findFirst({ where: { id: tenantId, demoKind: "SESSION" }, select: { id: true, subdomain: true, demoTemplate: true, demoExpiresAt: true, demoKeepToken: true } })).catch(() => null);
   if (!t || !t.demoExpiresAt || t.demoExpiresAt <= now) return null;
-  return { id: t.id, subdomain: t.subdomain, template: t.demoTemplate ?? "", expiresAt: t.demoExpiresAt };
+  return { id: t.id, subdomain: t.subdomain, template: t.demoTemplate ?? "", expiresAt: t.demoExpiresAt, keepCode: t.demoKeepToken ? `${t.id}.${t.demoKeepToken}` : null };
 }

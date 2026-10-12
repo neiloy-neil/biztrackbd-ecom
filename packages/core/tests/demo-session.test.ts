@@ -4,7 +4,7 @@ import { createOwnerClient, createTenantFixture, resetDatabase, seedPlans, testU
 import {
   DEMO_MAX_ACTIVE, DemoBusyError, DemoLimitError, DemoLockedError, DemoStoreError, addDomain, bookCourier, createDemoCookie, createDemoSession, createOrder, demoCreatorKey, inviteStaff,
   listConnectedCouriers, listInventory, listAdminProducts, loadDemoTenant, maybeDropDemoOrder, notifyOrder, resetDemoStore, saveMessageTemplate, setEventPublisher, setOrdersPaused, setSmsSender, sweepDemoSessions,
-  verifyDemoCookie, importProductsCsv, getDashboard, type DemoDeps, type StaffActor,
+  verifyDemoCookie, importProductsCsv, getDashboard, getLive, parseKeepCode, readKeptStore, signupStore, type DemoDeps, type StaffActor,
 } from "../src";
 
 let owner: PrismaClient;
@@ -198,5 +198,92 @@ describe("cleanup", () => {
     expect(await owner.order.count({ where: { tenantId: old.tenantId } })).toBe(0);
     expect(await owner.tenant.count({ where: { id: fresh.tenantId } })).toBe(1);
     expect(await owner.tenant.count({ where: { demoKind: "TEMPLATE" } })).toBe(1);
+  });
+});
+
+describe("keep this store", () => {
+  const copied: string[] = [];
+  const copyImage = async (tenantId: string, url: string) => { copied.push(url); return `https://media.example.test/kept/${tenantId}/${copied.length}.webp`; };
+  let n = 0;
+  const signup = (keep?: string, over: Record<string, unknown> = {}) =>
+    signupStore({ ownerName: "Rina", email: `keep${++n}@example.test`, phone: `0171000${String(1000 + n)}`, storeName: `Kept Store ${n}`, subdomain: `kept-store-${n}`, plan: "PRO", theme: "kapor", demoData: true, ...over },
+      { pictures: { rasterize: async (svg) => Buffer.from(svg), save: async (t) => ({ url: `https://media.example.test/sample/${t}/${++saved}.webp` }) }, ...(keep ? { keep: { code: keep, copyImage } } : {}) });
+
+  it("recognises a well-formed code and nothing else", () => {
+    expect(parseKeepCode("0b1f2a3c-0000-4000-8000-000000000000.abcdefghijklmnop1234")).toMatchObject({ tenantId: "0b1f2a3c-0000-4000-8000-000000000000" });
+    for (const bad of ["", "nope", "abc.def", "0b1f2a3c-0000-4000-8000-000000000000.short", undefined, null]) expect(parseKeepCode(bad as never)).toBeNull();
+  });
+
+  it("carries the visitor's changes into a real store: edited and new products, the pictures (copied, not linked), the details and the home page", async () => {
+    const d = await createDemoSession("kapor", who("20"));
+    const a = actorFor(await ownerOf(d.tenantId));
+    const code = (await loadDemoTenant(d.tenantId))!.keepCode!;
+    // The visitor changes things in their demo.
+    const first = await owner.product.findFirstOrThrow({ where: { tenantId: d.tenantId }, orderBy: { createdAt: "asc" } });
+    await owner.product.update({ where: { id: first.id }, data: { title: "My Own Panjabi", basePrice: 1999 } });
+    await owner.storeSettings.updateMany({ where: { tenantId: d.tenantId }, data: { tagline: "Made by me" } });
+    await owner.product.create({ data: { tenantId: d.tenantId, title: "Brand New Thing", slug: "brand-new-thing", descriptionHtml: "<p>x</p>", basePrice: 500, status: "ACTIVE" } });
+    const demoProducts = await owner.product.count({ where: { tenantId: d.tenantId, deletedAt: null } });
+    void a;
+
+    copied.length = 0;
+    const r = await signup(code);
+    expect(r.kept).toBe(demoProducts);
+    expect(r.keptPage).toBe(true);
+    const mine = await listAdminProducts(r.tenantId, actorFor(await ownerOf(r.tenantId)), { q: "My Own Panjabi" });
+    expect(mine.rows.map((x) => [x.title, x.price])).toEqual([["My Own Panjabi", 1999]]);
+    expect((await listAdminProducts(r.tenantId, actorFor(await ownerOf(r.tenantId)), { q: "Brand New Thing" })).total).toBe(1);
+    expect((await owner.storeSettings.findFirstOrThrow({ where: { tenantId: r.tenantId } })).tagline).toBe("Made by me");
+    // Pictures were copied into the new store, not linked to the demo's.
+    const imgs = await owner.productImage.findMany({ where: { tenantId: r.tenantId } });
+    expect(imgs.length).toBeGreaterThan(0);
+    expect(imgs.every((i) => i.url.includes(`/kept/${r.tenantId}/`))).toBe(true);
+    expect(copied.length).toBeGreaterThan(0);
+    // The home page came too, with its pictures swapped for the copies.
+    const live = await getLive(r.tenantId, "home");
+    expect(live).not.toBeNull();
+    expect(JSON.stringify(live!.page)).not.toContain(`/${d.tenantId}/`);
+    // It is a real store: on the plan they chose, in trial, and not a demo.
+    const t = await owner.tenant.findUniqueOrThrow({ where: { id: r.tenantId } });
+    expect([t.isDemo, t.demoKind, t.planTier, t.status]).toEqual([false, null, "PRO", "TRIAL"]);
+    // The demo is untouched, and its code is spent.
+    expect(await owner.product.count({ where: { tenantId: d.tenantId } })).toBe(demoProducts);
+    expect((await loadDemoTenant(d.tenantId))!.keepCode).toBeNull();
+  });
+
+  it("works once: the same code later gives the template's sample products instead", async () => {
+    const d = await createDemoSession("kapor", who("21"));
+    const code = (await loadDemoTenant(d.tenantId))!.keepCode!;
+    const first = await signup(code);
+    expect(first.kept).toBeGreaterThan(0);
+    const second = await signup(code);
+    expect(second.kept ?? 0).toBe(0);
+    expect(await owner.product.count({ where: { tenantId: second.tenantId } })).toBeGreaterThan(0); // the template's samples
+  });
+
+  it("ignores a wrong, someone else's or expired code, and signup still works", async () => {
+    const a = await createDemoSession("kapor", who("22"));
+    const b = await createDemoSession("kapor", who("23"));
+    const codeA = (await loadDemoTenant(a.tenantId))!.keepCode!;
+    const token = codeA.split(".")[1]!;
+    expect(await readKeptStore(`${b.tenantId}.${token}`)).toBeNull(); // A's secret does not open B
+    expect(await readKeptStore(`${a.tenantId}.${"x".repeat(24)}`)).toBeNull();
+    await owner.tenant.update({ where: { id: a.tenantId }, data: { demoExpiresAt: new Date(Date.now() - 1000) } });
+    expect(await readKeptStore(codeA)).toBeNull();
+    for (const bad of [`${b.tenantId}.${token}`, codeA, "garbage"]) {
+      const r = await signup(bad);
+      expect(r.kept ?? 0).toBe(0);
+      expect(r.tenantId).toBeTruthy();
+    }
+  });
+
+  it("a picture that cannot be copied is left out; the product still comes", async () => {
+    const d = await createDemoSession("kapor", who("24"));
+    const code = (await loadDemoTenant(d.tenantId))!.keepCode!;
+    const r = await signupStore({ ownerName: "Rina", email: `keep${++n}@example.test`, phone: `0171000${String(1000 + n)}`, storeName: `Kept Store ${n}`, subdomain: `kept-store-${n}`, plan: "PRO", theme: "kapor", demoData: true },
+      { keep: { code, copyImage: async () => { throw new Error("storage down"); } } });
+    expect(r.kept).toBeGreaterThan(0);
+    expect(await owner.productImage.count({ where: { tenantId: r.tenantId } })).toBe(0);
+    expect(await owner.product.count({ where: { tenantId: r.tenantId } })).toBe(r.kept);
   });
 });

@@ -156,3 +156,4 @@ export {
 export { isDemoSessionId } from "./demo/guard";
 export { DemoLockedError } from "./errors";
 export { assertNotInDemo } from "./demo/guard";
+export { parseKeepCode, readKeptStore, KEEP_MAX_PRODUCTS, type KeptStore } from "./demo/keep";

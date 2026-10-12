@@ -14,7 +14,7 @@ export interface AdminSession {
   /** What the store may do right now: trial, active, overdue, read-only or locked (docs/07 section 21). */
   access: Access;
   /** Set when this is a visitor's private demo copy: what to show in the banner, and what to lock. */
-  demo?: { expiresAt: number; template: string; subdomain: string };
+  demo?: { expiresAt: number; template: string; subdomain: string; /** The code that lets a signup keep this demo store. */ keep: string | null };
   impersonation?: {
     actorId: string;
     actorEmail: string;
@@ -43,7 +43,7 @@ export async function getDemoSession(): Promise<AdminSession | null> {
     user: { id: owner.id, name: owner.name, email: owner.email, role: owner.role },
     actor: { userId: owner.id, email: owner.email, name: owner.name, role: owner.role },
     access: await getStoreAccess(t.id),
-    demo: { expiresAt: t.expiresAt.getTime(), template: t.template, subdomain: t.subdomain },
+    demo: { expiresAt: t.expiresAt.getTime(), template: t.template, subdomain: t.subdomain, keep: t.keepCode },
   };
 }
 
