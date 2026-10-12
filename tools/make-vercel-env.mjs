@@ -33,6 +33,7 @@ for (const [k, make] of Object.entries({
   PREVIEW_SECRET: () => hex(24),
   PHONE_TRUST_SALT: () => hex(24),
   CRON_SECRET: () => hex(24),
+  IMPERSONATION_SECRET: () => hex(32), // 64 hex characters; the SAME value in admin and platform
   BACKUP_ENCRYPTION_KEY_HEX: () => hex(32),
 })) {
   if (!gen[k]) { gen[k] = make(); created.push(k); }
@@ -79,7 +80,7 @@ const files = {
   // Signup draws pictures for the sample products (docs/38), so marketing needs the picture storage settings too. The template demo links are built from the root domain.
   marketing: [...common, L("NEXT_PUBLIC_MARKETING_URL", site), L("NEXT_PUBLIC_ADMIN_URL", admin), L("SUPABASE_URL", need("SUPABASE_URL")), L("SUPABASE_SERVICE_ROLE_KEY", need("SUPABASE_SERVICE_ROLE_KEY"), "server only; never expose"), L("MEDIA_DRIVER", "supabase"), L("MEDIA_BUCKET", "store-media")],
   admin: [
-    ...common, ...supabase, ...shared("CRON_SECRET", "CUSTOMER_AUTH_SECRET", "INTEGRATION_VAULT_SECRET", "PREVIEW_SECRET", "PHONE_TRUST_SALT"),
+    ...common, ...supabase, ...shared("CRON_SECRET", "CUSTOMER_AUTH_SECRET", "INTEGRATION_VAULT_SECRET", "PREVIEW_SECRET", "PHONE_TRUST_SALT", "IMPERSONATION_SECRET"),
     L("INTEGRATION_VAULT_KEY_ID", "v1"), L("ADMIN_ORIGIN", admin), L("NEXT_PUBLIC_ADMIN_URL", admin),
     L("MEDIA_DRIVER", "supabase"), L("MEDIA_BUCKET", "store-media"), ...payments,
     L("PLATFORM_A_RECORD", local.PLATFORM_A_RECORD || "76.76.21.21"), L("PLATFORM_CNAME_TARGET", `cname.${domain}`),
@@ -87,7 +88,7 @@ const files = {
     ...sms, ...email,
   ],
   platform: [
-    ...common, L("PLATFORM_DATABASE_URL", need("SUPABASE_PLATFORM_DB_URL"), "the biztrack_platform login"), ...supabase, ...shared("CRON_SECRET", "PHONE_TRUST_SALT"),
+    ...common, L("PLATFORM_DATABASE_URL", need("SUPABASE_PLATFORM_DB_URL"), "the biztrack_platform login"), ...supabase, ...shared("CRON_SECRET", "PHONE_TRUST_SALT", "IMPERSONATION_SECRET"),
     ...payments,
     todo("PLATFORM_VERCEL_TOKEN", "same token as the admin project"), todo("PLATFORM_VERCEL_PROJECT_ID", "the storefront project's id"), todo("EDGE_CONFIG_ID", "same Edge Config id as the admin project"),
     ...sms, ...email,

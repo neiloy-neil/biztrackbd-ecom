@@ -3,7 +3,9 @@ import { getPlatformPrisma, type PrismaClient } from "@biztrackbd/db";
 import { ValidationError } from "../errors";
 import { assertPlatformCan, type PlatformActor } from "./admin";
 
-const SECRET = process.env.IMPERSONATION_SECRET || process.env.COOKIE_SECRET || "biztrack_super_admin_impersonate_secret_key_2026";
+// Dev/test only: never used when NODE_ENV is "production".
+const DEV_SECRET = "dev-only-impersonation-secret-not-for-production";
+const MIN_SECRET_LENGTH = 32;
 const TICKET_TTL_MS = 60_000; // 60 seconds
 const SESSION_TTL_MS = 15 * 60_000; // 15 minutes
 
@@ -21,8 +23,20 @@ export interface ImpersonationSessionPayload {
   expiresAt: number;
 }
 
+// Resolved lazily so importing this module never throws; signing and verifying do.
+function getSecret(): string {
+  const secret = process.env.IMPERSONATION_SECRET || process.env.COOKIE_SECRET;
+  if (process.env.NODE_ENV !== "production") return secret || DEV_SECRET;
+  if (!secret || secret.length < MIN_SECRET_LENGTH) {
+    throw new Error(
+      `IMPERSONATION_SECRET (or COOKIE_SECRET) must be set to at least ${MIN_SECRET_LENGTH} characters in production. It must be the same value in the admin and platform projects.`,
+    );
+  }
+  return secret;
+}
+
 function sign(payload: string): string {
-  return createHmac("sha256", SECRET).update(payload).digest("base64url");
+  return createHmac("sha256", getSecret()).update(payload).digest("base64url");
 }
 
 function verify(payload: string, signature: string): boolean {
@@ -65,6 +79,7 @@ export async function createImpersonationTicket(actor: PlatformActor, tenantId: 
 }
 
 export function verifyImpersonationTicket(ticket: string): ImpersonationTicketPayload | null {
+  getSecret(); // misconfiguration must throw, not read as "invalid ticket"
   try {
     const [json, sig] = ticket.split(".");
     if (!json || !sig) return null;
@@ -89,6 +104,7 @@ export function createImpersonationSessionCookie(payload: { tenantId: string; ac
 }
 
 export function verifyImpersonationSessionCookie(cookieValue: string): ImpersonationSessionPayload | null {
+  getSecret(); // misconfiguration must throw, not read as "invalid cookie"
   try {
     const [json, sig] = cookieValue.split(".");
     if (!json || !sig) return null;

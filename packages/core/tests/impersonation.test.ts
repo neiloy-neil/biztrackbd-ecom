@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createImpersonationSessionCookie,
   createImpersonationTicket,
@@ -75,5 +75,45 @@ describe("Platform Impersonation & Security Safeguards", () => {
     });
     const [json, sig] = cookieVal.split(".");
     expect(verifyImpersonationSessionCookie(`${json}.tamperedSig`)).toBeNull();
+  });
+});
+
+describe("Impersonation secret handling", () => {
+  const payload = { tenantId: "tenant-123", actorId: "admin-1", actorEmail: "sumi@biztrackbd.com" };
+  const secretA = "a".repeat(40);
+  const secretB = "b".repeat(40);
+
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("refuses to sign or verify in production without a secret", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("IMPERSONATION_SECRET", "");
+    vi.stubEnv("COOKIE_SECRET", "");
+    expect(() => createImpersonationSessionCookie(payload)).toThrow(/IMPERSONATION_SECRET/);
+    expect(() => verifyImpersonationSessionCookie("a.b")).toThrow(/IMPERSONATION_SECRET/);
+    expect(() => verifyImpersonationTicket("a.b")).toThrow(/IMPERSONATION_SECRET/);
+  });
+
+  it("refuses a production secret shorter than 32 characters", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("IMPERSONATION_SECRET", "too-short");
+    vi.stubEnv("COOKIE_SECRET", "");
+    expect(() => createImpersonationSessionCookie(payload)).toThrow(/32/);
+  });
+
+  it("falls back to COOKIE_SECRET in production", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("IMPERSONATION_SECRET", "");
+    vi.stubEnv("COOKIE_SECRET", secretA);
+    expect(verifyImpersonationSessionCookie(createImpersonationSessionCookie(payload))?.tenantId).toBe("tenant-123");
+  });
+
+  it("does not verify a cookie signed under a different secret", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("IMPERSONATION_SECRET", secretA);
+    const cookie = createImpersonationSessionCookie(payload);
+    expect(verifyImpersonationSessionCookie(cookie)).not.toBeNull();
+    vi.stubEnv("IMPERSONATION_SECRET", secretB);
+    expect(verifyImpersonationSessionCookie(cookie)).toBeNull();
   });
 });
