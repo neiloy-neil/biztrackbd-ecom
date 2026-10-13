@@ -41,6 +41,8 @@ export interface TrackingConfig {
   googleAnalyticsId: string | null;
   googleTagManagerId: string | null;
   tiktokPixelId: string | null;
+  ga4ApiSecret: string | null;
+  metaDomainVerification: string | null;
   capiConnected: boolean;
   capiMode: "TEST" | "LIVE" | null;
   capiStatus: string | null;
@@ -53,6 +55,7 @@ export interface StorefrontTracking {
   googleAnalyticsId: string | null;
   googleTagManagerId: string | null;
   tiktokPixelId: string | null;
+  metaDomainVerification: string | null;
 }
 
 /** What the storefront may know: public pixel and container IDs. Access tokens never leave the server. */
@@ -64,6 +67,7 @@ export async function getStorefrontTracking(tenantId: string): Promise<Storefron
         googleAnalyticsId: true,
         googleTagManagerId: true,
         tiktokPixelId: true,
+        metaDomainVerification: true,
       },
     });
     return {
@@ -71,6 +75,7 @@ export async function getStorefrontTracking(tenantId: string): Promise<Storefron
       googleAnalyticsId: s?.googleAnalyticsId ?? null,
       googleTagManagerId: s?.googleTagManagerId ?? null,
       tiktokPixelId: s?.tiktokPixelId ?? null,
+      metaDomainVerification: s?.metaDomainVerification ?? null,
     };
   });
 }
@@ -87,12 +92,18 @@ async function capiRow(tenantId: string) {
 
 export async function getTrackingConfig(tenantId: string, actor: StaffActor): Promise<TrackingConfig> {
   assertCan(actor, "marketing", "view");
-  const [sf, row] = await Promise.all([getStorefrontTracking(tenantId), capiRow(tenantId)]);
+  const [sf, row, s] = await Promise.all([
+    getStorefrontTracking(tenantId),
+    capiRow(tenantId),
+    withTenant(tenantId, (tx) => tx.storeSettings.findFirst({ select: { ga4ApiSecret: true, metaDomainVerification: true } })),
+  ]);
   return {
     pixelId: sf.pixelId,
     googleAnalyticsId: sf.googleAnalyticsId,
     googleTagManagerId: sf.googleTagManagerId,
     tiktokPixelId: sf.tiktokPixelId,
+    ga4ApiSecret: s?.ga4ApiSecret ?? null,
+    metaDomainVerification: s?.metaDomainVerification ?? null,
     capiConnected: Boolean(row),
     capiMode: (row?.mode as "TEST" | "LIVE" | undefined) ?? null,
     capiStatus: row?.status ?? null,
@@ -113,6 +124,8 @@ export async function saveTrackingConfig(
     googleAnalyticsId?: string | null;
     googleTagManagerId?: string | null;
     tiktokPixelId?: string | null;
+    ga4ApiSecret?: string | null;
+    metaDomainVerification?: string | null;
   },
 ): Promise<void> {
   assertCan(actor, "marketing", "edit");
@@ -124,6 +137,10 @@ export async function saveTrackingConfig(
   if (gtm && !/^GTM-[A-Za-z0-9]+$/i.test(gtm)) throw new ValidationError("A Google Tag Manager Container ID starts with GTM-, like GTM-ABC123X.");
   const tiktok = input.tiktokPixelId?.trim() || null;
   if (tiktok && !/^[A-Za-z0-9_-]{10,40}$/.test(tiktok)) throw new ValidationError("Enter a valid TikTok Pixel ID (10 to 40 characters).");
+  const ga4Secret = input.ga4ApiSecret?.trim() || null;
+  if (ga4Secret && !/^[A-Za-z0-9_-]{10,64}$/.test(ga4Secret)) throw new ValidationError("Enter a valid GA4 Measurement Protocol API Secret.");
+  const domainVerif = input.metaDomainVerification?.trim() || null;
+  if (domainVerif && !/^[A-Za-z0-9_-]{16,80}$/.test(domainVerif)) throw new ValidationError("Enter a valid Meta Domain Verification code.");
 
   await withTenant(tenantId, async (tx) => {
     const { count } = await tx.storeSettings.updateMany({
@@ -132,6 +149,8 @@ export async function saveTrackingConfig(
         googleAnalyticsId: ga4,
         googleTagManagerId: gtm,
         tiktokPixelId: tiktok,
+        ga4ApiSecret: ga4Secret,
+        metaDomainVerification: domainVerif,
       },
     });
     if (count === 0) throw new NotFoundError("Store settings");
@@ -140,6 +159,8 @@ export async function saveTrackingConfig(
       googleAnalyticsId: ga4,
       googleTagManagerId: gtm,
       tiktokPixelId: tiktok,
+      ga4ApiSecret: ga4Secret ? "[secret]" : null,
+      metaDomainVerification: domainVerif,
     });
   });
 }
@@ -323,15 +344,87 @@ async function purchaseFacts(tenantId: string, orderId: string) {
 }
 
 /**
+ * Dispatch server-side event to Google Analytics 4 via Measurement Protocol.
+ * https://developers.google.com/analytics/devguides/collection/protocol/ga4
+ */
+export async function sendGa4ServerEvent(
+  tenantId: string,
+  event: {
+    name: "purchase" | "refund";
+    transactionId: string;
+    value: number;
+    currency?: string;
+    items?: { id: string; name?: string; quantity?: number; price?: number }[];
+    clientId?: string;
+  },
+): Promise<{ ok: boolean }> {
+  try {
+    const s = await withTenant(tenantId, (tx) =>
+      tx.storeSettings.findFirst({
+        select: { googleAnalyticsId: true, ga4ApiSecret: true },
+      }),
+    );
+    if (!s?.googleAnalyticsId || !s.ga4ApiSecret) return { ok: false };
+
+    const clientId = event.clientId || `bt_${event.transactionId.slice(-16)}`;
+    const url = `https://www.google-analytics.com/mp/collect?measurement_id=${encodeURIComponent(s.googleAnalyticsId)}&api_secret=${encodeURIComponent(s.ga4ApiSecret)}`;
+
+    const body = {
+      client_id: clientId,
+      events: [
+        {
+          name: event.name,
+          params: {
+            transaction_id: event.transactionId,
+            value: event.value,
+            currency: event.currency ?? "BDT",
+            items: event.items?.map((it) => ({
+              item_id: it.id,
+              item_name: it.name ?? it.id,
+              quantity: it.quantity ?? 1,
+              price: it.price ?? 0,
+            })) ?? [],
+          },
+        },
+      ],
+    };
+
+    const res = await fetchImpl(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(5000),
+    });
+
+    return { ok: res.status >= 200 && res.status < 300 };
+  } catch (err) {
+    console.error("[tracking] GA4 server event failed", err instanceof Error ? err.name : "unknown");
+    return { ok: false };
+  }
+}
+
+/**
  * The order was just placed: report the Purchase to Meta from the server. Safe to call twice (a repeat is ignored). Best effort:
  * a Meta outage must never touch the customer's order, so this never throws.
  */
 export async function sendServerPurchase(tenantId: string, orderId: string, ctx: { ip?: string | null; userAgent?: string | null; fbp?: string | null; fbc?: string | null; url?: string | null } = {}): Promise<{ sent: boolean }> {
   try {
-    const pixelId = await getPixelId(tenantId);
-    if (!pixelId || !(await capiRow(tenantId))) return { sent: false };
     const f = await purchaseFacts(tenantId, orderId);
     if (!f) return { sent: false };
+
+    // 1. Dispatch to Google Analytics 4 Measurement Protocol (if configured)
+    sendGa4ServerEvent(tenantId, {
+      name: "purchase",
+      transactionId: orderId,
+      value: f.total,
+      currency: "BDT",
+      items: f.ids.map((id) => ({ id })),
+    }).catch(() => undefined);
+
+    // 2. Dispatch to Meta Conversions API (if configured)
+    const pixelId = await getPixelId(tenantId);
+    if (!pixelId || !(await capiRow(tenantId))) return { sent: false };
+
     const eventId = purchaseEventId(orderId);
     const payload = { value: f.total, currency: "BDT", contentIds: f.ids, numItems: f.qty };
     if (!(await remember(tenantId, { name: "Purchase", eventId, origin: "SERVER", orderId, status: "SENT", payload }))) return { sent: false };
@@ -367,10 +460,21 @@ export async function sendServerCancellation(
   reason = "Courier return or cancelled",
 ): Promise<{ sent: boolean }> {
   try {
-    const pixelId = await getPixelId(tenantId);
-    if (!pixelId || !(await capiRow(tenantId))) return { sent: false };
     const f = await purchaseFacts(tenantId, orderId);
     if (!f) return { sent: false };
+
+    // 1. Dispatch refund event to GA4 Measurement Protocol
+    sendGa4ServerEvent(tenantId, {
+      name: "refund",
+      transactionId: orderId,
+      value: f.total,
+      currency: "BDT",
+    }).catch(() => undefined);
+
+    // 2. Dispatch cancellation event to Meta CAPI
+    const pixelId = await getPixelId(tenantId);
+    if (!pixelId || !(await capiRow(tenantId))) return { sent: false };
+
     const eventId = `cancel_${orderId}`;
     const payload = { value: f.total, currency: "BDT", reason, contentIds: f.ids, numItems: f.qty };
     if (!(await remember(tenantId, { name: "Purchase", eventId, origin: "SERVER", orderId, status: "CANCELLED", payload }))) return { sent: false };

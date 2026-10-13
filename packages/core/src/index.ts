@@ -115,7 +115,7 @@ export {
 } from "./growth/abandoned";
 export {
   getPixelId, getStorefrontTracking, getTrackingConfig, savePixelId, saveTrackingConfig, trackBrowserEvent, sendServerPurchase, sendServerCancellation, recordBrowserPurchase, getTrackingOverview, sendTestEvent, setPixelFetchForTests, purchaseEventId, EVENT_NAMES,
-  buildMetaOAuthUrl, exchangeMetaOAuthCode, fetchMetaPixels,
+  buildMetaOAuthUrl, exchangeMetaOAuthCode, fetchMetaPixels, sendGa4ServerEvent,
   type TrackingConfig, type StorefrontTracking, type TrackingOverview, type EventStat, type UserContext, type EventName, type SendResult, type MetaAdAccountPixel,
 } from "./growth/tracking";
 export {

@@ -20,7 +20,8 @@ export function ImpersonationBanner({
       const remaining = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
       setTimeLeft(remaining);
       if (remaining <= 0) {
-        window.location.reload();
+        clearInterval(timer);
+        window.location.href = "/api/auth/impersonate/exit";
       }
     }, 1000);
     return () => clearInterval(timer);

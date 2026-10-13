@@ -29,8 +29,8 @@ export async function GET(req: NextRequest) {
 
   // Set the tenant cookies so the admin session immediately activates for this store
   jar.set(TENANT, payload.tenantId, cookieOpts);
-  jar.delete(DEMO);
-  jar.delete(DEMO_PREV);
+  jar.delete({ name: DEMO, path: "/" });
+  jar.delete({ name: DEMO_PREV, path: "/" });
   jar.set(DEV_TENANT_COOKIE, payload.subdomain, cookieOpts);
 
   return NextResponse.redirect(new URL("/?welcome=1", req.nextUrl.origin));

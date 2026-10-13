@@ -160,8 +160,10 @@ export const SECTIONS: SectionDef[] = [
     fields: [
       t("badge", "Small badge", 30), tb("badge", "Small badge", 30), t("headline", "Headline", 110), tb("headline", "Headline", 110), area("subhead", "Line under it", 260), areab("subhead", "Line under it", 260),
       image("image", "Picture"), t("ctaText", "Button text", 30), tb("ctaText", "Button text", 30),
+      { key: "showPrice", label: "Show the price, old price and saving", type: "checkbox", hint: "Taken from the product, so it is always right" },
+      t("tick1", "Reassurance 1", 40), tb("tick1", "Reassurance 1", 40), t("tick2", "Reassurance 2", 40), tb("tick2", "Reassurance 2", 40), t("tick3", "Reassurance 3", 40), tb("tick3", "Reassurance 3", 40),
     ],
-    defaults: { badge: "Cash on delivery", badgeBn: "ক্যাশ অন ডেলিভারি", headline: "The panjabi that stays cool in the heat", headlineBn: "গরমে আরামের পাঞ্জাবি", subhead: "100% cotton, stitched in Narayanganj. Pay when it arrives.", subheadBn: "", image: "", ctaText: "Order now", ctaTextBn: "অর্ডার করুন" },
+    defaults: { showPrice: true, tick1: "Cash on delivery", tick1Bn: "ক্যাশ অন ডেলিভারি", tick2: "Delivery in 1 to 3 days", tick2Bn: "১-৩ দিনে ডেলিভারি", tick3: "Easy exchange", tick3Bn: "সহজ বদল", badge: "Cash on delivery", badgeBn: "ক্যাশ অন ডেলিভারি", headline: "The panjabi that stays cool in the heat", headlineBn: "গরমে আরামের পাঞ্জাবি", subhead: "100% cotton, stitched in Narayanganj. Pay when it arrives.", subheadBn: "", image: "", ctaText: "Order now", ctaTextBn: "অর্ডার করুন" },
   },
   {
     type: "lp-benefits", label: "Why buy", description: "Three to eight short reasons.", page: "landing", pages: ["custom"], max: 2,
@@ -235,6 +237,47 @@ export const SECTIONS: SectionDef[] = [
     type: "contact-block", label: "Contact details", description: "Your phone, WhatsApp and address from your store settings. Change them in Settings.", page: "custom", max: 1,
     fields: [t("title", "Heading", 70), tb("title", "Heading", 70), area("text", "Line above the details", 240), areab("text", "Line above the details", 240)],
     defaults: { title: "Get in touch", titleBn: "যোগাযোগ করুন", text: "We answer messages every day.", textBn: "" },
+  },
+  {
+    type: "lp-header", label: "Header and style", description: "Your logo, ways to call you, and the colours of the whole page. Pick a colour style that suits the product.", page: "landing", max: 1,
+    fields: [
+      { key: "palette", label: "Colour style", type: "select", options: [
+        { value: "fresh", label: "Fresh green" }, { value: "red", label: "Bold red on charcoal" }, { value: "navy", label: "Navy and gold" }, { value: "sunny", label: "Sunny orange" },
+        { value: "purple", label: "Purple pop" }, { value: "teal", label: "Deep teal and amber" }, { value: "night", label: "Night and lime" }, { value: "rose", label: "Rose" },
+      ] },
+      image("logo", "Your logo (leave empty to use your store logo or name)"),
+      { key: "showPhone", label: "Show a call button", type: "checkbox", hint: "Uses the phone number in your store settings" },
+      { key: "showWhatsapp", label: "Show a WhatsApp button", type: "checkbox" },
+      { key: "showOrder", label: "Show an order button in the header", type: "checkbox" },
+      t("orderText", "Header button text", 24), tb("orderText", "Header button text", 24),
+      { key: "showLanguage", label: "Show the English / Bangla switch", type: "checkbox" },
+      { key: "floatWhatsapp", label: "Show a round WhatsApp button on the page", type: "checkbox" },
+    ],
+    defaults: { palette: "fresh", logo: "", showPhone: true, showWhatsapp: true, showOrder: true, orderText: "Order now", orderTextBn: "অর্ডার করুন", showLanguage: false, floatWhatsapp: true },
+  },
+  {
+    type: "lp-marquee", label: "Moving strip", description: "A slim coloured strip of short phrases that slides across: free delivery, cash on delivery, 7 days exchange.", page: "landing", max: 2,
+    fields: [],
+    list: { key: "items", label: "Phrases", itemLabel: "Phrase", min: 2, max: 8, fields: [t("text", "Phrase", 40), tb("text", "Phrase", 40)], defaultItem: { text: "", textBn: "" } },
+    defaults: { items: [{ text: "Free delivery on big orders", textBn: "বড় অর্ডারে ফ্রি ডেলিভারি" }, { text: "Cash on delivery", textBn: "ক্যাশ অন ডেলিভারি" }, { text: "Easy exchange", textBn: "সহজ বদল" }] },
+  },
+  {
+    type: "lp-compare", label: "Ordinary or ours", description: "Two columns: what people get elsewhere, and what they get from you. Or before and after.", page: "landing", max: 1,
+    fields: [t("title", "Heading", 80), tb("title", "Heading", 80), t("badTitle", "Left column heading", 40), tb("badTitle", "Left column heading", 40), t("goodTitle", "Right column heading", 40), tb("goodTitle", "Right column heading", 40)],
+    list: { key: "items", label: "Rows", itemLabel: "Row", min: 1, max: 6, fields: [t("bad", "Left", 80), tb("bad", "Left", 80), t("good", "Right", 80), tb("good", "Right", 80)], defaultItem: { bad: "", badBn: "", good: "", goodBn: "" } },
+    defaults: { title: "Why ours is different", titleBn: "কেন আমাদেরটা আলাদা", badTitle: "Ordinary", badTitleBn: "সাধারণ", goodTitle: "Ours", goodTitleBn: "আমাদের", items: [{ bad: "Fades after a few washes", badBn: "কয়েকবার ধুলেই রঙ চটে যায়", good: "Colour stays bright", goodBn: "রঙ থাকে উজ্জ্বল" }, { bad: "Hard to return", badBn: "ফেরত দেওয়া কঠিন", good: "Easy exchange", goodBn: "সহজ বদল" }] },
+  },
+  {
+    type: "lp-steps", label: "Steps", description: "Numbered steps: how to order, or how to use it.", page: "landing", max: 2,
+    fields: [t("title", "Heading", 80), tb("title", "Heading", 80)],
+    list: { key: "items", label: "Steps", itemLabel: "Step", min: 2, max: 6, fields: [t("title", "Step", 60), tb("title", "Step", 60), area("text", "A line about it", 140), areab("text", "A line about it", 140)], defaultItem: { title: "", titleBn: "", text: "", textBn: "" } },
+    defaults: { title: "How to order", titleBn: "কীভাবে অর্ডার করবেন", items: [{ title: "Fill the form", titleBn: "ফর্ম পূরণ করুন", text: "Your name, number and address.", textBn: "নাম, নম্বর ও ঠিকানা।" }, { title: "We call you", titleBn: "আমরা ফোন করি", text: "To confirm your order.", textBn: "অর্ডার নিশ্চিত করতে।" }, { title: "Pay on delivery", titleBn: "হাতে পেয়ে টাকা দিন", text: "Check the parcel, then pay.", textBn: "পণ্য দেখে তারপর দাম দিন।" }] },
+  },
+  {
+    type: "lp-screens", label: "Customer message pictures", description: "Screenshots of real customer messages and comments. Only add ones that are real.", page: "landing", max: 1,
+    fields: [t("title", "Heading", 80), tb("title", "Heading", 80)],
+    list: { key: "items", label: "Pictures", itemLabel: "Picture", min: 1, max: 12, fields: [image("image", "Picture"), t("alt", "What it shows", 100)], defaultItem: { image: "", alt: "" } },
+    defaults: { title: "What our customers say", titleBn: "ক্রেতারা কী বলছেন", items: [{ image: "", alt: "" }] },
   },
   {
     type: "lp-sticky-cta", label: "Sticky button", description: "A button that stays at the bottom of a phone screen and jumps to the order form.", page: "landing", max: 1,

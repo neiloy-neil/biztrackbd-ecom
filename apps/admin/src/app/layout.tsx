@@ -10,7 +10,6 @@ const hind = Hind_Siliguri({ subsets: ["bengali", "latin"], weight: ["400", "500
 
 export const metadata: Metadata = {
   title: { default: "BizTrackBD Admin", template: "%s | BizTrackBD" },
-  manifest: "/manifest.webmanifest",
   robots: { index: false, follow: false },
   appleWebApp: { capable: true, title: "BizTrack", statusBarStyle: "default" },
   icons: { icon: "/icons/icon-192.png", apple: "/icons/icon-192.png" },

@@ -13,6 +13,7 @@ import { assertCouponUsable, deliveryFor, discountFor, money, pickZone } from ".
 import { recordOrderUsage, type OrderThreshold } from "../limits/plan";
 import { assessOrderRisk } from "../fraud/assess";
 import { markRecoveredByOrder } from "../growth/abandoned";
+import { sendServerCancellation } from "../growth/tracking";
 import { recordOutcome, type TrustKind } from "../fraud/trust";
 import { onCancelled, onDelivered, onReturned, priceLoyalty, recordAtOrder, referralAddressClash, sendNotices, type Notice } from "../loyalty/engine";
 import { normalizeBdPhone } from "../phone";
@@ -364,6 +365,9 @@ export async function transitionOrder(tenantId: string, orderId: string, to: Ord
   await sendNotices(tenantId, notices);
   const told = to === "SHIPPED" ? "ORDER_SHIPPED" : to === "DELIVERED" ? "DELIVERED" : to === "CANCELLED" ? "ORDER_CANCELLED" : null;
   if (told) await notifyOrder(tenantId, orderId, told);
+  if (to === "CANCELLED" || to === "RETURNED" || to === "REFUNDED") {
+    sendServerCancellation(tenantId, orderId, reason ?? `Order ${to}`).catch(() => undefined);
+  }
   return updated;
 }
 

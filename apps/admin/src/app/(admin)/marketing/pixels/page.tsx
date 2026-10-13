@@ -5,6 +5,7 @@ import { SubmitButton } from "@/components/ui";
 import { dateTime } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
+import { storefrontOrigin } from "@/lib/store-url";
 import { saveAllTrackingAction, testEventAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -110,6 +111,19 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
               </div>
               <span className="hint">Saved in encrypted vault. Server events bypass ad-blockers.</span>
             </div>
+
+            <label className="field" style={{ marginBottom: 0, gridColumn: "1 / -1" }}>
+              <span className="label">Meta Domain Verification (Optional)</span>
+              <input
+                className="input"
+                name="metaDomainVerification"
+                defaultValue={c.metaDomainVerification ?? ""}
+                placeholder="e.g. 7abc89def01234567890abcdef"
+                disabled={!canEdit}
+                data-testid="meta-domain-verification"
+              />
+              <span className="hint">Copy verification code from Meta Business Suite &rarr; Brand Safety &rarr; Domains. Injected into store &lt;head&gt;.</span>
+            </label>
           </div>
         </section>
 
@@ -123,13 +137,13 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
               </div>
               <div style={{ flexGrow: 1 }}>
                 <div style={{ fontSize: 15, fontWeight: 700 }}>Google Analytics 4</div>
-                <div style={{ fontSize: 12.5, color: "var(--ink-3, #6B6B8D)" }}>Measurement ID (gtag.js)</div>
+                <div style={{ fontSize: 12.5, color: "var(--ink-3, #6B6B8D)" }}>Measurement ID &amp; Server Protocol</div>
               </div>
               <span className={`pill ${c.googleAnalyticsId ? "ok" : "grey"}`}>
                 {c.googleAnalyticsId ? "Active" : "Off"}
               </span>
             </div>
-            <label className="field" style={{ marginBottom: 0 }}>
+            <label className="field" style={{ marginBottom: 12 }}>
               <span className="label">Measurement ID</span>
               <input
                 className="input"
@@ -139,7 +153,20 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
                 disabled={!canEdit}
                 data-testid="ga4-id"
               />
-              <span className="hint">Copy from Google Analytics &rarr; Admin &rarr; Data Streams.</span>
+              <span className="hint">Google Analytics &rarr; Admin &rarr; Data Streams.</span>
+            </label>
+            <label className="field" style={{ marginBottom: 0 }}>
+              <span className="label">Measurement Protocol API Secret</span>
+              <input
+                className="input"
+                name="ga4ApiSecret"
+                type="password"
+                defaultValue={c.ga4ApiSecret ?? ""}
+                placeholder="••••••••••••••••"
+                disabled={!canEdit}
+                data-testid="ga4-secret"
+              />
+              <span className="hint">Admin &rarr; Data Streams &rarr; Measurement Protocol API secrets (enables server-side purchase tracking).</span>
             </label>
           </section>
 
@@ -199,6 +226,44 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
             </label>
           </section>
         </div>
+
+        {/* Dynamic Product Catalog Feed Card for Facebook & Google */}
+        <section className="card" data-testid="catalog-feed-card" style={{ padding: 22 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: "#10B981", color: "#fff", fontWeight: 800, fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              📦
+            </div>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700 }}>Dynamic Product Catalog Feed</div>
+              <div style={{ fontSize: 12.5, color: "var(--ink-3, #6B6B8D)" }}>Real-time XML product feed for Facebook Dynamic Retargeting &amp; Google Shopping</div>
+            </div>
+          </div>
+          <p className="muted" style={{ fontSize: 13, marginBottom: 14 }}>
+            Sync your products automatically with Meta Commerce Manager and Google Merchant Center. Always reflects real-time stock and prices.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
+            <div>
+              <span className="label" style={{ fontSize: 12.5, fontWeight: 600 }}>Meta (Facebook / Instagram) Catalog Feed URL</span>
+              <input
+                className="input"
+                readOnly
+                value={`${storefrontOrigin(s.tenantSubdomain)}/api/feed/facebook.xml`}
+                style={{ fontSize: 12.5, background: "var(--bg-subtle, #FAFAFC)", fontFamily: "monospace", marginTop: 4 }}
+              />
+              <span className="hint">Meta Commerce Manager &rarr; Catalogs &rarr; Data Sources &rarr; Data Feed.</span>
+            </div>
+            <div>
+              <span className="label" style={{ fontSize: 12.5, fontWeight: 600 }}>Google Merchant Center Feed URL</span>
+              <input
+                className="input"
+                readOnly
+                value={`${storefrontOrigin(s.tenantSubdomain)}/api/feed/google.xml`}
+                style={{ fontSize: 12.5, background: "var(--bg-subtle, #FAFAFC)", fontFamily: "monospace", marginTop: 4 }}
+              />
+              <span className="hint">Google Merchant Center &rarr; Products &rarr; Feeds &rarr; Primary Feed.</span>
+            </div>
+          </div>
+        </section>
 
         {canEdit && (
           <div style={{ display: "flex", gap: 12, marginTop: 4 }}>

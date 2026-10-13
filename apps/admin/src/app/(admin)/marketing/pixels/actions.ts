@@ -25,6 +25,8 @@ export async function saveAllTrackingAction(form: FormData): Promise<void> {
       googleAnalyticsId: String(form.get("googleAnalyticsId") ?? ""),
       googleTagManagerId: String(form.get("googleTagManagerId") ?? ""),
       tiktokPixelId: String(form.get("tiktokPixelId") ?? ""),
+      ga4ApiSecret: String(form.get("ga4ApiSecret") ?? ""),
+      metaDomainVerification: String(form.get("metaDomainVerification") ?? ""),
     });
   } catch (e) {
     if (e instanceof DomainError) redirect(`/marketing/pixels?err=${encodeURIComponent(e.message)}`);

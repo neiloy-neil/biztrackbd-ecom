@@ -237,7 +237,7 @@ export function StorefrontTracker({ tracking }: { tracking: StorefrontTracking }
 
 /** Legacy alias */
 export function Pixel({ pixelId }: { pixelId: string }) {
-  return <StorefrontTracker tracking={{ pixelId, googleAnalyticsId: null, googleTagManagerId: null, tiktokPixelId: null }} />;
+  return <StorefrontTracker tracking={{ pixelId, googleAnalyticsId: null, googleTagManagerId: null, tiktokPixelId: null, metaDomainVerification: null }} />;
 }
 
 /** ViewContent on a product page */

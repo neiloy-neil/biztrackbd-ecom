@@ -1715,6 +1715,8 @@ model StoreSettings {
   googleAnalyticsId      String?   // GA4 Measurement ID (e.g. G-XXXXXXXXXX)
   googleTagManagerId     String?   // GTM Container ID (e.g. GTM-XXXXXXX)
   tiktokPixelId          String?   // TikTok Pixel ID (e.g. CXXXXXXXXXXXXX)
+  ga4ApiSecret           String?   // GA4 Measurement Protocol API Secret for server-side events
+  metaDomainVerification String?   // Meta domain verification code for <meta name="facebook-domain-verification">
   // Loyalty points, VIP tiers and referrals (docs/26)
   loyaltyEnabled         Boolean @default(false)
   loyaltySpendPerPoint   Int     @default(100)   // every ৳ this much of a delivered order earns 1 point (before the tier multiplier)
