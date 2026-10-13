@@ -9,7 +9,7 @@ const en = {
   // header, nav, footer
   menu: "Menu", search: "Search", searchPlaceholder: "Search products", account: "Account", cart: "Cart", cartItems: "Cart, {n} items",
   newArrivals: "New arrivals", all: "All products", sale: "Sale", home: "Home", shop: "Shop", help: "Help", delivery: "Delivery",
-  exchange: "Exchange", contact: "Contact", poweredBy: "Powered by BizTrackBD", switchLang: "বাংলা",
+  exchange: "Exchange", contact: "Contact", poweredBy: "Powered by BizTrackBD", sisterOf: "a sister concern of", switchLang: "বাংলা",
   // home
   viewAll: "View all", shopByCategory: "Shop by category", sizeGuide: "Size guide",
   trustCodT: "Cash on delivery", trustCodS: "Pay when your parcel arrives.",
@@ -71,7 +71,7 @@ export type Key = keyof typeof en;
 const bn: Record<Key, string> = {
   menu: "মেনু", search: "খুঁজুন", searchPlaceholder: "পণ্য খুঁজুন", account: "অ্যাকাউন্ট", cart: "কার্ট", cartItems: "কার্ট, {n}টি পণ্য",
   newArrivals: "নতুন পণ্য", all: "সব পণ্য", sale: "ছাড়", home: "হোম", shop: "দোকান", help: "সাহায্য", delivery: "ডেলিভারি",
-  exchange: "বদল", contact: "যোগাযোগ", poweredBy: "BizTrackBD দ্বারা চালিত", switchLang: "English",
+  exchange: "বদল", contact: "যোগাযোগ", poweredBy: "BizTrackBD দ্বারা চালিত", sisterOf: "সহযোগী প্রতিষ্ঠান:", switchLang: "English",
   viewAll: "সব দেখুন", shopByCategory: "ক্যাটাগরি অনুযায়ী কিনুন", sizeGuide: "সাইজ গাইড",
   trustCodT: "ক্যাশ অন ডেলিভারি", trustCodS: "পার্সেল হাতে পেয়ে টাকা দিন।",
   trustMfsT: "বিকাশ ও নগদ", trustMfsS: "এখনই দিন, ২ ঘণ্টার মধ্যে নিশ্চিত করি।",

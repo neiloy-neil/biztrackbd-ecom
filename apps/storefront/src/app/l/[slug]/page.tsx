@@ -6,6 +6,7 @@ import { PreviewBridge } from "@/components/preview-bridge";
 import { Sections, type LandingInfo } from "@/components/sections";
 import { ThemeStyle } from "@/components/theme-style";
 import { LandingEvents } from "@/components/landing-events";
+import { PlatformCredit } from "@/components/platform-credit";
 import { StorefrontTracker } from "@/components/tracker";
 import { getLang, makeT, pickStrings } from "@/lib/i18n";
 import { LP_FORM_KEYS } from "@/lib/strings";
@@ -98,7 +99,7 @@ export default async function LandingPage({ params, searchParams }: { params: Pr
           <Sections page={landing.page} data={data} lang={lang} t={t} orderForm={form} landing={info} />
         )}
       </main>
-      <footer className="lp-footer">{landing.product.title}</footer>
+      <footer className="lp-footer">{landing.product.title}<PlatformCredit t={t} /></footer>
     </>
   );
 }

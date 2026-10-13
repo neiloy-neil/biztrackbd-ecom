@@ -3,6 +3,7 @@ import { linkHref, type CategoryCard, type Chrome, type FooterColumn, type Store
 import { setLanguage } from "@/app/actions";
 import type { Lang, T } from "@/lib/i18n";
 import { linkLabel } from "./header";
+import { PlatformCredit } from "./platform-credit";
 
 type Pages = { title: string; slug: string }[];
 
@@ -114,8 +115,8 @@ export function Footer({ info, categories, lang, t, pages = [], hasBlog = false,
         <div className="legal">
           <span>{copyright || `© ${new Date().getFullYear()} ${info.storeName}`}</span>
           <form action={setLanguage.bind(null, other)}><button className="lang-btn" type="submit" lang={other} style={{ color: "inherit", minHeight: 32 }}>{t("switchLang")}</button></form>
-          <span>{t("poweredBy")}</span>
         </div>
+        <PlatformCredit t={t} />
       </div>
     </footer>
   );

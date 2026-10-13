@@ -161,3 +161,20 @@ describe("secrets and risky patterns in the source", () => {
     expect(hits).toEqual([]);
   });
 });
+
+describe("the platform credit on every storefront", () => {
+  it("is part of every public store footer, links BizTrackBD and The Digital Dude, and no setting can switch it off", () => {
+    const credit = readFileSync(join(ROOT, "apps/storefront/src/components/platform-credit.tsx"), "utf8");
+    expect(credit).toMatch(/digitaldude\.co\.uk/);
+    expect(credit).toMatch(/NEXT_PUBLIC_MARKETING_URL/);
+    expect(credit).toMatch(/The Digital Dude/);
+    // The store footer draws it outside any header-and-footer setting; the landing page footer draws it too.
+    const footer = readFileSync(join(ROOT, "apps/storefront/src/components/footer.tsx"), "utf8");
+    expect(footer).toMatch(/<PlatformCredit t=\{t\} \/>/);
+    expect(footer.slice(footer.indexOf("export function Footer"))).not.toMatch(/chrome[^;]*PlatformCredit|PlatformCredit[^;]*chrome/);
+    expect(readFileSync(join(ROOT, "apps/storefront/src/app/l/[slug]/page.tsx"), "utf8")).toMatch(/<PlatformCredit t=\{t\} \/>/);
+    // The footer record the merchant edits has no field for it.
+    const chrome = readFileSync(join(ROOT, "packages/core/src/builder/chrome.ts"), "utf8");
+    expect(chrome).not.toMatch(/credit|poweredBy|powered/i);
+  });
+});
