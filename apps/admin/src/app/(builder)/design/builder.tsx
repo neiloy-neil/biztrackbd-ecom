@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Drawer, Segmented, useToast } from "@biztrackbd/ui";
 import {
-  DEFAULT_THEME, contrast, editableField, newSection, sectionDef, sectionsFor, setByPath, validateTheme,
+  DEFAULT_THEME, FONT_LABELS, FONT_PAIRS, STYLE_FIELDS, contrast, editableField, newSection, sectionDef, sectionsFor, setByPath, validateTheme,
   type Field, type ListSpec, type PageJson, type PageKind, type PageSection, type SectionDef, type ThemeSettings,
 } from "@biztrackbd/core/builder-client";
 import { ImagePicker } from "@/components/image-picker";
@@ -185,9 +185,25 @@ function ThemePanel({ theme, onChange, disabled }: { theme: ThemeSettings; onCha
       <div className="field" style={{ margin: 0 }}>
         <label className="label" htmlFor="theme-font">Font</label>
         <select id="theme-font" className="select" value={theme.font} disabled={disabled} onChange={(e) => set({ font: e.target.value as ThemeSettings["font"] })}>
-          <option value="sans">Clean (sans-serif)</option><option value="serif">Classic (serif)</option>
+          {FONT_PAIRS.map((f) => <option key={f} value={f}>{FONT_LABELS[f]}</option>)}
         </select>
+        <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>Every font pair shows Bangla clearly.</div>
       </div>
+      {["Buttons", "Product cards", "Spacing and width"].map((group) => (
+        <div key={group} className="bld-group" data-testid={`style-${group.toLowerCase().replace(/[^a-z]+/g, "-")}`}>
+          <div className="bld-gh">{group}</div>
+          <div className="stack" style={{ gap: 10 }}>
+            {STYLE_FIELDS.filter((f) => f.group === group).map((f) => (
+              <div className="field" style={{ margin: 0 }} key={f.key}>
+                <label className="label" htmlFor={`theme-${f.key}`}>{f.label}</label>
+                <select id={`theme-${f.key}`} className="select" value={String(theme[f.key] ?? "look")} disabled={disabled} onChange={(e) => set({ [f.key]: e.target.value } as Partial<ThemeSettings>)}>
+                  {Object.entries(f.options).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                </select>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
       {problem ? <div className="notice bad" role="alert">{problem} The preview keeps the last colours that worked.</div> : <div className="muted" style={{ fontSize: 13 }}>Text contrast {contrast(theme.text, theme.background).toFixed(1)} to 1. At least 4.5 keeps it easy to read.</div>}
       <button type="button" className="btn btn-secondary btn-sm" disabled={disabled} onClick={() => onChange(DEFAULT_THEME)}>Back to the original look</button>
     </div>
@@ -410,8 +426,8 @@ export function Builder(props: Props) {
       const useTwin = latest.current.lang === "bn" && m.twin === true && editableField(def, twinPath) !== null;
       const target = useTwin ? twinPath : m.path;
       const max = (useTwin ? editableField(def, twinPath) : field)?.max ?? 200;
-      // eslint-disable-next-line no-control-regex
       // A paragraph box keeps its line breaks; a single line of text never has one.
+      // eslint-disable-next-line no-control-regex
       const value = (field.type === "textarea" ? m.value.replace(/[\u0000-\u0009\u000B-\u001F\u007F]/g, " ") : m.value.replace(/[\u0000-\u001F\u007F]/g, " ")).slice(0, max);
       edit((pg) => ({ ...pg, sections: pg.sections.map((x) => (x.id === section.id ? { ...x, settings: setByPath(x.settings, target, value) } : x)) }));
     },

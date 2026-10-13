@@ -6,13 +6,66 @@ import { ValidationError } from "../errors";
  * Text must stay readable: a combination below WCAG AA contrast is refused with a plain message.
  */
 
+/** Font pairs (a heading font and a body font). Every one reads Bangla: Hind Siliguri or Noto Serif Bengali carries the Bangla letters. */
+export const FONT_PAIRS = ["sans", "serif", "editorial", "friendly", "bangla", "bangla-serif"] as const;
+export type FontPair = (typeof FONT_PAIRS)[number];
+
+/**
+ * The style choices beyond colours (docs/47 part B). Each is a short tested list, and "look" (the first choice) means "leave it as the
+ * template's own look has it": nothing is written for it, so a store that never touches these renders exactly as before.
+ */
+export const STYLE_CHOICES = {
+  button: ["look", "filled", "outline", "soft"],
+  buttonShape: ["look", "square", "rounded", "pill"],
+  buttonSize: ["look", "small", "medium", "large"],
+  cardRatio: ["look", "square", "portrait", "tall"],
+  cardHover: ["look", "none", "lift"],
+  cardsDesktop: ["look", "3", "4"],
+  cardsMobile: ["look", "2", "3"],
+  spacing: ["look", "tight", "airy"],
+  width: ["look", "narrow", "wide"],
+} as const;
+export type StyleKey = keyof typeof STYLE_CHOICES;
+export type StyleChoice<K extends StyleKey> = (typeof STYLE_CHOICES)[K][number];
+
 export interface ThemeSettings {
   accent: string;
   background: string;
   text: string;
   radius: "sharp" | "soft" | "round";
-  font: "sans" | "serif";
+  font: FontPair;
+  button?: StyleChoice<"button">;
+  buttonShape?: StyleChoice<"buttonShape">;
+  buttonSize?: StyleChoice<"buttonSize">;
+  cardRatio?: StyleChoice<"cardRatio">;
+  cardHover?: StyleChoice<"cardHover">;
+  cardsDesktop?: StyleChoice<"cardsDesktop">;
+  cardsMobile?: StyleChoice<"cardsMobile">;
+  spacing?: StyleChoice<"spacing">;
+  width?: StyleChoice<"width">;
 }
+
+/** What the editor shows for each style choice: its heading and the words for each option. */
+export const STYLE_FIELDS: { group: string; key: StyleKey; label: string; options: Record<string, string> }[] = [
+  { group: "Buttons", key: "button", label: "Button style", options: { look: "As the template has it", filled: "Filled", outline: "Outline", soft: "Soft" } },
+  { group: "Buttons", key: "buttonShape", label: "Button corners", options: { look: "As the template has it", square: "Square", rounded: "Rounded", pill: "Pill" } },
+  { group: "Buttons", key: "buttonSize", label: "Button size", options: { look: "As the template has it", small: "Small", medium: "Medium", large: "Large" } },
+  { group: "Product cards", key: "cardRatio", label: "Picture shape", options: { look: "As the template has it", square: "Square", portrait: "Portrait 4:5", tall: "Tall 3:4" } },
+  { group: "Product cards", key: "cardHover", label: "When someone points at a product", options: { look: "As the template has it", none: "Nothing moves", lift: "Lifts a little" } },
+  { group: "Product cards", key: "cardsDesktop", label: "Products per row on a computer", options: { look: "As the template has it", "3": "3", "4": "4" } },
+  { group: "Product cards", key: "cardsMobile", label: "Products per row on a phone", options: { look: "As the template has it", "2": "2", "3": "3" } },
+  { group: "Spacing and width", key: "spacing", label: "Space between sections", options: { look: "As the template has it", tight: "Tight", airy: "Airy" } },
+  { group: "Spacing and width", key: "width", label: "Page width", options: { look: "As the template has it", narrow: "Narrow", wide: "Wide" } },
+];
+
+export const FONT_LABELS: Record<FontPair, string> = {
+  sans: "Clean (sans-serif)",
+  serif: "Classic (serif)",
+  editorial: "Editorial: Playfair headings, clean text",
+  friendly: "Friendly: Poppins",
+  bangla: "Bangla first: Hind Siliguri",
+  "bangla-serif": "Bangla serif: Noto Serif Bengali headings",
+};
 
 export const DEFAULT_THEME: ThemeSettings = { accent: "#8C5A3C", background: "#FBF8F3", text: "#2B2118", radius: "soft", font: "sans" };
 
@@ -48,9 +101,19 @@ export const themeDefinition = (id: unknown): ThemeDefinition => STORE_THEMES.fi
 export const themeDefaults = (id: unknown): ThemeSettings => ({ ...themeDefinition(id).defaults });
 
 export const RADIUS_PX: Record<ThemeSettings["radius"], number> = { sharp: 2, soft: 10, round: 18 };
-export const FONT_STACK: Record<ThemeSettings["font"], string> = {
+/** The text font of each pair. The `--font-*` names are the storefront's self-hosted fonts (next/font), with system fonts behind them. */
+export const FONT_STACK: Record<FontPair, string> = {
   sans: 'system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Bengali", "Noto Sans", sans-serif',
   serif: 'Georgia, "Noto Serif Bengali", "Times New Roman", serif',
+  editorial: 'var(--font-hind), var(--font-jakarta), system-ui, -apple-system, "Segoe UI", sans-serif',
+  friendly: 'var(--font-poppins), var(--font-hind), system-ui, -apple-system, "Segoe UI", sans-serif',
+  bangla: 'var(--font-hind), var(--font-jakarta), system-ui, -apple-system, "Segoe UI", sans-serif',
+  "bangla-serif": 'var(--font-hind), var(--font-jakarta), system-ui, -apple-system, "Segoe UI", sans-serif',
+};
+/** The heading font of a pair, when it differs from the text font. */
+export const FONT_HEAD_STACK: Partial<Record<FontPair, string>> = {
+  editorial: 'var(--font-playfair), Georgia, "Noto Serif Bengali", "Times New Roman", serif',
+  "bangla-serif": 'var(--font-notoserifbn), Georgia, "Times New Roman", serif',
 };
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
@@ -81,7 +144,7 @@ export function validateTheme(raw: unknown): ThemeSettings {
     return v.toUpperCase();
   };
   const pick = <T extends string>(k: keyof ThemeSettings, label: string, allowed: readonly T[]): T => {
-    const v = String(o[k] ?? DEFAULT_THEME[k]);
+    const v = String(o[k] ?? DEFAULT_THEME[k] ?? "look");
     if (!(allowed as readonly string[]).includes(v)) throw new ValidationError(`${label} is not one of the choices`, { field: k });
     return v as T;
   };
@@ -90,7 +153,16 @@ export function validateTheme(raw: unknown): ThemeSettings {
     background: color("background", "Background"),
     text: color("text", "Text colour"),
     radius: pick("radius", "Corners", ["sharp", "soft", "round"] as const),
-    font: pick("font", "Font", ["sans", "serif"] as const),
+    font: pick("font", "Font", FONT_PAIRS),
+    button: pick("button", "Button style", STYLE_CHOICES.button),
+    buttonShape: pick("buttonShape", "Button corners", STYLE_CHOICES.buttonShape),
+    buttonSize: pick("buttonSize", "Button size", STYLE_CHOICES.buttonSize),
+    cardRatio: pick("cardRatio", "Picture shape", STYLE_CHOICES.cardRatio),
+    cardHover: pick("cardHover", "Product hover", STYLE_CHOICES.cardHover),
+    cardsDesktop: pick("cardsDesktop", "Products per row", STYLE_CHOICES.cardsDesktop),
+    cardsMobile: pick("cardsMobile", "Products per row on a phone", STYLE_CHOICES.cardsMobile),
+    spacing: pick("spacing", "Spacing", STYLE_CHOICES.spacing),
+    width: pick("width", "Page width", STYLE_CHOICES.width),
   };
   if (contrast(out.text, out.background) < 4.5) throw new ValidationError("Your text colour is hard to read on that background. Pick colours that are further apart.", { field: "text" });
   // The accent is used as text on the page too (links, prices), so it must read on the background as well.
@@ -108,6 +180,41 @@ export function themeCss(t: ThemeSettings, selector = ":root"): string {
   if (s.background !== d.background) v.push(`--bg:${s.background}`);
   if (s.text !== d.text) v.push(`--ink:${s.text}`);
   if (s.radius !== d.radius) v.push(`--radius:${RADIUS_PX[s.radius]}px`);
-  if (s.font !== d.font) v.push(`--font:${FONT_STACK[s.font]}`);
-  return v.length ? `${selector}{${v.join(";")}}` : "";
+  const out: string[] = v.length ? [`${selector}{${v.join(";")}}`] : [];
+  // The font pair is written with the weight of a template's own look, so a pair chosen here wins over the font a template sets for itself.
+  if (s.font !== d.font) out.push(`${P}{--font:${FONT_STACK[s.font]};--font-head:${FONT_HEAD_STACK[s.font] ?? FONT_STACK[s.font]}}`);
+  out.push(...styleRules(s));
+  return out.join("");
+}
+
+// The rules for the style choices. They start with `body[data-store-theme]` so they win over a template's own look (themes.css), and each one
+// is written only when the merchant picked something other than "as the template has it".
+const P = "body[data-store-theme]";
+export function styleRules(s: ThemeSettings): string[] {
+  const r: string[] = [];
+  const btn: Record<string, string> = {
+    filled: `${P} .btn-primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}`,
+    outline: `${P} .btn-primary{background:transparent;color:var(--accent);border-color:var(--accent)}${P} .btn-primary:hover{background:var(--accent);color:var(--accent-ink)}`,
+    soft: `${P} .btn-primary{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);border-color:transparent}${P} .btn-primary:hover{background:color-mix(in srgb,var(--accent) 24%,transparent)}`,
+  };
+  if (s.button && btn[s.button]) r.push(btn[s.button]!);
+  const shape: Record<string, string> = { square: "0", rounded: "8px", pill: "999px" };
+  if (s.buttonShape && shape[s.buttonShape]) r.push(`${P} .btn,${P} .btn-round{border-radius:${shape[s.buttonShape]}}`);
+  const size: Record<string, string> = {
+    small: "min-height:42px;padding:0 20px;font-size:14px", medium: "min-height:52px;padding:0 28px;font-size:15px", large: "min-height:60px;padding:0 36px;font-size:16.5px",
+  };
+  if (s.buttonSize && size[s.buttonSize]) r.push(`${P} .btn,${P} .btn-round{${size[s.buttonSize]}}`);
+  const ratio: Record<string, string> = { square: "1 / 1", portrait: "4 / 5", tall: "3 / 4" };
+  if (s.cardRatio && ratio[s.cardRatio]) r.push(`${P} .pcard .pimg{aspect-ratio:${ratio[s.cardRatio]}}`);
+  if (s.cardHover === "none") r.push(`${P} .pcard,${P} .pcard:hover{transition:none;transform:none;box-shadow:none}`);
+  if (s.cardHover === "lift") r.push(`${P} .pcard{transition:transform .2s ease,box-shadow .2s ease}${P} .pcard:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(0,0,0,.14)}`);
+  if (s.cardsDesktop === "3") r.push(`@media(min-width:700px){${P} .grid,${P} .grid-4{grid-template-columns:repeat(3,minmax(0,1fr))}}`);
+  if (s.cardsDesktop === "4") r.push(`@media(min-width:1000px){${P} .grid,${P} .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}}`);
+  if (s.cardsMobile === "3") r.push(`@media(max-width:699px){${P} .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}}`);
+  if (s.cardsMobile === "2") r.push(`@media(max-width:699px){${P} .grid{grid-template-columns:repeat(2,minmax(0,1fr))}}`);
+  if (s.spacing === "tight") r.push(`${P} .section,${P} .lp-block{padding-top:24px}@media(min-width:900px){${P} .section,${P} .lp-block{padding-top:40px}}`);
+  if (s.spacing === "airy") r.push(`${P} .section,${P} .lp-block{padding-top:56px}@media(min-width:900px){${P} .section,${P} .lp-block{padding-top:96px}}`);
+  if (s.width === "narrow") r.push(`${P} .wrap:not(.lp-narrow){max-width:1040px}`);
+  if (s.width === "wide") r.push(`${P} .wrap:not(.lp-narrow){max-width:1400px}`);
+  return r;
 }

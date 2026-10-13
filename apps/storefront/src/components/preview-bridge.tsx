@@ -111,7 +111,8 @@ export function PreviewBridge({ kind, initialPage, initialTheme, data, lang: ini
     return () => window.removeEventListener("message", onFocus);
   }, [adminOrigin]);
 
-  const css = themeCss(theme);
+  // Written on the body, as the live store does, so the colours, fonts and style choices win over a template's own look in the preview too.
+  const css = themeCss(theme, "body");
   return (
     <div data-testid="preview-root" data-preview-sections={page.sections.length}>
       <style id="bt-preview-select">{`[data-section]{cursor:pointer}[data-section]:hover{outline:2px dashed rgba(91,79,232,.55);outline-offset:-2px}[data-section].bt-selected{outline:3px solid #5B4FE8;outline-offset:-3px}`}</style>

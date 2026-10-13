@@ -5,7 +5,7 @@ import {
   DomainError, SECTIONS, STORE_PAGE_KINDS, allowedOn, defaultPageFor, requiredFor, sectionsFor, STORE_THEMES, activateTheme, checkDomain, contrast, createLandingPage, createPreviewToken, defaultHomePage, defaultLandingPage, deleteLandingPage, discardDraft, dnsInstruction, getLive, getPreview,
   getBuilderAccess, getPublicLanding, listLandingPages, listVersions, loadForEdit, loadPageData, newSection, normalizeSettings, placeLandingOrder, publish, recheckDomain, rollback, safeImage, safeUrl,
   saveDraft, saveThemeDraft, sectionDef, setDnsResolver, setEventPublisher, setLandingLive, setRoutingSync, setVercelClient, sweepDomains, themeCss, validatePage, validateTheme,
-  verifyPreviewToken, updateLandingOffers, landingSlugByCode, editableField, setByPath, getByPath, LANDING_TEMPLATES, landingStats, landingTotals, listLandingLeads, deleteLandingLead, recordLandingView, saveLandingLead, landingTemplate, pageFromTemplate, youtubeId, parseEndsAt, parseOffers, dealDiscount, type DnsResolver, type StaffActor, type VercelDomainClient,
+  verifyPreviewToken, updateLandingOffers, landingSlugByCode, FONT_PAIRS, STYLE_CHOICES, DEFAULT_THEME, styleRules, editableField, setByPath, getByPath, LANDING_TEMPLATES, landingStats, landingTotals, listLandingLeads, deleteLandingLead, recordLandingView, saveLandingLead, landingTemplate, pageFromTemplate, youtubeId, parseEndsAt, parseOffers, dealDiscount, type DnsResolver, type StaffActor, type VercelDomainClient,
 } from "../src";
 
 let owner: PrismaClient;
@@ -397,6 +397,51 @@ describe("landing pages", () => {
     await publish(s.f.tenantId, s.owner, pageKey);
     const other = s.f.products[1]!.variants[0]!.id;
     await fails(placeLandingOrder(s.f.tenantId, "eid-panjabi", { idempotencyKey: `lp-${Date.now()}-2`, variantId: other, quantity: 1, name: "Tania Akter", phone: "01712345602", address: "House 4, Road 2, Dhanmondi", district: "Dhaka", division: "Dhaka" }), "VALIDATION_ERROR", /options/);
+  });
+
+  describe("style controls (docs/47 part B)", () => {
+    const base = { accent: "#8C5A3C", background: "#FBF8F3", text: "#2B2118", radius: "soft", font: "sans" };
+
+    it("a theme saved before these controls existed is unchanged, and writes no extra CSS", () => {
+      const t = validateTheme(base);
+      expect(t).toMatchObject({ button: "look", buttonShape: "look", buttonSize: "look", cardRatio: "look", cardHover: "look", cardsDesktop: "look", cardsMobile: "look", spacing: "look", width: "look" });
+      expect(themeCss(t, "body")).toBe("");
+      expect(styleRules(t)).toEqual([]);
+      expect(themeCss(DEFAULT_THEME, "body")).toBe("");
+    });
+
+    it("accepts only the listed choices, for every control and every font pair", () => {
+      for (const [key, list] of Object.entries(STYLE_CHOICES)) {
+        for (const v of list) expect(() => validateTheme({ ...base, [key]: v }), `${key}=${v}`).not.toThrow();
+        expect(() => validateTheme({ ...base, [key]: "expression(alert(1))" }), key).toThrow(/not one of the choices/);
+        expect(() => validateTheme({ ...base, [key]: "red; } body { display:none" }), key).toThrow();
+      }
+      for (const f of FONT_PAIRS) expect(validateTheme({ ...base, font: f }).font).toBe(f);
+      expect(() => validateTheme({ ...base, font: "Comic Sans" })).toThrow(/not one of the choices/);
+    });
+
+    it("writes one clear rule for each choice, with the weight to beat a template's own look", () => {
+      const css = (patch: Record<string, string>) => themeCss(validateTheme({ ...base, ...patch }), "body");
+      expect(css({ button: "outline" })).toContain("body[data-store-theme] .btn-primary{background:transparent;color:var(--accent);border-color:var(--accent)}");
+      expect(css({ button: "soft" })).toContain("color-mix(in srgb,var(--accent) 14%,transparent)");
+      expect(css({ buttonShape: "pill" })).toBe("body[data-store-theme] .btn,body[data-store-theme] .btn-round{border-radius:999px}");
+      expect(css({ buttonSize: "large" })).toContain("min-height:60px");
+      expect(css({ cardRatio: "square" })).toBe("body[data-store-theme] .pcard .pimg{aspect-ratio:1 / 1}");
+      expect(css({ cardHover: "lift" })).toContain("translateY(-4px)");
+      expect(css({ cardsDesktop: "4" })).toContain("@media(min-width:1000px)");
+      expect(css({ cardsMobile: "3" })).toContain("repeat(3,minmax(0,1fr))");
+      expect(css({ spacing: "airy" })).toContain("padding-top:96px");
+      expect(css({ width: "wide" })).toBe("body[data-store-theme] .wrap:not(.lp-narrow){max-width:1400px}");
+      // A font pair sets both the text and the heading font; one pair uses a different heading font.
+      expect(css({ font: "editorial" })).toContain("--font-head:var(--font-playfair)");
+      expect(css({ font: "friendly" })).toContain("--font:var(--font-poppins)");
+      // Nothing a merchant types can reach the CSS: only these fixed strings do.
+      expect(css({ button: "filled", font: "bangla-serif" })).not.toMatch(/[<>]|javascript|url\(/i);
+    });
+
+    it("the contrast checks still protect readability", () => {
+      expect(() => validateTheme({ ...base, text: "#EEEEEE" })).toThrow(/hard to read/);
+    });
   });
 
   describe("editing text and pictures on the page (docs/46 stage 4)", () => {
