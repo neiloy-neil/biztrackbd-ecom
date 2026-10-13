@@ -5,7 +5,7 @@ import {
   DomainError, SECTIONS, STORE_PAGE_KINDS, allowedOn, defaultPageFor, requiredFor, sectionsFor, STORE_THEMES, activateTheme, checkDomain, contrast, createLandingPage, createPreviewToken, defaultHomePage, defaultLandingPage, deleteLandingPage, discardDraft, dnsInstruction, getLive, getPreview,
   getBuilderAccess, getPublicLanding, listLandingPages, listVersions, loadForEdit, loadPageData, newSection, normalizeSettings, placeLandingOrder, publish, recheckDomain, rollback, safeImage, safeUrl,
   saveDraft, saveThemeDraft, sectionDef, setDnsResolver, setEventPublisher, setLandingLive, setRoutingSync, setVercelClient, sweepDomains, themeCss, validatePage, validateTheme,
-  verifyPreviewToken, updateLandingOffers, landingSlugByCode, LANDING_TEMPLATES, landingTemplate, pageFromTemplate, youtubeId, parseEndsAt, parseOffers, dealDiscount, type DnsResolver, type StaffActor, type VercelDomainClient,
+  verifyPreviewToken, updateLandingOffers, landingSlugByCode, LANDING_TEMPLATES, landingStats, landingTotals, listLandingLeads, deleteLandingLead, recordLandingView, saveLandingLead, landingTemplate, pageFromTemplate, youtubeId, parseEndsAt, parseOffers, dealDiscount, type DnsResolver, type StaffActor, type VercelDomainClient,
 } from "../src";
 
 let owner: PrismaClient;
@@ -461,6 +461,82 @@ describe("landing pages", () => {
       expect(pageFromTemplate("nope")).toBeNull();
       const plain = await createLandingPage(s.f.tenantId, s.owner, { title: "Plain", productId: s.f.products[0]!.id });
       expect((await loadForEdit(s.f.tenantId, s.owner, plain.pageKey)).page.sections.map((x) => x.type)).toEqual(defaultLandingPage().sections.map((x) => x.type));
+    });
+  });
+
+  describe("views, orders, sources and leads (docs/46 stage 3)", () => {
+    const ship = { name: "Tania Akter", address: "House 4, Road 2, Dhanmondi", district: "Dhaka", division: "Dhaka" };
+    async function liveStore(name: string) {
+      const { s, id, pageKey } = await landingStore(name);
+      return { s, id, pageKey };
+    }
+    async function goLive(s: Awaited<ReturnType<typeof store>>, pageKey: string) {
+      await saveDraft(s.f.tenantId, s.owner, pageKey, defaultLandingPage());
+      await publish(s.f.tenantId, s.owner, pageKey);
+    }
+
+    it("counts views of a live page only, per day, without identifying anyone", async () => {
+      const { s, id, pageKey } = await liveStore("lps1");
+      await recordLandingView(s.f.tenantId, "eid-panjabi");
+      expect((await landingStats(s.f.tenantId, s.owner, id)).views).toBe(0);
+      await goLive(s, pageKey);
+      await recordLandingView(s.f.tenantId, "eid-panjabi");
+      await recordLandingView(s.f.tenantId, "eid-panjabi");
+      await recordLandingView(s.f.tenantId, "no-such-page");
+      const st = await landingStats(s.f.tenantId, s.owner, id);
+      expect(st).toMatchObject({ views: 2, orders: 0, conversion: 0 });
+      expect(st.perDay).toHaveLength(1);
+      expect((await landingTotals(s.f.tenantId, s.owner, [id])).get(id)).toEqual({ views: 2, orders: 0 });
+    });
+
+    it("an order from the page is counted once, remembers its page and source, and marks the lead as ordered", async () => {
+      const { s, id, pageKey } = await liveStore("lps2");
+      await goLive(s, pageKey);
+      await recordLandingView(s.f.tenantId, "eid-panjabi");
+      expect(await saveLandingLead(s.f.tenantId, "eid-panjabi", { name: "Tania Akter", phone: "01712345621", offerLabel: "1 piece", utmSource: "facebook" })).toBe(true);
+      const variantId = s.f.products[0]!.variants[0]!.id;
+      const input = { idempotencyKey: `lps-${Date.now()}-1`, variantId, quantity: 1, phone: "01712345621", utmSource: "facebook", utmCampaign: "eid", utmMedium: "paid", ...ship };
+      const o = await placeLandingOrder(s.f.tenantId, "eid-panjabi", input);
+      await placeLandingOrder(s.f.tenantId, "eid-panjabi", input); // the same order sent twice
+      const row = await owner.order.findUniqueOrThrow({ where: { id: o.orderId } });
+      expect(row).toMatchObject({ landingPageId: id, utmSource: "facebook", utmCampaign: "eid", utmMedium: "paid" });
+      const st = await landingStats(s.f.tenantId, s.owner, id);
+      expect(st).toMatchObject({ views: 1, orders: 1, conversion: 100, leads: 0 });
+      expect(st.sources).toEqual([{ source: "facebook", campaign: "eid", orders: 1 }]);
+      const leads = await listLandingLeads(s.f.tenantId, s.owner, id);
+      expect(leads).toHaveLength(1);
+      expect(leads[0]).toMatchObject({ phone: "01712345621", status: "ORDERED", offerLabel: "1 piece" });
+    });
+
+    it("keeps one lead per number, ignores bad numbers and names, never reopens an ordered lead, and removes old ones", async () => {
+      const { s, id, pageKey } = await liveStore("lps3");
+      await goLive(s, pageKey);
+      const save = (name: string, phone: string) => saveLandingLead(s.f.tenantId, "eid-panjabi", { name, phone });
+      expect(await save("A", "01712345622")).toBe(false);
+      expect(await save("Rina Akter", "12345")).toBe(false);
+      expect(await save("Rina Akter", "01712345622")).toBe(true);
+      expect(await save("Rina A.", "+8801712345622")).toBe(true);
+      expect(await listLandingLeads(s.f.tenantId, s.owner, id)).toHaveLength(1);
+      expect((await listLandingLeads(s.f.tenantId, s.owner, id))[0]!.name).toBe("Rina A.");
+      expect(await saveLandingLead(s.f.tenantId, "no-such-page", { name: "Rina Akter", phone: "01712345623" })).toBe(false);
+      await owner.landingLead.updateMany({ where: { landingPageId: id }, data: { createdAt: new Date(Date.now() - 31 * 86_400_000) } });
+      await save("Karim Uddin", "01712345624");
+      const left = await listLandingLeads(s.f.tenantId, s.owner, id);
+      expect(left.map((l) => l.phone)).toEqual(["01712345624"]);
+    });
+
+    it("another store sees none of it, and the right people can remove a lead", async () => {
+      const a = await liveStore("lps4");
+      await goLive(a.s, a.pageKey);
+      await saveLandingLead(a.s.f.tenantId, "eid-panjabi", { name: "Rina Akter", phone: "01712345625" });
+      const b = await liveStore("lps5");
+      await goLive(b.s, b.pageKey);
+      expect(await listLandingLeads(b.s.f.tenantId, b.s.owner, b.id)).toHaveLength(0);
+      const [lead] = await listLandingLeads(a.s.f.tenantId, a.s.owner, a.id);
+      await fails(deleteLandingLead(b.s.f.tenantId, b.s.owner, lead!.id), "VALIDATION_ERROR");
+      await fails(deleteLandingLead(a.s.f.tenantId, a.s.packer, lead!.id), "FORBIDDEN");
+      await deleteLandingLead(a.s.f.tenantId, a.s.owner, lead!.id);
+      expect(await listLandingLeads(a.s.f.tenantId, a.s.owner, a.id)).toHaveLength(0);
     });
   });
 

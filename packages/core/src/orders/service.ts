@@ -229,7 +229,7 @@ async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof Cr
       mfsSenderNumber: mfs?.sender, mfsTrxId: mfs?.trx,
       fraudRiskLevel: fraud.level, fraudTrustScore: fraud.score, fraudFlags: fraud.flags, fraudReview: fraud.hold ? "HELD" : null,
       channel: input.channel, createdByUserId: input.createdByUserId,
-      utmSource: input.utmSource, utmCampaign: input.utmCampaign, notes: input.notes,
+      utmSource: input.utmSource, utmCampaign: input.utmCampaign, utmMedium: input.utmMedium, landingPageId: input.landingPageId, notes: input.notes,
       items: {
         create: lines.map((l) => ({
           tenantId, productId: l.v.productId, variantId: l.v.id, productTitle: l.v.product.title,

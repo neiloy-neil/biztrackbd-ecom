@@ -32,6 +32,9 @@ export const CreateOrderInput = z.object({
   offerDiscount: z.number().min(0).max(10_000_000).optional(),
   utmSource: z.string().max(100).optional(),
   utmCampaign: z.string().max(100).optional(),
+  utmMedium: z.string().max(100).optional(),
+  /** Set by placeLandingOrder: the landing page this order came from. */
+  landingPageId: z.string().max(64).optional(),
   /** Loyalty points to spend, in whole blocks. Only honoured with `verifiedCustomerId`. */
   redeemPoints: z.number().int().min(0).max(1_000_000).optional(),
   /** A friend's code (REF-...). Needs no sign-in: the friend is new by definition. */

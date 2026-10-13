@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { NotFoundError, can, createPreviewToken, landingKey, listLandingPages, listVersions, loadForEdit } from "@biztrackbd/core";
+import { NotFoundError, can, createPreviewToken, landingKey, landingStats, listLandingLeads, listLandingPages, listVersions, loadForEdit } from "@biztrackbd/core";
 import { withTenant } from "@biztrackbd/db";
 import { SubmitButton } from "@/components/ui";
 import { one } from "@/lib/query";
+import { dateOnly } from "@/lib/format";
 import { requireAccess } from "@/lib/session";
 import { storefrontOrigin } from "@/lib/store-url";
 import { Builder } from "../../design/builder";
-import { deleteLandingAction, saveLandingMetaAction, saveLandingOffersAction, setLandingLiveAction } from "@/app/(admin)/landing/actions";
+import { deleteLandingAction, deleteLandingLeadAction, saveLandingMetaAction, saveLandingOffersAction, setLandingLiveAction } from "@/app/(admin)/landing/actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Landing page" };
@@ -19,6 +20,7 @@ export default async function LandingEdit({ params, searchParams }: { params: Pr
   const row = (await listLandingPages(s.tenantId, s.actor)).find((p) => p.id === id);
   if (!row) notFound();
   const pageKey = landingKey(id);
+  const [stats, leads] = await Promise.all([landingStats(s.tenantId, s.actor, id), listLandingLeads(s.tenantId, s.actor, id)]);
   const [state, versions, products] = await Promise.all([
     loadForEdit(s.tenantId, s.actor, pageKey).catch((e) => {
       if (e instanceof NotFoundError) notFound();
@@ -30,12 +32,44 @@ export default async function LandingEdit({ params, searchParams }: { params: Pr
   const origin = storefrontOrigin(s.tenantSubdomain);
   const err = one(sp.err);
   const done = one(sp.done);
-  const DONE: Record<string, string> = { saved: "Saved.", live: "The page is live.", offline: "The page is no longer live." };
+  const DONE: Record<string, string> = { saved: "Saved.", live: "The page is live.", offline: "The page is no longer live.", lead: "Removed." };
 
   const header = (
     <>
       {err && <div className="notice bad" role="alert">{err}</div>}
       {done && DONE[done] && <div className="notice good" role="status">{DONE[done]}</div>}
+      <section className="card stack" data-testid="landing-stats">
+        <div className="card-head"><h2>Last {stats.days} days</h2></div>
+        <div className="row" style={{ gap: 24, flexWrap: "wrap" }}>
+          <div><div className="muted" style={{ fontSize: 13 }}>Views</div><b style={{ fontSize: 22 }} data-testid="stat-views">{stats.views}</b></div>
+          <div><div className="muted" style={{ fontSize: 13 }}>Orders</div><b style={{ fontSize: 22 }} data-testid="stat-orders">{stats.orders}</b></div>
+          <div><div className="muted" style={{ fontSize: 13 }}>Orders per 100 views</div><b style={{ fontSize: 22 }}>{stats.conversion ?? "–"}</b></div>
+        </div>
+        {stats.sources.length > 0 && (
+          <div>
+            <div className="muted" style={{ fontSize: 13, marginBottom: 4 }}>Where the orders came from</div>
+            <ul style={{ margin: 0, paddingLeft: 18 }} data-testid="stat-sources">{stats.sources.map((x, i) => <li key={i}>{x.source}{x.campaign ? ` / ${x.campaign}` : ""}: {x.orders}</li>)}</ul>
+          </div>
+        )}
+      </section>
+      <section className="card stack" data-testid="landing-leads">
+        <div className="card-head"><h2>People who did not finish ({stats.leads})</h2></div>
+        <p className="muted" style={{ fontSize: 13 }}>A name and number typed on the page. The page tells the visitor it is kept for 30 days. Call them: a short call often turns into an order.</p>
+        {leads.length === 0 ? <p className="muted">No one yet.</p> : (
+          <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 8 }}>
+            {leads.map((l) => (
+              <li key={l.id} className="row" style={{ gap: 10, flexWrap: "wrap", alignItems: "center" }} data-testid="lead-row">
+                <b>{l.name}</b>
+                <a className="link" href={`tel:${l.phone}`}>{l.phone}</a>
+                <a className="link" href={`https://wa.me/88${l.phone}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+                <span className="muted" style={{ fontSize: 13 }}>{l.offerLabel ? `${l.offerLabel} · ` : ""}{l.source} · {dateOnly(l.createdAt)}</span>
+                <span className={`pill ${l.status === "ORDERED" ? "ok" : "grey"}`}>{l.status === "ORDERED" ? "Ordered" : "Not ordered"}</span>
+                {canEdit && <form action={deleteLandingLeadAction.bind(null, id, l.id)}><SubmitButton className="btn btn-secondary" pending="…">Remove</SubmitButton></form>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
       <section className="card stack" data-testid="landing-meta">
         <div className="card-head"><h2>Page details</h2><span className={`pill ${row.isPublished ? "ok" : "grey"}`}>{row.isPublished ? "Live" : "Not live"}</span></div>
         <form action={saveLandingMetaAction.bind(null, id)} className="stack">

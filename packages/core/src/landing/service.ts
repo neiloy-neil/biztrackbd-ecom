@@ -7,6 +7,8 @@ import { createOrder } from "../orders/service";
 import { assertCan, type StaffActor } from "../permissions";
 import { getProductBySlug, type ProductDetail } from "../storefront/catalog";
 import { pageFromTemplate } from "./templates";
+import { recordLandingOrder } from "./stats";
+import { normalizeBdPhone } from "../phone";
 import { bumpDiscount, dealDiscount, legacyOffers, parseOffers, type LandingOffers, type OfferOption } from "./offers";
 import { randomBytes } from "node:crypto";
 
@@ -253,6 +255,7 @@ export interface LandingOrderInput {
   city?: string;
   utmSource?: string;
   utmCampaign?: string;
+  utmMedium?: string;
 }
 
 /** What an order from this page will contain and how much the deals take off, from database prices. */
@@ -278,7 +281,7 @@ export async function placeLandingOrder(tenantId: string, slug: string, input: L
   const landing = await getPublicLanding(tenantId, slug);
   if (!landing) throw new NotFoundError("Page");
   const { items, offerDiscount } = priceLandingChoice(landing, input);
-  return createOrder(tenantId, {
+  const placed = await createOrder(tenantId, {
     idempotencyKey: input.idempotencyKey,
     customer: { name: input.name, phone: input.phone },
     shipping: { address: input.address, city: input.city?.trim() || input.district, district: input.district, division: input.division },
@@ -289,5 +292,16 @@ export async function placeLandingOrder(tenantId: string, slug: string, input: L
     clientHash: input.clientHash,
     utmSource: input.utmSource ?? `landing:${slug}`.slice(0, 100),
     utmCampaign: input.utmCampaign,
+    utmMedium: input.utmMedium,
+    landingPageId: landing.id,
   });
+  // The count is a convenience: a failure here must never lose or fail an order that was placed.
+  if (!placed.replayed) {
+    try {
+      await recordLandingOrder(tenantId, landing.id, normalizeBdPhone(input.phone));
+    } catch (e) {
+      console.error("landing order count failed", e instanceof Error ? e.name : "unknown");
+    }
+  }
+  return placed;
 }

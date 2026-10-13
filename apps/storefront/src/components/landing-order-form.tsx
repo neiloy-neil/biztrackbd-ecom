@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { BD_GEO } from "@biztrackbd/core/geo";
-import { placeLandingOrderAction, type LandingOrderState } from "@/app/l/actions";
+import { placeLandingOrderAction, saveLandingLeadAction, type LandingOrderState } from "@/app/l/actions";
+import { trackEvent } from "./tracker";
 import { money, type Lang } from "@/lib/i18n-core";
 import type { LP_FORM_KEYS } from "@/lib/strings";
 
@@ -23,7 +24,7 @@ export function dealOff(deal: LandingOption["deal"], line: number): number {
 const uuid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `k-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
 /** Cash on delivery order form: no cart, no account. The button text and the intro come from the page's own section. */
-export function LandingOrderForm({ slug, options, bump, lang, s, buttonText, utm }: { slug: string; options: LandingOption[]; bump: LandingBump | null; lang: Lang; s: LpStrings; buttonText: string; utm?: { source?: string; campaign?: string } }) {
+export function LandingOrderForm({ slug, options, bump, lang, s, buttonText, utm, track = true }: { slug: string; options: LandingOption[]; bump: LandingBump | null; lang: Lang; s: LpStrings; buttonText: string; utm?: { source?: string; campaign?: string; medium?: string }; /** False in the editor preview: nothing is counted or sent. */ track?: boolean }) {
   const t = (k: keyof LpStrings) => s[k];
   const [state, action, pending] = useActionState<LandingOrderState, FormData>(placeLandingOrderAction.bind(null, slug), {});
   const router = useRouter();
@@ -50,12 +51,36 @@ export function LandingOrderForm({ slug, options, bump, lang, s, buttonText, utm
   const line = (variant?.price ?? 0) * pieces;
   const total = line - dealOff(option.deal, line) + (withBump && bump ? bump.price - Math.round(bump.price * bump.percentOff) / 100 : 0);
   const bad = (f: string) => (state.field === f ? true : undefined);
+  const started = useRef(false);
+  const savedLead = useRef("");
 
   return (
-    <form action={action} className="lp-form" data-testid="lp-order-form" noValidate={false}>
+    <form
+      action={action}
+      className="lp-form"
+      data-testid="lp-order-form"
+      noValidate={false}
+      // The first time the visitor touches the form they have started to buy: tell the ad platforms once (Meta, TikTok, Google).
+      onFocusCapture={() => {
+        if (!track || started.current) return;
+        started.current = true;
+        trackEvent("InitiateCheckout", { contentIds: [option.id], numItems: pieces, value: total });
+      }}
+      // A name and a valid number are kept as a lead if the order is not finished. The note under the form says so.
+      onBlurCapture={(e) => {
+        if (!track || (e.target as HTMLElement).getAttribute("name") !== "phone") return;
+        const f = (e.currentTarget as HTMLFormElement).elements;
+        const phone = (f.namedItem("phone") as HTMLInputElement | null)?.value.replace(/[\s-]/g, "") ?? "";
+        const name = (f.namedItem("name") as HTMLInputElement | null)?.value ?? "";
+        if (!/^(\+?88)?01[3-9]\d{8}$/.test(phone) || name.trim().length < 2 || savedLead.current === phone) return;
+        savedLead.current = phone;
+        void saveLandingLeadAction(slug, { name, phone, offerLabel: option.label, utmSource: utm?.source, utmCampaign: utm?.campaign });
+      }}
+    >
       <input type="hidden" name="key" value={key.current} />
       <input type="hidden" name="utm_source" value={utm?.source ?? ""} />
       <input type="hidden" name="utm_campaign" value={utm?.campaign ?? ""} />
+      <input type="hidden" name="utm_medium" value={utm?.medium ?? ""} />
       <input type="hidden" name="optionId" value={option.id} />
       {options.length > 1 && (
         <fieldset className="lp-offers" data-testid="lp-offers" style={{ border: 0, padding: 0, margin: 0, display: "grid", gap: 8 }}>
@@ -113,6 +138,7 @@ export function LandingOrderForm({ slug, options, bump, lang, s, buttonText, utm
       )}
       {variant && <div className="lp-price"><span>{t("lpOrderTotal")}</span><span data-testid="lp-total">{money(total, lang)}</span></div>}
       <p className="muted" style={{ fontSize: 13 }}>{t("lpOrderNote")}</p>
+      <p className="muted" style={{ fontSize: 12 }} data-testid="lp-lead-note">{t("lpLeadNote")}</p>
       {state.error && <p className="err" role="alert">{state.error}</p>}
       <button type="submit" className="btn btn-primary btn-round btn-block" disabled={pending || soldOut || !!state.redirectTo}>{pending || state.redirectTo ? t("lpOrderSending") : soldOut ? t("soldOut") : buttonText}</button>
     </form>

@@ -123,6 +123,8 @@ model Tenant {
   apiKeys          ApiKeyCredential[]
   webhookSubs      WebhookSubscription[]
   landingPages     LandingPage[]
+  landingDaily     LandingDaily[]
+  landingLeads     LandingLead[]
   collections      Collection[]
   expenses         Expense[]
   courierEvents    CourierEvent[]
@@ -469,6 +471,9 @@ model Order {
   createdByUserId     String?           // staff who keyed in a quick order
   utmSource           String?
   utmCampaign         String?
+  utmMedium           String?
+  // The landing page this order came from, when it did (docs/46)
+  landingPageId       String?
   
   notes               String?           @db.Text
   staffNotes          String?           @db.Text
@@ -892,6 +897,8 @@ model LandingPage {
   offersJson      Json?
   // The short address for ads: /p/<shortCode>
   shortCode       String?  @unique
+  daily           LandingDaily[]
+  leads           LandingLead[]
 
   tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt       DateTime @default(now())
@@ -899,6 +906,43 @@ model LandingPage {
 
   @@unique([tenantId, slug])
   @@index([tenantId])
+}
+
+// Views and orders of a landing page, one row per day (docs/46). Counts only: no visitor is identified.
+model LandingDaily {
+  landingPageId String
+  day           DateTime    @db.Date
+  tenantId      String
+  views         Int         @default(0)
+  orders        Int         @default(0)
+
+  page          LandingPage @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
+  tenant        Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@id([landingPageId, day])
+  @@index([tenantId, day])
+}
+
+// A visitor who typed a name and number on a landing page and may not have finished (docs/46). Kept 30 days, shown to the seller to call.
+model LandingLead {
+  id            String      @id @default(cuid())
+  tenantId      String
+  landingPageId String
+  name          String
+  phone         String
+  offerLabel    String?
+  utmSource     String?
+  utmCampaign   String?
+  // NEW until an order from the same number arrives, then ORDERED
+  status        String      @default("NEW")
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  page          LandingPage @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
+  tenant        Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([landingPageId, phone])
+  @@index([tenantId, createdAt])
 }
 
 model Coupon {

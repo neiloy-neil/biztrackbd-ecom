@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LANDING_TEMPLATES, can, listLandingPages } from "@biztrackbd/core";
+import { LANDING_TEMPLATES, can, landingTotals, listLandingPages } from "@biztrackbd/core";
 import { withTenant } from "@biztrackbd/db";
 import { SubmitButton } from "@/components/ui";
 import { dateOnly } from "@/lib/format";
@@ -20,6 +20,7 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
     listLandingPages(s.tenantId, s.actor),
     withTenant(s.tenantId, (tx) => tx.product.findMany({ where: { deletedAt: null, status: "ACTIVE" }, orderBy: { title: "asc" }, select: { id: true, title: true }, take: 500 })),
   ]);
+  const totals = await landingTotals(s.tenantId, s.actor, pages.map((p) => p.id));
   const origin = storefrontOrigin(s.tenantSubdomain);
   const err = one(sp.err);
   const done = one(sp.done);
@@ -39,6 +40,7 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
                 <span className={`pill ${p.isPublished ? "ok" : "grey"}`}>{p.isPublished ? "Live" : "Not live"}</span>
               </div>
               <p className="muted" style={{ fontSize: 14 }}>Sells {p.productTitle ?? "a product that is no longer available"} · changed {dateOnly(p.updatedAt)}</p>
+              <p style={{ fontSize: 14, marginTop: 4 }} data-testid="landing-totals">Last 30 days: <b>{totals.get(p.id)?.views ?? 0}</b> views · <b>{totals.get(p.id)?.orders ?? 0}</b> orders</p>
               {p.isPublished && <p style={{ fontSize: 14, marginTop: 4, overflowWrap: "anywhere" }}><a className="link" href={`${origin}/l/${p.slug}`} target="_blank" rel="noopener noreferrer">{origin}/l/{p.slug}</a></p>}
             </section>
           ))}

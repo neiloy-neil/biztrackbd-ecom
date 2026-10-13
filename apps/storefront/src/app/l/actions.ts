@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { DomainError, districtsOf, divisionNames, hashClient, normalizeBdPhone, placeLandingOrder, sendServerPurchase, signOrderAccess } from "@biztrackbd/core";
+import { DomainError, districtsOf, divisionNames, hashClient, normalizeBdPhone, placeLandingOrder, recordLandingView, saveLandingLead, sendServerPurchase, signOrderAccess } from "@biztrackbd/core";
 import { clientIp } from "@/lib/ip";
 import { getStore } from "@/lib/tenant";
 
@@ -36,7 +36,7 @@ export async function placeLandingOrderAction(slug: string, _prev: LandingOrderS
   try {
     placed = await placeLandingOrder(store.id, slug, {
       idempotencyKey: get("key"), optionId: get("optionId") || undefined, bump, variantId: get("variantId"), quantity, name: get("name"), phone, address: get("address"), district, division,
-      clientHash: hashClient(await clientIp()), utmSource: get("utm_source") || undefined, utmCampaign: get("utm_campaign") || undefined,
+      clientHash: hashClient(await clientIp()), utmSource: get("utm_source") || undefined, utmCampaign: get("utm_campaign") || undefined, utmMedium: get("utm_medium") || undefined,
     });
     if (!placed.replayed) {
       const ua = (await headers()).get("user-agent");
@@ -49,4 +49,35 @@ export async function placeLandingOrderAction(slug: string, _prev: LandingOrderS
   }
   // Returned, not redirected: the form moves the customer on from the browser, so the store host is kept (as checkout does).
   return { redirectTo: `/order/${placed.orderId}?k=${signOrderAccess(store.id, placed.orderId)}` };
+}
+
+// Per process, per connection: a brake against a script filling the lead list or inflating the view count. Real limits belong at the edge.
+const hits = new Map<string, number[]>();
+function tooMany(key: string, max: number, windowMs = 3_600_000): boolean {
+  const now = Date.now();
+  const list = (hits.get(key) ?? []).filter((t) => now - t < windowMs);
+  list.push(now);
+  hits.set(key, list);
+  if (hits.size > 5000) hits.clear();
+  return list.length > max;
+}
+
+/** Counts a view of a live page. Never throws: a counting problem must not touch the page. */
+export async function trackLandingViewAction(slug: string): Promise<void> {
+  try {
+    if (!/^[a-z0-9-]{1,60}$/.test(slug) || tooMany(`v:${await clientIp()}`, 120)) return;
+    await recordLandingView((await getStore()).id, slug);
+  } catch {
+    /* counting is best effort */
+  }
+}
+
+/** Keeps the name and number a visitor typed, so the seller can call if the order was not finished. The page tells the visitor this. */
+export async function saveLandingLeadAction(slug: string, lead: { name: string; phone: string; offerLabel?: string; utmSource?: string; utmCampaign?: string }): Promise<void> {
+  try {
+    if (!/^[a-z0-9-]{1,60}$/.test(slug) || tooMany(`l:${await clientIp()}`, 20)) return;
+    await saveLandingLead((await getStore()).id, slug, lead);
+  } catch {
+    /* a lead is a convenience */
+  }
 }

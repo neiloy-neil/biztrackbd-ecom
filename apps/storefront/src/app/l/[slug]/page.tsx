@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getPixelId, getPreview, getPublicLanding, verifyPreviewToken } from "@biztrackbd/core";
+import { getPreview, getPublicLanding, getStorefrontTracking, verifyPreviewToken } from "@biztrackbd/core";
 import { LandingOrderForm } from "@/components/landing-order-form";
 import { PreviewBridge } from "@/components/preview-bridge";
 import { Sections, type LandingInfo } from "@/components/sections";
 import { ThemeStyle } from "@/components/theme-style";
-import { Pixel } from "@/components/tracker";
+import { LandingEvents } from "@/components/landing-events";
+import { StorefrontTracker } from "@/components/tracker";
 import { getLang, makeT, pickStrings } from "@/lib/i18n";
 import { LP_FORM_KEYS } from "@/lib/strings";
 import { getStore } from "@/lib/tenant";
@@ -31,7 +32,7 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
 }
 
 /** A one-product page with a cash on delivery order form. Live pages are public; a draft is shown only with a preview token. */
-export default async function LandingPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ preview?: string; utm_source?: string; utm_campaign?: string }> }) {
+export default async function LandingPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ preview?: string; utm_source?: string; utm_campaign?: string; utm_medium?: string }> }) {
   const [{ slug }, sp] = await Promise.all([params, searchParams]);
   const store = await getStore();
   const lang = await getLang(store.locale);
@@ -49,7 +50,9 @@ export default async function LandingPage({ params, searchParams }: { params: Pr
   const landing = await getPublicLanding(store.id, slug, preview ? { page: preview.page } : undefined);
   if (!landing) notFound();
 
-  const pixelId = landing.pixelId ?? (await getPixelId(store.id));
+  // The store's tags (Meta, TikTok, Google) as on every page, with this page's own Meta Pixel when it has one.
+  const tracking = await getStorefrontTracking(store.id);
+  if (landing.pixelId) tracking.pixelId = landing.pixelId;
   const orderSection = landing.page.sections.find((s) => s.type === "lp-order-form");
   const buttonText = orderSection ? (lang === "bn" && orderSection.settings.buttonTextBn ? String(orderSection.settings.buttonTextBn) : String(orderSection.settings.buttonText ?? "")) : t("lpOrderSubmit");
   const form = (
@@ -60,7 +63,8 @@ export default async function LandingPage({ params, searchParams }: { params: Pr
       buttonText={buttonText || t("lpOrderSubmit")}
       options={landing.options}
       bump={landing.bump}
-      utm={{ source: sp.utm_source, campaign: sp.utm_campaign }}
+      utm={{ source: sp.utm_source, campaign: sp.utm_campaign, medium: sp.utm_medium }}
+      track={!preview}
     />
   );
   const data = { products: {}, categories: [] };
@@ -85,7 +89,8 @@ export default async function LandingPage({ params, searchParams }: { params: Pr
   return (
     <>
       <ThemeStyle tenantId={store.id} />
-      {!preview && pixelId && <Pixel pixelId={pixelId} />}
+      {!preview && <StorefrontTracker tracking={tracking} />}
+      <LandingEvents slug={slug} contentIds={landing.options.map((o) => o.productId)} value={info.price ?? undefined} preview={Boolean(preview)} />
       <main id="main">
         {preview ? (
           <PreviewBridge kind="landing" initialPage={landing.page} initialTheme={preview.theme} data={data} lang={lang} orderForm={form} adminOrigin={adminOrigin()} landing={info} />

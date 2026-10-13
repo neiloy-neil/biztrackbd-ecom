@@ -20,4 +20,4 @@ export const LOYALTY_STRINGS = ["usePoints", "usePointsHint", "pointsDiscountLin
 export const LOGIN_STRINGS = ["signIn", "signInS", "mobileNumber", "sendCode", "enterCode", "codeSentTo", "verify", "useOtherNumber"] as const;
 
 /** The words the landing page order form needs, picked on the server (a function cannot be handed to a client component). */
-export const LP_FORM_KEYS = ["lpOrderName", "lpOrderOffer", "lpOrderSave", "lpOrderBump", "lpOrderPcs", "lpOrderPhone", "lpOrderAddress", "lpOrderDivision", "lpOrderDistrict", "lpOrderQty", "lpOrderOption", "lpOrderTotal", "lpOrderChoose", "lpOrderSubmit", "lpOrderSending", "lpOrderNote", "soldOut"] as const;
+export const LP_FORM_KEYS = ["lpOrderName", "lpLeadNote", "lpOrderOffer", "lpOrderSave", "lpOrderBump", "lpOrderPcs", "lpOrderPhone", "lpOrderAddress", "lpOrderDivision", "lpOrderDistrict", "lpOrderQty", "lpOrderOption", "lpOrderTotal", "lpOrderChoose", "lpOrderSubmit", "lpOrderSending", "lpOrderNote", "soldOut"] as const;

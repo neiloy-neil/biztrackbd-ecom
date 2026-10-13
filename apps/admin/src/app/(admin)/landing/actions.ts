@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { DomainError, createLandingPage, deleteLandingPage, setLandingLive, updateLandingOffers, updateLandingPage } from "@biztrackbd/core";
+import { DomainError, createLandingPage, deleteLandingLead, deleteLandingPage, setLandingLive, updateLandingOffers, updateLandingPage } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 
 const back = (path: string, params: Record<string, string>): never => redirect(`${path}?${new URLSearchParams(params)}`);
@@ -77,4 +77,16 @@ export async function saveLandingOffersAction(id: string, f: FormData): Promise<
   }
   revalidatePath(`/landing/${id}`);
   back(`/landing/${id}`, { done: "saved" });
+}
+
+export async function deleteLandingLeadAction(pageId: string, leadId: string): Promise<void> {
+  const s = await requireAction("design", "edit");
+  try {
+    await deleteLandingLead(s.tenantId, s.actor, leadId);
+  } catch (e) {
+    if (e instanceof DomainError) back(`/landing/${pageId}`, { err: e.message });
+    throw e;
+  }
+  revalidatePath(`/landing/${pageId}`);
+  back(`/landing/${pageId}`, { done: "lead" });
 }
