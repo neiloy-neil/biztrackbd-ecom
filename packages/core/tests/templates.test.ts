@@ -2,7 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createBaseClient, setBasePrisma, setPlatformPrisma, type PrismaClient } from "@biztrackbd/db";
 import { createOwnerClient, resetDatabase, seedPlans, testUrls } from "@biztrackbd/db/testing";
 import {
-  DomainError, STORE_THEMES, applyTemplateToStore, applyTemplateUpdate, defaultHomePage, getLive, getTemplate, listPublishedTemplates, listTemplatesForStaff, loadForEdit, newSection, publish,
+  DomainError, STORE_THEMES, BUILT_IN_CHROMES, defaultChrome, getLiveChrome, loadChromeForEdit, publishChrome, saveChromeDraft, applyTemplateToStore, applyTemplateUpdate, defaultHomePage, getLive, getTemplate, listPublishedTemplates, listTemplatesForStaff, loadForEdit, newSection, publish,
   publishTemplateFromStore, saveDraft, setEventPublisher, setTemplateStatus, signupStore, templateUpdateAvailable, type PageJson, type PlatformActor, type StaffActor,
 } from "../src";
 
@@ -216,3 +216,77 @@ describe("store templates published without a deploy (docs/46 stage 5)", () => {
     await expect(listTemplatesForStaff({ ...boss, role: "SUPPORT" })).rejects.toBeInstanceOf(DomainError);
   });
 });
+
+describe("a template carries a header and footer (docs/47)", () => {
+  it("a new store starts with its template's header and footer live, without any words of its own", async () => {
+    const s = await store("mini-bunny");
+    const live = await getLiveChrome(s.tenantId);
+    expect(live?.header.logo).toBe("stacked");
+    expect(live?.footer.columns.map((c) => c.type)).toEqual(["about", "shop", "help", "social"]);
+    expect(live?.footer.copyright).toBe("");
+    expect(live?.menu).toEqual({ auto: true, items: [] });
+    // every original has its own
+    const logos = new Set(STORE_THEMES.map((t) => JSON.stringify(listed(t.id))));
+    expect(logos.size).toBeGreaterThan(3);
+  });
+
+  it("switching template offers its header and footer as a draft: the live one stays, and it can be left out", async () => {
+    const s = await store("kapor");
+    const before = await getLiveChrome(s.tenantId);
+    const r = await applyTemplateToStore(s.tenantId, s.actor, "axionwear");
+    expect(r.chrome).toBe(true);
+    expect(await getLiveChrome(s.tenantId)).toEqual(before);
+    const edit = await loadChromeForEdit(s.tenantId, s.actor);
+    expect(edit.isDraft).toBe(true);
+    expect(edit.chrome.header.logo).toBe("left");
+    expect(edit.chrome.header.announcement.bgColor).toBe("#D7FF3F");
+    await publishChrome(s.tenantId, s.actor);
+    expect((await getLiveChrome(s.tenantId))?.header.announcement.bgColor).toBe("#D7FF3F");
+
+    const t = await store("kapor");
+    const left = await applyTemplateToStore(t.tenantId, t.actor, "bindu", [], false);
+    expect(left.chrome).toBe(false);
+    expect((await loadChromeForEdit(t.tenantId, t.actor)).isDraft).toBe(false);
+  });
+
+  it("a store whose plan cannot edit its header and footer does not get a draft of it", async () => {
+    const s = await store("kapor", "STARTER");
+    const r = await applyTemplateToStore(s.tenantId, s.actor, "axionwear");
+    expect(r.chrome).toBe(false);
+  });
+
+  it("a template published from a store brings its layout but not its words or links; an update is offered as a draft unless the owner made their own", async () => {
+    const w = await store("kapor");
+    const c = defaultChrome();
+    c.header.logo = "center";
+    c.footer.copyright = "Secret Shop Ltd";
+    c.menu = { auto: false, items: [{ id: "m_one", type: "link", label: "Offers", labelBn: "", ref: "", url: "https://example.com/offers" }] };
+    c.footer.columns = [{ id: "about", type: "about", title: "", titleBn: "", body: "", bodyBn: "", links: [] }, { id: "txt_1", type: "text", title: "Hi", titleBn: "", body: "words", bodyBn: "", links: [] }];
+    await saveChromeDraft(w.tenantId, w.actor, c);
+    await publishChrome(w.tenantId, w.actor);
+    const t = await publishTemplateFromStore(boss, { tenantId: w.tenantId, id: "chrome-test", name: "Chrome test" });
+    expect(t.chrome?.header.logo).toBe("center");
+    expect(t.chrome?.footer.copyright).toBe("");
+    expect(t.chrome?.menu.items).toEqual([]);
+    expect(t.chrome?.footer.columns.map((x) => x.type)).toEqual(["about"]);
+
+    const a = await store("kapor");
+    const b = await store("kapor");
+    await applyTemplateToStore(a.tenantId, a.actor, "chrome-test");
+    await applyTemplateToStore(b.tenantId, b.actor, "chrome-test");
+    await publishChrome(a.tenantId, a.actor); // taken as it was: still marked as the template's
+    const own = defaultChrome();
+    own.header.logo = "stacked";
+    await saveChromeDraft(b.tenantId, b.actor, own);
+    await publishChrome(b.tenantId, b.actor); // the owner's own
+
+    await (publishTemplateFromStore(boss, { tenantId: w.tenantId, id: "chrome-test", name: "Chrome test" }));
+    const ra = await applyTemplateUpdate(a.tenantId, a.actor);
+    const rb = await applyTemplateUpdate(b.tenantId, b.actor);
+    expect(ra.chrome).toBe(true);
+    expect(rb.chrome).toBe(false);
+    expect((await getLiveChrome(b.tenantId))?.header.logo).toBe("stacked");
+  });
+});
+
+const listed = (id: string) => BUILT_IN_CHROMES[id];

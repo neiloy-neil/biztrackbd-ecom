@@ -2,6 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createBaseClient, setBasePrisma, setPlatformPrisma, type PrismaClient } from "@biztrackbd/db";
 import { createOwnerClient, resetDatabase, seedPlans, testUrls } from "@biztrackbd/db/testing";
 import {
+  BUILT_IN_CHROMES,
   DomainError, defaultChrome, discardChromeDraft, getLiveChrome, getPreviewChrome, linkHref, listChromeVersions, loadChromeForEdit, publishChrome, rollbackChrome, saveChromeDraft,
   setEventPublisher, signupStore, validateChrome, type Chrome, type StaffActor,
 } from "../src";
@@ -95,22 +96,23 @@ describe("saving, publishing and going back", () => {
   it("opens with today's header and footer, saves a draft, and keeps it private until it is published", async () => {
     const s = await store("PRO");
     const first = await loadChromeForEdit(s.tenantId, s.actor);
-    expect(first).toMatchObject({ isDraft: false, publishedVersion: null, unpublished: false, editable: true, stamp: null });
-    expect(first.chrome).toEqual(defaultChrome());
-    expect(await getLiveChrome(s.tenantId)).toBeNull();
+    // A new store starts with the header and footer of its template, as version 1.
+    expect(first).toMatchObject({ isDraft: false, publishedVersion: 1, unpublished: false, editable: true, stamp: null });
+    expect(first.chrome).toEqual(BUILT_IN_CHROMES.kapor);
+    expect(await getLiveChrome(s.tenantId)).toEqual(BUILT_IN_CHROMES.kapor);
 
     await saveChromeDraft(s.tenantId, s.actor, custom());
     const drafted = await loadChromeForEdit(s.tenantId, s.actor);
     expect(drafted).toMatchObject({ isDraft: true, unpublished: true });
     expect(drafted.chrome.header.logo).toBe("center");
-    // The live store still has no header and footer of its own; only the editor's preview shows the draft.
-    expect(await getLiveChrome(s.tenantId)).toBeNull();
+    // The live store still has the template's; only the editor's preview shows the draft.
+    expect(await getLiveChrome(s.tenantId)).toEqual(BUILT_IN_CHROMES.kapor);
     expect((await getPreviewChrome(s.tenantId))!.header.logo).toBe("center");
 
     const v1 = await publishChrome(s.tenantId, s.actor, "Eid");
-    expect(v1).toBe(1);
+    expect(v1).toBe(2);
     expect((await getLiveChrome(s.tenantId))!.menu.items).toHaveLength(3);
-    expect((await loadChromeForEdit(s.tenantId, s.actor))).toMatchObject({ isDraft: false, publishedVersion: 1, unpublished: false });
+    expect((await loadChromeForEdit(s.tenantId, s.actor))).toMatchObject({ isDraft: false, publishedVersion: 2, unpublished: false });
     await fails(publishChrome(s.tenantId, s.actor), "VALIDATION_ERROR", /nothing to publish/);
   });
 
@@ -122,11 +124,11 @@ describe("saving, publishing and going back", () => {
     next.header.logo = "stacked";
     await saveChromeDraft(s.tenantId, s.actor, next);
     await publishChrome(s.tenantId, s.actor, "Stacked");
-    expect((await listChromeVersions(s.tenantId, s.actor)).map((v) => [v.version, v.isLive])).toEqual([[2, true], [1, false]]);
+    expect((await listChromeVersions(s.tenantId, s.actor)).map((v) => [v.version, v.isLive])).toEqual([[3, true], [2, false], [1, false]]);
     expect((await getLiveChrome(s.tenantId))!.header.logo).toBe("stacked");
 
-    const back = await rollbackChrome(s.tenantId, s.actor, 1);
-    expect(back).toBe(3);
+    const back = await rollbackChrome(s.tenantId, s.actor, 2);
+    expect(back).toBe(4);
     expect((await getLiveChrome(s.tenantId))!.header.logo).toBe("center");
     await fails(rollbackChrome(s.tenantId, s.actor, 99), "NOT_FOUND");
 
@@ -155,8 +157,8 @@ describe("saving, publishing and going back", () => {
     const b = await store("PRO");
     await saveChromeDraft(a.tenantId, a.actor, custom());
     await publishChrome(a.tenantId, a.actor);
-    expect(await getLiveChrome(b.tenantId)).toBeNull();
-    expect(await getPreviewChrome(b.tenantId)).toBeNull();
+    expect(await getLiveChrome(b.tenantId)).toEqual(BUILT_IN_CHROMES.kapor);
+    expect(await getPreviewChrome(b.tenantId)).toEqual(BUILT_IN_CHROMES.kapor);
     expect((await getLiveChrome(a.tenantId))!.header.logo).toBe("center");
   });
 });
