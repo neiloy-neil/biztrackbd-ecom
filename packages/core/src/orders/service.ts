@@ -165,6 +165,9 @@ async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof Cr
   if (loyalty.referral && input.clientHash && (await tx.order.findFirst({ where: { customerId: loyalty.referral.customerId, clientHash: input.clientHash, createdAt: { gt: new Date(Date.now() - 90 * 86_400_000) } }, select: { id: true } }))) {
     throw new ValidationError("The referral offer cannot be used from the same connection as the person who invited you.", { field: "referral" });
   }
+  // A landing page's deal (bundle price, order bump), already worked out from database prices by placeLandingOrder; it can never exceed what is left to pay for the goods.
+  const offerDiscount = money(Math.min(input.offerDiscount ?? 0, Math.max(0, subtotal - discount - loyalty.tierDiscount - loyalty.referralDiscount - loyalty.pointsDiscount)));
+  discount = money(discount + offerDiscount);
   const couponWaives = couponId != null && deliveryCharge === 0 && zone != null && deliveryFor(zone, subtotal) > 0;
   if (loyalty.freeDelivery) deliveryCharge = 0;
   const deliveryWaived = loyalty.freeDelivery || couponWaives;

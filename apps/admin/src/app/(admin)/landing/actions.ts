@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { DomainError, createLandingPage, deleteLandingPage, setLandingLive, updateLandingPage } from "@biztrackbd/core";
+import { DomainError, createLandingPage, deleteLandingPage, setLandingLive, updateLandingOffers, updateLandingPage } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 
 const back = (path: string, params: Record<string, string>): never => redirect(`${path}?${new URLSearchParams(params)}`);
@@ -23,7 +23,7 @@ export async function createLandingAction(f: FormData): Promise<void> {
 export async function saveLandingMetaAction(id: string, f: FormData): Promise<void> {
   const s = await requireAction("design", "edit");
   try {
-    await updateLandingPage(s.tenantId, s.actor, id, { title: String(f.get("title") ?? ""), productId: String(f.get("productId") ?? ""), pixelId: String(f.get("pixelId") ?? "") });
+    await updateLandingPage(s.tenantId, s.actor, id, { title: String(f.get("title") ?? ""), productId: String(f.get("productId") ?? "") || undefined, pixelId: String(f.get("pixelId") ?? "") });
   } catch (e) {
     if (e instanceof DomainError) back(`/landing/${id}`, { err: e.message });
     throw e;
@@ -49,4 +49,32 @@ export async function deleteLandingAction(id: string): Promise<void> {
   await deleteLandingPage(s.tenantId, s.actor, id);
   revalidatePath("/landing");
   back("/landing", { done: "deleted" });
+}
+
+/** What the page sells: up to six offers (a product, pieces, a deal) and one optional extra item above the button. Empty rows are ignored. */
+export async function saveLandingOffersAction(id: string, f: FormData): Promise<void> {
+  const s = await requireAction("design", "edit");
+  const get = (k: string) => String(f.get(k) ?? "").trim();
+  const options: unknown[] = [];
+  for (let i = 0; i < 6; i++) {
+    const productId = get(`o${i}-product`);
+    if (!productId) continue;
+    const kind = get(`o${i}-deal`) || "none";
+    const quantity = Number(get(`o${i}-qty`));
+    options.push({
+      id: `o${i + 1}`, label: get(`o${i}-label`) || `Offer ${i + 1}`, labelBn: get(`o${i}-labelBn`) || undefined, productId,
+      quantity: Number.isInteger(quantity) && quantity > 0 ? quantity : undefined,
+      deal: { kind, value: kind === "none" ? 0 : Number(get(`o${i}-value`)) || 0 },
+    });
+  }
+  const bumpVariant = get("bump-variant");
+  const bump = bumpVariant ? { productId: get("bump-variant").split(":")[0], variantId: bumpVariant.split(":")[1] ?? "", label: get("bump-label") || "Add this", labelBn: get("bump-labelBn") || undefined, percentOff: Number(get("bump-off")) || 0 } : null;
+  try {
+    await updateLandingOffers(s.tenantId, s.actor, id, { options, bump });
+  } catch (e) {
+    if (e instanceof DomainError) back(`/landing/${id}`, { err: e.message });
+    throw e;
+  }
+  revalidatePath(`/landing/${id}`);
+  back(`/landing/${id}`, { done: "saved" });
 }

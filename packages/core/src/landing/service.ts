@@ -6,6 +6,8 @@ import { NotFoundError, PlanLimitError, ValidationError } from "../errors";
 import { createOrder } from "../orders/service";
 import { assertCan, type StaffActor } from "../permissions";
 import { getProductBySlug, type ProductDetail } from "../storefront/catalog";
+import { bumpDiscount, dealDiscount, legacyOffers, parseOffers, type LandingOffers, type OfferOption } from "./offers";
+import { randomBytes } from "node:crypto";
 
 /**
  * Landing pages (docs/06 BldLanding): one product, one page, an order form with cash on delivery and no cart or account.
@@ -26,9 +28,23 @@ export interface LandingRow {
   pixelId: string | null;
   updatedAt: Date;
   pageKey: string;
+  shortCode: string | null;
+  offers: LandingOffers;
 }
 
 export const slugify = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60);
+
+/** The page's offers, or its one product when it was made before offers existed or the saved offers are no longer valid. */
+function offersOf(r: { offersJson: unknown; targetProductId: string }): LandingOffers {
+  if (r.offersJson == null) return legacyOffers(r.targetProductId);
+  try {
+    return parseOffers(r.offersJson);
+  } catch {
+    return legacyOffers(r.targetProductId);
+  }
+}
+
+const newShortCode = (): string => randomBytes(5).toString("base64url").toLowerCase().replace(/[^a-z0-9]/g, "x").slice(0, 7);
 
 export async function listLandingPages(tenantId: string, actor: StaffActor): Promise<LandingRow[]> {
   assertCan(actor, "design", "view");
@@ -36,7 +52,7 @@ export async function listLandingPages(tenantId: string, actor: StaffActor): Pro
     const rows = await tx.landingPage.findMany({ orderBy: { createdAt: "desc" } });
     const products = await tx.product.findMany({ where: { id: { in: rows.map((r) => r.targetProductId) } }, select: { id: true, title: true } });
     const name = new Map(products.map((p) => [p.id, p.title]));
-    return rows.map((r) => ({ id: r.id, title: r.title, slug: r.slug, productId: r.targetProductId, productTitle: name.get(r.targetProductId) ?? null, isPublished: r.isPublished, pixelId: r.pixelId, updatedAt: r.updatedAt, pageKey: landingKey(r.id) }));
+    return rows.map((r) => ({ id: r.id, title: r.title, slug: r.slug, productId: r.targetProductId, productTitle: name.get(r.targetProductId) ?? null, isPublished: r.isPublished, pixelId: r.pixelId, updatedAt: r.updatedAt, pageKey: landingKey(r.id), shortCode: r.shortCode, offers: offersOf(r) }));
   });
 }
 
@@ -58,7 +74,7 @@ export async function createLandingPage(tenantId: string, actor: StaffActor, inp
     }
     try {
       // Unpublished until the owner presses Publish in the editor: a half-built page never goes live.
-      const row = await tx.landingPage.create({ data: { tenantId, title, slug, targetProductId: product.id, sectionsJson: defaultLandingPage() as object, isPublished: false } });
+      const row = await tx.landingPage.create({ data: { tenantId, title, slug, targetProductId: product.id, sectionsJson: defaultLandingPage() as object, isPublished: false, shortCode: newShortCode() } });
       await audit(tx, tenantId, actor, "landing.created", { slug });
       return { id: row.id, pageKey: landingKey(row.id) };
     } catch (e) {
@@ -92,6 +108,28 @@ export async function updateLandingPage(tenantId: string, actor: StaffActor, id:
   });
 }
 
+/**
+ * Saves what the page sells. Every product and the bump's variant must be this store's own and on sale, so a page can never be pointed at
+ * another store's goods. The first option's product becomes the page's main product (its title, picture and address).
+ */
+export async function updateLandingOffers(tenantId: string, actor: StaffActor, id: string, raw: unknown): Promise<void> {
+  assertCan(actor, "design", "edit");
+  const offers = parseOffers(raw);
+  await withTenant(tenantId, async (tx) => {
+    const row = await tx.landingPage.findFirst({ where: { id } });
+    if (!row) throw new NotFoundError("Landing page");
+    const ids = [...new Set([...offers.options.map((o) => o.productId), ...(offers.bump ? [offers.bump.productId] : [])])];
+    const found = await tx.product.findMany({ where: { id: { in: ids }, status: "ACTIVE", deletedAt: null }, select: { id: true } });
+    if (found.length !== ids.length) throw new ValidationError("One of the products is not on sale in your store", { field: "offers" });
+    if (offers.bump) {
+      const v = await tx.productVariant.findFirst({ where: { id: offers.bump.variantId, productId: offers.bump.productId }, select: { id: true } });
+      if (!v) throw new ValidationError("The extra item must be one of its product's options", { field: "offers" });
+    }
+    await tx.landingPage.update({ where: { id }, data: { offersJson: offers as object, targetProductId: offers.options[0]!.productId } });
+    await audit(tx, tenantId, actor, "landing.offers", { slug: row.slug, options: offers.options.length, bump: Boolean(offers.bump) });
+  });
+}
+
 export async function setLandingLive(tenantId: string, actor: StaffActor, id: string, live: boolean): Promise<void> {
   assertCan(actor, "design", "edit");
   await withTenant(tenantId, async (tx) => {
@@ -114,6 +152,27 @@ export async function deleteLandingPage(tenantId: string, actor: StaffActor, id:
   });
 }
 
+export interface PublicOption {
+  id: string;
+  label: string;
+  labelBn: string | null;
+  productId: string;
+  productTitle: string;
+  imageUrl: string | null;
+  /** Fixed pieces for a bundle; null when the customer chooses the quantity. */
+  quantity: number | null;
+  deal: OfferOption["deal"];
+  variants: { id: string; title: string; price: number; stock: number }[];
+}
+export interface PublicBump {
+  label: string;
+  labelBn: string | null;
+  variantId: string;
+  productTitle: string;
+  price: number;
+  percentOff: number;
+  stock: number;
+}
 export interface PublicLanding {
   id: string;
   title: string;
@@ -121,34 +180,70 @@ export interface PublicLanding {
   pixelId: string | null;
   page: PageJson;
   product: ProductDetail;
+  options: PublicOption[];
+  bump: PublicBump | null;
+}
+
+/** The slug behind a short address, or null. Only reads the code; whether the page is live is decided when it is opened. */
+export async function landingSlugByCode(tenantId: string, code: string): Promise<string | null> {
+  if (!/^[a-z0-9]{4,12}$/.test(code)) return null;
+  return withTenant(tenantId, async (tx) => (await tx.landingPage.findFirst({ where: { shortCode: code }, select: { slug: true } }))?.slug ?? null);
 }
 
 /**
- * The public read. Returns null unless the page is live, has a published layout and its product is on sale.
+ * The public read. Returns null unless the page is live, has a published layout and its first product is on sale.
  * With `preview`, the draft is shown instead and a page that is not live yet still renders.
  */
 export async function getPublicLanding(tenantId: string, slug: string, preview?: { page: PageJson }): Promise<PublicLanding | null> {
   const row = await withTenant(tenantId, async (tx) => {
     const l = await tx.landingPage.findFirst({ where: { slug } });
     if (!l) return null;
-    const product = await tx.product.findFirst({ where: { id: l.targetProductId, status: "ACTIVE", deletedAt: null }, select: { slug: true } });
+    const offers = offersOf(l);
+    const wanted = [...new Set([...offers.options.map((o) => o.productId), ...(offers.bump ? [offers.bump.productId] : [])])];
+    const products = await tx.product.findMany({
+      where: { id: { in: wanted }, status: "ACTIVE", deletedAt: null },
+      select: { id: true, slug: true, title: true, images: { orderBy: { sortOrder: "asc" }, take: 1, select: { url: true } }, variants: { orderBy: { createdAt: "asc" }, select: { id: true, title: true, price: true, stockQuantity: true } } },
+    });
     const live = await tx.themeVersion.findFirst({ where: { pageKey: landingKey(l.id), state: "PUBLISHED" }, orderBy: { version: "desc" }, select: { sectionsJson: true } });
-    return { l, productSlug: product?.slug ?? null, liveJson: live?.sectionsJson ?? null };
+    return { l, offers, products, liveJson: live?.sectionsJson ?? null };
   });
-  if (!row?.productSlug) return null;
+  if (!row) return null;
+  const byId = new Map(row.products.map((p) => [p.id, p]));
+  // An option whose product has gone off sale is left out; with none left the page is not shown.
+  const options: PublicOption[] = row.offers.options.flatMap((o) => {
+    const p = byId.get(o.productId);
+    if (!p) return [];
+    return [{
+      id: o.id, label: o.label, labelBn: o.labelBn ?? null, productId: p.id, productTitle: p.title, imageUrl: p.images[0]?.url ?? null, quantity: o.quantity ?? null, deal: o.deal,
+      variants: p.variants.map((v) => ({ id: v.id, title: v.title, price: Number(v.price), stock: v.stockQuantity })),
+    }];
+  });
+  const first = options[0] && byId.get(options[0].productId);
+  if (!first) return null;
   if (!preview && (!row.l.isPublished || !row.liveJson)) return null;
-  const product = await getProductBySlug(tenantId, row.productSlug);
+  const product = await getProductBySlug(tenantId, first.slug);
   if (!product) return null;
+  let bump: PublicBump | null = null;
+  const b = row.offers.bump;
+  if (b) {
+    const bp = byId.get(b.productId);
+    const bv = bp?.variants.find((v) => v.id === b.variantId);
+    if (bp && bv) bump = { label: b.label, labelBn: b.labelBn ?? null, variantId: bv.id, productTitle: bp.title, price: Number(bv.price), percentOff: b.percentOff, stock: bv.stockQuantity };
+  }
   const page = preview?.page ?? validatePage("landing", row.liveJson);
-  return { id: row.l.id, title: row.l.title, slug: row.l.slug, pixelId: row.l.pixelId, page, product };
+  return { id: row.l.id, title: row.l.title, slug: row.l.slug, pixelId: row.l.pixelId, page, product, options, bump };
 }
 
 export interface LandingOrderInput {
   /** A keyed hash of the buyer's address (hashClient). Never a raw address. */
   clientHash?: string;
   idempotencyKey: string;
+  /** Which option the customer picked; the first one when absent. */
+  optionId?: string;
   variantId: string;
   quantity: number;
+  /** The customer ticked the order bump. */
+  bump?: boolean;
   name: string;
   phone: string;
   address: string;
@@ -159,17 +254,35 @@ export interface LandingOrderInput {
   utmCampaign?: string;
 }
 
-/** Places the cash on delivery order a landing page collects. The price and stock are read from the product, never the page. */
+/** What an order from this page will contain and how much the deals take off, from database prices. */
+export function priceLandingChoice(landing: Pick<PublicLanding, "options" | "bump">, input: Pick<LandingOrderInput, "optionId" | "variantId" | "quantity" | "bump">) {
+  const option = landing.options.find((o) => o.id === (input.optionId || landing.options[0]!.id));
+  if (!option) throw new ValidationError("Pick one of the offers shown", { field: "optionId" });
+  // The variant must belong to the chosen option's product: a form for one product cannot be bent into ordering another.
+  const variant = option.variants.find((v) => v.id === input.variantId);
+  if (!variant) throw new ValidationError("Pick one of the options shown", { field: "variantId" });
+  const quantity = option.quantity ?? input.quantity;
+  const items: { variantId: string; quantity: number }[] = [{ variantId: variant.id, quantity }];
+  let offerDiscount = dealDiscount(option.deal, variant.price * quantity);
+  if (input.bump) {
+    if (!landing.bump) throw new ValidationError("That extra item is not offered", { field: "bump" });
+    items.push({ variantId: landing.bump.variantId, quantity: 1 });
+    offerDiscount += bumpDiscount(landing.bump, landing.bump.price);
+  }
+  return { items, offerDiscount, optionLabel: option.label };
+}
+
+/** Places the cash on delivery order a landing page collects. The price, the deal and stock are read from the database, never the page. */
 export async function placeLandingOrder(tenantId: string, slug: string, input: LandingOrderInput) {
   const landing = await getPublicLanding(tenantId, slug);
   if (!landing) throw new NotFoundError("Page");
-  // The variant must belong to this page's product: a form for one product cannot be bent into ordering another.
-  if (!landing.product.variants.some((v) => v.id === input.variantId)) throw new ValidationError("Pick one of the options shown", { field: "variantId" });
+  const { items, offerDiscount } = priceLandingChoice(landing, input);
   return createOrder(tenantId, {
     idempotencyKey: input.idempotencyKey,
     customer: { name: input.name, phone: input.phone },
     shipping: { address: input.address, city: input.city?.trim() || input.district, district: input.district, division: input.division },
-    items: [{ variantId: input.variantId, quantity: input.quantity }],
+    items,
+    offerDiscount,
     paymentMethod: "COD",
     channel: "LANDING_PAGE",
     clientHash: input.clientHash,

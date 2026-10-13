@@ -29,12 +29,13 @@ export async function placeLandingOrderAction(slug: string, _prev: LandingOrderS
     return { error: "Enter a valid mobile number, like 01712345678.", field: "phone" };
   }
   const quantity = Number(get("quantity")) || 1;
+  const bump = get("bump") === "on";
   if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) return { error: "Choose a quantity from 1 to 10.", field: "quantity" };
 
   let placed: Awaited<ReturnType<typeof placeLandingOrder>>;
   try {
     placed = await placeLandingOrder(store.id, slug, {
-      idempotencyKey: get("key"), variantId: get("variantId"), quantity, name: get("name"), phone, address: get("address"), district, division,
+      idempotencyKey: get("key"), optionId: get("optionId") || undefined, bump, variantId: get("variantId"), quantity, name: get("name"), phone, address: get("address"), district, division,
       clientHash: hashClient(await clientIp()), utmSource: get("utm_source") || undefined, utmCampaign: get("utm_campaign") || undefined,
     });
     if (!placed.replayed) {

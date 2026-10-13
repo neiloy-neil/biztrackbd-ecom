@@ -888,6 +888,10 @@ model LandingPage {
   sectionsJson    Json     // Page builder block layout
   isPublished     Boolean  @default(false)
   pixelId         String?
+  // What the page sells (docs/46): one product, a choice of products, bundle deals and an optional order bump. Null = the one product above.
+  offersJson      Json?
+  // The short address for ads: /p/<shortCode>
+  shortCode       String?  @unique
 
   tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt       DateTime @default(now())

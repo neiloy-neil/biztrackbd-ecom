@@ -28,6 +28,8 @@ export const CreateOrderInput = z.object({
   createdByName: z.string().max(120).optional(),
   /** Staff only (quick order desk): the money is already in. The order starts as paid, TrxID optional. */
   alreadyPaid: z.boolean().optional(),
+  /** Taka off, worked out by a trusted server from a landing page's deal (placeLandingOrder). Never taken from a browser: the storefront builds the order itself. */
+  offerDiscount: z.number().min(0).max(10_000_000).optional(),
   utmSource: z.string().max(100).optional(),
   utmCampaign: z.string().max(100).optional(),
   /** Loyalty points to spend, in whole blocks. Only honoured with `verifiedCustomerId`. */

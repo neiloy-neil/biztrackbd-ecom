@@ -245,6 +245,38 @@ test.describe.serial("store design, landing pages and domains", () => {
     const o = await withDb(async (c) => (await c.query(`SELECT channel, "paymentMethod", "utmSource" FROM "Order" WHERE "orderNumber" = $1`, [orderNumber])).rows[0] as { channel: string; paymentMethod: string; utmSource: string });
     expect(o).toMatchObject({ channel: "LANDING_PAGE", paymentMethod: "COD", utmSource: `landing:${slug}` });
 
+    // Offers (docs/46): the owner adds a two-piece deal; the customer sees it, the total shows the saving, and the order takes the discount.
+    await page.getByTestId("tab-theme").click();
+    await page.getByTestId("offer-product-1").selectOption({ index: 1 });
+    await page.getByLabel("Offer 2 name", { exact: true }).fill("2 pieces");
+    await page.getByLabel("Offer 2 pieces").fill("2");
+    await page.getByLabel("Offer 2 deal", { exact: true }).selectOption("amount");
+    await page.getByLabel("Offer 2 deal amount").fill("100");
+    await page.getByTestId("offer-product-0").selectOption({ index: 1 });
+    await page.getByTestId("save-offers").click();
+    await expect(page.getByText("Saved.")).toBeVisible();
+    await page.getByTestId("tab-theme").click();
+    const short = await page.getByTestId("landing-short").getByRole("link").getAttribute("href");
+    expect(short).toMatch(/\/go\/[a-z0-9]{7}$/);
+    const v3 = await visitor(browser);
+    await v3.page.goto(new URL(short!).pathname + "?utm_campaign=eid");
+    await expect(v3.page).toHaveURL(new RegExp(`/l/${slug}\\?utm_campaign=eid`));
+    const f3 = v3.page.getByTestId("lp-order-form");
+    await expect(f3.getByTestId("lp-offers")).toBeVisible();
+    await f3.getByTestId("lp-offer-o2").check();
+    await f3.getByLabel("Your name").fill("Tania Akter");
+    await f3.getByLabel("Mobile number").fill(freshPhone());
+    await f3.getByLabel("Division").selectOption("Dhaka");
+    await f3.getByLabel("District").selectOption("Dhaka");
+    await f3.getByLabel("Full address").fill("House 14, Road 7, Block C, Section 10, Mirpur");
+    await f3.getByRole("button", { name: "Place my order" }).click();
+    await expect(v3.page).toHaveURL(/\/order\//);
+    const second = (await v3.page.getByTestId("order-success").innerText()).match(/BT-\d+/)![0];
+    await v3.ctx.close();
+    const o2 = await withDb(async (c) => (await c.query(`SELECT "discountAmount", "utmCampaign" FROM "Order" WHERE "orderNumber" = $1`, [second])).rows[0] as { discountAmount: string; utmCampaign: string | null });
+    expect(Number(o2.discountAmount)).toBe(100);
+    expect(o2.utmCampaign).toBe("eid");
+
     // The owner takes it down, and it stops being public.
     await page.getByTestId("tab-theme").click(); // the page details (and the live switch) are in the Page tab
     await page.getByTestId("toggle-live").click();

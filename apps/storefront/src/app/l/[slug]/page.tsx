@@ -58,7 +58,8 @@ export default async function LandingPage({ params, searchParams }: { params: Pr
       lang={lang}
       s={pickStrings(lang, LP_FORM_KEYS)}
       buttonText={buttonText || t("lpOrderSubmit")}
-      variants={landing.product.variants.map((v) => ({ id: v.id, title: v.title, price: v.price, stock: v.stock }))}
+      options={landing.options}
+      bump={landing.bump}
       utm={{ source: sp.utm_source, campaign: sp.utm_campaign }}
     />
   );

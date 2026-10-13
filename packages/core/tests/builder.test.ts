@@ -5,7 +5,7 @@ import {
   DomainError, SECTIONS, STORE_PAGE_KINDS, allowedOn, defaultPageFor, requiredFor, sectionsFor, STORE_THEMES, activateTheme, checkDomain, contrast, createLandingPage, createPreviewToken, defaultHomePage, defaultLandingPage, deleteLandingPage, discardDraft, dnsInstruction, getLive, getPreview,
   getBuilderAccess, getPublicLanding, listLandingPages, listVersions, loadForEdit, loadPageData, newSection, normalizeSettings, placeLandingOrder, publish, recheckDomain, rollback, safeImage, safeUrl,
   saveDraft, saveThemeDraft, sectionDef, setDnsResolver, setEventPublisher, setLandingLive, setRoutingSync, setVercelClient, sweepDomains, themeCss, validatePage, validateTheme,
-  verifyPreviewToken, type DnsResolver, type StaffActor, type VercelDomainClient,
+  verifyPreviewToken, updateLandingOffers, landingSlugByCode, parseOffers, dealDiscount, type DnsResolver, type StaffActor, type VercelDomainClient,
 } from "../src";
 
 let owner: PrismaClient;
@@ -397,6 +397,78 @@ describe("landing pages", () => {
     await publish(s.f.tenantId, s.owner, pageKey);
     const other = s.f.products[1]!.variants[0]!.id;
     await fails(placeLandingOrder(s.f.tenantId, "eid-panjabi", { idempotencyKey: `lp-${Date.now()}-2`, variantId: other, quantity: 1, name: "Tania Akter", phone: "01712345602", address: "House 4, Road 2, Dhanmondi", district: "Dhaka", division: "Dhaka" }), "VALIDATION_ERROR", /options/);
+  });
+
+  describe("offers (docs/46)", () => {
+    const ship = { name: "Tania Akter", address: "House 4, Road 2, Dhanmondi", district: "Dhaka", division: "Dhaka" };
+    async function offerStore(name: string) {
+      const { s, id, pageKey } = await landingStore(name);
+      await saveDraft(s.f.tenantId, s.owner, pageKey, defaultLandingPage());
+      await publish(s.f.tenantId, s.owner, pageKey);
+      const [p0, p1] = s.f.products;
+      await updateLandingOffers(s.f.tenantId, s.owner, id, {
+        options: [
+          { id: "o1", label: "1 piece", productId: p0!.id },
+          { id: "o2", label: "2 pieces", productId: p0!.id, quantity: 2, deal: { kind: "amount", value: 100 } },
+          { id: "o3", label: "The other one", productId: p1!.id, deal: { kind: "percent", value: 10 } },
+        ],
+        bump: { productId: p1!.id, variantId: p1!.variants[0]!.id, label: "Add the other", percentOff: 50 },
+      });
+      return { s, id, pageKey, p0: p0!, p1: p1! };
+    }
+
+    it("shows the options and the bump from the database", async () => {
+      const { s, p0 } = await offerStore("lpo1");
+      const live = await getPublicLanding(s.f.tenantId, "eid-panjabi");
+      expect(live!.options.map((o) => o.id)).toEqual(["o1", "o2", "o3"]);
+      expect(live!.options[1]).toMatchObject({ quantity: 2, deal: { kind: "amount", value: 100 } });
+      expect(live!.options[0]!.variants[0]!.price).toBe(p0.variants[0]!.price);
+      expect(live!.bump).toMatchObject({ label: "Add the other", percentOff: 50 });
+    });
+
+    it("prices a bundle and the bump from the database, never from the page", async () => {
+      const { s, p0, p1 } = await offerStore("lpo2");
+      const o = await placeLandingOrder(s.f.tenantId, "eid-panjabi", { idempotencyKey: `lpo-${Date.now()}-1`, optionId: "o2", variantId: p0.variants[0]!.id, quantity: 1, bump: true, phone: "01712345611", ...ship });
+      const row = await owner.order.findUniqueOrThrow({ where: { id: o.orderId } });
+      const bumpPrice = p1.variants[0]!.price;
+      expect(Number(row.subtotalAmount)).toBe(p0.variants[0]!.price * 2 + bumpPrice);
+      expect(Number(row.discountAmount)).toBe(100 + bumpPrice / 2);
+    });
+
+    it("applies a percentage deal to the chosen product only", async () => {
+      const { s, p1 } = await offerStore("lpo3");
+      const o = await placeLandingOrder(s.f.tenantId, "eid-panjabi", { idempotencyKey: `lpo-${Date.now()}-2`, optionId: "o3", variantId: p1.variants[0]!.id, quantity: 2, phone: "01712345612", ...ship });
+      const row = await owner.order.findUniqueOrThrow({ where: { id: o.orderId } });
+      expect(Number(row.discountAmount)).toBe(Math.round(p1.variants[0]!.price * 2 * 10) / 100);
+    });
+
+    it("will not mix an option with another option's product, ask for a bump that is not offered, or point at foreign goods", async () => {
+      const { s, id, p0, p1 } = await offerStore("lpo4");
+      await fails(placeLandingOrder(s.f.tenantId, "eid-panjabi", { idempotencyKey: `lpo-${Date.now()}-3`, optionId: "o3", variantId: p0.variants[0]!.id, quantity: 1, phone: "01712345613", ...ship }), "VALIDATION_ERROR", /options/);
+      await fails(placeLandingOrder(s.f.tenantId, "eid-panjabi", { idempotencyKey: `lpo-${Date.now()}-4`, optionId: "zzz", variantId: p0.variants[0]!.id, quantity: 1, phone: "01712345614", ...ship }), "VALIDATION_ERROR", /offers/);
+      const other = await store("lpo4b");
+      await fails(updateLandingOffers(s.f.tenantId, s.owner, id, { options: [{ id: "o1", label: "x", productId: other.f.products[0]!.id }] }), "VALIDATION_ERROR", /not on sale/);
+      await fails(updateLandingOffers(s.f.tenantId, s.owner, id, { options: [{ id: "o1", label: "x", productId: p0.id }], bump: { productId: p1.id, variantId: p0.variants[0]!.id, label: "y", percentOff: 0 } }), "VALIDATION_ERROR", /extra item/);
+      await fails(updateLandingOffers(s.f.tenantId, s.packer, id, { options: [{ id: "o1", label: "x", productId: p0.id }] }), "FORBIDDEN");
+    });
+
+    it("a page with no saved offers sells its one product, and every page has a short code that finds it", async () => {
+      const { s, id } = await landingStore("lpo5");
+      const [row] = await listLandingPages(s.f.tenantId, s.owner);
+      expect(row!.offers.options).toHaveLength(1);
+      expect(row!.shortCode).toMatch(/^[a-z0-9]{7}$/);
+      expect(await landingSlugByCode(s.f.tenantId, row!.shortCode!)).toBe("eid-panjabi");
+      expect(await landingSlugByCode(s.f.tenantId, "nothere")).toBeNull();
+      expect(id).toBeTruthy();
+    });
+
+    it("validates the deal arithmetic", () => {
+      expect(dealDiscount({ kind: "percent", value: 25 }, 1000)).toBe(250);
+      expect(dealDiscount({ kind: "amount", value: 5000 }, 1000)).toBe(1000);
+      expect(dealDiscount({ kind: "none", value: 0 }, 1000)).toBe(0);
+      expect(() => parseOffers({ options: [] })).toThrow();
+      expect(() => parseOffers({ options: [{ id: "a", label: "x", productId: "12345678" }, { id: "a", label: "y", productId: "12345678" }] })).toThrow(/same id/);
+    });
   });
 
   it("does not take an order while the page is not live", async () => {
