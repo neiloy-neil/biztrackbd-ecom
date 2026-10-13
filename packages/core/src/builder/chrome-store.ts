@@ -3,6 +3,7 @@ import { audit } from "../audit/service";
 import { NotFoundError, PlanFeatureError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
 import { defaultChrome, validateChrome, type Chrome } from "./chrome";
+import { templateChrome } from "./template-chromes";
 import { DraftConflictError, MAX_KEPT_VERSIONS } from "./versions";
 
 /**
@@ -12,6 +13,8 @@ import { DraftConflictError, MAX_KEPT_VERSIONS } from "./versions";
  */
 
 const KEY = "chrome";
+/** A header and footer that came from a template is marked with this in its label, until the owner changes it. */
+export const TEMPLATE_MARK = "template:";
 const THEME = "chrome";
 
 type Tx = Parameters<Parameters<typeof withTenant>[1]>[0];
@@ -64,8 +67,10 @@ export async function saveChromeDraft(tenantId: string, actor: StaffActor, raw: 
     if (!(await allowedByPlan(tx))) throw new PlanFeatureError("sectionBuilder");
     const existing = await draftRow(tx);
     if (expected !== undefined && (existing?.updatedAt.toISOString() ?? null) !== expected.stamp) throw new DraftConflictError(existing?.updatedAt.toISOString() ?? null);
+    // A draft that came from a template keeps its mark only while it is untouched.
+    const label = existing && same(asChrome(existing.sectionsJson), chrome) ? existing.label : null;
     const saved = existing
-      ? await tx.themeVersion.update({ where: { id: existing.id }, data: { sectionsJson: chrome as object, createdBy: actor.userId } })
+      ? await tx.themeVersion.update({ where: { id: existing.id }, data: { sectionsJson: chrome as object, label, createdBy: actor.userId } })
       : await tx.themeVersion.create({ data: { tenantId, themeId: THEME, pageKey: KEY, state: "DRAFT", version: 0, settings: {}, sectionsJson: chrome as object, createdBy: actor.userId } });
     return { stamp: saved.updatedAt.toISOString() };
   });
@@ -87,7 +92,7 @@ export async function publishChrome(tenantId: string, actor: StaffActor, label?:
     if (!(await allowedByPlan(tx))) throw new PlanFeatureError("sectionBuilder");
     const draft = await draftRow(tx);
     if (!draft) throw new ValidationError("There is nothing to publish. Make a change first.");
-    const version = await writePublished(tx, tenantId, actor, validateChrome(draft.sectionsJson), label?.trim().slice(0, 60) || null);
+    const version = await writePublished(tx, tenantId, actor, validateChrome(draft.sectionsJson), label?.trim().slice(0, 60) || (draft.label?.startsWith(TEMPLATE_MARK) ? draft.label : null));
     await tx.themeVersion.deleteMany({ where: { id: draft.id } });
     await audit(tx, tenantId, actor, "design.published", { pageKey: KEY, version });
     return version;
@@ -139,4 +144,37 @@ export async function getPreviewChrome(tenantId: string): Promise<Chrome | null>
     const live = await latestPublished(tx);
     return live ? asChrome(live.sectionsJson) : null;
   });
+}
+
+/**
+ * Gives a store a template's header and footer. Into a new store it goes live at once; for a store that already has its own it goes into the
+ * DRAFT, for the owner to look at and publish. Returns whether anything was written: the plan must allow editing it, and an update does not
+ * replace a header and footer the owner has changed (`onlyIfUntouched`) or a draft they are working on.
+ */
+export async function installTemplateChrome(
+  tx: Tx, tenantId: string, chrome: Chrome, mode: "publish" | "draft", createdBy: string, templateId: string, templateVersion: number,
+  opts: { onlyIfUntouched?: boolean } = {},
+): Promise<boolean> {
+  const label = `${TEMPLATE_MARK}${templateId}:v${templateVersion}`;
+  const actor = { userId: createdBy } as StaffActor;
+  if (mode === "publish") {
+    await writePublished(tx, tenantId, actor, chrome, label);
+    return true;
+  }
+  if (!(await allowedByPlan(tx))) return false;
+  const [live, existing] = await Promise.all([latestPublished(tx), draftRow(tx)]);
+  if (opts.onlyIfUntouched) {
+    if (live && !live.label?.startsWith(TEMPLATE_MARK)) return false;
+    if (existing && !existing.label?.startsWith(TEMPLATE_MARK)) return false;
+  }
+  if (existing) await tx.themeVersion.update({ where: { id: existing.id }, data: { sectionsJson: chrome as object, label, createdBy } });
+  else await tx.themeVersion.create({ data: { tenantId, themeId: THEME, pageKey: KEY, state: "DRAFT", version: 0, settings: {}, sectionsJson: chrome as object, label, createdBy } });
+  return true;
+}
+
+/** The store's live header and footer as a template's (words and links removed), or null when it never published one. Used when a template is published from a store. */
+export async function liveChromeForTemplate(tenantId: string, db: { themeVersion: Tx["themeVersion"] }): Promise<Chrome | null> {
+  const row = await db.themeVersion.findFirst({ where: { tenantId, themeId: THEME, pageKey: KEY, state: "PUBLISHED" }, orderBy: { version: "desc" } });
+  if (!row) return null;
+  try { return templateChrome(row.sectionsJson); } catch { return null; }
 }

@@ -22,39 +22,46 @@ export function WhatsAppFloatingButton({ whatsappNumber, greeting }: Props) {
 
   return (
     <aside aria-label="WhatsApp Support">
+      <style>{`
+        .bt-wa-float {
+          position: fixed;
+          right: 20px;
+          bottom: 24px;
+          z-index: 999;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: #25D366;
+          color: #ffffff;
+          padding: 10px 14px;
+          border-radius: 9999px;
+          box-shadow: 0 4px 16px rgba(37, 211, 102, 0.4), 0 2px 6px rgba(0,0,0,0.15);
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 13.5px;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          cursor: pointer;
+        }
+        .bt-wa-float:hover {
+          transform: scale(1.06) translateY(-2px);
+          box-shadow: 0 8px 24px rgba(37, 211, 102, 0.55), 0 3px 8px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 640px) {
+          .bt-wa-float {
+            bottom: 84px;
+            right: 16px;
+            padding: 8px 12px;
+            font-size: 12.5px;
+          }
+        }
+      `}</style>
       <a
         href={href}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat with us on WhatsApp"
         data-testid="whatsapp-floating-widget"
-        style={{
-          position: "fixed",
-          right: "20px",
-          bottom: "24px",
-          zIndex: 999,
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          background: "#25D366",
-          color: "#ffffff",
-          padding: "10px 14px",
-          borderRadius: "9999px",
-          boxShadow: "0 4px 16px rgba(37, 211, 102, 0.4), 0 2px 6px rgba(0,0,0,0.15)",
-          textDecoration: "none",
-          fontWeight: 600,
-          fontSize: "13.5px",
-          transition: "transform 0.2s ease, box-shadow 0.2s ease",
-          cursor: "pointer",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = "scale(1.06) translateY(-2px)";
-          e.currentTarget.style.boxShadow = "0 8px 24px rgba(37, 211, 102, 0.55), 0 3px 8px rgba(0,0,0,0.2)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = "scale(1) translateY(0)";
-          e.currentTarget.style.boxShadow = "0 4px 16px rgba(37, 211, 102, 0.4), 0 2px 6px rgba(0,0,0,0.15)";
-        }}
+        className="bt-wa-float"
       >
         <svg
           width="24"

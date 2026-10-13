@@ -128,7 +128,7 @@ export async function applyTemplateAction(form: FormData): Promise<void> {
   const take = new Set(form.getAll("take").map(String));
   const keep = STORE_PAGE_KINDS.filter((k) => !take.has(k));
   try {
-    await applyTemplateToStore(s.tenantId, s.actor, String(form.get("templateId") ?? ""), keep);
+    await applyTemplateToStore(s.tenantId, s.actor, String(form.get("templateId") ?? ""), keep, form.get("chrome") === "on");
   } catch (e) {
     if (e instanceof DomainError) redirect(`/design?note=${encodeURIComponent(e.message)}`);
     throw e;

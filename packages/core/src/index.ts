@@ -145,6 +145,7 @@ export * from "./landing/service";
 export * from "./builder/chrome";
 export * from "./builder/custom-pages";
 export * from "./builder/chrome-store";
+export { templateChrome, BUILT_IN_CHROMES } from "./builder/template-chromes";
 export * from "./landing/offers";
 export * from "./landing/templates";
 export * from "./landing/stats";

@@ -35,6 +35,7 @@ export function TemplateSwitcher({ templates, currentLook, currentTemplate, canE
                       {PAGES.map((p) => <label key={p.key} className="check"><input type="checkbox" name="take" value={p.key} defaultChecked /><span>{p.label}</span></label>)}
                     </div>
                   </fieldset>
+                  {t.chrome && <label className="check"><input type="checkbox" name="chrome" defaultChecked /><span>Also its header and footer (as a draft you can publish or discard)</span></label>}
                   {lookChange && <div className="notice warn" role="note" style={{ fontSize: 13 }}>This template is drawn with a different look, and that changes on your live store <b>straight away</b>. Your pages show that look's own layouts until you publish the drafts.</div>}
                   <div><SubmitButton className="btn btn-secondary btn-sm" pending="Preparing drafts…">Use this template (as drafts)</SubmitButton></div>
                 </div>

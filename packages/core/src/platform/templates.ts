@@ -1,5 +1,8 @@
 import { getBasePrisma, getPlatformPrisma, withTenant, type PrismaClient } from "@biztrackbd/db";
 import { installTemplatePages } from "../builder/versions";
+import type { Chrome } from "../builder/chrome";
+import { installTemplateChrome, liveChromeForTemplate } from "../builder/chrome-store";
+import { BUILT_IN_CHROMES, templateChrome } from "../builder/template-chromes";
 import { defaultPageFor, STORE_PAGE_KINDS, validatePage, type PageJson, type PageKind } from "../builder/registry";
 import { STORE_THEMES, isThemeId, themeDefaults, validateTheme, type ThemeId, type ThemeSettings } from "../builder/theme";
 import { NotFoundError, ValidationError } from "../errors";
@@ -38,6 +41,8 @@ export interface TemplateInfo {
   settings: ThemeSettings;
   /** Null for an untouched original: the store pages start from the built-in layouts. */
   pages: TemplatePages | null;
+  /** The layout and style of the header and footer. Null: the store keeps today's. */
+  chrome: Chrome | null;
 }
 
 const BUILT_IN_CATEGORY: Record<string, TemplateCategory> = { kapor: "fashion", gadgetstudio: "electronics", "mini-bunny": "kids", axionwear: "streetwear", bindu: "beauty", berber: "fashion" };
@@ -46,7 +51,7 @@ const ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const builtIns = (): TemplateInfo[] =>
   STORE_THEMES.map((t) => ({
     id: t.id, name: t.name, blurb: t.blurb, audience: t.audience, baseLook: t.id, category: BUILT_IN_CATEGORY[t.id] ?? "other", tags: [t.audience], moduleLabel: null,
-    version: 1, status: "PUBLISHED" as const, builtIn: true, settings: { ...t.defaults }, pages: null,
+    version: 1, status: "PUBLISHED" as const, builtIn: true, settings: { ...t.defaults }, pages: null, chrome: BUILT_IN_CHROMES[t.id] ?? null,
   }));
 
 type Row = { id: string; name: string; blurb: string; audience: string; baseLook: string; category: string; tags: string[]; moduleLabel: string | null; status: string; version: number; settingsJson: unknown; pagesJson: unknown };
@@ -62,8 +67,11 @@ function fromRow(r: Row): TemplateInfo {
     if (raw[kind] === undefined) continue;
     try { pages[kind] = validatePage(kind, raw[kind]); } catch { /* that page falls back to the built-in layout */ }
   }
+  // The header and footer ride in the same record under a key of their own, so no new column was needed. A replaced original keeps its own when the new one has none.
+  let chrome: Chrome | null = BUILT_IN_CHROMES[r.id] ?? null;
+  if (raw._chrome !== undefined) { try { chrome = templateChrome(raw._chrome); } catch { /* keep the original's */ } }
   const category = (TEMPLATE_CATEGORIES as readonly string[]).includes(r.category) ? (r.category as TemplateCategory) : "other";
-  return { id: r.id, name: r.name, blurb: r.blurb, audience: r.audience, baseLook, category, tags: r.tags, moduleLabel: r.moduleLabel, version: r.version, status: r.status as TemplateStatus, builtIn: false, settings, pages };
+  return { id: r.id, name: r.name, blurb: r.blurb, audience: r.audience, baseLook, category, tags: r.tags, moduleLabel: r.moduleLabel, version: r.version, status: r.status as TemplateStatus, builtIn: false, settings, pages, chrome };
 }
 
 /** The templates a visitor or a new store can choose: the originals (unless replaced or archived) and every published one. */
@@ -146,6 +154,8 @@ export async function publishTemplateFromStore(actor: PlatformActor, input: Publ
     const row = kind === "home" ? home : await live(kind);
     pages[kind] = row ? validatePage(kind, row.sectionsJson) : defaultPageFor(kind);
   }
+  const chrome = await liveChromeForTemplate(tenant.id, db);
+  if (chrome) pages._chrome = chrome;
   const category = (TEMPLATE_CATEGORIES as readonly string[]).includes(input.category ?? "") ? input.category! : "other";
   const tags = (input.tags ?? []).map((t) => t.trim().slice(0, 30)).filter(Boolean).slice(0, 4);
   const data = {
@@ -175,7 +185,7 @@ export async function setTemplateStatus(actor: PlatformActor, id: string, status
     if (existing) await tx.template.update({ where: { id }, data: { status, ...(status === "PUBLISHED" && !existing.publishedAt ? { publishedAt: new Date() } : {}) } });
     else if (original) {
       // An original template that has no row yet: one is made from its built-in defaults, so it can be hidden (or shown again) like any other.
-      await tx.template.create({ data: { id, name: original.name, blurb: original.blurb, audience: original.audience, baseLook: original.id, category: BUILT_IN_CATEGORY[id] ?? "other", tags: [original.audience], settingsJson: original.defaults as object, pagesJson: Object.fromEntries(STORE_PAGE_KINDS.map((k) => [k, defaultPageFor(k)])) as object, status, version: 1, publishedAt: new Date() } });
+      await tx.template.create({ data: { id, name: original.name, blurb: original.blurb, audience: original.audience, baseLook: original.id, category: BUILT_IN_CATEGORY[id] ?? "other", tags: [original.audience], settingsJson: original.defaults as object, pagesJson: { ...Object.fromEntries(STORE_PAGE_KINDS.map((k) => [k, defaultPageFor(k)])), ...(BUILT_IN_CHROMES[id] ? { _chrome: BUILT_IN_CHROMES[id] } : {}) } as object, status, version: 1, publishedAt: new Date() } });
     }
     await tx.platformAuditLog.create({ data: { actorId: actor.id, action: "template.status", details: { id, status }, ipAddress: actor.ip ?? null } });
   });
@@ -195,6 +205,7 @@ export async function resolveTemplateForSignup(id: string, db?: PrismaClient): P
 /** Installs a template into a store being created: its pages go live at once. Called inside the signup's own transaction. */
 export async function installTemplateForNewStore(tx: Parameters<typeof installTemplatePages>[0], tenantId: string, info: TemplateInfo, createdBy: string): Promise<void> {
   if (info.pages) await installTemplatePages(tx, tenantId, info.baseLook, { settings: info.settings, pages: info.pages }, "publish", createdBy);
+  if (info.chrome) await installTemplateChrome(tx, tenantId, info.chrome, "publish", createdBy, info.id, info.version);
   await tx.tenant.update({ where: { id: tenantId }, data: { templateId: info.id, templateVersion: info.version } });
 }
 
@@ -215,23 +226,24 @@ export async function templateUpdateAvailable(tenantId: string): Promise<Templat
  * Takes the newer version of the store's template as DRAFTS: nothing changes on the live store until the owner looks at it in the editor and
  * publishes. The plan decides how much is taken (a store that can only restyle gets the colours). Returns the pages that were drafted.
  */
-export async function applyTemplateUpdate(tenantId: string, actor: StaffActor): Promise<{ pages: string[]; version: number }> {
+export async function applyTemplateUpdate(tenantId: string, actor: StaffActor): Promise<{ pages: string[]; version: number; chrome: boolean }> {
   assertCan(actor, "design", "edit");
   const update = await templateUpdateAvailable(tenantId);
   if (!update) throw new ValidationError("There is no newer version of your template");
   const info = (await getTemplate(update.id))!;
-  const pages = await withTenant(tenantId, async (tx) => {
+  return withTenant(tenantId, async (tx) => {
     await tx.$queryRaw`SELECT "id" FROM "Tenant" WHERE "id" = ${tenantId} FOR UPDATE`;
     const tenant = await tx.tenant.findFirstOrThrow({ select: { themeId: true } });
     const themeId: ThemeId = isThemeId(tenant.themeId) ? tenant.themeId : "kapor";
-    const written = await installTemplatePages(tx, tenantId, themeId, { settings: info.settings, pages: info.pages! }, "draft", actor.userId);
+    const pages = await installTemplatePages(tx, tenantId, themeId, { settings: info.settings, pages: info.pages! }, "draft", actor.userId);
+    // The header and footer are offered too, unless the owner has made their own: those are never replaced without asking.
+    const chrome = info.chrome ? await installTemplateChrome(tx, tenantId, info.chrome, "draft", actor.userId, info.id, info.version, { onlyIfUntouched: true }) : false;
     await tx.tenant.update({ where: { id: tenantId }, data: { templateVersion: info.version } });
-    return written;
+    return { pages, version: info.version, chrome };
   });
-  return { pages, version: info.version };
 }
 
-export interface ApplyTemplateResult { pages: string[]; version: number; /** The store's look (the CSS it is drawn with) changed, and that is live at once. */ lookChanged: boolean }
+export interface ApplyTemplateResult { pages: string[]; version: number; /** The header and footer of the template went into the draft. */ chrome: boolean; /** The store's look (the CSS it is drawn with) changed, and that is live at once. */ lookChanged: boolean }
 
 /**
  * Moves a store to another template, from the store's own design screen. The template's colours, style and page layouts go into the DRAFTS, so
@@ -239,7 +251,7 @@ export interface ApplyTemplateResult { pages: string[]; version: number; /** The
  * template is drawn with a different look, the store switches to it at once (the screen says so first), and its pages start from that look's
  * own layouts until the drafts are published. Products, categories and content are never touched. `keep` lists pages whose layout stays.
  */
-export async function applyTemplateToStore(tenantId: string, actor: StaffActor, templateId: string, keep: readonly PageKind[] = []): Promise<ApplyTemplateResult> {
+export async function applyTemplateToStore(tenantId: string, actor: StaffActor, templateId: string, keep: readonly PageKind[] = [], takeChrome = true): Promise<ApplyTemplateResult> {
   assertCan(actor, "design", "edit");
   const info = await getTemplate(templateId);
   if (!info) throw new ValidationError("Choose a template that is available", { field: "templateId" });
@@ -255,8 +267,10 @@ export async function applyTemplateToStore(tenantId: string, actor: StaffActor, 
       await tx.tenant.update({ where: { id: tenantId }, data: { themeId: info.baseLook } });
     }
     const written = await installTemplatePages(tx, tenantId, info.baseLook, { settings: info.settings, pages }, "draft", actor.userId, only);
+    // Asked for: the header and footer of the template go into the draft too, in place of whatever draft there is.
+    const chrome = takeChrome && info.chrome ? await installTemplateChrome(tx, tenantId, info.chrome, "draft", actor.userId, info.id, info.version) : false;
     await tx.tenant.update({ where: { id: tenantId }, data: { templateId: info.id, templateVersion: info.version } });
-    await audit(tx, tenantId, actor, "design.template_applied", { templateId: info.id, version: info.version, lookChanged, kept: [...keep] });
-    return { pages: written, version: info.version, lookChanged };
+    await audit(tx, tenantId, actor, "design.template_applied", { templateId: info.id, version: info.version, lookChanged, kept: [...keep], chrome });
+    return { pages: written, version: info.version, lookChanged, chrome };
   });
 }
