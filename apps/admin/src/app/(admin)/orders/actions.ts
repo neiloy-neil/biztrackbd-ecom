@@ -33,15 +33,13 @@ export async function bulkBookAction(form: FormData): Promise<void> {
   redirect(`${safeBack}${sep}msg=booked-${r.done.length}-${r.skipped.length}${why}`);
 }
 
-/** Confirm or cancel every selected order. Cancelling needs a reason, typed once for all of them. */
-export async function bulkStatusAction(form: FormData): Promise<void> {
+async function bulkStatus(form: FormData, to: "CONFIRMED" | "CANCELLED"): Promise<void> {
   const s = await requireAction("orders", "edit");
   const ids = form.getAll("ids").map(String).filter(Boolean);
   const back = String(form.get("back") ?? "/orders");
   const safeBack = back.startsWith("/orders") ? back : "/orders";
   const sep = safeBack.includes("?") ? "&" : "?";
   if (ids.length === 0) redirect(`${safeBack}${sep}msg=none`);
-  const to = form.get("to") === "CANCELLED" ? "CANCELLED" : "CONFIRMED";
   let r;
   try {
     r = await bulkChangeStatus(s.tenantId, s.actor, ids, to, String(form.get("reason") ?? ""));
@@ -52,4 +50,14 @@ export async function bulkStatusAction(form: FormData): Promise<void> {
   revalidatePath("/orders");
   revalidatePath("/");
   redirect(`${safeBack}${sep}msg=${to === "CANCELLED" ? "cancelled" : "confirmed"}-${r.done.length}-${r.skipped.length}`);
+}
+
+/** Confirm every selected order. */
+export async function bulkConfirmAction(form: FormData): Promise<void> {
+  await bulkStatus(form, "CONFIRMED");
+}
+
+/** Cancel every selected order. Needs a reason, typed once for all of them. */
+export async function bulkCancelAction(form: FormData): Promise<void> {
+  await bulkStatus(form, "CANCELLED");
 }

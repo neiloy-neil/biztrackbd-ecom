@@ -27,9 +27,15 @@ export default async function Apps({
 
   const [storeSettings, tenant] = await withTenant(s.tenantId, async (tx) => {
     const st = await tx.storeSettings.findFirst();
-    const tn = await tx.tenant.findFirstOrThrow({ select: { subdomain: true, name: true } });
+    const tn = await tx.tenant.findFirstOrThrow({ select: { subdomain: true, name: true, customDomain: true } });
     return [st, tn] as const;
   });
+
+  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+  const proto = rootDomain.startsWith("localhost") ? "http" : "https";
+  const storefrontOrigin = tenant.customDomain
+    ? `https://${tenant.customDomain}`
+    : `${proto}://${tenant.subdomain}.${rootDomain}`;
 
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
@@ -85,6 +91,7 @@ export default async function Apps({
         integrations={integrations}
         webhookTokens={webhookTokens}
         origin={origin}
+        storefrontOrigin={storefrontOrigin}
         storeSubdomain={tenant.subdomain}
         initialOpen={initialOpen}
       />

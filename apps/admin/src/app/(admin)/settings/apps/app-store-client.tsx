@@ -48,6 +48,7 @@ interface Props {
   integrations: IntegrationView[];
   webhookTokens: Record<string, string>;
   origin: string;
+  storefrontOrigin?: string;
   storeSubdomain: string;
   initialOpen?: string;
 }
@@ -164,6 +165,7 @@ export function AppStoreClient({
   integrations,
   webhookTokens,
   origin,
+  storefrontOrigin,
   storeSubdomain,
   initialOpen,
 }: Props) {
@@ -219,7 +221,8 @@ export function AppStoreClient({
     return overview.apps.find((a) => a.key === activeModal);
   }, [overview.apps, activeModal]);
 
-  const liveFeedUrl = `${origin}/api/catalog/facebook`;
+  // Live catalog feed URL points to the storefront (or admin route if storefront not set)
+  const liveFeedUrl = `${storefrontOrigin || origin}/api/catalog/facebook`;
 
   return (
     <div className="stack" style={{ gap: 20 }}>

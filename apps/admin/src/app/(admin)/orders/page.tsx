@@ -11,7 +11,7 @@ import { friendlyDate, prettyPhone, taka } from "@/lib/format";
 import { one, pageOf, qs } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { CHANNEL, OrderPill, PaymentPill } from "@/lib/status";
-import { bulkBookAction, bulkPackAction, bulkStatusAction } from "./actions";
+import { bulkBookAction, bulkCancelAction, bulkConfirmAction, bulkPackAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Orders" };
@@ -64,7 +64,7 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
   const bookedMsg = msg?.startsWith("booked-") ? msg.split("-").map(Number) : null;
   const why = one(sp.why);
   const filtered = Boolean(q || payment || range || district || courier || tag);
-  const statusMsg = msg?.match(/^(confirmed|cancelled)-(d+)-(d+)$/);
+  const statusMsg = msg?.match(/^(confirmed|cancelled)-(\d+)-(\d+)$/);
 
   return (
     <>
@@ -110,9 +110,9 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
                     <SubmitButton formAction={bulkBookAction} className="btn btn-primary btn-sm" pending="Booking…" data-testid="bulk-book">Book courier for selected</SubmitButton>
                   </>
                 )}
-                <SubmitButton formAction={bulkStatusAction} name="to" value="CONFIRMED" className="btn btn-secondary btn-sm" pending="Confirming…" data-testid="bulk-confirm">Confirm selected</SubmitButton>
+                <SubmitButton formAction={bulkConfirmAction} className="btn btn-secondary btn-sm" pending="Confirming…" data-testid="bulk-confirm">Confirm selected</SubmitButton>
                 <input className="input input-sm" name="reason" maxLength={150} placeholder="Reason, to cancel" aria-label="Reason for cancelling" style={{ maxWidth: 200 }} data-testid="bulk-reason" />
-                <SubmitButton formAction={bulkStatusAction} name="to" value="CANCELLED" className="btn btn-danger btn-sm" pending="Cancelling…" data-testid="bulk-cancel">Cancel selected</SubmitButton>
+                <SubmitButton formAction={bulkCancelAction} className="btn btn-danger btn-sm" pending="Cancelling…" data-testid="bulk-cancel">Cancel selected</SubmitButton>
                 <button className="btn btn-secondary btn-sm" type="submit" formAction="/orders/print" formMethod="get" formTarget="_blank" name="doc" value="slip">Print packing slips</button>
                 <button className="btn btn-secondary btn-sm" type="submit" formAction="/orders/print" formMethod="get" formTarget="_blank" name="doc" value="invoice">Print invoices</button>
               </BulkBar>
