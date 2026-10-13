@@ -66,9 +66,140 @@ export async function listModules(tenantId: string, actor: StaffActor): Promise<
   });
 }
 
+export * from "./catalog";
+import { APP_CATALOG, type AppCatalogItem } from "./catalog";
+
+export interface AppStoreItemView extends AppCatalogItem {
+  status: "ACTIVE" | "NEEDS_SETUP" | "AVAILABLE" | "LOCKED" | "COMING_SOON";
+  statusLabel: string;
+  enabled: boolean;
+  configured: boolean;
+  blockedReason: string | null;
+}
+
+export interface AppStoreOverview {
+  apps: AppStoreItemView[];
+  planTier: string;
+  allowance: number | null;
+  usedAddons: number;
+  totalActive: number;
+}
+
+export async function listAppStoreCatalog(tenantId: string, actor: StaffActor): Promise<AppStoreOverview> {
+  assertCan(actor, "billing", "view");
+  return withTenant(tenantId, async (tx) => {
+    const t = await tx.tenant.findFirstOrThrow({ select: { planTier: true } });
+    const cap = await allowance(tx);
+    const [integrations, modules, storeSettings] = await Promise.all([
+      tx.tenantIntegration.findMany(),
+      tx.tenantModule.findMany(),
+      tx.storeSettings.findFirst(),
+    ]);
+
+    const activeIntegrations = new Set(integrations.map((i: { provider: string }) => i.provider));
+    const moduleOn = new Map(modules.map((m: { moduleKey: string; isEnabled: boolean }) => [m.moduleKey, m.isEnabled]));
+
+    let usedAddons = 0;
+    let totalActive = 0;
+
+    const apps: AppStoreItemView[] = APP_CATALOG.map((item) => {
+      if (!item.built) {
+        return {
+          ...item,
+          status: "COMING_SOON",
+          statusLabel: "Coming Soon",
+          enabled: false,
+          configured: false,
+          blockedReason: "In development for upcoming platform release",
+        };
+      }
+
+      // 1. Couriers & Vault Integrations
+      if (item.category === "COURIERS") {
+        const prov = item.key === "steadfast_courier" ? "STEADFAST" : item.key === "pathao_courier" ? "PATHAO" : "REDX";
+        const hasKeys = activeIntegrations.has(prov);
+        const active = hasKeys;
+        if (active) totalActive++;
+        return {
+          ...item,
+          status: hasKeys ? "ACTIVE" : "NEEDS_SETUP",
+          statusLabel: hasKeys ? "Connected" : "Setup Required",
+          enabled: true,
+          configured: hasKeys,
+          blockedReason: null,
+        };
+      }
+
+      // 2. Marketing Pixels & CAPI
+      if (item.category === "MARKETING") {
+        let configured = false;
+        if (item.key === "meta_pixel_capi") configured = Boolean(storeSettings?.metaPixelId);
+        else if (item.key === "google_analytics") configured = Boolean(storeSettings?.googleAnalyticsId || storeSettings?.googleTagManagerId);
+        else if (item.key === "tiktok_pixel") configured = Boolean(storeSettings?.tiktokPixelId);
+        else if (item.key === "facebook_catalog") configured = true; // Catalog feed is always ready at /api/catalog/facebook
+
+        if (configured) totalActive++;
+        return {
+          ...item,
+          status: configured ? "ACTIVE" : "AVAILABLE",
+          statusLabel: configured ? "Active" : "Available",
+          enabled: true,
+          configured,
+          blockedReason: null,
+        };
+      }
+
+      // 3. Plan Addon Modules (Loyalty, Wholesale, WhatsApp)
+      if (item.tier === "ADDON") {
+        const modKey = item.key === "loyalty_vip" ? "loyalty" : item.key;
+        const isPlanLocked = cap <= 0;
+        const enabled = cap > 0 && (moduleOn.get(modKey) ?? (item.key === "loyalty_vip"));
+
+        if (enabled) {
+          usedAddons++;
+          totalActive++;
+        }
+
+        const isOverLimit = cap !== Infinity && usedAddons > cap;
+        const status = isPlanLocked || isOverLimit ? "LOCKED" : enabled ? "ACTIVE" : "AVAILABLE";
+        const statusLabel = isPlanLocked ? "Upgrade Required" : enabled ? "Active" : "Available";
+
+        return {
+          ...item,
+          status,
+          statusLabel,
+          enabled: Boolean(enabled && !isPlanLocked),
+          configured: true,
+          blockedReason: isPlanLocked ? "Not included in your current plan tier" : isOverLimit ? "Plan addon limit reached" : null,
+        };
+      }
+
+      // 4. Automation & Other Included Apps (Fraud Shield, Abandoned Cart, SMS)
+      totalActive++;
+      return {
+        ...item,
+        status: "ACTIVE",
+        statusLabel: "Active",
+        enabled: true,
+        configured: true,
+        blockedReason: null,
+      };
+    });
+
+    return {
+      apps,
+      planTier: t.planTier,
+      allowance: cap === Infinity ? null : cap,
+      usedAddons,
+      totalActive,
+    };
+  });
+}
+
 export async function setModule(tenantId: string, actor: StaffActor, key: string, enabled: boolean): Promise<void> {
   assertCan(actor, "billing", "edit");
-  const d = def(key);
+  const modKey = key === "loyalty_vip" ? "loyalty" : key;
+  const d = def(modKey);
   if (!d) throw new ValidationError("Unknown module");
   if (!d.built) throw new ValidationError(`${d.label} is not available yet`);
   await withTenant(tenantId, async (tx) => {
@@ -78,10 +209,12 @@ export async function setModule(tenantId: string, actor: StaffActor, key: string
       const rows = await tx.tenantModule.findMany();
       const on = new Set(rows.filter((r) => r.isEnabled).map((r) => r.moduleKey));
       for (const m of MODULES) if (m.built && !rows.some((r) => r.moduleKey === m.key)) on.add(m.key);
-      on.add(key);
+      on.add(modKey);
       if (on.size > cap) throw new ValidationError(`Your plan includes ${cap} module${cap === 1 ? "" : "s"}. Switch another one off first.`);
     }
-    await tx.tenantModule.upsert({ where: { tenantId_moduleKey: { tenantId, moduleKey: key } }, create: { tenantId, moduleKey: key, isEnabled: enabled }, update: { isEnabled: enabled } });
-    await audit(tx, tenantId, actor, enabled ? "module.enabled" : "module.disabled", { module: key });
+    await tx.tenantModule.upsert({ where: { tenantId_moduleKey: { tenantId, moduleKey: modKey } }, create: { tenantId, moduleKey: modKey, isEnabled: enabled }, update: { isEnabled: enabled } });
+    await audit(tx, tenantId, actor, enabled ? "module.enabled" : "module.disabled", { module: modKey });
   });
 }
+
+

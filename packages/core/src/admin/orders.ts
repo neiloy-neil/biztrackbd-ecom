@@ -9,7 +9,7 @@ import { transitionOrder } from "../orders/service";
 import { TRANSITIONS } from "../orders/state-machine";
 import { recordOrderEvent } from "./order-events";
 import { COURIER_STATUS_LABELS, type CourierStatus } from "../couriers/types";
-import { lookupInTx, type PhoneLookup } from "../fraud/service";
+import { lookupInTx, fetchSteadfastFraudStats, type PhoneLookup } from "../fraud/service";
 import { FLAG_LABELS } from "../fraud/assess";
 
 const actorName = (a: StaffActor) => a.name ?? a.email;
@@ -164,7 +164,8 @@ export async function getOrderDetail(tenantId: string, actor: StaffActor, orderI
     const events = await tx.orderEvent.findMany({ where: { orderId }, orderBy: { createdAt: "asc" } });
     const reuse = o.mfsTrxId ? await tx.order.findMany({ where: { mfsTrxId: o.mfsTrxId, id: { not: o.id } }, select: { id: true, orderNumber: true } }) : [];
 
-    const lookup = await lookupInTx(tx, o.customerPhone);
+    const courierStats = await fetchSteadfastFraudStats(tenantId, o.customerPhone);
+    const lookup = await lookupInTx(tx, o.customerPhone, courierStats);
     let customer: OrderDetail["customer"] = null;
     if (o.customerId) {
       const c = await tx.customer.findFirst({ where: { id: o.customerId } });

@@ -7,7 +7,7 @@ import { dateTime, prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { CHANNEL, OrderPill, PaymentPill, methodName } from "@/lib/status";
-import { blockAction, bookAction, holdAction, noteAction, refreshCourierAction, releaseHoldAction, returnedAction, shipAction, statusAction, verifyAction } from "./actions";
+import { blockAction, bookAction, holdAction, noteAction, refreshCourierAction, refreshFraudAction, releaseHoldAction, returnedAction, shipAction, statusAction, verifyAction } from "./actions";
 import { AddressEditor, CopyButton, RejectForm } from "./forms";
 
 export const dynamic = "force-dynamic";
@@ -137,9 +137,24 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
           <section className="card" data-testid="risk-card">
             <div className="card-head">
               <h2>Delivery trust</h2>
-              {o.risk.firstTime && o.risk.flags.length === 0 ? <span className="pill grey">First-time buyer</span> : <span className={`pill ${o.risk.level === "HIGH" ? "bad" : o.risk.level === "MEDIUM" ? "warn" : "ok"}`} data-testid="risk-level">{o.risk.level === "HIGH" ? "High risk" : o.risk.level === "MEDIUM" ? "Medium risk" : "Trusted"} · {o.risk.score}</span>}
+              <div className="row" style={{ gap: 6 }}>
+                {o.risk.firstTime && o.risk.flags.length === 0 ? <span className="pill grey">First-time buyer</span> : <span className={`pill ${o.risk.level === "HIGH" ? "bad" : o.risk.level === "MEDIUM" ? "warn" : "ok"}`} data-testid="risk-level">{o.risk.level === "HIGH" ? "High risk" : o.risk.level === "MEDIUM" ? "Medium risk" : "Trusted"} · {o.risk.score}</span>}
+                {canEdit && (
+                  <form action={refreshFraudAction.bind(null, o.id)}>
+                    <SubmitButton className="btn btn-secondary btn-sm" pending="…">↻</SubmitButton>
+                  </form>
+                )}
+              </div>
             </div>
             <dl className="kv">
+              {o.risk.lookup.courier && (
+                <>
+                  <dt>Steadfast courier</dt>
+                  <dd data-testid="risk-courier">
+                    <b>{o.risk.lookup.courier.successRatio}%</b> success ({o.risk.lookup.courier.deliveredParcels} of {o.risk.lookup.courier.totalParcels} delivered{o.risk.lookup.courier.cancelledParcels > 0 ? `, ${o.risk.lookup.courier.cancelledParcels} cancelled` : ""})
+                  </dd>
+                </>
+              )}
               <dt>Across all stores</dt>
               <dd data-testid="risk-network">{trust.level === "NEW" ? "No parcels sent to this number yet" : `${trust.delivered} delivered, ${trust.failed} came back${trust.refused ? ` (${trust.refused} refused in the last 60 days)` : ""}${trust.stores > 1 ? `, ${trust.stores} stores` : ""}`}</dd>
               <dt>In your store</dt><dd>{o.risk.lookup.here.orders} {o.risk.lookup.here.orders === 1 ? "order" : "orders"}, {o.risk.lookup.here.delivered} delivered, {o.risk.lookup.here.returned} returned</dd>

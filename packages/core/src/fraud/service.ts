@@ -1,10 +1,14 @@
 import { withTenant, type TenantTx } from "@biztrackbd/db";
 import { recordOrderEvent } from "../admin/order-events";
 import { audit } from "../audit/service";
+import { checkSteadfastFraud } from "../couriers/steadfast";
 import { NotFoundError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
 import { normalizeBdPhone } from "../phone";
-import { FLAG_LABELS } from "./assess";
+import { loadCredentials } from "../vault/integrations";
+import {
+  FLAG_LABELS, computeUnifiedFraudScore, type CourierFraudStats, type UnifiedFraudReport,
+} from "./assess";
 import { lookupTrust, type TrustScore } from "./trust";
 
 const actorName = (a: StaffActor) => a.name ?? a.email;
@@ -140,6 +144,8 @@ export async function unblockPhone(tenantId: string, actor: StaffActor, blockedI
 
 // ---- Number lookup -------------------------------------------------------------------------------------------------
 
+// ---- Number lookup & Unified Fraud ---------------------------------------------------------------------------------
+
 export interface PhoneLookup {
   phone: string;
   /** Across every store on the platform. Counts only; never names, addresses or items (docs/12 section 1C). */
@@ -147,9 +153,41 @@ export interface PhoneLookup {
   /** This store's own orders for the number. */
   here: { orders: number; delivered: number; returned: number; cancelled: number };
   blocked: boolean;
+  courier?: CourierFraudStats | null;
+  unifiedScore?: number;
+  unifiedLevel?: string;
 }
 
-async function lookup(tx: TenantTx, phone: string): Promise<PhoneLookup> {
+/** Safely fetches Steadfast cross-merchant delivery stats if keys are configured in the store's vault */
+export async function fetchSteadfastFraudStats(tenantId: string, phone: string): Promise<CourierFraudStats | null> {
+  try {
+    let mode: "LIVE" | "TEST" = "LIVE";
+    let creds = await loadCredentials(tenantId, "STEADFAST", "LIVE").catch(() => null);
+    if (!creds) {
+      creds = await loadCredentials(tenantId, "STEADFAST", "TEST").catch(() => null);
+      mode = "TEST";
+    }
+    if (!creds?.secrets?.apiKey || !creds?.secrets?.secretKey) return null;
+    const res = await checkSteadfastFraud({
+      mode,
+      fetch: globalThis.fetch,
+      secrets: creds.secrets,
+      config: creds.config,
+    }, phone);
+    if (!res) return null;
+    return {
+      provider: "STEADFAST",
+      totalParcels: res.totalParcels,
+      deliveredParcels: res.deliveredParcels,
+      cancelledParcels: res.cancelledParcels,
+      successRatio: res.successRate,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function lookup(tx: TenantTx, phone: string, courierStats: CourierFraudStats | null = null): Promise<PhoneLookup> {
   const [network, orders, delivered, returned, cancelled, blocked] = await Promise.all([
     lookupTrust(tx, phone),
     tx.order.count({ where: { customerPhone: phone } }),
@@ -158,7 +196,25 @@ async function lookup(tx: TenantTx, phone: string): Promise<PhoneLookup> {
     tx.order.count({ where: { customerPhone: phone, status: "CANCELLED" } }),
     tx.blockedContact.findFirst({ where: { phone }, select: { id: true } }),
   ]);
-  return { phone, network, here: { orders, delivered, returned, cancelled }, blocked: Boolean(blocked) };
+
+  const unified = computeUnifiedFraudScore({
+    courierStats,
+    networkTrust: network,
+    storeHistory: { orders, delivered, returned, cancelled },
+    flags: [],
+    isCod: true,
+    customerFacing: true,
+  });
+
+  return {
+    phone,
+    network,
+    here: { orders, delivered, returned, cancelled },
+    blocked: Boolean(blocked),
+    courier: courierStats,
+    unifiedScore: unified.score,
+    unifiedLevel: unified.level,
+  };
 }
 
 /** Check a number before taking its order, for example while on the phone with a new customer. */
@@ -166,10 +222,75 @@ export async function lookupPhone(tenantId: string, actor: StaffActor, phoneInpu
   assertCan(actor, "orders", "view");
   const phone = normalizeBdPhone(phoneInput);
   if (!/^01[3-9]\d{8}$/.test(phone)) throw new ValidationError("Enter a Bangladesh mobile number, for example 01712345678");
-  return withTenant(tenantId, (tx) => lookup(tx, phone));
+  const courierStats = await fetchSteadfastFraudStats(tenantId, phone);
+  return withTenant(tenantId, (tx) => lookup(tx, phone, courierStats));
 }
 
 /** The same lookup for an order's own number, inside the order screen. */
-export async function lookupInTx(tx: TenantTx, phone: string): Promise<PhoneLookup> {
-  return lookup(tx, phone);
+export async function lookupInTx(tx: TenantTx, phone: string, courierStats: CourierFraudStats | null = null): Promise<PhoneLookup> {
+  return lookup(tx, phone, courierStats);
 }
+
+/**
+ * Re-queries Steadfast live for the order customer's phone number, recomputes the unified blended fraud score,
+ * updates the order, and logs an order timeline event.
+ */
+export async function refreshOrderFraudReport(tenantId: string, actor: StaffActor, orderId: string): Promise<UnifiedFraudReport> {
+  assertCan(actor, "orders", "edit");
+  return withTenant(tenantId, async (tx) => {
+    const o = await tx.order.findFirst({ where: { id: orderId } });
+    if (!o) throw new NotFoundError("Order");
+
+    const [courierStats, trust, storeOrders, storeDelivered, storeReturned, storeCancelled] = await Promise.all([
+      fetchSteadfastFraudStats(tenantId, o.customerPhone),
+      lookupTrust(tx, o.customerPhone),
+      tx.order.count({ where: { customerPhone: o.customerPhone } }),
+      tx.order.count({ where: { customerPhone: o.customerPhone, status: "DELIVERED" } }),
+      tx.order.count({ where: { customerPhone: o.customerPhone, status: { in: ["RETURNED", "REFUNDED"] } } }),
+      tx.order.count({ where: { customerPhone: o.customerPhone, status: "CANCELLED" } }),
+    ]);
+
+    const isCod = o.paymentMethod === "COD";
+    const report = computeUnifiedFraudScore({
+      courierStats,
+      networkTrust: trust,
+      storeHistory: { orders: storeOrders, delivered: storeDelivered, returned: storeReturned, cancelled: storeCancelled },
+      flags: o.fraudFlags,
+      isCod,
+      customerFacing: true,
+    });
+
+    await tx.order.update({
+      where: { id: orderId },
+      data: {
+        fraudTrustScore: report.score,
+        fraudRiskLevel: report.level,
+      },
+    });
+
+    const courierMsg = courierStats
+      ? `Steadfast courier stats: ${courierStats.totalParcels} parcels, ${courierStats.deliveredParcels} delivered (${courierStats.successRatio}% success)`
+      : "No external courier history recorded";
+
+    await recordOrderEvent(tx, tenantId, orderId, {
+      type: "FRAUD",
+      message: `Fraud score refreshed by ${actorName(actor)}: ${report.score}/100 (${report.levelLabel}) · ${courierMsg}`,
+      actor: { id: actor.userId, name: actorName(actor) },
+      data: {
+        score: report.score,
+        level: report.level,
+        courier: courierStats,
+      },
+    });
+
+    await audit(tx, tenantId, actor, "fraud.score_refreshed", {
+      orderNumber: o.orderNumber,
+      newScore: report.score,
+      newLevel: report.level,
+      courierRatio: courierStats?.successRatio ?? null,
+    });
+
+    return report;
+  });
+}
+

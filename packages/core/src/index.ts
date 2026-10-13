@@ -54,9 +54,13 @@ export {
   syncCourierStatuses, refreshCourierStatus, syncAllStores, type ConnectedCourier, type Booked, type BookOptions, type SyncSummary, type WebhookResponse,
 } from "./couriers/service";
 export { computeTrust, phoneHash, lookupTrust, recordOutcome, TRUST_LABELS, type TrustScore, type TrustCounts, type TrustLevel, type TrustKind } from "./fraud/trust";
-export { assessOrderRisk, addressLooksIncomplete, FLAG_LABELS, HIGH_VALUE_COD, type RiskAssessment, type RiskLevel } from "./fraud/assess";
+export {
+  assessOrderRisk, computeUnifiedFraudScore, addressLooksIncomplete, FLAG_LABELS, HIGH_VALUE_COD, RISK_LEVEL_LABELS,
+  type RiskAssessment, type RiskLevel, type CourierFraudStats, type UnifiedFraudReport,
+} from "./fraud/assess";
 export {
   getFraudOverview, listFlaggedOrders, releaseHold, holdOrder, listBlocked, blockPhone, unblockPhone, lookupPhone, lookupInTx,
+  refreshOrderFraudReport, fetchSteadfastFraudStats,
   type FlaggedOrder, type FraudOverview, type BlockedRow, type PhoneLookup,
 } from "./fraud/service";
 export {
@@ -157,7 +161,11 @@ export { saveContent, deleteContent, listContent, getContent, bodyToHtml, slugOf
 // Phase 10: real sign-in (Supabase Auth)
 export * from "./auth/supabase";
 export * from "./auth/membership";
-export { MODULES, isModuleOn, listModules, setModule, type ModuleDef, type ModuleView } from "./modules/service";
+export {
+  MODULES, isModuleOn, listModules, setModule, listAppStoreCatalog,
+  APP_CATALOG, getAppCatalogItem, CATEGORY_LABELS,
+  type ModuleDef, type ModuleView, type AppCatalogItem, type AppCategory, type AppTier, type AppStoreItemView, type AppStoreOverview,
+} from "./modules/service";
 
 export {
   MESSAGE_EVENTS, MESSAGE_LOCALES, DEFAULT_MESSAGES, VAR_HELP, MESSAGE_MAX_LENGTH, renderMessage, sampleVars, smsParts, validateMessage,

@@ -43,8 +43,100 @@ export function addressLooksIncomplete(address: string): boolean {
   return !/\d/.test(a) && a.split(/\s+/).length < 3;
 }
 
+export interface CourierFraudStats {
+  provider: "STEADFAST" | "PATHAO" | "REDX" | "NONE";
+  totalParcels: number;
+  deliveredParcels: number;
+  cancelledParcels: number;
+  successRatio: number; // e.g. 85.5%
+}
+
+export interface UnifiedFraudReport {
+  score: number;
+  level: RiskLevel;
+  levelLabel: string;
+  flags: string[];
+  hold: boolean;
+  sources: {
+    courier: CourierFraudStats | null;
+    network: TrustScore;
+    store: { orders: number; delivered: number; returned: number; cancelled: number };
+  };
+}
+
+export const RISK_LEVEL_LABELS: Record<RiskLevel, string> = {
+  LOW: "Low risk (Safe to ship)",
+  MEDIUM: "Medium risk (Verify by phone)",
+  HIGH: "High risk (High return risk)",
+};
+
+/**
+ * Computes the unified blended fraud score combining:
+ * 50% External Courier Delivery Rate + 30% BizTrack Network Trust + 20% Local Store History
+ * minus penalties for missing address, high-value COD on new numbers, or suspicious district bursts.
+ */
+export function computeUnifiedFraudScore(params: {
+  courierStats: CourierFraudStats | null;
+  networkTrust: TrustScore;
+  storeHistory: { orders: number; delivered: number; returned: number; cancelled: number };
+  flags: string[];
+  isCod: boolean;
+  customerFacing: boolean;
+}): UnifiedFraudReport {
+  const { courierStats, networkTrust, storeHistory, flags, isCod, customerFacing } = params;
+
+  // 1. External Courier Score (50% weight)
+  const courierScore = courierStats && courierStats.totalParcels > 0
+    ? Math.max(0, Math.min(100, Math.round(courierStats.successRatio)))
+    : 85;
+
+  // 2. BizTrack Platform Network Trust (30% weight)
+  const networkScore = networkTrust.score ?? 85;
+
+  // 3. Local Store History (20% weight)
+  let storeScore = 75; // Default for first-time buyer in this store
+  if (storeHistory.delivered > 0) {
+    storeScore = 100;
+  } else if (storeHistory.returned > 0 || storeHistory.cancelled > 1) {
+    storeScore = 25;
+  }
+
+  // Blended Base Score
+  const base = Math.round(courierScore * 0.5 + networkScore * 0.3 + storeScore * 0.2);
+
+  // Flags penalties
+  const penalizable = flags.filter((f) => !INFO_FLAGS.has(f) && f !== "LOW_DELIVERY_SUCCESS").length;
+  let score = Math.max(0, Math.min(100, base - FLAG_PENALTY * penalizable));
+
+  // If courier record has >= 3 parcels and success rate is < 50%, cap at High Risk
+  if (courierStats && courierStats.totalParcels >= 3 && courierStats.successRatio < 50) {
+    score = Math.min(score, 45);
+  }
+
+  let level: RiskLevel = score >= 75 ? "LOW" : score >= 50 ? "MEDIUM" : "HIGH";
+
+  // Safety rule: a single bad parcel alone doesn't trigger HIGH if no other flags exist
+  if (level === "HIGH" && (networkTrust.delivered + networkTrust.failed < 2) && (!courierStats || courierStats.totalParcels < 2) && penalizable === 0) {
+    level = "MEDIUM";
+    score = Math.max(score, 52);
+  }
+
+  return {
+    score,
+    level,
+    levelLabel: RISK_LEVEL_LABELS[level],
+    flags,
+    hold: level === "HIGH" && isCod && customerFacing,
+    sources: {
+      courier: courierStats,
+      network: networkTrust,
+      store: storeHistory,
+    },
+  };
+}
+
 /** Scores a new order. Runs inside the order's own transaction, so the score always matches the order that was saved. */
-export async function assessOrderRisk(tx: TenantTx, input: RiskInput): Promise<RiskAssessment> {
+export async function assessOrderRisk(tx: TenantTx, input: RiskInput, courierStats: CourierFraudStats | null = null): Promise<RiskAssessment> {
   const trust = await lookupTrust(tx, input.phone);
   const flags: string[] = [];
   const isCod = input.paymentMethod === "COD";
@@ -60,6 +152,26 @@ export async function assessOrderRisk(tx: TenantTx, input: RiskInput): Promise<R
   });
   if (elsewhere > 0) flags.push("PHONE_MULTIPLE_ADDRESSES");
 
+  if (courierStats) {
+    // Local store counts for blended assessment
+    const [storeOrders, storeDelivered, storeReturned, storeCancelled] = await Promise.all([
+      tx.order.count({ where: { customerPhone: input.phone } }),
+      tx.order.count({ where: { customerPhone: input.phone, status: "DELIVERED" } }),
+      tx.order.count({ where: { customerPhone: input.phone, status: { in: ["RETURNED", "REFUNDED"] } } }),
+      tx.order.count({ where: { customerPhone: input.phone, status: "CANCELLED" } }),
+    ]);
+
+    const unified = computeUnifiedFraudScore({
+      courierStats,
+      networkTrust: trust,
+      storeHistory: { orders: storeOrders, delivered: storeDelivered, returned: storeReturned, cancelled: storeCancelled },
+      flags,
+      isCod,
+      customerFacing: input.customerFacing,
+    });
+    return { level: unified.level, score: unified.score, flags: unified.flags, hold: unified.hold, trust };
+  }
+
   // A number with no history starts at 85 (the doc's "normal processing"); a known number starts at its network score.
   const base = trust.score ?? 85;
   // The network score already explains LOW_DELIVERY_SUCCESS, so that flag does not cost points twice.
@@ -70,3 +182,5 @@ export async function assessOrderRisk(tx: TenantTx, input: RiskInput): Promise<R
   if (level === "HIGH" && trust.level !== "HIGH" && trust.delivered + trust.failed < 2) level = "MEDIUM";
   return { level, score, flags, hold: level === "HIGH" && isCod && input.customerFacing, trust };
 }
+
+

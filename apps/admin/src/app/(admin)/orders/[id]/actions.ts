@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
-  DomainError, addOrderNote, blockPhone, bookCourier, holdOrder, isValidAddress, markPacked, markParcelReturned, refreshCourierStatus, rejectPayment, releaseHold, shipManually,
+  DomainError, addOrderNote, blockPhone, bookCourier, holdOrder, isValidAddress, markPacked, markParcelReturned, refreshCourierStatus, refreshOrderFraudReport, rejectPayment, releaseHold, shipManually,
   transitionOrder, updateShippingAddress, verifyPayment,
 } from "@biztrackbd/core";
 import type { OrderStatus } from "@biztrackbd/db";
@@ -104,6 +104,11 @@ export async function bookAction(id: string, form: FormData): Promise<void> {
 export async function refreshCourierAction(id: string): Promise<void> {
   const s = await requireAction("orders", "view");
   await run(id, () => refreshCourierStatus(s.tenantId, s.actor, id));
+}
+
+export async function refreshFraudAction(id: string): Promise<void> {
+  const s = await requireAction("orders", "edit");
+  await run(id, () => refreshOrderFraudReport(s.tenantId, s.actor, id));
 }
 
 export async function releaseHoldAction(id: string, form: FormData): Promise<void> {
