@@ -18,6 +18,7 @@ const LABELS: Record<string, string> = {
   apiKey: "API key", secretKey: "Secret key", clientId: "Client ID", clientSecret: "Client secret", username: "Username (email)", password: "Password",
   storeId: "Store ID", accessToken: "Access token", pickupStoreId: "Pickup store ID", storePassword: "Store password", pixelId: "Pixel ID",
   apiSecret: "API secret", measurementId: "Measurement ID", senderEmail: "Sender email", senderName: "Sender name", senderId: "Sender ID",
+  baseUrl: "Base URL (optional)",
 };
 const HINTS: Partial<Record<string, string>> = {
   senderEmail: "Customers see this as the sender. It must be verified in your Brevo account.",
@@ -25,6 +26,7 @@ const HINTS: Partial<Record<string, string>> = {
   pickupStoreId: "The pickup store you set up in your RedX panel.",
   pixelId: "The number from Meta Events Manager. It is not secret.",
   measurementId: "Looks like G-XXXXXXXXXX. It is not secret.",
+  baseUrl: "Leave blank for live checkout (https://pay.uddoktapay.com), or enter https://sandbox.uddoktapay.com for testing.",
 };
 
 const META: Record<ProviderKey, { group: string; description: string }> = {
@@ -32,6 +34,7 @@ const META: Record<ProviderKey, { group: string; description: string }> = {
   PATHAO: { group: "Couriers", description: "Book pickups and follow parcels with Pathao." },
   REDX: { group: "Couriers", description: "Book RedX pickups. Parcels are checked every 30 minutes." },
   SSLCOMMERZ: { group: "Payments", description: "Take card and mobile-banking payments into your own merchant account." },
+  UDDOKTAPAY: { group: "Payments", description: "Automated bKash, Nagad, Rocket, Upay and Card checkout directly into your merchant account." },
   META_CAPI: { group: "Marketing and tracking", description: "Send purchases to Meta from the server for better ad results." },
   GA4: { group: "Marketing and tracking", description: "Send purchase events to Google Analytics 4." },
   BREVO_BYO: { group: "Messaging", description: "Send customer emails from your own Brevo account." },

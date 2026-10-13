@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { submitProofAction, type ProofState } from "./actions";
+import { initiateOnlineBillingAction, submitProofAction, type ProofState } from "./actions";
 
 interface Plan { tier: string; name: string; priceMonthly: number; priceYearly: number; yearlyMonthsFree: number; summary: string }
 interface PayTo { provider: "BKASH" | "NAGAD"; number: string; kind: string }
@@ -15,12 +15,28 @@ export function PayForm({ plans, payTo, current, suggested }: { plans: Plan[]; p
   const [plan, setPlan] = useState(suggested);
   const [interval, setInterval] = useState<"MONTHLY" | "YEARLY">("MONTHLY");
   const [provider, setProvider] = useState<string>(payTo[0]?.provider ?? "BKASH");
+  const [onlinePending, setOnlinePending] = useState(false);
+  const [onlineError, setOnlineError] = useState("");
+  const [showManual, setShowManual] = useState(false);
+
   const chosen = plans.find((p) => p.tier === plan)!;
   const amount = interval === "YEARLY" ? chosen.priceYearly : chosen.priceMonthly;
   const target = payTo.find((p) => p.provider === provider);
 
+  async function handlePayOnline() {
+    setOnlinePending(true);
+    setOnlineError("");
+    const res = await initiateOnlineBillingAction(plan, interval);
+    if (res.paymentUrl) {
+      window.location.href = res.paymentUrl;
+      return;
+    }
+    setOnlinePending(false);
+    setOnlineError(res.error || "Could not open online payment gateway");
+  }
+
   return (
-    <form action={action} className="stack" data-testid="pay-form">
+    <div className="stack">
       <fieldset className="field" style={{ border: 0, padding: 0, margin: 0 }}>
         <legend className="label">Plan</legend>
         <div className="grid grid-3">
@@ -46,30 +62,67 @@ export function PayForm({ plans, payTo, current, suggested }: { plans: Plan[]; p
         </div>
       </fieldset>
 
-      {payTo.length === 0 ? (
-        <div className="notice bad" role="alert">Payment numbers are not set up yet. Please contact support.</div>
-      ) : (
-        <div className="notice info" data-testid="pay-instructions">
-          <b>Send {taka(amount)}</b> by {provider === "BKASH" ? "bKash" : "Nagad"} Send Money to <b className="num">{target?.number}</b> ({KIND[target?.kind ?? ""] ?? "merchant"} number). Then fill in the details below.
+      <div className="card" style={{ background: "linear-gradient(135deg, rgba(15,118,110,0.06), rgba(2,132,199,0.06))", borderColor: "var(--brand, #0f766e)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <h3 style={{ margin: "0 0 4px 0", fontSize: 16 }}>⚡ Pay Instantly with UddoktaPay</h3>
+            <p className="muted" style={{ margin: 0, fontSize: 13.5 }}>
+              Auto-activates your {chosen.name} plan immediately via bKash, Nagad, Rocket, Upay or Cards.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="btn btn-primary btn-lg"
+            onClick={handlePayOnline}
+            disabled={onlinePending}
+            style={{ minWidth: 200 }}
+          >
+            {onlinePending ? "Opening gateway…" : `Pay ${taka(amount)} Online`}
+          </button>
         </div>
-      )}
-
-      <fieldset className="field" style={{ border: 0, padding: 0, margin: 0 }}>
-        <legend className="label">You paid with</legend>
-        <div className="chips">
-          {payTo.map((p) => (
-            <label key={p.provider} className="chip" style={{ cursor: "pointer" }}><input type="radio" name="provider" value={p.provider} checked={provider === p.provider} onChange={() => setProvider(p.provider)} /> {p.provider === "BKASH" ? "bKash" : "Nagad"}</label>
-          ))}
-        </div>
-      </fieldset>
-      <div className="row-2">
-        <label className="field" style={{ marginBottom: 0 }}><span className="label">The number you sent from</span><input className="input" name="senderNumber" inputMode="tel" required placeholder="01712345678" /></label>
-        <label className="field" style={{ marginBottom: 0 }}><span className="label">Transaction ID (TrxID)</span><input className="input" name="trxId" required minLength={8} maxLength={12} autoCapitalize="characters" autoComplete="off" /></label>
+        {onlineError && <div className="notice bad" style={{ marginTop: 12 }}>{onlineError}</div>}
       </div>
-      <label className="field" style={{ marginBottom: 0 }}><span className="label">Note <span className="opt">(optional)</span></span><input className="input" name="note" maxLength={150} /></label>
-      {state.error && <div className="notice bad" role="alert" data-testid="pay-error">{state.error}</div>}
-      <button className="btn btn-primary btn-lg" type="submit" disabled={pending || payTo.length === 0}>{pending ? "Sending…" : `I sent ${taka(amount)}. Check my payment`}</button>
-      <p className="muted" style={{ fontSize: 13 }}>We check the TrxID in our own {provider === "BKASH" ? "bKash" : "Nagad"} account and switch your plan on, usually within a few hours. Your store keeps working while you wait.</p>
-    </form>
+
+      <div style={{ textAlign: "center", margin: "8px 0" }}>
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm"
+          onClick={() => setShowManual(!showManual)}
+        >
+          {showManual ? "Hide manual Send Money form" : "Or pay manually (Send Money TrxID verification) ↓"}
+        </button>
+      </div>
+
+      {showManual && (
+        <form action={action} className="stack" data-testid="pay-form">
+          <input type="hidden" name="plan" value={plan} />
+          <input type="hidden" name="interval" value={interval} />
+          {payTo.length === 0 ? (
+            <div className="notice bad" role="alert">Payment numbers are not set up yet. Please contact support.</div>
+          ) : (
+            <div className="notice info" data-testid="pay-instructions">
+              <b>Send {taka(amount)}</b> by {provider === "BKASH" ? "bKash" : "Nagad"} Send Money to <b className="num">{target?.number}</b> ({KIND[target?.kind ?? ""] ?? "merchant"} number). Then fill in the details below.
+            </div>
+          )}
+
+          <fieldset className="field" style={{ border: 0, padding: 0, margin: 0 }}>
+            <legend className="label">You paid with</legend>
+            <div className="chips">
+              {payTo.map((p) => (
+                <label key={p.provider} className="chip" style={{ cursor: "pointer" }}><input type="radio" name="provider" value={p.provider} checked={provider === p.provider} onChange={() => setProvider(p.provider)} /> {p.provider === "BKASH" ? "bKash" : "Nagad"}</label>
+              ))}
+            </div>
+          </fieldset>
+          <div className="row-2">
+            <label className="field" style={{ marginBottom: 0 }}><span className="label">The number you sent from</span><input className="input" name="senderNumber" inputMode="tel" required placeholder="01712345678" /></label>
+            <label className="field" style={{ marginBottom: 0 }}><span className="label">Transaction ID (TrxID)</span><input className="input" name="trxId" required minLength={8} maxLength={12} autoCapitalize="characters" autoComplete="off" /></label>
+          </div>
+          <label className="field" style={{ marginBottom: 0 }}><span className="label">Note <span className="opt">(optional)</span></span><input className="input" name="note" maxLength={150} /></label>
+          {state.error && <div className="notice bad" role="alert" data-testid="pay-error">{state.error}</div>}
+          <button className="btn btn-secondary btn-lg" type="submit" disabled={pending || payTo.length === 0}>{pending ? "Sending…" : `I sent ${taka(amount)}. Check my payment`}</button>
+          <p className="muted" style={{ fontSize: 13 }}>We check the TrxID in our own {provider === "BKASH" ? "bKash" : "Nagad"} account and switch your plan on, usually within a few hours. Your store keeps working while you wait.</p>
+        </form>
+      )}
+    </div>
   );
 }

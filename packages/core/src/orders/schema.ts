@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const PAYMENT_METHODS = ["COD", "MANUAL_BKASH", "MANUAL_NAGAD", "MANUAL_ROCKET"] as const;
+export const PAYMENT_METHODS = ["COD", "MANUAL_BKASH", "MANUAL_NAGAD", "MANUAL_ROCKET", "GATEWAY_UDDOKTAPAY"] as const;
 
 export const CreateOrderInput = z.object({
   idempotencyKey: z.string().min(8).max(100),

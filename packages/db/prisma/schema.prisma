@@ -384,6 +384,7 @@ enum PaymentMethodType {
   MANUAL_ROCKET
   GATEWAY_SSLCOMMERZ
   GATEWAY_STRIPE
+  GATEWAY_UDDOKTAPAY
 }
 
 enum CourierProvider {

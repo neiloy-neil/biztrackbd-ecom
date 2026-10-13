@@ -125,6 +125,11 @@ export {
 export { createGreenwebSender, createSmsNetBdSender, smsSenderFromEnv } from "./growth/sms";
 export { createBrevoSender, emailSenderFromEnv, type EmailSender } from "./growth/email";
 export { currentSmsSender } from "./customers/auth";
+export {
+  createUddoktaPayCharge, verifyUddoktaPayPayment, getStoreUddoktaPayConfig, processUddoktaPayOrderSuccess, processUddoktaPaySubscriptionSuccess,
+  DEFAULT_UDDOKTAPAY_BASE_URL, DEFAULT_UDDOKTAPAY_API_KEY, setUddoktaPayFetchForTests,
+  type UddoktaPayChargeRequest, type UddoktaPayChargeResponse, type UddoktaPayVerifyResponse,
+} from "./payments/uddoktapay";
 
 // Phase 7: store design builder, landing pages, domain connection
 export * from "./builder/registry";

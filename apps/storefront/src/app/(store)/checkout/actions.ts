@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { DomainError, createOrder, hashClient, isValidAddress, normalizeBdPhone, sendServerPurchase, signOrderAccess } from "@biztrackbd/core";
+import { DomainError, createOrder, createUddoktaPayCharge, getStoreUddoktaPayConfig, hashClient, isValidAddress, normalizeBdPhone, sendServerPurchase, signOrderAccess } from "@biztrackbd/core";
 import { clientIp } from "@/lib/ip";
 import { getCustomerSession } from "@/lib/session";
 import { getStore } from "@/lib/tenant";
@@ -11,7 +11,7 @@ export interface PlaceOrderPayload {
   items: { variantId: string; quantity: number }[];
   customer: { name: string; phone: string; email?: string };
   shipping: { division: string; district: string; upazila: string; address: string; note?: string };
-  paymentMethod: "COD" | "MANUAL_BKASH" | "MANUAL_NAGAD";
+  paymentMethod: "COD" | "MANUAL_BKASH" | "MANUAL_NAGAD" | "GATEWAY_UDDOKTAPAY";
   mfs?: { senderNumber: string; trxId: string };
   couponCode?: string;
   redeemPoints?: number;
@@ -21,7 +21,7 @@ export interface PlaceOrderPayload {
 }
 
 export type PlaceOrderResult =
-  | { ok: true; orderId: string; token: string }
+  | { ok: true; orderId: string; token: string; paymentUrl?: string }
   | { ok: false; error: string; field?: string };
 
 /**
@@ -42,7 +42,7 @@ export async function placeOrderAction(p: PlaceOrderPayload): Promise<PlaceOrder
       shipping: { address: p.shipping.address, city: p.shipping.upazila, district: p.shipping.district, division: p.shipping.division },
       items: p.items,
       paymentMethod: p.paymentMethod,
-      mfs: p.paymentMethod === "COD" ? undefined : p.mfs,
+      mfs: p.paymentMethod === "COD" || p.paymentMethod === "GATEWAY_UDDOKTAPAY" ? undefined : p.mfs,
       couponCode: p.couponCode?.trim() || undefined,
       redeemPoints: p.redeemPoints && p.redeemPoints > 0 ? p.redeemPoints : undefined,
       referralCode: p.referralCode?.trim() || undefined,
@@ -51,15 +51,43 @@ export async function placeOrderAction(p: PlaceOrderPayload): Promise<PlaceOrder
       channel: "STOREFRONT",
       clientHash: hashClient(await clientIp()),
     });
-    // Report the Purchase from the server too, under the id the thank-you page will use. A repeat or a Meta outage changes nothing about the order.
-    if (!placed.replayed) {
-      const ua = (await headers()).get("user-agent");
-      await Promise.race([
-        sendServerPurchase(store.id, placed.orderId, { ip: await clientIp(), userAgent: ua, fbp: p.tracking?.fbp, fbc: p.tracking?.fbc, url: p.tracking?.url }),
-        new Promise((resolve) => setTimeout(resolve, 2500)),
-      ]);
+
+    let paymentUrl: string | undefined;
+    if (p.paymentMethod === "GATEWAY_UDDOKTAPAY") {
+      const h = await headers();
+      const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+      const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+      const origin = `${proto}://${host}`;
+      const cfg = await getStoreUddoktaPayConfig(store.id);
+
+      const charge = await createUddoktaPayCharge({
+        apiKey: cfg.apiKey,
+        baseUrl: cfg.baseUrl,
+        fullName: p.customer.name,
+        email: p.customer.email || `${p.customer.phone}@biztrackbd.test`,
+        amount: placed.totalAmount,
+        metadata: {
+          tenantId: store.id,
+          orderId: placed.orderId,
+          orderNumber: placed.orderNumber,
+        },
+        redirectUrl: `${origin}/api/payments/uddoktapay/callback?tenantId=${encodeURIComponent(store.id)}`,
+        cancelUrl: `${origin}/order/${placed.orderId}?cancelled=1`,
+        webhookUrl: `${origin}/api/payments/uddoktapay/webhook?tenantId=${encodeURIComponent(store.id)}`,
+        returnType: "GET",
+      });
+      paymentUrl = charge.paymentUrl;
+    } else {
+      // For COD and Manual MFS, report the Purchase from server immediately
+      if (!placed.replayed) {
+        const ua = (await headers()).get("user-agent");
+        await Promise.race([
+          sendServerPurchase(store.id, placed.orderId, { ip: await clientIp(), userAgent: ua, fbp: p.tracking?.fbp, fbc: p.tracking?.fbc, url: p.tracking?.url }),
+          new Promise((resolve) => setTimeout(resolve, 2500)),
+        ]);
+      }
     }
-    return { ok: true, orderId: placed.orderId, token: signOrderAccess(store.id, placed.orderId) };
+    return { ok: true, orderId: placed.orderId, token: signOrderAccess(store.id, placed.orderId), paymentUrl };
   } catch (e) {
     if (e instanceof DomainError) {
       const field = typeof e.details?.field === "string" ? e.details.field : e.code === "COUPON_INVALID" ? "coupon" : undefined;

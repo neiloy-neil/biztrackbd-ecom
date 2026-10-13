@@ -46,9 +46,18 @@ export async function signupAction(_prev: SignupState, form: FormData): Promise<
     }, { pictures: samplePictures() ?? undefined, ...(keepCode && copier ? { keep: { code: keepCode, copyImage: copier } } : {}) });
   } catch (e) {
     if (e instanceof DomainError) return { error: e.message, field: typeof e.details?.field === "string" ? e.details.field : undefined };
-    // The full error goes to the server log only; visitors never see database or internal messages.
-    console.error("signup failed", e instanceof Error ? `${e.name}: ${e.message}` : "unknown");
-    return { error: "We could not create your store. Nothing was charged. Please try again." };
+    console.error("signup failed", e instanceof Error ? `${e.name}: ${e.message}\n${e.stack}` : e);
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.toLowerCase().includes("subdomain") || msg.toLowerCase().includes("taken")) {
+      return { error: "This store address is already taken. Please choose another.", field: "subdomain" };
+    }
+    if (msg.toLowerCase().includes("too many stores")) {
+      return { error: "This email already has the maximum allowed stores. Please sign in to your existing store.", field: "email" };
+    }
+    if (msg.toLowerCase().includes("connect") || msg.toLowerCase().includes("econnrefused")) {
+      return { error: "Unable to connect to the store database. Please try again shortly." };
+    }
+    return { error: `Could not create store: ${msg.slice(0, 120)}. Please check your details and try again.` };
   }
 
   const q = new URLSearchParams({

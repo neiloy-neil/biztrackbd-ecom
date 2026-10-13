@@ -447,7 +447,8 @@ function normObject(fields: Field[], raw: unknown, defaults: Record<string, unkn
 }
 
 /** Cleans one section's settings against its definition. Unknown keys are dropped, bad values refused with a plain message. */
-export function normalizeSettings(def: SectionDef, raw: unknown, label = def.label): Record<string, unknown> {
+export function normalizeSettings(def?: SectionDef | null, raw?: unknown, label = def?.label ?? "Section"): Record<string, unknown> {
+  if (!def) return raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
   const out = normObject(def.fields, raw, def.defaults, label);
   if (def.list) {
     const src = raw && typeof raw === "object" ? (raw as Record<string, unknown>)[def.list.key] : undefined;

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { getAccountView, getLoyaltyPublic, getReferralOffer, getStoreInfo, resolveRecovery } from "@biztrackbd/core";
+import { getAccountView, getLoyaltyPublic, getReferralOffer, getStoreInfo, getStoreUddoktaPayConfig, resolveRecovery } from "@biztrackbd/core";
 import { CheckoutForm } from "@/components/checkout-form";
 import { PausedCard } from "@/components/paused-notice";
 import { getLang, makeT, pickStrings } from "@/lib/i18n";
@@ -45,6 +45,7 @@ export default async function Checkout({ searchParams }: { searchParams: Promise
   const refCode = (await cookies()).get("bt_ref")?.value;
   const offer = refCode ? await getReferralOffer(store.id, refCode) : null;
   const restored = recover ? await resolveRecovery(store.id, recover).catch(() => null) : null;
+  const uddoktaConfig = await getStoreUddoktaPayConfig(store.id).catch(() => null);
   return (
     <div className="wrap">
       <h1 className="page-title" style={{ paddingBottom: 4 }}>{lang === "bn" ? "চেকআউট" : "Checkout"}</h1>
@@ -54,7 +55,7 @@ export default async function Checkout({ searchParams }: { searchParams: Promise
         errorsText={ERRORS[lang]}
         recover={restored}
         loyalty={{ s: pickStrings(lang, LOYALTY_STRINGS), pointsOn: pub.enabled, signedIn: Boolean(session), available: view?.available ?? 0, worth: view?.worthBdt ?? 0, referralCode: offer?.code ?? "", referralOn: pub.referralEnabled }}
-        pay={{ bkashNumber: info.bkashNumber, bkashKind: info.bkashKind, nagadNumber: info.nagadNumber, nagadKind: info.nagadKind, paymentNote: info.paymentNote }}
+        pay={{ bkashNumber: info.bkashNumber, bkashKind: info.bkashKind, nagadNumber: info.nagadNumber, nagadKind: info.nagadKind, paymentNote: info.paymentNote, uddoktapayEnabled: Boolean(uddoktaConfig?.apiKey) }}
       />
     </div>
   );

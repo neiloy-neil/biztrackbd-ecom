@@ -25,6 +25,16 @@ export function PaymentsForm({ initial }: { initial: PayValues }) {
         </div>
       </section>
 
+      <section className="card" style={{ background: "linear-gradient(135deg, rgba(15,118,110,0.05), rgba(2,132,199,0.05))" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <b>⚡ Automated Online Payments (UddoktaPay)</b><br />
+            <span className="muted" style={{ fontSize: 13 }}>Accept automated bKash, Nagad, Rocket, Upay and Cards without manual TrxID checking.</span>
+          </div>
+          <a href="/settings/integrations?open=UDDOKTAPAY" className="btn btn-secondary btn-sm">Configure UddoktaPay Keys →</a>
+        </div>
+      </section>
+
       {([
         ["bkash", "bKash", initial.bkashEnabled, initial.bkashNumber, initial.bkashKind, initial.bkashInstruction],
         ["nagad", "Nagad", initial.nagadEnabled, initial.nagadNumber, initial.nagadKind, initial.nagadInstruction],

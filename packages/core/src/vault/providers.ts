@@ -12,6 +12,7 @@ export const PROVIDERS = {
   PATHAO: { label: "Pathao", secrets: ["clientId", "clientSecret", "username", "password"], config: ["storeId"] },
   REDX: { label: "RedX", secrets: ["accessToken"], config: ["pickupStoreId"] },
   SSLCOMMERZ: { label: "SSLCommerz", secrets: ["storeId", "storePassword"], config: [] },
+  UDDOKTAPAY: { label: "UddoktaPay", secrets: ["apiKey"], config: ["baseUrl"] },
   META_CAPI: { label: "Meta Conversions API", secrets: ["accessToken"], config: ["pixelId"] },
   GA4: { label: "Google Analytics 4", secrets: ["apiSecret"], config: ["measurementId"] },
   BREVO_BYO: { label: "Brevo (own account)", secrets: ["apiKey"], config: ["senderEmail", "senderName"] },

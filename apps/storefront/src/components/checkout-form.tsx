@@ -20,9 +20,10 @@ export interface PayInfo {
   nagadNumber: string | null;
   nagadKind: string;
   paymentNote: string | null;
+  uddoktapayEnabled?: boolean;
 }
 
-type Method = "COD" | "MANUAL_BKASH" | "MANUAL_NAGAD";
+type Method = "COD" | "MANUAL_BKASH" | "MANUAL_NAGAD" | "GATEWAY_UDDOKTAPAY";
 type Errors = Partial<Record<"phone" | "name" | "email" | "division" | "district" | "upazila" | "address" | "mfsSender" | "trxId" | "coupon" | "referral", string>>;
 
 // ---- Phone: the customer types the 10 digits after +880. Pasting 01712345678 or +8801712345678 also works.
@@ -166,7 +167,7 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = errorsText.email!;
     if (!upazila) e.upazila = errorsText.upazila!;
     if (address.trim().length < 5) e.address = errorsText.address!;
-    if (method !== "COD") {
+    if (method === "MANUAL_BKASH" || method === "MANUAL_NAGAD") {
       const sender = cleanPhoneDigits(mfsSender);
       if (!validLocal(sender)) e.mfsSender = errorsText.mfsSender!;
       if (!/^[A-Za-z0-9]{8,12}$/.test(trx.trim())) e.trxId = errorsText.trxId!;
@@ -193,7 +194,7 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
       customer: { name: name.trim(), phone: full(phone), email: email.trim() || undefined },
       shipping: { division, district, upazila, address: address.trim(), note: note.trim() || undefined },
       paymentMethod: method,
-      mfs: method === "COD" ? undefined : { senderNumber: full(cleanPhoneDigits(mfsSender)), trxId: trx.trim() },
+      mfs: method === "MANUAL_BKASH" || method === "MANUAL_NAGAD" ? { senderNumber: full(cleanPhoneDigits(mfsSender)), trxId: trx.trim() } : undefined,
       couponCode: coupon || undefined,
       redeemPoints: usePoints && redeem > 0 ? redeem : undefined,
       referralCode: refCode || undefined,
@@ -201,6 +202,10 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
     });
     if (r.ok) {
       cart.clear();
+      if (r.paymentUrl) {
+        window.location.href = r.paymentUrl;
+        return;
+      }
       router.push(`/order/${r.orderId}?k=${encodeURIComponent(r.token)}`);
       return;
     }
@@ -325,6 +330,16 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
             <input type="radio" name="pay" checked={method === "COD"} onChange={() => setMethod("COD")} data-testid="pay-cod" />
             <div className="grow"><div className="t">{s.cod}</div><div className="s">{s.codS}</div></div>
           </label>
+          {pay.uddoktapayEnabled && (
+            <label className={`option${method === "GATEWAY_UDDOKTAPAY" ? " selected" : ""}`} style={{ borderColor: method === "GATEWAY_UDDOKTAPAY" ? "var(--primary, #0f766e)" : undefined }}>
+              <input type="radio" name="pay" checked={method === "GATEWAY_UDDOKTAPAY"} onChange={() => setMethod("GATEWAY_UDDOKTAPAY")} data-testid="pay-uddoktapay" />
+              <div className="grow">
+                <div className="t">{lang === "bn" ? "অনলাইন পেমেন্ট (বিকাশ / নগদ / কার্ড)" : "Pay Online (bKash / Nagad / Cards)"}</div>
+                <div className="s">{lang === "bn" ? "উদ্যোক্তাপে এর মাধ্যমে নিরাপদ অটোমেটিক পেমেন্ট" : "Instant automated payment via UddoktaPay"}</div>
+              </div>
+              <span className="mfs-tag" style={{ background: "linear-gradient(135deg, #0f766e, #0284c7)", color: "#fff", fontWeight: 700 }} aria-hidden="true">ONLINE</span>
+            </label>
+          )}
           {(["MANUAL_BKASH", "MANUAL_NAGAD"] as const).map((m) => {
             const info = mfsInfo(m);
             const brand = m === "MANUAL_BKASH" ? "bkash" : "nagad";
