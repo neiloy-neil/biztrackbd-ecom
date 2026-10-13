@@ -627,6 +627,21 @@ describe("landing pages", () => {
       expect(left.map((l) => l.phone)).toEqual(["01712345624"]);
     });
 
+    it("deleting a landing page removes its counts, leads and history, and keeps the orders placed from it", async () => {
+      const { s, id, pageKey } = await liveStore("lps6");
+      await goLive(s, pageKey);
+      await recordLandingView(s.f.tenantId, "eid-panjabi");
+      await saveLandingLead(s.f.tenantId, "eid-panjabi", { name: "Rina Akter", phone: "01712345631" });
+      const o = await placeLandingOrder(s.f.tenantId, "eid-panjabi", { idempotencyKey: `lps-${Date.now()}-del`, variantId: s.f.products[0]!.variants[0]!.id, quantity: 1, phone: "01712345632", ...ship });
+      await deleteLandingPage(s.f.tenantId, s.owner, id);
+      expect(await owner.landingDaily.count({ where: { landingPageId: id } })).toBe(0);
+      expect(await owner.landingLead.count({ where: { landingPageId: id } })).toBe(0);
+      expect(await owner.themeVersion.count({ where: { pageKey } })).toBe(0);
+      expect(await getPublicLanding(s.f.tenantId, "eid-panjabi")).toBeNull();
+      expect(await owner.order.findUnique({ where: { id: o.orderId } })).not.toBeNull();
+      await fails(deleteLandingPage(s.f.tenantId, s.packer, id), undefined);
+    });
+
     it("another store sees none of it, and the right people can remove a lead", async () => {
       const a = await liveStore("lps4");
       await goLive(a.s, a.pageKey);

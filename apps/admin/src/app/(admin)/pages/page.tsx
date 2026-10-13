@@ -6,7 +6,8 @@ import { dateOnly } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { storefrontOrigin } from "@/lib/store-url";
-import { createPageAction } from "./actions";
+import { ConfirmDelete } from "@/components/confirm-delete";
+import { createPageAction, deletePageAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Pages built from sections" };
@@ -34,6 +35,12 @@ export default async function Pages({ searchParams }: { searchParams: Promise<Re
                 <h2><Link href={`/pages/${p.id}`} className="link" prefetch={false}>{p.title}</Link></h2>
                 <span className={`pill ${p.isPublished ? "ok" : "grey"}`}>{p.isPublished ? "Live" : "Not live"}</span>
               </div>
+              {canEdit && (
+                <div className="row" style={{ marginTop: 8 }}>
+                  <Link href={`/pages/${p.id}`} className="btn btn-secondary btn-sm" prefetch={false}>Edit</Link>
+                  <ConfirmDelete action={deletePageAction.bind(null, p.id)} testId="page-delete" message={`Delete "${p.title}"? ${p.isPublished ? "It is live: its address will stop working. " : ""}This cannot be undone.`} />
+                </div>
+              )}
               <p className="muted" style={{ fontSize: 14 }}>Changed {dateOnly(p.updatedAt)}</p>
               {p.isPublished && <p style={{ fontSize: 14, marginTop: 4, overflowWrap: "anywhere" }}><a className="link" href={`${origin}/p/${p.slug}`} target="_blank" rel="noopener noreferrer">{origin}/p/{p.slug}</a></p>}
             </section>

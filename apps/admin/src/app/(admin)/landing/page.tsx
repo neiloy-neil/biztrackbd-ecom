@@ -7,7 +7,8 @@ import { dateOnly } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { storefrontOrigin } from "@/lib/store-url";
-import { createLandingAction } from "./actions";
+import { ConfirmDelete } from "@/components/confirm-delete";
+import { createLandingAction, deleteLandingAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Landing pages" };
@@ -39,6 +40,12 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
                 <h2><Link href={`/landing/${p.id}`} className="link" prefetch={false}>{p.title}</Link></h2>
                 <span className={`pill ${p.isPublished ? "ok" : "grey"}`}>{p.isPublished ? "Live" : "Not live"}</span>
               </div>
+              {canEdit && (
+                <div className="row" style={{ marginTop: 8 }}>
+                  <Link href={`/landing/${p.id}`} className="btn btn-secondary btn-sm" prefetch={false}>Edit</Link>
+                  <ConfirmDelete action={deleteLandingAction.bind(null, p.id)} testId="landing-delete" message={`Delete "${p.title}"? ${p.isPublished ? "It is live: its address will stop working. " : ""}Its design and its list of people who did not finish are deleted too. Orders already placed from it stay. This cannot be undone.`} />
+                </div>
+              )}
               <p className="muted" style={{ fontSize: 14 }}>Sells {p.productTitle ?? "a product that is no longer available"} · changed {dateOnly(p.updatedAt)}</p>
               <p style={{ fontSize: 14, marginTop: 4 }} data-testid="landing-totals">Last 30 days: <b>{totals.get(p.id)?.views ?? 0}</b> views · <b>{totals.get(p.id)?.orders ?? 0}</b> orders</p>
               {p.isPublished && <p style={{ fontSize: 14, marginTop: 4, overflowWrap: "anywhere" }}><a className="link" href={`${origin}/l/${p.slug}`} target="_blank" rel="noopener noreferrer">{origin}/l/{p.slug}</a></p>}

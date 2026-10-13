@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { NotFoundError, can, createPreviewToken, customKey, listCustomPages, listVersions, loadForEdit } from "@biztrackbd/core";
+import { ConfirmDelete } from "@/components/confirm-delete";
 import { SubmitButton } from "@/components/ui";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
@@ -45,7 +46,7 @@ export default async function PageEdit({ params, searchParams }: { params: Promi
         {canEdit && (
           <div className="row">
             <form action={setPageLiveAction.bind(null, id, !row.isPublished)}><SubmitButton className={row.isPublished ? "btn btn-secondary" : "btn btn-success"} pending="…" data-testid="toggle-live">{row.isPublished ? "Take offline" : "Put live"}</SubmitButton></form>
-            <form action={deletePageAction.bind(null, id)}><SubmitButton className="btn btn-secondary" pending="Deleting…">Delete page</SubmitButton></form>
+            <ConfirmDelete action={deletePageAction.bind(null, id)} label="Delete page" message={`Delete "${row.title}"? ${row.isPublished ? "It is live: its address will stop working. " : ""}This cannot be undone.`} />
           </div>
         )}
         {row.isPublished && <p style={{ fontSize: 13, overflowWrap: "anywhere" }}>Address: <a className="link" href={`${origin}/p/${row.slug}`} target="_blank" rel="noopener noreferrer">{origin}/p/{row.slug}</a></p>}

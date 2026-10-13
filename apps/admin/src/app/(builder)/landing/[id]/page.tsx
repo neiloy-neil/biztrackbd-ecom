@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { NotFoundError, can, createPreviewToken, landingKey, landingStats, listLandingLeads, listLandingPages, listVersions, loadForEdit } from "@biztrackbd/core";
 import { withTenant } from "@biztrackbd/db";
+import { ConfirmDelete } from "@/components/confirm-delete";
 import { SubmitButton } from "@/components/ui";
 import { one } from "@/lib/query";
 import { dateOnly } from "@/lib/format";
@@ -120,7 +121,7 @@ export default async function LandingEdit({ params, searchParams }: { params: Pr
         {canEdit && (
           <div className="row">
             <form action={setLandingLiveAction.bind(null, id, !row.isPublished)}><SubmitButton className={row.isPublished ? "btn btn-secondary" : "btn btn-success"} pending="…" data-testid="toggle-live">{row.isPublished ? "Take offline" : "Put live"}</SubmitButton></form>
-            <form action={deleteLandingAction.bind(null, id)}><SubmitButton className="btn btn-secondary" pending="Deleting…">Delete page</SubmitButton></form>
+            <ConfirmDelete action={deleteLandingAction.bind(null, id)} label="Delete page" message={`Delete "${row.title}"? ${row.isPublished ? "It is live: its address will stop working. " : ""}This cannot be undone.`} />
           </div>
         )}
         {row.isPublished && <p style={{ fontSize: 13, overflowWrap: "anywhere" }}>Address: <a className="link" href={`${origin}/l/${row.slug}`} target="_blank" rel="noopener noreferrer">{origin}/l/{row.slug}</a></p>}
