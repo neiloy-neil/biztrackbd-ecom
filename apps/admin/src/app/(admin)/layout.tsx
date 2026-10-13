@@ -42,7 +42,7 @@ const GROUPS: Group[] = [
   { id: "marketing", label: "Marketing", icon: <TagIcon />, items: [{ href: "/marketing/coupons", label: "Discounts", area: "marketing" }, { href: "/marketing/pixels", label: "Pixels", area: "marketing" }] },
   { id: "store", label: "Online store", icon: <StoreIcon />, items: [{ href: "/design", label: "Store design", area: "design" }, { href: "/landing", label: "Landing pages", area: "design" }, { href: "/pages", label: "Pages built from sections", area: "design" }, { href: "/content", label: "Pages and blog", area: "design" }] },
   { id: "reports", label: "Reports", icon: <ChartIcon />, items: [{ href: "/reports", label: "Reports", area: "reports" }, { href: "/finance/cod", label: "COD payouts", area: "reports" }, { href: "/finance/profit", label: "Profit and loss", area: "reports" }] },
-  { id: "apps", label: "Apps", icon: <PuzzleIcon />, items: [{ href: "/settings/integrations", label: "Integrations", area: "billing" }, { href: "/settings/apps", label: "Apps", area: "billing" }] },
+  { id: "apps", label: "Apps", icon: <PuzzleIcon />, items: [{ href: "/settings/apps", label: "Apps & Integrations", area: "billing" }] },
   {
     id: "settings", label: "Settings", icon: <GearIcon />,
     items: [

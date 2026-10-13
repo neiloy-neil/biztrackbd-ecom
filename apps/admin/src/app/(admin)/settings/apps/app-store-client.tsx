@@ -1,14 +1,55 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import type { AppCategory, AppStoreItemView, AppStoreOverview } from "@biztrackbd/core";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import type { AppCategory, AppStoreItemView, AppStoreOverview, IntegrationView } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
-import { setModuleAction } from "./actions";
+import {
+  removeIntegrationAction,
+  saveCourierAction,
+  saveLoyaltyAction,
+  savePaymentGatewayAction,
+  saveSmsGatewayAction,
+  saveTrackingPixelsAction,
+  saveWhatsAppWidgetAction,
+  setModuleAction,
+  testCourierAction,
+} from "./actions";
+
+interface StoreSettingsData {
+  whatsappNumber?: string | null;
+  metaPixelId?: string | null;
+  googleAnalyticsId?: string | null;
+  googleTagManagerId?: string | null;
+  tiktokPixelId?: string | null;
+  metaDomainVerification?: string | null;
+  loyaltyEnabled?: boolean;
+  loyaltySpendPerPoint?: number;
+  loyaltyPointsPerBlock?: number;
+  loyaltyBdtPerBlock?: number;
+  loyaltyMaxCartPercent?: number;
+  referralEnabled?: boolean;
+  refereeDiscountBdt?: number;
+  refereeMinCartBdt?: number;
+  referrerRewardPoints?: number;
+  vipSilverMin?: number;
+  vipGoldMin?: number;
+  vipPlatinumMin?: number;
+  vipGoldDiscount?: number;
+  vipPlatinumDiscount?: number;
+  loyaltyExpiryMonths?: number;
+  birthdayVoucherBdt?: number;
+}
 
 interface Props {
   overview: AppStoreOverview;
   canEdit: boolean;
+  storeSettings?: StoreSettingsData | null;
+  integrations: IntegrationView[];
+  webhookTokens: Record<string, string>;
+  origin: string;
+  storeSubdomain: string;
+  initialOpen?: string;
 }
 
 const CATEGORIES: { key: AppCategory | "ALL"; label: string }[] = [
@@ -17,7 +58,7 @@ const CATEGORIES: { key: AppCategory | "ALL"; label: string }[] = [
   { key: "COURIERS", label: "Couriers & Logistics" },
   { key: "GROWTH", label: "Growth & Loyalty" },
   { key: "AUTOMATION", label: "Automation & Protection" },
-  { key: "COMMERCE", label: "Commerce & Specialized" },
+  { key: "COMMERCE", label: "Commerce & Payments" },
 ];
 
 function AppIcon({ icon }: { icon: string }) {
@@ -90,6 +131,22 @@ function AppIcon({ icon }: { icon: string }) {
           <path d="M17.5 14.4c-.3-.1-1.6-.8-1.8-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-1 .1-.2.2-.4.2-.7.1-.3-.1-1.2-.4-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.7.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.2-1.2 2.9s1.2 3.4 1.4 3.6c.2.2 2.4 3.7 5.8 5.1.8.3 1.4.6 1.9.7.8.3 1.5.2 2.1.1.6-.1 1.9-.8 2.2-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.3-.6-.4z" fill="white" />
         </svg>
       );
+    case "catalog":
+      return (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0284C7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="3" y="3" width="7" height="7" />
+          <rect x="14" y="3" width="7" height="7" />
+          <rect x="14" y="14" width="7" height="7" />
+          <rect x="3" y="14" width="7" height="7" />
+        </svg>
+      );
+    case "credit-card":
+      return (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+          <line x1="1" y1="10" x2="23" y2="10" />
+        </svg>
+      );
     default:
       return (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -100,10 +157,37 @@ function AppIcon({ icon }: { icon: string }) {
   }
 }
 
-export function AppStoreClient({ overview, canEdit }: Props) {
+export function AppStoreClient({
+  overview,
+  canEdit,
+  storeSettings,
+  integrations,
+  webhookTokens,
+  origin,
+  storeSubdomain,
+  initialOpen,
+}: Props) {
   const [category, setCategory] = useState<AppCategory | "ALL">("ALL");
   const [search, setSearch] = useState("");
+  const [activeModal, setActiveModal] = useState<string | null>(initialOpen ?? null);
 
+  // Modal form states
+  const [copiedFeed, setCopiedFeed] = useState(false);
+  const [copiedWebhook, setCopiedWebhook] = useState(false);
+  const [formMsg, setFormMsg] = useState<{ ok?: boolean; error?: string } | null>(null);
+  const [testResult, setTestResult] = useState<{ ok?: boolean; error?: string } | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  // Close modal on Escape key
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setActiveModal(null);
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  // Filter apps
   const filteredApps = useMemo(() => {
     return overview.apps.filter((app) => {
       const matchCat = category === "ALL" || app.category === category;
@@ -126,9 +210,20 @@ export function AppStoreClient({ overview, canEdit }: Props) {
     return map;
   }, [overview.apps]);
 
+  // Integration records helper
+  const getIntegration = (prov: string, mode: "TEST" | "LIVE" = "LIVE") =>
+    integrations.find((i) => i.provider === prov && i.mode === mode);
+
+  // Active App item
+  const currentApp = useMemo(() => {
+    return overview.apps.find((a) => a.key === activeModal);
+  }, [overview.apps, activeModal]);
+
+  const liveFeedUrl = `${origin}/api/catalog/facebook`;
+
   return (
     <div className="stack" style={{ gap: 20 }}>
-      {/* 1. Header Overview & Plan Allowance */}
+      {/* 1. Header Overview & Ecosystem Status */}
       <div
         className="card"
         style={{
@@ -143,7 +238,7 @@ export function AppStoreClient({ overview, canEdit }: Props) {
       >
         <div>
           <div style={{ fontSize: 13, fontWeight: 600, color: "var(--primary, #6366f1)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            Store Ecosystem
+            Unified Ecosystem
           </div>
           <div style={{ fontSize: 20, fontWeight: 700, marginTop: 2 }}>
             {overview.totalActive} Apps & Integrations Active
@@ -151,15 +246,12 @@ export function AppStoreClient({ overview, canEdit }: Props) {
           <div className="muted" style={{ fontSize: 13.5, marginTop: 4 }}>
             {overview.allowance == null
               ? "All premium addons unlocked on Business Plan."
-              : `${overview.usedAddons} of ${overview.allowance} premium addons currently active on ${overview.planTier} Plan.`}
+              : `${overview.usedAddons} of ${overview.allowance} premium addons active on ${overview.planTier} Plan.`}
           </div>
         </div>
         <div className="row" style={{ gap: 8 }}>
           <Link href="/billing" className="btn btn-secondary btn-sm" prefetch={false}>
-            Upgrade Plan
-          </Link>
-          <Link href="/settings/integrations" className="btn btn-secondary btn-sm" prefetch={false}>
-            Manage Keys
+            Plans & Billing
           </Link>
         </div>
       </div>
@@ -171,7 +263,7 @@ export function AppStoreClient({ overview, canEdit }: Props) {
             <input
               type="search"
               className="input"
-              placeholder="Search apps by name, courier, or keyword (e.g. Facebook, Steadfast, Loyalty)..."
+              placeholder="Search apps by name, courier, or keyword (e.g. Facebook, Steadfast, Loyalty, WhatsApp)..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               aria-label="Search apps"
@@ -268,9 +360,26 @@ export function AppStoreClient({ overview, canEdit }: Props) {
                       </div>
                       <div>
                         <div style={{ fontWeight: 700, fontSize: 15, lineHeight: 1.25 }}>
-                          <Link href={`/settings/apps/${app.key}`} className="link" prefetch={false} style={{ color: "inherit", textDecoration: "none" }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormMsg(null);
+                              setTestResult(null);
+                              setActiveModal(app.key);
+                            }}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              padding: 0,
+                              font: "inherit",
+                              fontWeight: 700,
+                              color: "inherit",
+                              cursor: "pointer",
+                              textAlign: "left",
+                            }}
+                          >
                             {app.label}
-                          </Link>
+                          </button>
                         </div>
                         <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>
                           {app.categoryLabel}
@@ -343,9 +452,17 @@ export function AppStoreClient({ overview, canEdit }: Props) {
                         Upgrade
                       </Link>
                     ) : app.built ? (
-                      <Link href={app.configureHref} className="btn btn-primary btn-sm" prefetch={false}>
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={() => {
+                          setFormMsg(null);
+                          setTestResult(null);
+                          setActiveModal(app.key);
+                        }}
+                      >
                         {isInstalled ? "Configure" : "Set Up"}
-                      </Link>
+                      </button>
                     ) : (
                       <span className="muted" style={{ fontSize: 12 }}>
                         Soon
@@ -356,6 +473,1116 @@ export function AppStoreClient({ overview, canEdit }: Props) {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* 4. MODAL OVERLAY SYSTEM */}
+      {activeModal && currentApp && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.55)",
+            backdropFilter: "blur(4px)",
+            padding: 16,
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setActiveModal(null);
+          }}
+        >
+          <div
+            className="card"
+            style={{
+              width: "100%",
+              maxWidth: 640,
+              maxHeight: "90vh",
+              overflowY: "auto",
+              boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
+              border: "1px solid var(--border, #e5e7eb)",
+              padding: 0,
+              position: "relative",
+            }}
+          >
+            {/* Modal Header */}
+            <div
+              style={{
+                padding: "20px 24px",
+                borderBottom: "1px solid var(--border, #e5e7eb)",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                background: "var(--bg-subtle, #f9fafb)",
+              }}
+            >
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <div
+                  style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: 8,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "#fff",
+                    border: "1px solid var(--border, #e5e7eb)",
+                    flexShrink: 0,
+                  }}
+                >
+                  <AppIcon icon={currentApp.icon} />
+                </div>
+                <div>
+                  <h2 id="modal-title" style={{ fontSize: 17, fontWeight: 700, margin: 0, lineHeight: 1.2 }}>
+                    {currentApp.label}
+                  </h2>
+                  <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>
+                    {currentApp.categoryLabel}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => setActiveModal(null)}
+                aria-label="Close dialog"
+                style={{ padding: "4px 10px", fontSize: 15 }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div style={{ padding: "24px" }} className="stack">
+              {formMsg?.ok && (
+                <div className="notice good" role="status" style={{ marginBottom: 16 }}>
+                  Configuration saved successfully.
+                </div>
+              )}
+              {formMsg?.error && (
+                <div className="notice bad" role="alert" style={{ marginBottom: 16 }}>
+                  {formMsg.error}
+                </div>
+              )}
+              {testResult && (
+                <div className={`notice ${testResult.ok ? "good" : "bad"}`} style={{ marginBottom: 16 }}>
+                  {testResult.ok ? "✓ Connection test successful! Keys verified." : `✕ Connection test failed: ${testResult.error}`}
+                </div>
+              )}
+
+              {/* SPECIFIC APP MODAL BODIES */}
+
+              {/* 1. FACEBOOK CATALOG */}
+              {activeModal === "facebook_catalog" && (
+                <div className="stack" style={{ gap: 16 }}>
+                  <p style={{ fontSize: 14, lineHeight: 1.5 }}>
+                    Your store generates an automated live XML/RSS catalog product feed in official Meta Commerce format. Use this feed for Facebook Dynamic Product Ads (DPA) and Instagram Shopping.
+                  </p>
+
+                  <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 16 }}>
+                    <label style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                      Live Product Feed URL
+                    </label>
+                    <div className="row" style={{ marginTop: 6, gap: 8 }}>
+                      <input
+                        type="text"
+                        readOnly
+                        value={liveFeedUrl}
+                        className="input"
+                        style={{ flex: 1, fontFamily: "monospace", fontSize: 13, background: "#fff" }}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => {
+                          navigator.clipboard.writeText(liveFeedUrl);
+                          setCopiedFeed(true);
+                          setTimeout(() => setCopiedFeed(false), 2500);
+                        }}
+                      >
+                        {copiedFeed ? "Copied! ✓" : "Copy URL"}
+                      </button>
+                      <a
+                        href={liveFeedUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-secondary"
+                      >
+                        Verify XML ↗
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="card" style={{ border: "1px solid rgba(6, 104, 225, 0.2)", background: "rgba(6, 104, 225, 0.03)" }}>
+                    <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "#0668E1" }}>
+                      Meta Commerce Manager Setup Guide:
+                    </h4>
+                    <ol style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.6 }}>
+                      <li>Open <b>Meta Commerce Manager</b> and select your Catalog.</li>
+                      <li>Go to <b>Catalog &gt; Data Sources</b> and click <b>Add Products</b>.</li>
+                      <li>Select <b>Data Feed (Scheduled Feed)</b> and set update frequency to <b>Hourly or Daily</b>.</li>
+                      <li>Paste the copied live feed URL above into the feed address field and click <b>Save</b>.</li>
+                    </ol>
+                  </div>
+                </div>
+              )}
+
+              {/* 2. STEADFAST COURIER */}
+              {activeModal === "steadfast_courier" && (() => {
+                const row = getIntegration("STEADFAST", "LIVE");
+                const webhookUrl = webhookTokens.STEADFAST ? `${origin}/api/webhooks/courier/${webhookTokens.STEADFAST}` : null;
+
+                return (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const fd = new FormData(e.currentTarget);
+                      startTransition(async () => {
+                        const res = await saveCourierAction("STEADFAST", "LIVE", {
+                          apiKey: String(fd.get("apiKey") ?? ""),
+                          secretKey: String(fd.get("secretKey") ?? ""),
+                          baseUrl: String(fd.get("baseUrl") ?? ""),
+                        });
+                        setFormMsg(res);
+                      });
+                    }}
+                    className="stack"
+                    style={{ gap: 14 }}
+                  >
+                    <p style={{ fontSize: 13.5 }}>
+                      Connect your Steadfast / Packzy account for 1-click order booking, real-time balance inquiries, and cross-merchant fraud rate checks.
+                    </p>
+
+                    <div>
+                      <label className="label">API Key</label>
+                      <input
+                        type="text"
+                        name="apiKey"
+                        placeholder={row?.secretsSet?.apiKey ? "•••••••••••• (Leave blank to keep saved)" : "Enter Steadfast Api-Key"}
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="label">Secret Key</label>
+                      <input
+                        type="password"
+                        name="secretKey"
+                        placeholder={row?.secretsSet?.secretKey ? "•••••••••••• (Leave blank to keep saved)" : "Enter Steadfast Secret-Key"}
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="label">API Base URL (Optional)</label>
+                      <input
+                        type="text"
+                        name="baseUrl"
+                        defaultValue={row?.config?.baseUrl ?? "https://portal.packzy.com/api/v1"}
+                        className="input"
+                        style={{ width: "100%", fontFamily: "monospace", fontSize: 13 }}
+                      />
+                      <span className="muted" style={{ fontSize: 12 }}>
+                        Default: https://portal.packzy.com/api/v1
+                      </span>
+                    </div>
+
+                    {webhookUrl && (
+                      <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 12 }}>
+                        <label style={{ fontSize: 12, fontWeight: 600 }}>Steadfast Webhook URL</label>
+                        <div className="row" style={{ marginTop: 4, gap: 8 }}>
+                          <input
+                            type="text"
+                            readOnly
+                            value={webhookUrl}
+                            className="input"
+                            style={{ flex: 1, fontFamily: "monospace", fontSize: 12, background: "#fff" }}
+                          />
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => {
+                              navigator.clipboard.writeText(webhookUrl);
+                              setCopiedWebhook(true);
+                              setTimeout(() => setCopiedWebhook(false), 2500);
+                            }}
+                          >
+                            {copiedWebhook ? "Copied! ✓" : "Copy"}
+                          </button>
+                        </div>
+                        <span className="muted" style={{ fontSize: 11.5, marginTop: 4, display: "block" }}>
+                          Paste this in your Steadfast merchant portal under API Webhook settings.
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        disabled={isPending || !row?.secretsSet?.apiKey}
+                        onClick={() => {
+                          startTransition(async () => {
+                            const res = await testCourierAction("STEADFAST", "LIVE");
+                            setTestResult(res);
+                          });
+                        }}
+                      >
+                        {isPending ? "Testing…" : "Test Connection"}
+                      </button>
+
+                      <button type="submit" className="btn btn-primary" disabled={isPending}>
+                        {isPending ? "Saving…" : "Save Steadfast Keys"}
+                      </button>
+                    </div>
+                  </form>
+                );
+              })()}
+
+              {/* 3. PATHAO COURIER */}
+              {activeModal === "pathao_courier" && (() => {
+                const row = getIntegration("PATHAO", "LIVE");
+                const webhookUrl = webhookTokens.PATHAO ? `${origin}/api/webhooks/courier/${webhookTokens.PATHAO}` : null;
+
+                return (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const fd = new FormData(e.currentTarget);
+                      startTransition(async () => {
+                        const res = await saveCourierAction("PATHAO", "LIVE", {
+                          clientId: String(fd.get("clientId") ?? ""),
+                          clientSecret: String(fd.get("clientSecret") ?? ""),
+                          username: String(fd.get("username") ?? ""),
+                          password: String(fd.get("password") ?? ""),
+                          storeId: String(fd.get("storeId") ?? ""),
+                          baseUrl: String(fd.get("baseUrl") ?? ""),
+                        });
+                        setFormMsg(res);
+                      });
+                    }}
+                    className="stack"
+                    style={{ gap: 14 }}
+                  >
+                    <p style={{ fontSize: 13.5 }}>
+                      Official Pathao Hermes API integration. Automates parcel creation, city/zone routing, and dynamic rate estimates.
+                    </p>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                      <div>
+                        <label className="label">Client ID</label>
+                        <input
+                          type="text"
+                          name="clientId"
+                          placeholder={row?.secretsSet?.clientId ? "•••••• (Saved)" : "Pathao Client ID"}
+                          className="input"
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                      <div>
+                        <label className="label">Client Secret</label>
+                        <input
+                          type="password"
+                          name="clientSecret"
+                          placeholder={row?.secretsSet?.clientSecret ? "•••••• (Saved)" : "Pathao Client Secret"}
+                          className="input"
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                      <div>
+                        <label className="label">Username (Email)</label>
+                        <input
+                          type="text"
+                          name="username"
+                          placeholder={row?.secretsSet?.username ? "•••••• (Saved)" : "merchant@pathao.com"}
+                          className="input"
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                      <div>
+                        <label className="label">Password</label>
+                        <input
+                          type="password"
+                          name="password"
+                          placeholder={row?.secretsSet?.password ? "•••••• (Saved)" : "Password"}
+                          className="input"
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="label">Pickup Store ID</label>
+                      <input
+                        type="text"
+                        name="storeId"
+                        defaultValue={row?.config?.storeId ?? ""}
+                        placeholder="Pathao store ID (e.g. 12345)"
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+
+                    {webhookUrl && (
+                      <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 12 }}>
+                        <label style={{ fontSize: 12, fontWeight: 600 }}>Pathao Webhook URL</label>
+                        <div className="row" style={{ marginTop: 4, gap: 8 }}>
+                          <input
+                            type="text"
+                            readOnly
+                            value={webhookUrl}
+                            className="input"
+                            style={{ flex: 1, fontFamily: "monospace", fontSize: 12, background: "#fff" }}
+                          />
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => {
+                              navigator.clipboard.writeText(webhookUrl);
+                              setCopiedWebhook(true);
+                              setTimeout(() => setCopiedWebhook(false), 2500);
+                            }}
+                          >
+                            {copiedWebhook ? "Copied! ✓" : "Copy"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        disabled={isPending || !row?.secretsSet?.clientId}
+                        onClick={() => {
+                          startTransition(async () => {
+                            const res = await testCourierAction("PATHAO", "LIVE");
+                            setTestResult(res);
+                          });
+                        }}
+                      >
+                        {isPending ? "Testing…" : "Test Connection"}
+                      </button>
+
+                      <button type="submit" className="btn btn-primary" disabled={isPending}>
+                        {isPending ? "Saving…" : "Save Pathao Keys"}
+                      </button>
+                    </div>
+                  </form>
+                );
+              })()}
+
+              {/* 4. REDX COURIER */}
+              {activeModal === "redx_courier" && (() => {
+                const row = getIntegration("REDX", "LIVE");
+
+                return (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const fd = new FormData(e.currentTarget);
+                      startTransition(async () => {
+                        const res = await saveCourierAction("REDX", "LIVE", {
+                          accessToken: String(fd.get("accessToken") ?? ""),
+                          pickupStoreId: String(fd.get("pickupStoreId") ?? ""),
+                          baseUrl: String(fd.get("baseUrl") ?? ""),
+                        });
+                        setFormMsg(res);
+                      });
+                    }}
+                    className="stack"
+                    style={{ gap: 14 }}
+                  >
+                    <p style={{ fontSize: 13.5 }}>
+                      RedX OpenAPI integration for parcel creation, tracking, and pickup store synchronization.
+                    </p>
+
+                    <div>
+                      <label className="label">API Access Token</label>
+                      <input
+                        type="password"
+                        name="accessToken"
+                        placeholder={row?.secretsSet?.accessToken ? "•••••••••••• (Leave blank to keep saved)" : "Enter RedX API Token"}
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="label">Pickup Store ID (Optional)</label>
+                      <input
+                        type="text"
+                        name="pickupStoreId"
+                        defaultValue={row?.config?.pickupStoreId ?? ""}
+                        placeholder="e.g. 123"
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+
+                    <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        disabled={isPending || !row?.secretsSet?.accessToken}
+                        onClick={() => {
+                          startTransition(async () => {
+                            const res = await testCourierAction("REDX", "LIVE");
+                            setTestResult(res);
+                          });
+                        }}
+                      >
+                        {isPending ? "Testing…" : "Test Connection"}
+                      </button>
+
+                      <button type="submit" className="btn btn-primary" disabled={isPending}>
+                        {isPending ? "Saving…" : "Save RedX Keys"}
+                      </button>
+                    </div>
+                  </form>
+                );
+              })()}
+
+              {/* 5. META PIXEL & CAPI */}
+              {activeModal === "meta_pixel_capi" && (() => {
+                const capi = getIntegration("META_CAPI", "LIVE");
+
+                return (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const fd = new FormData(e.currentTarget);
+                      startTransition(async () => {
+                        const res = await saveTrackingPixelsAction({
+                          metaPixelId: String(fd.get("metaPixelId") ?? ""),
+                          capiAccessToken: String(fd.get("capiAccessToken") ?? ""),
+                          metaDomainVerification: String(fd.get("metaDomainVerification") ?? ""),
+                        });
+                        setFormMsg(res);
+                      });
+                    }}
+                    className="stack"
+                    style={{ gap: 14 }}
+                  >
+                    <div className="notice info" style={{ fontSize: 13 }}>
+                      <b>Direct Key Setup:</b> No Facebook App approval or Meta Business Verification required. Enter your Pixel ID and Access Token directly.
+                    </div>
+
+                    <div>
+                      <label className="label">Meta Pixel ID</label>
+                      <input
+                        type="text"
+                        name="metaPixelId"
+                        defaultValue={storeSettings?.metaPixelId ?? ""}
+                        placeholder="e.g. 123456789012345"
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                      <span className="muted" style={{ fontSize: 12 }}>
+                        Find this in Meta Events Manager &gt; Data Sources.
+                      </span>
+                    </div>
+
+                    <div>
+                      <label className="label">Conversions API (CAPI) Access Token</label>
+                      <input
+                        type="password"
+                        name="capiAccessToken"
+                        placeholder={capi?.secretsSet?.accessToken ? "•••••••••••• (Leave blank to keep saved)" : "EAAB..."}
+                        className="input"
+                        style={{ width: "100%", fontFamily: "monospace", fontSize: 13 }}
+                      />
+                      <span className="muted" style={{ fontSize: 12 }}>
+                        In Meta Events Manager &gt; Settings &gt; Set up directly &gt; Generate access token.
+                      </span>
+                    </div>
+
+                    <div>
+                      <label className="label">Meta Domain Verification Meta-Tag (Optional)</label>
+                      <input
+                        type="text"
+                        name="metaDomainVerification"
+                        defaultValue={storeSettings?.metaDomainVerification ?? ""}
+                        placeholder="e.g. abcdef0123456789"
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+
+                    <div style={{ marginTop: 8 }}>
+                      <button type="submit" className="btn btn-primary" disabled={isPending} style={{ width: "100%" }}>
+                        {isPending ? "Saving…" : "Save Meta Pixel & CAPI Settings"}
+                      </button>
+                    </div>
+                  </form>
+                );
+              })()}
+
+              {/* 6. GOOGLE ANALYTICS & TAG MANAGER */}
+              {activeModal === "google_analytics" && (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const fd = new FormData(e.currentTarget);
+                    startTransition(async () => {
+                      const res = await saveTrackingPixelsAction({
+                        googleAnalyticsId: String(fd.get("googleAnalyticsId") ?? ""),
+                        googleTagManagerId: String(fd.get("googleTagManagerId") ?? ""),
+                      });
+                      setFormMsg(res);
+                    });
+                  }}
+                  className="stack"
+                  style={{ gap: 14 }}
+                >
+                  <div>
+                    <label className="label">Google Analytics 4 Measurement ID</label>
+                    <input
+                      type="text"
+                      name="googleAnalyticsId"
+                      defaultValue={storeSettings?.googleAnalyticsId ?? ""}
+                      placeholder="e.g. G-XXXXXXXXXX"
+                      className="input"
+                      style={{ width: "100%" }}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="label">Google Tag Manager Container ID</label>
+                    <input
+                      type="text"
+                      name="googleTagManagerId"
+                      defaultValue={storeSettings?.googleTagManagerId ?? ""}
+                      placeholder="e.g. GTM-XXXXXXX"
+                      className="input"
+                      style={{ width: "100%" }}
+                    />
+                  </div>
+
+                  <div style={{ marginTop: 8 }}>
+                    <button type="submit" className="btn btn-primary" disabled={isPending} style={{ width: "100%" }}>
+                      {isPending ? "Saving…" : "Save Google Tracking"}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* 7. TIKTOK PIXEL */}
+              {activeModal === "tiktok_pixel" && (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const fd = new FormData(e.currentTarget);
+                    startTransition(async () => {
+                      const res = await saveTrackingPixelsAction({
+                        tiktokPixelId: String(fd.get("tiktokPixelId") ?? ""),
+                      });
+                      setFormMsg(res);
+                    });
+                  }}
+                  className="stack"
+                  style={{ gap: 14 }}
+                >
+                  <div>
+                    <label className="label">TikTok Pixel ID</label>
+                    <input
+                      type="text"
+                      name="tiktokPixelId"
+                      defaultValue={storeSettings?.tiktokPixelId ?? ""}
+                      placeholder="e.g. CXXXXXXXXXXXXXXX"
+                      className="input"
+                      style={{ width: "100%" }}
+                    />
+                  </div>
+
+                  <div style={{ marginTop: 8 }}>
+                    <button type="submit" className="btn btn-primary" disabled={isPending} style={{ width: "100%" }}>
+                      {isPending ? "Saving…" : "Save TikTok Pixel"}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* 8. STOREFRONT WHATSAPP FLOATING CHAT WIDGET */}
+              {activeModal === "whatsapp_widget" && (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const fd = new FormData(e.currentTarget);
+                    startTransition(async () => {
+                      const res = await saveWhatsAppWidgetAction({
+                        whatsappNumber: String(fd.get("whatsappNumber") ?? ""),
+                      });
+                      setFormMsg(res);
+                    });
+                  }}
+                  className="stack"
+                  style={{ gap: 16 }}
+                >
+                  <p style={{ fontSize: 13.5, lineHeight: 1.5 }}>
+                    Show a clean floating WhatsApp button in the corner of your storefront. When shoppers click, it instantly opens WhatsApp with your number ready to chat.
+                  </p>
+
+                  <div>
+                    <label className="label">WhatsApp Mobile Number</label>
+                    <input
+                      type="text"
+                      name="whatsappNumber"
+                      defaultValue={storeSettings?.whatsappNumber ?? ""}
+                      placeholder="e.g. 01712345678 (Leave blank to hide widget)"
+                      className="input"
+                      style={{ width: "100%", fontSize: 15 }}
+                    />
+                    <span className="muted" style={{ fontSize: 12 }}>
+                      Supports all Bangladeshi mobile numbers (Grameenphone, Banglalink, Robi, Teletalk).
+                    </span>
+                  </div>
+
+                  {/* Visual preview */}
+                  <div
+                    className="card"
+                    style={{
+                      background: "var(--bg-subtle, #f9fafb)",
+                      padding: 16,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 700 }}>Storefront Floating Button Preview</div>
+                      <div className="muted" style={{ fontSize: 12 }}>Positioned at bottom right of all store pages.</div>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        background: "#25D366",
+                        color: "#fff",
+                        padding: "8px 14px",
+                        borderRadius: 9999,
+                        fontWeight: 600,
+                        fontSize: 13,
+                        boxShadow: "0 4px 12px rgba(37, 211, 102, 0.4)",
+                      }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                        <path d="M12 2C6.48 2 2 6.48 2 12C2 13.85 2.5 15.58 3.39 17.07L2.05 22L7.11 20.68C8.55 21.52 10.22 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM17.04 16.47C16.83 17.06 15.82 17.61 15.34 17.68C14.86 17.75 14.24 17.77 12.28 16.96C9.77 15.93 8.16 13.38 8.03 13.21C7.91 13.04 7.02 11.86 7.02 10.63C7.02 9.4 7.65 8.8 7.88 8.55C8.11 8.3 8.41 8.24 8.58 8.24C8.75 8.24 8.92 8.24 9.06 8.25C9.21 8.26 9.41 8.2 9.61 8.68C9.82 9.19 10.32 10.42 10.38 10.55C10.44 10.68 10.49 10.84 10.39 11.02C10.3 11.2 10.22 11.3 10.08 11.46C9.94 11.62 9.79 11.81 9.67 11.95C9.53 12.1 9.38 12.26 9.55 12.55C9.72 12.84 10.31 13.8 11.17 14.57C12.28 15.56 13.19 15.87 13.51 16C13.83 16.13 14.02 16.1 14.21 15.88C14.4 15.66 14.88 15.09 15.07 14.81C15.26 14.53 15.45 14.57 15.72 14.67C15.99 14.77 17.43 15.48 17.72 15.63C18.01 15.78 18.2 15.85 18.27 15.97C18.34 16.09 18.34 16.66 17.04 16.47Z" />
+                      </svg>
+                      <span>WhatsApp</span>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: 8 }}>
+                    <button type="submit" className="btn btn-primary" disabled={isPending} style={{ width: "100%" }}>
+                      {isPending ? "Saving…" : "Save WhatsApp Widget"}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* 9. LOYALTY & VIP TIERS */}
+              {activeModal === "loyalty_vip" && (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const fd = new FormData(e.currentTarget);
+                    startTransition(async () => {
+                      const res = await saveLoyaltyAction({
+                        enabled: fd.get("enabled") === "on",
+                        referralEnabled: fd.get("referralEnabled") === "on",
+                        spendPerPoint: Number(fd.get("spendPerPoint") ?? 100),
+                        pointsPerBlock: Number(fd.get("pointsPerBlock") ?? 10),
+                        bdtPerBlock: Number(fd.get("bdtPerBlock") ?? 10),
+                        maxCartPercent: Number(fd.get("maxCartPercent") ?? 30),
+                        refereeDiscount: Number(fd.get("refereeDiscount") ?? 50),
+                        refereeMinCart: Number(fd.get("refereeMinCart") ?? 500),
+                        referrerReward: Number(fd.get("referrerReward") ?? 100),
+                        vipSilverMin: Number(fd.get("vipSilverMin") ?? 5000),
+                        vipGoldMin: Number(fd.get("vipGoldMin") ?? 15000),
+                        vipPlatinumMin: Number(fd.get("vipPlatinumMin") ?? 35000),
+                        vipGoldDiscount: Number(fd.get("vipGoldDiscount") ?? 5),
+                        vipPlatinumDiscount: Number(fd.get("vipPlatinumDiscount") ?? 10),
+                        expiryMonths: Number(fd.get("expiryMonths") ?? 0),
+                        birthdayVoucher: Number(fd.get("birthdayVoucher") ?? 100),
+                      });
+                      setFormMsg(res);
+                    });
+                  }}
+                  className="stack"
+                  style={{ gap: 16 }}
+                >
+                  <div className="card" style={{ background: "rgba(124, 58, 237, 0.04)", border: "1px solid rgba(124, 58, 237, 0.2)", padding: 14 }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontWeight: 700, fontSize: 15 }}>
+                      <input
+                        type="checkbox"
+                        name="enabled"
+                        defaultChecked={storeSettings?.loyaltyEnabled ?? false}
+                        style={{ width: 18, height: 18 }}
+                      />
+                      <span>Enable Loyalty Reward Points at Checkout</span>
+                    </label>
+                    <p className="muted" style={{ margin: "6px 0 0", fontSize: 13 }}>
+                      When turned on, shoppers earn points on delivered orders and can redeem them for cash discounts at checkout.
+                    </p>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                    <div>
+                      <label className="label">Spend per 1 Point (BDT)</label>
+                      <input
+                        type="number"
+                        name="spendPerPoint"
+                        defaultValue={storeSettings?.loyaltySpendPerPoint ?? 100}
+                        min={1}
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                      <span className="muted" style={{ fontSize: 12 }}>Default: ৳100 = 1 point</span>
+                    </div>
+
+                    <div>
+                      <label className="label">Points Redemption Rate</label>
+                      <input
+                        type="number"
+                        name="bdtPerBlock"
+                        defaultValue={storeSettings?.loyaltyBdtPerBlock ?? 10}
+                        min={1}
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                      <input type="hidden" name="pointsPerBlock" value={10} />
+                      <span className="muted" style={{ fontSize: 12 }}>10 points = ৳10 discount</span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                    <div>
+                      <label className="label">Max Cart % Points Can Pay</label>
+                      <input
+                        type="number"
+                        name="maxCartPercent"
+                        defaultValue={storeSettings?.loyaltyMaxCartPercent ?? 30}
+                        min={1}
+                        max={100}
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                      <span className="muted" style={{ fontSize: 12 }}>Default: 30% of cart</span>
+                    </div>
+
+                    <div>
+                      <label className="label">Points Expiry (Months)</label>
+                      <input
+                        type="number"
+                        name="expiryMonths"
+                        defaultValue={storeSettings?.loyaltyExpiryMonths ?? 0}
+                        min={0}
+                        max={60}
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                      <span className="muted" style={{ fontSize: 12 }}>0 = Never expire</span>
+                    </div>
+                  </div>
+
+                  <div className="card" style={{ padding: 14 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 8 }}>VIP Tier Thresholds (12-Month Spend)</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+                      <div>
+                        <label className="label" style={{ fontSize: 12 }}>Silver Min (৳)</label>
+                        <input
+                          type="number"
+                          name="vipSilverMin"
+                          defaultValue={storeSettings?.vipSilverMin ?? 5000}
+                          className="input"
+                          style={{ width: "100%", fontSize: 13 }}
+                        />
+                        <span className="muted" style={{ fontSize: 11 }}>1.25x points</span>
+                      </div>
+                      <div>
+                        <label className="label" style={{ fontSize: 12 }}>Gold Min (৳)</label>
+                        <input
+                          type="number"
+                          name="vipGoldMin"
+                          defaultValue={storeSettings?.vipGoldMin ?? 15000}
+                          className="input"
+                          style={{ width: "100%", fontSize: 13 }}
+                        />
+                        <input type="hidden" name="vipGoldDiscount" value={storeSettings?.vipGoldDiscount ?? 5} />
+                        <span className="muted" style={{ fontSize: 11 }}>1.5x pts + 5% off</span>
+                      </div>
+                      <div>
+                        <label className="label" style={{ fontSize: 12 }}>Platinum Min (৳)</label>
+                        <input
+                          type="number"
+                          name="vipPlatinumMin"
+                          defaultValue={storeSettings?.vipPlatinumMin ?? 35000}
+                          className="input"
+                          style={{ width: "100%", fontSize: 13 }}
+                        />
+                        <input type="hidden" name="vipPlatinumDiscount" value={storeSettings?.vipPlatinumDiscount ?? 10} />
+                        <span className="muted" style={{ fontSize: 11 }}>2x + 10% + Free Ship</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="card" style={{ padding: 14 }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontWeight: 700, fontSize: 14 }}>
+                      <input
+                        type="checkbox"
+                        name="referralEnabled"
+                        defaultChecked={storeSettings?.referralEnabled ?? false}
+                        style={{ width: 16, height: 16 }}
+                      />
+                      <span>Refer-a-Friend Viral Discounts</span>
+                    </label>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 10 }}>
+                      <div>
+                        <label className="label" style={{ fontSize: 12 }}>Friend Gets Off (৳)</label>
+                        <input
+                          type="number"
+                          name="refereeDiscount"
+                          defaultValue={storeSettings?.refereeDiscountBdt ?? 50}
+                          className="input"
+                          style={{ width: "100%", fontSize: 13 }}
+                        />
+                      </div>
+                      <div>
+                        <label className="label" style={{ fontSize: 12 }}>Referrer Earns (Pts)</label>
+                        <input
+                          type="number"
+                          name="referrerReward"
+                          defaultValue={storeSettings?.referrerRewardPoints ?? 100}
+                          className="input"
+                          style={{ width: "100%", fontSize: 13 }}
+                        />
+                      </div>
+                    </div>
+                    <input type="hidden" name="refereeMinCart" value={storeSettings?.refereeMinCartBdt ?? 500} />
+                    <input type="hidden" name="birthdayVoucher" value={storeSettings?.birthdayVoucherBdt ?? 100} />
+                  </div>
+
+                  <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+                    <Link href="/marketing/loyalty" className="link" prefetch={false} style={{ fontSize: 13 }}>
+                      View Customer Points Ledger & Leaderboard →
+                    </Link>
+                    <button type="submit" className="btn btn-primary" disabled={isPending}>
+                      {isPending ? "Saving…" : "Save Loyalty Settings"}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* 10. UNIFIED FRAUD SHIELD */}
+              {activeModal === "fraud_shield" && (
+                <div className="stack" style={{ gap: 16 }}>
+                  <p style={{ fontSize: 13.5, lineHeight: 1.5 }}>
+                    Unified multi-layer defense engine protects your store from fake cash-on-delivery orders and return parcel charges.
+                  </p>
+
+                  <div className="card" style={{ background: "rgba(5, 150, 105, 0.05)", border: "1px solid rgba(5, 150, 105, 0.2)", padding: 16 }}>
+                    <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "#059669" }}>
+                      Active Risk Formula (0 - 100 Score):
+                    </h4>
+                    <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13, lineHeight: 1.6 }}>
+                      <li><b>50% Weight:</b> Verified Steadfast courier delivery completion percentage.</li>
+                      <li><b>30% Weight:</b> Cross-merchant BizTrack platform trust network.</li>
+                      <li><b>20% Weight:</b> Repeat customer order history on your store.</li>
+                    </ul>
+                  </div>
+
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <Link href="/fraud" className="btn btn-primary" style={{ flex: 1, textAlign: "center" }} prefetch={false}>
+                      Go to Fraud & Risk Panel →
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+              {/* 11. SMS GATEWAY AGGREGATOR */}
+              {activeModal === "sms_alerts" && (() => {
+                const row = getIntegration("SMS_BYO", "LIVE");
+
+                return (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const fd = new FormData(e.currentTarget);
+                      startTransition(async () => {
+                        const res = await saveSmsGatewayAction({
+                          apiKey: String(fd.get("apiKey") ?? ""),
+                          senderId: String(fd.get("senderId") ?? ""),
+                          provider: String(fd.get("provider") ?? "greenweb"),
+                        });
+                        setFormMsg(res);
+                      });
+                    }}
+                    className="stack"
+                    style={{ gap: 14 }}
+                  >
+                    <p style={{ fontSize: 13.5 }}>
+                      Send transactional SMS order confirmation and status updates using your own Greenweb, Reve, or Elitbuzz account.
+                    </p>
+
+                    <div>
+                      <label className="label">SMS Aggregator Provider</label>
+                      <select name="provider" defaultValue={row?.config?.provider ?? "greenweb"} className="input" style={{ width: "100%" }}>
+                        <option value="greenweb">Greenweb SMS</option>
+                        <option value="reve">Reve Systems SMS</option>
+                        <option value="elitbuzz">Elitbuzz Technologies</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="label">API Key / Token</label>
+                      <input
+                        type="password"
+                        name="apiKey"
+                        placeholder={row?.secretsSet?.apiKey ? "•••••••••••• (Leave blank to keep saved)" : "Enter SMS API token"}
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="label">Sender ID (Masking Name, Optional)</label>
+                      <input
+                        type="text"
+                        name="senderId"
+                        defaultValue={row?.config?.senderId ?? ""}
+                        placeholder="e.g. BIZTRACK"
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+
+                    <div style={{ marginTop: 8 }}>
+                      <button type="submit" className="btn btn-primary" disabled={isPending} style={{ width: "100%" }}>
+                        {isPending ? "Saving…" : "Save SMS Gateway"}
+                      </button>
+                    </div>
+                  </form>
+                );
+              })()}
+
+              {/* 12. SSLCOMMERZ */}
+              {activeModal === "sslcommerz_pay" && (() => {
+                const row = getIntegration("SSLCOMMERZ", "LIVE");
+
+                return (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const fd = new FormData(e.currentTarget);
+                      startTransition(async () => {
+                        const res = await savePaymentGatewayAction("SSLCOMMERZ", "LIVE", {
+                          storeId: String(fd.get("storeId") ?? ""),
+                          storePassword: String(fd.get("storePassword") ?? ""),
+                        });
+                        setFormMsg(res);
+                      });
+                    }}
+                    className="stack"
+                    style={{ gap: 14 }}
+                  >
+                    <div>
+                      <label className="label">SSLCOMMERZ Store ID</label>
+                      <input
+                        type="text"
+                        name="storeId"
+                        defaultValue={row?.config?.storeId ?? ""}
+                        placeholder="Your Store ID"
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="label">Store Password</label>
+                      <input
+                        type="password"
+                        name="storePassword"
+                        placeholder={row?.secretsSet?.storePassword ? "•••••••••••• (Leave blank to keep saved)" : "Store password"}
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+
+                    <div style={{ marginTop: 8 }}>
+                      <button type="submit" className="btn btn-primary" disabled={isPending} style={{ width: "100%" }}>
+                        {isPending ? "Saving…" : "Save SSLCOMMERZ Keys"}
+                      </button>
+                    </div>
+                  </form>
+                );
+              })()}
+
+              {/* 13. UDDOKTAPAY */}
+              {activeModal === "uddoktapay_pay" && (() => {
+                const row = getIntegration("UDDOKTAPAY", "LIVE");
+
+                return (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const fd = new FormData(e.currentTarget);
+                      startTransition(async () => {
+                        const res = await savePaymentGatewayAction("UDDOKTAPAY", "LIVE", {
+                          apiKey: String(fd.get("apiKey") ?? ""),
+                          baseUrl: String(fd.get("baseUrl") ?? ""),
+                        });
+                        setFormMsg(res);
+                      });
+                    }}
+                    className="stack"
+                    style={{ gap: 14 }}
+                  >
+                    <div>
+                      <label className="label">UddoktaPay API Key</label>
+                      <input
+                        type="password"
+                        name="apiKey"
+                        placeholder={row?.secretsSet?.apiKey ? "•••••••••••• (Leave blank to keep saved)" : "Enter API Key"}
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="label">Base URL (Optional)</label>
+                      <input
+                        type="text"
+                        name="baseUrl"
+                        defaultValue={row?.config?.baseUrl ?? "https://pay.uddoktapay.com/api/checkout-v2"}
+                        className="input"
+                        style={{ width: "100%", fontFamily: "monospace", fontSize: 13 }}
+                      />
+                    </div>
+
+                    <div style={{ marginTop: 8 }}>
+                      <button type="submit" className="btn btn-primary" disabled={isPending} style={{ width: "100%" }}>
+                        {isPending ? "Saving…" : "Save UddoktaPay Keys"}
+                      </button>
+                    </div>
+                  </form>
+                );
+              })()}
+
+            </div>
+          </div>
         </div>
       )}
     </div>

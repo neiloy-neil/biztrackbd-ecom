@@ -105,7 +105,7 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
                 <span style={{ flexGrow: 1, letterSpacing: 2, color: "var(--ink-2, #4B4B73)" }}>
                   {c.capiConnected ? "••••••••••••••token" : "No token saved"}
                 </span>
-                <Link href="/settings/integrations" className="link" style={{ fontSize: 13, fontWeight: 700 }} prefetch={false}>
+                <Link href="/settings/apps?open=meta_pixel_capi" className="link" style={{ fontSize: 13, fontWeight: 700 }} prefetch={false}>
                   {c.capiConnected ? "Configure" : "Add Token"}
                 </Link>
               </div>

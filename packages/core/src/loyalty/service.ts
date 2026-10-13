@@ -42,6 +42,11 @@ export async function saveLoyaltySettings(tenantId: string, actor: StaffActor, i
   await withTenant(tenantId, async (tx) => {
     const before = await loadLoyaltySettings(tx);
     await tx.storeSettings.updateMany({ data });
+    await tx.tenantModule.upsert({
+      where: { tenantId_moduleKey: { tenantId, moduleKey: "loyalty" } },
+      create: { tenantId, moduleKey: "loyalty", isEnabled: data.loyaltyEnabled },
+      update: { isEnabled: data.loyaltyEnabled },
+    }).catch(() => {});
     await audit(tx, tenantId, actor, "loyalty.settings_changed", { from: before, to: data });
   });
 }

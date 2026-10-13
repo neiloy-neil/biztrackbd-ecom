@@ -97,7 +97,7 @@ export default async function ShipDesk({ searchParams }: { searchParams: Promise
             )}
             {canEdit && couriers.length === 0 && (
               <div className="stack">
-                <div className="notice">No courier is connected yet. <Link href="/settings/integrations" className="link" prefetch={false}>Connect Steadfast, Pathao or RedX</Link>, or write a tracking code yourself.</div>
+                <div className="notice">No courier is connected yet. <Link href="/settings/apps?open=steadfast_courier" className="link" prefetch={false}>Connect Steadfast, Pathao or RedX</Link>, or write a tracking code yourself.</div>
                 <form action={shipByHandAction.bind(null, o.id, nextId, o.orderNumber)} className="stack">
                   <label className="field" style={{ marginBottom: 0 }}><span className="label">Tracking code</span><input className="input" name="tracking" required maxLength={60} data-testid="ship-tracking" /></label>
                   <SubmitButton className="btn btn-primary btn-xl" pending="Saving…" data-testid="ship-byhand">Mark as shipped</SubmitButton>

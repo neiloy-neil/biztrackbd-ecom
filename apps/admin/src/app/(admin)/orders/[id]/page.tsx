@@ -247,7 +247,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               </form>
             )}
             {canBook && couriers.length === 0 && (
-              <div className="notice info" style={{ marginTop: 4 }}>Connect Steadfast, Pathao or RedX with your own keys to book parcels from here. <Link href="/settings/integrations" className="link" prefetch={false}>Add courier keys</Link></div>
+              <div className="notice info" style={{ marginTop: 4 }}>Connect Steadfast, Pathao or RedX with your own keys to book parcels from here. <Link href="/settings/apps?open=steadfast_courier" className="link" prefetch={false}>Add courier keys</Link></div>
             )}
             {canBook && (
               <details style={{ marginTop: 12 }} data-testid="manual-ship">

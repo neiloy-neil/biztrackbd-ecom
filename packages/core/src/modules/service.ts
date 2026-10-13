@@ -114,12 +114,11 @@ export async function listAppStoreCatalog(tenantId: string, actor: StaffActor): 
         };
       }
 
-      // 1. Couriers & Vault Integrations
+      // 1. Couriers & Logistics
       if (item.category === "COURIERS") {
         const prov = item.key === "steadfast_courier" ? "STEADFAST" : item.key === "pathao_courier" ? "PATHAO" : "REDX";
         const hasKeys = activeIntegrations.has(prov);
-        const active = hasKeys;
-        if (active) totalActive++;
+        if (hasKeys) totalActive++;
         return {
           ...item,
           status: hasKeys ? "ACTIVE" : "NEEDS_SETUP",
@@ -130,11 +129,11 @@ export async function listAppStoreCatalog(tenantId: string, actor: StaffActor): 
         };
       }
 
-      // 2. Marketing Pixels & CAPI
+      // 2. Marketing Pixels & Feeds
       if (item.category === "MARKETING") {
         let configured = false;
-        if (item.key === "meta_pixel_capi") configured = Boolean(storeSettings?.metaPixelId);
-        else if (item.key === "google_analytics") configured = Boolean(storeSettings?.googleAnalyticsId || storeSettings?.googleTagManagerId);
+        if (item.key === "meta_pixel_capi") configured = Boolean(storeSettings?.metaPixelId || activeIntegrations.has("META_CAPI"));
+        else if (item.key === "google_analytics") configured = Boolean(storeSettings?.googleAnalyticsId || storeSettings?.googleTagManagerId || activeIntegrations.has("GA4"));
         else if (item.key === "tiktok_pixel") configured = Boolean(storeSettings?.tiktokPixelId);
         else if (item.key === "facebook_catalog") configured = true; // Catalog feed is always ready at /api/catalog/facebook
 
@@ -149,11 +148,100 @@ export async function listAppStoreCatalog(tenantId: string, actor: StaffActor): 
         };
       }
 
-      // 3. Plan Addon Modules (Loyalty, Wholesale, WhatsApp)
+      // 3. Customer Growth & Retention (WhatsApp Widget, Loyalty, Abandoned Cart, Reviews)
+      if (item.category === "GROWTH") {
+        if (item.key === "whatsapp_widget") {
+          const isConfigured = Boolean(storeSettings?.whatsappNumber);
+          if (isConfigured) totalActive++;
+          return {
+            ...item,
+            status: isConfigured ? "ACTIVE" : "AVAILABLE",
+            statusLabel: isConfigured ? "Active" : "Available",
+            enabled: true,
+            configured: isConfigured,
+            blockedReason: null,
+          };
+        }
+        if (item.key === "loyalty_vip") {
+          const isConfigured = Boolean(storeSettings?.loyaltyEnabled);
+          if (isConfigured) totalActive++;
+          return {
+            ...item,
+            status: isConfigured ? "ACTIVE" : "AVAILABLE",
+            statusLabel: isConfigured ? "Active" : "Available",
+            enabled: true,
+            configured: isConfigured,
+            blockedReason: null,
+          };
+        }
+        totalActive++;
+        return {
+          ...item,
+          status: "ACTIVE",
+          statusLabel: "Active",
+          enabled: true,
+          configured: true,
+          blockedReason: null,
+        };
+      }
+
+      // 4. Automation & Protection (Fraud Shield, SMS Alerts)
+      if (item.category === "AUTOMATION") {
+        if (item.key === "sms_alerts") {
+          const hasKeys = activeIntegrations.has("SMS_BYO");
+          if (hasKeys) totalActive++;
+          return {
+            ...item,
+            status: hasKeys ? "ACTIVE" : "NEEDS_SETUP",
+            statusLabel: hasKeys ? "Connected" : "Setup Required",
+            enabled: true,
+            configured: hasKeys,
+            blockedReason: null,
+          };
+        }
+        totalActive++;
+        return {
+          ...item,
+          status: "ACTIVE",
+          statusLabel: "Active",
+          enabled: true,
+          configured: true,
+          blockedReason: null,
+        };
+      }
+
+      // 5. Commerce & Payments (SSLCOMMERZ, UddoktaPay, or Addons)
+      if (item.category === "COMMERCE") {
+        if (item.key === "sslcommerz_pay") {
+          const hasKeys = activeIntegrations.has("SSLCOMMERZ");
+          if (hasKeys) totalActive++;
+          return {
+            ...item,
+            status: hasKeys ? "ACTIVE" : "NEEDS_SETUP",
+            statusLabel: hasKeys ? "Connected" : "Setup Required",
+            enabled: true,
+            configured: hasKeys,
+            blockedReason: null,
+          };
+        }
+        if (item.key === "uddoktapay_pay") {
+          const hasKeys = activeIntegrations.has("UDDOKTAPAY");
+          if (hasKeys) totalActive++;
+          return {
+            ...item,
+            status: hasKeys ? "ACTIVE" : "NEEDS_SETUP",
+            statusLabel: hasKeys ? "Connected" : "Setup Required",
+            enabled: true,
+            configured: hasKeys,
+            blockedReason: null,
+          };
+        }
+      }
+
+      // 6. Generic Plan Addon Modules (Wholesale, Drops, Bespoke)
       if (item.tier === "ADDON") {
-        const modKey = item.key === "loyalty_vip" ? "loyalty" : item.key;
         const isPlanLocked = cap <= 0;
-        const enabled = cap > 0 && (moduleOn.get(modKey) ?? (item.key === "loyalty_vip"));
+        const enabled = cap > 0 && (moduleOn.get(item.key) ?? false);
 
         if (enabled) {
           usedAddons++;
@@ -174,7 +262,6 @@ export async function listAppStoreCatalog(tenantId: string, actor: StaffActor): 
         };
       }
 
-      // 4. Automation & Other Included Apps (Fraud Shield, Abandoned Cart, SMS)
       totalActive++;
       return {
         ...item,

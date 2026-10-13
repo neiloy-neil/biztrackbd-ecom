@@ -137,8 +137,8 @@ export default async function AppDetailPage({
             </div>
             <p className="muted" style={{ fontSize: 13.5, lineHeight: 1.5 }}>
               For developer webhooks and advanced settings, visit{" "}
-              <Link href="/settings/integrations" className="link" prefetch={false}>
-                Settings &gt; Integrations
+              <Link href="/settings/apps" className="link" prefetch={false}>
+                Settings &gt; Apps &amp; Integrations
               </Link>
               .
             </p>

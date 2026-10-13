@@ -8,6 +8,7 @@ import { ReferralBanner } from "@/components/referral-banner";
 import { DemoRibbon } from "@/components/demo-ribbon";
 import { PausedBanner } from "@/components/paused-notice";
 import { StorefrontTracker } from "@/components/tracker";
+import { WhatsAppFloatingButton } from "@/components/whatsapp-floating-button";
 import { getLang, makeT } from "@/lib/i18n";
 import { getOrigin } from "@/lib/origin";
 import { getCustomerSession } from "@/lib/session";
@@ -61,6 +62,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
       <Header info={info} categories={categories} lang={lang} t={t} points={points} chrome={chrome} />
       <main id="main">{children}</main>
       <Footer info={info} categories={categories} lang={lang} t={t} pages={footerPages} hasBlog={blog.total > 0} chrome={chrome} />
+      <WhatsAppFloatingButton whatsappNumber={info.whatsappNumber} />
     </CartProvider>
   );
 }

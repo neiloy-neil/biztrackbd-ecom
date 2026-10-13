@@ -16,7 +16,7 @@ const SETUP: Record<SetupStep["key"], { label: string; href: string }> = {
   details: { label: "Set your store name and phone", href: "/settings/store" },
   payments: { label: "Choose how customers pay", href: "/settings/payments" },
   delivery: { label: "Set delivery charges", href: "/settings/shipping" },
-  courier: { label: "Connect Pathao or Steadfast", href: "/settings/integrations" },
+  courier: { label: "Connect Pathao or Steadfast", href: "/settings/apps?open=steadfast_courier" },
   publish: { label: "Publish your store", href: "/settings/store" },
 };
 
@@ -42,7 +42,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const prevLine = ser.days.map((x, i) => `${(i * bw + bw / 2).toFixed(1)},${(x.previousSales > 0 ? y(x.previousSales) : H).toFixed(1)}`).join(" ");
   const shortDate = (date: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`));
   const tips: { text: string; href: string; cta: string }[] = [];
-  if (d.setup.steps.some((st) => st.key === "courier" && !st.done)) tips.push({ text: "Connect a courier and book parcels from the orders list in one tap.", href: "/settings/integrations", cta: "Connect" });
+  if (d.setup.steps.some((st) => st.key === "courier" && !st.done)) tips.push({ text: "Connect a courier and book parcels from the orders list in one tap.", href: "/settings/apps?open=steadfast_courier", cta: "Connect" });
   if (d.lowStock.length + d.outOfStock.count > 0) tips.push({ text: "Products that run out lose sales. Restock the ones below their reorder level.", href: "/inventory?filter=low", cta: "Open inventory" });
   tips.push({ text: "Share your store link in your Facebook page and WhatsApp status. Most first orders come from there.", href: "/settings/store", cta: "See your link" });
   const dayName = (date: string) => new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`));

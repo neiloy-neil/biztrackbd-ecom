@@ -71,7 +71,6 @@ export async function loadLoyaltySettings(tx: TenantTx): Promise<LoyaltySettings
   const s = await tx.storeSettings.findFirst();
   const vip = { silverMin: s?.vipSilverMin ?? 5000, goldMin: s?.vipGoldMin ?? 15000, platinumMin: s?.vipPlatinumMin ?? 35000, goldDiscount: s?.vipGoldDiscount ?? 5, platinumDiscount: s?.vipPlatinumDiscount ?? 10 };
   return {
-    // Switched on by the owner AND included in the plan (and not switched off in Apps).
     enabled: (s?.loyaltyEnabled ?? false) && (await isModuleOn(tx, "loyalty")), spendPerPoint: s?.loyaltySpendPerPoint ?? 100, pointsPerBlock: s?.loyaltyPointsPerBlock ?? 10, bdtPerBlock: s?.loyaltyBdtPerBlock ?? 10,
     maxCartPercent: s?.loyaltyMaxCartPercent ?? 30, referralEnabled: s?.referralEnabled ?? false, refereeDiscount: s?.refereeDiscountBdt ?? 50, refereeMinCart: s?.refereeMinCartBdt ?? 500,
     referrerReward: s?.referrerRewardPoints ?? 100, expiryMonths: s?.loyaltyExpiryMonths ?? 0, birthdayVoucher: s?.birthdayVoucherBdt ?? 100,

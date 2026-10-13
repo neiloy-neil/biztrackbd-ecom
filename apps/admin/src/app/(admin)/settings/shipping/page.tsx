@@ -56,7 +56,7 @@ export default async function Shipping({ searchParams }: { searchParams: Promise
             <h2>Courier accounts</h2>
             <p className="muted">
               {connected.length > 0 ? `Connected: ${connected.map((c) => c.label).join(", ")}. ` : "No courier connected yet. "}
-              Add Steadfast, Pathao or RedX with your own keys in <Link href="/settings/integrations" className="link" prefetch={false}>Integrations</Link>, then book parcels from any order.
+              Add Steadfast, Pathao or RedX with your own keys in <Link href="/settings/apps" className="link" prefetch={false}>Apps &amp; Integrations</Link>, then book parcels from any order.
             </p>
           </div>
           <form action={saveRatesAction} className="card stack" style={{ marginTop: 14 }} data-testid="rates-form">
