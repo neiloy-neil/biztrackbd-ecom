@@ -49,8 +49,10 @@ const todo = (k, note) => (local[k] ? `${k}="${local[k]}"` : `${k}=""  # TODO: $
 const need = (k) => { if (!local[k]) console.log(`  missing in .env.local: ${k}`); return local[k]; };
 const site = `https://${domain}`, admin = `https://admin.${domain}`, platform = `https://platform.${domain}`;
 
+// The serverless apps open many short connections; the transaction pooler (port 6543) shares a few real ones between them.
+const poolerUrl = (u) => { if (!u) return u; const x = new URL(u); x.port = "6543"; return x.toString(); };
 const common = [
-  L("DATABASE_URL", need("SUPABASE_APP_DB_URL"), "the biztrack_app login (restricted), session pooler"),
+  L("DATABASE_URL", poolerUrl(need("SUPABASE_APP_DB_URL")), "the biztrack_app login (restricted), TRANSACTION pooler (port 6543): the session pooler allows only 15 connections on the free plan"),
   L("DB_POOL_MAX", "1"),
   L("NEXT_PUBLIC_ROOT_DOMAIN", domain),
 ];
