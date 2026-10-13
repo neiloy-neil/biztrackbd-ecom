@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { can, listLandingPages } from "@biztrackbd/core";
+import { LANDING_TEMPLATES, can, listLandingPages } from "@biztrackbd/core";
 import { withTenant } from "@biztrackbd/db";
 import { SubmitButton } from "@/components/ui";
 import { dateOnly } from "@/lib/format";
@@ -54,6 +54,13 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
               <option value="" disabled>Choose a product</option>
               {products.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}
             </select>
+          </div>
+          <div className="field" style={{ margin: 0 }}><label className="label" htmlFor="lp-template">Start from</label>
+            <select id="lp-template" className="select" name="templateId" defaultValue="" data-testid="lp-template">
+              <option value="">A plain starting page</option>
+              {LANDING_TEMPLATES.map((t) => <option key={t.id} value={t.id}>{t.name} · {t.blurb}</option>)}
+            </select>
+            <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>You can change every word, picture and section afterwards.</div>
           </div>
           <div className="field" style={{ margin: 0 }}><label className="label" htmlFor="lp-slug">Web address (optional)</label><input id="lp-slug" className="input" name="slug" maxLength={60} placeholder="eid-panjabi" pattern="[a-z0-9]+(-[a-z0-9]+)*" /><div className="muted" style={{ fontSize: 12, marginTop: 4 }}>Small letters, numbers and dashes. We make one from the name if you leave it empty.</div></div>
           <div><SubmitButton pending="Creating…">Create and edit</SubmitButton></div>

@@ -49,6 +49,8 @@ export interface SectionDef {
   fields: Field[];
   list?: ListSpec;
   defaults: Record<string, unknown>;
+  /** Extra rule on the cleaned settings: a plain message when they are not usable, else null. */
+  check?: (settings: Record<string, unknown>) => string | null;
 }
 
 const t = (key: string, label: string, max = 120, more: Partial<Field> = {}): Field => ({ key, label, type: "text", max, ...more });
@@ -105,7 +107,7 @@ export const SECTIONS: SectionDef[] = [
     defaults: { heading: "About us", headingBn: "আমাদের কথা", body: "Tell your customers who you are and why they can trust you.", bodyBn: "" },
   },
   {
-    type: "trust-strip", label: "Trust strip", description: "Cash on delivery, bKash and Nagad, delivery time and easy exchange, in four short lines.", page: "home", pages: ["product", "collection", "cart"], max: 1,
+    type: "trust-strip", label: "Trust strip", description: "Cash on delivery, bKash and Nagad, delivery time and easy exchange, in four short lines.", page: "home", pages: ["product", "collection", "cart", "landing"], max: 1,
     fields: [], defaults: {},
   },
 
@@ -191,11 +193,83 @@ export const SECTIONS: SectionDef[] = [
     defaults: { title: "Order now. Pay when it arrives.", titleBn: "অর্ডার করুন। হাতে পেয়ে দাম দিন।", intro: "Fill in your details and we will call you to confirm.", introBn: "", buttonText: "Place my order", buttonTextBn: "অর্ডার করুন" },
   },
   {
+    type: "lp-video", label: "Video", description: "A YouTube video: the product in use, a review, an unboxing.", page: "landing", max: 2,
+    fields: [t("title", "Heading (optional)", 70), tb("title", "Heading (optional)", 70), { key: "videoUrl", label: "YouTube address", type: "url", max: 200, hint: "Paste the address of the video from YouTube, like https://youtu.be/…" }],
+    defaults: { title: "", titleBn: "", videoUrl: "" },
+    check: (s) => (s.videoUrl && !youtubeId(String(s.videoUrl)) ? "use a YouTube address (youtube.com or youtu.be)" : null),
+  },
+  {
+    type: "lp-split", label: "Picture and text", description: "A picture beside a few lines: how to use it, what is inside, why it is different.", page: "landing", max: 4,
+    fields: [
+      t("title", "Heading", 80), tb("title", "Heading", 80), area("text", "Text", 500), areab("text", "Text", 500), image("image", "Picture"),
+      { key: "side", label: "Picture on", type: "select", options: [{ value: "right", label: "The right" }, { value: "left", label: "The left" }] },
+      t("ctaText", "Button text (optional)", 30), tb("ctaText", "Button text (optional)", 30),
+    ],
+    defaults: { title: "How to use it", titleBn: "ব্যবহারের নিয়ম", text: "Explain in two or three short lines how your customer uses the product and what they get.", textBn: "", image: "", side: "right", ctaText: "", ctaTextBn: "" },
+  },
+  {
+    type: "lp-text", label: "Text and button", description: "A heading, a paragraph and an order button. Good for a promise, a guarantee or a story.", page: "landing", max: 4,
+    fields: [t("title", "Heading", 80), tb("title", "Heading", 80), area("text", "Text", 600), areab("text", "Text", 600), t("ctaText", "Button text", 30), tb("ctaText", "Button text", 30)],
+    defaults: { title: "Our promise", titleBn: "আমাদের প্রতিশ্রুতি", text: "If the product is not what you saw, tell us when it arrives and we will make it right.", textBn: "", ctaText: "Order now", ctaTextBn: "অর্ডার করুন" },
+  },
+  {
+    type: "lp-countdown", label: "Countdown", description: "A timer to the day your offer really ends. It disappears by itself when the time is up. Leave the date empty to hide it.", page: "landing", max: 1,
+    fields: [
+      t("title", "Heading", 70), tb("title", "Heading", 70),
+      { key: "endsAt", label: "Offer ends", type: "text", max: 16, hint: "Bangladesh time, like 2026-12-20 23:59. Only set a date your offer truly ends on." },
+    ],
+    defaults: { title: "This offer ends in", titleBn: "অফার শেষ হতে বাকি", endsAt: "" },
+    check: (s) => (s.endsAt && parseEndsAt(String(s.endsAt)) === null ? "write the end as a date and time, like 2026-12-20 23:59" : null),
+  },
+  {
+    type: "lp-stock", label: "Stock left", description: "Shows how many are left, using your real stock, and only once it is low.", page: "landing", max: 1,
+    fields: [t("text", "Message", 80, { hint: "Use {n} where the number goes" }), tb("text", "Message", 80), { key: "threshold", label: "Show when this many or fewer are left", type: "number", min: 1, max: 500 }],
+    defaults: { text: "Only {n} left in stock", textBn: "মাত্র {n}টি স্টকে আছে", threshold: 20 },
+  },
+  {
+    type: "lp-offer-bar", label: "Price and button", description: "Today's price (and the old price if you set one on the product) with a button to the order form.", page: "landing", max: 2,
+    fields: [t("text", "Line above the price", 60), tb("text", "Line above the price", 60), t("ctaText", "Button text", 30), tb("ctaText", "Button text", 30)],
+    defaults: { text: "Today's price", textBn: "আজকের দাম", ctaText: "Order now", ctaTextBn: "অর্ডার করুন" },
+  },
+  {
     type: "lp-sticky-cta", label: "Sticky button", description: "A button that stays at the bottom of a phone screen and jumps to the order form.", page: "landing", max: 1,
     fields: [t("text", "Button text", 40), tb("text", "Button text", 40)],
     defaults: { text: "Order now", textBn: "অর্ডার করুন" },
   },
 ];
+
+/** The 11-character id of a YouTube video from a pasted address (watch, youtu.be, embed, shorts), or null. Nothing else is ever put in a page. */
+export function youtubeId(url: string): string | null {
+  try {
+    const u = new URL(url.trim());
+    if (u.protocol !== "https:") return null;
+    const host = u.hostname.replace(/^www\.|^m\./, "");
+    let id: string | null = null;
+    if (host === "youtu.be") id = u.pathname.slice(1).split("/")[0] ?? null;
+    else if (host === "youtube.com" || host === "youtube-nocookie.com") {
+      if (u.pathname === "/watch") id = u.searchParams.get("v");
+      else {
+        const m = u.pathname.match(/^\/(?:embed|shorts|live)\/([^/]+)/);
+        id = m?.[1] ?? null;
+      }
+    }
+    return id && /^[A-Za-z0-9_-]{11}$/.test(id) ? id : null;
+  } catch {
+    return null;
+  }
+}
+
+/** "2026-12-20 23:59" (Bangladesh time, 23:59 when no time is given) as the moment it means, or null if it is not a real date. */
+export function parseEndsAt(v: string): Date | null {
+  const m = v.trim().match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?$/);
+  if (!m) return null;
+  const [y, mo, d, h, mi] = [Number(m[1]), Number(m[2]), Number(m[3]), Number(m[4] ?? 23), Number(m[5] ?? 59)];
+  if (mo < 1 || mo > 12 || d < 1 || d > 31 || h > 23 || mi > 59) return null;
+  // A 31st of a 30-day month would roll over into the next month; that is not a real date.
+  const day = new Date(Date.UTC(y, mo - 1, d));
+  if (day.getUTCMonth() !== mo - 1 || day.getUTCDate() !== d) return null;
+  return new Date(Date.UTC(y, mo - 1, d, h - 6, mi));
+}
 
 export const sectionDef = (type: string): SectionDef | undefined => SECTIONS.find((s) => s.type === type);
 /** Whether a section may be placed on this kind of page. */
@@ -298,6 +372,8 @@ export function normalizeSettings(def: SectionDef, raw: unknown, label = def.lab
     if (arr.length > def.list.max) throw new ValidationError(`${label}: at most ${def.list.max} ${def.list.label.toLowerCase()}`);
     out[def.list.key] = arr.map((item, i) => normObject(def.list!.fields, item, def.list!.defaultItem, `${label}, ${def.list!.itemLabel.toLowerCase()} ${i + 1}`));
   }
+  const problem = def.check?.(out);
+  if (problem) throw new ValidationError(`${label}: ${problem}`);
   return out;
 }
 

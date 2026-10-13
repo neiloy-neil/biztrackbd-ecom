@@ -111,7 +111,18 @@ export async function loadForEdit(tenantId: string, actor: StaffActor, pageKey: 
     await assertPageExists(tx, pageKey);
     const themeId = await activeThemeId(tx);
     const [draft, live] = await Promise.all([draftRow(tx, themeId, pageKey), latestPublished(tx, themeId, pageKey)]);
-    const start = defaultPageFor(kind);
+    let start = defaultPageFor(kind);
+    if (kind === "landing") {
+      // A page made from a template opens with that template's layout (stored when the page was created); a bad row falls back to the plain start.
+      const row = await tx.landingPage.findFirst({ where: { id: pageKey.slice("landing:".length) }, select: { sectionsJson: true } });
+      if (row) {
+        try {
+          start = asPage(kind, row.sectionsJson);
+        } catch {
+          /* keep the plain start */
+        }
+      }
+    }
     const page = draft ? asPage(kind, draft.sectionsJson) : live ? asPage(kind, live.sectionsJson) : start;
     const theme = await storeTheme(tx, themeId, true);
     const liveTheme = await storeTheme(tx, themeId, false);

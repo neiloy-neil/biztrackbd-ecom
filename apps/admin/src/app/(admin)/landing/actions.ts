@@ -11,7 +11,7 @@ export async function createLandingAction(f: FormData): Promise<void> {
   const s = await requireAction("design", "edit");
   let created: { id: string } | null = null;
   try {
-    created = await createLandingPage(s.tenantId, s.actor, { title: String(f.get("title") ?? ""), slug: String(f.get("slug") ?? "") || undefined, productId: String(f.get("productId") ?? "") });
+    created = await createLandingPage(s.tenantId, s.actor, { title: String(f.get("title") ?? ""), slug: String(f.get("slug") ?? "") || undefined, productId: String(f.get("productId") ?? ""), templateId: String(f.get("templateId") ?? "") || undefined });
   } catch (e) {
     if (e instanceof DomainError) back("/landing", { err: e.message });
     throw e;

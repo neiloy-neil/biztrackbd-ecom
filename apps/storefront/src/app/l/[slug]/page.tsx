@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getPixelId, getPreview, getPublicLanding, verifyPreviewToken } from "@biztrackbd/core";
 import { LandingOrderForm } from "@/components/landing-order-form";
 import { PreviewBridge } from "@/components/preview-bridge";
-import { Sections } from "@/components/sections";
+import { Sections, type LandingInfo } from "@/components/sections";
 import { ThemeStyle } from "@/components/theme-style";
 import { Pixel } from "@/components/tracker";
 import { getLang, makeT, pickStrings } from "@/lib/i18n";
@@ -64,6 +64,23 @@ export default async function LandingPage({ params, searchParams }: { params: Pr
     />
   );
   const data = { products: {}, categories: [] };
+  // What the stock line and the price bar show: the first offer, from the database (never typed into the page).
+  const first = landing.options[0];
+  const firstVariants = first?.variants ?? [];
+  const finalPrice = (price: number) => {
+    if (!first) return price;
+    const line = price * (first.quantity ?? 1);
+    const off = first.deal.kind === "percent" ? Math.round(line * first.deal.value) / 100 : first.deal.kind === "amount" ? first.deal.value : 0;
+    return Math.max(0, line - Math.min(line, off));
+  };
+  const sellable = firstVariants.filter((v) => v.stock > 0);
+  const cheapest = sellable.length ? sellable.reduce((a, b) => (finalPrice(b.price) < finalPrice(a.price) ? b : a)) : null;
+  const info: LandingInfo = {
+    stock: firstVariants.length ? firstVariants.reduce((n, v) => n + Math.max(0, v.stock), 0) : null,
+    alwaysShowStock: Boolean(preview),
+    price: cheapest ? finalPrice(cheapest.price) : null,
+    was: cheapest?.compareAt != null && cheapest.compareAt > cheapest.price ? cheapest.compareAt * (first?.quantity ?? 1) : null,
+  };
 
   return (
     <>
@@ -71,9 +88,9 @@ export default async function LandingPage({ params, searchParams }: { params: Pr
       {!preview && pixelId && <Pixel pixelId={pixelId} />}
       <main id="main">
         {preview ? (
-          <PreviewBridge kind="landing" initialPage={landing.page} initialTheme={preview.theme} data={data} lang={lang} orderForm={form} adminOrigin={adminOrigin()} />
+          <PreviewBridge kind="landing" initialPage={landing.page} initialTheme={preview.theme} data={data} lang={lang} orderForm={form} adminOrigin={adminOrigin()} landing={info} />
         ) : (
-          <Sections page={landing.page} data={data} lang={lang} t={t} orderForm={form} />
+          <Sections page={landing.page} data={data} lang={lang} t={t} orderForm={form} landing={info} />
         )}
       </main>
       <footer className="lp-footer">{landing.product.title}</footer>

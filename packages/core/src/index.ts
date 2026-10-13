@@ -132,6 +132,7 @@ export * from "./builder/preview";
 export * from "./builder/data";
 export * from "./landing/service";
 export * from "./landing/offers";
+export * from "./landing/templates";
 export { checkDomain, recheckDomain, sweepDomains, dnsInstruction, setDnsResolver, setVercelClient, vercelFromEnv, type DnsResolver, type VercelDomainClient, type DnsInstruction, type CheckOutcome, type SweepSummary } from "./domains/verify";
 export { listPlatformDomains, checkPlatformDomain, type PlatformDomainRow, type DomainFilter } from "./platform/domains";
 

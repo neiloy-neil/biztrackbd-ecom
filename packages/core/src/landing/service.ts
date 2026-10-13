@@ -6,6 +6,7 @@ import { NotFoundError, PlanLimitError, ValidationError } from "../errors";
 import { createOrder } from "../orders/service";
 import { assertCan, type StaffActor } from "../permissions";
 import { getProductBySlug, type ProductDetail } from "../storefront/catalog";
+import { pageFromTemplate } from "./templates";
 import { bumpDiscount, dealDiscount, legacyOffers, parseOffers, type LandingOffers, type OfferOption } from "./offers";
 import { randomBytes } from "node:crypto";
 
@@ -56,7 +57,7 @@ export async function listLandingPages(tenantId: string, actor: StaffActor): Pro
   });
 }
 
-export async function createLandingPage(tenantId: string, actor: StaffActor, input: { title: string; slug?: string; productId: string }): Promise<{ id: string; pageKey: string }> {
+export async function createLandingPage(tenantId: string, actor: StaffActor, input: { title: string; slug?: string; productId: string; templateId?: string }): Promise<{ id: string; pageKey: string }> {
   assertCan(actor, "design", "edit");
   const title = input.title.trim();
   if (title.length < 2 || title.length > 120) throw new ValidationError("Give the page a name of 2 to 120 characters", { field: "title" });
@@ -74,7 +75,7 @@ export async function createLandingPage(tenantId: string, actor: StaffActor, inp
     }
     try {
       // Unpublished until the owner presses Publish in the editor: a half-built page never goes live.
-      const row = await tx.landingPage.create({ data: { tenantId, title, slug, targetProductId: product.id, sectionsJson: defaultLandingPage() as object, isPublished: false, shortCode: newShortCode() } });
+      const row = await tx.landingPage.create({ data: { tenantId, title, slug, targetProductId: product.id, sectionsJson: (pageFromTemplate(input.templateId) ?? defaultLandingPage()) as object, isPublished: false, shortCode: newShortCode() } });
       await audit(tx, tenantId, actor, "landing.created", { slug });
       return { id: row.id, pageKey: landingKey(row.id) };
     } catch (e) {
@@ -162,7 +163,7 @@ export interface PublicOption {
   /** Fixed pieces for a bundle; null when the customer chooses the quantity. */
   quantity: number | null;
   deal: OfferOption["deal"];
-  variants: { id: string; title: string; price: number; stock: number }[];
+  variants: { id: string; title: string; price: number; compareAt: number | null; stock: number }[];
 }
 export interface PublicBump {
   label: string;
@@ -202,7 +203,7 @@ export async function getPublicLanding(tenantId: string, slug: string, preview?:
     const wanted = [...new Set([...offers.options.map((o) => o.productId), ...(offers.bump ? [offers.bump.productId] : [])])];
     const products = await tx.product.findMany({
       where: { id: { in: wanted }, status: "ACTIVE", deletedAt: null },
-      select: { id: true, slug: true, title: true, images: { orderBy: { sortOrder: "asc" }, take: 1, select: { url: true } }, variants: { orderBy: { createdAt: "asc" }, select: { id: true, title: true, price: true, stockQuantity: true } } },
+      select: { id: true, slug: true, title: true, images: { orderBy: { sortOrder: "asc" }, take: 1, select: { url: true } }, variants: { orderBy: { createdAt: "asc" }, select: { id: true, title: true, price: true, compareAtPrice: true, stockQuantity: true } } },
     });
     const live = await tx.themeVersion.findFirst({ where: { pageKey: landingKey(l.id), state: "PUBLISHED" }, orderBy: { version: "desc" }, select: { sectionsJson: true } });
     return { l, offers, products, liveJson: live?.sectionsJson ?? null };
@@ -215,7 +216,7 @@ export async function getPublicLanding(tenantId: string, slug: string, preview?:
     if (!p) return [];
     return [{
       id: o.id, label: o.label, labelBn: o.labelBn ?? null, productId: p.id, productTitle: p.title, imageUrl: p.images[0]?.url ?? null, quantity: o.quantity ?? null, deal: o.deal,
-      variants: p.variants.map((v) => ({ id: v.id, title: v.title, price: Number(v.price), stock: v.stockQuantity })),
+      variants: p.variants.map((v) => ({ id: v.id, title: v.title, price: Number(v.price), compareAt: v.compareAtPrice != null ? Number(v.compareAtPrice) : null, stock: v.stockQuantity })),
     }];
   });
   const first = options[0] && byId.get(options[0].productId);

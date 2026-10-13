@@ -5,7 +5,7 @@ import {
   DomainError, SECTIONS, STORE_PAGE_KINDS, allowedOn, defaultPageFor, requiredFor, sectionsFor, STORE_THEMES, activateTheme, checkDomain, contrast, createLandingPage, createPreviewToken, defaultHomePage, defaultLandingPage, deleteLandingPage, discardDraft, dnsInstruction, getLive, getPreview,
   getBuilderAccess, getPublicLanding, listLandingPages, listVersions, loadForEdit, loadPageData, newSection, normalizeSettings, placeLandingOrder, publish, recheckDomain, rollback, safeImage, safeUrl,
   saveDraft, saveThemeDraft, sectionDef, setDnsResolver, setEventPublisher, setLandingLive, setRoutingSync, setVercelClient, sweepDomains, themeCss, validatePage, validateTheme,
-  verifyPreviewToken, updateLandingOffers, landingSlugByCode, parseOffers, dealDiscount, type DnsResolver, type StaffActor, type VercelDomainClient,
+  verifyPreviewToken, updateLandingOffers, landingSlugByCode, LANDING_TEMPLATES, landingTemplate, pageFromTemplate, youtubeId, parseEndsAt, parseOffers, dealDiscount, type DnsResolver, type StaffActor, type VercelDomainClient,
 } from "../src";
 
 let owner: PrismaClient;
@@ -397,6 +397,71 @@ describe("landing pages", () => {
     await publish(s.f.tenantId, s.owner, pageKey);
     const other = s.f.products[1]!.variants[0]!.id;
     await fails(placeLandingOrder(s.f.tenantId, "eid-panjabi", { idempotencyKey: `lp-${Date.now()}-2`, variantId: other, quantity: 1, name: "Tania Akter", phone: "01712345602", address: "House 4, Road 2, Dhanmondi", district: "Dhaka", division: "Dhaka" }), "VALIDATION_ERROR", /options/);
+  });
+
+  describe("sections and templates (docs/46 stage 2)", () => {
+    it("reads a YouTube address only when it really is one, and returns just the id", () => {
+      expect(youtubeId("https://www.youtube.com/watch?v=yx0ody0GGWY&t=3")).toBe("yx0ody0GGWY");
+      expect(youtubeId("https://youtu.be/yx0ody0GGWY?si=abc")).toBe("yx0ody0GGWY");
+      expect(youtubeId("https://youtube.com/embed/yx0ody0GGWY")).toBe("yx0ody0GGWY");
+      expect(youtubeId("https://www.youtube.com/shorts/yx0ody0GGWY")).toBe("yx0ody0GGWY");
+      expect(youtubeId("http://youtu.be/yx0ody0GGWY")).toBeNull();
+      expect(youtubeId("https://evil.example/watch?v=yx0ody0GGWY")).toBeNull();
+      expect(youtubeId("https://youtube.com.evil.example/watch?v=yx0ody0GGWY")).toBeNull();
+      expect(youtubeId("https://youtu.be/short")).toBeNull();
+      expect(youtubeId('https://youtu.be/yx0ody0GGWY"onload="x')).toBeNull();
+      expect(youtubeId("javascript:alert(1)")).toBeNull();
+    });
+
+    it("turns an end date into Bangladesh time and refuses dates that are not real", () => {
+      expect(parseEndsAt("2026-12-20 23:59")!.toISOString()).toBe("2026-12-20T17:59:00.000Z");
+      expect(parseEndsAt("2026-12-20")!.toISOString()).toBe("2026-12-20T17:59:00.000Z");
+      expect(parseEndsAt("2026-02-30")).toBeNull();
+      expect(parseEndsAt("20-12-2026")).toBeNull();
+      expect(parseEndsAt("2026-12-20 25:00")).toBeNull();
+    });
+
+    it("the video and countdown sections refuse values they cannot show", () => {
+      const video = sectionDef("lp-video")!;
+      expect(() => normalizeSettings(video, { videoUrl: "https://example.com/video" })).toThrow(/YouTube/);
+      expect(normalizeSettings(video, { videoUrl: "" }).videoUrl).toBe("");
+      expect(normalizeSettings(video, { videoUrl: "https://youtu.be/yx0ody0GGWY" }).videoUrl).toBe("https://youtu.be/yx0ody0GGWY");
+      const clock = sectionDef("lp-countdown")!;
+      expect(() => normalizeSettings(clock, { endsAt: "soon" })).toThrow(/date and time/);
+      expect(normalizeSettings(clock, {}).endsAt).toBe("");
+    });
+
+    it("ships ten templates that all validate, with no invented customer words and a hidden countdown", () => {
+      expect(LANDING_TEMPLATES).toHaveLength(10);
+      expect(new Set(LANDING_TEMPLATES.map((t) => t.id)).size).toBe(10);
+      for (const t of LANDING_TEMPLATES) {
+        expect(() => validatePage("landing", t.page), t.id).not.toThrow();
+        const types = t.page.sections.map((x) => x.type);
+        expect(types, t.id).toContain("lp-order-form");
+        expect(types, t.id).toContain("lp-hero");
+        expect(types, t.id).not.toContain("lp-reviews");
+        for (const x of t.page.sections) {
+          if (x.type === "lp-countdown") expect(x.settings.endsAt).toBe("");
+          if (x.type === "lp-video") expect(x.settings.videoUrl).toBe("");
+        }
+        // Every starting line has its Bangla twin, so a Bangla visitor never sees English by accident.
+        const hero = t.page.sections.find((x) => x.type === "lp-hero")!;
+        expect(String(hero.settings.headlineBn), t.id).not.toBe("");
+      }
+    });
+
+    it("a page made from a template opens with that template's layout, with its own section ids", async () => {
+      const s = await store("lpt1");
+      const lp = await createLandingPage(s.f.tenantId, s.owner, { title: "Honey", productId: s.f.products[0]!.id, templateId: "food" });
+      const state = await loadForEdit(s.f.tenantId, s.owner, lp.pageKey);
+      expect(state.page.sections.map((x) => x.type)).toEqual(landingTemplate("food")!.page.sections.map((x) => x.type));
+      const a = pageFromTemplate("food")!;
+      const b = pageFromTemplate("food")!;
+      expect(a.sections[0]!.id).not.toBe(b.sections[0]!.id);
+      expect(pageFromTemplate("nope")).toBeNull();
+      const plain = await createLandingPage(s.f.tenantId, s.owner, { title: "Plain", productId: s.f.products[0]!.id });
+      expect((await loadForEdit(s.f.tenantId, s.owner, plain.pageKey)).page.sections.map((x) => x.type)).toEqual(defaultLandingPage().sections.map((x) => x.type));
+    });
   });
 
   describe("offers (docs/46)", () => {

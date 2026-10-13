@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { PageData, PageJson, PageSection } from "@biztrackbd/core";
-import { productKey } from "@biztrackbd/core/builder-client";
-import { type Lang, type T } from "@/lib/i18n-core";
+import { parseEndsAt, productKey, youtubeId } from "@biztrackbd/core/builder-client";
+import { money, type Lang, type T } from "@/lib/i18n-core";
+import { Countdown } from "./countdown";
 import type { PageCtx } from "@/lib/page-ctx";
 import { renderPageBlock } from "./page-blocks";
 import { ProductCard } from "./product-card";
@@ -29,7 +30,18 @@ function Cta({ href, className, children }: { href: string; className: string; c
   return href.startsWith("/") ? <Link href={href} className={className}>{children}</Link> : <a href={href} className={className} rel="noopener noreferrer">{children}</a>;
 }
 
-function Section({ section, data, lang, t, orderForm, ctx }: { section: PageSection; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx }) {
+/** What a landing page knows about its offers, for the sections that show a price or the stock. */
+export interface LandingInfo {
+  /** Pieces left across the first offer's options; null when unknown. */
+  stock: number | null;
+  /** Show the stock line even when stock is plentiful (the editor's preview). */
+  alwaysShowStock?: boolean;
+  /** The lowest price a customer pays for the first offer, and the crossed-out price when the product has one. */
+  price: number | null;
+  was: number | null;
+}
+
+function Section({ section, data, lang, t, orderForm, ctx, landing }: { section: PageSection; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx; landing?: LandingInfo }) {
   const s = section.settings as S;
   const id = section.id;
   switch (section.type) {
@@ -201,6 +213,81 @@ function Section({ section, data, lang, t, orderForm, ctx }: { section: PageSect
           </div>
         </section>
       );
+    case "lp-video": {
+      const vid = youtubeId(str(s.videoUrl));
+      if (!vid) return null;
+      return (
+        <section className="lp-block" data-section={id}>
+          <div className="wrap lp-narrow">
+            {L(s, "title", lang) && <h2>{L(s, "title", lang)}</h2>}
+            <div className="lp-video">
+              {/* The privacy-friendly YouTube address, and only an 11-character id that passed the check above. */}
+              <iframe src={`https://www.youtube-nocookie.com/embed/${vid}`} title={L(s, "title", lang) || "Video"} loading="lazy" allow="encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
+            </div>
+          </div>
+        </section>
+      );
+    }
+    case "lp-split": {
+      const img = str(s.image);
+      return (
+        <section className="lp-block" data-section={id}>
+          <div className={`wrap lp-split${s.side === "left" ? " lp-split-left" : ""}${img ? "" : " lp-split-solo"}`}>
+            <div>
+              <h2>{L(s, "title", lang)}</h2>
+              <p>{L(s, "text", lang)}</p>
+              {L(s, "ctaText", lang) && <a href="#order" className="btn btn-primary btn-round">{L(s, "ctaText", lang)}</a>}
+            </div>
+            {img && <Img src={img} alt={L(s, "title", lang)} />}
+          </div>
+        </section>
+      );
+    }
+    case "lp-text":
+      return (
+        <section className="lp-block" data-section={id}>
+          <div className="wrap lp-narrow lp-center">
+            <h2>{L(s, "title", lang)}</h2>
+            <p>{L(s, "text", lang)}</p>
+            {L(s, "ctaText", lang) && <a href="#order" className="btn btn-primary btn-round">{L(s, "ctaText", lang)}</a>}
+          </div>
+        </section>
+      );
+    case "lp-countdown": {
+      // Only a real end date counts down; with none, or once it has passed, the section is simply not there.
+      const end = parseEndsAt(str(s.endsAt));
+      if (!end || end.getTime() <= Date.now()) return null;
+      return (
+        <section className="lp-block" data-section={id}>
+          <div className="wrap lp-narrow lp-center">
+            <h2>{L(s, "title", lang)}</h2>
+            <Countdown endsAt={end.toISOString()} labels={{ d: t("lpDays"), h: t("lpHours"), m: t("lpMinutes"), s: t("lpSeconds") }} />
+          </div>
+        </section>
+      );
+    }
+    case "lp-stock": {
+      const n = landing?.stock;
+      const limit = Number(s.threshold) || 20;
+      if (n == null || n <= 0 || (n > limit && !landing?.alwaysShowStock)) return null;
+      return <div className="wrap lp-narrow lp-center" data-section={id}><p className="lp-stock" role="status">{L(s, "text", lang).replace("{n}", String(n))}</p></div>;
+    }
+    case "lp-offer-bar": {
+      const price = landing?.price;
+      if (price == null) return null;
+      return (
+        <section className="lp-block" data-section={id}>
+          <div className="wrap lp-narrow lp-center">
+            <div className="lp-offer">
+              <span className="muted">{L(s, "text", lang)}</span>
+              <b className="lp-offer-price">{money(price, lang)}</b>
+              {landing?.was != null && landing.was > price && <s className="muted">{money(landing.was, lang)}</s>}
+            </div>
+            {L(s, "ctaText", lang) && <a href="#order" className="btn btn-primary btn-round">{L(s, "ctaText", lang)}</a>}
+          </div>
+        </section>
+      );
+    }
     case "lp-sticky-cta":
       return <div className="lp-sticky" data-section={id}><a href="#order" className="btn btn-primary btn-round btn-block">{L(s, "text", lang)}</a></div>;
     default:
@@ -209,6 +296,6 @@ function Section({ section, data, lang, t, orderForm, ctx }: { section: PageSect
   }
 }
 
-export function Sections({ page, data, lang, t, orderForm, ctx }: { page: PageJson; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx }) {
-  return <>{page.sections.filter((s) => !s.disabled).map((s) => <Section key={s.id} section={s} data={data} lang={lang} t={t} orderForm={orderForm} ctx={ctx} />)}</>;
+export function Sections({ page, data, lang, t, orderForm, ctx, landing }: { page: PageJson; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx; landing?: LandingInfo }) {
+  return <>{page.sections.filter((s) => !s.disabled).map((s) => <Section key={s.id} section={s} data={data} lang={lang} t={t} orderForm={orderForm} ctx={ctx} landing={landing} />)}</>;
 }
