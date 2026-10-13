@@ -1,0 +1,47 @@
+# Is every migration in the repository applied to the live database? (docs/34)
+# A column used by the code but missing in the database makes every page that reads it answer 500, so this fails loudly, by email through
+# GitHub's normal notifications, the moment a pushed migration has not been applied, and keeps failing every hour until it is.
+# Fix: run `node tools/checkup-migrate.mjs` (applies what is pending), then re-run this workflow.
+name: Migrations
+
+on:
+  push:
+    branches: [main]
+    paths: ["packages/db/prisma/**"]
+  schedule:
+    - cron: "41 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: migrations
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  applied:
+    name: Applied to the live database
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compare
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_DB_URL:-}" ]; then echo "SUPABASE_DB_URL is not set as a repository secret"; exit 1; fi
+          applied="$(psql "$SUPABASE_DB_URL" -Atc 'select migration_name from _prisma_migrations where finished_at is not null and rolled_back_at is null')"
+          missing=""
+          for dir in packages/db/prisma/migrations/*/; do
+            name="$(basename "$dir")"
+            if ! grep -qx "$name" <<<"$applied"; then missing="$missing $name"; fi
+          done
+          if [ -n "$missing" ]; then
+            echo "::error title=Migrations not applied to the live database::$missing"
+            echo "Not applied:$missing"
+            echo "Run: node tools/checkup-migrate.mjs"
+            exit 1
+          fi
+          echo "All $(ls -d packages/db/prisma/migrations/*/ | wc -l) migrations are applied."
