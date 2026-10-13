@@ -1,3 +1,4 @@
+import { afterRestock } from "./stock-alerts";
 import { assertNotInDemo } from "../demo/guard";
 import { Prisma, withTenant } from "@biztrackbd/db";
 import { z } from "zod";
@@ -145,7 +146,7 @@ export async function saveProduct(tenantId: string, actor: StaffActor, raw: unkn
   const titles = p.variants.map((v) => v.title.toLowerCase());
   if (new Set(titles).size !== titles.length) throw new ValidationError("Two variants have the same name", { field: "variants" });
 
-  return withTenant(tenantId, async (tx) => {
+  const saved = await withTenant(tenantId, async (tx) => {
     // Category: an existing one, or a new one typed in the editor.
     let categoryId = p.categoryId || null;
     if (p.newCategoryName) {
@@ -240,6 +241,9 @@ export async function saveProduct(tenantId: string, actor: StaffActor, raw: unkn
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") throw new ValidationError("That SKU or URL name is already used by another product");
     throw e;
   });
+  // Stock may have gone up: tell shoppers who were waiting. A failed message never undoes the save.
+  await afterRestock(tenantId);
+  return saved;
 }
 
 export async function getProductForEdit(tenantId: string, actor: StaffActor, productId: string) {
@@ -273,27 +277,77 @@ export async function setProductStatus(tenantId: string, actor: StaffActor, prod
   });
 }
 
-export async function listCategoriesAdmin(tenantId: string, actor: StaffActor) {
+export interface CategoryAdminRow {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  imageUrl: string | null;
+  parentId: string | null;
+  sortOrder: number;
+  isActive: boolean;
+  products: number;
+}
+
+/** Every category, newest structure first: top-level ones in their chosen order, each followed by its sub-categories. */
+export async function listCategoriesAdmin(tenantId: string, actor: StaffActor): Promise<CategoryAdminRow[]> {
   assertCan(actor, "products", "view");
   return withTenant(tenantId, async (tx) => {
     const cats = await tx.category.findMany({ orderBy: [{ sortOrder: "asc" }, { name: "asc" }], include: { _count: { select: { products: true } } } });
-    return cats.map((c) => ({ id: c.id, name: c.name, slug: c.slug, isActive: c.isActive, products: c._count.products }));
+    const row = (c: (typeof cats)[number]): CategoryAdminRow => ({ id: c.id, name: c.name, slug: c.slug, description: c.description, imageUrl: c.imageUrl, parentId: c.parentId, sortOrder: c.sortOrder, isActive: c.isActive, products: c._count.products });
+    const top = cats.filter((c) => !c.parentId);
+    const ids = new Set(cats.map((c) => c.id));
+    const out: CategoryAdminRow[] = [];
+    for (const t of top) { out.push(row(t)); for (const k of cats.filter((c) => c.parentId === t.id)) out.push(row(k)); }
+    // A sub-category whose parent is gone cannot be reached from a parent; keep it visible rather than lose it.
+    for (const c of cats) if (c.parentId && !ids.has(c.parentId)) out.push(row(c));
+    return out;
   });
 }
 
-export async function saveCategory(tenantId: string, actor: StaffActor, input: { name: string; isActive?: boolean }, categoryId?: string): Promise<{ id: string }> {
+export interface CategoryInput {
+  name: string;
+  description?: string | null;
+  /** A cover picture, from the upload route. */
+  imageUrl?: string | null;
+  /** The top-level category this one sits under. Only one level is allowed. */
+  parentId?: string | null;
+  sortOrder?: number;
+  isActive?: boolean;
+}
+
+export async function saveCategory(tenantId: string, actor: StaffActor, input: CategoryInput, categoryId?: string): Promise<{ id: string }> {
   assertCan(actor, "products", "edit");
   const name = input.name.trim();
-  if (name.length < 2 || name.length > 60) throw new ValidationError("Enter a category name");
+  if (name.length < 2 || name.length > 60) throw new ValidationError("Enter a category name", { field: "name" });
+  const description = input.description === undefined ? undefined : input.description?.trim().slice(0, 500) || null;
+  if (input.imageUrl && !/^\/media\/[A-Za-z0-9_-]+\/[0-9a-f-]{36}\.webp$/.test(input.imageUrl)) throw new ValidationError("Upload the picture from this page");
+  const sortOrder = input.sortOrder === undefined ? undefined : Math.min(Math.max(Math.round(input.sortOrder), 0), 9999);
   return withTenant(tenantId, async (tx) => {
+    // One level of sub-categories: the parent must exist, must be top-level itself, and a category that has children cannot become one.
+    let parentId: string | null | undefined = input.parentId === undefined ? undefined : input.parentId || null;
+    if (parentId) {
+      if (parentId === categoryId) throw new ValidationError("A category cannot be inside itself", { field: "parentId" });
+      const parent = await tx.category.findFirst({ where: { id: parentId } });
+      if (!parent) throw new ValidationError("Choose a parent category from the list", { field: "parentId" });
+      if (parent.parentId) throw new ValidationError("Sub-categories can only go one level deep. Choose a top-level category.", { field: "parentId" });
+      if (categoryId && (await tx.category.count({ where: { parentId: categoryId } })) > 0) throw new ValidationError("This category has sub-categories of its own, so it cannot go inside another one.", { field: "parentId" });
+    }
+    const data = {
+      name, ...(description !== undefined ? { description } : {}), ...(input.imageUrl !== undefined ? { imageUrl: input.imageUrl || null } : {}),
+      ...(parentId !== undefined ? { parentId } : {}), ...(sortOrder !== undefined ? { sortOrder } : {}), ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
+    };
     if (categoryId) {
-      const { count } = await tx.category.updateMany({ where: { id: categoryId }, data: { name, ...(input.isActive !== undefined ? { isActive: input.isActive } : {}) } });
+      const { count } = await tx.category.updateMany({ where: { id: categoryId }, data });
       if (count === 0) throw new NotFoundError("Category");
+      await audit(tx, tenantId, actor, "category.saved", { categoryId });
       return { id: categoryId };
     }
     const slug = slugify(name);
-    if (await tx.category.findFirst({ where: { slug } })) throw new ValidationError("You already have a category with that name");
-    return { id: (await tx.category.create({ data: { tenantId, name, slug } })).id };
+    if (await tx.category.findFirst({ where: { slug } })) throw new ValidationError("You already have a category with that name", { field: "name" });
+    const made = await tx.category.create({ data: { tenantId, slug, ...data } });
+    await audit(tx, tenantId, actor, "category.saved", { categoryId: made.id });
+    return { id: made.id };
   });
 }
 

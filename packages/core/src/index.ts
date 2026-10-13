@@ -29,6 +29,9 @@ export {
 } from "./storefront/catalog";
 export { requestOtp, verifyOtp, setSmsSender, signCustomerSession, readCustomerSession, signOrderAccess, verifyOrderAccess, getAccount, RateLimitError, SESSION_TTL_SECONDS, type SmsSender, type CustomerSession, type AccountOrder } from "./customers/auth";
 export { sanitizeProductHtml } from "./storefront/html";
+export { createDraftOrder, listDraftOrders, cancelDraftOrder, draftLink, viewDraftOrder, placeDraftOrder, type DraftInput, type DraftRow, type DraftStatus, type DraftView } from "./admin/draft-orders";
+export { messageCustomer, ORDER_MESSAGE_MAX } from "./admin/order-messages";
+export { getEditableOrder, editOrderItems, type EditableOrder, type WantedLine } from "./admin/order-items";
 export { listOrders, orderTabCounts, setOrderTags, listOrderTags, setCallNote, bulkChangeStatus, ordersCsv, cleanTag, getOrderDetail, verifyPayment, rejectPayment, addOrderNote, updateShippingAddress, markPacked, shipManually, recordPrinted, type OrderTab, type OrderFilters, type OrderRow, type OrderDetail, type AddressEdit } from "./admin/orders";
 export { recordOrderEvent, type OrderEventType } from "./admin/order-events";
 export { DEMO_TEMPLATES, demoTemplate, type DemoTemplate, type DemoProduct, type DemoVariant } from "./demo/templates";
@@ -40,7 +43,11 @@ export { getDashboard, DASHBOARD_RANGES, type DashboardRange, dhakaDate, addDays
 export { listInventory, adjustStock, updateStockSettings, listStockHistory, STOCK_REASONS, type InventoryRow, type InventorySummary, type StockFilter, type AdjustInput } from "./admin/inventory";
 export { listCustomers, getCustomerDetail, updateCustomer, createCustomer, setCustomerBlocked, customersCsv, VIP_SPENT, VIP_ORDERS, type CustomerRow, type CustomerSegment } from "./admin/customers";
 export { listCoupons, saveCoupon, setCouponActive, deleteCoupon, couponStatus, CouponInput, type CouponStatus } from "./admin/coupons";
-export { listAdminProducts, bulkProductAction, importProductsCsv, IMPORT_TEMPLATE, IMPORT_MAX_ROWS, type ProductImportResult, saveProduct, getProductForEdit, setProductStatus, listCategoriesAdmin, saveCategory, deleteCategory, slugify, SaveProductInput, type AdminProductRow, type ProductTab } from "./admin/products";
+export { submitContactMessage, listContactMessages, markContactRead, replyToContact, closeContact, ContactRateLimitError, CONTACT_MESSAGE_MAX, CONTACT_REPLY_MAX, type ContactInput, type ContactRow, type ContactStatus, type ContactTab } from "./admin/contact-inbox";
+export { requestStockAlert, listStockAlerts, notifyRestocked, sweepStockAlerts, removeStockAlerts, type StockAlertRow, type RestockSummary } from "./admin/stock-alerts";
+export { storeOriginFor } from "./storefront/origin";
+export { importCustomersCsv, CUSTOMER_IMPORT_MAX_ROWS, CUSTOMER_IMPORT_TEMPLATE, type CustomerImportResult } from "./admin/customer-import";
+export { type CategoryAdminRow, type CategoryInput, listAdminProducts, bulkProductAction, importProductsCsv, IMPORT_TEMPLATE, IMPORT_MAX_ROWS, type ProductImportResult, saveProduct, getProductForEdit, setProductStatus, listCategoriesAdmin, saveCategory, deleteCategory, slugify, SaveProductInput, type AdminProductRow, type ProductTab } from "./admin/products";
 export { getSalesReport, salesReportCsv, lastDays, changePercent, type SalesReport, type PeriodTotals } from "./admin/reports";
 export { getStoreSettings, getPrintSettings, saveStoreDetails, saveInvoiceSettings, INVOICE_PAPERS, type InvoicePaper, type InvoiceSettingsInput, setOrdersPaused, savePaymentSettings, listZones, saveZone, deleteZone, ALL_OTHER_DISTRICTS, type StoreSettingsView, type StoreDetailsInput, type PaymentSettingsInput, type ZoneInput } from "./admin/settings";
 export { parseOrderMessage, findCustomerForOrder, searchVariantsForOrder, createQuickOrder, QUICK_SOURCES, QuickOrderInput, type ParsedMessage, type CatalogVariant, type QuickSource } from "./admin/quick-order";

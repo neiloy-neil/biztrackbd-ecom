@@ -7,6 +7,7 @@ const PAGES = [
   "/orders",
   "/orders?tab=check",
   "/orders/new",
+  "/orders/drafts",
   "/products",
   "/products/new",
   "/products/import",

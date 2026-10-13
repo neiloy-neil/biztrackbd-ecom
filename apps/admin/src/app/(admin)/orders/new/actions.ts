@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
-  DomainError, createQuickOrder, findCustomerForOrder, parseOrderMessage, quoteOrder, searchVariantsForOrder, type ParsedMessage, type Quote,
+  DomainError, createDraftOrder, draftLink, createQuickOrder, findCustomerForOrder, parseOrderMessage, quoteOrder, searchVariantsForOrder, type ParsedMessage, type Quote,
 } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 
@@ -72,4 +72,21 @@ export async function createDeskOrderAction(order: DeskOrder): Promise<DeskResul
 export async function openOrderAction(id: string): Promise<void> {
   await requireAction("orders", "view");
   redirect(`/orders/${id}`);
+}
+
+export type DraftResult = { ok: true; link: string; total: number | null; phone: string; hours: number } | { ok: false; error: string };
+
+/** Saves what is on the desk as a draft and returns the link to send the customer. Nothing is reserved until they place it. */
+export async function createDeskDraftAction(order: Pick<DeskOrder, "customer" | "shipping" | "items" | "couponCode" | "note">): Promise<DraftResult> {
+  const s = await requireAction("orders", "edit");
+  try {
+    const hours = 48;
+    const d = await createDraftOrder(s.tenantId, s.actor, { ...order, hours });
+    revalidatePath("/orders/drafts");
+    return { ok: true, link: await draftLink(s.tenantId, d.code), total: d.total, phone: order.customer.phone, hours };
+  } catch (e) {
+    if (e instanceof DomainError) return { ok: false, error: e.message };
+    console.error("createDeskDraftAction failed", e instanceof Error ? e.name : "unknown");
+    return { ok: false, error: "Something went wrong. The draft was not saved." };
+  }
 }

@@ -7,7 +7,7 @@ import { dateTime, prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { CHANNEL, OrderPill, PaymentPill, methodName } from "@/lib/status";
-import { blockAction, bookAction, callNoteAction, tagsAction, holdAction, noteAction, refreshCourierAction, refreshFraudAction, releaseHoldAction, returnedAction, shipAction, statusAction, verifyAction } from "./actions";
+import { blockAction, bookAction, callNoteAction, messageAction, tagsAction, holdAction, noteAction, refreshCourierAction, refreshFraudAction, releaseHoldAction, returnedAction, shipAction, statusAction, verifyAction } from "./actions";
 import { AddressEditor, CopyButton, RejectForm } from "./forms";
 
 export const dynamic = "force-dynamic";
@@ -91,7 +91,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
           </section>
 
           <section className="card" data-testid="items-card">
-            <div className="card-head"><h2>Items ({o.items.reduce((n, i) => n + i.quantity, 0)})</h2></div>
+            <div className="card-head"><h2>Items ({o.items.reduce((n, i) => n + i.quantity, 0)})</h2>{canEdit && ["PENDING", "CONFIRMED", "PROCESSING"].includes(o.status) && <Link href={`/orders/${o.id}/items`} className="link" prefetch={false} data-testid="change-items">Change items</Link>}</div>
             {o.items.map((i) => (
               <div key={i.id} className="row" style={{ padding: "8px 0", flexWrap: "nowrap", alignItems: "flex-start" }}>
                 <span className="thumb">{i.imageUrl ? /* eslint-disable-line @next/next/no-img-element */ <img src={i.imageUrl} alt="" width={44} height={44} style={{ objectFit: "cover" }} /> : "·"}</span>
@@ -228,6 +228,19 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               <p className="muted" style={{ margin: 0 }}>{o.tags.length ? o.tags.join(", ") : "No labels."}</p>
             )}
           </section>
+
+          {canEdit && o.customerPhone && (
+            <section className="card" data-testid="message-card">
+              <div className="card-head"><h2>Message the customer</h2></div>
+              <form action={messageAction.bind(null, o.id)} className="stack">
+                <label className="field" style={{ marginBottom: 0 }}>
+                  <span className="label">SMS to {prettyPhone(o.customerPhone)} <span className="opt">(uses one SMS credit; their reply comes to your own phone)</span></span>
+                  <textarea className="textarea" name="text" rows={2} maxLength={200} required placeholder={`Your parcel goes out tomorrow. Please keep ${taka(o.totals.total)} ready.`} data-testid="message-text" />
+                </label>
+                <SubmitButton className="btn btn-secondary btn-sm" pending="Sending…" data-testid="message-send">Send SMS</SubmitButton>
+              </form>
+            </section>
+          )}
 
           <section className="card" data-testid="delivery-card">
             <div className="card-head"><h2>Delivery</h2></div>

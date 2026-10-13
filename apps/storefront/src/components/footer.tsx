@@ -38,6 +38,7 @@ const Help = ({ title, info, t, pages, hasBlog }: { title: string; info: StoreIn
     {info.whatsappNumber && <a href={`https://wa.me/88${info.whatsappNumber}`} rel="noopener noreferrer">WhatsApp</a>}
     {info.facebookUrl && <a href={info.facebookUrl} rel="noopener noreferrer">Facebook</a>}
     <Link href="/account">{t("account")}</Link>
+    <Link href="/contact">{t("contact")}</Link>
     {hasBlog && <Link href="/blog">{t("blog")}</Link>}
     {pages.map((p) => <Link key={p.slug} href={`/p/${p.slug}`}>{p.title}</Link>)}
   </div>

@@ -80,4 +80,13 @@ test.describe.serial("handling orders", () => {
     await page.goto("/orders?tab=cancelled");
     await expect(page.locator(`a:has-text("${a.orderNumber}"):visible`).first()).toBeVisible();
   });
+
+  test("the owner texts the customer from the order, and the words are on the timeline", async ({ page }) => {
+    await page.goto(`/orders/${orderId}`);
+    const words = `Your parcel goes out tomorrow ${Date.now().toString(36)}`;
+    await page.getByTestId("message-text").fill(words);
+    await page.getByTestId("message-send").click();
+    await expect(page.getByTestId("timeline")).toContainText(`SMS to customer: ${words}`);
+    await expect(page.getByTestId("timeline")).toContainText("Nusrat Jahan");
+  });
 });

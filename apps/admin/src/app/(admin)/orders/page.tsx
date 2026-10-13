@@ -68,7 +68,7 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
 
   return (
     <>
-      <PageHeader title="Orders" actions={<><a href={`/orders/export${qs(base)}`} className="btn btn-secondary" data-testid="export-orders">Export CSV</a>{canEdit && <Link href="/orders/new" className="btn btn-primary" prefetch={false}>Create order</Link>}</>} />
+      <PageHeader title="Orders" actions={<><Link href="/orders/drafts" className="btn btn-secondary" prefetch={false} data-testid="open-drafts">Draft orders</Link><a href={`/orders/export${qs(base)}`} className="btn btn-secondary" data-testid="export-orders">Export CSV</a>{canEdit && <Link href="/orders/new" className="btn btn-primary" prefetch={false}>Create order</Link>}</>} />
 
       {packedMsg && <div className="notice good" role="status" style={{ marginBottom: 12 }}>{packedMsg[1]} marked as packed{packedMsg[2] ? `. ${packedMsg[2]} could not be packed (they must be confirmed first).` : "."}</div>}
       {bookedMsg && <div className="notice good" role="status" style={{ marginBottom: 12 }} data-testid="booked-msg">{bookedMsg[1]} booked with the courier{bookedMsg[2] ? `. ${bookedMsg[2]} could not be booked${why ? `: ${why}` : ""}.` : "."}</div>}

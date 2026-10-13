@@ -153,3 +153,47 @@ describe("orders spreadsheet", () => {
     await fails(ordersCsv(f.tenantId, S.content), "FORBIDDEN");
   });
 });
+
+describe("messaging the customer from an order", () => {
+  it("sends the owner's words by SMS, uses one credit and writes the message on the timeline", async () => {
+    const { messageCustomer, setSmsSender } = await import("../src");
+    const sent: string[] = [];
+    setSmsSender({ async send(_t, to, text) { sent.push(`${to}: ${text}`); } });
+    const S = await store("msg");
+    const o = await place(S.f);
+    const ph = (await owner.order.findUniqueOrThrow({ where: { id: o.orderId } })).customerPhone;
+    const r = await messageCustomer(S.f.tenantId, S.owner, o.orderId, "  Your   parcel goes out tomorrow  ");
+    expect(r.parts).toBe(1);
+    expect(sent).toEqual([`${ph}: Your parcel goes out tomorrow`]);
+    const e = await owner.orderEvent.findMany({ where: { orderId: o.orderId, type: "SMS" } });
+    expect(e.map((x) => x.message)).toEqual(["SMS to customer: Your parcel goes out tomorrow"]);
+    expect(e[0]!.actorName).toBe("Nusrat");
+    const used = await owner.usageCounter.findFirst({ where: { tenantId: S.f.tenantId, metric: "sms" } });
+    expect(Number(used?.value)).toBe(1);
+  });
+
+  it("refuses an empty or very long message, a customer who opted out, and people who cannot edit orders; nothing is sent", async () => {
+    const { messageCustomer, setSmsSender, ORDER_MESSAGE_MAX } = await import("../src");
+    const sent: string[] = [];
+    setSmsSender({ async send(_t, to, text) { sent.push(`${to}: ${text}`); } });
+    const S = await store("msgno");
+    const o = await place(S.f);
+    await fails(messageCustomer(S.f.tenantId, S.owner, o.orderId, "  "), "VALIDATION_ERROR");
+    await fails(messageCustomer(S.f.tenantId, S.owner, o.orderId, "x".repeat(ORDER_MESSAGE_MAX + 1)), "VALIDATION_ERROR");
+    await fails(messageCustomer(S.f.tenantId, S.content, o.orderId, "hello there"), "FORBIDDEN");
+    const ph = (await owner.order.findUniqueOrThrow({ where: { id: o.orderId } })).customerPhone;
+    await owner.smsOptOut.create({ data: { tenantId: S.f.tenantId, phone: ph, reason: "USER_STOP_REQUEST" } });
+    await fails(messageCustomer(S.f.tenantId, S.owner, o.orderId, "hello there"), "VALIDATION_ERROR");
+    expect(sent).toEqual([]);
+    expect(await owner.orderEvent.count({ where: { orderId: o.orderId, type: "SMS" } })).toBe(0);
+  });
+
+  it("a failing SMS provider gives a plain message and nothing on the timeline", async () => {
+    const { messageCustomer, setSmsSender } = await import("../src");
+    setSmsSender({ async send() { throw new Error("gateway down"); } });
+    const S = await store("msgfail");
+    const o = await place(S.f);
+    await fails(messageCustomer(S.f.tenantId, S.owner, o.orderId, "hello there"), "VALIDATION_ERROR");
+    expect(await owner.orderEvent.count({ where: { orderId: o.orderId, type: "SMS" } })).toBe(0);
+  });
+});

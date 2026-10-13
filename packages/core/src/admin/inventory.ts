@@ -1,4 +1,5 @@
 import { withTenant } from "@biztrackbd/db";
+import { afterRestock } from "./stock-alerts";
 import { audit } from "../audit/service";
 import { NotFoundError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
@@ -108,7 +109,7 @@ export async function adjustStock(tenantId: string, actor: StaffActor, variantId
   if (hasDelta && (!Number.isInteger(input.delta) || Math.abs(input.delta!) > 1_000_000 || input.delta === 0)) throw new ValidationError("Enter a whole number other than zero");
   if (hasSet && (!Number.isInteger(input.setTo) || input.setTo! < 0 || input.setTo! > 1_000_000)) throw new ValidationError("Enter a count of zero or more");
 
-  return withTenant(tenantId, async (tx) => {
+  const result = await withTenant(tenantId, async (tx) => {
     const before = await tx.$queryRaw<{ stock: number; product: string; variant: string }[]>`
       SELECT v."stockQuantity" AS stock, p.title AS product, v.title AS variant
       FROM "ProductVariant" v JOIN "Product" p ON p.id = v."productId" WHERE v.id = ${variantId} FOR UPDATE OF v`;
@@ -130,6 +131,8 @@ export async function adjustStock(tenantId: string, actor: StaffActor, variantId
     await audit(tx, tenantId, actor, "stock.adjusted", { product: row.product, variant: row.variant, delta, quantityAfter, reason });
     return { quantityAfter, delta };
   });
+  if (result.delta > 0) await afterRestock(tenantId);
+  return result;
 }
 
 /** Reorder level and shelf label for a variant. */

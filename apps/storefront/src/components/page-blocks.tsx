@@ -62,7 +62,7 @@ export function ProductMain({ ctx, s, lang, t, id }: { ctx: ProductCtx; s: S; la
           <PurchasePanel
             variants={p.variants.map((v) => ({ id: v.id, title: v.title, price: v.price, compareAtPrice: v.compareAtPrice, stock: v.stock }))}
             hasChoices={hasChoices}
-            text={{ size: t("size"), chooseSize: t("chooseSize"), quantity: t("quantity"), addToCart: t("addToCart"), buyNow: t("buyNow"), added: t("added"), viewCart: t("viewCart"), soldOut: t("soldOut"), onlyLeft: t("onlyLeft", { n: "{n}", size: "{size}" }), priceLabel: prices }}
+            text={{ size: t("size"), chooseSize: t("chooseSize"), quantity: t("quantity"), addToCart: t("addToCart"), buyNow: t("buyNow"), added: t("added"), viewCart: t("viewCart"), soldOut: t("soldOut"), notifyTitle: t("notifyTitle"), notifyPhone: t("notifyPhone"), notifyButton: t("notifyButton"), notifySent: t("notifySent"), notifyWaiting: t("notifyWaiting"), notifyBad: t("notifyBad"), onlyLeft: t("onlyLeft", { n: "{n}", size: "{size}" }), priceLabel: prices }}
           />
 
           {on(s.showAssurance) && (

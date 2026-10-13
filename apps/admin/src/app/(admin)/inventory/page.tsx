@@ -68,7 +68,7 @@ export default async function Inventory({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <div className="page-head"><h1>Inventory</h1><div className="actions"><Link href="/products" className="btn btn-secondary" prefetch={false}>Products</Link></div></div>
+      <div className="page-head"><h1>Inventory</h1><div className="actions"><Link href="/inventory/alerts" className="btn btn-secondary" prefetch={false} data-testid="open-alerts">Back in stock requests</Link><Link href="/products" className="btn btn-secondary" prefetch={false}>Products</Link></div></div>
       <div className="grid grid-4" style={{ marginBottom: 14 }}>
         <div className="stat"><div className="k">Units in stock</div><div className="v num">{list.summary.unitsInStock.toLocaleString("en-IN")}</div></div>
         {showValue ? <div className="stat"><div className="k">Stock value (at cost)</div><div className="v num">{taka(list.summary.stockValueAtCost)}</div></div> : <div className="stat"><div className="k">Variants</div><div className="v num">{list.total}</div></div>}

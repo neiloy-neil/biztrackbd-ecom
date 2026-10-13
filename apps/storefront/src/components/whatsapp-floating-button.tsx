@@ -32,7 +32,7 @@ export function WhatsAppFloatingButton({ whatsappNumber, greeting }: Props) {
           align-items: center;
           gap: 8px;
           background: #25D366;
-          color: #ffffff;
+          color: #05290f;
           padding: 10px 14px;
           border-radius: 9999px;
           box-shadow: 0 4px 16px rgba(37, 211, 102, 0.4), 0 2px 6px rgba(0,0,0,0.15);

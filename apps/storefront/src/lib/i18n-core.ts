@@ -17,6 +17,7 @@ const en = {
   trustDeliveryT: "1 to 4 day delivery", trustDeliveryS: "Inside Dhaka in 1 to 2 days.",
   trustExchangeT: "Easy size exchange", trustExchangeS: "Within 7 days of delivery.",
   // product
+  notifyTitle: "Sold out. Want to know when it is back?", notifyPhone: "Your mobile number", notifyButton: "Tell me when it is back", notifySent: "Done. We will send you an SMS when it is back.", notifyWaiting: "You are already on the list. We will SMS you.", notifyBad: "Enter a valid mobile number, like 01712345678",
   inStock: "In stock", soldOut: "Sold out", onlyLeft: "Only {n} left in size {size}", size: "Size", option: "Option", quantity: "Quantity",
   save: "Save {amount}", addToCart: "Add to cart", buyNow: "Buy now", added: "Added to your cart", viewCart: "View cart", description: "Description",
   reviews: "{n} reviews", noReviews: "No reviews yet", goesWith: "Goes well with", chooseSize: "Choose a size",
@@ -77,6 +78,7 @@ const bn: Record<Key, string> = {
   trustMfsT: "বিকাশ ও নগদ", trustMfsS: "এখনই দিন, ২ ঘণ্টার মধ্যে নিশ্চিত করি।",
   trustDeliveryT: "১ থেকে ৪ দিনে ডেলিভারি", trustDeliveryS: "ঢাকার ভেতরে ১ থেকে ২ দিনে।",
   trustExchangeT: "সহজ সাইজ বদল", trustExchangeS: "ডেলিভারির ৭ দিনের মধ্যে।",
+  notifyTitle: "শেষ হয়ে গেছে। আবার এলে জানতে চান?", notifyPhone: "আপনার মোবাইল নম্বর", notifyButton: "আবার এলে জানান", notifySent: "ঠিক আছে। আবার এলে আপনাকে SMS পাঠাব।", notifyWaiting: "আপনি তালিকায় আছেন। এলে SMS পাঠাব।", notifyBad: "সঠিক মোবাইল নম্বর দিন, যেমন 01712345678",
   inStock: "স্টকে আছে", soldOut: "শেষ", onlyLeft: "{size} সাইজে মাত্র {n}টি আছে", size: "সাইজ", option: "অপশন", quantity: "পরিমাণ",
   save: "{amount} সাশ্রয়", addToCart: "কার্টে যোগ করুন", buyNow: "এখনই কিনুন", added: "কার্টে যোগ হয়েছে", viewCart: "কার্ট দেখুন", description: "বিবরণ",
   reviews: "{n}টি রিভিউ", noReviews: "এখনও কোনো রিভিউ নেই", goesWith: "এর সাথে মানানসই", chooseSize: "সাইজ বেছে নিন",

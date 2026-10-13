@@ -30,7 +30,7 @@ export default async function Customers({ searchParams }: { searchParams: Promis
     <>
       <div className="page-head">
         <h1>Customers</h1>
-        <div className="actions"><a className="btn btn-secondary" href="/customers/export" download>Export CSV</a></div>
+        <div className="actions">{can(s.user.role, "customers", "edit") && <Link href="/customers/import" className="btn btn-secondary" prefetch={false} data-testid="import-customers">Import</Link>} <a className="btn btn-secondary" href="/customers/export" download>Export CSV</a></div>
       </div>
       <div className="grid grid-4" style={{ marginBottom: 14 }}>
         <div className="stat"><div className="k">All customers</div><div className="v num">{list.summary.all}</div></div>

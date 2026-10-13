@@ -1,3 +1,4 @@
+import { afterRestock } from "../admin/stock-alerts";
 import { assertTakesOrders } from "../demo/guard";
 import { randomUUID } from "node:crypto";
 import { Prisma, withTenant, type OrderStatus, type TenantTx } from "@biztrackbd/db";
@@ -365,6 +366,7 @@ export async function transitionOrder(tenantId: string, orderId: string, to: Ord
   await sendNotices(tenantId, notices);
   const told = to === "SHIPPED" ? "ORDER_SHIPPED" : to === "DELIVERED" ? "DELIVERED" : to === "CANCELLED" ? "ORDER_CANCELLED" : null;
   if (told) await notifyOrder(tenantId, orderId, told);
+  if (RESTOCKS_ON.includes(to)) await afterRestock(tenantId);
   if (to === "CANCELLED" || to === "RETURNED" || to === "REFUNDED") {
     sendServerCancellation(tenantId, orderId, reason ?? `Order ${to}`).catch(() => undefined);
   }

@@ -33,8 +33,7 @@ export async function bulkBookAction(form: FormData): Promise<void> {
   redirect(`${safeBack}${sep}msg=booked-${r.done.length}-${r.skipped.length}${why}`);
 }
 
-async function bulkStatus(form: FormData, to: "CONFIRMED" | "CANCELLED"): Promise<void> {
-  const s = await requireAction("orders", "edit");
+async function bulkStatus(s: Awaited<ReturnType<typeof requireAction>>, form: FormData, to: "CONFIRMED" | "CANCELLED"): Promise<void> {
   const ids = form.getAll("ids").map(String).filter(Boolean);
   const back = String(form.get("back") ?? "/orders");
   const safeBack = back.startsWith("/orders") ? back : "/orders";
@@ -54,10 +53,12 @@ async function bulkStatus(form: FormData, to: "CONFIRMED" | "CANCELLED"): Promis
 
 /** Confirm every selected order. */
 export async function bulkConfirmAction(form: FormData): Promise<void> {
-  await bulkStatus(form, "CONFIRMED");
+  const s = await requireAction("orders", "edit");
+  await bulkStatus(s, form, "CONFIRMED");
 }
 
 /** Cancel every selected order. Needs a reason, typed once for all of them. */
 export async function bulkCancelAction(form: FormData): Promise<void> {
-  await bulkStatus(form, "CANCELLED");
+  const s = await requireAction("orders", "edit");
+  await bulkStatus(s, form, "CANCELLED");
 }

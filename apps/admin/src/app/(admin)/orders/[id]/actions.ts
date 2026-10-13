@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
-  DomainError, addOrderNote, setCallNote, setOrderTags, blockPhone, bookCourier, holdOrder, isValidAddress, markPacked, markParcelReturned, refreshCourierStatus, refreshOrderFraudReport, rejectPayment, releaseHold, shipManually,
+  DomainError, addOrderNote, messageCustomer, setCallNote, setOrderTags, blockPhone, bookCourier, holdOrder, isValidAddress, markPacked, markParcelReturned, refreshCourierStatus, refreshOrderFraudReport, rejectPayment, releaseHold, shipManually,
   transitionOrder, updateShippingAddress, verifyPayment,
 } from "@biztrackbd/core";
 import type { OrderStatus } from "@biztrackbd/db";
@@ -141,4 +141,10 @@ export async function tagsAction(id: string, form: FormData): Promise<void> {
 export async function callNoteAction(id: string, form: FormData): Promise<void> {
   const s = await requireAction("orders", "edit");
   await run(id, () => setCallNote(s.tenantId, s.actor, id, String(form.get("callNote") ?? "")));
+}
+
+/** An SMS to the customer about this order, in the owner's own words. */
+export async function messageAction(id: string, form: FormData): Promise<void> {
+  const s = await requireAction("orders", "edit");
+  await run(id, () => messageCustomer(s.tenantId, s.actor, id, String(form.get("text") ?? "")));
 }

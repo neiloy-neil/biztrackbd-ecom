@@ -181,7 +181,8 @@ export async function listProducts(tenantId: string, opts: ListProductsOptions =
     const where = {
       status: "ACTIVE" as const,
       deletedAt: null,
-      ...(opts.categorySlug ? { category: { slug: opts.categorySlug } } : {}),
+      // A top-level category also shows the products of its sub-categories.
+      ...(opts.categorySlug ? { AND: [{ OR: [{ category: { slug: opts.categorySlug } }, { category: { parent: { slug: opts.categorySlug } } }] }] } : {}),
       ...(opts.featuredOnly ? { isFeatured: true } : {}),
       ...(opts.onSale ? { compareAtPrice: { not: null } } : {}),
       ...(q ? { OR: [{ title: { contains: like, mode: "insensitive" as const } }, { titleBn: { contains: like } }, { tags: { has: q.toLowerCase() } }] } : {}),

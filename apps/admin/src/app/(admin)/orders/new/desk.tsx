@@ -7,7 +7,7 @@ import { BD_GEO } from "@biztrackbd/core/geo";
 import { SubmitButton } from "@/components/ui";
 import { taka } from "@/lib/format";
 import {
-  createDeskOrderAction, deskQuoteAction, lookupCustomerAction, parseMessageAction, searchProductsAction,
+  createDeskDraftAction, createDeskOrderAction, deskQuoteAction, lookupCustomerAction, parseMessageAction, searchProductsAction,
 } from "./actions";
 
 type Found = Awaited<ReturnType<typeof lookupCustomerAction>>;
@@ -61,6 +61,8 @@ export function QuickOrderDesk({ prefill }: { prefill?: Prefill }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<{ id: string; number: string; total: number }[]>([]);
+  const [draft, setDraft] = useState<{ link: string; total: number | null; phone: string; hours: number } | null>(null);
+  const [copied, setCopied] = useState(false);
   const seq = useRef(0);
 
   useEffect(() => { const t = setInterval(() => setTick((n) => n + 1), 1000); return () => clearInterval(t); }, []);
@@ -142,6 +144,22 @@ export function QuickOrderDesk({ prefill }: { prefill?: Prefill }) {
     const over = lines.find((l) => l.quantity > l.stock);
     if (over) return `Only ${over.stock} left of ${over.label}.`;
     return "";
+  }
+
+  async function saveDraft() {
+    if (busy) return;
+    const p = problem();
+    setError(p);
+    if (p) return;
+    setBusy(true);
+    const r = await createDeskDraftAction({
+      customer: { name: name.trim(), phone: `0${phone}` }, shipping: { division, district, upazila, address: address.trim() },
+      items: lines.map((l) => ({ variantId: l.variantId, quantity: l.quantity })), couponCode: coupon.trim() || undefined, note: note.trim() || undefined,
+    });
+    setBusy(false);
+    if (!r.ok) { setError(r.error); return; }
+    setDraft({ link: r.link, total: r.total, phone: r.phone, hours: r.hours });
+    setCopied(false);
   }
 
   async function create(next: boolean) {
@@ -270,9 +288,23 @@ export function QuickOrderDesk({ prefill }: { prefill?: Prefill }) {
             <div className="stack" style={{ marginTop: 14 }}>
               <SubmitButton className="btn btn-primary btn-block btn-lg" pending="Creating…" disabled={busy} onClick={(e) => { e.preventDefault(); void create(false); }} data-testid="desk-create">Create order</SubmitButton>
               <button type="button" className="btn btn-secondary btn-block" disabled={busy} onClick={() => void create(true)} data-testid="desk-create-next">Create and start the next one</button>
+              <button type="button" className="btn btn-secondary btn-block" disabled={busy} onClick={() => void saveDraft()} data-testid="desk-draft">Save as a draft and get a link</button>
               <p className="muted" style={{ fontSize: 12.5, textAlign: "center" }}>Press Ctrl and Enter to save and start the next order.</p>
             </div>
           </section>
+
+          {draft && (
+            <section className="card stack" data-testid="desk-draft-done">
+              <h2>Send this link to the customer</h2>
+              <p className="muted" style={{ margin: 0 }}>They open it, check the order, choose how to pay and place it themselves. Nothing is reserved until they do. It works for {draft.hours} hours.</p>
+              <input className="input" readOnly value={draft.link} onFocus={(e) => e.currentTarget.select()} aria-label="Order link" data-testid="desk-draft-link" />
+              <div className="row">
+                <button type="button" className="btn btn-secondary" onClick={async () => { try { await navigator.clipboard.writeText(draft.link); setCopied(true); } catch { /* clipboard blocked */ } }}>{copied ? "Copied" : "Copy link"}</button>
+                <a className="btn btn-secondary" target="_blank" rel="noopener noreferrer" href={`https://wa.me/88${draft.phone}?text=${encodeURIComponent(`Please check and confirm your order: ${draft.link}`)}`}>Send on WhatsApp</a>
+                <button type="button" className="btn btn-primary" onClick={() => { setDraft(null); reset(true); }}>Start the next one</button>
+              </div>
+            </section>
+          )}
 
           {done.length > 0 && (
             <section className="card" data-testid="desk-done">

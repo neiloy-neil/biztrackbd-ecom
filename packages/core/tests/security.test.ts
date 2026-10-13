@@ -72,7 +72,9 @@ describe("who can call each admin and platform action", () => {
     // Public on purpose: store photos, which the public storefront shows anyway (random ids, path shape checked, read-only).
     // The demo admin's door (docs/41): starting is limited per visitor and capped for everyone, and a demo copy can reach nothing but itself;
     // leaving only forgets a cookie.
-    const PUBLIC_ROUTES = new Set(["apps/admin/src/app/media/[...path]/route.ts", "apps/admin/src/app/demo/start/route.ts", "apps/admin/src/app/demo/exit/route.ts"]);
+    // The product feed alias (/api/feed/facebook.xml and friends): a public product feed for Meta and Google, which must be fetchable without signing in.
+    // It only rewrites to /api/catalog/facebook, which lists published products (what the public store shows) for the store named in ?store=.
+    const PUBLIC_ROUTES = new Set(["apps/admin/src/app/api/feed/[format]/route.ts", "apps/admin/src/app/media/[...path]/route.ts", "apps/admin/src/app/demo/start/route.ts", "apps/admin/src/app/demo/exit/route.ts"]);
     for (const f of routes.filter((r) => !PUBLIC_ROUTES.has(rel(r)))) {
       const text = readFileSync(f, "utf8");
       const guarded = /getSession(OrNull)?\(|requireAccess\(|requireAction\(|authorised\(|CRON_SECRET|verify|signature|token/i.test(text);
