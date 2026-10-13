@@ -27,7 +27,8 @@ const DRAWINGS: Record<string, ReactNode> = {
 const KIND: Record<string, keyof typeof DRAWINGS> = {
   "lp-hero": "hero", "lp-video": "video", "lp-benefits": "list", "lp-split": "split", "lp-text": "text", "lp-gallery": "gallery", "lp-reviews": "reviews",
   "lp-countdown": "clock", "lp-stock": "bar", "lp-offer-bar": "price", "trust-strip": "bar", "lp-faq": "faq", "lp-order-form": "form", "lp-sticky-cta": "bar",
-  hero: "hero", banner: "split", "rich-text": "text", "featured-products": "gallery", "category-grid": "gallery",
+  hero: "hero", banner: "split", "rich-text": "text", "featured-products": "gallery", "category-grid": "gallery", "announcement-bar": "bar",
+  "product-main": "split", "product-reviews": "reviews", "product-related": "gallery", "collection-header": "text", "collection-products": "gallery", "cart-main": "form",
 };
 
 export function SectionThumb({ type }: { type: string }) {

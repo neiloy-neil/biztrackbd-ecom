@@ -3,6 +3,7 @@ import type { PageData, PageJson, PageSection } from "@biztrackbd/core";
 import { parseEndsAt, productKey, youtubeId } from "@biztrackbd/core/builder-client";
 import { money, type Lang, type T } from "@/lib/i18n-core";
 import { Countdown } from "./countdown";
+import { mark, markImg } from "./edit-marks";
 import type { PageCtx } from "@/lib/page-ctx";
 import { renderPageBlock } from "./page-blocks";
 import { ProductCard } from "./product-card";
@@ -25,8 +26,10 @@ function Img({ src, alt = "", className }: { src: string; alt?: string; classNam
   return <img src={src} alt={alt} className={className} loading="lazy" decoding="async" />;
 }
 
-function Cta({ href, className, children }: { href: string; className: string; children: React.ReactNode }) {
-  if (!href) return null;
+function Cta({ href, className, children, attrs }: { href: string; className: string; children: React.ReactNode; attrs?: Record<string, string> }) {
+  // In the editor a button without a link is still drawn, so its words can be typed.
+  if (!href) return attrs && Object.keys(attrs).length ? <span className={className} {...attrs}>{children}</span> : null;
+  if (attrs && Object.keys(attrs).length) return <span className={className} {...attrs}>{children}</span>;
   return href.startsWith("/") ? <Link href={href} className={className}>{children}</Link> : <a href={href} className={className} rel="noopener noreferrer">{children}</a>;
 }
 
@@ -41,11 +44,6 @@ export interface LandingInfo {
   was: number | null;
 }
 
-/** Marks a piece of text as editable on the page itself (the editor's preview only). `twin` says the field has a Bangla version. */
-const mark = (editing: boolean | undefined) => (path: string, twin = true): Record<string, string> => (editing ? { "data-edit": path, ...(twin ? { "data-tw": "1" } : {}) } : {});
-/** The same for a picture: a click opens the picture chooser in the editor. */
-const markImg = (editing: boolean | undefined) => (path: string): Record<string, string> => (editing ? { "data-edit-image": path } : {});
-
 function Section({ section, data, lang, t, orderForm, ctx, landing, editing }: { section: PageSection; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx; landing?: LandingInfo; editing?: boolean }) {
   const s = section.settings as S;
   const id = section.id;
@@ -54,10 +52,10 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing }: {
   switch (section.type) {
     case "announcement-bar": {
       const text = L(s, "text", lang);
-      if (!text) return null;
+      if (!text && !editing) return null;
       const style = { background: str(s.bgColor), color: str(s.textColor) };
-      const inner = <span>{text}</span>;
-      return <div className="b-announce" style={style} data-section={id}>{str(s.link) ? <Cta href={str(s.link)} className="b-announce-link">{inner}</Cta> : inner}</div>;
+      const inner = <span {...ed("text")}>{text}</span>;
+      return <div className="b-announce" style={style} data-section={id}>{str(s.link) && !editing ? <Cta href={str(s.link)} className="b-announce-link">{inner}</Cta> : inner}</div>;
     }
     case "hero": {
       const img = str(s.image);
@@ -65,39 +63,40 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing }: {
         <section className={`hero${s.align === "center" ? " hero-center" : ""}`} data-section={id}>
           <div className="wrap">
             <div>
-              {L(s, "eyebrow", lang) && <div className="eyebrow">{L(s, "eyebrow", lang)}</div>}
-              <h1>{L(s, "title", lang)}</h1>
-              {L(s, "text", lang) && <p>{L(s, "text", lang)}</p>}
-              <div className="ctas"><Cta href={str(s.ctaLink)} className="btn btn-primary">{L(s, "ctaText", lang)}</Cta></div>
+              {(L(s, "eyebrow", lang) || editing) && <div className="eyebrow" {...ed("eyebrow")}>{L(s, "eyebrow", lang)}</div>}
+              <h1 {...ed("title")}>{L(s, "title", lang)}</h1>
+              {(L(s, "text", lang) || editing) && <p {...ed("text")}>{L(s, "text", lang)}</p>}
+              <div className="ctas"><Cta href={str(s.ctaLink)} className="btn btn-primary" attrs={ed("ctaText")}>{L(s, "ctaText", lang)}</Cta></div>
             </div>
-            {img && <div className="b-hero-img"><Img src={img} /></div>}
+            {img ? <div className="b-hero-img" {...edImg("image")}><Img src={img} /></div> : editing ? <div className="b-hero-img lp-pick" {...edImg("image")}>+ Picture</div> : null}
           </div>
         </section>
       );
     }
     case "featured-products": {
       const items = (data.products[productKey(s as { source: string; categorySlug?: string })] ?? []).slice(0, Number(s.limit) || 8);
-      if (items.length === 0) return null;
+      if (items.length === 0 && !editing) return null;
       const cols = s.columns === "3" ? "grid-3" : "grid-4";
       return (
         <div className="wrap" data-section={id}>
           <section className="section">
             <div className="section-head">
-              <h2>{L(s, "title", lang)}</h2>
+              <h2 {...ed("title")}>{L(s, "title", lang)}</h2>
               <Link href={s.source === "sale" ? "/search?sale=1" : s.source === "category" && str(s.categorySlug) ? `/c/${encodeURIComponent(str(s.categorySlug))}` : "/search?sort=newest"} className="link-accent">{t("viewAll")}</Link>
             </div>
-            <div className={`grid ${cols}`}>{items.map((p, i) => <ProductCard key={p.id} p={p} lang={lang} t={t} priority={i < 2} />)}</div>
+            {items.length === 0 ? <p className="muted">No products to show here yet.</p> : <div className={`grid ${cols}`}>{items.map((p, i) => <ProductCard key={p.id} p={p} lang={lang} t={t} priority={i < 2} />)}</div>}
           </section>
         </div>
       );
     }
     case "category-grid": {
       const cats = data.categories.slice(0, Number(s.limit) || 3);
-      if (cats.length === 0) return null;
+      if (cats.length === 0 && !editing) return null;
       return (
         <div className="wrap" data-section={id}>
           <section className="section">
-            <div className="section-head"><h2>{L(s, "title", lang)}</h2></div>
+            <div className="section-head"><h2 {...ed("title")}>{L(s, "title", lang)}</h2></div>
+            {cats.length === 0 && <p className="muted">No categories yet.</p>}
             <div className="cats">{cats.map((c) => <Link key={c.id} href={`/c/${c.slug}`} className="cat" style={{ background: tintFor(c.id) }}>{c.name}</Link>)}</div>
           </section>
         </div>
@@ -109,9 +108,10 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing }: {
         <div className="wrap" data-section={id}>
           <section className={`section b-banner b-banner-${s.height === "tall" ? "tall" : "short"}${img ? " has-img" : ""}`} style={img ? { backgroundImage: `url("${img.replace(/"/g, "%22")}")` } : undefined}>
             <div className="b-banner-text">
-              <h2>{L(s, "heading", lang)}</h2>
-              {L(s, "text", lang) && <p>{L(s, "text", lang)}</p>}
-              <Cta href={str(s.ctaLink)} className="btn btn-primary">{L(s, "ctaText", lang)}</Cta>
+              <h2 {...ed("heading")}>{L(s, "heading", lang)}</h2>
+              {(L(s, "text", lang) || editing) && <p {...ed("text")}>{L(s, "text", lang)}</p>}
+              <Cta href={str(s.ctaLink)} className="btn btn-primary" attrs={ed("ctaText")}>{L(s, "ctaText", lang)}</Cta>
+              {editing && <button type="button" className="lp-pick-btn" {...edImg("image")}>{img ? "Change picture" : "+ Picture"}</button>}
             </div>
           </section>
         </div>
@@ -121,8 +121,10 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing }: {
       return (
         <div className="wrap" data-section={id}>
           <section className="section b-text">
-            {L(s, "heading", lang) && <h2>{L(s, "heading", lang)}</h2>}
-            {L(s, "body", lang).split(/\n{2,}/).filter(Boolean).map((p, i) => <p key={i}>{p}</p>)}
+            {(L(s, "heading", lang) || editing) && <h2 {...ed("heading")}>{L(s, "heading", lang)}</h2>}
+            {editing
+              ? <div style={{ whiteSpace: "pre-wrap" }} {...ed("body", true, true)}>{L(s, "body", lang)}</div>
+              : L(s, "body", lang).split(/\n{2,}/).filter(Boolean).map((p, i) => <p key={i}>{p}</p>)}
           </section>
         </div>
       );
@@ -300,7 +302,7 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing }: {
       return <div className="lp-sticky" data-section={id}><a href="#order" className="btn btn-primary btn-round btn-block" {...ed("text")}>{L(s, "text", lang)}</a></div>;
     default:
       // The product, collection and cart blocks (docs/39) need the page's own data.
-      return <>{renderPageBlock(section.type, id, s, ctx, lang, t)}</>;
+      return <>{renderPageBlock(section.type, id, s, ctx, lang, t, editing)}</>;
   }
 }
 

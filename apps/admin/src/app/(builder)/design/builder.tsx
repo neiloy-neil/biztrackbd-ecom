@@ -220,7 +220,7 @@ export function Builder(props: Props) {
   const [imgSignal, setImgSignal] = useState<{ path: string; n: number } | undefined>(undefined);
   // On a phone the page fills the screen and the settings slide up from the bottom.
   const [sheet, setSheet] = useState(false);
-  const visual = kind === "landing";
+  const visual = true;
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [dragOver, setDragOver] = useState<number | null>(null);
   const [conflict, setConflict] = useState<{ stamp: string | null } | null>(null);
@@ -411,7 +411,8 @@ export function Builder(props: Props) {
       const target = useTwin ? twinPath : m.path;
       const max = (useTwin ? editableField(def, twinPath) : field)?.max ?? 200;
       // eslint-disable-next-line no-control-regex
-      const value = m.value.replace(/[\u0000-\u001F\u007F]/g, " ").slice(0, max);
+      // A paragraph box keeps its line breaks; a single line of text never has one.
+      const value = (field.type === "textarea" ? m.value.replace(/[\u0000-\u0009\u000B-\u001F\u007F]/g, " ") : m.value.replace(/[\u0000-\u001F\u007F]/g, " ")).slice(0, max);
       edit((pg) => ({ ...pg, sections: pg.sections.map((x) => (x.id === section.id ? { ...x, settings: setByPath(x.settings, target, value) } : x)) }));
     },
     "bt-preview:image": (m) => {

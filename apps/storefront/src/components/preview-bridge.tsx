@@ -24,12 +24,12 @@ export function PreviewBridge({ kind, initialPage, initialTheme, data, lang: ini
   const [theme, setTheme] = useState(initialTheme);
   const [error, setError] = useState<string | null>(null);
   const [lang, setLang] = useState<Lang>(initialLang);
-  // Landing pages can be edited on the page itself. A plan that only allows colours (or a viewer) gets the plain preview.
+  // Every page can be edited on the page itself (docs/46 stage 4, docs/47 part A). A plan that only allows colours (or a viewer) gets the plain preview.
   const [locked, setLocked] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const typing = useRef(false);
   const pending = useRef<unknown>(undefined);
-  const editing = kind === "landing" && !locked;
+  const editing = !locked;
   const send = useCallback((msg: Record<string, unknown>) => window.parent.postMessage(msg, adminOrigin || "*"), [adminOrigin]);
   const onTyping = useCallback((on: boolean) => {
     typing.current = on;

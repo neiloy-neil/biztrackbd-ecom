@@ -24,6 +24,7 @@ const EDIT_CSS = `
 [data-edit]:empty::before{content:"Type here";opacity:.5}
 [data-edit-image]{cursor:pointer;position:relative}
 [data-edit-image]:hover{outline:2px solid #5B4FE8;outline-offset:-2px}
+.lp-pick-btn{margin-top:10px;padding:8px 14px;border-radius:99px;border:2px dashed #5B4FE8;background:rgba(255,255,255,.92);color:#5B4FE8;font:700 13px/1 system-ui;cursor:pointer}
 .lp-pick{display:flex;align-items:center;justify-content:center;min-height:120px;border:2px dashed rgba(91,79,232,.55);border-radius:12px;color:#5B4FE8;font-weight:700;cursor:pointer}
 .bt-ovl{position:absolute;left:0;top:0;width:100%;pointer-events:none;z-index:60}
 .bt-bar{position:absolute;right:8px;display:flex;gap:2px;padding:3px;background:#fff;border:1px solid #cfcdf5;border-radius:10px;box-shadow:0 4px 14px rgba(26,26,78,.2);pointer-events:auto}
@@ -102,13 +103,15 @@ export function EditOverlay({ page, selectedId, send, onTyping }: { page: PageJs
     };
     const onKey = (e: KeyboardEvent) => {
       const el = target(e);
-      if (el && e.key === "Enter") { e.preventDefault(); el.blur(); }
+      // Enter finishes a line of text; in a paragraph box it starts a new line.
+      if (el && e.key === "Enter" && !el.hasAttribute("data-ml")) { e.preventDefault(); el.blur(); }
     };
     // Pasted text arrives as plain text only: no styles or markup from wherever it was copied.
     const onPaste = (e: ClipboardEvent) => {
       if (!target(e)) return;
       e.preventDefault();
-      document.execCommand("insertText", false, (e.clipboardData?.getData("text/plain") ?? "").replace(/\s+/g, " "));
+      const text = e.clipboardData?.getData("text/plain") ?? "";
+      document.execCommand("insertText", false, target(e)?.hasAttribute("data-ml") ? text.replace(/[ \t]+/g, " ").replace(/\r/g, "") : text.replace(/\s+/g, " "));
     };
     const onClick = (e: MouseEvent) => {
       const img = (e.target as Element | null)?.closest?.("[data-edit-image]");

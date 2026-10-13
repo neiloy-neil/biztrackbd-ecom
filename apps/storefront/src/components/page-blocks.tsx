@@ -4,6 +4,7 @@ import { SwapIcon, TruckIcon, WalletIcon } from "@/components/icons";
 import { money, num, productTitle, type Lang, type T } from "@/lib/i18n-core";
 import type { CartCtx, CollectionCtx, PageCtx, ProductCtx } from "@/lib/page-ctx";
 import { CartView } from "./cart-view";
+import { mark } from "./edit-marks";
 import { Listing } from "./listing";
 import { ProductCard } from "./product-card";
 import { tintFor } from "./product-image";
@@ -86,13 +87,14 @@ export function ProductMain({ ctx, s, lang, t, id }: { ctx: ProductCtx; s: S; la
   );
 }
 
-export function ProductReviews({ ctx, s, lang, t, id }: { ctx: ProductCtx; s: S; lang: Lang; t: T; id: string }) {
+export function ProductReviews({ ctx, s, lang, t, id, editing }: { ctx: ProductCtx; s: S; lang: Lang; t: T; id: string; editing?: boolean }) {
   const { summary, reviews } = ctx;
+  const ed = mark(editing);
   const heading = L(s, "title", lang) || t("reviewsTitle");
   return (
     <div className="wrap" data-section={id}>
       <section className="section" aria-labelledby={`revs-${id}`} data-testid="reviews">
-        <div className="section-head"><h2 id={`revs-${id}`}>{heading}</h2>{summary.average !== null && <span className="muted" data-testid="reviews-average">{"★".repeat(Math.round(summary.average))} {t("reviewsAverage", { avg: num(summary.average, lang) })} · {t("reviews", { n: num(summary.count, lang) })}</span>}</div>
+        <div className="section-head"><h2 id={`revs-${id}`} {...ed("title")}>{heading}</h2>{summary.average !== null && <span className="muted" data-testid="reviews-average">{"★".repeat(Math.round(summary.average))} {t("reviewsAverage", { avg: num(summary.average, lang) })} · {t("reviews", { n: num(summary.count, lang) })}</span>}</div>
         {reviews.length === 0 ? <p className="muted">{t("noReviews")}</p> : (
           <div className="stack">
             {reviews.map((r) => (
@@ -110,13 +112,14 @@ export function ProductReviews({ ctx, s, lang, t, id }: { ctx: ProductCtx; s: S;
   );
 }
 
-export function ProductRelated({ ctx, s, lang, t, id }: { ctx: ProductCtx; s: S; lang: Lang; t: T; id: string }) {
+export function ProductRelated({ ctx, s, lang, t, id, editing }: { ctx: ProductCtx; s: S; lang: Lang; t: T; id: string; editing?: boolean }) {
+  const ed = mark(editing);
   const items = ctx.p.related.slice(0, Math.max(2, Math.min(8, Number(s.limit) || 4)));
-  if (items.length === 0) return null;
+  if (items.length === 0 && !editing) return null;
   return (
     <div className="wrap" data-section={id}>
       <section className="section" aria-labelledby={`rel-${id}`}>
-        <div className="section-head"><h2 id={`rel-${id}`}>{L(s, "title", lang) || t("goesWith")}</h2><Link href="/search" className="link-accent">{t("viewAll")}</Link></div>
+        <div className="section-head"><h2 id={`rel-${id}`} {...ed("title")}>{L(s, "title", lang) || t("goesWith")}</h2><Link href="/search" className="link-accent">{t("viewAll")}</Link></div>
         <div className="grid grid-4">{items.map((r) => <ProductCard key={r.id} p={r} lang={lang} t={t} />)}</div>
       </section>
     </div>
@@ -153,25 +156,26 @@ function SampleCart({ cart }: { cart: CartCtx }) {
   );
 }
 
-export function CartMain({ ctx, s, lang, id, preview }: { ctx: CartCtx; s: S; lang: Lang; id: string; preview?: boolean }) {
+export function CartMain({ ctx, s, lang, id, preview, editing }: { ctx: CartCtx; s: S; lang: Lang; id: string; preview?: boolean; editing?: boolean }) {
+  const ed = mark(editing);
   return (
     <div className="wrap" style={{ paddingBottom: 48 }} data-section={id}>
-      <h1 className="page-title">{L(s, "title", lang) || ctx.s.yourCart}</h1>
+      <h1 className="page-title" {...ed("title")}>{L(s, "title", lang) || ctx.s.yourCart}</h1>
       {preview ? <SampleCart cart={ctx} /> : <CartView lang={lang} s={ctx.s} freeOver={ctx.freeOver} />}
     </div>
   );
 }
 
 /** Draws one of the page blocks, or null when this page has no data for it. */
-export function renderPageBlock(type: string, id: string, s: S, ctx: PageCtx | undefined, lang: Lang, t: T): React.ReactNode {
+export function renderPageBlock(type: string, id: string, s: S, ctx: PageCtx | undefined, lang: Lang, t: T, editing?: boolean): React.ReactNode {
   if (!ctx) return null;
   switch (type) {
     case "product-main": return ctx.product ? <ProductMain key={id} id={id} ctx={ctx.product} s={s} lang={lang} t={t} /> : null;
-    case "product-reviews": return ctx.product ? <ProductReviews key={id} id={id} ctx={ctx.product} s={s} lang={lang} t={t} /> : null;
-    case "product-related": return ctx.product ? <ProductRelated key={id} id={id} ctx={ctx.product} s={s} lang={lang} t={t} /> : null;
+    case "product-reviews": return ctx.product ? <ProductReviews key={id} id={id} ctx={ctx.product} s={s} lang={lang} t={t} editing={editing} /> : null;
+    case "product-related": return ctx.product ? <ProductRelated key={id} id={id} ctx={ctx.product} s={s} lang={lang} t={t} editing={editing} /> : null;
     case "collection-header": return ctx.collection ? <CollectionHeader key={id} id={id} ctx={ctx.collection} s={s} lang={lang} /> : null;
     case "collection-products": return ctx.collection ? <CollectionProducts key={id} id={id} ctx={ctx.collection} s={s} lang={lang} t={t} /> : null;
-    case "cart-main": return ctx.cart ? <CartMain key={id} id={id} ctx={ctx.cart} s={s} lang={lang} preview={ctx.preview} /> : null;
+    case "cart-main": return ctx.cart ? <CartMain key={id} id={id} ctx={ctx.cart} s={s} lang={lang} preview={ctx.preview} editing={editing} /> : null;
     default: return null;
   }
 }
