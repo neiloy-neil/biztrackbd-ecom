@@ -134,6 +134,7 @@ export * from "./builder/preview";
 export * from "./builder/data";
 export * from "./landing/service";
 export * from "./builder/chrome";
+export * from "./builder/custom-pages";
 export * from "./builder/chrome-store";
 export * from "./landing/offers";
 export * from "./landing/templates";

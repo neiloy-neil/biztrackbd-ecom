@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { can, createPreviewToken, getBuilderAccess, listCategories, listChromeVersions, listFooterPages, listVersions, loadChromeForEdit, loadForEdit, templateUpdateAvailable } from "@biztrackbd/core";
+import { can, createPreviewToken, getBuilderAccess, listCategories, listPublishedTemplates, listChromeVersions, listFooterPages, listVersions, loadChromeForEdit, loadForEdit, templateUpdateAvailable } from "@biztrackbd/core";
+import { withTenant } from "@biztrackbd/db";
 import { SubmitButton } from "@/components/ui";
 import { applyTemplateUpdateAction } from "./actions";
 import { requireAccess } from "@/lib/session";
 import { storefrontOrigin } from "@/lib/store-url";
 import { Builder } from "./builder";
 import { ChromeEditor } from "./chrome-editor";
+import { TemplateSwitcher } from "./template-switcher";
 import { ThemePicker } from "./theme-picker";
 
 export const dynamic = "force-dynamic";
@@ -56,6 +58,8 @@ export default async function Design({ searchParams }: { searchParams: Promise<{
   const label = PAGES.find((p) => p.key === pageKey)!.label;
   // A newer version of the template this store started from (docs/46 stage 5): offered, never forced.
   const update = canEdit ? await templateUpdateAvailable(s.tenantId).catch(() => null) : null;
+  const templates = pageKey === "home" ? await listPublishedTemplates().catch(() => []) : [];
+  const currentTemplate = pageKey === "home" ? await withTenant(s.tenantId, (tx) => tx.tenant.findFirstOrThrow({ select: { templateId: true } })).then((t) => t.templateId).catch(() => null) : null;
   const notice = (
     <>
       {note === "applied" && <div className="notice good" role="status" data-testid="template-applied">The new version of the template is in your drafts. Look through each page and press Publish when you like it. Your live store has not changed.</div>}
@@ -90,7 +94,7 @@ export default async function Design({ searchParams }: { searchParams: Promise<{
       exitHref="/"
       initialTab={update || note ? "theme" : undefined}
       header={pageKey === "home"
-        ? <>{notice}<ThemePicker active={state.themeId} canEdit={canEdit} /></>
+        ? <>{notice}<ThemePicker active={state.themeId} canEdit={canEdit} /><TemplateSwitcher templates={templates} currentLook={state.themeId} currentTemplate={currentTemplate} canEdit={canEdit} /></>
         : <>{notice}<div className="notice info" role="note">Colours, fonts and the template are set once for the whole store, on the <Link className="link" href="/design">Home page</Link>.</div></>}
     />
   );

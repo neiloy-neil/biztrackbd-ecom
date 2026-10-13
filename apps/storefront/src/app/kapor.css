@@ -381,6 +381,7 @@ h1, h2, h3, p { margin: 0; }
 .lp-stock { display: inline-block; padding: 6px 14px; border-radius: 99px; background: var(--warn-bg, var(--tint-1)); color: var(--ink); font-weight: 700; font-size: 14px; margin: 14px 0 0; }
 .lp-offer { display: flex; gap: 10px; align-items: baseline; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
 .lp-offer-price { font-size: 32px; letter-spacing: -.5px; }
+.lp-contact { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 .lp-footer { text-align: center; padding: 22px var(--gutter) 30px; font-size: 13px; color: var(--muted); }
 
 /* ---- Loyalty and referrals */

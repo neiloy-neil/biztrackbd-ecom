@@ -9,7 +9,7 @@ import { ValidationError } from "../errors";
  */
 
 /** The pages the editor can build. product, collection and cart are one layout per store (docs/39); home and landing existed first. */
-export type PageKind = "home" | "landing" | "product" | "collection" | "cart";
+export type PageKind = "home" | "landing" | "product" | "collection" | "cart" | "custom";
 export const STORE_PAGE_KINDS: readonly PageKind[] = ["home", "product", "collection", "cart"];
 
 export interface Field {
@@ -77,7 +77,7 @@ export const SECTIONS: SectionDef[] = [
     defaults: { eyebrow: "NEW COLLECTION", eyebrowBn: "নতুন কালেকশন", title: "Made well. Delivered across Bangladesh.", titleBn: "যত্নে তৈরি। সারা বাংলাদেশে পৌঁছে দিই।", text: "Shop our latest pieces and pay the way you like.", textBn: "নতুন পণ্য দেখুন, পছন্দের উপায়ে দাম দিন।", ctaText: "Shop the collection", ctaTextBn: "কালেকশন দেখুন", ctaLink: "/search?sort=newest", image: "", align: "left" },
   },
   {
-    type: "featured-products", label: "Product grid", description: "A row of products: newest, on sale, featured, or one category.", page: "home", pages: ["product", "collection", "cart"], max: 8,
+    type: "featured-products", label: "Product grid", description: "A row of products: newest, on sale, featured, or one category.", page: "home", pages: ["custom", "product", "collection", "cart"], max: 8,
     fields: [
       t("title", "Heading", 60), tb("title", "Heading", 60),
       { key: "source", label: "Show", type: "select", options: [{ value: "new", label: "Newest products" }, { value: "sale", label: "Products on sale" }, { value: "featured", label: "Featured products" }, { value: "category", label: "One category" }] },
@@ -88,12 +88,12 @@ export const SECTIONS: SectionDef[] = [
     defaults: { title: "New arrivals", titleBn: "নতুন পণ্য", source: "new", categorySlug: "", limit: 8, columns: "4" },
   },
   {
-    type: "category-grid", label: "Categories", description: "Big tappable tiles for your categories.", page: "home", pages: ["product", "collection", "cart"], max: 2,
+    type: "category-grid", label: "Categories", description: "Big tappable tiles for your categories.", page: "home", pages: ["custom", "product", "collection", "cart"], max: 2,
     fields: [t("title", "Heading", 60), tb("title", "Heading", 60), { key: "limit", label: "How many", type: "number", min: 1, max: 6 }],
     defaults: { title: "Shop by category", titleBn: "ক্যাটাগরি অনুযায়ী কিনুন", limit: 3 },
   },
   {
-    type: "banner", label: "Picture banner", description: "A wide picture with a line of text and a button, for a sale or a new arrival.", page: "home", pages: ["product", "collection", "cart"], max: 6,
+    type: "banner", label: "Picture banner", description: "A wide picture with a line of text and a button, for a sale or a new arrival.", page: "home", pages: ["custom", "product", "collection", "cart"], max: 6,
     fields: [
       image("image", "Picture"), t("heading", "Heading", 80), tb("heading", "Heading", 80), area("text", "Text", 200), areab("text", "Text", 200),
       t("ctaText", "Button text", 30), tb("ctaText", "Button text", 30), link("ctaLink", "Button link"),
@@ -102,12 +102,12 @@ export const SECTIONS: SectionDef[] = [
     defaults: { image: "", heading: "Eid collection", headingBn: "ঈদ কালেকশন", text: "", textBn: "", ctaText: "Shop now", ctaTextBn: "এখনই কিনুন", ctaLink: "/search?sale=1", height: "short" },
   },
   {
-    type: "rich-text", label: "Text block", description: "A heading and a few paragraphs: your story, a delivery note, a size guide.", page: "home", pages: ["product", "collection", "cart"], max: 6,
+    type: "rich-text", label: "Text block", description: "A heading and a few paragraphs: your story, a delivery note, a size guide.", page: "home", pages: ["custom", "product", "collection", "cart"], max: 6,
     fields: [t("heading", "Heading", 80), tb("heading", "Heading", 80), area("body", "Text", 1200), areab("body", "Text", 1200)],
     defaults: { heading: "About us", headingBn: "আমাদের কথা", body: "Tell your customers who you are and why they can trust you.", bodyBn: "" },
   },
   {
-    type: "trust-strip", label: "Trust strip", description: "Cash on delivery, bKash and Nagad, delivery time and easy exchange, in four short lines.", page: "home", pages: ["product", "collection", "cart", "landing"], max: 1,
+    type: "trust-strip", label: "Trust strip", description: "Cash on delivery, bKash and Nagad, delivery time and easy exchange, in four short lines.", page: "home", pages: ["custom", "product", "collection", "cart", "landing"], max: 1,
     fields: [], defaults: {},
   },
 
@@ -156,7 +156,7 @@ export const SECTIONS: SectionDef[] = [
 
   // ---- Landing page
   {
-    type: "lp-hero", label: "Top of the page", description: "The headline your ad promised, one picture and a button that jumps to the order form.", page: "landing", max: 1,
+    type: "lp-hero", label: "Top of the page", description: "The headline your ad promised, one picture and a button that jumps to the order form.", page: "landing", pages: ["custom"], max: 1,
     fields: [
       t("badge", "Small badge", 30), tb("badge", "Small badge", 30), t("headline", "Headline", 110), tb("headline", "Headline", 110), area("subhead", "Line under it", 260), areab("subhead", "Line under it", 260),
       image("image", "Picture"), t("ctaText", "Button text", 30), tb("ctaText", "Button text", 30),
@@ -164,13 +164,13 @@ export const SECTIONS: SectionDef[] = [
     defaults: { badge: "Cash on delivery", badgeBn: "ক্যাশ অন ডেলিভারি", headline: "The panjabi that stays cool in the heat", headlineBn: "গরমে আরামের পাঞ্জাবি", subhead: "100% cotton, stitched in Narayanganj. Pay when it arrives.", subheadBn: "", image: "", ctaText: "Order now", ctaTextBn: "অর্ডার করুন" },
   },
   {
-    type: "lp-benefits", label: "Why buy", description: "Three to eight short reasons.", page: "landing", max: 2,
+    type: "lp-benefits", label: "Why buy", description: "Three to eight short reasons.", page: "landing", pages: ["custom"], max: 2,
     fields: [t("title", "Heading", 70), tb("title", "Heading", 70)],
     list: { key: "items", label: "Reasons", itemLabel: "Reason", min: 1, max: 8, fields: [t("title", "Short title", 60), tb("title", "Short title", 60), area("text", "A sentence", 160), areab("text", "A sentence", 160)], defaultItem: { title: "Soft cotton", titleBn: "", text: "Breathable fabric for hot days.", textBn: "" } },
     defaults: { title: "Why you will love it", titleBn: "কেন পছন্দ করবেন", items: [{ title: "Soft cotton", titleBn: "", text: "Breathable fabric for hot days.", textBn: "" }, { title: "Cash on delivery", titleBn: "", text: "Pay only when it arrives.", textBn: "" }, { title: "Easy exchange", titleBn: "", text: "Wrong size? We swap it.", textBn: "" }] },
   },
   {
-    type: "lp-gallery", label: "Pictures", description: "Up to eight pictures of the product.", page: "landing", max: 2,
+    type: "lp-gallery", label: "Pictures", description: "Up to eight pictures of the product.", page: "landing", pages: ["custom"], max: 2,
     fields: [t("title", "Heading (optional)", 70), tb("title", "Heading (optional)", 70)],
     list: { key: "items", label: "Pictures", itemLabel: "Picture", min: 1, max: 8, fields: [image("image", "Picture"), t("alt", "What it shows", 100)], defaultItem: { image: "", alt: "" } },
     defaults: { title: "", titleBn: "", items: [{ image: "", alt: "" }] },
@@ -182,7 +182,7 @@ export const SECTIONS: SectionDef[] = [
     defaults: { title: "What customers say", titleBn: "ক্রেতারা কী বলছেন", items: [{ name: "Customer name", text: "Write what they said here.", rating: 5 }] },
   },
   {
-    type: "lp-faq", label: "Questions", description: "The questions people ask before they order.", page: "landing", max: 1,
+    type: "lp-faq", label: "Questions", description: "The questions people ask before they order.", page: "landing", pages: ["custom"], max: 1,
     fields: [t("title", "Heading", 70), tb("title", "Heading", 70)],
     list: { key: "items", label: "Questions", itemLabel: "Question", min: 1, max: 8, fields: [t("q", "Question", 120), tb("q", "Question", 120), area("a", "Answer", 300), areab("a", "Answer", 300)], defaultItem: { q: "", qBn: "", a: "", aBn: "" } },
     defaults: { title: "Questions", titleBn: "প্রশ্ন", items: [{ q: "How long does delivery take?", qBn: "", a: "1 to 2 days inside Dhaka, 3 to 4 days outside.", aBn: "" }] },
@@ -193,13 +193,13 @@ export const SECTIONS: SectionDef[] = [
     defaults: { title: "Order now. Pay when it arrives.", titleBn: "অর্ডার করুন। হাতে পেয়ে দাম দিন।", intro: "Fill in your details and we will call you to confirm.", introBn: "", buttonText: "Place my order", buttonTextBn: "অর্ডার করুন" },
   },
   {
-    type: "lp-video", label: "Video", description: "A YouTube video: the product in use, a review, an unboxing.", page: "landing", max: 2,
+    type: "lp-video", label: "Video", description: "A YouTube video: the product in use, a review, an unboxing.", page: "landing", pages: ["custom"], max: 2,
     fields: [t("title", "Heading (optional)", 70), tb("title", "Heading (optional)", 70), { key: "videoUrl", label: "YouTube address", type: "url", max: 200, hint: "Paste the address of the video from YouTube, like https://youtu.be/…" }],
     defaults: { title: "", titleBn: "", videoUrl: "" },
     check: (s) => (s.videoUrl && !youtubeId(String(s.videoUrl)) ? "use a YouTube address (youtube.com or youtu.be)" : null),
   },
   {
-    type: "lp-split", label: "Picture and text", description: "A picture beside a few lines: how to use it, what is inside, why it is different.", page: "landing", max: 4,
+    type: "lp-split", label: "Picture and text", description: "A picture beside a few lines: how to use it, what is inside, why it is different.", page: "landing", pages: ["custom"], max: 4,
     fields: [
       t("title", "Heading", 80), tb("title", "Heading", 80), area("text", "Text", 500), areab("text", "Text", 500), image("image", "Picture"),
       { key: "side", label: "Picture on", type: "select", options: [{ value: "right", label: "The right" }, { value: "left", label: "The left" }] },
@@ -208,7 +208,7 @@ export const SECTIONS: SectionDef[] = [
     defaults: { title: "How to use it", titleBn: "ব্যবহারের নিয়ম", text: "Explain in two or three short lines how your customer uses the product and what they get.", textBn: "", image: "", side: "right", ctaText: "", ctaTextBn: "" },
   },
   {
-    type: "lp-text", label: "Text and button", description: "A heading, a paragraph and an order button. Good for a promise, a guarantee or a story.", page: "landing", max: 4,
+    type: "lp-text", label: "Text and button", description: "A heading, a paragraph and an order button. Good for a promise, a guarantee or a story.", page: "landing", pages: ["custom"], max: 4,
     fields: [t("title", "Heading", 80), tb("title", "Heading", 80), area("text", "Text", 600), areab("text", "Text", 600), t("ctaText", "Button text", 30), tb("ctaText", "Button text", 30)],
     defaults: { title: "Our promise", titleBn: "আমাদের প্রতিশ্রুতি", text: "If the product is not what you saw, tell us when it arrives and we will make it right.", textBn: "", ctaText: "Order now", ctaTextBn: "অর্ডার করুন" },
   },
@@ -230,6 +230,11 @@ export const SECTIONS: SectionDef[] = [
     type: "lp-offer-bar", label: "Price and button", description: "Today's price (and the old price if you set one on the product) with a button to the order form.", page: "landing", max: 2,
     fields: [t("text", "Line above the price", 60), tb("text", "Line above the price", 60), t("ctaText", "Button text", 30), tb("ctaText", "Button text", 30)],
     defaults: { text: "Today's price", textBn: "আজকের দাম", ctaText: "Order now", ctaTextBn: "অর্ডার করুন" },
+  },
+  {
+    type: "contact-block", label: "Contact details", description: "Your phone, WhatsApp and address from your store settings. Change them in Settings.", page: "custom", max: 1,
+    fields: [t("title", "Heading", 70), tb("title", "Heading", 70), area("text", "Line above the details", 240), areab("text", "Line above the details", 240)],
+    defaults: { title: "Get in touch", titleBn: "যোগাযোগ করুন", text: "We answer messages every day.", textBn: "" },
   },
   {
     type: "lp-sticky-cta", label: "Sticky button", description: "A button that stays at the bottom of a phone screen and jumps to the order form.", page: "landing", max: 1,
@@ -468,7 +473,7 @@ export function defaultLandingPage(): PageJson {
 }
 
 const starting = (types: string[]): PageJson => ({ version: 1, sections: types.map((type) => ({ id: `${type.replace(/-/g, "_")}_1`, type, settings: normalizeSettings(sectionDef(type)!, {}) })) });
-const DEFAULT_PAGES: Record<Exclude<PageKind, "landing">, string[]> = {
+const DEFAULT_PAGES: Record<Exclude<PageKind, "landing" | "custom">, string[]> = {
   home: ["hero", "featured-products", "category-grid", "trust-strip"],
   // The layouts the storefront has always had: they are what a store shows until its owner edits them.
   product: ["product-main", "product-reviews", "product-related"],
@@ -477,7 +482,14 @@ const DEFAULT_PAGES: Record<Exclude<PageKind, "landing">, string[]> = {
 };
 /** The starting layout of any page kind. Landing pages have their own. */
 export function defaultPageFor(kind: PageKind): PageJson {
-  return kind === "landing" ? defaultLandingPage() : starting(DEFAULT_PAGES[kind]);
+  if (kind === "landing") return defaultLandingPage();
+  if (kind === "custom") return defaultCustomPage();
+  return starting(DEFAULT_PAGES[kind]);
+}
+
+/** A new page made from sections starts as one heading and paragraph, ready to type into. */
+export function defaultCustomPage(): PageJson {
+  return starting(["lp-text"]);
 }
 
 /** Which list of products a product-grid section shows ("new", "sale", "featured", "cat:<slug>"). Shared by the server and the live preview. */

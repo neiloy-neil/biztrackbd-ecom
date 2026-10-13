@@ -2,7 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createBaseClient, setBasePrisma, setPlatformPrisma, type PrismaClient } from "@biztrackbd/db";
 import { createOwnerClient, resetDatabase, seedPlans, testUrls } from "@biztrackbd/db/testing";
 import {
-  DomainError, STORE_THEMES, applyTemplateUpdate, defaultHomePage, getLive, getTemplate, listPublishedTemplates, listTemplatesForStaff, loadForEdit, newSection, publish,
+  DomainError, STORE_THEMES, applyTemplateToStore, applyTemplateUpdate, defaultHomePage, getLive, getTemplate, listPublishedTemplates, listTemplatesForStaff, loadForEdit, newSection, publish,
   publishTemplateFromStore, saveDraft, setEventPublisher, setTemplateStatus, signupStore, templateUpdateAvailable, type PageJson, type PlatformActor, type StaffActor,
 } from "../src";
 
@@ -155,6 +155,50 @@ describe("store templates published without a deploy (docs/46 stage 5)", () => {
     const state = await loadForEdit(s.tenantId, s.actor, "home");
     expect(state.page.sections.map((x) => x.type)).toEqual(before.page.sections.map((x) => x.type));
     expect(state.theme.accent).toBe("#155EEF");
+  });
+
+  it("a store can move to another template: layouts and style land in the drafts, content stays, and the look changes only when the template needs another one", async () => {
+    const w = await workshop();
+    await publishTemplateFromStore(boss, { tenantId: w.tenantId, id: "switch-kapor", name: "Switch Kapor" });
+    const s = await store("kapor");
+    // A store started from an original template has published nothing yet: it shows the built-in layouts.
+    expect(await getLive(s.tenantId, "home")).toBeNull();
+
+    // Same look: only drafts change; keeping the cart leaves its layout alone.
+    const r = await applyTemplateToStore(s.tenantId, s.actor, "switch-kapor", ["cart"]);
+    expect(r).toMatchObject({ lookChanged: false, version: 1 });
+    expect(r.pages).toEqual(expect.arrayContaining(["home", "product", "collection"]));
+    expect(r.pages).not.toContain("cart");
+    expect(await getLive(s.tenantId, "home")).toBeNull();
+    expect((await loadForEdit(s.tenantId, s.actor, "home")).isDraft).toBe(true);
+    expect((await loadForEdit(s.tenantId, s.actor, "cart")).isDraft).toBe(false);
+    expect(await owner.tenant.findUniqueOrThrow({ where: { id: s.tenantId } })).toMatchObject({ themeId: "kapor", templateId: "switch-kapor", templateVersion: 1 });
+
+    // Another look: the look switches at once and the new look's pages start from its own layouts, with the template in the drafts.
+    const r2 = await applyTemplateToStore(s.tenantId, s.actor, "berber");
+    expect(r2.lookChanged).toBe(true);
+    expect(await owner.tenant.findUniqueOrThrow({ where: { id: s.tenantId } })).toMatchObject({ themeId: "berber", templateId: "berber" });
+    expect(await getLive(s.tenantId, "home")).toBeNull();
+    expect((await loadForEdit(s.tenantId, s.actor, "home"))).toMatchObject({ isDraft: true, themeId: "berber" });
+    // Their products and content are untouched by any of it.
+    const products = await owner.product.count({ where: { tenantId: s.tenantId } });
+    await applyTemplateToStore(s.tenantId, s.actor, "kapor");
+    expect(await owner.product.count({ where: { tenantId: s.tenantId } })).toBe(products);
+
+    await fails(applyTemplateToStore(s.tenantId, s.actor, "no-such-template"), "VALIDATION_ERROR", /available/);
+    await fails(applyTemplateToStore(s.tenantId, { ...s.actor, role: "ORDER_PACKER" }, "kapor"), "FORBIDDEN");
+  });
+
+  it("a store whose plan only restyles takes a new template's colours and keeps its own sections", async () => {
+    const w = await workshop();
+    await publishTemplateFromStore(boss, { tenantId: w.tenantId, id: "style-only", name: "Style Only" });
+    const s = await store("kapor", "STARTER");
+    const before = (await loadForEdit(s.tenantId, s.actor, "home")).page.sections.map((x) => x.type);
+    const r = await applyTemplateToStore(s.tenantId, s.actor, "style-only");
+    expect(r.pages).toEqual(["home"]);
+    const state = await loadForEdit(s.tenantId, s.actor, "home");
+    expect(state.page.sections.map((x) => x.type)).toEqual(before);
+    expect(state.theme.accent).toBe("#8A2855");
   });
 
   it("replacing an original: stores made from it are offered the new version, and staff see how many use each template", async () => {

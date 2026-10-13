@@ -1020,6 +1020,10 @@ model Page {
   contentHtml String   @db.Text
   isPublished Boolean  @default(true)
   publishAt   DateTime?   // when set, the page appears at that time even if isPublished is on
+  // A page built from sections in the visual editor (docs/47 part D). Null: a rich-text page, shown from contentHtml.
+  sectionsJson Json?
+  seoTitle    String?
+  seoDescription String?
   
   tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())

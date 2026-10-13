@@ -44,7 +44,10 @@ export interface LandingInfo {
   was: number | null;
 }
 
-function Section({ section, data, lang, t, orderForm, ctx, landing, editing }: { section: PageSection; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx; landing?: LandingInfo; editing?: boolean }) {
+/** The store's own contact details, for the contact block of a page built from sections. They come from the store settings, never from the layout. */
+export interface SiteInfo { phone: string | null; whatsapp: string | null; address: string | null }
+
+function Section({ section, data, lang, t, orderForm, ctx, landing, editing, site }: { section: PageSection; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx; landing?: LandingInfo; editing?: boolean; site?: SiteInfo }) {
   const s = section.settings as S;
   const id = section.id;
   const ed = mark(editing);
@@ -298,6 +301,21 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing }: {
         </section>
       );
     }
+    case "contact-block":
+      return (
+        <section className="lp-block" data-section={id}>
+          <div className="wrap lp-narrow lp-center">
+            <h2 {...ed("title")}>{L(s, "title", lang)}</h2>
+            {(L(s, "text", lang) || editing) && <p {...ed("text")}>{L(s, "text", lang)}</p>}
+            <div className="lp-contact">
+              {site?.phone && <a href={`tel:${site.phone}`} className="btn btn-primary btn-round">{site.phone}</a>}
+              {site?.whatsapp && <a href={`https://wa.me/88${site.whatsapp}`} rel="noopener noreferrer" className="btn btn-secondary btn-round">WhatsApp</a>}
+              {!site?.phone && !site?.whatsapp && editing && <p className="muted">Add your phone number and WhatsApp in Settings, and they appear here.</p>}
+            </div>
+            {site?.address && <p className="muted" style={{ marginTop: 12 }}>{site.address}</p>}
+          </div>
+        </section>
+      );
     case "lp-sticky-cta":
       return <div className="lp-sticky" data-section={id}><a href="#order" className="btn btn-primary btn-round btn-block" {...ed("text")}>{L(s, "text", lang)}</a></div>;
     default:
@@ -306,7 +324,7 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing }: {
   }
 }
 
-export function Sections({ page, data, lang, t, orderForm, ctx, landing, editing }: { page: PageJson; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx; landing?: LandingInfo; /** The editor's preview of a landing page: text and pictures are marked so they can be changed on the page. */ editing?: boolean }) {
+export function Sections({ page, data, lang, t, orderForm, ctx, landing, editing, site }: { page: PageJson; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx; landing?: LandingInfo; site?: SiteInfo; /** The editor's preview of a landing page: text and pictures are marked so they can be changed on the page. */ editing?: boolean }) {
   // In the editor a hidden section is still drawn, dimmed, so it can be found and shown again; the live page never draws it.
-  return <>{page.sections.filter((s) => editing || !s.disabled).map((s) => <Section key={s.id} section={s} data={data} lang={lang} t={t} orderForm={orderForm} ctx={ctx} landing={landing} editing={editing} />)}</>;
+  return <>{page.sections.filter((s) => editing || !s.disabled).map((s) => <Section key={s.id} section={s} data={data} lang={lang} t={t} orderForm={orderForm} ctx={ctx} landing={landing} editing={editing} site={site} />)}</>;
 }

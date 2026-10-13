@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { DomainError, DraftConflictError, activateTheme, applyTemplateUpdate, discardChromeDraft, publishChrome, rollbackChrome, saveChromeDraft, discardDraft, publish, rollback, saveDraft } from "@biztrackbd/core";
+import { DomainError, DraftConflictError, STORE_PAGE_KINDS, activateTheme, applyTemplateToStore, applyTemplateUpdate, discardChromeDraft, publishChrome, rollbackChrome, saveChromeDraft, discardDraft, publish, rollback, saveDraft } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 
 export type EditResult = { ok: true; version?: number; stamp?: string } | { ok: false; error: string; conflict?: { stamp: string | null } };
@@ -120,4 +120,19 @@ export async function rollbackChromeAction(version: number): Promise<EditResult>
   } catch (e) {
     return fail(e);
   }
+}
+
+/** Moves the store to another template: its layouts and style land in the drafts, ready to look at. Pages left unticked keep their own layout. */
+export async function applyTemplateAction(form: FormData): Promise<void> {
+  const s = await requireAction("design", "edit");
+  const take = new Set(form.getAll("take").map(String));
+  const keep = STORE_PAGE_KINDS.filter((k) => !take.has(k));
+  try {
+    await applyTemplateToStore(s.tenantId, s.actor, String(form.get("templateId") ?? ""), keep);
+  } catch (e) {
+    if (e instanceof DomainError) redirect(`/design?note=${encodeURIComponent(e.message)}`);
+    throw e;
+  }
+  revalidatePath("/design");
+  redirect("/design?note=applied");
 }

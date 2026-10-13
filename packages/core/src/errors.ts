@@ -64,7 +64,7 @@ export class NotFoundError extends DomainError {
 
 /** The plan's hard cap on a resource. The UI turns this into the upgrade prompt (AdmLimit). */
 export class PlanLimitError extends DomainError {
-  constructor(readonly metric: "products" | "staff" | "storage" | "landing pages", readonly limit: number, readonly used: number) {
+  constructor(readonly metric: "products" | "staff" | "storage" | "landing pages" | "pages built from sections", readonly limit: number, readonly used: number) {
     super("PLAN_LIMIT", `Your plan allows ${limit} ${metric}. Upgrade to add more.`, 403, { metric, limit, used });
   }
 }

@@ -3,6 +3,7 @@ import { installTemplatePages } from "../builder/versions";
 import { defaultPageFor, STORE_PAGE_KINDS, validatePage, type PageJson, type PageKind } from "../builder/registry";
 import { STORE_THEMES, isThemeId, themeDefaults, validateTheme, type ThemeId, type ThemeSettings } from "../builder/theme";
 import { NotFoundError, ValidationError } from "../errors";
+import { audit } from "../audit/service";
 import { assertCan, type StaffActor } from "../permissions";
 import { assertPlatformCan, type PlatformActor } from "./admin";
 
@@ -228,4 +229,34 @@ export async function applyTemplateUpdate(tenantId: string, actor: StaffActor): 
     return written;
   });
   return { pages, version: info.version };
+}
+
+export interface ApplyTemplateResult { pages: string[]; version: number; /** The store's look (the CSS it is drawn with) changed, and that is live at once. */ lookChanged: boolean }
+
+/**
+ * Moves a store to another template, from the store's own design screen. The template's colours, style and page layouts go into the DRAFTS, so
+ * nothing about the pages changes until the owner looks through them and publishes. The one thing that cannot wait is the look: if the
+ * template is drawn with a different look, the store switches to it at once (the screen says so first), and its pages start from that look's
+ * own layouts until the drafts are published. Products, categories and content are never touched. `keep` lists pages whose layout stays.
+ */
+export async function applyTemplateToStore(tenantId: string, actor: StaffActor, templateId: string, keep: readonly PageKind[] = []): Promise<ApplyTemplateResult> {
+  assertCan(actor, "design", "edit");
+  const info = await getTemplate(templateId);
+  if (!info) throw new ValidationError("Choose a template that is available", { field: "templateId" });
+  const pages: TemplatePages = info.pages ?? Object.fromEntries(STORE_PAGE_KINDS.map((k) => [k, defaultPageFor(k)]));
+  const only = STORE_PAGE_KINDS.filter((k) => !keep.includes(k));
+  return withTenant(tenantId, async (tx) => {
+    await tx.$queryRaw`SELECT "id" FROM "Tenant" WHERE "id" = ${tenantId} FOR UPDATE`;
+    const tenant = await tx.tenant.findFirstOrThrow({ select: { themeId: true } });
+    const lookChanged = tenant.themeId !== info.baseLook;
+    if (lookChanged) {
+      await tx.themeInstall.updateMany({ where: { isActive: true }, data: { isActive: false } });
+      await tx.themeInstall.upsert({ where: { tenantId_themeId: { tenantId, themeId: info.baseLook } }, update: { isActive: true }, create: { tenantId, themeId: info.baseLook, isActive: true, settings: {}, pagesJson: {} } });
+      await tx.tenant.update({ where: { id: tenantId }, data: { themeId: info.baseLook } });
+    }
+    const written = await installTemplatePages(tx, tenantId, info.baseLook, { settings: info.settings, pages }, "draft", actor.userId, only);
+    await tx.tenant.update({ where: { id: tenantId }, data: { templateId: info.id, templateVersion: info.version } });
+    await audit(tx, tenantId, actor, "design.template_applied", { templateId: info.id, version: info.version, lookChanged, kept: [...keep] });
+    return { pages: written, version: info.version, lookChanged };
+  });
 }

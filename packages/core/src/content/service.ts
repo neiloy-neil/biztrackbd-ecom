@@ -88,7 +88,7 @@ const rowOf = (r: Row): ContentDetail => ({ id: r.id, title: r.title, slug: r.sl
 export async function listContent(tenantId: string, actor: StaffActor, kind: ContentKind): Promise<PostRow[]> {
   assertCan(actor, "design", "view");
   return withTenant(tenantId, async (tx) => {
-    const rows: Row[] = kind === "page" ? await tx.page.findMany({ orderBy: { updatedAt: "desc" }, take: 200 }) : await tx.blogPost.findMany({ orderBy: { createdAt: "desc" }, take: 200 });
+    const rows: Row[] = kind === "page" ? await tx.page.findMany({ where: { sectionsJson: { equals: Prisma.DbNull } }, orderBy: { updatedAt: "desc" }, take: 200 }) : await tx.blogPost.findMany({ orderBy: { createdAt: "desc" }, take: 200 });
     return rows.map((r) => {
       const { contentHtml: _drop, ...rest } = rowOf(r);
       void _drop;

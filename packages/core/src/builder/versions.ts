@@ -1,4 +1,4 @@
-import { withTenant, type TenantTx } from "@biztrackbd/db";
+import { Prisma, withTenant, type TenantTx } from "@biztrackbd/db";
 import { audit } from "../audit/service";
 import { DomainError, NotFoundError, PlanFeatureError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
@@ -13,6 +13,8 @@ import { themeDefaults, validateTheme, validateThemeId, type ThemeId, type Theme
 
 export const HOME_KEY = "home";
 export const landingKey = (id: string) => `landing:${id}`;
+/** The key of a page built from sections (docs/47 part D). */
+export const customKey = (id: string) => `page:${id}`;
 export const MAX_KEPT_VERSIONS = 30;
 
 /**
@@ -46,6 +48,7 @@ const isStorePage = (pageKey: string): boolean => (STORE_PAGE_KINDS as readonly 
 const kindOf = (pageKey: string): PageKind => {
   if (isStorePage(pageKey)) return pageKey as PageKind;
   if (/^landing:[A-Za-z0-9]{8,40}$/.test(pageKey)) return "landing";
+  if (/^page:[A-Za-z0-9]{8,40}$/.test(pageKey)) return "custom";
   throw new ValidationError("Unknown page");
 };
 
@@ -89,6 +92,10 @@ const draftRow = (tx: TenantTx, themeId: ThemeId, pageKey: string) => tx.themeVe
 
 async function assertPageExists(tx: TenantTx, pageKey: string) {
   if (isStorePage(pageKey)) return;
+  if (pageKey.startsWith("page:")) {
+    if (!(await tx.page.findFirst({ where: { id: pageKey.slice("page:".length), sectionsJson: { not: Prisma.DbNull } }, select: { id: true } }))) throw new NotFoundError("Page");
+    return;
+  }
   const id = pageKey.slice("landing:".length);
   if (!(await tx.landingPage.findFirst({ where: { id }, select: { id: true } }))) throw new NotFoundError("Landing page");
 }
@@ -112,9 +119,11 @@ export async function loadForEdit(tenantId: string, actor: StaffActor, pageKey: 
     const themeId = await activeThemeId(tx);
     const [draft, live] = await Promise.all([draftRow(tx, themeId, pageKey), latestPublished(tx, themeId, pageKey)]);
     let start = defaultPageFor(kind);
-    if (kind === "landing") {
+    if (kind === "landing" || kind === "custom") {
       // A page made from a template opens with that template's layout (stored when the page was created); a bad row falls back to the plain start.
-      const row = await tx.landingPage.findFirst({ where: { id: pageKey.slice("landing:".length) }, select: { sectionsJson: true } });
+      const row = kind === "landing"
+        ? await tx.landingPage.findFirst({ where: { id: pageKey.slice("landing:".length) }, select: { sectionsJson: true } })
+        : await tx.page.findFirst({ where: { id: pageKey.slice("page:".length) }, select: { sectionsJson: true } });
       if (row) {
         try {
           start = asPage(kind, row.sectionsJson);
@@ -203,8 +212,8 @@ async function writePublished(tx: TenantTx, tenantId: string, themeId: ThemeId, 
   await tx.themeVersion.create({ data: { tenantId, themeId, pageKey, state: "PUBLISHED", version, settings: theme as object, sectionsJson: page as object, label, createdBy: actor.userId } });
   // The theme is store-wide: publishing the home page makes the theme live. A landing page uses the store's current theme.
   if (!isStorePage(pageKey)) {
-    const id = pageKey.slice("landing:".length);
-    await tx.landingPage.update({ where: { id }, data: { sectionsJson: page as object, isPublished: true } });
+    if (pageKey.startsWith("page:")) await tx.page.update({ where: { id: pageKey.slice("page:".length) }, data: { sectionsJson: page as object, isPublished: true } });
+    else await tx.landingPage.update({ where: { id: pageKey.slice("landing:".length) }, data: { sectionsJson: page as object, isPublished: true } });
   }
   // Keep the history bounded; the oldest published rows go first.
   const old = await tx.themeVersion.findMany({ where: { themeId, pageKey, state: "PUBLISHED" }, orderBy: { version: "desc" }, skip: MAX_KEPT_VERSIONS, select: { id: true } });
@@ -219,13 +228,15 @@ async function writePublished(tx: TenantTx, tenantId: string, themeId: ThemeId, 
  */
 export async function installTemplatePages(
   tx: TenantTx, tenantId: string, themeId: ThemeId, tpl: { settings: ThemeSettings; pages: Partial<Record<PageKind, PageJson>> }, mode: "publish" | "draft", createdBy: string,
+  /** Take the template's layout for these pages only; the others keep what they have. The colours and style come either way. */
+  only?: readonly PageKind[],
 ): Promise<string[]> {
   const tier = await builderTier(tx);
   const actor = { userId: createdBy } as StaffActor;
   const written: string[] = [];
   for (const kind of STORE_PAGE_KINDS) {
     const allowed = kind === HOME_KEY ? tier !== "settings" : tier === "all";
-    let page: PageJson | undefined = allowed ? tpl.pages[kind] : undefined;
+    let page: PageJson | undefined = allowed && (!only || only.includes(kind)) ? tpl.pages[kind] : undefined;
     // The home page carries the colours and style, so it is always written; with sections the plan does not allow, it keeps what it had.
     if (!page && kind === HOME_KEY) {
       const live = await latestPublished(tx, themeId, HOME_KEY);
