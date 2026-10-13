@@ -5,7 +5,7 @@ import {
   DomainError, SECTIONS, STORE_PAGE_KINDS, allowedOn, defaultPageFor, requiredFor, sectionsFor, STORE_THEMES, activateTheme, checkDomain, contrast, createLandingPage, createPreviewToken, defaultHomePage, defaultLandingPage, deleteLandingPage, discardDraft, dnsInstruction, getLive, getPreview,
   getBuilderAccess, getPublicLanding, listLandingPages, listVersions, loadForEdit, loadPageData, newSection, normalizeSettings, placeLandingOrder, publish, recheckDomain, rollback, safeImage, safeUrl,
   saveDraft, saveThemeDraft, sectionDef, setDnsResolver, setEventPublisher, setLandingLive, setRoutingSync, setVercelClient, sweepDomains, themeCss, validatePage, validateTheme,
-  verifyPreviewToken, updateLandingOffers, landingSlugByCode, LANDING_TEMPLATES, landingStats, landingTotals, listLandingLeads, deleteLandingLead, recordLandingView, saveLandingLead, landingTemplate, pageFromTemplate, youtubeId, parseEndsAt, parseOffers, dealDiscount, type DnsResolver, type StaffActor, type VercelDomainClient,
+  verifyPreviewToken, updateLandingOffers, landingSlugByCode, editableField, setByPath, getByPath, LANDING_TEMPLATES, landingStats, landingTotals, listLandingLeads, deleteLandingLead, recordLandingView, saveLandingLead, landingTemplate, pageFromTemplate, youtubeId, parseEndsAt, parseOffers, dealDiscount, type DnsResolver, type StaffActor, type VercelDomainClient,
 } from "../src";
 
 let owner: PrismaClient;
@@ -397,6 +397,43 @@ describe("landing pages", () => {
     await publish(s.f.tenantId, s.owner, pageKey);
     const other = s.f.products[1]!.variants[0]!.id;
     await fails(placeLandingOrder(s.f.tenantId, "eid-panjabi", { idempotencyKey: `lp-${Date.now()}-2`, variantId: other, quantity: 1, name: "Tania Akter", phone: "01712345602", address: "House 4, Road 2, Dhanmondi", district: "Dhaka", division: "Dhaka" }), "VALIDATION_ERROR", /options/);
+  });
+
+  describe("editing text and pictures on the page (docs/46 stage 4)", () => {
+    const hero = () => sectionDef("lp-hero")!;
+    const benefits = () => sectionDef("lp-benefits")!;
+
+    it("only lets the page change plain text fields of the section's own definition", () => {
+      expect(editableField(hero(), "headline")?.type).toBe("text");
+      expect(editableField(hero(), "subhead")?.type).toBe("textarea");
+      expect(editableField(hero(), "headlineBn")?.bn).toBe(true);
+      expect(editableField(hero(), "image")).toBeNull(); // a picture is not text
+      expect(editableField(hero(), "image", ["image"])?.type).toBe("image");
+      expect(editableField(hero(), "ctaLink")).toBeNull();
+      expect(editableField(hero(), "nope")).toBeNull();
+      expect(editableField(benefits(), "items.2.title")?.type).toBe("text");
+      expect(editableField(benefits(), "items.2.nope")).toBeNull();
+      expect(editableField(benefits(), "other.2.title")).toBeNull();
+    });
+
+    it("refuses paths that could reach anything else", () => {
+      for (const bad of ["__proto__", "constructor", "headline.x", "items.x.title", "items.1.title.z", "items.123.title", "../x", "items..title", "", " headline"]) {
+        expect(editableField(benefits(), bad), bad).toBeNull();
+        expect(editableField(hero(), bad), bad).toBeNull();
+      }
+    });
+
+    it("changes one value and leaves the rest alone, without touching the original", () => {
+      const s = { headline: "A", items: [{ title: "x", text: "1" }, { title: "y", text: "2" }] };
+      const a = setByPath(s, "headline", "B");
+      expect(a.headline).toBe("B");
+      expect(s.headline).toBe("A");
+      const b = setByPath(s, "items.1.title", "Z");
+      expect(getByPath(b, "items.1.title")).toBe("Z");
+      expect(getByPath(b, "items.0.title")).toBe("x");
+      expect(getByPath(s, "items.1.title")).toBe("y");
+      expect(setByPath(s, "items.5.title", "Q")).toEqual(s);
+    });
   });
 
   describe("sections and templates (docs/46 stage 2)", () => {

@@ -271,6 +271,42 @@ export function parseEndsAt(v: string): Date | null {
   return new Date(Date.UTC(y, mo - 1, d, h - 6, mi));
 }
 
+// ---- Editing text and pictures on the page itself (docs/46, stage 4) --------------------------------------------------------
+
+const PATH = /^[A-Za-z][A-Za-z0-9]*(\.[0-9]{1,2}\.[A-Za-z][A-Za-z0-9]*)?$/;
+
+/**
+ * The field a path points at, when the page may change it from the preview: a plain text field of the section ("headline"), or one of its list
+ * items ("items.2.title"). The preview is a different site, so what it sends is checked here against the section's own definition.
+ * Only text, textarea and image fields qualify; anything else (links, colours, numbers) is changed in the form.
+ */
+export function editableField(def: SectionDef, path: string, kinds: Field["type"][] = ["text", "textarea"]): Field | null {
+  if (!PATH.test(path)) return null;
+  const parts = path.split(".");
+  const ok = (f: Field | undefined) => (f && kinds.includes(f.type) ? f : null);
+  if (parts.length === 1) return ok(def.fields.find((f) => f.key === parts[0]));
+  if (!def.list || parts[0] !== def.list.key) return null;
+  return ok(def.list.fields.find((f) => f.key === parts[2]));
+}
+
+/** A copy of the settings with one text value replaced. The path must already have passed `editableField`. */
+export function setByPath(settings: Record<string, unknown>, path: string, value: string): Record<string, unknown> {
+  const parts = path.split(".");
+  if (parts.length === 1) return { ...settings, [parts[0]!]: value };
+  const [listKey, index, field] = parts as [string, string, string];
+  const list = Array.isArray(settings[listKey]) ? (settings[listKey] as Record<string, unknown>[]) : [];
+  const i = Number(index);
+  if (!list[i]) return settings;
+  return { ...settings, [listKey]: list.map((item, j) => (j === i ? { ...item, [field]: value } : item)) };
+}
+
+export function getByPath(settings: Record<string, unknown>, path: string): unknown {
+  const parts = path.split(".");
+  if (parts.length === 1) return settings[parts[0]!];
+  const list = settings[parts[0]!];
+  return Array.isArray(list) ? (list[Number(parts[1])] as Record<string, unknown> | undefined)?.[parts[2]!] : undefined;
+}
+
 export const sectionDef = (type: string): SectionDef | undefined => SECTIONS.find((s) => s.type === type);
 /** Whether a section may be placed on this kind of page. */
 export const allowedOn = (def: SectionDef, kind: PageKind): boolean => def.page === kind || (def.pages?.includes(kind) ?? false);

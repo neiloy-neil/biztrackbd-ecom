@@ -41,9 +41,16 @@ export interface LandingInfo {
   was: number | null;
 }
 
-function Section({ section, data, lang, t, orderForm, ctx, landing }: { section: PageSection; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx; landing?: LandingInfo }) {
+/** Marks a piece of text as editable on the page itself (the editor's preview only). `twin` says the field has a Bangla version. */
+const mark = (editing: boolean | undefined) => (path: string, twin = true): Record<string, string> => (editing ? { "data-edit": path, ...(twin ? { "data-tw": "1" } : {}) } : {});
+/** The same for a picture: a click opens the picture chooser in the editor. */
+const markImg = (editing: boolean | undefined) => (path: string): Record<string, string> => (editing ? { "data-edit-image": path } : {});
+
+function Section({ section, data, lang, t, orderForm, ctx, landing, editing }: { section: PageSection; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx; landing?: LandingInfo; editing?: boolean }) {
   const s = section.settings as S;
   const id = section.id;
+  const ed = mark(editing);
+  const edImg = markImg(editing);
   switch (section.type) {
     case "announcement-bar": {
       const text = L(s, "text", lang);
@@ -140,12 +147,12 @@ function Section({ section, data, lang, t, orderForm, ctx, landing }: { section:
         <section className="lp-hero" data-section={id}>
           <div className="wrap lp-hero-in">
             <div>
-              {L(s, "badge", lang) && <span className="lp-badge">{L(s, "badge", lang)}</span>}
-              <h1>{L(s, "headline", lang)}</h1>
-              {L(s, "subhead", lang) && <p>{L(s, "subhead", lang)}</p>}
-              <a href="#order" className="btn btn-primary btn-round">{L(s, "ctaText", lang)}</a>
+              {(L(s, "badge", lang) || editing) && <span className="lp-badge" {...ed("badge")}>{L(s, "badge", lang)}</span>}
+              <h1 {...ed("headline")}>{L(s, "headline", lang)}</h1>
+              {(L(s, "subhead", lang) || editing) && <p {...ed("subhead")}>{L(s, "subhead", lang)}</p>}
+              <a href="#order" className="btn btn-primary btn-round" {...ed("ctaText")}>{L(s, "ctaText", lang)}</a>
             </div>
-            {img && <div className="lp-hero-img"><Img src={img} alt={L(s, "headline", lang)} /></div>}
+            {img ? <div className="lp-hero-img" {...edImg("image")}><Img src={img} alt={L(s, "headline", lang)} /></div> : editing ? <div className="lp-hero-img lp-pick" {...edImg("image")}>+ Picture</div> : null}
           </div>
         </section>
       );
@@ -155,20 +162,21 @@ function Section({ section, data, lang, t, orderForm, ctx, landing }: { section:
       return (
         <section className="lp-block" data-section={id}>
           <div className="wrap">
-            <h2>{L(s, "title", lang)}</h2>
-            <ul className="lp-benefits">{items.map((it, i) => <li key={i}><b>{L(it, "title", lang)}</b>{L(it, "text", lang) && <span>{L(it, "text", lang)}</span>}</li>)}</ul>
+            <h2 {...ed("title")}>{L(s, "title", lang)}</h2>
+            <ul className="lp-benefits">{items.map((it, i) => <li key={i}><b {...ed(`items.${i}.title`)}>{L(it, "title", lang)}</b>{(L(it, "text", lang) || editing) && <span {...ed(`items.${i}.text`)}>{L(it, "text", lang)}</span>}</li>)}</ul>
           </div>
         </section>
       );
     }
     case "lp-gallery": {
-      const items = ((s.items as S[] | undefined) ?? []).filter((it) => str(it.image));
-      if (items.length === 0) return null;
+      const all = (s.items as S[] | undefined) ?? [];
+      const items = all.map((it, i) => ({ it, i })).filter(({ it }) => str(it.image));
+      if (items.length === 0 && !editing) return null;
       return (
         <section className="lp-block" data-section={id}>
           <div className="wrap">
-            {L(s, "title", lang) && <h2>{L(s, "title", lang)}</h2>}
-            <div className="lp-gallery">{items.map((it, i) => <Img key={i} src={str(it.image)} alt={str(it.alt)} />)}</div>
+            {(L(s, "title", lang) || editing) && <h2 {...ed("title")}>{L(s, "title", lang)}</h2>}
+            <div className="lp-gallery">{items.length === 0 ? <div className="lp-pick" {...edImg("items.0.image")}>+ Picture</div> : items.map(({ it, i }) => <span key={i} style={{ display: "contents" }} {...edImg(`items.${i}.image`)}><Img src={str(it.image)} alt={str(it.alt)} /></span>)}</div>
           </div>
         </section>
       );
@@ -197,8 +205,8 @@ function Section({ section, data, lang, t, orderForm, ctx, landing }: { section:
       return (
         <section className="lp-block" data-section={id}>
           <div className="wrap lp-narrow">
-            <h2>{L(s, "title", lang)}</h2>
-            {items.map((it, i) => <details key={i} className="lp-faq"><summary>{L(it, "q", lang)}</summary><p>{L(it, "a", lang)}</p></details>)}
+            <h2 {...ed("title")}>{L(s, "title", lang)}</h2>
+            {items.map((it, i) => <details key={i} className="lp-faq" open={editing || undefined}><summary {...ed(`items.${i}.q`)}>{L(it, "q", lang)}</summary><p {...ed(`items.${i}.a`)}>{L(it, "a", lang)}</p></details>)}
           </div>
         </section>
       );
@@ -207,8 +215,8 @@ function Section({ section, data, lang, t, orderForm, ctx, landing }: { section:
       return (
         <section className="lp-block lp-order" id="order" data-section={id}>
           <div className="wrap lp-narrow">
-            <h2>{L(s, "title", lang)}</h2>
-            {L(s, "intro", lang) && <p className="muted">{L(s, "intro", lang)}</p>}
+            <h2 {...ed("title")}>{L(s, "title", lang)}</h2>
+            {(L(s, "intro", lang) || editing) && <p className="muted" {...ed("intro")}>{L(s, "intro", lang)}</p>}
             {orderForm ?? <p className="muted">{t("previewOrderForm")}</p>}
           </div>
         </section>
@@ -219,7 +227,7 @@ function Section({ section, data, lang, t, orderForm, ctx, landing }: { section:
       return (
         <section className="lp-block" data-section={id}>
           <div className="wrap lp-narrow">
-            {L(s, "title", lang) && <h2>{L(s, "title", lang)}</h2>}
+            {(L(s, "title", lang) || editing) && <h2 {...ed("title")}>{L(s, "title", lang)}</h2>}
             <div className="lp-video">
               {/* The privacy-friendly YouTube address, and only an 11-character id that passed the check above. */}
               <iframe src={`https://www.youtube-nocookie.com/embed/${vid}`} title={L(s, "title", lang) || "Video"} loading="lazy" allow="encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
@@ -232,13 +240,13 @@ function Section({ section, data, lang, t, orderForm, ctx, landing }: { section:
       const img = str(s.image);
       return (
         <section className="lp-block" data-section={id}>
-          <div className={`wrap lp-split${s.side === "left" ? " lp-split-left" : ""}${img ? "" : " lp-split-solo"}`}>
+          <div className={`wrap lp-split${s.side === "left" ? " lp-split-left" : ""}${img || editing ? "" : " lp-split-solo"}`}>
             <div>
-              <h2>{L(s, "title", lang)}</h2>
-              <p>{L(s, "text", lang)}</p>
-              {L(s, "ctaText", lang) && <a href="#order" className="btn btn-primary btn-round">{L(s, "ctaText", lang)}</a>}
+              <h2 {...ed("title")}>{L(s, "title", lang)}</h2>
+              <p {...ed("text")}>{L(s, "text", lang)}</p>
+              {(L(s, "ctaText", lang) || editing) && <a href="#order" className="btn btn-primary btn-round" {...ed("ctaText")}>{L(s, "ctaText", lang)}</a>}
             </div>
-            {img && <Img src={img} alt={L(s, "title", lang)} />}
+            {img ? <span style={{ display: "contents" }} {...edImg("image")}><Img src={img} alt={L(s, "title", lang)} /></span> : editing ? <div className="lp-pick" {...edImg("image")}>+ Picture</div> : null}
           </div>
         </section>
       );
@@ -247,20 +255,20 @@ function Section({ section, data, lang, t, orderForm, ctx, landing }: { section:
       return (
         <section className="lp-block" data-section={id}>
           <div className="wrap lp-narrow lp-center">
-            <h2>{L(s, "title", lang)}</h2>
-            <p>{L(s, "text", lang)}</p>
-            {L(s, "ctaText", lang) && <a href="#order" className="btn btn-primary btn-round">{L(s, "ctaText", lang)}</a>}
+            <h2 {...ed("title")}>{L(s, "title", lang)}</h2>
+            <p {...ed("text")}>{L(s, "text", lang)}</p>
+            {(L(s, "ctaText", lang) || editing) && <a href="#order" className="btn btn-primary btn-round" {...ed("ctaText")}>{L(s, "ctaText", lang)}</a>}
           </div>
         </section>
       );
     case "lp-countdown": {
       // Only a real end date counts down; with none, or once it has passed, the section is simply not there.
       const end = parseEndsAt(str(s.endsAt));
-      if (!end || end.getTime() <= Date.now()) return null;
+      if (!end || end.getTime() <= Date.now()) return editing ? <section className="lp-block" data-section={id}><div className="wrap lp-narrow lp-center"><h2 {...ed("title")}>{L(s, "title", lang)}</h2><p className="muted">Set the end date in the settings to show the timer. It stays hidden until then.</p></div></section> : null;
       return (
         <section className="lp-block" data-section={id}>
           <div className="wrap lp-narrow lp-center">
-            <h2>{L(s, "title", lang)}</h2>
+            <h2 {...ed("title")}>{L(s, "title", lang)}</h2>
             <Countdown endsAt={end.toISOString()} labels={{ d: t("lpDays"), h: t("lpHours"), m: t("lpMinutes"), s: t("lpSeconds") }} />
           </div>
         </section>
@@ -279,23 +287,24 @@ function Section({ section, data, lang, t, orderForm, ctx, landing }: { section:
         <section className="lp-block" data-section={id}>
           <div className="wrap lp-narrow lp-center">
             <div className="lp-offer">
-              <span className="muted">{L(s, "text", lang)}</span>
+              <span className="muted" {...ed("text")}>{L(s, "text", lang)}</span>
               <b className="lp-offer-price">{money(price, lang)}</b>
               {landing?.was != null && landing.was > price && <s className="muted">{money(landing.was, lang)}</s>}
             </div>
-            {L(s, "ctaText", lang) && <a href="#order" className="btn btn-primary btn-round">{L(s, "ctaText", lang)}</a>}
+            {(L(s, "ctaText", lang) || editing) && <a href="#order" className="btn btn-primary btn-round" {...ed("ctaText")}>{L(s, "ctaText", lang)}</a>}
           </div>
         </section>
       );
     }
     case "lp-sticky-cta":
-      return <div className="lp-sticky" data-section={id}><a href="#order" className="btn btn-primary btn-round btn-block">{L(s, "text", lang)}</a></div>;
+      return <div className="lp-sticky" data-section={id}><a href="#order" className="btn btn-primary btn-round btn-block" {...ed("text")}>{L(s, "text", lang)}</a></div>;
     default:
       // The product, collection and cart blocks (docs/39) need the page's own data.
       return <>{renderPageBlock(section.type, id, s, ctx, lang, t)}</>;
   }
 }
 
-export function Sections({ page, data, lang, t, orderForm, ctx, landing }: { page: PageJson; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx; landing?: LandingInfo }) {
-  return <>{page.sections.filter((s) => !s.disabled).map((s) => <Section key={s.id} section={s} data={data} lang={lang} t={t} orderForm={orderForm} ctx={ctx} landing={landing} />)}</>;
+export function Sections({ page, data, lang, t, orderForm, ctx, landing, editing }: { page: PageJson; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx; landing?: LandingInfo; /** The editor's preview of a landing page: text and pictures are marked so they can be changed on the page. */ editing?: boolean }) {
+  // In the editor a hidden section is still drawn, dimmed, so it can be found and shown again; the live page never draws it.
+  return <>{page.sections.filter((s) => editing || !s.disabled).map((s) => <Section key={s.id} section={s} data={data} lang={lang} t={t} orderForm={orderForm} ctx={ctx} landing={landing} editing={editing} />)}</>;
 }

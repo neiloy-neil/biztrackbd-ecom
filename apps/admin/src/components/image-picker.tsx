@@ -15,8 +15,13 @@ const OUT_LONG_EDGE = 1600;
  * Choose a picture, crop it, and upload it as WebP. The crop happens in the browser (zoom and position, with a fixed shape
  * to pick from), and the server stores and resizes it again, so a huge phone photo never reaches the store as is.
  */
-export function ImagePicker({ label, value, onChange, disabled }: { label: string; value: string; onChange: (url: string) => void; disabled?: boolean }) {
+export function ImagePicker({ label, value, onChange, disabled, openSignal = 0 }: { label: string; value: string; onChange: (url: string) => void; disabled?: boolean; /** Goes up when the page being edited asks for this picture to be changed: the file chooser opens. */ openSignal?: number }) {
   const id = useId();
+  const fileInput = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (openSignal > 0 && !disabled) fileInput.current?.click();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openSignal]);
   const dlg = useRef<HTMLDialogElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const [src, setSrc] = useState<HTMLImageElement | null>(null);
@@ -106,7 +111,7 @@ export function ImagePicker({ label, value, onChange, disabled }: { label: strin
         )}
         <label className="btn btn-secondary btn-sm" style={{ cursor: disabled ? "not-allowed" : "pointer" }}>
           {value ? "Change" : "Choose picture"}
-          <input type="file" accept="image/jpeg,image/png,image/webp" hidden disabled={disabled} aria-labelledby={`${id}-l`} data-testid="image-file" onChange={(e) => { pick(e.target.files?.[0]); e.target.value = ""; }} />
+          <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" hidden disabled={disabled} aria-labelledby={`${id}-l`} data-testid="image-file" onChange={(e) => { pick(e.target.files?.[0]); e.target.value = ""; }} />
         </label>
         {value && !disabled && <button type="button" className="btn btn-secondary btn-sm" onClick={() => onChange("")}>Remove</button>}
       </div>

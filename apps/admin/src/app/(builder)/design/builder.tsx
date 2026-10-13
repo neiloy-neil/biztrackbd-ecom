@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Drawer, Segmented, useToast } from "@biztrackbd/ui";
 import {
-  DEFAULT_THEME, contrast, newSection, sectionDef, sectionsFor, validateTheme,
+  DEFAULT_THEME, contrast, editableField, newSection, sectionDef, sectionsFor, setByPath, validateTheme,
   type Field, type ListSpec, type PageJson, type PageKind, type PageSection, type SectionDef, type ThemeSettings,
 } from "@biztrackbd/core/builder-client";
 import { ImagePicker } from "@/components/image-picker";
+import { LANDING_GROUPS, SectionThumb } from "./section-thumbs";
 import { discardDraftAction, publishAction, rollbackAction, saveDraftAction } from "./actions";
 
 export interface VersionItem { version: number; label: string | null; createdAt: string; isLive: boolean }
@@ -72,10 +73,10 @@ function useNarrow(): boolean {
 }
 
 // ---- A single field, drawn from its definition --------------------------------------------------------------------
-function FieldInput({ f, value, onChange, disabled, idPrefix }: { f: Field; value: unknown; onChange: (v: unknown) => void; disabled: boolean; idPrefix: string }) {
+function FieldInput({ f, value, onChange, disabled, idPrefix, openSignal = 0 }: { f: Field; value: unknown; onChange: (v: unknown) => void; disabled: boolean; idPrefix: string; /** Goes up each time the page asks for this picture to be changed. */ openSignal?: number }) {
   const id = `${idPrefix}-${f.key}`;
   const str = typeof value === "string" ? value : value == null ? "" : String(value);
-  if (f.type === "image") return <ImagePicker label={f.label} value={str} onChange={onChange} disabled={disabled} />;
+  if (f.type === "image") return <ImagePicker label={f.label} value={str} onChange={onChange} disabled={disabled} openSignal={openSignal} />;
   if (f.type === "checkbox") {
     return (
       <label className="check" htmlFor={id} style={{ minHeight: 40, alignItems: "center" }}>
@@ -106,7 +107,7 @@ function FieldInput({ f, value, onChange, disabled, idPrefix }: { f: Field; valu
   );
 }
 
-function ListEditor({ spec, items, onChange, disabled, idPrefix }: { spec: ListSpec; items: Settings[]; onChange: (items: Settings[]) => void; disabled: boolean; idPrefix: string }) {
+function ListEditor({ spec, items, onChange, disabled, idPrefix, imgSignal }: { spec: ListSpec; items: Settings[]; onChange: (items: Settings[]) => void; disabled: boolean; idPrefix: string; imgSignal?: { path: string; n: number } }) {
   const set = (i: number, patch: Settings) => onChange(items.map((it, j) => (j === i ? { ...it, ...patch } : it)));
   const move = (i: number, d: -1 | 1) => {
     const j = i + d;
@@ -129,7 +130,7 @@ function ListEditor({ spec, items, onChange, disabled, idPrefix }: { spec: ListS
             </span>
           </div>
           <div className="stack" style={{ gap: 8 }}>
-            {spec.fields.map((f) => <FieldInput key={f.key} f={f} value={it[f.key]} disabled={disabled} idPrefix={`${idPrefix}-${i}`} onChange={(v) => set(i, { [f.key]: v })} />)}
+            {spec.fields.map((f) => <FieldInput key={f.key} f={f} value={it[f.key]} disabled={disabled} idPrefix={`${idPrefix}-${i}`} openSignal={imgSignal?.path === `${spec.key}.${i}.${f.key}` ? imgSignal.n : 0} onChange={(v) => set(i, { [f.key]: v })} />)}
           </div>
         </div>
       ))}
@@ -141,16 +142,16 @@ function ListEditor({ spec, items, onChange, disabled, idPrefix }: { spec: ListS
 const isStyle = (f: Field) => f.type === "color" || f.type === "select" || f.type === "number" || f.type === "checkbox";
 
 /** A section's settings in three groups: what it says, how it looks, and the Bangla twins tucked into one fold (instead of every field twice). */
-function SectionForm({ def, section, onChange, disabled, bnOpen }: { def: SectionDef; section: PageSection; onChange: (patch: Settings) => void; disabled: boolean; bnOpen: boolean }) {
+function SectionForm({ def, section, onChange, disabled, bnOpen, imgSignal }: { def: SectionDef; section: PageSection; onChange: (patch: Settings) => void; disabled: boolean; bnOpen: boolean; imgSignal?: { path: string; n: number } }) {
   if (def.fields.length === 0 && !def.list) return <p className="muted" style={{ fontSize: 14 }}>This section has nothing to set. It shows your delivery and payment promises.</p>;
   const content = def.fields.filter((f) => !f.bn && !isStyle(f));
   const style = def.fields.filter((f) => !f.bn && isStyle(f));
   const bn = def.fields.filter((f) => f.bn);
-  const row = (f: Field) => <FieldInput key={f.key} f={f} value={section.settings[f.key]} disabled={disabled} idPrefix={section.id} onChange={(v) => onChange({ [f.key]: v })} />;
+  const row = (f: Field) => <FieldInput key={f.key} f={f} value={section.settings[f.key]} disabled={disabled} idPrefix={section.id} openSignal={imgSignal?.path === f.key ? imgSignal.n : 0} onChange={(v) => onChange({ [f.key]: v })} />;
   return (
     <div className="stack" style={{ gap: 14 }} data-testid="section-form">
       {content.length > 0 && <div className="bld-group"><div className="bld-gh">Content</div><div className="stack" style={{ gap: 10 }}>{content.map(row)}</div></div>}
-      {def.list && <div className="bld-group"><ListEditor spec={def.list} items={(section.settings[def.list.key] as Settings[]) ?? []} disabled={disabled} idPrefix={section.id} onChange={(items) => onChange({ [def.list!.key]: items })} /></div>}
+      {def.list && <div className="bld-group"><ListEditor spec={def.list} items={(section.settings[def.list.key] as Settings[]) ?? []} disabled={disabled} idPrefix={section.id} imgSignal={imgSignal} onChange={(items) => onChange({ [def.list!.key]: items })} /></div>}
       {style.length > 0 && <div className="bld-group"><div className="bld-gh">Style</div><div className="stack" style={{ gap: 10 }}>{style.map(row)}</div></div>}
       {bn.length > 0 && (
         <details className="bld-group bld-bn" open={bnOpen}>
@@ -213,6 +214,13 @@ export function Builder(props: Props) {
   const [label, setLabel] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
   const [library, setLibrary] = useState(false);
+  // Where a section chosen from the gallery goes: the gap that was clicked on the page, or the end.
+  const [addAt, setAddAt] = useState<number | null>(null);
+  // A click on a picture in the preview asks for that picture to be changed.
+  const [imgSignal, setImgSignal] = useState<{ path: string; n: number } | undefined>(undefined);
+  // On a phone the page fills the screen and the settings slide up from the bottom.
+  const [sheet, setSheet] = useState(false);
+  const visual = kind === "landing";
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [dragOver, setDragOver] = useState<number | null>(null);
   const [conflict, setConflict] = useState<{ stamp: string | null } | null>(null);
@@ -247,6 +255,8 @@ export function Builder(props: Props) {
   }, [pageKey]);
 
   const post = useCallback((msg: Record<string, unknown>) => frame.current?.contentWindow?.postMessage(msg, previewOrigin), [previewOrigin]);
+  // What the preview asks for (typing on the page, dragging, adding, choosing a picture). Filled in below, once the editing functions exist.
+  const handlers = useRef<Record<string, (m: Record<string, unknown>) => void>>({});
 
   // The preview tells us when it has loaded, or that a section was clicked.
   useEffect(() => {
@@ -255,17 +265,20 @@ export function Builder(props: Props) {
       const m = e.data as { type?: string; id?: unknown } | null;
       if (m?.type === "bt-preview:ready") {
         ready.current = true;
-        post({ type: "bt-preview:update", page: latest.current.page, theme: latest.current.theme, lang: latest.current.lang });
+        post({ type: "bt-preview:update", page: latest.current.page, theme: latest.current.theme, lang: latest.current.lang, locked });
         if (selectedRef.current) post({ type: "bt-preview:focus", id: selectedRef.current });
       } else if (m?.type === "bt-preview:select" && typeof m.id === "string" && latest.current.page.sections.some((s) => s.id === m.id)) {
         setSelected(m.id);
         setTab("settings");
+        setSheet(true);
         post({ type: "bt-preview:focus", id: m.id });
+      } else if (m && typeof m.type === "string" && m.type.startsWith("bt-preview:") && visual) {
+        handlers.current[m.type]?.(m as Record<string, unknown>);
       }
     }
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, [previewOrigin, post]);
+  }, [previewOrigin, post, visual, locked]);
   // Publishing and going back reload the editor from the server, which resets this component: the notice is carried across in the tab.
   useEffect(() => {
     try {
@@ -280,7 +293,7 @@ export function Builder(props: Props) {
   // Every change goes to the preview at once, and to the server a moment after typing stops.
   useEffect(() => {
     if (!touched.current) return;
-    if (ready.current) post({ type: "bt-preview:update", page, theme, lang: latest.current.lang });
+    if (ready.current) post({ type: "bt-preview:update", page, theme, lang: latest.current.lang, locked });
     if (!canEdit) return;
     setSave("saving");
     setDirty(true);
@@ -294,9 +307,9 @@ export function Builder(props: Props) {
       else { setSave("error"); setError(r.error); }
     }, 700);
     return () => { if (timer.current) clearTimeout(timer.current); };
-  }, [page, theme, pageKey, canEdit, post, persist]);
+  }, [page, theme, pageKey, canEdit, post, persist, locked]);
 
-  useEffect(() => { if (ready.current) post({ type: "bt-preview:update", lang }); }, [lang, post]);
+  useEffect(() => { if (ready.current) post({ type: "bt-preview:update", lang, locked }); }, [lang, locked, post]);
 
   // ---- edits, with undo and redo. Typing is grouped: a snapshot is kept when a change comes after a pause.
   const remember = () => {
@@ -347,8 +360,14 @@ export function Builder(props: Props) {
   const choose = (id: string) => { setSelected(id); post({ type: "bt-preview:focus", id }); if (narrow) setTab("settings"); };
   function add(type: string) {
     const s = newSection(type);
-    edit((p) => ({ ...p, sections: [...p.sections, s] }));
+    const at = addAt;
+    edit((p) => {
+      const next = [...p.sections];
+      next.splice(at === null ? next.length : Math.max(0, Math.min(at, next.length)), 0, s);
+      return { ...p, sections: next };
+    });
     setSelected(s.id);
+    setAddAt(null);
     setLibrary(false);
     setTab(narrow ? "settings" : "layers");
     setTimeout(() => { post({ type: "bt-preview:focus", id: s.id }); }, 200);
@@ -377,6 +396,56 @@ export function Builder(props: Props) {
     if (selected === id) setSelected(null);
   }
   const toggle = (id: string) => edit((p) => ({ ...p, sections: p.sections.map((x) => (x.id === id ? { ...x, disabled: !x.disabled } : x)) }));
+
+  // ---- editing on the page itself. Everything the preview sends is checked here against the section's own definition.
+  handlers.current = {
+    "bt-preview:edit": (m) => {
+      if (locked || typeof m.id !== "string" || typeof m.path !== "string" || typeof m.value !== "string") return;
+      const section = latest.current.page.sections.find((x) => x.id === m.id);
+      const def = section && sectionDef(section.type);
+      const field = def ? editableField(def, m.path) : null;
+      if (!section || !def || !field) return;
+      // In Bangla view the words belong to the Bangla twin of the field, when it has one.
+      const twinPath = m.path.replace(/([A-Za-z0-9]+)$/, "$1Bn");
+      const useTwin = latest.current.lang === "bn" && m.twin === true && editableField(def, twinPath) !== null;
+      const target = useTwin ? twinPath : m.path;
+      const max = (useTwin ? editableField(def, twinPath) : field)?.max ?? 200;
+      // eslint-disable-next-line no-control-regex
+      const value = m.value.replace(/[\u0000-\u001F\u007F]/g, " ").slice(0, max);
+      edit((pg) => ({ ...pg, sections: pg.sections.map((x) => (x.id === section.id ? { ...x, settings: setByPath(x.settings, target, value) } : x)) }));
+    },
+    "bt-preview:image": (m) => {
+      if (locked || typeof m.id !== "string" || typeof m.path !== "string") return;
+      const section = latest.current.page.sections.find((x) => x.id === m.id);
+      const def = section && sectionDef(section.type);
+      if (!section || !def || !editableField(def, m.path, ["image"])) return;
+      setSelected(section.id); setTab("settings"); setSheet(true);
+      setImgSignal({ path: m.path, n: Date.now() });
+    },
+    "bt-preview:move": (m) => {
+      if (locked || typeof m.id !== "string" || typeof m.slot !== "number") return;
+      const from = latest.current.page.sections.findIndex((x) => x.id === m.id);
+      if (from < 0) return;
+      const slot = Math.max(0, Math.min(Math.round(m.slot), latest.current.page.sections.length));
+      const to = slot > from ? slot - 1 : slot;
+      if (to !== from) reorder(from, to);
+    },
+    "bt-preview:op": (m) => {
+      if (locked || typeof m.id !== "string") return;
+      const section = latest.current.page.sections.find((x) => x.id === m.id);
+      if (!section) return;
+      if (m.op === "up") move(section.id, -1);
+      else if (m.op === "down") move(section.id, 1);
+      else if (m.op === "hide" && !isRequired(section.type)) toggle(section.id);
+      else if (m.op === "dup") duplicate(section);
+      else if (m.op === "delete" && !isRequired(section.type)) remove(section.id);
+    },
+    "bt-preview:add": (m) => {
+      if (locked || typeof m.index !== "number") return;
+      setAddAt(Math.max(0, Math.min(Math.round(m.index), latest.current.page.sections.length)));
+      setLibrary(true);
+    },
+  };
 
   async function flush(): Promise<boolean> {
     if (timer.current) clearTimeout(timer.current);
@@ -500,7 +569,7 @@ export function Builder(props: Props) {
           </span>
         )}
       </div>
-      <SectionForm def={currentDef} section={current} disabled={locked} bnOpen={lang === "bn"} onChange={(p) => patch(current.id, p)} />
+      <SectionForm def={currentDef} section={current} disabled={locked} bnOpen={lang === "bn"} imgSignal={imgSignal} onChange={(p) => patch(current.id, p)} />
     </section>
   ) : (
     <div className="bld-empty"><b>Pick a section</b><p className="muted">Choose one in the list, or click it in the preview, to change its text, pictures and style.</p></div>
@@ -549,7 +618,7 @@ export function Builder(props: Props) {
   const canUndo = hist.current.past.length > 0, canRedo = hist.current.future.length > 0;
 
   return (
-    <div className="bld" data-testid="builder">
+    <div className="bld" data-testid="builder" data-visual={visual ? "1" : undefined} data-sheet={visual && narrow ? (sheet ? "open" : "peek") : undefined}>
       <header className="bld-top">
         <Link href={props.exitHref} className="bld-exit" aria-label="Exit the editor">← <span>Exit</span></Link>
         <div className="bld-title">
@@ -601,6 +670,7 @@ export function Builder(props: Props) {
         </main>
 
         <aside className="bld-right" aria-label={narrow ? "Editor panel" : "Settings"}>
+          {visual && narrow && <button type="button" className="bld-handle" onClick={() => setSheet((v) => !v)} aria-expanded={sheet} data-testid="sheet-handle"><span aria-hidden /><b>{sheet ? "Show the page" : current && currentDef ? `Edit: ${currentDef.label}` : "Sections and settings"}</b></button>}
           <div className="bld-tabs" role="tablist" aria-label="Editor">
             {tabs.map((t) => (
               <button key={t.id} type="button" role="tab" aria-selected={active === t.id} onClick={() => setTab(t.id)} data-testid={t.test ?? `tab-${t.id}`}>{t.label}</button>
@@ -610,16 +680,26 @@ export function Builder(props: Props) {
         </aside>
       </div>
 
-      <Drawer open={library} onClose={() => setLibrary(false)} title="Add a section">
-        <div className="bld-lib">
-          {defs.map((d) => (
-            <button key={d.type} type="button" className="bld-card" disabled={full(d.type)} onClick={() => add(d.type)} data-testid={`lib-${d.type}`}>
-              <b>{d.label}</b>
-              <span>{d.description}</span>
-              {d.max && count(d.type) >= d.max && <em>Already on the page</em>}
+      <Drawer open={library} onClose={() => { setLibrary(false); setAddAt(null); }} title="Add a section">
+        {(() => {
+          const card = (d: (typeof defs)[number]) => (
+            <button key={d.type} type="button" className="bld-card bld-card-pic" disabled={full(d.type)} onClick={() => add(d.type)} data-testid={`lib-${d.type}`}>
+              <SectionThumb type={d.type} />
+              <span className="bld-card-txt"><b>{d.label}</b><span>{d.description}</span>{d.max && count(d.type) >= d.max && <em>Already on the page</em>}</span>
             </button>
-          ))}
-        </div>
+          );
+          if (kind !== "landing") return <div className="bld-lib">{defs.map(card)}</div>;
+          return (
+            <div className="stack" style={{ gap: 14 }}>
+              {LANDING_GROUPS.map((g) => (
+                <section key={g.title} aria-label={g.title}>
+                  <div className="bld-gh" style={{ marginBottom: 6 }}>{g.title}</div>
+                  <div className="bld-lib">{g.types.map((t) => defs.find((d) => d.type === t)).filter((d): d is NonNullable<typeof d> => Boolean(d)).map(card)}</div>
+                </section>
+              ))}
+            </div>
+          );
+        })()}
       </Drawer>
     </div>
   );

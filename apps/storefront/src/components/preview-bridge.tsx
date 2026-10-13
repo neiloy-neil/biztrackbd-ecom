@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { PageData, PageJson } from "@biztrackbd/core";
 import { themeCss, validatePage, validateTheme, type PageKind, type ThemeSettings } from "@biztrackbd/core/builder-client";
 import { makeT, type Lang } from "@/lib/i18n-core";
 import type { PageCtx } from "@/lib/page-ctx";
+import { EditOverlay } from "./edit-overlay";
 import { Sections, type LandingInfo } from "./sections";
 
 /**
@@ -23,6 +24,21 @@ export function PreviewBridge({ kind, initialPage, initialTheme, data, lang: ini
   const [theme, setTheme] = useState(initialTheme);
   const [error, setError] = useState<string | null>(null);
   const [lang, setLang] = useState<Lang>(initialLang);
+  // Landing pages can be edited on the page itself. A plan that only allows colours (or a viewer) gets the plain preview.
+  const [locked, setLocked] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const typing = useRef(false);
+  const pending = useRef<unknown>(undefined);
+  const editing = kind === "landing" && !locked;
+  const send = useCallback((msg: Record<string, unknown>) => window.parent.postMessage(msg, adminOrigin || "*"), [adminOrigin]);
+  const onTyping = useCallback((on: boolean) => {
+    typing.current = on;
+    // Redraws that arrived while a word was being typed would move the cursor, so the newest one waits until the typing stops.
+    if (!on && pending.current !== undefined) {
+      try { setPage(validatePage(kind, pending.current)); } catch { /* the next message corrects it */ }
+      pending.current = undefined;
+    }
+  }, [kind]);
 
   useEffect(() => {
     function onMessage(e: MessageEvent) {
@@ -36,8 +52,12 @@ export function PreviewBridge({ kind, initialPage, initialTheme, data, lang: ini
       }
       if (m.type !== PREVIEW_MESSAGE) return;
       if (m.lang === "en" || m.lang === "bn") setLang(m.lang);
+      if (typeof (m as { locked?: unknown }).locked === "boolean") setLocked((m as { locked: boolean }).locked);
       try {
-        if (m.page !== undefined) setPage(validatePage(kind, m.page));
+        if (m.page !== undefined) {
+          if (typing.current) pending.current = m.page;
+          else setPage(validatePage(kind, m.page));
+        }
         if (m.theme !== undefined) setTheme(validateTheme(m.theme));
         setError(null);
       } catch (err) {
@@ -85,6 +105,7 @@ export function PreviewBridge({ kind, initialPage, initialTheme, data, lang: ini
       if (m?.type !== "bt-preview:focus" || typeof m.id !== "string") return;
       document.querySelectorAll(".bt-selected").forEach((el) => el.classList.remove("bt-selected"));
       document.querySelector(`[data-section="${CSS.escape(m.id)}"]`)?.classList.add("bt-selected");
+      setSelectedId(m.id);
     }
     window.addEventListener("message", onFocus);
     return () => window.removeEventListener("message", onFocus);
@@ -96,7 +117,8 @@ export function PreviewBridge({ kind, initialPage, initialTheme, data, lang: ini
       <style id="bt-preview-select">{`[data-section]{cursor:pointer}[data-section]:hover{outline:2px dashed rgba(91,79,232,.55);outline-offset:-2px}[data-section].bt-selected{outline:3px solid #5B4FE8;outline-offset:-3px}`}</style>
       {css && <style id="bt-preview-theme" dangerouslySetInnerHTML={{ __html: css }} />}
       {error && <div role="status" style={{ position: "sticky", top: 0, zIndex: 50, background: "#FEF3E2", color: "#92400E", padding: "8px 16px", fontSize: 13, fontWeight: 600 }}>{error}</div>}
-      <Sections page={page} data={data} lang={lang} t={makeT(lang)} orderForm={orderForm} ctx={ctx} landing={landing} />
+      <Sections page={page} data={data} lang={lang} t={makeT(lang)} orderForm={orderForm} ctx={ctx} landing={landing} editing={editing} />
+      {editing && <EditOverlay page={page} selectedId={selectedId} send={send} onTyping={onTyping} />}
     </div>
   );
 }
