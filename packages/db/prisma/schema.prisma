@@ -481,6 +481,10 @@ model Order {
   
   notes               String?           @db.Text
   staffNotes          String?           @db.Text
+  /** Short labels the team puts on an order, for example "call first" or "gift". */
+  tags                String[]          @default([])
+  /** What was said on the confirmation call. Shown at the top of the order for whoever packs it. */
+  callNote            String?           @db.Text
   
   tenant              Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   customer            Customer?         @relation(fields: [customerId], references: [id], onDelete: SetNull)

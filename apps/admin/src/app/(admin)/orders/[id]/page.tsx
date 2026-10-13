@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { COURIER_STATUS_LABELS, can, getCourierRates, getOrderDetail, listConnectedCouriers, type OrderDetail } from "@biztrackbd/core";
+import { COURIER_STATUS_LABELS, can, getCourierRates, getOrderDetail, listConnectedCouriers, listOrderTags, type OrderDetail } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
 import { dateTime, prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { CHANNEL, OrderPill, PaymentPill, methodName } from "@/lib/status";
-import { blockAction, bookAction, holdAction, noteAction, refreshCourierAction, refreshFraudAction, releaseHoldAction, returnedAction, shipAction, statusAction, verifyAction } from "./actions";
+import { blockAction, bookAction, callNoteAction, tagsAction, holdAction, noteAction, refreshCourierAction, refreshFraudAction, releaseHoldAction, returnedAction, shipAction, statusAction, verifyAction } from "./actions";
 import { AddressEditor, CopyButton, RejectForm } from "./forms";
 
 export const dynamic = "force-dynamic";
@@ -31,7 +31,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
   const s = await requireAccess("orders");
   const o = await getOrderDetail(s.tenantId, s.actor, id).catch(() => null);
   if (!o) notFound();
-  const [couriers, rates] = await Promise.all([listConnectedCouriers(s.tenantId), getCourierRates(s.tenantId, s.actor)]);
+  const [couriers, rates, knownTags] = await Promise.all([listConnectedCouriers(s.tenantId), getCourierRates(s.tenantId, s.actor), listOrderTags(s.tenantId, s.actor)]);
   const canEdit = can(s.user.role, "orders", "edit");
   const step = canEdit ? nextStep(o) : null;
   const err = one(sp.err);
@@ -58,6 +58,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
       </div>
       <p className="muted" style={{ margin: "-6px 0 14px", fontSize: 13.5 }}>{dateTime(o.createdAt)} · {CHANNEL[o.channel] ?? o.channel}</p>
       {err && <div className="notice bad" role="alert" style={{ marginBottom: 14 }} data-testid="order-error">{err}</div>}
+      {o.callNote && <div className="notice info" style={{ marginBottom: 14 }} data-testid="call-note-banner"><b>Call note:</b> {o.callNote}</div>}
 
       <div className="split">
         <div className="col stack">
@@ -201,6 +202,31 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               </dl>
             )}
             {o.customer?.id && can(s.user.role, "customers") && <p style={{ marginTop: 10 }}><Link href={`/customers/${o.customer.id}`} className="link" prefetch={false}>Open customer</Link></p>}
+          </section>
+
+          <section className="card" data-testid="labels-card">
+            <div className="card-head"><h2>Labels and call note</h2></div>
+            {canEdit ? (
+              <div className="stack">
+                <form action={tagsAction.bind(null, o.id)} className="stack">
+                  <label className="field" style={{ marginBottom: 0 }}>
+                    <span className="label">Labels <span className="opt">(separate with commas)</span></span>
+                    <input className="input" name="tags" list="known-labels" defaultValue={o.tags.join(", ")} maxLength={200} placeholder="gift, call first" data-testid="labels-input" />
+                  </label>
+                  <datalist id="known-labels">{knownTags.map((t) => <option key={t.tag} value={t.tag} />)}</datalist>
+                  <SubmitButton className="btn btn-secondary btn-sm" pending="Saving…">Save labels</SubmitButton>
+                </form>
+                <form action={callNoteAction.bind(null, o.id)} className="stack">
+                  <label className="field" style={{ marginBottom: 0 }}>
+                    <span className="label">Call note <span className="opt">(shown to whoever packs it)</span></span>
+                    <textarea className="textarea" name="callNote" defaultValue={o.callNote ?? ""} maxLength={500} rows={2} placeholder="Said deliver after 6pm" data-testid="call-note-input" />
+                  </label>
+                  <SubmitButton className="btn btn-secondary btn-sm" pending="Saving…">Save call note</SubmitButton>
+                </form>
+              </div>
+            ) : (
+              <p className="muted" style={{ margin: 0 }}>{o.tags.length ? o.tags.join(", ") : "No labels."}</p>
+            )}
           </section>
 
           <section className="card" data-testid="delivery-card">

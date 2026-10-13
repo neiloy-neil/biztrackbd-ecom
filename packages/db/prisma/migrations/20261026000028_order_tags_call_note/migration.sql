@@ -1,0 +1,3 @@
+ALTER TABLE "Order" ADD COLUMN "tags" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[];
+ALTER TABLE "Order" ADD COLUMN "callNote" TEXT;
+CREATE INDEX "Order_tags_idx" ON "Order" USING GIN ("tags");

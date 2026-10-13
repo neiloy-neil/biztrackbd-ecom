@@ -1,6 +1,6 @@
 import type { TenantTx } from "@biztrackbd/db";
 
-export type OrderEventType = "PLACED" | "PAYMENT_SUBMITTED" | "PAYMENT_VERIFIED" | "PAYMENT_REJECTED" | "STATUS" | "NOTE" | "PRINTED" | "ADDRESS_CHANGED" | "COURIER_BOOKED" | "COURIER_STATUS" | "COURIER_FAILED" | "FRAUD" | "RETURN" | "SETTLEMENT" | "SMS";
+export type OrderEventType = "PLACED" | "PAYMENT_SUBMITTED" | "PAYMENT_VERIFIED" | "PAYMENT_REJECTED" | "STATUS" | "NOTE" | "PRINTED" | "ADDRESS_CHANGED" | "COURIER_BOOKED" | "COURIER_STATUS" | "COURIER_FAILED" | "FRAUD" | "RETURN" | "SETTLEMENT" | "SMS" | "TAGS" | "CALL_NOTE";
 
 export interface EventActor {
   id?: string;

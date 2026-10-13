@@ -123,7 +123,9 @@ function Slip({ o, st }: { o: OrderDetail; st: StoreSettingsView }) {
           ))}
         </tbody>
       </table>
+      {o.callNote && <div><h2>Call note</h2><div><b>{o.callNote}</b></div></div>}
       {o.notes && <div><h2>Customer note</h2><div>{o.notes}</div></div>}
+      {o.tags.length > 0 && <div style={{ marginTop: 6 }}>Labels: {o.tags.join(", ")}</div>}
     </div>
   );
 }
@@ -157,6 +159,8 @@ function sampleOrder(): OrderDetail {
     customerName: "Rina Akter", customerPhone: "01712345678", customerEmail: null,
     address: { line: "House 12, Road 5, Dhanmondi", area: "Dhanmondi", district: "Dhaka", division: "Dhaka", zone: "Dhaka" },
     notes: "Please call before delivery.",
+    tags: [],
+    callNote: null,
     totals: { subtotal: 2750, delivery: 80, codFee: 0, discount: 0, couponCode: null, tierDiscount: 0, referralDiscount: 0, pointsDiscount: 0, pointsUsed: 0, total: 2830 },
     mfs: { trxId: null, sender: null, verifiedAt: null, verifiedBy: null },
     courier: { provider: null, trackingCode: "SF-884201", consignmentId: null, trackingUrl: null, bookedAt: null, status: null, statusLabel: null, statusAt: null, syncedAt: null, fee: null },

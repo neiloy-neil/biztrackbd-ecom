@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
-  DomainError, addOrderNote, blockPhone, bookCourier, holdOrder, isValidAddress, markPacked, markParcelReturned, refreshCourierStatus, refreshOrderFraudReport, rejectPayment, releaseHold, shipManually,
+  DomainError, addOrderNote, setCallNote, setOrderTags, blockPhone, bookCourier, holdOrder, isValidAddress, markPacked, markParcelReturned, refreshCourierStatus, refreshOrderFraudReport, rejectPayment, releaseHold, shipManually,
   transitionOrder, updateShippingAddress, verifyPayment,
 } from "@biztrackbd/core";
 import type { OrderStatus } from "@biztrackbd/db";
@@ -130,4 +130,15 @@ export async function returnedAction(id: string, form: FormData): Promise<void> 
 export async function blockAction(id: string, phone: string, form: FormData): Promise<void> {
   const s = await requireAction("customers", "edit");
   await run(id, () => blockPhone(s.tenantId, s.actor, phone, String(form.get("reason") ?? ""), "FRAUD_REVIEW"));
+}
+
+/** Labels come in as one comma-separated line, for example: gift, call first. */
+export async function tagsAction(id: string, form: FormData): Promise<void> {
+  const s = await requireAction("orders", "edit");
+  await run(id, () => setOrderTags(s.tenantId, s.actor, id, String(form.get("tags") ?? "").split(",")));
+}
+
+export async function callNoteAction(id: string, form: FormData): Promise<void> {
+  const s = await requireAction("orders", "edit");
+  await run(id, () => setCallNote(s.tenantId, s.actor, id, String(form.get("callNote") ?? "")));
 }

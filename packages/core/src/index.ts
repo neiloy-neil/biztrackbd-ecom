@@ -29,7 +29,7 @@ export {
 } from "./storefront/catalog";
 export { requestOtp, verifyOtp, setSmsSender, signCustomerSession, readCustomerSession, signOrderAccess, verifyOrderAccess, getAccount, RateLimitError, SESSION_TTL_SECONDS, type SmsSender, type CustomerSession, type AccountOrder } from "./customers/auth";
 export { sanitizeProductHtml } from "./storefront/html";
-export { listOrders, orderTabCounts, getOrderDetail, verifyPayment, rejectPayment, addOrderNote, updateShippingAddress, markPacked, shipManually, recordPrinted, type OrderTab, type OrderFilters, type OrderRow, type OrderDetail, type AddressEdit } from "./admin/orders";
+export { listOrders, orderTabCounts, setOrderTags, listOrderTags, setCallNote, bulkChangeStatus, ordersCsv, cleanTag, getOrderDetail, verifyPayment, rejectPayment, addOrderNote, updateShippingAddress, markPacked, shipManually, recordPrinted, type OrderTab, type OrderFilters, type OrderRow, type OrderDetail, type AddressEdit } from "./admin/orders";
 export { recordOrderEvent, type OrderEventType } from "./admin/order-events";
 export { DEMO_TEMPLATES, demoTemplate, type DemoTemplate, type DemoProduct, type DemoVariant } from "./demo/templates";
 export { resetDemoStore, DEMO_TEMPLATE_IDS, type DemoDeps, type DemoResult } from "./demo/seed";
