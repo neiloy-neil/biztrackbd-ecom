@@ -14,7 +14,10 @@ export function mapSteadfastStatus(raw: string): CourierStatus {
   }
 }
 
-export function createSteadfast(ctx: AdapterContext, baseUrl = "https://portal.steadfast.com.bd/api/v1"): CourierAdapter {
+export function createSteadfast(
+  ctx: AdapterContext,
+  baseUrl = ctx.config.baseUrl || "https://portal.steadfast.com.bd/api/v1",
+): CourierAdapter {
   const headers = () => ({ "Api-Key": ctx.secrets.apiKey ?? "", "Secret-Key": ctx.secrets.secretKey ?? "" });
   return {
     provider: "STEADFAST",
@@ -51,4 +54,66 @@ export function createSteadfast(ctx: AdapterContext, baseUrl = "https://portal.s
       };
     },
   };
+}
+
+export interface SteadfastFraudReport {
+  phone: string;
+  totalParcels: number;
+  deliveredParcels: number;
+  cancelledParcels: number;
+  successRate: number;
+}
+
+/** Queries customer delivery and cancellation history across merchants from Steadfast fraud check API. */
+export async function checkSteadfastFraud(
+  ctx: AdapterContext,
+  phone: string,
+  baseUrl = ctx.config.baseUrl || "https://portal.packzy.com/api/v1",
+): Promise<SteadfastFraudReport | null> {
+  const headers = () => ({ "Api-Key": ctx.secrets.apiKey ?? "", "Secret-Key": ctx.secrets.secretKey ?? "" });
+  try {
+    const raw = await courierJson(ctx.fetch, "Steadfast", `${baseUrl}/fraud_check/score/${encodeURIComponent(phone)}`, {
+      headers: headers(),
+    });
+    const r = rec(raw);
+    const total = Number(r.total_parcels ?? r.total ?? 0);
+    const delivered = Number(r.delivered_parcels ?? r.delivered ?? 0);
+    const cancelled = Number(r.cancelled_parcels ?? r.cancelled ?? 0);
+    const successRate = total > 0 ? Math.round((delivered / total) * 100) : 100;
+    return {
+      phone,
+      totalParcels: total,
+      deliveredParcels: delivered,
+      cancelledParcels: cancelled,
+      successRate,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** Fetches delivery thanas and districts supported by Steadfast. */
+export async function getSteadfastPoliceStations(
+  ctx: AdapterContext,
+  baseUrl = ctx.config.baseUrl || "https://portal.packzy.com/api/v1",
+): Promise<{ id: number; name: string; district: string }[]> {
+  const headers = () => ({ "Api-Key": ctx.secrets.apiKey ?? "", "Secret-Key": ctx.secrets.secretKey ?? "" });
+  const raw = await courierJson(ctx.fetch, "Steadfast", `${baseUrl}/police_stations`, { headers: headers() });
+  const r = rec(raw);
+  const data = Array.isArray(r.data) ? r.data : Array.isArray(raw) ? (raw as unknown[]) : [];
+  return data.map((item: any) => ({
+    id: Number(item?.id ?? 0),
+    name: String(item?.name ?? item?.thana ?? ""),
+    district: String(item?.district ?? ""),
+  }));
+}
+
+/** Fetches current unpaid COD balance with Steadfast. */
+export async function getSteadfastBalance(
+  ctx: AdapterContext,
+  baseUrl = ctx.config.baseUrl || "https://portal.packzy.com/api/v1",
+): Promise<{ currentBalance: number }> {
+  const headers = () => ({ "Api-Key": ctx.secrets.apiKey ?? "", "Secret-Key": ctx.secrets.secretKey ?? "" });
+  const raw = rec(await courierJson(ctx.fetch, "Steadfast", `${baseUrl}/get_balance`, { headers: headers() }));
+  return { currentBalance: Number(raw.current_balance ?? raw.balance ?? 0) };
 }

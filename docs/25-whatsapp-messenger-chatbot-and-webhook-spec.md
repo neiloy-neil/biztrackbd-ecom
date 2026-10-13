@@ -135,7 +135,7 @@ When customers prefer to enter their own address or pay via bKash/Card, the bot 
 ```json
 {
   "success": true,
-  "shortUrl": "https://rongdhonu.biztrackbd.com/c/xK9p2L",
+  "shortUrl": "https://rongdhonu.biztrack.bd/c/xK9p2L",
   "expiresAt": "2026-10-13T03:30:00.000Z"
 }
 ```

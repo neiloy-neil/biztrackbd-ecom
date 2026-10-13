@@ -23,7 +23,7 @@ export async function initiateOnlineBillingAction(plan: string, interval: "MONTH
 
     const charge = await createUddoktaPayCharge({
       fullName: s.actor.name || "Merchant",
-      email: s.actor.email || "billing@biztrackbd.com",
+      email: s.actor.email || "billing@biztrack.bd",
       amount,
       metadata: {
         tenantId: s.tenantId,

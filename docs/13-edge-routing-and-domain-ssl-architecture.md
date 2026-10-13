@@ -11,7 +11,7 @@ BizTrackBD handles multi-tenancy at the edge with **sub-5ms request routing**:
 
 ```
 +-----------------------------------------------------------------------------------+
-| Visitor / Customer Request (e.g. rongdhonufashion.com or kapor.biztrackbd.com)    |
+| Visitor / Customer Request (e.g. rongdhonufashion.com or kapor.biztrack.bd)    |
 +-----------------------------------------------------------------------------------+
                                           |
                                           v
@@ -199,14 +199,14 @@ Whenever a merchant connects a custom domain (e.g. `rongdhonufashion.com`):
 
 ### 6.2 In-App DNS Assistant & Google DoH Check
 On the Custom Domain Settings screen (`/admin/settings/domain`):
-- **1-Click Copy Buttons**: For `A Record` (`76.76.21.21`) and `CNAME Record` (`cname.biztrackbd.com`).
+- **1-Click Copy Buttons**: For `A Record` (`76.76.21.21`) and `CNAME Record` (`cname.biztrack.bd`).
 - **Instant DoH Check**: A "Verify DNS Now" button directly queries Google DNS over HTTPS (`https://dns.google/resolve?name=${domain}&type=A`) to show live propagation status in real-time.
 
 ### 6.3 Step-by-Step Bangladesh Registrar Guides
 The UI includes expandable visual guides with copy-paste instructions for the top registrars used by Bangladeshi merchants:
 1. **DianaHost / ExonHost / IT Nut Hosting (cPanel / DirectAdmin)**:
    - Zone Editor -> Add A Record for `@` -> `76.76.21.21`.
-   - Add CNAME for `www` -> `cname.biztrackbd.com`.
+   - Add CNAME for `www` -> `cname.biztrack.bd`.
 2. **Namecheap / GoDaddy / Cloudflare**:
    - Advanced DNS -> CNAME Flattening / Alias Record setup.
 

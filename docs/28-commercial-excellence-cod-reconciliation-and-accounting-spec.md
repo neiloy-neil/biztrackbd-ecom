@@ -82,7 +82,7 @@ For telephone and Facebook Messenger sales, staff hit `Alt + N` (or click `[+ Qu
 1. **Auto-Complete**: Typing `01711...` instantly populates past address, preferred courier, and trust score.
 2. **Product Chips**: Instant variant buttons (Size `M`, `L`, `XL`) with real-time stock counts.
 3. **Instant Share Link**: Generates a pre-filled WhatsApp confirmation message with 1 click:
-   *"প্রিয় রাহাত ভাই, আপনার অর্ডারের মোট বিল ৳২,৪৫০ (ক্যাশ অন ডেলিভারি)। অর্ডার কনফার্ম করতে বা ঠিকানা পরিবর্তন করতে ক্লিক করুন: https://rongdhonu.biztrackbd.com/c/xK9p2L"*
+   *"প্রিয় রাহাত ভাই, আপনার অর্ডারের মোট বিল ৳২,৪৫০ (ক্যাশ অন ডেলিভারি)। অর্ডার কনফার্ম করতে বা ঠিকানা পরিবর্তন করতে ক্লিক করুন: https://rongdhonu.biztrack.bd/c/xK9p2L"*
 
 ---
 

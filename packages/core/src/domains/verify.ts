@@ -105,7 +105,7 @@ export interface DnsInstruction {
 
 const isApex = (domain: string) => domain.split(".").length <= 2 || /\.(co|com|org|net|gov|edu)\.bd$/.test(domain) && domain.split(".").length <= 3;
 const aTarget = () => process.env.PLATFORM_A_RECORD ?? "76.76.21.21";
-const cnameTarget = () => (process.env.PLATFORM_CNAME_TARGET ?? "cname.biztrackbd.com").toLowerCase();
+const cnameTarget = () => (process.env.PLATFORM_CNAME_TARGET ?? "cname.biztrack.bd").toLowerCase();
 
 /** What the owner must create at their registrar. A name with nothing in front of it needs an A record; "shop.example.com" a CNAME. */
 export function dnsInstruction(domain: string): DnsInstruction {

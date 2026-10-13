@@ -75,7 +75,7 @@ Platform administrators occasionally need to "Log in as owner" to assist with th
    ```
    +---------------------------------------------------------------------------------+
    | ⚠️ IMPERSONATING: Rongdhonu Fashion (Tenant ID: k7Qx92mTa)                     |
-   | Super Admin: sumi@biztrackbd.com | Session expires in 11:42 | [ Exit Session ]   |
+   | Super Admin: sumi@biztrack.bd | Session expires in 11:42 | [ Exit Session ]   |
    +---------------------------------------------------------------------------------+
    ```
 3. **Restricted Actions During Impersonation**:

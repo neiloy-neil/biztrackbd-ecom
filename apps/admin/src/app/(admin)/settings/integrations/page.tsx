@@ -8,9 +8,9 @@ import { requireAccess } from "@/lib/session";
 import { IntegrationsList, type IntegrationItem, type ModeData } from "./integrations-list";
 
 const WEBHOOK_NOTE: Record<CourierProviderKey, string> = {
-  STEADFAST: "Paste this in your Steadfast merchant panel under API settings, as the webhook URL. Parcels are also checked every 30 minutes.",
+  STEADFAST: "Paste this in your Steadfast/Packzy merchant panel under API settings as the webhook URL. Parcels are also checked every 30 minutes.",
   PATHAO: "Paste this in your Pathao merchant panel under Webhook integration. Parcels are also checked every 30 minutes.",
-  REDX: "RedX does not send status messages, so parcels are checked every 30 minutes instead.",
+  REDX: "Paste this callback URL in your RedX merchant panel under Webhook settings. Parcels are also checked every 30 minutes.",
 };
 
 /** What people read for each field. The names on the left are what the server reads and never change. */
@@ -23,10 +23,11 @@ const LABELS: Record<string, string> = {
 const HINTS: Partial<Record<string, string>> = {
   senderEmail: "Customers see this as the sender. It must be verified in your Brevo account.",
   senderId: "The name or number customers see on the message, if your SMS provider supports one.",
-  pickupStoreId: "The pickup store you set up in your RedX panel.",
+  storeId: "Your Pathao pickup store ID (from Stores in Pathao merchant panel).",
+  pickupStoreId: "The pickup store ID you set up in your RedX merchant panel.",
   pixelId: "The number from Meta Events Manager. It is not secret.",
   measurementId: "Looks like G-XXXXXXXXXX. It is not secret.",
-  baseUrl: "Leave blank for live checkout (https://pay.uddoktapay.com), or enter https://sandbox.uddoktapay.com for testing.",
+  baseUrl: "Leave blank for default live endpoint, or enter custom URL (e.g. https://portal.packzy.com/api/v1 for Steadfast, https://sandbox.redx.com.bd/v1.0.0-beta for RedX, https://sandbox.uddoktapay.com for UddoktaPay).",
 };
 
 const META: Record<ProviderKey, { group: string; description: string }> = {

@@ -10,7 +10,7 @@ Scope: `apps/storefront/app/api/v1`, Public Integration API, OpenAPI 3.0
 The BizTrackBD Public REST API enables merchants, ERP connectors, accounting software, and mobile apps to interact with store resources programmatically.
 
 ### Core Standards:
-- **Base URL**: `https://api.biztrackbd.com/v1`
+- **Base URL**: `https://api.biztrack.bd/v1`
 - **Protocol**: HTTPS only, JSON request/response payloads (`Content-Type: application/json`).
 - **Idempotency**: All `POST` / `PATCH` requests accept an `X-Idempotency-Key` header (UUID v4) for replay prevention.
 - **Rate Limiting**: **120 requests/minute** per tenant enforced via Redis sliding window counter.
@@ -18,7 +18,7 @@ The BizTrackBD Public REST API enables merchants, ERP connectors, accounting sof
 - **RFC 7807 Standard Error Format**:
   ```json
   {
-    "type": "https://api.biztrackbd.com/errors/invalid_parameters",
+    "type": "https://api.biztrack.bd/errors/invalid_parameters",
     "title": "Invalid Request Parameters",
     "status": 422,
     "detail": "Field 'customer.phone' must be a valid 11-digit Bangladesh mobile number starting with 01.",

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
 const whatsappNumber = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP ?? "+880 1711 000000";
-const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@biztrackbd.com";
+const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@biztrack.bd";
 
 const contactJsonLd = {
   "@context": "https://schema.org",

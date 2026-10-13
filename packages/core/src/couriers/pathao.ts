@@ -25,7 +25,10 @@ export function clearPathaoTokens(): void {
   tokens.clear();
 }
 
-export function createPathao(ctx: AdapterContext, baseUrl = ctx.mode === "LIVE" ? "https://api-hermes.pathao.com" : "https://courier-api-sandbox.pathao.com"): CourierAdapter {
+export function createPathao(
+  ctx: AdapterContext,
+  baseUrl = ctx.config.baseUrl || (ctx.mode === "LIVE" ? "https://api-hermes.pathao.com" : "https://courier-api-sandbox.pathao.com"),
+): CourierAdapter {
   const cacheKey = `${baseUrl}|${ctx.secrets.clientId}|${ctx.secrets.username}`;
 
   async function token(): Promise<string> {
@@ -85,5 +88,104 @@ export function createPathao(ctx: AdapterContext, baseUrl = ctx.mode === "LIVE" 
       if (!raw || key(raw) === "webhook_integration") return null;
       return { consignmentId: str(b.consignment_id) || undefined, invoice: str(b.merchant_order_id) || undefined, status: mapPathaoStatus(raw), rawStatus: raw, occurredAt: b.updated_at ? new Date(str(b.updated_at)) : undefined };
     },
+  };
+}
+
+export interface PathaoStoreInfo {
+  storeId: number;
+  storeName: string;
+  storeAddress: string;
+  isActive: boolean;
+  cityId?: number;
+  zoneId?: number;
+  isDefaultStore?: boolean;
+}
+
+/** Fetches the list of merchant pickup stores configured in Pathao. */
+export async function listPathaoStores(
+  ctx: AdapterContext,
+  baseUrl = ctx.config.baseUrl || (ctx.mode === "LIVE" ? "https://api-hermes.pathao.com" : "https://courier-api-sandbox.pathao.com"),
+): Promise<PathaoStoreInfo[]> {
+  const tokenRes = await courierJson(ctx.fetch, "Pathao", `${baseUrl}/aladdin/api/v1/issue-token`, {
+    method: "POST",
+    body: { client_id: ctx.secrets.clientId, client_secret: ctx.secrets.clientSecret, username: ctx.secrets.username, password: ctx.secrets.password, grant_type: "password" },
+  });
+  const t = str(rec(tokenRes).access_token);
+  if (!t) throw new CourierError("Pathao did not accept credentials", "Pathao");
+
+  const r = rec(await courierJson(ctx.fetch, "Pathao", `${baseUrl}/aladdin/api/v1/stores`, {
+    headers: { Authorization: `Bearer ${t}` },
+  }));
+  const rawList = Array.isArray(r.data) ? r.data : [];
+  return rawList.map((item: any) => ({
+    storeId: Number(item?.store_id ?? 0),
+    storeName: String(item?.store_name ?? ""),
+    storeAddress: String(item?.store_address ?? ""),
+    isActive: Boolean(item?.is_active),
+    cityId: item?.city_id ? Number(item.city_id) : undefined,
+    zoneId: item?.zone_id ? Number(item.zone_id) : undefined,
+    isDefaultStore: Boolean(item?.is_default_store),
+  }));
+}
+
+/** Fetches delivery cities from Pathao. */
+export async function getPathaoCities(
+  ctx: AdapterContext,
+  baseUrl = ctx.config.baseUrl || (ctx.mode === "LIVE" ? "https://api-hermes.pathao.com" : "https://courier-api-sandbox.pathao.com"),
+): Promise<{ cityId: number; cityName: string }[]> {
+  const tokenRes = await courierJson(ctx.fetch, "Pathao", `${baseUrl}/aladdin/api/v1/issue-token`, {
+    method: "POST",
+    body: { client_id: ctx.secrets.clientId, client_secret: ctx.secrets.clientSecret, username: ctx.secrets.username, password: ctx.secrets.password, grant_type: "password" },
+  });
+  const t = str(rec(tokenRes).access_token);
+  if (!t) throw new CourierError("Pathao did not accept credentials", "Pathao");
+
+  const r = rec(await courierJson(ctx.fetch, "Pathao", `${baseUrl}/aladdin/api/v1/city-list`, {
+    headers: { Authorization: `Bearer ${t}` },
+  }));
+  const rawList = Array.isArray(r.data) ? r.data : [];
+  return rawList.map((item: any) => ({
+    cityId: Number(item?.city_id ?? 0),
+    cityName: String(item?.city_name ?? ""),
+  }));
+}
+
+/** Calculates estimated delivery charges using Pathao price-plan API. */
+export async function calculatePathaoPrice(
+  ctx: AdapterContext,
+  params: {
+    storeId: number;
+    recipientCity: number;
+    recipientZone: number;
+    itemWeightKg: number;
+    itemType?: number;
+    deliveryType?: number;
+  },
+  baseUrl = ctx.config.baseUrl || (ctx.mode === "LIVE" ? "https://api-hermes.pathao.com" : "https://courier-api-sandbox.pathao.com"),
+): Promise<{ price: number; finalPrice: number; codPercentage: number }> {
+  const tokenRes = await courierJson(ctx.fetch, "Pathao", `${baseUrl}/aladdin/api/v1/issue-token`, {
+    method: "POST",
+    body: { client_id: ctx.secrets.clientId, client_secret: ctx.secrets.clientSecret, username: ctx.secrets.username, password: ctx.secrets.password, grant_type: "password" },
+  });
+  const t = str(rec(tokenRes).access_token);
+  if (!t) throw new CourierError("Pathao did not accept credentials", "Pathao");
+
+  const r = rec(await courierJson(ctx.fetch, "Pathao", `${baseUrl}/aladdin/api/v1/merchant/price-plan`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${t}` },
+    body: {
+      store_id: params.storeId,
+      item_type: params.itemType ?? 2,
+      delivery_type: params.deliveryType ?? 48,
+      item_weight: params.itemWeightKg,
+      recipient_city: params.recipientCity,
+      recipient_zone: params.recipientZone,
+    },
+  }));
+  const d = rec(r.data);
+  return {
+    price: Number(d.price ?? 0),
+    finalPrice: Number(d.final_price ?? d.price ?? 0),
+    codPercentage: Number(d.cod_percentage ?? 0),
   };
 }

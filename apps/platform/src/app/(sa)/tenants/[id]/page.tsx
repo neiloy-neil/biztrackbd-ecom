@@ -144,14 +144,14 @@ export default async function TenantDetail({
             {t.quarantined && <span style={{ padding: "3px 10px", borderRadius: 11, background: "#FDF3E3", color: "#B45309", fontSize: 12, fontWeight: 600 }}>Flagged for review</span>}
           </div>
           <div style={{ fontSize: 13, color: "#4B4B73", marginTop: 3 }}>
-            {t.subdomain}.biztrackbd.com · Owner {t.ownerName ?? "Unknown"} ({t.ownerEmail ?? "no email"}) · Joined {dateOnly(t.createdAt)}
+            {t.subdomain}.biztrack.bd · Owner {t.ownerName ?? "Unknown"} ({t.ownerEmail ?? "no email"}) · Joined {dateOnly(t.createdAt)}
           </div>
         </div>
 
         {/* Header Action Buttons */}
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
           <a
-            href={`https://${t.subdomain}.biztrackbd.com`}
+            href={`https://${t.subdomain}.biztrack.bd`}
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -462,7 +462,7 @@ export default async function TenantDetail({
               <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Configured Domains</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 8, background: "#FAFAFC", border: "1px solid #E7E7F0" }}>
-                  <div style={{ flex: 1, fontWeight: 600 }}>{t.subdomain}.biztrackbd.com (System Subdomain)</div>
+                  <div style={{ flex: 1, fontWeight: 600 }}>{t.subdomain}.biztrack.bd (System Subdomain)</div>
                   <span style={{ padding: "3px 10px", borderRadius: 10, background: "#E8F6EE", color: "#15803D", fontSize: 12, fontWeight: 600 }}>Active</span>
                 </div>
                 {t.domains.map((d) => (
@@ -618,7 +618,7 @@ export default async function TenantDetail({
             <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 14 }}>Domains</div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13.5, marginBottom: 10 }}>
               <div style={{ flex: 1, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis" }}>
-                {t.subdomain}.biztrackbd.com
+                {t.subdomain}.biztrack.bd
               </div>
               <span style={{ padding: "2px 9px", borderRadius: 10, background: "#E8F6EE", color: "#15803D", fontSize: 12, fontWeight: 600 }}>Active</span>
             </div>

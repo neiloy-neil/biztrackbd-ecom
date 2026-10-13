@@ -2,6 +2,9 @@ import { createHmac } from "node:crypto";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   CourierError, WebhookAuthError, clearPathaoTokens, createPathao, createRedx, createSteadfast, mapPathaoStatus, mapRedxStatus, mapSteadfastStatus,
+  checkSteadfastFraud, getSteadfastPoliceStations, getSteadfastBalance,
+  listPathaoStores, getPathaoCities, calculatePathaoPrice,
+  listRedxPickupStores, calculateRedxCharge,
   type AdapterContext, type BookingParcel,
 } from "../src";
 
@@ -106,6 +109,32 @@ describe("Steadfast", () => {
     expect(e).toBeInstanceOf(CourierError);
     expect(e.ambiguous).toBe(true);
   });
+
+  it("checks delivery fraud scores and reports history", async () => {
+    const { f, calls } = fakeFetch([
+      json({ status: 200, total_parcels: 20, delivered_parcels: 18, cancelled_parcels: 2 }),
+    ]);
+    const score = await checkSteadfastFraud(ctx(f, { secrets }), "01711223344");
+    expect(score).toEqual({
+      phone: "01711223344",
+      totalParcels: 20,
+      deliveredParcels: 18,
+      cancelledParcels: 2,
+      successRate: 90,
+    });
+    expect(calls[0]!.url).toContain("/fraud_check/score/01711223344");
+  });
+
+  it("fetches police stations and balance", async () => {
+    const { f } = fakeFetch([
+      json({ status: 200, data: [{ id: 1, name: "Dhanmondi", district: "Dhaka" }] }),
+      json({ status: 200, current_balance: 14500 }),
+    ]);
+    const stations = await getSteadfastPoliceStations(ctx(f, { secrets }));
+    expect(stations).toEqual([{ id: 1, name: "Dhanmondi", district: "Dhaka" }]);
+    const bal = await getSteadfastBalance(ctx(f, { secrets }));
+    expect(bal.currentBalance).toBe(14500);
+  });
 });
 
 describe("Pathao", () => {
@@ -151,6 +180,25 @@ describe("Pathao", () => {
     expect(a.parseWebhook({}, JSON.parse(raw), raw)).toMatchObject({ status: "DELIVERED" });
     expect(a.parseWebhook({}, { event: "webhook_integration" }, "")).toBeNull();
   });
+
+  it("fetches Pathao stores, cities, and price calculations", async () => {
+    const { f } = fakeFetch([
+      json({ access_token: "t1", expires_in: 3600 }),
+      json({ code: 200, data: [{ store_id: 101, store_name: "Dhaka Hub", store_address: "Uttara", is_active: 1 }] }),
+      json({ access_token: "t2", expires_in: 3600 }),
+      json({ code: 200, data: [{ city_id: 1, city_name: "Dhaka" }] }),
+      json({ access_token: "t3", expires_in: 3600 }),
+      json({ code: 200, data: { price: 80, final_price: 80, cod_percentage: 0.01 } }),
+    ]);
+    const stores = await listPathaoStores(ctx(f, { secrets }));
+    expect(stores).toEqual([{ storeId: 101, storeName: "Dhaka Hub", storeAddress: "Uttara", isActive: true, isDefaultStore: false }]);
+    const cities = await getPathaoCities(ctx(f, { secrets }));
+    expect(cities).toEqual([{ cityId: 1, cityName: "Dhaka" }]);
+    const price = await calculatePathaoPrice(ctx(f, { secrets }), {
+      storeId: 101, recipientCity: 1, recipientZone: 298, itemWeightKg: 0.5,
+    });
+    expect(price).toEqual({ price: 80, finalPrice: 80, codPercentage: 0.01 });
+  });
 });
 
 describe("RedX", () => {
@@ -182,5 +230,38 @@ describe("RedX", () => {
   it("refuses when RedX has no area for the address", async () => {
     const { f } = fakeFetch([json({ areas: [] })]);
     await expect(createRedx(ctx(f, { secrets })).book(parcel)).rejects.toThrow(/no delivery area/);
+  });
+
+  it("parses incoming RedX webhooks with real event payload", () => {
+    const a = createRedx(ctx(fakeFetch([]).f, { secrets }));
+    const payload = {
+      tracking_number: "21A427TU4N3N",
+      timestamp: "2026-10-13T12:00:00.000Z",
+      status: "delivered",
+      message_en: "Parcels delivered by rider",
+      invoice_number: "BT-10482",
+      delivery_type: "regular",
+    };
+    const update = a.parseWebhook({}, payload, JSON.stringify(payload));
+    expect(update).toMatchObject({
+      consignmentId: "21A427TU4N3N",
+      invoice: "BT-10482",
+      status: "DELIVERED",
+      rawStatus: "delivered",
+    });
+  });
+
+  it("fetches RedX pickup stores and calculates delivery charge", async () => {
+    const { f, calls } = fakeFetch([
+      json({ pickup_stores: [{ id: 1, name: "Test Pickup", address: "Dhanmondi", area_name: "Dhanmondi", area_id: 2, phone: "01711111111" }] }),
+      json({ deliveryCharge: 60, codCharge: 0 }),
+    ]);
+    const stores = await listRedxPickupStores(ctx(f, { secrets }));
+    expect(stores).toEqual([{ id: 1, name: "Test Pickup", address: "Dhanmondi", areaName: "Dhanmondi", areaId: 2, phone: "01711111111" }]);
+    const charge = await calculateRedxCharge(ctx(f, { secrets }), {
+      deliveryAreaId: 12, pickupAreaId: 1, cashCollectionAmount: 1000, weightGrams: 500,
+    });
+    expect(charge).toEqual({ deliveryCharge: 60, codCharge: 0 });
+    expect(calls[1]!.url).toContain("/charge/charge_calculator?");
   });
 });

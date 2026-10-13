@@ -183,7 +183,7 @@ export default async function Overview() {
                       <Link href={`/tenants/${sUp.id}`} style={{ fontWeight: 600, color: "#1A1A4E", textDecoration: "none", display: "inline-flex", alignItems: "center", minHeight: 40 }} prefetch={false}>
                         {sUp.name}
                       </Link>
-                      <div style={{ fontSize: 12, color: "#6B6B8D" }}>{sUp.subdomain}.biztrackbd.com</div>
+                      <div style={{ fontSize: 12, color: "#6B6B8D" }}>{sUp.subdomain}.biztrack.bd</div>
                     </div>
                     <div style={{ width: 110, color: "#4B4B73", fontSize: 13 }}>{sUp.theme}</div>
                     <span

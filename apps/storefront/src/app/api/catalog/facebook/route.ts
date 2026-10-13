@@ -26,7 +26,7 @@ function escapeXml(unsafe: string): string {
 /**
  * Facebook Catalog Product Feed (RSS 2.0 / Google Merchant spec)
  * Used by Meta Commerce Manager for Dynamic Product Ads (DPA) and Instagram Shop tags.
- * URL: https://store.biztrackbd.com/api/catalog/facebook
+ * URL: https://store.biztrack.bd/api/catalog/facebook
  */
 export async function GET(req: Request) {
   const store = await findStore();

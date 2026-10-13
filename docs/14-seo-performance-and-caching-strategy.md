@@ -108,7 +108,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title,
       description: `${priceFormatted} — ${description}`,
-      url: `https://${product.tenant.customDomain || `${product.tenant.subdomain}.biztrackbd.com`}/products/${slug}`,
+      url: `https://${product.tenant.customDomain || `${product.tenant.subdomain}.biztrack.bd`}/products/${slug}`,
       siteName: product.tenant.settings?.storeName || product.tenant.name,
       images: [
         {
@@ -144,7 +144,7 @@ import { MetadataRoute } from "next";
 import { db } from "@biztrackbd/db";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_STORE_URL || "https://biztrackbd.com";
+  const baseUrl = process.env.NEXT_PUBLIC_STORE_URL || "https://biztrack.bd";
 
   // Query all active products and collections for this tenant
   const products = await db.product.findMany({

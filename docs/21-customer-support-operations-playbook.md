@@ -89,7 +89,7 @@ For merchants on the **Business Plan (৳3,499/mo)**:
 ## 5. Consumer Abuse & Fraudulent Merchant Reporting
 
 If a retail buyer reports a merchant for fraudulent behavior (e.g. collecting bKash advance payment and refusing delivery):
-1. **Intake**: Buyer files complaint via platform abuse page (`biztrackbd.com/report-abuse`).
+1. **Intake**: Buyer files complaint via platform abuse page (`biztrack.bd/report-abuse`).
 2. **Investigation**: Support agent checks merchant's order history, bKash TrxID claims, and delivery tracking.
 3. **Warning & 24h Proof Request**: Merchant is notified via SMS/Email to provide valid courier tracking proof within 24 hours.
 4. **Suspension**: If merchant fails to provide proof or multiple verified complaints accumulate, Super Admin executes **1-Click Tenant Suspension**, locking the store and preventing further customer transactions.

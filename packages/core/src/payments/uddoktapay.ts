@@ -62,7 +62,7 @@ export async function createUddoktaPayCharge(
 
   const body = {
     full_name: req.fullName || "Customer",
-    email: req.email || "support@biztrackbd.com",
+    email: req.email || "support@biztrack.bd",
     amount: String(req.amount),
     metadata: req.metadata,
     redirect_url: req.redirectUrl,

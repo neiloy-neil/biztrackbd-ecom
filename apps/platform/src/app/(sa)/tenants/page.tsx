@@ -194,7 +194,7 @@ export default async function Tenants({ searchParams }: { searchParams: Promise<
                           {t.name}
                         </Link>
                         <div style={{ fontSize: 12, color: "#6B6B8D", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                          {t.customDomain ?? `${t.subdomain}.biztrackbd.com`}
+                          {t.customDomain ?? `${t.subdomain}.biztrack.bd`}
                           {t.quarantined && <span style={{ marginLeft: 6, color: "#DC2626", fontWeight: 700 }}>[Flagged]</span>}
                         </div>
                       </div>

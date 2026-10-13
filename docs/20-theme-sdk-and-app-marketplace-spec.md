@@ -46,7 +46,7 @@ Third-party apps run in secure, isolated iframes within the merchant admin dashb
 
 ```
 +-------------------------------------------------------------------------------+
-| Merchant Admin Shell (Parent Host: admin.biztrackbd.com)                      |
+| Merchant Admin Shell (Parent Host: admin.biztrack.bd)                      |
 |  - Topbar: App Title, Save State Indicator                                    |
 |  - Native Toast Notifications, Modals & Resource Pickers                      |
 +-------------------------------------------------------------------------------+
@@ -120,7 +120,7 @@ When a merchant installs an app from `AdmApps.dc.html`, the system issues a scop
 
 ### API Endpoint Format:
 ```http
-GET https://api.biztrackbd.com/v1/orders
+GET https://api.biztrack.bd/v1/orders
 Authorization: Bearer <app_scoped_jwt_token>
 X-BizTrack-Tenant-Id: k7Qx92mTa
 ```

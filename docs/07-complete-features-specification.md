@@ -264,7 +264,7 @@ Source: `design/canvas/project/` (88 Design Canvas HTML Artboards & Data Logic; 
 - **File Reference**: `design/canvas/project/AdmDomains.dc.html`
 - **Purpose**: Custom domain connection with automated SSL certificate provisioning.
 - **Key Features & UI Elements**:
-  - **Subdomain**: Default `{store}.biztrackbd.com` free on all plans.
+  - **Subdomain**: Default `{store}.biztrack.bd` free on all plans.
   - **Custom Domain Connection**: Connect custom domain (e.g. `rongdhonufashion.com`).
   - **DNS Assistant**: Step-by-step CNAME and A record instructions with automatic live DNS propagation checker.
   - **SSL Status**: Real-time Let's Encrypt SSL certificate issuance status.
@@ -416,7 +416,7 @@ Source: `design/canvas/project/` (88 Design Canvas HTML Artboards & Data Logic; 
   - **Step 1 — Signup**: Mobile number + OTP or Google sign-in.
   - **Step 2 — Store Profile**: Store name, category (Fashion, Electronics, Kids, Organic, Cosmetics), physical district.
   - **Step 3 — Brand Identity**: Logo upload, primary brand color picker, brand font selection.
-  - **Step 4 — Theme Selection & Subdomain**: Pick starter template with live preview and claim `{storename}.biztrackbd.com` handle.
+  - **Step 4 — Theme Selection & Subdomain**: Pick starter template with live preview and claim `{storename}.biztrack.bd` handle.
   - **Demo Data Seeding**: Automatically populates store with 5 realistic demo products, collections, and banners so merchant immediately sees a populated storefront.
 
 ---

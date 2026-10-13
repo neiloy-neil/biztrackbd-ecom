@@ -16,8 +16,8 @@ Built from the owner's answers on 13 Oct 2026 plus `docs/48`. Items marked **ASS
 | Ads (first 90 days) | Facebook ads |
 | Spokesperson | Tanvir, the support lead, speaking Banglish on video. His content leans on real merchant questions and fixes |
 | Launch deal | Free setup + 50% off for 3 months for the first 20 founding merchants, in exchange for written case-study consent, a 30-day dashboard screenshot and a feedback call |
-| Domain control | Owner controls biztrackbd.com DNS |
-| Brand domain | biztrackbd.com (decided 13 Oct 2026). Production docs and the live setup still use biztrack.bd, so the apps, SMS links, email links and social bios must move to biztrackbd.com or redirect; keep biztrack.bd as a redirect |
+| Domain control | Owner controls DNS for the brand domain (confirm this applies to biztrack.bd) |
+| Brand domain | biztrack.bd (final, 13 Oct 2026; matches the live setup in docs/35). Earlier mention of biztrackbd.com was withdrawn. Optionally hold biztrackbd.com and redirect it to biztrack.bd so typed guesses still land |
 | Approvals | Branding manager decides alone |
 | Support | One person |
 | Personality | Sharp business partner |
@@ -221,5 +221,5 @@ A realistic early round (friends, angels) buys on: founder credibility, a workin
 3. Tanvir's role (founder, sales, support?), comfort on camera, and Bangla/English mix on video.
 4. Which of the PROOF NEEDED items you can document this week.
 5. Final launch deal terms (discount, number of spots, deadline).
-6. Domain move plan: which subdomains (admin, platform, stores) go to biztrackbd.com and when; keep biztrack.bd as a redirect. Confirm you own biztrackbd.com and its DNS.
+6. Confirm you control DNS for biztrack.bd, and whether you also hold biztrackbd.com or the Bangla-friendly variants as redirects.
 7. Support hours and language.

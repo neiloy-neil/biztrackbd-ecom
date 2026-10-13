@@ -33,9 +33,9 @@ NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET="store-assets"
 # ==============================================================================
 # 3. DOMAINS, HOSTING & EDGE CONFIG (VERCEL)
 # ==============================================================================
-NEXT_PUBLIC_ROOT_DOMAIN="biztrackbd.com"
-NEXT_PUBLIC_APP_URL="https://app.biztrackbd.com"
-NEXT_PUBLIC_PLATFORM_URL="https://super.biztrackbd.com"
+NEXT_PUBLIC_ROOT_DOMAIN="biztrack.bd"
+NEXT_PUBLIC_APP_URL="https://app.biztrack.bd"
+NEXT_PUBLIC_PLATFORM_URL="https://super.biztrack.bd"
 
 # Vercel Edge Config connection string (for sub-5ms edge hostname lookups)
 EDGE_CONFIG="https://edge-config.vercel.com/ecfg_...[token]"
@@ -71,7 +71,7 @@ DEFAULT_SMS_SENDER_ID="" # Blank for non-masking, or "BIZTRACK" if approved
 # 6b. PLATFORM EMAIL (BREVO), platform-managed with per-store plan quotas (docs/04, docs/05)
 # ==============================================================================
 BREVO_API_KEY="xkeysib-..."
-BREVO_SENDER_EMAIL="orders@mail.biztrackbd.com" # verified sender domain (SPF and DKIM)
+BREVO_SENDER_EMAIL="orders@mail.biztrack.bd" # verified sender domain (SPF and DKIM)
 BREVO_WEBHOOK_SECRET="..." # verifies delivery and bounce webhooks
 # Stores that bring their own Brevo key keep it in TenantIntegration (provider BREVO_BYO), never here.
 
@@ -132,7 +132,7 @@ Built in Phase 1. AES-256-GCM with these properties (the earlier sample here had
 | `VITALS_HOST` | Tooling | The storefront address the web vitals audit measures. Default `http://rongdhonu.localhost:3000` |
 | `PREVIEW_SECRET` | Server Only | Signs the editor's preview link. Must be the SAME in the store admin and the storefront. Falls back to `CRON_SECRET`; required in production |
 | `PLATFORM_A_RECORD` | Server Only | The IP address owners create an A record for (bare domains). Default `76.76.21.21` |
-| `PLATFORM_CNAME_TARGET` | Server Only | The name owners point a CNAME at (subdomains), for example `cname.biztrackbd.com` |
+| `PLATFORM_CNAME_TARGET` | Server Only | The name owners point a CNAME at (subdomains), for example `cname.biztrack.bd` |
 | `VERCEL_TOKEN` | Server Only | Lets the store admin and the platform app add and read domains on the storefront's Vercel project. Without it a correct DNS record waits at "getting the certificate" |
 | `VERCEL_PROJECT_ID` | Server Only | The storefront project that serves custom domains |
 | `VERCEL_TEAM_ID` | Server Only | Only for a team-owned project |

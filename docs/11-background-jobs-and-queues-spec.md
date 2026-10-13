@@ -125,7 +125,7 @@ export const handleAbandonedCheckout = inngest.createFunction(
 
     // Step 3: Send first gentle SMS recovery reminder
     await step.run("send-first-sms-recovery", async () => {
-      const recoveryUrl = `https://${checkoutRecord.tenantId}.biztrackbd.com/checkout?recover=${abandonedId}`;
+      const recoveryUrl = `https://${checkoutRecord.tenantId}.biztrack.bd/checkout?recover=${abandonedId}`;
       const message = `Assalamu alaikum ${customerName || ""}, finish your order of ৳${cartValue} with 1-click delivery here: ${recoveryUrl}`;
       
       await sendPlatformSms({ recipientPhone: customerPhone, messageText: message });
@@ -141,7 +141,7 @@ export const handleAbandonedCheckout = inngest.createFunction(
 
     if (finalCheck && finalCheck.status !== "recovered") {
       await step.run("send-discount-incentive-sms", async () => {
-        const discountUrl = `https://${checkoutRecord.tenantId}.biztrackbd.com/checkout?recover=${abandonedId}&coupon=SAVE5`;
+        const discountUrl = `https://${checkoutRecord.tenantId}.biztrack.bd/checkout?recover=${abandonedId}&coupon=SAVE5`;
         const message = `Special Eid offer: Take 5% off your saved cart today! Use code SAVE5: ${discountUrl}`;
         await sendPlatformSms({ recipientPhone: customerPhone, messageText: message });
       });
@@ -165,7 +165,7 @@ export const handleOrderCreated = inngest.createFunction(
 
     // Step 1: Send Immediate Order Confirmation SMS
     await step.run("send-order-confirmation-sms", async () => {
-      const msg = `Your order ${orderNumber} for ৳${totalBDT} has been received! Track status: https://${tenantId}.biztrackbd.com/account`;
+      const msg = `Your order ${orderNumber} for ৳${totalBDT} has been received! Track status: https://${tenantId}.biztrack.bd/account`;
       await sendPlatformSms({ recipientPhone: customerPhone, messageText: msg });
     });
 

@@ -26,7 +26,7 @@ When a merchant completes the 3-minute onboarding wizard:
    - 2 collections (e.g. "Eid Collection", "Bestsellers").
    - 1 hero slider banner and 1 announcement bar.
    - 1 sample 5-star customer review.
-3. **Immediate Visual Gratification**: The merchant is redirected directly to their live storefront subdomain (`{store}.biztrackbd.com`), seeing a fully designed, populated store from minute one.
+3. **Immediate Visual Gratification**: The merchant is redirected directly to their live storefront subdomain (`{store}.biztrack.bd`), seeing a fully designed, populated store from minute one.
 
 ---
 
@@ -54,7 +54,7 @@ Inside the merchant admin, a sticky progress checklist gamifies store completion
 Dispatches coordinated **SMS (Bangla)** and **Email (Bilingual)** messages triggered by elapsed time and merchant milestone completion:
 
 ### Day 1 (0 Hours) — Welcome & Store Live
-- **SMS**: `অভিনন্দন! আপনার অনলাইন স্টোর এখন লাইভ: [store.biztrackbd.com]। আপনার প্রথম ৩টি প্রোডাক্ট যোগ করে বিক্রি শুরু করুন।`
+- **SMS**: `অভিনন্দন! আপনার অনলাইন স্টোর এখন লাইভ: [store.biztrack.bd]। আপনার প্রথম ৩টি প্রোডাক্ট যোগ করে বিক্রি শুরু করুন।`
 - **Email**: "Welcome to BizTrackBD — Here is your store link and quick-start guide."
 
 ---

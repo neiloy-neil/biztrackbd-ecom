@@ -1,19 +1,22 @@
 import { CourierError } from "../errors";
 import { courierJson, num, rec, str } from "./http";
-import type { AdapterContext, CourierAdapter, CourierStatus } from "./types";
+import type { AdapterContext, CourierAdapter, CourierStatus, CourierUpdate } from "./types";
 
 export function mapRedxStatus(raw: string): CourierStatus {
   switch (raw.trim().toLowerCase().replace(/[\s_]+/g, "-")) {
     case "pickup-pending": return "BOOKED";
     case "ready-for-delivery": case "delivery-in-progress": return "IN_TRANSIT";
-    case "delivered": return "DELIVERED";
+    case "delivered": case "paid": return "DELIVERED";
     case "returned": return "RETURNED";
     case "agent-hold": case "agent-returning": case "agent-area-change": return "HOLD";
     default: return "UNKNOWN";
   }
 }
 
-export function createRedx(ctx: AdapterContext, baseUrl = ctx.mode === "LIVE" ? "https://openapi.redx.com.bd/v1.0.0" : "https://openapi.redx.com.bd/v1.0.0-sandbox"): CourierAdapter {
+export function createRedx(
+  ctx: AdapterContext,
+  baseUrl = ctx.config.baseUrl || (ctx.mode === "LIVE" ? "https://openapi.redx.com.bd/v1.0.0-beta" : "https://sandbox.redx.com.bd/v1.0.0-sandbox"),
+): CourierAdapter {
   // RedX's guide shows the token in API-ACCESS-TOKEN; docs/10 shows Authorization. Both carry the same value.
   const headers = () => ({ "API-ACCESS-TOKEN": `Bearer ${ctx.secrets.accessToken ?? ""}`, Authorization: `Bearer ${ctx.secrets.accessToken ?? ""}` });
 
@@ -53,7 +56,70 @@ export function createRedx(ctx: AdapterContext, baseUrl = ctx.mode === "LIVE" ? 
       const raw = str(rec(r.parcel).status);
       return { status: mapRedxStatus(raw), rawStatus: raw };
     },
-    // RedX has no callback we rely on: its parcels are followed by the 30-minute sync.
-    parseWebhook: () => null,
+    parseWebhook(_headers, body): CourierUpdate | null {
+      const b = rec(body);
+      const tracking = str(b.tracking_number);
+      const raw = str(b.status);
+      if (!raw) return null;
+      return {
+        consignmentId: tracking || undefined,
+        invoice: str(b.invoice_number) || undefined,
+        status: mapRedxStatus(raw),
+        rawStatus: raw,
+        occurredAt: b.timestamp ? new Date(str(b.timestamp)) : undefined,
+      };
+    },
+  };
+}
+
+export interface RedxPickupStoreInfo {
+  id: number;
+  name: string;
+  address: string;
+  areaName: string;
+  areaId: number;
+  phone: string;
+}
+
+/** Fetches available pickup stores from RedX merchant panel. */
+export async function listRedxPickupStores(
+  ctx: AdapterContext,
+  baseUrl = ctx.config.baseUrl || (ctx.mode === "LIVE" ? "https://openapi.redx.com.bd/v1.0.0-beta" : "https://sandbox.redx.com.bd/v1.0.0-sandbox"),
+): Promise<RedxPickupStoreInfo[]> {
+  const headers = () => ({ "API-ACCESS-TOKEN": `Bearer ${ctx.secrets.accessToken ?? ""}`, Authorization: `Bearer ${ctx.secrets.accessToken ?? ""}` });
+  const r = rec(await courierJson(ctx.fetch, "RedX", `${baseUrl}/pickup/stores`, { headers: headers() }));
+  const list = Array.isArray(r.pickup_stores) ? r.pickup_stores : [];
+  return list.map((item: any) => ({
+    id: Number(item?.id ?? 0),
+    name: String(item?.name ?? ""),
+    address: String(item?.address ?? ""),
+    areaName: String(item?.area_name ?? ""),
+    areaId: Number(item?.area_id ?? 0),
+    phone: String(item?.phone ?? ""),
+  }));
+}
+
+/** Calculates delivery charges using RedX charge calculator. */
+export async function calculateRedxCharge(
+  ctx: AdapterContext,
+  params: {
+    deliveryAreaId: number;
+    pickupAreaId: number;
+    cashCollectionAmount: number;
+    weightGrams: number;
+  },
+  baseUrl = ctx.config.baseUrl || (ctx.mode === "LIVE" ? "https://openapi.redx.com.bd/v1.0.0-beta" : "https://sandbox.redx.com.bd/v1.0.0-sandbox"),
+): Promise<{ deliveryCharge: number; codCharge: number }> {
+  const headers = () => ({ "API-ACCESS-TOKEN": `Bearer ${ctx.secrets.accessToken ?? ""}`, Authorization: `Bearer ${ctx.secrets.accessToken ?? ""}` });
+  const query = new URLSearchParams({
+    delivery_area_id: String(params.deliveryAreaId),
+    pickup_area_id: String(params.pickupAreaId),
+    cash_collection_amount: String(params.cashCollectionAmount),
+    weight: String(params.weightGrams),
+  });
+  const r = rec(await courierJson(ctx.fetch, "RedX", `${baseUrl}/charge/charge_calculator?${query.toString()}`, { headers: headers() }));
+  return {
+    deliveryCharge: Number(r.deliveryCharge ?? 0),
+    codCharge: Number(r.codCharge ?? 0),
   };
 }

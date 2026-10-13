@@ -8,9 +8,9 @@ export interface ProviderSpec {
 }
 
 export const PROVIDERS = {
-  STEADFAST: { label: "Steadfast", secrets: ["apiKey", "secretKey"], config: [] },
+  STEADFAST: { label: "Steadfast", secrets: ["apiKey", "secretKey"], config: ["baseUrl"] },
   PATHAO: { label: "Pathao", secrets: ["clientId", "clientSecret", "username", "password"], config: ["storeId"] },
-  REDX: { label: "RedX", secrets: ["accessToken"], config: ["pickupStoreId"] },
+  REDX: { label: "RedX", secrets: ["accessToken"], config: ["pickupStoreId", "baseUrl"] },
   SSLCOMMERZ: { label: "SSLCommerz", secrets: ["storeId", "storePassword"], config: [] },
   UDDOKTAPAY: { label: "UddoktaPay", secrets: ["apiKey"], config: ["baseUrl"] },
   META_CAPI: { label: "Meta Conversions API", secrets: ["accessToken"], config: ["pixelId"] },

@@ -19,7 +19,7 @@ All third-party integrations (Couriers, Payment Gateways, SMS Aggregators, and M
 
 ## 2. Courier Integration Specifications
 
-### A. Steadfast Courier Adapter
+### A. Steadfast Courier Adapter (Packzy)
 
 ```typescript
 export interface SteadfastCredentials {
@@ -51,15 +51,23 @@ export interface SteadfastCreateOrderResponse {
 }
 ```
 
-- **Base URL**: `https://portal.steadfast.com.bd/api/v1`
-- **Endpoints**:
-  - Create Order: `POST /create_order` (Headers: `Api-Key`, `Secret-Key`)
-  - Delivery Status: `GET /status_by_cid/{consignment_id}` or `GET /status_by_invoice/{invoice}`
-- **Webhook Endpoint**: `POST /api/webhooks/steadfast/{tenantId}` *(Superseded: the built address is `POST /api/webhooks/courier/<integration token>` on the admin app, see section 11.)*
+- **Base URLs**: `https://portal.steadfast.com.bd/api/v1` or `https://portal.packzy.com/api/v1`
+- **Authentication**: `Api-Key` and `Secret-Key` headers on every request. No token refresh needed.
+- **Key Endpoints**:
+  - Service Check: `GET /ping` (No auth required)
+  - Create Order: `POST /create_order`
+  - Bulk Orders: `POST /create_order/bulk-order` (Up to 500 parcels)
+  - Status Check: `GET /status_by_cid/{consignment_id}`, `GET /status_by_invoice/{invoice}`, `GET /status_by_trackingcode/{tracking_code}`
+  - Tracking History: `GET /trackings_by_invoice/{invoice}`
+  - Account Balance: `GET /get_balance` (COD balance owed to merchant)
+  - Thana/District Directory: `GET /police_stations`
+  - Customer Delivery History / Fraud Score: `GET /fraud_check/score/{phone}` (Total, delivered, cancelled parcels & success rate)
 - **Status Mapping**:
-  - `pending` / `in_review` -> `OrderStatus.PACKED`
-  - `delivered` -> `OrderStatus.DELIVERED`, `PaymentStatus.PAID`
-  - `cancelled` / `returned` -> `OrderStatus.RETURNED`
+  - `pending` / `in_review` -> `OrderStatus.PACKED` / `COURIER_STATUS.BOOKED`
+  - `delivered` / `delivered_approval_pending` -> `OrderStatus.DELIVERED`, `PaymentStatus.PAID`
+  - `cancelled` / `cancelled_approval_pending` -> `OrderStatus.RETURNED`
+  - `hold` -> `COURIER_STATUS.HOLD`
+- **Webhook Endpoint**: `POST /api/webhooks/courier/<integrationToken>` (Receives `delivery_status` updates).
 
 ---
 
@@ -71,7 +79,7 @@ export interface PathaoCredentials {
   clientSecret: string;
   username: string;            // Merchant login email
   password: string;            // Merchant login password
-  storeId: number;             // Pathao pickup store ID
+  storeId?: number;            // Pathao pickup store ID
 }
 
 export interface PathaoCreateOrderPayload {
@@ -80,22 +88,36 @@ export interface PathaoCreateOrderPayload {
   recipient_name: string;
   recipient_phone: string;
   recipient_address: string;
-  recipient_city: number;      // Pathao City ID
-  recipient_zone: number;      // Pathao Zone ID
+  recipient_city?: number;     // Pathao City ID (auto-populated by address if omitted)
+  recipient_zone?: number;     // Pathao Zone ID
   recipient_area?: number;     // Pathao Area ID
   delivery_type: 48;           // 48 (Normal) or 12 (On Demand)
-  item_type: 1;                // 1 (Document) or 2 (Parcel)
+  item_type: 1 | 2;            // 1 (Document) or 2 (Parcel)
   special_instruction?: string;
   item_quantity: number;
-  item_weight: number;         // in KG (e.g. 0.5)
-  amount_to_collect: number;   // COD Amount in BDT
+  item_weight: number;         // in KG (0.5 to 10.0 kg)
+  amount_to_collect: number;   // COD Amount in BDT (0 for non-COD)
 }
 ```
 
-- **Base URL**: `https://api-hermes.pathao.com`
-- **Token Exchange**: `POST /aladdin/api/v1/issue-token` (`grant_type: password`)
-- **Token Cache**: Access tokens are cached in Redis / KV with a 7-day TTL and automatically refreshed on expiry.
-- **Webhook Endpoint**: `POST /api/webhooks/pathao/{tenantId}` (Signature verified via `X-PATHAO-SIGNATURE`).
+- **Base URLs**:
+  - Live/Production: `https://api-hermes.pathao.com`
+  - Test/Sandbox: `https://courier-api-sandbox.pathao.com`
+- **Authentication**: OAuth 2.0 Password Grant (`POST /aladdin/api/v1/issue-token`) with `client_id`, `client_secret`, `username`, `password`, `grant_type: "password"`.
+- **Token Cache**: Tokens are cached in-memory with expiration safety margins (Pathao token TTL is ~5 days / 432,000s).
+- **Key Endpoints**:
+  - Issue Token: `POST /aladdin/api/v1/issue-token`
+  - List Pickup Stores: `GET /aladdin/api/v1/stores`
+  - Create Store: `POST /aladdin/api/v1/stores`
+  - Create Order: `POST /aladdin/api/v1/orders`
+  - Create Bulk Orders: `POST /aladdin/api/v1/orders/bulk`
+  - Order Summary: `GET /aladdin/api/v1/orders/{consignment_id}/info`
+  - City / Zone / Area Directories:
+    - `GET /aladdin/api/v1/city-list`
+    - `GET /aladdin/api/v1/cities/{city_id}/zone-list`
+    - `GET /aladdin/api/v1/zones/{zone_id}/area-list`
+  - Price Calculator: `POST /aladdin/api/v1/merchant/price-plan`
+- **Webhook Endpoint**: `POST /api/webhooks/courier/<integrationToken>` (Signature verified via `X-PATHAO-SIGNATURE`).
 
 ---
 
@@ -103,7 +125,8 @@ export interface PathaoCreateOrderPayload {
 
 ```typescript
 export interface RedXCredentials {
-  apiToken: string;
+  apiToken: string;            // Bearer JWT Token
+  pickupStoreId?: number;      // Pickup store ID
 }
 
 export interface RedXCreateParcelPayload {
@@ -113,14 +136,39 @@ export interface RedXCreateParcelPayload {
   delivery_area_id: number;
   customer_address: string;
   merchant_invoice_id: string; // Order number
-  cash_collection_amount: number;
+  cash_collection_amount: string;
   parcel_weight: number;       // in grams (e.g. 500)
   instruction?: string;
+  value: number;
+  pickup_store_id?: number;
 }
 ```
 
-- **Base URL**: `https://openapi.redx.com.bd/v1.0.0-sandbox` (Test) / `https://openapi.redx.com.bd/v1.0.0` (Live)
-- **Header**: `Authorization: Bearer {apiToken}`
+- **Base URLs**:
+  - Live/Production: `https://openapi.redx.com.bd/v1.0.0-beta`
+  - Test/Sandbox: `https://sandbox.redx.com.bd/v1.0.0-beta` (or `v1.0.0-sandbox`)
+- **Headers**: `API-ACCESS-TOKEN: Bearer {token}` and `Authorization: Bearer {token}`.
+- **Key Endpoints**:
+  - Create Parcel: `POST /parcel`
+  - Track Parcel: `GET /parcel/track/{tracking_id}`
+  - Parcel Info: `GET /parcel/info/{tracking_id}`
+  - Update Parcel: `PATCH /parcels`
+  - Areas Directory: `GET /areas`, `GET /areas?district_name={district}`, `GET /areas?post_code={post_code}`
+  - Pickup Stores: `GET /pickup/stores`, `POST /pickup/store`, `GET /pickup/store/info/{pickup_store_id}`
+  - Charge Calculator: `GET /charge/charge_calculator?delivery_area_id={id}&pickup_area_id={id}&cash_collection_amount={amount}&weight={grams}`
+- **Webhook Callback Payload**:
+  RedX sends POST callbacks to the configured callback URL:
+  ```json
+  {
+    "tracking_number": "20A312THJDJ8",
+    "timestamp": "2026-10-13T12:00:00Z",
+    "status": "delivered",
+    "invoice_number": "BT-10482",
+    "delivery_type": "regular"
+  }
+  ```
+  Status values: `ready-for-delivery`, `delivery-in-progress`, `delivered`, `paid`, `agent-hold`, `agent-returning`, `returned`.
+- **Webhook Endpoint**: `POST /api/webhooks/courier/<integrationToken>`
 
 ---
 
@@ -156,7 +204,7 @@ export interface SslCommerzSessionPayload {
   success_url: string;         // https://{domain}/api/payments/sslcommerz/success
   fail_url: string;            // https://{domain}/api/payments/sslcommerz/fail
   cancel_url: string;          // https://{domain}/api/payments/sslcommerz/cancel
-  ipn_url: string;             // https://app.biztrackbd.com/api/webhooks/sslcommerz/{tenantId}
+  ipn_url: string;             // https://app.biztrack.bd/api/webhooks/sslcommerz/{tenantId}
   cus_name: string;
   cus_email: string;
   cus_phone: string;
@@ -212,9 +260,19 @@ export async function sendPlatformSms({ recipientPhone, messageText, senderId }:
 Code: `packages/core/src/couriers/` (`steadfast.ts`, `pathao.ts`, `redx.ts`, `factory.ts`, `service.ts`). Where this differs from the sketches above:
 
 - **One interface, not one function per courier:** `verify()`, `book()`, `status()`, `parseWebhook()`. Secrets are read from the vault only inside the service, and an adapter error becomes a `CourierError` whose message never contains a key (the courier's own message, shortened, or a fixed sentence).
-- **Steadfast:** `Api-Key` and `Secret-Key` headers; `get_balance` is the cheapest proof the keys work. Its single `cancelled` status is how a parcel comes back, so it is treated as a return. `tracking_update` messages carry no status and are ignored.
-- **Pathao:** logs in with the password grant and caches the token per process until it expires (shared storage is Phase 7). The booking sends the address text and lets Pathao work out city, zone and area; `recipient_city` and `recipient_zone` are not sent. Status words come in several spellings (`Pickup Requested`, `order.pickup-requested`) and are normalised first. A signed webhook is checked with an HMAC-SHA256 of the raw body keyed with the client secret, constant time; the exact signing scheme should be confirmed on the first live webhook (the 30-minute sync covers a mismatch). Pathao's registration handshake message is ignored, not answered.
-- **RedX:** sends the token in both `API-ACCESS-TOKEN` and `Authorization`; looks up the delivery area by district and upazila before booking; status comes from `parcel/info`. No webhook: the 30-minute sync follows its parcels.
+- **Steadfast (Packzy):** `Api-Key` and `Secret-Key` headers; `get_balance` is the cheapest proof the keys work. Its single `cancelled` status is how a parcel comes back, so it is treated as a return. Extended capabilities:
+  - `checkSteadfastFraud(ctx, phone)`: Queries `GET /fraud_check/score/{phone}` for cross-merchant parcel success rate.
+  - `getSteadfastBalance(ctx)`: Queries `GET /get_balance` for current unpaid COD payout balance.
+  - `getSteadfastPoliceStations(ctx)`: Queries `GET /police_stations` for coverage directory.
+- **Pathao:** logs in with the password grant and caches the token per process until it expires (~5-day lifespan). The booking sends the address text and lets Pathao work out city, zone and area, with fallback to manual selection. Extended capabilities:
+  - `listPathaoStores(ctx)`: Queries `GET /aladdin/api/v1/stores` for pickup hub IDs.
+  - `getPathaoCities(ctx)`: Queries `GET /aladdin/api/v1/city-list` for supported city options.
+  - `calculatePathaoPrice(ctx, params)`: Queries `POST /aladdin/api/v1/merchant/price-plan` for delivery cost estimation.
+  - Status words are normalised across various slug variants. Webhooks are verified with HMAC-SHA256 signature when secret is provided.
+- **RedX:** sends token in both `API-ACCESS-TOKEN` and `Authorization`; looks up delivery area by district and upazila before booking; status comes from `parcel/info/{id}`. Extended capabilities:
+  - `listRedxPickupStores(ctx)`: Queries `GET /pickup/stores` for merchant pickup addresses.
+  - `calculateRedxCharge(ctx, params)`: Queries `GET /charge/charge_calculator` with weight and area IDs.
+  - `parseWebhook(headers, body)`: Parses RedX POST status callbacks (`tracking_number`, `invoice_number`, `status`), routing updates directly to the unified event ledger.
 - **Test and live:** each integration row has a mode; test uses the sandbox hosts where one exists. If a store has both, live wins. `COURIER_BASE_URL_<PROVIDER>` points an adapter at a local fake outside production.
 - **Webhook address:** `POST /api/webhooks/courier/<integrationToken>` on the admin app, not `/api/webhooks/steadfast/{tenantId}`: the random token (rotatable, `rotateWebhookToken`) replaces the tenant id so the address reveals nothing. Repeats are answered `200 {duplicate:true}`; an unknown parcel `200`; a bad signature `401`; a malformed body `400`; a failure on our side `500` so the courier retries (safe: applying a message twice changes nothing).
-- **Audit:** the doc says webhook payloads go to `AuditLog`. They go to `CourierEvent` instead (append-only, one row per message, with the result), which carries the de-duplication key; `AuditLog` records the owner's actions (booking, connection changes).
+- **Audit:** webhook payloads go to `CourierEvent` (append-only, one row per message, with the result), which carries the de-duplication key; `AuditLog` records the owner's actions (booking, connection changes).

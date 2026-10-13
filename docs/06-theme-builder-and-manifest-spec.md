@@ -174,7 +174,7 @@ Pages (Home, Landing Pages, Custom Pages) are saved in the `ThemeInstall` or `Pa
           "settings": {
             "title": "Summer Panjabi Drop",
             "subtitle": "Breathable 100% Egyptian Cotton",
-            "image": "https://storage.biztrackbd.com/tenants/kapor/panjabi-hero.webp",
+            "image": "https://storage.biztrack.bd/tenants/kapor/panjabi-hero.webp",
             "ctaLabel": "Order Now",
             "ctaUrl": "/collections/panjabi"
           }
