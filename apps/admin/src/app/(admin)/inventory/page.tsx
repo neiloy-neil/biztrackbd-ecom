@@ -8,6 +8,7 @@ import { taka } from "@/lib/format";
 import { one, pageOf, qs } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { adjustAction, stockSettingsAction } from "./actions";
+import { StockHistory } from "./stock-history";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Inventory" };
@@ -45,6 +46,7 @@ function AdjustForm({ r, back }: { r: InventoryRow; back: string }) {
           </div>
           <SubmitButton className="btn btn-secondary" pending="…">Save</SubmitButton>
         </form>
+        <StockHistory variantId={r.variantId} />
       </div>
     </ActionDrawer>
   );

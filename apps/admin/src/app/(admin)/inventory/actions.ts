@@ -2,8 +2,32 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { DomainError, adjustStock, updateStockSettings } from "@biztrackbd/core";
+import { DomainError, adjustStock, updateStockSettings, listStockHistory } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
+
+export interface StockHistoryItem {
+  id: string;
+  delta: number;
+  quantityAfter: number;
+  reason: string;
+  note: string | null;
+  actorName: string;
+  createdAt: string;
+}
+
+export async function getStockHistoryAction(variantId: string): Promise<StockHistoryItem[]> {
+  const s = await requireAction("products", "view");
+  const list = await listStockHistory(s.tenantId, s.actor, variantId, 20);
+  return list.map((item) => ({
+    id: item.id,
+    delta: item.delta,
+    quantityAfter: item.quantityAfter,
+    reason: item.reason,
+    note: item.note,
+    actorName: item.actorName,
+    createdAt: item.createdAt.toISOString(),
+  }));
+}
 
 function back(form: FormData, extra: string): never {
   const to = String(form.get("back") ?? "/inventory");
