@@ -3,6 +3,7 @@ import type { PageData, PageJson, PageSection } from "@biztrackbd/core";
 import { parseEndsAt, productKey, youtubeId } from "@biztrackbd/core/builder-client";
 import { money, type Lang, type T } from "@/lib/i18n-core";
 import { Countdown } from "./countdown";
+import { LandingMotion } from "./landing-motion";
 import { mark, markImg } from "./edit-marks";
 import type { PageCtx } from "@/lib/page-ctx";
 import { renderPageBlock } from "./page-blocks";
@@ -45,9 +46,15 @@ export interface LandingInfo {
 }
 
 /** The store's own contact details, for the contact block of a page built from sections. They come from the store settings, never from the layout. */
-export interface SiteInfo { phone: string | null; whatsapp: string | null; address: string | null }
+export interface SiteInfo { phone: string | null; whatsapp: string | null; address: string | null; logoUrl?: string | null; storeName?: string }
+/** Things only the server can draw, handed in by the page (a server action cannot be imported into code the editor's preview also uses). */
+export interface SectionExtras { langSwitch?: React.ReactNode }
 
-function Section({ section, data, lang, t, orderForm, ctx, landing, editing, site }: { section: PageSection; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx; landing?: LandingInfo; editing?: boolean; site?: SiteInfo }) {
+const PhoneIcon = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z" /></svg>;
+const WaIcon = ({ size = 18 }: { size?: number }) => <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .5l-.4.6-.3.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.6-.1l2 1c.3.1.5.2.6.3.1.2.1.8-.1 1.3z" /></svg>;
+const NO_REVEAL = new Set(["lp-header", "lp-hero", "lp-marquee", "lp-sticky-cta"]);
+
+function Section({ section, data, lang, t, orderForm, ctx, landing, editing, site, pro, extras }: { section: PageSection; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx; landing?: LandingInfo; editing?: boolean; site?: SiteInfo; pro?: boolean; extras?: SectionExtras }) {
   const s = section.settings as S;
   const id = section.id;
   const ed = mark(editing);
@@ -148,6 +155,9 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
     // ---- Landing
     case "lp-hero": {
       const img = str(s.image);
+      const ticks = [1, 2, 3].map((n) => ({ n, text: L(s, `tick${n}`, lang) })).filter((x) => x.text || editing);
+      const price = pro && s.showPrice !== false ? landing?.price ?? null : null;
+      const was = pro ? landing?.was ?? null : null;
       return (
         <section className="lp-hero" data-section={id}>
           <div className="wrap lp-hero-in">
@@ -155,9 +165,81 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
               {(L(s, "badge", lang) || editing) && <span className="lp-badge" {...ed("badge")}>{L(s, "badge", lang)}</span>}
               <h1 {...ed("headline")}>{L(s, "headline", lang)}</h1>
               {(L(s, "subhead", lang) || editing) && <p {...ed("subhead")}>{L(s, "subhead", lang)}</p>}
-              <a href="#order" className="btn btn-primary btn-round" {...ed("ctaText")}>{L(s, "ctaText", lang)}</a>
+              {price != null && (
+                <div className="lp-price" data-testid="lp-hero-price">
+                  <span className="now">{money(price, lang)}</span>
+                  {was != null && was > price && <><s className="was">{money(was, lang)}</s><span className="save">{t("save", { amount: money(was - price, lang) })}</span></>}
+                </div>
+              )}
+              <a href="#order" className={`btn btn-primary btn-round${pro ? " lp-pulse" : ""}`} {...ed("ctaText")}>{L(s, "ctaText", lang)}</a>
+              {pro && ticks.length > 0 && <ul className="lp-ticks">{ticks.map((x) => <li key={x.n} {...ed(`tick${x.n}`)}>{L(s, `tick${x.n}`, lang)}</li>)}</ul>}
             </div>
             {img ? <div className="lp-hero-img" {...edImg("image")}><Img src={img} alt={L(s, "headline", lang)} /></div> : editing ? <div className="lp-hero-img lp-pick" {...edImg("image")}>+ Picture</div> : null}
+          </div>
+        </section>
+      );
+    }
+    case "lp-header": {
+      const logo = str(s.logo) || site?.logoUrl || "";
+      const name = site?.storeName ?? "";
+      const phone = site?.phone;
+      const wa = site?.whatsapp;
+      return (
+        <header className="lp-head" data-section={id}>
+          <div className="wrap lp-head-in">
+            <a href="#top" className="lp-brand" aria-label={name || "Home"}>{logo ? <Img src={logo} alt={name} /> : <span>{name}</span>}</a>
+            <div className="lp-head-act">
+              {s.showPhone !== false && phone && <a href={`tel:${phone}`} className="lp-chip" aria-label={phone}><PhoneIcon /><span className="t">{phone}</span></a>}
+              {s.showWhatsapp !== false && wa && <a href={`https://wa.me/88${wa}`} rel="noopener noreferrer" className="lp-chip wa" aria-label="WhatsApp"><WaIcon /><span className="t">WhatsApp</span></a>}
+              {s.showLanguage === true && (extras?.langSwitch ?? (editing ? <span className="lp-chip">EN | বাং</span> : null))}
+              {s.showOrder !== false && <a href="#order" className="lp-chip go" {...ed("orderText")}>{L(s, "orderText", lang) || t("lpOrderSubmit")}</a>}
+            </div>
+          </div>
+          {s.floatWhatsapp !== false && wa && <a href={`https://wa.me/88${wa}`} rel="noopener noreferrer" className="lp-wa-float" aria-label="WhatsApp"><WaIcon size={30} /></a>}
+        </header>
+      );
+    }
+    case "lp-marquee": {
+      const items = ((s.items as S[] | undefined) ?? []).map((it) => L(it, "text", lang)).filter(Boolean);
+      if (items.length === 0) return null;
+      // The phrases are drawn twice, so the strip can slide by half its length and start over without a jump.
+      const run = [...items, ...items, ...items, ...items];
+      return <div className="lp-marquee" data-section={id} aria-label={items.join(", ")}><div className="lp-marquee-track" aria-hidden="true">{[0, 1].map((k) => run.map((x, i) => <span key={`${k}-${i}`}>{x}</span>))}</div></div>;
+    }
+    case "lp-compare": {
+      const items = (s.items as S[] | undefined) ?? [];
+      return (
+        <section className="lp-block" data-section={id}>
+          <div className="wrap">
+            <h2 {...ed("title")}>{L(s, "title", lang)}</h2>
+            <div className="lp-compare">
+              <div className="bad"><h3 {...ed("badTitle")}>{L(s, "badTitle", lang)}</h3><ul>{items.map((it, i) => <li key={i} {...ed(`items.${i}.bad`)}>{L(it, "bad", lang)}</li>)}</ul></div>
+              <div className="good"><h3 {...ed("goodTitle")}>{L(s, "goodTitle", lang)}</h3><ul>{items.map((it, i) => <li key={i} {...ed(`items.${i}.good`)}>{L(it, "good", lang)}</li>)}</ul></div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+    case "lp-steps": {
+      const items = (s.items as S[] | undefined) ?? [];
+      return (
+        <section className="lp-block" data-section={id}>
+          <div className="wrap">
+            <h2 {...ed("title")}>{L(s, "title", lang)}</h2>
+            <ol className="lp-steps">{items.map((it, i) => <li key={i}><b {...ed(`items.${i}.title`)}>{L(it, "title", lang)}</b>{(L(it, "text", lang) || editing) && <span {...ed(`items.${i}.text`)}>{L(it, "text", lang)}</span>}</li>)}</ol>
+          </div>
+        </section>
+      );
+    }
+    case "lp-screens": {
+      const all = (s.items as S[] | undefined) ?? [];
+      const items = all.map((it, i) => ({ it, i })).filter(({ it }) => str(it.image));
+      if (items.length === 0 && !editing) return null;
+      return (
+        <section className="lp-block" data-section={id}>
+          <div className="wrap">
+            <h2 {...ed("title")}>{L(s, "title", lang)}</h2>
+            <div className="lp-screens">{items.length === 0 ? <div className="lp-pick" {...edImg("items.0.image")}>+ Picture</div> : items.map(({ it, i }) => <span key={i} style={{ display: "contents" }} {...edImg(`items.${i}.image`)}><Img src={str(it.image)} alt={str(it.alt)} /></span>)}</div>
           </div>
         </section>
       );
@@ -317,14 +399,30 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
         </section>
       );
     case "lp-sticky-cta":
-      return <div className="lp-sticky" data-section={id}><a href="#order" className="btn btn-primary btn-round btn-block" {...ed("text")}>{L(s, "text", lang)}</a></div>;
+      return (
+        <div className="lp-sticky" data-section={id}>
+          {pro && landing?.price != null && <div className="sum"><b>{money(landing.price, lang)}</b>{landing.was != null && landing.was > landing.price && <s>{money(landing.was, lang)}</s>}</div>}
+          <a href="#order" className={`btn btn-primary btn-round${pro ? "" : " btn-block"}`} {...ed("text")}>{L(s, "text", lang)}</a>
+        </div>
+      );
     default:
       // The product, collection and cart blocks (docs/39) need the page's own data.
       return <>{renderPageBlock(section.type, id, s, ctx, lang, t, editing)}</>;
   }
 }
 
-export function Sections({ page, data, lang, t, orderForm, ctx, landing, editing, site }: { page: PageJson; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx; landing?: LandingInfo; site?: SiteInfo; /** The editor's preview of a landing page: text and pictures are marked so they can be changed on the page. */ editing?: boolean }) {
+export function Sections({ page, data, lang, t, orderForm, ctx, landing, editing, site, extras }: { page: PageJson; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx; landing?: LandingInfo; site?: SiteInfo; extras?: SectionExtras; /** The editor's preview of a landing page: text and pictures are marked so they can be changed on the page. */ editing?: boolean }) {
   // In the editor a hidden section is still drawn, dimmed, so it can be found and shown again; the live page never draws it.
-  return <>{page.sections.filter((s) => editing || !s.disabled).map((s) => <Section key={s.id} section={s} data={data} lang={lang} t={t} orderForm={orderForm} ctx={ctx} landing={landing} editing={editing} site={site} />)}</>;
+  const shown = page.sections.filter((x) => editing || !x.disabled);
+  // A landing page with a header section has a style of its own (colour palette, motion); one without keeps the quieter look it was made with.
+  const header = page.sections.find((x) => x.type === "lp-header");
+  const pro = Boolean(header);
+  const nodes = shown.map((x) => {
+    const node = <Section key={x.id} section={x} data={data} lang={lang} t={t} orderForm={orderForm} ctx={ctx} landing={landing} editing={editing} site={site} pro={pro} extras={extras} />;
+    // Each block rises into place as it comes into view (never in the editor, and never when the visitor asks for less motion).
+    return pro && !NO_REVEAL.has(x.type) ? <div key={x.id} className={`lp-rv${editing ? "" : " lp-reveal"}`}>{node}</div> : node;
+  });
+  if (!pro) return <>{nodes}</>;
+  const palette = String(header!.settings.palette ?? "fresh");
+  return <div className="lp-pro" id="top" data-palette={palette}>{!editing && <LandingMotion />}{nodes}</div>;
 }

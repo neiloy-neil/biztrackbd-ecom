@@ -58,6 +58,7 @@ export function LandingOrderForm({ slug, options, bump, lang, s, buttonText, utm
     <form
       action={action}
       className="lp-form"
+      data-ribbon={t("lpRibbon")}
       data-testid="lp-order-form"
       noValidate={false}
       // The first time the visitor touches the form they have started to buy: tell the ad platforms once (Meta, TikTok, Google).

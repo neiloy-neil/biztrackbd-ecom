@@ -532,6 +532,26 @@ describe("landing pages", () => {
       }
     });
 
+    it("every template has the colourful look: a header with a colour style, a moving strip, and a hidden-until-filled place for customer messages", () => {
+      const palettes = new Set<string>();
+      for (const t of LANDING_TEMPLATES) {
+        const types = t.page.sections.map((x) => x.type);
+        expect(types[0], t.id).toBe("lp-header");
+        expect(types[1], t.id).toBe("lp-hero");
+        expect(types, t.id).toContain("lp-sticky-cta");
+        const header = t.page.sections[0]!;
+        palettes.add(String(header.settings.palette));
+        expect(["fresh", "red", "navy", "sunny", "purple", "teal", "night", "rose"], t.id).toContain(header.settings.palette);
+        // A real logo comes from the store's settings unless the merchant uploads one; nothing is typed into a template.
+        expect(header.settings.logo, t.id).toBe("");
+        for (const x of t.page.sections) if (x.type === "lp-screens") expect((x.settings.items as { image: string }[]).every((i) => i.image === ""), t.id).toBe(true);
+      }
+      expect(palettes.size).toBeGreaterThanOrEqual(6);
+      expect(() => normalizeSettings(sectionDef("lp-header")!, { palette: "neon" })).toThrow(/not one of the choices/);
+      expect(() => normalizeSettings(sectionDef("lp-header")!, { logo: "javascript:alert(1)" })).toThrow(/picture/);
+      expect(normalizeSettings(sectionDef("lp-header")!, {}).palette).toBe("fresh");
+    });
+
     it("a page made from a template opens with that template's layout, with its own section ids", async () => {
       const s = await store("lpt1");
       const lp = await createLandingPage(s.f.tenantId, s.owner, { title: "Honey", productId: s.f.products[0]!.id, templateId: "food" });

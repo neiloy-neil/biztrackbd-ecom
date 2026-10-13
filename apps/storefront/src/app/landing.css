@@ -53,6 +53,8 @@
 @media (min-width: 860px) { .lp-pro .lp-hero { padding: 56px 0 84px; } .lp-pro .lp-hero-in { grid-template-columns: 1.05fr 1fr; gap: 48px; } .lp-pro .lp-hero h1 { font-size: 52px; } .lp-price .now { font-size: 54px; } }
 
 /* ---- The order button: strong, pulsing gently, popping when touched */
+body[data-store-theme] .lp-pro .btn { text-transform: none; letter-spacing: 0; }
+body[data-store-theme] .lp-pro .btn-primary, body[data-store-theme] .lp-pro .btn-round { border-radius: 99px; }
 .lp-pro .btn-primary { background: var(--p-accent); color: var(--p-accent-ink); border-color: var(--p-accent); font-family: var(--font-baloo), var(--font-hind), sans-serif; font-weight: 800; font-size: 18px; min-height: 58px; padding: 0 34px; border-radius: 99px; box-shadow: 0 10px 24px color-mix(in srgb, var(--p-accent) 45%, transparent); transition: transform .15s ease, box-shadow .15s ease; }
 .lp-pro .btn-primary:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 16px 30px color-mix(in srgb, var(--p-accent) 55%, transparent); background: var(--p-accent); }
 .lp-pro .btn-primary:active { transform: scale(.98); }
@@ -61,7 +63,7 @@
 
 /* ---- Sections */
 .lp-pro .lp-block { padding: 46px 0; }
-.lp-pro > .lp-block:nth-child(even) { background: var(--p-soft); }
+.lp-pro > .lp-rv:nth-child(even) > .lp-block { background: var(--p-soft); }
 .lp-pro .lp-block h2 { font-size: 28px; line-height: 1.25; font-weight: 800; color: var(--p-band); margin-bottom: 22px; text-align: center; text-wrap: balance; }
 .lp-pro .lp-center p { color: var(--p-muted); }
 @media (min-width: 860px) { .lp-pro .lp-block { padding: 70px 0; } .lp-pro .lp-block h2 { font-size: 38px; } }
@@ -158,3 +160,4 @@
   .lp-marquee { white-space: normal; text-align: center; }
   .lp-pro .btn-primary, .lp-chip, .lp-pro .lp-benefits li, .lp-pro .lp-gallery img { transition: none; }
 }
+.lp-pro .lp-order .lp-narrow > p { text-align: center; }

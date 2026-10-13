@@ -110,6 +110,26 @@ async function storeTheme(tx: TenantTx, themeId: ThemeId, draftFirst: boolean): 
   return p ? asTheme(p.settings, themeId) : themeDefaults(themeId);
 }
 
+/**
+ * The layout a page starts from before anything is saved or published. A landing page or a page built from sections made from a template starts
+ * from that template's layout (stored when it was created); everything else, and a damaged row, starts from the plain built-in layout.
+ */
+async function startingPage(tx: TenantTx, kind: PageKind, pageKey: string): Promise<PageJson> {
+  if (kind === "landing" || kind === "custom") {
+    const row = kind === "landing"
+      ? await tx.landingPage.findFirst({ where: { id: pageKey.slice("landing:".length) }, select: { sectionsJson: true } })
+      : await tx.page.findFirst({ where: { id: pageKey.slice("page:".length) }, select: { sectionsJson: true } });
+    if (row) {
+      try {
+        return asPage(kind, row.sectionsJson);
+      } catch {
+        /* the plain start below */
+      }
+    }
+  }
+  return defaultPageFor(kind);
+}
+
 /** What the editor opens with: the draft if there is one, else what is live, else the starting layout. */
 export async function loadForEdit(tenantId: string, actor: StaffActor, pageKey: string): Promise<PageState> {
   assertCan(actor, "design", "view");
@@ -118,20 +138,7 @@ export async function loadForEdit(tenantId: string, actor: StaffActor, pageKey: 
     await assertPageExists(tx, pageKey);
     const themeId = await activeThemeId(tx);
     const [draft, live] = await Promise.all([draftRow(tx, themeId, pageKey), latestPublished(tx, themeId, pageKey)]);
-    let start = defaultPageFor(kind);
-    if (kind === "landing" || kind === "custom") {
-      // A page made from a template opens with that template's layout (stored when the page was created); a bad row falls back to the plain start.
-      const row = kind === "landing"
-        ? await tx.landingPage.findFirst({ where: { id: pageKey.slice("landing:".length) }, select: { sectionsJson: true } })
-        : await tx.page.findFirst({ where: { id: pageKey.slice("page:".length) }, select: { sectionsJson: true } });
-      if (row) {
-        try {
-          start = asPage(kind, row.sectionsJson);
-        } catch {
-          /* keep the plain start */
-        }
-      }
-    }
+    const start = await startingPage(tx, kind, pageKey);
     const page = draft ? asPage(kind, draft.sectionsJson) : live ? asPage(kind, live.sectionsJson) : start;
     const theme = await storeTheme(tx, themeId, true);
     const liveTheme = await storeTheme(tx, themeId, false);
@@ -334,7 +341,7 @@ export async function getPreview(tenantId: string, pageKey: string): Promise<{ p
     const draft = await draftRow(tx, themeId, pageKey);
     const live = draft ? null : await latestPublished(tx, themeId, pageKey);
     const raw = draft?.sectionsJson ?? live?.sectionsJson;
-    return { page: raw ? asPage(kind, raw) : defaultPageFor(kind), theme: await storeTheme(tx, themeId, true), themeId };
+    return { page: raw ? asPage(kind, raw) : await startingPage(tx, kind, pageKey), theme: await storeTheme(tx, themeId, true), themeId };
   });
 }
 

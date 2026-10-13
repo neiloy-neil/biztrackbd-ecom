@@ -26,7 +26,7 @@ const DRAWINGS: Record<string, ReactNode> = {
 
 const KIND: Record<string, keyof typeof DRAWINGS> = {
   "lp-hero": "hero", "lp-video": "video", "lp-benefits": "list", "lp-split": "split", "lp-text": "text", "lp-gallery": "gallery", "lp-reviews": "reviews",
-  "lp-countdown": "clock", "lp-stock": "bar", "lp-offer-bar": "price", "trust-strip": "bar", "lp-faq": "faq", "lp-order-form": "form", "lp-sticky-cta": "bar",
+  "lp-countdown": "clock", "lp-stock": "bar", "lp-offer-bar": "price", "trust-strip": "bar", "lp-faq": "faq", "lp-order-form": "form", "lp-sticky-cta": "bar", "lp-header": "bar", "lp-marquee": "bar", "lp-compare": "split", "lp-steps": "list", "lp-screens": "gallery", "contact-block": "text",
   hero: "hero", banner: "split", "rich-text": "text", "featured-products": "gallery", "category-grid": "gallery", "announcement-bar": "bar",
   "product-main": "split", "product-reviews": "reviews", "product-related": "gallery", "collection-header": "text", "collection-products": "gallery", "cart-main": "form",
 };
@@ -42,8 +42,8 @@ export function SectionThumb({ type }: { type: string }) {
 
 /** How the cards are grouped on a landing page; other pages show one list. */
 export const LANDING_GROUPS: { title: string; types: string[] }[] = [
-  { title: "Top of the page", types: ["lp-hero", "lp-video"] },
-  { title: "Describe the product", types: ["lp-benefits", "lp-split", "lp-text", "lp-gallery"] },
-  { title: "Build trust", types: ["lp-reviews", "trust-strip", "lp-countdown", "lp-stock"] },
+  { title: "Top of the page", types: ["lp-header", "lp-hero", "lp-marquee", "lp-video"] },
+  { title: "Describe the product", types: ["lp-benefits", "lp-split", "lp-compare", "lp-steps", "lp-text", "lp-gallery"] },
+  { title: "Build trust", types: ["lp-reviews", "lp-screens", "trust-strip", "lp-countdown", "lp-stock"] },
   { title: "Close the sale", types: ["lp-offer-bar", "lp-order-form", "lp-faq", "lp-sticky-cta"] },
 ];

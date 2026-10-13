@@ -34,25 +34,47 @@ interface Seed {
 const en = (p: Pair) => p[0];
 const bn = (p: Pair) => p[1];
 
+/** How a template looks and flows beyond its words: its colour style, its moving strip, and the order its blocks come in (docs/48). */
+interface Style {
+  palette: string;
+  marquee: Pair[];
+  layout: ("marquee" | "benefits" | "split0" | "split1" | "compare" | "steps" | "video" | "gallery" | "screens" | "urgency" | "faq")[];
+  compare?: { title: Pair; bad: Pair; good: Pair; rows: [Pair, Pair][] };
+  steps?: { title: Pair; items: [Pair, Pair][] };
+}
+
+const STEP_ORDER: Style["steps"] = {
+  title: ["How to order", "কীভাবে অর্ডার করবেন"],
+  items: [[["Fill the form", "ফর্ম পূরণ করুন"], ["Your name, number and address. It takes one minute.", "নাম, নম্বর ও ঠিকানা দিন। এক মিনিটও লাগে না।"]], [["We call you", "আমরা ফোন করি"], ["A short call to confirm your order.", "অর্ডার নিশ্চিত করতে ছোট একটি কল।"]], [["Pay on delivery", "হাতে পেয়ে টাকা দিন"], ["Check the parcel, then pay the courier.", "পণ্য দেখে তারপর কুরিয়ারকে টাকা দিন।"]]],
+};
+
 function build(seed: Seed): LandingTemplate {
+  const st = STYLES[seed.id]!;
   const n = new Map<string, number>();
   const sec = (type: string, settings: Record<string, unknown>): PageSection => {
     const i = (n.get(type) ?? 0) + 1;
     n.set(type, i);
     return { id: `${type.replace(/-/g, "_")}_${i}`, type, settings: normalizeSettings(sectionDef(type)!, settings) };
   };
+  const splitOf = (k: number): PageSection[] => (seed.split[k] ? [sec("lp-split", { title: en(seed.split[k]!.title), titleBn: bn(seed.split[k]!.title), text: en(seed.split[k]!.text), textBn: bn(seed.split[k]!.text), side: seed.split[k]!.side ?? (k % 2 === 0 ? "right" : "left"), ctaText: k === 0 ? "Order now" : "", ctaTextBn: k === 0 ? "অর্ডার করুন" : "" })] : []);
+  const blocks: Record<string, () => PageSection[]> = {
+    marquee: () => [sec("lp-marquee", { items: st.marquee.map((m) => ({ text: en(m), textBn: bn(m) })) })],
+    benefits: () => [sec("lp-benefits", { title: en(seed.benefitsTitle), titleBn: bn(seed.benefitsTitle), items: seed.benefits.map(([t, x]) => ({ title: en(t), titleBn: bn(t), text: en(x), textBn: bn(x) })) })],
+    split0: () => splitOf(0),
+    split1: () => splitOf(1),
+    compare: () => (st.compare ? [sec("lp-compare", { title: en(st.compare.title), titleBn: bn(st.compare.title), badTitle: en(st.compare.bad), badTitleBn: bn(st.compare.bad), goodTitle: en(st.compare.good), goodTitleBn: bn(st.compare.good), items: st.compare.rows.map(([b, g]) => ({ bad: en(b), badBn: bn(b), good: en(g), goodBn: bn(g) })) })] : []),
+    steps: () => (st.steps ? [sec("lp-steps", { title: en(st.steps.title), titleBn: bn(st.steps.title), items: st.steps.items.map(([t, x]) => ({ title: en(t), titleBn: bn(t), text: en(x), textBn: bn(x) })) })] : []),
+    video: () => [sec("lp-video", {})],
+    gallery: () => [sec("lp-gallery", {})],
+    // Room for the merchant's real customer messages. Empty, it is not shown: no template invents a review.
+    screens: () => [sec("lp-screens", {})],
+    urgency: () => [sec("lp-offer-bar", {}), sec("lp-stock", {}), sec("lp-countdown", {})],
+    faq: () => [sec("lp-faq", { title: "Questions", titleBn: "প্রশ্ন", items: seed.faqs.map(([q, a]) => ({ q: en(q), qBn: bn(q), a: en(a), aBn: bn(a) })) })],
+  };
   const sections: PageSection[] = [
+    sec("lp-header", { palette: st.palette }),
     sec("lp-hero", { badge: en(seed.badge), badgeBn: bn(seed.badge), headline: en(seed.headline), headlineBn: bn(seed.headline), subhead: en(seed.subhead), subheadBn: bn(seed.subhead), ctaText: "Order now", ctaTextBn: "অর্ডার করতে চাই" }),
-    sec("lp-video", {}),
-    sec("lp-benefits", {
-      title: en(seed.benefitsTitle), titleBn: bn(seed.benefitsTitle),
-      items: seed.benefits.map(([t, x]) => ({ title: en(t), titleBn: bn(t), text: en(x), textBn: bn(x) })),
-    }),
-    ...seed.split.map((s, i) => sec("lp-split", { title: en(s.title), titleBn: bn(s.title), text: en(s.text), textBn: bn(s.text), side: s.side ?? (i % 2 === 0 ? "right" : "left"), ctaText: i === 0 ? "Order now" : "", ctaTextBn: i === 0 ? "অর্ডার করুন" : "" })),
-    sec("lp-gallery", {}),
-    sec("trust-strip", {}),
-    ...(seed.urgency ? [sec("lp-offer-bar", {}), sec("lp-stock", {}), sec("lp-countdown", {})] : []),
-    sec("lp-faq", { title: "Questions", titleBn: "প্রশ্ন", items: seed.faqs.map(([q, a]) => ({ q: en(q), qBn: bn(q), a: en(a), aBn: bn(a) })) }),
+    ...st.layout.flatMap((k) => blocks[k]!()),
     sec("lp-order-form", {}),
     sec("lp-sticky-cta", {}),
   ];
@@ -157,6 +179,55 @@ const SEEDS: Seed[] = [
     faqs: [DELIVERY, PAY],
   },
 ];
+
+const STYLES: Record<string, Style> = {
+  fashion: {
+    palette: "navy", marquee: [["New arrivals every week", "প্রতি সপ্তাহে নতুন কালেকশন"], ["Cash on delivery", "ক্যাশ অন ডেলিভারি"], ["Size exchange available", "সাইজ বদলের সুবিধা"]],
+    layout: ["marquee", "benefits", "split0", "gallery", "compare", "screens", "urgency", "faq"],
+    compare: { title: ["Why you will like it", "কেন পছন্দ হবে"], bad: ["Ordinary", "সাধারণ"], good: ["Ours", "আমাদের"], rows: [[["Thin, rough fabric", "পাতলা, খসখসে কাপড়"], ["Soft, breathable fabric", "নরম, আরামদায়ক কাপড়"]], [["Loose stitches", "ঢিলে সেলাই"], ["Neat, strong stitching", "পরিপাটি, মজবুত সেলাই"]], [["Hard to exchange", "বদল করা কঠিন"], ["Easy size exchange", "সহজে সাইজ বদল"]]] },
+  },
+  food: {
+    palette: "sunny", marquee: [["Fresh and pure", "খাঁটি ও তাজা"], ["Packed clean", "পরিষ্কারভাবে প্যাক করা"], ["Cash on delivery", "ক্যাশ অন ডেলিভারি"], ["Delivery all over Bangladesh", "সারা বাংলাদেশে ডেলিভারি"]],
+    layout: ["marquee", "split0", "benefits", "split1", "steps", "screens", "urgency", "faq"], steps: STEP_ORDER,
+  },
+  gadget: {
+    palette: "night", marquee: [["Warranty included", "ওয়ারেন্টি সহ"], ["Test it, then pay", "দেখে নিয়ে তারপর টাকা"], ["Fast delivery", "দ্রুত ডেলিভারি"]],
+    layout: ["video", "benefits", "split0", "compare", "split1", "screens", "urgency", "faq"],
+    compare: { title: ["Compare and see", "তুলনা করে দেখুন"], bad: ["Cheap copies", "নকল পণ্য"], good: ["Ours", "আমাদের"], rows: [[["Breaks in weeks", "কয়েক সপ্তাহেই নষ্ট"], ["Built for daily use", "প্রতিদিনের ব্যবহারের জন্য তৈরি"]], [["No warranty", "ওয়ারেন্টি নেই"], ["Warranty and support", "ওয়ারেন্টি ও সহায়তা"]], [["Pay first, hope later", "আগে টাকা, পরে ভরসা"], ["Pay when it arrives", "হাতে পেয়ে টাকা"]]] },
+  },
+  beauty: {
+    palette: "rose", marquee: [["Gentle on skin", "ত্বকের জন্য কোমল"], ["Simple routine", "সহজ রুটিন"], ["Cash on delivery", "ক্যাশ অন ডেলিভারি"]],
+    layout: ["marquee", "benefits", "steps", "split0", "gallery", "screens", "faq"],
+    steps: { title: ["How to use", "ব্যবহারের নিয়ম"], items: [[["Clean", "পরিষ্কার করুন"], ["Wash your face and pat it dry.", "মুখ ধুয়ে শুকিয়ে নিন।"]], [["Apply", "লাগান"], ["A small amount, gently, morning and night.", "অল্প পরিমাণে, আলতো করে, সকাল-সন্ধ্যায়।"]], [["Be regular", "নিয়মিত থাকুন"], ["Use it every day to see the difference.", "প্রতিদিন ব্যবহার করুন, পার্থক্য বুঝবেন।"]]] },
+  },
+  kitchen: {
+    palette: "teal", marquee: [["Makes work easier", "কাজ সহজ করে"], ["Strong and safe", "মজবুত ও নিরাপদ"], ["Cash on delivery", "ক্যাশ অন ডেলিভারি"]],
+    layout: ["marquee", "split0", "benefits", "video", "compare", "split1", "screens", "faq"],
+    compare: { title: ["Before and after", "আগে আর পরে"], bad: ["Without it", "এটা ছাড়া"], good: ["With it", "এটা থাকলে"], rows: [[["Ten minutes of effort", "দশ মিনিটের পরিশ্রম"], ["Done in one minute", "এক মিনিটেই শেষ"]], [["Messy to clean", "পরিষ্কার করা ঝামেলা"], ["Wipe and rinse", "মুছে বা ধুয়ে নিন"]]] },
+  },
+  kids: {
+    palette: "purple", marquee: [["For little ones", "ছোটদের জন্য"], ["Safe and bright", "নিরাপদ ও রঙিন"], ["Cash on delivery", "ক্যাশ অন ডেলিভারি"]],
+    layout: ["marquee", "benefits", "split0", "gallery", "steps", "screens", "faq"], steps: STEP_ORDER,
+  },
+  watch: {
+    palette: "red", marquee: [["New in", "নতুন এসেছে"], ["Gift ready", "উপহারের জন্য তৈরি"], ["Cash on delivery", "ক্যাশ অন ডেলিভারি"]],
+    layout: ["marquee", "gallery", "benefits", "split0", "compare", "screens", "urgency", "faq"],
+    compare: { title: ["Look closer", "ভালো করে দেখুন"], bad: ["Ordinary", "সাধারণ"], good: ["Ours", "আমাদের"], rows: [[["Dull finish", "ম্লান ফিনিশ"], ["Clean, premium finish", "পরিষ্কার, আভিজাত্যপূর্ণ ফিনিশ"]], [["Uncomfortable strap", "অস্বস্তিকর স্ট্র্যাপ"], ["Light and comfortable", "হালকা ও আরামদায়ক"]]] },
+  },
+  combo: {
+    palette: "fresh", marquee: [["Buy together, save more", "একসাথে কিনুন, বেশি সাশ্রয়"], ["One parcel, one delivery charge", "এক পার্সেল, এক ডেলিভারি চার্জ"], ["Cash on delivery", "ক্যাশ অন ডেলিভারি"]],
+    layout: ["marquee", "benefits", "split0", "steps", "screens", "urgency", "faq"], steps: STEP_ORDER,
+  },
+  health: {
+    palette: "teal", marquee: [["Natural", "প্রাকৃতিক"], ["Clear directions", "পরিষ্কার নির্দেশনা"], ["Cash on delivery", "ক্যাশ অন ডেলিভারি"]],
+    layout: ["marquee", "benefits", "split0", "steps", "screens", "faq"],
+    steps: { title: ["How to use it", "ব্যবহারের নিয়ম"], items: [[["Read the label", "লেবেল পড়ুন"], ["Use the amount written on the pack.", "প্যাকে লেখা পরিমাণে ব্যবহার করুন।"]], [["Take it regularly", "নিয়মিত নিন"], ["Same time each day works best.", "প্রতিদিন একই সময়ে নেওয়া ভালো।"]], [["Ask if unsure", "অনিশ্চিত হলে জিজ্ঞাসা করুন"], ["If you are pregnant or on medicine, ask a doctor first.", "গর্ভবতী বা ওষুধ সেবনরত হলে আগে ডাক্তারের পরামর্শ নিন।"]]] },
+  },
+  minimal: {
+    palette: "fresh", marquee: [["Cash on delivery", "ক্যাশ অন ডেলিভারি"], ["Easy exchange", "সহজ বদল"]],
+    layout: ["benefits", "gallery", "faq"],
+  },
+};
 
 export const LANDING_TEMPLATES: LandingTemplate[] = SEEDS.map(build);
 

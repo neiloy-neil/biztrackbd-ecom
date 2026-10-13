@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getPreview, getPublicLanding, getStorefrontTracking, verifyPreviewToken } from "@biztrackbd/core";
+import { getPreview, getPublicLanding, getStoreInfo, getStorefrontTracking, verifyPreviewToken } from "@biztrackbd/core";
+import { setLanguage } from "@/app/actions";
 import { LandingOrderForm } from "@/components/landing-order-form";
 import { PreviewBridge } from "@/components/preview-bridge";
 import { Sections, type LandingInfo } from "@/components/sections";
@@ -87,6 +88,12 @@ export default async function LandingPage({ params, searchParams }: { params: Pr
     was: cheapest?.compareAt != null && cheapest.compareAt > cheapest.price ? cheapest.compareAt * (first?.quantity ?? 1) : null,
   };
 
+  // The header of the page shows the merchant's own logo (or the store's name) and the ways to reach them, from the store settings.
+  const storeInfo = await getStoreInfo(store.id);
+  const site = { phone: storeInfo.contactPhone, whatsapp: storeInfo.whatsappNumber, address: storeInfo.addressLine, logoUrl: storeInfo.logoUrl, storeName: storeInfo.storeName };
+  const other = lang === "bn" ? "en" : "bn";
+  const extras = { langSwitch: <form action={setLanguage.bind(null, other)}><button className="lp-chip" type="submit" lang={other}>{t("switchLang")}</button></form> };
+
   return (
     <>
       <ThemeStyle tenantId={store.id} />
@@ -94,9 +101,9 @@ export default async function LandingPage({ params, searchParams }: { params: Pr
       <LandingEvents slug={slug} contentIds={landing.options.map((o) => o.productId)} value={info.price ?? undefined} preview={Boolean(preview)} />
       <main id="main">
         {preview ? (
-          <PreviewBridge kind="landing" initialPage={landing.page} initialTheme={preview.theme} data={data} lang={lang} orderForm={form} adminOrigin={adminOrigin()} landing={info} />
+          <PreviewBridge kind="landing" initialPage={landing.page} initialTheme={preview.theme} data={data} lang={lang} orderForm={form} adminOrigin={adminOrigin()} landing={info} site={site} extras={extras} />
         ) : (
-          <Sections page={landing.page} data={data} lang={lang} t={t} orderForm={form} landing={info} />
+          <Sections page={landing.page} data={data} lang={lang} t={t} orderForm={form} landing={info} site={site} extras={extras} />
         )}
       </main>
       <footer className="lp-footer">{landing.product.title}<PlatformCredit t={t} /></footer>
