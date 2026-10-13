@@ -37,7 +37,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<Re
       <h1 style={{ marginTop: 0 }}>Sign in</h1>
       <p className="muted">to your BizTrackBD store</p>
       {note && <div className="notice" role="note" style={{ marginBottom: 12 }}>{note}</div>}
-      <LoginForm next={next} />
+      <LoginForm next={next} initialEmail={one(sp.email)} />
       <p className="muted" style={{ fontSize: 14, marginTop: 14 }} data-testid="login-new">New here? <a className="link" href={signupHref} data-testid="login-signup">Open a free store</a></p>
       {keepHref && (
         <div className="notice good" role="note" data-testid="login-keep" style={{ marginTop: 12 }}>

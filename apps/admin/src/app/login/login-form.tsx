@@ -6,14 +6,37 @@ import { completeSetupAction, loginAction, mfaAction, requestCodeAction, type Lo
 
 const Err = ({ s }: { s: LoginState }) => (s.error ? <div className="notice bad" role="alert" data-testid="login-error">{s.error}</div> : null);
 
-export function LoginForm({ next }: { next: string }) {
+export function LoginForm({ next, initialEmail }: { next: string; initialEmail?: string }) {
   const [state, action, pending] = useActionState<LoginState, FormData>(loginAction, {});
   return (
     <form action={action} className="stack" data-testid="login-form">
       <input type="hidden" name="next" value={next} />
       <Err s={state} />
-      <div className="field" style={{ margin: 0 }}><label className="label" htmlFor="l-email">Email</label><input id="l-email" className="input" name="email" type="email" autoComplete="username" defaultValue={state.email ?? ""} required autoFocus /></div>
-      <div className="field" style={{ margin: 0 }}><label className="label" htmlFor="l-pw">Password</label><input id="l-pw" className="input" name="password" type="password" autoComplete="current-password" required /></div>
+      <div className="field" style={{ margin: 0 }}>
+        <label className="label" htmlFor="l-email">Email</label>
+        <input
+          id="l-email"
+          className="input"
+          name="email"
+          type="email"
+          autoComplete="username"
+          defaultValue={state.email ?? initialEmail ?? ""}
+          required
+          autoFocus={!initialEmail}
+        />
+      </div>
+      <div className="field" style={{ margin: 0 }}>
+        <label className="label" htmlFor="l-pw">Password</label>
+        <input
+          id="l-pw"
+          className="input"
+          name="password"
+          type="password"
+          autoComplete="current-password"
+          required
+          autoFocus={Boolean(initialEmail)}
+        />
+      </div>
       <button type="submit" className="btn btn-primary btn-block" disabled={pending}>{pending ? "Signing in…" : "Sign in"}</button>
       <p className="muted" style={{ fontSize: 14 }}>First time here, or forgot your password? <Link className="link" href={`/login/start?next=${encodeURIComponent(next)}`}>Set up your password</Link></p>
     </form>

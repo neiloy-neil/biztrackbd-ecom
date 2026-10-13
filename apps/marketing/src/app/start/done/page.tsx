@@ -14,8 +14,13 @@ export default async function Done({ searchParams }: { searchParams: Promise<Rec
   const proto = root.startsWith("localhost") ? "http" : "https";
   const storeUrl = `${proto}://${store}.${root}`;
   const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? "http://localhost:3001";
+  const email = one(sp.email);
   // Sign in with the email and password chosen while opening the store: nobody is signed in on their behalf.
-  const adminEntryUrl = `${adminUrl.replace(/\/$/, "")}/login`;
+  const adminParams = new URLSearchParams({
+    ...(email ? { email } : {}),
+    next: "/?welcome=1",
+  });
+  const adminEntryUrl = `${adminUrl.replace(/\/$/, "")}/login?${adminParams.toString()}`;
   const ends = one(sp.ends) ? new Date(one(sp.ends)!) : null;
   const endsText = ends && !Number.isNaN(ends.getTime()) ? new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Dhaka" }).format(ends) : null;
   const review = one(sp.review) === "1";

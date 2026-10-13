@@ -63,6 +63,7 @@ export async function signupAction(_prev: SignupState, form: FormData): Promise<
   const q = new URLSearchParams({
     store: signed.subdomain,
     name: signed.storeName,
+    email: signed.ownerEmail,
     ends: signed.trialEndsAt.toISOString(),
     plan: signed.plan,
     ...(signed.quarantined ? { review: "1" } : {}),

@@ -79,6 +79,8 @@ export function Wizard({
   const [pw, setPw] = useState("");
   const [pw2, setPw2] = useState("");
   const [busy, setBusy] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendSent, setResendSent] = useState(false);
   const [touchedAddress, setTouchedAddress] = useState(false);
   const [address, setAddress] = useState<{ ok: boolean; message: string } | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
@@ -98,6 +100,15 @@ export function Wizard({
       }
     } catch {}
   }, []);
+
+  // Cooldown countdown for resending verification code
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setInterval(() => {
+      setResendCooldown((c) => (c > 0 ? c - 1 : 0));
+    }, 1000);
+    return () => clearInterval(t);
+  }, [resendCooldown]);
 
   // Suggest an address from the store name until the owner types their own.
   useEffect(() => {
@@ -150,9 +161,25 @@ export function Wizard({
       setBusy(false);
       if (!r.ok) return setProblem(r.error ?? "We could not send the code.");
       setCode("");
+      setResendCooldown(30);
       return setPhase("code");
     }
     setStep(step + 1);
+  }
+
+  async function handleResendCode() {
+    if (resendCooldown > 0 || busy) return;
+    setBusy(true);
+    setProblem(null);
+    const r = await sendCodeAction(v.email, "both").catch(() => ({ ok: false, error: "We could not send the code. Please try again." }));
+    setBusy(false);
+    if (!r.ok) {
+      setProblem(r.error ?? "We could not send the code.");
+      return;
+    }
+    setResendCooldown(30);
+    setResendSent(true);
+    setTimeout(() => setResendSent(false), 3000);
   }
 
   async function confirm() {
@@ -249,8 +276,20 @@ export function Wizard({
                 <span className="label">Type the password again</span>
                 <input className="input" type="password" autoComplete="new-password" value={pw2} onChange={(e) => setPw2(e.target.value)} data-testid="f-password2" />
               </label>
-              <button type="button" className="btn btn-primary btn-lg" onClick={confirm} disabled={busy} data-testid="confirm-email">{busy ? "Checking…" : "Confirm and continue"}</button>
-              <button type="button" className="btn btn-secondary btn-lg" style={{ marginLeft: 10 }} onClick={() => { setProblem(null); setPhase("form"); }}>Change email</button>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", marginTop: 14 }}>
+                <button type="button" className="btn btn-primary btn-lg" onClick={confirm} disabled={busy} data-testid="confirm-email">{busy ? "Checking…" : "Confirm and continue"}</button>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-lg"
+                  onClick={handleResendCode}
+                  disabled={busy || resendCooldown > 0}
+                  data-testid="resend-code"
+                >
+                  {resendCooldown > 0 ? `Resend code (${resendCooldown}s)` : "Resend code"}
+                </button>
+                <button type="button" className="btn btn-secondary btn-lg" onClick={() => { setProblem(null); setPhase("form"); }}>Change email</button>
+                {resendSent && <span style={{ color: "#059669", fontSize: 13.5, fontWeight: 600 }}>✓ Code sent!</span>}
+              </div>
             </div>
           )}
 
@@ -359,7 +398,44 @@ export function Wizard({
                     (address.ok ? (
                       <span className="ok">✓ {v.subdomain}.{displayHost} is available!</span>
                     ) : (
-                      <span className="err">✗ {address.message}</span>
+                      <div>
+                        <span className="err">✗ {address.message}</span>
+                        {address.message.toLowerCase().includes("taken") && (
+                          <div style={{ marginTop: 8, fontSize: 13 }}>
+                            <span className="muted" style={{ marginRight: 6 }}>Available suggestions:</span>
+                            {[
+                              `${v.subdomain}-bd`,
+                              `shop-${v.subdomain}`,
+                              `${v.subdomain}-store`,
+                            ]
+                              .map((s) => s.slice(0, 30))
+                              .map((alt) => (
+                                <button
+                                  key={alt}
+                                  type="button"
+                                  className="chip"
+                                  style={{
+                                    cursor: "pointer",
+                                    marginRight: 6,
+                                    marginTop: 4,
+                                    fontSize: 12.5,
+                                    fontWeight: 600,
+                                    padding: "3px 10px",
+                                    border: "1px solid var(--line, #e2e8f0)",
+                                    borderRadius: 6,
+                                    background: "#fff",
+                                  }}
+                                  onClick={() => {
+                                    setTouchedAddress(true);
+                                    set("subdomain", alt);
+                                  }}
+                                >
+                                  {alt}
+                                </button>
+                              ))}
+                          </div>
+                        )}
+                      </div>
                     ))}
                 </div>
                 <span className="hint">
