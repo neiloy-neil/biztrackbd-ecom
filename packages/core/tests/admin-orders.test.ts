@@ -161,6 +161,33 @@ describe("orders list", () => {
     for (const q of ["%", "_", "%%%%"]) expect((await listOrders(S.f.tenantId, S.owner, { q })).total, q).toBe(0);
   });
 
+  it("filters by risk tab and projects fraud risk level and score", async () => {
+    const S = await store("fraudtab");
+    await place(S.f);
+    const risky = await place(S.f);
+    await owner.order.update({
+      where: { id: risky.orderId },
+      data: { fraudRiskLevel: "HIGH", fraudTrustScore: 32 },
+    });
+    const held = await place(S.f);
+    await owner.order.update({
+      where: { id: held.orderId },
+      data: { fraudReview: "HELD" },
+    });
+
+    const riskOrders = await listOrders(S.f.tenantId, S.owner, { tab: "risk" });
+    expect(riskOrders.total).toBe(2);
+    expect(riskOrders.rows.map((r) => r.id)).toContain(risky.orderId);
+    expect(riskOrders.rows.map((r) => r.id)).toContain(held.orderId);
+
+    const row = riskOrders.rows.find((r) => r.id === risky.orderId)!;
+    expect(row.fraudRiskLevel).toBe("HIGH");
+    expect(row.fraudTrustScore).toBe(32);
+
+    const counts = await orderTabCounts(S.f.tenantId, S.owner);
+    expect(counts.risk).toBe(2);
+  });
+
   it("pages, and never shows another store's orders", async () => {
     const A = await store("pga");
     const B = await store("pgb");

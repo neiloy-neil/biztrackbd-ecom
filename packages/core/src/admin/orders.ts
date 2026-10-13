@@ -14,13 +14,19 @@ import { FLAG_LABELS } from "../fraud/assess";
 
 const actorName = (a: StaffActor) => a.name ?? a.email;
 
-export type OrderTab = "all" | "new" | "check" | "to_pack" | "shipped" | "delivered" | "returns" | "cancelled";
+/** A label is a few lowercase words: "call first", "gift". Trimmed, one space between words, no symbols that break a URL or a CSV. */
+export function cleanTag(raw: string): string {
+  return raw.normalize("NFC").toLowerCase().replace(/[^\p{L}\p{M}\p{N} \-]/gu, "").replace(/\s+/g, " ").trim().slice(0, 24);
+}
 
-/** Tabs on the orders screen. "check" cuts across statuses: orders waiting for the owner to confirm a bKash or Nagad payment. */
+export type OrderTab = "all" | "new" | "check" | "risk" | "to_pack" | "shipped" | "delivered" | "returns" | "cancelled";
+
+/** Tabs on the orders screen. "check" cuts across statuses: orders waiting for the owner to confirm a bKash or Nagad payment. "risk" shows held or high-risk orders. */
 function tabWhere(tab: OrderTab): Prisma.OrderWhereInput {
   switch (tab) {
     case "new": return { status: "PENDING" };
     case "check": return { paymentStatus: "PENDING_VERIFICATION", status: { notIn: ["CANCELLED", "REFUNDED"] } };
+    case "risk": return { OR: [{ fraudRiskLevel: "HIGH" }, { fraudReview: "HELD" }], status: { notIn: ["CANCELLED", "REFUNDED"] } };
     case "to_pack": return { status: { in: ["CONFIRMED", "PROCESSING"] } };
     case "shipped": return { status: "SHIPPED" };
     case "delivered": return { status: "DELIVERED" };
@@ -38,6 +44,8 @@ export interface OrderFilters {
   district?: string;
   /** The courier an order was booked with (STEADFAST, PATHAO, REDX). */
   courier?: string;
+  /** Only orders carrying this label. */
+  tag?: string;
   from?: Date;
   to?: Date;
   page?: number;
@@ -62,6 +70,10 @@ export interface OrderRow {
   trackingCode: string | null;
   /** A Gold or Platinum member's order: packed first. */
   priority: boolean;
+  tags: string[];
+  fraudRiskLevel: "LOW" | "MEDIUM" | "HIGH";
+  fraudTrustScore: number;
+  fraudReview: string | null;
 }
 
 export async function listOrders(tenantId: string, actor: StaffActor, f: OrderFilters = {}): Promise<{ rows: OrderRow[]; total: number; page: number; pageSize: number }> {
@@ -77,6 +89,7 @@ export async function listOrders(tenantId: string, actor: StaffActor, f: OrderFi
     ...tabWhere(f.tab ?? "all"),
     ...(f.payment ? { paymentMethod: f.payment } : {}),
     ...(f.district ? { shippingDistrict: f.district } : {}),
+    ...(f.tag ? { tags: { has: cleanTag(f.tag) } } : {}),
     ...(f.courier === "STEADFAST" || f.courier === "PATHAO" || f.courier === "REDX" ? { courierProvider: f.courier } : {}),
     ...(f.from || f.to ? { createdAt: { ...(f.from ? { gte: f.from } : {}), ...(f.to ? { lt: f.to } : {}) } } : {}),
     ...(q
@@ -102,7 +115,8 @@ export async function listOrders(tenantId: string, actor: StaffActor, f: OrderFi
       rows: rows.map((o) => ({
         id: o.id, orderNumber: o.orderNumber, createdAt: o.createdAt, customerName: o.customerName, customerPhone: o.customerPhone,
         district: o.shippingDistrict, area: o.shippingCity, itemCount: o.items.reduce((n, i) => n + i.quantity, 0), paymentMethod: o.paymentMethod,
-        paymentStatus: o.paymentStatus, status: o.status, totalAmount: Number(o.totalAmount), channel: o.channel, courierProvider: o.courierProvider, trackingCode: o.trackingCode, priority: o.priorityPacking,
+        paymentStatus: o.paymentStatus, status: o.status, totalAmount: Number(o.totalAmount), channel: o.channel, courierProvider: o.courierProvider, trackingCode: o.trackingCode, priority: o.priorityPacking, tags: o.tags,
+        fraudRiskLevel: o.fraudRiskLevel as "LOW" | "MEDIUM" | "HIGH", fraudTrustScore: o.fraudTrustScore, fraudReview: o.fraudReview,
       })),
     };
   });
@@ -110,7 +124,7 @@ export async function listOrders(tenantId: string, actor: StaffActor, f: OrderFi
 
 export async function orderTabCounts(tenantId: string, actor: StaffActor): Promise<Record<OrderTab, number>> {
   assertCan(actor, "orders", "view");
-  const tabs: OrderTab[] = ["all", "new", "check", "to_pack", "shipped", "delivered", "returns", "cancelled"];
+  const tabs: OrderTab[] = ["all", "new", "check", "risk", "to_pack", "shipped", "delivered", "returns", "cancelled"];
   return withTenant(tenantId, async (tx) => {
     const out = {} as Record<OrderTab, number>;
     for (const t of tabs) out[t] = await tx.order.count({ where: { deletedAt: null, ...tabWhere(t) } });
@@ -131,6 +145,8 @@ export interface OrderDetail {
   customerEmail: string | null;
   address: { line: string; area: string; district: string; division: string; zone: string };
   notes: string | null;
+  tags: string[];
+  callNote: string | null;
   totals: { subtotal: number; delivery: number; codFee: number; discount: number; couponCode: string | null; tierDiscount: number; referralDiscount: number; pointsDiscount: number; pointsUsed: number; total: number };
   mfs: { trxId: string | null; sender: string | null; verifiedAt: Date | null; verifiedBy: string | null };
   /** Other orders in this store that used the same TrxID. Placement blocks this, so a hit means something was changed by hand. */
@@ -185,7 +201,7 @@ export async function getOrderDetail(tenantId: string, actor: StaffActor, orderI
       id: o.id, orderNumber: o.orderNumber, status: o.status, paymentStatus: o.paymentStatus, paymentMethod: o.paymentMethod, channel: o.channel, createdAt: o.createdAt,
       customerName: o.customerName, customerPhone: o.customerPhone, customerEmail: o.customerEmail,
       address: { line: o.shippingAddress, area: o.shippingCity, district: o.shippingDistrict, division: o.shippingDivision, zone: o.deliveryZone },
-      notes: o.notes,
+      notes: o.notes, tags: o.tags, callNote: o.callNote,
       totals: { subtotal: Number(o.subtotalAmount), delivery: Number(o.deliveryCharge), codFee: Number(o.codFee), discount: Number(o.discountAmount), couponCode: o.couponCode, tierDiscount: Number(o.tierDiscountBdt), referralDiscount: Number(o.referralDiscountBdt), pointsDiscount: Number(o.loyaltyDiscountBdt), pointsUsed: o.loyaltyPointsUsed, total: Number(o.totalAmount) },
       mfs: { trxId: o.mfsTrxId, sender: o.mfsSenderNumber, verifiedAt: o.mfsVerifiedAt, verifiedBy: o.mfsVerifiedBy },
       trxReuse: reuse,
@@ -355,4 +371,88 @@ export async function recordPrinted(tenantId: string, actor: StaffActor, orderId
       if (o) await recordOrderEvent(tx, tenantId, id, { type: "PRINTED", message: `${doc} printed`, actor: { id: actor.userId, name: actorName(actor) } });
     }
   });
+}
+
+/** Replaces the labels on an order. At most 8, each a few words. */
+export async function setOrderTags(tenantId: string, actor: StaffActor, orderId: string, tags: string[]): Promise<string[]> {
+  assertCan(actor, "orders", "edit");
+  const clean = [...new Set(tags.map(cleanTag).filter(Boolean))].slice(0, 8);
+  await withTenant(tenantId, async (tx) => {
+    const o = await tx.order.findFirst({ where: { id: orderId }, select: { tags: true, orderNumber: true } });
+    if (!o) throw new NotFoundError("Order");
+    if (o.tags.join("|") === clean.join("|")) return;
+    await tx.order.update({ where: { id: orderId }, data: { tags: clean } });
+    await recordOrderEvent(tx, tenantId, orderId, { type: "TAGS", message: clean.length ? `Labels: ${clean.join(", ")}` : "Labels removed", actor: { id: actor.userId, name: actorName(actor) } });
+    await audit(tx, tenantId, actor, "order.tags_changed", { orderNumber: o.orderNumber, count: clean.length });
+  });
+  return clean;
+}
+
+/** The labels this store already uses, most used first, so the owner picks instead of retyping. */
+export async function listOrderTags(tenantId: string, actor: StaffActor): Promise<{ tag: string; count: number }[]> {
+  assertCan(actor, "orders", "view");
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx.$queryRaw<{ tag: string; n: bigint }[]>`SELECT t AS tag, count(*) AS n FROM "Order", unnest("tags") AS t WHERE "deletedAt" IS NULL GROUP BY t ORDER BY n DESC, t LIMIT 40`;
+    return rows.map((r) => ({ tag: r.tag, count: Number(r.n) }));
+  });
+}
+
+/** What was said on the confirmation call. Shown on the order and on the packing slip so the packer sees it. */
+export async function setCallNote(tenantId: string, actor: StaffActor, orderId: string, text: string): Promise<void> {
+  assertCan(actor, "orders", "edit");
+  const note = text.trim().slice(0, 500) || null;
+  await withTenant(tenantId, async (tx) => {
+    const o = await tx.order.findFirst({ where: { id: orderId }, select: { callNote: true } });
+    if (!o) throw new NotFoundError("Order");
+    if ((o.callNote ?? null) === note) return;
+    await tx.order.update({ where: { id: orderId }, data: { callNote: note } });
+    await recordOrderEvent(tx, tenantId, orderId, { type: "CALL_NOTE", message: note ? `Call note: ${note}` : "Call note cleared", actor: { id: actor.userId, name: actorName(actor) } });
+  });
+}
+
+/** Confirms or cancels many orders at once. Orders that cannot make the move are skipped and reported, never half done. */
+export async function bulkChangeStatus(
+  tenantId: string, actor: StaffActor, orderIds: string[], to: "CONFIRMED" | "CANCELLED", reason?: string,
+): Promise<{ done: string[]; skipped: { id: string; reason: string }[] }> {
+  assertCan(actor, "orders", "edit");
+  if (to === "CANCELLED" && (reason?.trim().length ?? 0) < 3) throw new ValidationError("Say briefly why you are cancelling, for example: customer asked");
+  const done: string[] = [];
+  const skipped: { id: string; reason: string }[] = [];
+  for (const id of [...new Set(orderIds)].slice(0, 100)) {
+    try {
+      await transitionOrder(tenantId, id, to, { type: "MERCHANT", id: actor.userId, name: actorName(actor) }, to === "CANCELLED" ? reason!.trim().slice(0, 150) : "confirmed");
+      done.push(id);
+    } catch (e) {
+      skipped.push({ id, reason: e instanceof Error ? e.message : "failed" });
+    }
+  }
+  return { done, skipped };
+}
+
+/** Orders as a spreadsheet, for the same filters as the list. One row per item, so the packer or the accountant can sort by product. */
+export async function ordersCsv(tenantId: string, actor: StaffActor, f: OrderFilters = {}): Promise<string> {
+  assertCan(actor, "orders", "view");
+  const out: string[] = [];
+  const cell = (v: string | number | null | undefined) => {
+    let t = v == null ? "" : String(v);
+    // A cell starting with = + - @ is run as a formula by spreadsheets. Prefix a quote so customer-typed text cannot execute.
+    if (/^[=+\-@\t\r]/.test(t)) t = `'${t}`;
+    return `"${t.replace(/"/g, '""')}"`;
+  };
+  out.push(["Order", "Date", "Status", "Payment method", "Payment status", "Customer", "Phone", "District", "Area", "Address", "Product", "Variant", "SKU", "Quantity", "Unit price", "Order total", "Courier", "Tracking", "Labels", "Call note"].map(cell).join(","));
+  for (let page = 1; page <= 100; page++) {
+    const list = await listOrders(tenantId, actor, { ...f, page, pageSize: 100 });
+    if (list.rows.length === 0) break;
+    const ids = list.rows.map((r) => r.id);
+    const full = await withTenant(tenantId, (tx) => tx.order.findMany({ where: { id: { in: ids } }, include: { items: true }, orderBy: { createdAt: "desc" } }));
+    for (const o of full) {
+      const base = [o.orderNumber, o.createdAt.toISOString().slice(0, 10), o.status, o.paymentMethod, o.paymentStatus, o.customerName, o.customerPhone, o.shippingDistrict, o.shippingCity, o.shippingAddress];
+      const tail = [Number(o.totalAmount), o.courierProvider, o.trackingCode, o.tags.join("; "), o.callNote];
+      const items = o.items.length ? o.items : [null];
+      for (const i of items) out.push([...base, i?.productTitle, i?.variantTitle, i?.sku, i?.quantity, i ? Number(i.unitPrice) : null, ...tail].map(cell).join(","));
+    }
+    if (list.rows.length < 100) break;
+  }
+  return out.join("\r\n");
+
 }

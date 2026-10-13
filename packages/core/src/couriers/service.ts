@@ -109,6 +109,7 @@ export interface BookOptions {
   provider: string;
   weightGrams?: number;
   note?: string;
+  skipHighRisk?: boolean;
 }
 
 export interface Booked {
@@ -143,6 +144,9 @@ export async function bookCourier(tenantId: string, actor: StaffActor, orderId: 
     }
     if (o.consignmentId) throw new ValidationError(`Already booked with ${o.courierProvider ?? "a courier"} (${o.trackingCode ?? o.consignmentId})`);
     if (o.fraudReview === "HELD") throw new ValidationError("This order is held for review. Call the customer, then release the hold.");
+    if (opts.skipHighRisk && o.fraudRiskLevel === "HIGH" && o.fraudReview !== "CLEARED") {
+      throw new ValidationError("High risk order. Review customer delivery trust before booking.");
+    }
     if (o.paymentMethod !== "COD" && o.paymentStatus !== "PAID") throw new ValidationError("Confirm the payment before booking a courier");
 
     const n = await tx.$executeRaw`
@@ -221,7 +225,7 @@ export async function bookCouriers(
   const skipped: { id: string; reason: string }[] = [];
   for (const id of [...new Set(orderIds)].slice(0, 50)) {
     try {
-      done.push(await bookCourier(tenantId, actor, id, opts));
+      done.push(await bookCourier(tenantId, actor, id, { ...opts, skipHighRisk: true }));
     } catch (e) {
       skipped.push({ id, reason: e instanceof Error ? e.message : "failed" });
     }
