@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { DomainError, DraftConflictError, activateTheme, applyTemplateUpdate, discardDraft, publish, rollback, saveDraft } from "@biztrackbd/core";
+import { DomainError, DraftConflictError, activateTheme, applyTemplateUpdate, discardChromeDraft, publishChrome, rollbackChrome, saveChromeDraft, discardDraft, publish, rollback, saveDraft } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 
 export type EditResult = { ok: true; version?: number; stamp?: string } | { ok: false; error: string; conflict?: { stamp: string | null } };
@@ -74,4 +74,50 @@ export async function applyTemplateUpdateAction(): Promise<void> {
   }
   revalidatePath("/design");
   redirect("/design?note=applied");
+}
+
+// ---- The header and footer (docs/47 part C): the same draft, publish and go-back steps as a page.
+
+/** Autosave from the header and footer editor. The record is checked again on the server, so a draft is always publishable. */
+export async function saveChromeAction(chrome: unknown, stamp?: string | null): Promise<EditResult> {
+  const s = await requireAction("design", "edit");
+  try {
+    const saved = await saveChromeDraft(s.tenantId, s.actor, chrome, stamp === undefined ? undefined : { stamp });
+    return { ok: true, stamp: saved.stamp };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+export async function publishChromeAction(label: string): Promise<EditResult> {
+  const s = await requireAction("design", "edit");
+  try {
+    const version = await publishChrome(s.tenantId, s.actor, label);
+    revalidatePath("/design");
+    return { ok: true, version };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+export async function discardChromeAction(): Promise<EditResult> {
+  const s = await requireAction("design", "edit");
+  try {
+    await discardChromeDraft(s.tenantId, s.actor);
+    revalidatePath("/design");
+    return { ok: true };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+export async function rollbackChromeAction(version: number): Promise<EditResult> {
+  const s = await requireAction("design", "edit");
+  try {
+    const next = await rollbackChrome(s.tenantId, s.actor, version);
+    revalidatePath("/design");
+    return { ok: true, version: next };
+  } catch (e) {
+    return fail(e);
+  }
 }

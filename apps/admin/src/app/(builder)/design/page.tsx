@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { can, createPreviewToken, getBuilderAccess, listVersions, loadForEdit, templateUpdateAvailable } from "@biztrackbd/core";
+import { can, createPreviewToken, getBuilderAccess, listCategories, listChromeVersions, listFooterPages, listVersions, loadChromeForEdit, loadForEdit, templateUpdateAvailable } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
 import { applyTemplateUpdateAction } from "./actions";
 import { requireAccess } from "@/lib/session";
 import { storefrontOrigin } from "@/lib/store-url";
 import { Builder } from "./builder";
+import { ChromeEditor } from "./chrome-editor";
 import { ThemePicker } from "./theme-picker";
 
 export const dynamic = "force-dynamic";
@@ -18,11 +19,36 @@ const PAGES = [
   { key: "collection", label: "Collection page" },
   { key: "cart", label: "Cart page" },
 ] as const;
+// Every page of the editor's switcher, including the header and footer (which are not a page of sections).
+const PAGE_CHOICES = [...PAGES.map((p) => ({ key: p.key as string, label: p.label as string })), { key: "chrome", label: "Header and footer" }];
 
 export default async function Design({ searchParams }: { searchParams: Promise<{ page?: string; note?: string }> }) {
   const { page, note } = await searchParams;
   const pageKey = PAGES.find((p) => p.key === page)?.key ?? "home";
   const s = await requireAccess("design");
+  if (page === "chrome") {
+    const [state, versions, categories, pages] = await Promise.all([loadChromeForEdit(s.tenantId, s.actor), listChromeVersions(s.tenantId, s.actor), listCategories(s.tenantId), listFooterPages(s.tenantId)]);
+    const origin = storefrontOrigin(s.tenantSubdomain);
+    return (
+      <ChromeEditor
+        key={`${state.publishedVersion}-${state.isDraft}-${versions.length}-${state.stamp}`}
+        initial={state.chrome}
+        stamp={state.stamp}
+        hasDraft={state.isDraft}
+        unpublished={state.unpublished}
+        publishedVersion={state.publishedVersion}
+        versions={versions.map((v) => ({ version: v.version, label: v.label, createdAt: v.createdAt.toISOString(), isLive: v.isLive }))}
+        editable={state.editable}
+        canEdit={can(s.user.role, "design", "edit")}
+        previewUrl={`${origin}/chrome-preview?token=${createPreviewToken(s.tenantId)}`}
+        previewOrigin={origin}
+        liveUrl={origin}
+        categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
+        pages={pages}
+        pageChoices={PAGE_CHOICES}
+      />
+    );
+  }
   const [state, versions, access] = await Promise.all([loadForEdit(s.tenantId, s.actor, pageKey), listVersions(s.tenantId, s.actor, pageKey), getBuilderAccess(s.tenantId)]);
   const origin = storefrontOrigin(s.tenantSubdomain);
   const canEdit = can(s.user.role, "design", "edit");
@@ -48,7 +74,7 @@ export default async function Design({ searchParams }: { searchParams: Promise<{
       pageKey={pageKey}
       kind={state.kind}
       title={pageKey === "home" ? "Store design" : label}
-      pages={PAGES.map((p) => ({ key: p.key, label: p.label }))}
+      pages={PAGE_CHOICES}
       initialPage={state.page}
       initialTheme={state.theme}
       hasDraft={state.isDraft}

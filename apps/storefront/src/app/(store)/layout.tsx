@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getStorefrontTracking, getPointsSummary, listCategories, getStoreInfo, listFooterPages, listPublishedPosts } from "@biztrackbd/core";
+import { getLiveChrome, getStorefrontTracking, getPointsSummary, listCategories, getStoreInfo, listFooterPages, listPublishedPosts } from "@biztrackbd/core";
 import { CartProvider } from "@/components/cart-provider";
 import { Footer } from "@/components/footer";
 import { Announcement, Header } from "@/components/header";
@@ -39,6 +39,8 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   const t = makeT(lang);
   const session = await getCustomerSession(store.id);
   const [footerPages, blog] = await Promise.all([listFooterPages(store.id), listPublishedPosts(store.id, { pageSize: 1 })]);
+  // The header and footer the merchant built and published (docs/47 part C). None: today's header and footer.
+  const chrome = await getLiveChrome(store.id).catch(() => null);
   const [info, categories, tracking, points] = await Promise.all([
     getStoreInfo(store.id),
     listCategories(store.id),
@@ -51,11 +53,11 @@ export default async function StoreLayout({ children }: { children: React.ReactN
       {store.isDemo && <DemoRibbon themeId={store.themeId} lang={lang} />}
       <StorefrontTracker tracking={tracking} />
       {info.ordersPaused && <PausedBanner t={t} />}
-      <Announcement info={info} lang={lang} />
+      <Announcement info={info} lang={lang} chrome={chrome} />
       <ReferralBanner tenantId={store.id} lang={lang} t={t} />
-      <Header info={info} categories={categories} lang={lang} t={t} points={points} />
+      <Header info={info} categories={categories} lang={lang} t={t} points={points} chrome={chrome} />
       <main id="main">{children}</main>
-      <Footer info={info} categories={categories} lang={lang} t={t} pages={footerPages} hasBlog={blog.total > 0} />
+      <Footer info={info} categories={categories} lang={lang} t={t} pages={footerPages} hasBlog={blog.total > 0} chrome={chrome} />
     </CartProvider>
   );
 }

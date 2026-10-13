@@ -110,3 +110,6 @@ details.bld-group[open] > summary.bld-gh::after { transform: rotate(180deg); }
   .bld[data-visual][data-sheet="open"] .bld-right { transform: translateY(0); }
   .bld[data-visual] .bld-handle { display: flex; }
 }
+
+/* ---- The header and footer editor: the store's header and footer on the left, the choices on the right (docs/47 part C) */
+@media (min-width: 900px) { .bld-body.bld-body-chrome { grid-template-columns: minmax(0, 1fr) minmax(320px, 440px); } }

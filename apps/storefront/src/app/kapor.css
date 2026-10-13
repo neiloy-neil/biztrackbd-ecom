@@ -76,6 +76,22 @@ h1, h2, h3, p { margin: 0; }
   .search-pill input { border: 0; background: none; outline: none; width: 100%; font-size: 13px; }
 }
 
+/* ---- Header options a merchant chose in the header and footer builder (docs/47 part C). Without them the header is exactly as above. */
+.header-right { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.header[data-sticky="off"] { position: static; }
+@media (min-width: 900px) {
+  .header-right { gap: 8px; }
+  .header[data-logo="center"] .bar { display: grid; grid-template-columns: 1fr auto 1fr; }
+  .header[data-logo="center"] .nav-desktop { order: 1; justify-content: flex-start; flex: none; }
+  .header[data-logo="center"] .logo { order: 2; text-align: center; }
+  .header[data-logo="center"] .header-right { order: 3; justify-self: end; }
+  .header[data-logo="stacked"] .bar { flex-wrap: wrap; height: auto; padding-top: 12px; padding-bottom: 8px; row-gap: 6px; }
+  .header[data-logo="stacked"] .logo { order: 1; flex: 0 0 100%; text-align: center; }
+  .header[data-logo="stacked"] .logo img { margin: 0 auto; }
+  .header[data-logo="stacked"] .nav-desktop { order: 2; flex: 1; }
+  .header[data-logo="stacked"] .header-right { order: 3; }
+}
+
 /* ---- Buttons and fields */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 28px; border-radius: 6px; border: 1.5px solid transparent; font-size: 15px; font-weight: 700; cursor: pointer; text-align: center; }
 .btn-primary { background: var(--accent); color: var(--accent-ink); }
@@ -180,7 +196,7 @@ h1, h2, h3, p { margin: 0; }
 /* ---- Footer */
 .footer { margin-top: 56px; background: var(--ink); color: var(--hero); padding: 40px 0 24px; }
 .footer .cols { display: grid; gap: 28px; grid-template-columns: 1fr; }
-@media (min-width: 700px) { .footer .cols { grid-template-columns: 2fr 1fr 1fr; } }
+@media (min-width: 700px) { .footer .cols { grid-template-columns: var(--cols, 2fr 1fr 1fr); } }
 .footer b { color: #fff; display: block; margin-bottom: 8px; }
 .footer .brand { font-size: 20px; font-weight: 800; letter-spacing: 3px; color: #fff; }
 .footer a { display: block; line-height: 2; font-size: 14px; }
