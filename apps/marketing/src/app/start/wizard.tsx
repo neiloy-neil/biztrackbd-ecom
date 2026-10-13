@@ -16,6 +16,8 @@ interface Theme {
   name: string;
   blurb: string;
   live: boolean;
+  /** The original template whose pictures stand in for this one (a published template is drawn on one of the originals' looks). */
+  look?: string;
 }
 
 const STEPS = ["You", "Your store", "Address", "Template and plan", "Create"] as const;
@@ -579,7 +581,7 @@ export function Wizard({
             }}
           >
             <Image
-              src={`/templates/${v.theme}.webp`}
+              src={`/templates/${chosenTheme?.look ?? v.theme}.webp`}
               alt={`${chosenTheme?.name} preview`}
               fill
               sizes="340px"
@@ -599,7 +601,7 @@ export function Wizard({
               }}
             >
               <Image
-                src={`/templates/${v.theme}-phone.webp`}
+                src={`/templates/${chosenTheme?.look ?? v.theme}-phone.webp`}
                 alt={`${chosenTheme?.name} phone preview`}
                 fill
                 sizes="90px"

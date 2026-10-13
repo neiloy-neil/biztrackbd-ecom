@@ -4,7 +4,8 @@ import { createOwnerClient, createTenantFixture, resetDatabase, seedPlans, testU
 
 let report: RlsReport;
 // Read by every store on purpose: the plan catalogue, platform announcements, and the Tenant row (which has its own policy: a store sees only itself).
-const PLATFORM_READABLE = ["Plan", "Announcement", "Tenant"];
+// Template: the published store templates (the signup, the gallery and the editor read them); a row-level policy hides drafts.
+const PLATFORM_READABLE = ["Plan", "Announcement", "Template", "Tenant"];
 const urls = testUrls();
 
 beforeAll(async () => {

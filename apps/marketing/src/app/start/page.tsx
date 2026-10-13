@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { THEMES, listPublicPlans, readKeptStore, verificationRequired } from "@biztrackbd/core";
+import { THEMES, listPublicPlans, listPublishedTemplates, readKeptStore, verificationRequired } from "@biztrackbd/core";
 import { planBullets } from "@/lib/plans";
 import { Wizard } from "./wizard";
 
@@ -28,8 +28,10 @@ export default async function Start({
   // Coming from a demo: its store comes with the visitor, in the template they were trying.
   const from = typeof sp.from === "string" ? sp.from.slice(0, 120) : "";
   const kept = from ? await readKeptStore(from).catch(() => null) : null;
-  const initialTheme =
-    THEMES.find((t) => t.id === (kept?.template || wantedTheme) && t.live)?.id ?? "kapor";
+  // The templates on offer are the published list (the originals plus any staff have published). If it cannot be read, the originals still work.
+  const templates = await listPublishedTemplates().catch(() => []);
+  const offered = templates.length > 0 ? templates.map((t) => ({ id: t.id, name: t.name, blurb: t.blurb, live: true, look: t.baseLook })) : THEMES.map((t) => ({ id: t.id, name: t.name, blurb: t.blurb, live: t.live, look: t.id }));
+  const initialTheme = offered.find((t) => t.id === (kept?.template || wantedTheme) && t.live)?.id ?? offered[0]?.id ?? "kapor";
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
 
   return (
@@ -40,7 +42,7 @@ export default async function Start({
       rootDomain={rootDomain}
       initialPlan={initialPlan}
       initialTheme={initialTheme}
-      themes={THEMES.map((t) => ({ id: t.id, name: t.name, blurb: t.blurb, live: t.live }))}
+      themes={offered}
       plans={plans.map((p) => ({
         tier: p.tier,
         name: p.name,

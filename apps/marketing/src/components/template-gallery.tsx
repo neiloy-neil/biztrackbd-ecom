@@ -100,13 +100,17 @@ const CATEGORIES: { id: CategoryFilter; label: string; count: number }[] = [
   { id: "beauty", label: "Beauty", count: 1 },
 ];
 
-export function TemplateGallery() {
+/** A template staff published without a deploy: it has no screenshots, so its card shows its colours instead. */
+export interface PublishedGalleryTheme extends GalleryTheme {
+  colors: { accent: string; background: string; text: string };
+}
+
+export function TemplateGallery({ extra = [], hidden = [] }: { extra?: PublishedGalleryTheme[]; /** Original templates staff have taken down. */ hidden?: string[] }) {
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>("all");
 
-  const filtered =
-    activeCategory === "all"
-      ? TEMPLATES_DATA
-      : TEMPLATES_DATA.filter((t) => t.category === activeCategory);
+  const all: (GalleryTheme & { colors?: PublishedGalleryTheme["colors"] })[] = [...TEMPLATES_DATA.filter((t) => !hidden.includes(t.id)), ...extra];
+  const filtered = activeCategory === "all" ? all : all.filter((t) => t.category === activeCategory);
+  const categories = CATEGORIES.map((c) => ({ ...c, count: c.id === "all" ? all.length : all.filter((t) => t.category === c.id).length })).filter((c) => c.id === "all" || c.count > 0);
 
   return (
     <>
@@ -128,7 +132,7 @@ export function TemplateGallery() {
             alignItems: "center",
           }}
         >
-          {CATEGORIES.map((cat) => {
+          {categories.map((cat) => {
             const isActive = activeCategory === cat.id;
             return (
               <button
@@ -208,14 +212,21 @@ export function TemplateGallery() {
                   border: "1px solid var(--line)",
                 }}
               >
-                <Image
-                  src={`/templates/${t.id}.webp`}
-                  alt={`${t.name} template home page`}
-                  fill
-                  sizes="(min-width: 900px) 33vw, 100vw"
-                  style={{ objectFit: "cover", objectPosition: "top" }}
-                />
-                <div
+                {t.colors ? (
+                  <div aria-hidden style={{ position: "absolute", inset: 0, background: t.colors.background, display: "grid", alignContent: "center", justifyItems: "center", gap: 12, color: t.colors.text }}>
+                    <b style={{ fontSize: 26, letterSpacing: "-.5px" }}>{t.name}</b>
+                    <span style={{ padding: "8px 22px", borderRadius: 99, background: t.colors.accent, color: "#fff", fontWeight: 700, fontSize: 14 }}>Shop now</span>
+                  </div>
+                ) : (
+                  <Image
+                    src={`/templates/${t.id}.webp`}
+                    alt={`${t.name} template home page`}
+                    fill
+                    sizes="(min-width: 900px) 33vw, 100vw"
+                    style={{ objectFit: "cover", objectPosition: "top" }}
+                  />
+                )}
+                {!t.colors && <div
                   style={{
                     position: "absolute",
                     right: 12,
@@ -235,7 +246,7 @@ export function TemplateGallery() {
                     sizes="110px"
                     style={{ objectFit: "cover", objectPosition: "top" }}
                   />
-                </div>
+                </div>}
               </div>
 
               {/* Title and Description */}
@@ -306,7 +317,7 @@ export function TemplateGallery() {
                   borderTop: "1px solid var(--line)",
                 }}
               >
-                <a
+                {!t.colors && <a
                   href={demoStoreUrl}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -315,7 +326,7 @@ export function TemplateGallery() {
                   data-testid={`demo-${t.id}`}
                 >
                   Live demo ↗
-                </a>
+                </a>}
                 <Link
                   href={`/start?theme=${t.id}`}
                   className="btn btn-primary btn-sm"

@@ -104,3 +104,13 @@ Today templates are mostly code (`STORE_THEMES`) with merchant edits stored per 
 - Whether the order form may also offer bKash and Nagad later (decided: COD only for now).
 - Whether the rolling countdown ("this offer ends in 23:59:59") is acceptable. It is common in these pages but can mislead customers if the offer does not really end. Proposed: only a real end date set by the merchant.
 - Rights: the sample bundle's pictures and copy are not reused. If you own the bundle and want its pictures, say so and we can import them for your own demo store only.
+
+## 10. Stage 5 as built: templates published without a deploy (13 October 2026)
+Decisions (owner): a template changes colours, fonts, corners, the page layouts and the gallery text on one of the six original looks; new templates are built in a workshop store and published from the platform admin; platform staff only; stores already using a template are offered a newer version and choose when to take it.
+- **Data**: `Template` (platform table: published and archived rows readable by the store apps, drafts private) and `Tenant.templateId / templateVersion`. Migration `20261023000025_templates`.
+- **The six originals stay in code.** A published row with the same id replaces one (version 2 and up); an archived row hides it. Nothing needs seeding.
+- **Publish**: platform admin, Themes and modules, "Publish a template from a store". It takes what is live in that store (colours, home, product, collection, cart). Publishing the same id again makes the next version. Owner role only.
+- **New stores**: the signup accepts any published template id; its pages go live at once and the store remembers the template and version.
+- **Updates**: the store's design screen offers "Put it in my drafts". The new layouts land as drafts only; a plan that can only restyle gets the colours but keeps its sections. Nothing changes on the live store until the owner publishes.
+- **Public gallery and signup wizard** list the published templates. A new template has no screenshots, so its card shows its colours; it has no live demo store and no private admin demo yet.
+- **Not in this stage**: a template editor inside the platform admin (the workshop store is the editor), preview pictures uploaded for a template, a private admin demo for published templates, switching an existing store to a different template (only updates to its own).

@@ -81,6 +81,8 @@ export {
 } from "./finance/profit";
 export { accessState, statusFor, addPeriod, ACCESS_LABELS, GRACE_DAYS, READ_ONLY_UNTIL_DAY, type AccessState, type Access, type AccessInput } from "./platform/lifecycle";
 export { scanBrandRisk } from "./platform/brand";
+export * from "./platform/templates";
+export { installTemplatePages } from "./builder/versions";
 export { createEmailProof, emailProofValid, sendSignupCode, confirmSignupEmail, verificationRequired, type ConfirmedEmail } from "./platform/signup-verify";
 export { signupStore, checkSubdomain, SignupInput, THEMES, SUBDOMAIN_MESSAGES, type SignedUp, type SubdomainCheck } from "./platform/signup";
 export {

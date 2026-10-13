@@ -212,6 +212,38 @@ async function writePublished(tx: TenantTx, tenantId: string, themeId: ThemeId, 
   return version;
 }
 
+/**
+ * Puts a template's page layouts into a store (docs/46 stage 5). "publish" makes them live at once (a new store); "draft" leaves them as drafts
+ * for the owner to look at in the editor and publish (an existing store taking a newer version of its template). The plan decides how much
+ * a store may rearrange: below its level a page's sections stay as they are, and only the colours and style are taken. Returns the pages written.
+ */
+export async function installTemplatePages(
+  tx: TenantTx, tenantId: string, themeId: ThemeId, tpl: { settings: ThemeSettings; pages: Partial<Record<PageKind, PageJson>> }, mode: "publish" | "draft", createdBy: string,
+): Promise<string[]> {
+  const tier = await builderTier(tx);
+  const actor = { userId: createdBy } as StaffActor;
+  const written: string[] = [];
+  for (const kind of STORE_PAGE_KINDS) {
+    const allowed = kind === HOME_KEY ? tier !== "settings" : tier === "all";
+    let page: PageJson | undefined = allowed ? tpl.pages[kind] : undefined;
+    // The home page carries the colours and style, so it is always written; with sections the plan does not allow, it keeps what it had.
+    if (!page && kind === HOME_KEY) {
+      const live = await latestPublished(tx, themeId, HOME_KEY);
+      page = live ? asPage(kind, live.sectionsJson) : defaultPageFor(kind);
+    }
+    if (!page) continue;
+    const theme = kind === HOME_KEY ? tpl.settings : await storeTheme(tx, themeId, mode === "draft");
+    if (mode === "publish") await writePublished(tx, tenantId, themeId, actor, kind, page, theme, null);
+    else {
+      const existing = await draftRow(tx, themeId, kind);
+      if (existing) await tx.themeVersion.update({ where: { id: existing.id }, data: { sectionsJson: page as object, settings: theme as object, createdBy } });
+      else await tx.themeVersion.create({ data: { tenantId, themeId, pageKey: kind, state: "DRAFT", version: 0, settings: theme as object, sectionsJson: page as object, createdBy } });
+    }
+    written.push(kind);
+  }
+  return written;
+}
+
 /** Makes the draft live. Returns the new version number. */
 export async function publish(tenantId: string, actor: StaffActor, pageKey: string, label?: string): Promise<number> {
   assertCan(actor, "design", "edit");

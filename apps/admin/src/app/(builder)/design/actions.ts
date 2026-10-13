@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { DomainError, DraftConflictError, activateTheme, discardDraft, publish, rollback, saveDraft } from "@biztrackbd/core";
+import { redirect } from "next/navigation";
+import { DomainError, DraftConflictError, activateTheme, applyTemplateUpdate, discardDraft, publish, rollback, saveDraft } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 
 export type EditResult = { ok: true; version?: number; stamp?: string } | { ok: false; error: string; conflict?: { stamp: string | null } };
@@ -60,4 +61,17 @@ export async function activateThemeAction(form: FormData): Promise<void> {
   await activateTheme(s.tenantId, s.actor, form.get("themeId"));
   revalidatePath("/design");
   revalidatePath("/", "layout");
+}
+
+/** Takes the newer version of the store's template as drafts. Nothing goes live until the owner publishes each page from the editor. */
+export async function applyTemplateUpdateAction(): Promise<void> {
+  const s = await requireAction("design", "edit");
+  try {
+    await applyTemplateUpdate(s.tenantId, s.actor);
+  } catch (e) {
+    if (e instanceof DomainError) redirect(`/design?note=${encodeURIComponent(e.message)}`);
+    throw e;
+  }
+  revalidatePath("/design");
+  redirect("/design?note=applied");
 }

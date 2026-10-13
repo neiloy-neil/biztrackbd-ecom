@@ -3,7 +3,8 @@ import { copyKeptPage, copyKeptPictures, finishKeep, keptPageJson, keptPictureUr
 import { randomUUID } from "node:crypto";
 import { Prisma, getBasePrisma, withTenant } from "@biztrackbd/db";
 import { z } from "zod";
-import { STORE_THEMES, validateThemeId } from "../builder/theme";
+import { STORE_THEMES } from "../builder/theme";
+import { installTemplateForNewStore, resolveTemplateForSignup } from "./templates";
 import { audit } from "../audit/service";
 import { DomainError, ValidationError } from "../errors";
 import { publishEvent } from "../events";
@@ -31,7 +32,8 @@ export const SignupInput = z.object({
   storeName: z.string().trim().min(2, "Enter your store name").max(60),
   subdomain: z.string().trim().toLowerCase(),
   plan: z.enum(["STARTER", "PRO", "BUSINESS"]).default("PRO"),
-  theme: z.enum(["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu", "berber"]).default("kapor"),
+  // A template id: one of the original six, or any template staff have published (docs/46 stage 5). Checked against the published list below.
+  theme: z.string().trim().toLowerCase().min(2).max(40).default("kapor"),
   tagline: z.string().trim().max(120).optional(),
   locale: z.enum(["bn-BD", "en-US"]).default("bn-BD"),
   demoData: z.boolean().default(true),
@@ -88,7 +90,9 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
   } catch {
     throw new ValidationError("Enter a valid Bangladeshi mobile number, like 01712345678", { field: "phone" });
   }
-  validateThemeId(input.theme);
+  const chosen = await resolveTemplateForSignup(input.theme);
+  // Everything about how the store is drawn follows the template's look; the template itself is remembered on the store.
+  const look = chosen.baseLook;
   const sub = validateSubdomain(input.subdomain);
   if (!sub.ok) throw new ValidationError(SUBDOMAIN_MESSAGES[sub.reason]!, { field: "subdomain" });
 
@@ -99,7 +103,7 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
 
   const id = randomUUID();
   try {
-    await base.$queryRaw`SELECT signup_create_tenant(${id}, ${input.storeName}, ${sub.label}, ${input.theme}, ${input.plan}::"PlanTier", ${input.ownerName}, ${input.email}, ${phone}, ${plan.trialDays}, ${brand !== null}, ${brand ? `Name or address contains "${brand}"` : null}, ${MAX_STORES_PER_EMAIL})`;
+    await base.$queryRaw`SELECT signup_create_tenant(${id}, ${input.storeName}, ${sub.label}, ${look}, ${input.plan}::"PlanTier", ${input.ownerName}, ${input.email}, ${phone}, ${plan.trialDays}, ${brand !== null}, ${brand ? `Name or address contains "${brand}"` : null}, ${MAX_STORES_PER_EMAIL})`;
   } catch (e) {
     const m = failureOf(e);
     if (m.includes("subdomain taken")) throw new ValidationError(SUBDOMAIN_MESSAGES.taken!, { field: "subdomain" });
@@ -121,7 +125,7 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
   }
 
   // Sample products that fit the chosen template (docs/38). Pictures are made first because they are stored under the store's id.
-  const template = input.demoData && !kept ? demoTemplate(input.theme) : undefined;
+  const template = input.demoData && !kept ? demoTemplate(look) : undefined;
   let samples: { template: NonNullable<typeof template>; urls: Map<string, string> } | null = null;
   try {
     if (template) {
@@ -145,15 +149,16 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
           { tenantId: id, name: "Outside Dhaka", districts: ["*"], rate: 130, freeOverAmount: 5000, etaMinDays: 3, etaMaxDays: 4 },
         ],
       });
-      await tx.themeInstall.create({ data: { tenantId: id, themeId: input.theme, isActive: true, pagesJson: {}, settings: {} } });
+      await tx.themeInstall.create({ data: { tenantId: id, themeId: look, isActive: true, pagesJson: {}, settings: {} } });
       await tx.subscription.create({
         data: { tenantId: id, planTier: input.plan, interval: "MONTHLY", status: "TRIALING", amount: 0, currentPeriodStart: tenant.trialStartsAt, currentPeriodEnd: tenant.trialEndsAt },
       });
       const owner = await tx.tenantUser.create({ data: { tenantId: id, email: input.email, name: input.ownerName, phone, role: "STORE_OWNER", passwordHash: EXTERNAL_AUTH } });
+      await installTemplateForNewStore(tx, id, chosen.info, owner.id);
       let keptCount = 0;
       if (kept) keptCount = await writeKeptCatalog(tx, id, kept, keptPictures);
       else if (input.demoData && samples) await seedCatalog(tx, id, samples.template, samples.urls, { sample: true });
-      await audit(tx, id, { userId: owner.id, email: owner.email }, "store.created", { plan: input.plan, theme: input.theme, demoData: input.demoData, quarantined: brand !== null });
+      await audit(tx, id, { userId: owner.id, email: owner.email }, "store.created", { plan: input.plan, theme: look, template: chosen.info.id, demoData: input.demoData, quarantined: brand !== null });
       return { tenantId: id, subdomain: sub.label, storeName: input.storeName, plan: input.plan, trialEndsAt: tenant.trialEndsAt, quarantined: brand !== null, kept: keptCount, ownerId: owner.id, ownerEmail: owner.email, ownerName: owner.name };
     });
     let keptPage = false;

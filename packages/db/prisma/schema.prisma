@@ -60,6 +60,9 @@ model Tenant {
   status           TenantStatus @default(TRIAL)
   planTier         PlanTier     @default(STARTER)
   themeId          String       @default("kapor")
+  // The template this store was started from or last updated to (docs/46 stage 5), and the version it has. Null: built from one of the original looks, untouched.
+  templateId       String?
+  templateVersion  Int?
   locale           String       @default("bn-BD")
   currency         String       @default("BDT")
   timezone         String       @default("Asia/Dhaka")
@@ -1183,6 +1186,33 @@ model AuditLog {
 // ==========================================
 
 // PLATFORM-LEVEL (no tenantId). Limits live here, never in code (docs/05: prices and limits are hypotheses).
+// A store template that BizTrackBD staff publish without a deploy (docs/46 stage 5): a colour and style preset plus a layout for each page,
+// on top of one of the original "looks" (baseLook, the CSS a template is drawn with). The six original templates exist in code; a row with the
+// same id replaces one of them. Platform table: stores may read published and archived rows, only the platform role writes.
+model Template {
+  id             String    @id
+  name           String
+  blurb          String    @default("")
+  audience       String    @default("")
+  baseLook       String
+  category       String    @default("other")
+  tags           String[]  @default([])
+  moduleLabel    String?
+  // DRAFT | PUBLISHED | ARCHIVED
+  status         String    @default("DRAFT")
+  version        Int       @default(1)
+  settingsJson   Json
+  // { home, product, collection, cart }: each a page layout (see builder registry)
+  pagesJson      Json
+  // The workshop store it was last published from
+  sourceTenantId String?
+  publishedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([status])
+}
+
 model Plan {
   tier            PlanTier @id
   name            String
