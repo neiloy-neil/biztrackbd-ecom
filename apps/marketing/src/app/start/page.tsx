@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { THEMES, listPublicPlans, readKeptStore } from "@biztrackbd/core";
+import { THEMES, listPublicPlans, readKeptStore, verificationRequired } from "@biztrackbd/core";
 import { planBullets } from "@/lib/plans";
 import { Wizard } from "./wizard";
 
@@ -34,6 +34,7 @@ export default async function Start({
 
   return (
     <Wizard
+      verify={verificationRequired()}
       keepCode={kept ? from : ""}
       keptProductsCount={kept?.products.length}
       rootDomain={rootDomain}

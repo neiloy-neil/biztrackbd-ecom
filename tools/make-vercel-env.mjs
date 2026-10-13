@@ -78,7 +78,7 @@ const shared = (...ks) => ks.map((k) => L(k, gen[k]));
 
 const files = {
   // Signup draws pictures for the sample products (docs/38), so marketing needs the picture storage settings too. The template demo links are built from the root domain.
-  marketing: [...common, L("NEXT_PUBLIC_MARKETING_URL", site), L("NEXT_PUBLIC_ADMIN_URL", admin), L("SUPABASE_URL", need("SUPABASE_URL")), L("SUPABASE_SERVICE_ROLE_KEY", need("SUPABASE_SERVICE_ROLE_KEY"), "server only; never expose"), L("MEDIA_DRIVER", "supabase"), L("MEDIA_BUCKET", "store-media")],
+  marketing: [...common, L("NEXT_PUBLIC_MARKETING_URL", site), L("NEXT_PUBLIC_ADMIN_URL", admin), ...supabase, L("MEDIA_DRIVER", "supabase"), L("MEDIA_BUCKET", "store-media"), ...email, ...sms, ...shared("CUSTOMER_AUTH_SECRET")], // sign-up sends the confirmation code and the welcome email (docs/45)
   admin: [
     ...common, ...supabase, ...shared("CRON_SECRET", "CUSTOMER_AUTH_SECRET", "INTEGRATION_VAULT_SECRET", "PREVIEW_SECRET", "PHONE_TRUST_SALT", "IMPERSONATION_SECRET"),
     L("INTEGRATION_VAULT_KEY_ID", "v1"), L("ADMIN_ORIGIN", admin), L("NEXT_PUBLIC_ADMIN_URL", admin),

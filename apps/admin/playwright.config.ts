@@ -43,7 +43,7 @@ export default defineConfig({
     // COURIER_BASE_URL_STEADFAST points booking at the local stand-in; it is ignored by production builds.
     { command: "pnpm exec next dev -p 3001", url: "http://localhost:3001/no-access", reuseExistingServer: true, timeout: 120_000, env: { COURIER_BASE_URL_STEADFAST: "http://localhost:4010", PLATFORM_BKASH_NUMBER: "01800000000", PLATFORM_NAGAD_NUMBER: "01900000000", DEV_SMS_OUTBOX: ADMIN_OUTBOX, META_GRAPH_URL: META, CRON_SECRET: "e2e-cron-secret-0123456789", ...DOMAINS_ENV } },
     // Phase 5: the marketing site and signup wizard, and the super admin. CRON_SECRET lets the test run the daily billing sweep.
-    { command: "pnpm --filter @biztrackbd/marketing exec next dev -p 3002", cwd: "../..", url: "http://localhost:3002/pricing", reuseExistingServer: true, timeout: 120_000 },
+    { command: "pnpm --filter @biztrackbd/marketing exec next dev -p 3002", cwd: "../..", url: "http://localhost:3002/pricing", reuseExistingServer: true, timeout: 120_000, env: { SIGNUP_VERIFY: "off" } },
     { command: "pnpm --filter @biztrackbd/platform exec next dev -p 3003", cwd: "../..", url: "http://localhost:3003/no-access", reuseExistingServer: true, timeout: 120_000, env: { CRON_SECRET: "e2e-cron-secret-0123456789", ...DOMAINS_ENV } },
     { command: "pnpm --filter @biztrackbd/storefront exec next dev -p 3000", cwd: "../..", url: "http://localhost:3000", reuseExistingServer: true, timeout: 120_000, env: { DEV_SMS_OUTBOX: STORE_OUTBOX, META_GRAPH_URL: META, PREVIEW_SECRET: DOMAINS_ENV.PREVIEW_SECRET } },
   ],

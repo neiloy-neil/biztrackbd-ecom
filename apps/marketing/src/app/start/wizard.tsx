@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useActionState, useEffect, useRef, useState } from "react";
-import { checkAddressAction, signupAction, type SignupState } from "./actions";
+import { checkAddressAction, confirmEmailAction, sendCodeAction, signupAction, type SignupState } from "./actions";
 
 interface Plan {
   tier: string;
@@ -46,7 +46,9 @@ export function Wizard({
   initialTheme,
   keepCode = "",
   keptProductsCount,
+  verify = true,
 }: {
+  verify?: boolean;
   keepCode?: string;
   keptProductsCount?: number;
   plans: Plan[];
@@ -68,6 +70,13 @@ export function Wizard({
     theme: initialTheme,
     demoData: true,
   });
+  // Confirming the email with a code, before anything is created (docs/45).
+  const [proof, setProof] = useState("");
+  const [phase, setPhase] = useState<"form" | "code">("form");
+  const [code, setCode] = useState("");
+  const [pw, setPw] = useState("");
+  const [pw2, setPw2] = useState("");
+  const [busy, setBusy] = useState(false);
   const [touchedAddress, setTouchedAddress] = useState(false);
   const [address, setAddress] = useState<{ ok: boolean; message: string } | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
@@ -129,10 +138,33 @@ export function Wizard({
     return null;
   }
 
-  function next() {
+  async function next() {
     const p = validate(step);
     setProblem(p);
-    if (!p) setStep(step + 1);
+    if (p) return;
+    if (step === 0 && verify && !proof) {
+      setBusy(true);
+      const r = await sendCodeAction(v.email, "both").catch(() => ({ ok: false, error: "We could not send the code. Please try again." }));
+      setBusy(false);
+      if (!r.ok) return setProblem(r.error ?? "We could not send the code.");
+      setCode("");
+      return setPhase("code");
+    }
+    setStep(step + 1);
+  }
+
+  async function confirm() {
+    if (pw !== pw2) return setProblem("The two passwords are not the same.");
+    setBusy(true);
+    const r = await confirmEmailAction(v.email, code, pw).catch(() => ({ error: "We could not check the code. Please try again." }) as { error?: string; proof?: string });
+    setBusy(false);
+    if (!("proof" in r) || !r.proof) return setProblem(r.error ?? "That code is not right.");
+    setProblem(null);
+    setProof(r.proof);
+    setPw("");
+    setPw2("");
+    setPhase("form");
+    setStep(1);
   }
 
   const chosenPlan = plans.find((p) => p.tier === v.plan);
@@ -179,6 +211,7 @@ export function Wizard({
               <input key={k} type="hidden" name={k} value={String(val)} />
             )
           )}
+          <input type="hidden" name="proof" value={proof} />
           {keepCode && <input type="hidden" name="from" value={keepCode} />}
           <div className="hp" aria-hidden="true">
             <label>
@@ -197,7 +230,29 @@ export function Wizard({
           )}
 
           {/* Step 0: You */}
-          {step === 0 && (
+          {step === 0 && phase === "code" && (
+            <div data-testid="step-code">
+              <h2 style={{ fontSize: 20, marginBottom: 8, color: "var(--ink)" }}>Confirm your email</h2>
+              <p className="muted" style={{ marginBottom: 16, fontSize: 15 }}>We sent a code to <b>{v.email}</b>. Type it here, then choose a password for signing in.</p>
+              <label className="field">
+                <span className="label">Code from the email</span>
+                <input className="input" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={(e) => setCode(e.target.value)} data-testid="f-code" />
+              </label>
+              <label className="field">
+                <span className="label">Choose a password</span>
+                <input className="input" type="password" autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} data-testid="f-password" />
+                <span className="hint">At least 10 characters. If you already use BizTrackBD with this email, leave both password boxes empty and your new store joins your account.</span>
+              </label>
+              <label className="field">
+                <span className="label">Type the password again</span>
+                <input className="input" type="password" autoComplete="new-password" value={pw2} onChange={(e) => setPw2(e.target.value)} data-testid="f-password2" />
+              </label>
+              <button type="button" className="btn btn-primary btn-lg" onClick={confirm} disabled={busy} data-testid="confirm-email">{busy ? "Checking…" : "Confirm and continue"}</button>
+              <button type="button" className="btn btn-secondary btn-lg" style={{ marginLeft: 10 }} onClick={() => { setProblem(null); setPhase("form"); }}>Change email</button>
+            </div>
+          )}
+
+          {step === 0 && phase === "form" && (
             <div data-testid="step-you">
               <h2 style={{ fontSize: 20, marginBottom: 16, color: "var(--ink)" }}>Who are you?</h2>
               <label className="field">
@@ -219,7 +274,7 @@ export function Wizard({
                   autoComplete="email"
                   placeholder="tanvir@example.com"
                   value={v.email}
-                  onChange={(e) => set("email", e.target.value)}
+                  onChange={(e) => { set("email", e.target.value); setProof(""); }}
                   data-testid="f-email"
                 />
                 <span className="hint">For your store admin login and receipts.</span>
@@ -460,7 +515,7 @@ export function Wizard({
             </div>
           )}
 
-          <div className="nav-row" style={{ marginTop: 20 }}>
+          <div className="nav-row" style={{ marginTop: 20, ...(step === 0 && phase === "code" ? { display: "none" } : {}) }}>
             {step > 0 && (
               <button
                 key="back"
@@ -480,9 +535,10 @@ export function Wizard({
                 type="button"
                 className="btn btn-primary btn-lg"
                 onClick={next}
+                disabled={busy}
                 data-testid="next"
               >
-                Next Step →
+                {busy ? "Sending the code…" : "Next Step →"}
               </button>
             ) : (
               <button
