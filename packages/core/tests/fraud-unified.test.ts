@@ -113,7 +113,7 @@ describe("App Store Catalog & Native Modules", () => {
     expect(meta?.label).toContain("Meta Pixel");
     expect(meta?.category).toBe("MARKETING");
     expect(meta?.tier).toBe("INCLUDED");
-    expect(meta?.configureHref).toBe("/settings/integrations#marketing");
+    expect(meta?.configureHref).toBe("/settings/apps?open=meta_pixel_capi");
 
     const steadfast = getAppCatalogItem("steadfast_courier");
     expect(steadfast).toBeDefined();
@@ -121,6 +121,6 @@ describe("App Store Catalog & Native Modules", () => {
 
     const loyalty = getAppCatalogItem("loyalty_vip");
     expect(loyalty).toBeDefined();
-    expect(loyalty?.tier).toBe("ADDON");
+    expect(loyalty?.tier).toBe("INCLUDED");
   });
 });
