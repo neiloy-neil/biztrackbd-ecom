@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AutoSubmitSelect } from "@/components/auto-submit-select";
 import Link from "next/link";
 import {
   listPlatformAudit,
@@ -143,17 +144,11 @@ export default async function AuditPage({
                           }}
                           style={{ margin: 0 }}
                         >
-                          <select
+                          <AutoSubmitSelect
                             name="role"
                             defaultValue={u.role}
-                            onChange={(e) => e.target.form?.requestSubmit()}
-                            style={{ padding: "4px 8px", fontSize: 12, borderRadius: 6, border: "1px solid #D5D5E4" }}
-                          >
-                            <option value="OWNER">Platform Owner</option>
-                            <option value="FINANCE">Finance</option>
-                            <option value="SUPPORT_LEAD">Support Lead</option>
-                            <option value="SUPPORT">Support</option>
-                          </select>
+                            options={[{ value: "OWNER", label: "Platform Owner" }, { value: "FINANCE", label: "Finance" }, { value: "SUPPORT_LEAD", label: "Support Lead" }, { value: "SUPPORT", label: "Support" }]}
+                          />
                         </form>
                       ) : (
                         <span style={{ fontSize: 12, fontWeight: 600 }}>{ROLE_LABELS[u.role] ?? u.role}</span>

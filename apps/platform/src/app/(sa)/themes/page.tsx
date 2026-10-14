@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AutoSubmitSelect } from "@/components/auto-submit-select";
 import {
   TEMPLATE_CATEGORIES,
   canPlatform,
@@ -242,17 +243,11 @@ export default async function ThemesPage({
                   {canEdit ? (
                     <form action={setModulePlanOverrideAction} style={{ margin: 0 }}>
                       <input type="hidden" name="moduleKey" value={m.key} />
-                      <select
+                      <AutoSubmitSelect
                         name="minPlan"
                         defaultValue={m.effectiveMinPlan}
-                        onChange={(e) => e.target.form?.requestSubmit()}
-                        style={{ padding: "4px 8px", fontSize: 12, borderRadius: 6, border: "1px solid #D5D5E4" }}
-                      >
-                        <option value="STARTER">Starter</option>
-                        <option value="PRO">Pro</option>
-                        <option value="BUSINESS">Business</option>
-                        <option value="DEFAULT">Default ({m.minPlan || "PRO"})</option>
-                      </select>
+                        options={[{ value: "STARTER", label: "Starter" }, { value: "PRO", label: "Pro" }, { value: "BUSINESS", label: "Business" }, { value: "DEFAULT", label: `Default (${m.minPlan || "PRO"})` }]}
+                      />
                     </form>
                   ) : (
                     <span style={{ fontSize: 12, fontWeight: 600 }}>{m.effectiveMinPlan}</span>

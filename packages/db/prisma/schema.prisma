@@ -522,6 +522,8 @@ model Order {
   @@index([tenantId, createdAt])
   @@index([tenantId, consignmentId])
   @@index([tenantId, status, courierSyncedAt])
+  @@index([tenantId, landingPageId])
+  @@index([tags], type: Gin)   // the label filter on the orders list (migration 28)
 }
 
 model OrderItem {
