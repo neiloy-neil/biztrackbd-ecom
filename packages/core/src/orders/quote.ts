@@ -6,7 +6,12 @@ import { priceLoyalty, type LoyaltyPricing } from "../loyalty/engine";
 import { assertCouponUsable, deliveryFor, discountFor, money, pickZone } from "./pricing";
 
 export const QuoteInput = z.object({
-  items: z.array(z.object({ variantId: z.string().min(8), quantity: z.number().int().min(1).max(50) })).max(50),
+  items: z.array(z.object({
+    variantId: z.string().min(8),
+    quantity: z.number().int().min(1).max(50),
+    bundleId: z.string().optional(),
+    isBump: z.boolean().optional(),
+  })).max(50),
   /** Needed to price delivery. Without it delivery is unknown (null) and the customer is told it is added at checkout. */
   district: z.string().trim().max(80).optional(),
   couponCode: z.string().trim().max(40).optional(),
@@ -19,6 +24,8 @@ export const QuoteInput = z.object({
   referralCode: z.string().trim().max(40).optional(),
   /** Set ONLY by a server that verified the sign-in; the storefront overwrites whatever the browser sent. */
   verifiedCustomerId: z.string().max(64).optional(),
+  bundleId: z.string().optional(),
+  bumpIds: z.array(z.string()).optional(),
 });
 export type QuoteInput = z.input<typeof QuoteInput>;
 
@@ -35,6 +42,9 @@ export interface QuoteLine {
   lineTotal: number;
   /** Stock right now. The cart shows "only 3 left" and blocks quantities above it. */
   available: number;
+  bundleId?: string | null;
+  bundleTitle?: string | null;
+  isBump?: boolean;
 }
 
 export interface QuoteProblem {
@@ -46,6 +56,8 @@ export interface QuoteProblem {
 export interface Quote {
   lines: QuoteLine[];
   subtotal: number;
+  bundleSavings?: number;
+  bumpSavings?: number;
   zone: { name: string; rate: number; freeOverAmount: number | null; etaMinDays: number; etaMaxDays: number } | null;
   /** null until a district is known */
   deliveryCharge: number | null;
@@ -86,6 +98,28 @@ export async function quoteOrder(tenantId: string, rawInput: unknown): Promise<Q
         })
       : [];
 
+    // Check for active order bumps among wanted variants
+    const activeBumps = wanted.size
+      ? await tx.orderBump.findMany({
+          where: {
+            variantId: { in: [...wanted.keys()] },
+            status: "ACTIVE",
+          },
+        })
+      : [];
+
+    // Check for bundle if supplied
+    const activeBundleId = input.bundleId || input.items.find((it) => it.bundleId)?.bundleId;
+    const activeBundle = activeBundleId
+      ? await tx.productBundle.findFirst({
+          where: { id: activeBundleId, status: "ACTIVE" },
+          include: { items: true },
+        })
+      : null;
+
+    let bumpSavings = 0;
+    let bundleSavings = 0;
+
     const lines: QuoteLine[] = [];
     const problems: QuoteProblem[] = [];
     for (const [id, quantity] of wanted) {
@@ -94,15 +128,85 @@ export async function quoteOrder(tenantId: string, rawInput: unknown): Promise<Q
         problems.push({ variantId: id, kind: "unavailable", available: 0 });
         continue;
       }
-      const unitPrice = Number(v.price);
+
+      // Check if this line is marked as an order bump
+      const isBump = input.items.some((it) => it.variantId === id && it.isBump) ||
+        (input.bumpIds?.some((bId) => activeBumps.some((ab) => ab.id === bId && ab.variantId === id)) ?? false);
+      const matchedBump = isBump ? activeBumps.find((ab) => ab.variantId === id) : null;
+
+      let unitPrice = Number(v.price);
+      if (matchedBump) {
+        const bp = Number(matchedBump.bumpPrice);
+        bumpSavings += Math.max(0, (unitPrice - bp) * quantity);
+        unitPrice = bp;
+      }
+
+      const itemBundleId = input.items.find((it) => it.variantId === id)?.bundleId || (activeBundle ? activeBundle.id : null);
+      const isBundleLine = Boolean(activeBundle && (itemBundleId === activeBundle.id || activeBundle.items.some((bi) => bi.productId === v.productId)));
+
       lines.push({
-        variantId: id, productId: v.productId, slug: v.product.slug, productTitle: v.product.title, productTitleBn: v.product.titleBn,
-        variantTitle: v.title, imageUrl: v.imageUrl ?? v.product.images[0]?.url ?? null, unitPrice, quantity,
-        lineTotal: money(unitPrice * quantity), available: Math.max(v.stockQuantity, 0),
+        variantId: id,
+        productId: v.productId,
+        slug: v.product.slug,
+        productTitle: v.product.title,
+        productTitleBn: v.product.titleBn,
+        variantTitle: v.title,
+        imageUrl: v.imageUrl ?? v.product.images[0]?.url ?? null,
+        unitPrice,
+        quantity,
+        lineTotal: money(unitPrice * quantity),
+        available: Math.max(v.stockQuantity, 0),
+        bundleId: isBundleLine ? activeBundle?.id : null,
+        bundleTitle: isBundleLine ? activeBundle?.title : null,
+        isBump: Boolean(matchedBump),
       });
+
       if (v.stockQuantity < quantity) problems.push({ variantId: id, kind: "insufficient_stock", available: Math.max(v.stockQuantity, 0) });
     }
+
+    // Apply bundle discount if all required bundle products are present
+    if (activeBundle) {
+      const bundleLines = lines.filter((l) => l.bundleId === activeBundle.id);
+      if (bundleLines.length >= 2) {
+        const regularBundleTotal = bundleLines.reduce((s, l) => s + l.lineTotal, 0);
+        let promotionalBundleTotal = regularBundleTotal;
+        const val = Number(activeBundle.discountValue);
+
+        if (activeBundle.discountType === "FIXED_PRICE") {
+          promotionalBundleTotal = Math.min(val, regularBundleTotal);
+        } else if (activeBundle.discountType === "PERCENTAGE") {
+          promotionalBundleTotal = Math.max(0, regularBundleTotal * (1 - val / 100));
+        } else if (activeBundle.discountType === "FIXED_DISCOUNT") {
+          promotionalBundleTotal = Math.max(0, regularBundleTotal - val);
+        }
+
+        bundleSavings = Math.max(0, regularBundleTotal - promotionalBundleTotal);
+
+        // Distribute discount proportionately across bundle lines
+        if (bundleSavings > 0 && regularBundleTotal > 0) {
+          const ratio = promotionalBundleTotal / regularBundleTotal;
+          for (const bl of bundleLines) {
+            bl.unitPrice = money(bl.unitPrice * ratio);
+            bl.lineTotal = money(bl.unitPrice * bl.quantity);
+          }
+        }
+      }
+    }
+
     const subtotal = money(lines.reduce((s, l) => s + l.lineTotal, 0));
+
+    // Calculate coupon-eligible subtotal: skip items from bundles or bumps that have allowCoupon: false
+    let couponEligibleSubtotal = subtotal;
+    if (activeBundle && !activeBundle.allowCoupon) {
+      const bundleLinesSum = lines.filter((l) => l.bundleId === activeBundle.id).reduce((s, l) => s + l.lineTotal, 0);
+      couponEligibleSubtotal = Math.max(0, couponEligibleSubtotal - bundleLinesSum);
+    }
+    const noCouponBumpsSum = lines.filter((l) => {
+      if (!l.isBump) return false;
+      const b = activeBumps.find((ab) => ab.variantId === l.variantId);
+      return b && !b.allowCoupon;
+    }).reduce((s, l) => s + l.lineTotal, 0);
+    couponEligibleSubtotal = Math.max(0, couponEligibleSubtotal - noCouponBumpsSum);
 
     const zones = input.district ? await tx.shippingZone.findMany() : [];
     const zone = input.district ? pickZone(zones, input.district) : undefined;
@@ -114,7 +218,7 @@ export async function quoteOrder(tenantId: string, rawInput: unknown): Promise<Q
     if (input.couponCode) {
       try {
         const c = await tx.coupon.findFirst({ where: { code: input.couponCode.toUpperCase() } });
-        assertCouponUsable(c, subtotal);
+        assertCouponUsable(c, couponEligibleSubtotal > 0 ? couponEligibleSubtotal : subtotal);
         if (c.usageLimit != null && c.usageCount >= c.usageLimit) throw new CouponError("This coupon has been fully claimed");
         if (input.phone) {
           let phone: string | null = null;
@@ -124,7 +228,7 @@ export async function quoteOrder(tenantId: string, rawInput: unknown): Promise<Q
             if (used >= c.perCustomerLimit) throw new CouponError("You have already used this coupon");
           }
         }
-        const applied = discountFor(c, subtotal);
+        const applied = discountFor(c, couponEligibleSubtotal);
         discount = applied.discount;
         if (applied.freeShipping && deliveryCharge != null) deliveryCharge = 0;
         couponCode = c.code;

@@ -153,6 +153,9 @@ model Tenant {
   settlements      CourierSettlementInvoice[]
   notes            TenantNote[]
   platformMessages PlatformMessage[]
+  productBundles   ProductBundle[]
+  orderBumps       OrderBump[]
+  bundleItems      ProductBundleItem[]
 
   @@index([subdomain])
   @@index([customDomain])
@@ -304,6 +307,8 @@ model Product {
   reviews         Review[]
   orderItems      OrderItem[]
   collections     CollectionProduct[]
+  bundleItems     ProductBundleItem[]
+  orderBumps      OrderBump[]
   
   // SEO Fields
   seoTitle        String?
@@ -354,6 +359,8 @@ model ProductVariant {
   product        Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
   orderItems     OrderItem[]
   stockAlerts    StockAlert[]
+  bundleItems    ProductBundleItem[]
+  orderBumps     OrderBump[]
 
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
@@ -541,15 +548,21 @@ model OrderItem {
   quantity       Int
   totalPrice     Decimal         @db.Decimal(12, 2)
   
+  bundleId       String?
+  bundleTitle    String?
+  isBump         Boolean         @default(false)
+  
   order          Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product        Product         @relation(fields: [productId], references: [id], onDelete: Restrict)
   variant        ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  bundle         ProductBundle?  @relation(fields: [bundleId], references: [id], onDelete: SetNull)
   
   createdAt      DateTime        @default(now())
 
   @@index([tenantId, orderId])
   @@index([productId])
   @@index([variantId])
+  @@index([bundleId])
 }
 
 model OrderStateLog {
@@ -2066,3 +2079,109 @@ model TenantQuotaAdjustment {
 
   @@index([tenantId, createdAt])
 }
+
+// ==========================================
+// 19. PRODUCT BUNDLES & CHECKOUT ORDER BUMPS
+// ==========================================
+
+enum BundleDiscountType {
+  FIXED_PRICE
+  PERCENTAGE
+  FIXED_DISCOUNT
+}
+
+enum BundleStatus {
+  ACTIVE
+  DRAFT
+  ARCHIVED
+}
+
+model ProductBundle {
+  id              String             @id @default(cuid())
+  tenantId        String
+  title           String
+  titleBn         String?
+  slug            String
+  description     String?            @db.Text
+  descriptionBn   String?            @db.Text
+  bannerImage     String?
+  discountType    BundleDiscountType @default(FIXED_PRICE)
+  discountValue   Decimal            @db.Decimal(12, 2)
+  allowCoupon     Boolean            @default(false)
+  status          BundleStatus       @default(ACTIVE)
+  sortOrder       Int                @default(0)
+
+  tenant          Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items           ProductBundleItem[]
+  orderItems      OrderItem[]
+
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@unique([tenantId, slug])
+  @@index([tenantId, status])
+}
+
+model ProductBundleItem {
+  id         String          @id @default(cuid())
+  tenantId   String
+  bundleId   String
+  productId  String
+  variantId  String?
+  quantity   Int             @default(1)
+  sortOrder  Int             @default(0)
+
+  tenant     Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  bundle     ProductBundle   @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  product    Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant    ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  createdAt  DateTime        @default(now())
+
+  @@index([tenantId, bundleId])
+  @@index([productId])
+  @@index([variantId])
+}
+
+enum BumpTriggerType {
+  GLOBAL
+  PRODUCT
+  CATEGORY
+}
+
+enum BumpStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model OrderBump {
+  id               String          @id @default(cuid())
+  tenantId         String
+  title            String
+  titleBn          String?
+  highlightText    String?
+  highlightTextBn  String?
+  description      String?         @db.Text
+  descriptionBn    String?         @db.Text
+  productId        String
+  variantId        String
+  bumpPrice        Decimal         @db.Decimal(12, 2)
+  allowCoupon      Boolean         @default(false)
+  triggerType      BumpTriggerType @default(GLOBAL)
+  triggerIds       String[]        @default([])
+  status           BumpStatus      @default(ACTIVE)
+  displayOrder     Int             @default(0)
+  acceptedCount    Int             @default(0)
+  revenueGenerated Decimal         @default(0) @db.Decimal(12, 2)
+
+  tenant           Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  product          Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant          ProductVariant  @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([tenantId, status])
+  @@index([tenantId, triggerType])
+}
+

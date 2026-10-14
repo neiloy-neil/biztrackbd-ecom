@@ -58,6 +58,7 @@ const GROUPS: Group[] = [
     icon: <TagIcon />,
     items: [
       { href: "/marketing", label: "Overview", area: "marketing", exact: true },
+      { href: "/marketing/bundles", label: "Bundles & Upsells", area: "marketing" },
       { href: "/marketing/coupons", label: "Discounts", area: "marketing" },
       { href: "/marketing/campaigns", label: "Campaigns", area: "marketing", moduleKey: "marketing_campaigns" },
       { href: "/marketing/notifications", label: "Notifications", area: "marketing", moduleKey: "marketing_campaigns" },

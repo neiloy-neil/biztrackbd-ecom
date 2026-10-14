@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Quote } from "@biztrackbd/core";
+import type { Quote, StorefrontOrderBump } from "@biztrackbd/core";
 import { BD_GEO } from "@biztrackbd/core/geo";
-import { quoteCartAction } from "@/app/actions";
+import { quoteCartAction, fetchCheckoutBumpsAction } from "@/app/actions";
 import { placeOrderAction, parseAddressTextAction } from "@/app/(store)/checkout/actions";
 import { captureAction } from "@/app/growth-actions";
 import { fmt, money, productTitle, type Lang } from "@/lib/i18n-core";
@@ -83,6 +83,8 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
   const [couponInput, setCouponInput] = useState("");
   const [coupon, setCoupon] = useState("");
   const [quote, setQuote] = useState<Quote | null>(null);
+  const [availableBumps, setAvailableBumps] = useState<StorefrontOrderBump[]>([]);
+  const [selectedBumpIds, setSelectedBumpIds] = useState<string[]>([]);
   const [usePoints, setUsePoints] = useState(false);
   const [redeem, setRedeem] = useState(0);
   const [refInput, setRefInput] = useState(loyalty?.referralCode ?? "");
@@ -151,13 +153,38 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
   const districts = useMemo(() => BD_GEO.find((d) => d.name === division)?.districts ?? [], [division]);
   const upazilas = useMemo(() => districts.find((d) => d.name === district)?.upazilas ?? [], [districts, district]);
 
+  // Fetch active bumps matching cart items
+  const quoteBaseProductIds = useMemo(() => {
+    return quote?.lines.filter((l) => !l.isBump).map((l) => l.productId).sort().join(",") ?? "";
+  }, [quote]);
+
+  useEffect(() => {
+    if (!quote || quote.lines.length === 0) return;
+    const basePids = [...new Set(quote.lines.filter((l) => !l.isBump).map((l) => l.productId))];
+    if (basePids.length === 0) return;
+    void fetchCheckoutBumpsAction(basePids).then((res) => {
+      if (res.ok) {
+        setAvailableBumps(res.bumps);
+        setSelectedBumpIds((prev) => prev.filter((id) => res.bumps.some((b) => b.id === id)));
+      }
+    });
+  }, [quoteBaseProductIds]);
+
   // Live totals. Display only; the server recalculates when the order is placed.
   useEffect(() => {
     if (!cart.ready || cart.lines.length === 0) return;
     const mine = ++seq.current;
     const timer = setTimeout(async () => {
+      const bumpItems = availableBumps
+        .filter((b) => selectedBumpIds.includes(b.id))
+        .map((b) => ({ variantId: b.variantId, quantity: 1, isBump: true }));
+
       const r = await quoteCartAction({
-        items: cart.lines.map((l) => ({ variantId: l.variantId, quantity: l.quantity })),
+        items: [
+          ...cart.lines.map((l) => ({ variantId: l.variantId, quantity: l.quantity })),
+          ...bumpItems,
+        ],
+        bumpIds: selectedBumpIds,
         district, couponCode: coupon || undefined, phone: validLocal(phone) ? full(phone) : undefined,
         redeemPoints: usePoints && redeem > 0 ? redeem : undefined, referralCode: refCode || undefined,
       });
@@ -167,7 +194,7 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
       else setErrors((e) => (e.coupon ? { ...e, coupon: undefined } : e));
     }, 150);
     return () => clearTimeout(timer);
-  }, [cart.lines, cart.ready, district, coupon, phone, redeem, usePoints, refCode]);
+  }, [cart.lines, cart.ready, district, coupon, phone, redeem, usePoints, refCode, selectedBumpIds, availableBumps]);
 
   // "Use my points" means as many as this cart allows. The server says how many that is; follow it as the cart changes.
   useEffect(() => {
@@ -217,9 +244,17 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
       return;
     }
     setBusy(true);
+    const bumpItems = availableBumps
+      .filter((b) => selectedBumpIds.includes(b.id))
+      .map((b) => ({ variantId: b.variantId, quantity: 1, isBump: true }));
+
     const r = await placeOrderAction({
       idempotencyKey: key.current,
-      items: cart.lines.map((l) => ({ variantId: l.variantId, quantity: l.quantity })),
+      items: [
+        ...cart.lines.map((l) => ({ variantId: l.variantId, quantity: l.quantity })),
+        ...bumpItems,
+      ],
+      bumpIds: selectedBumpIds,
       customer: { name: name.trim(), phone: full(phone), email: email.trim() || undefined },
       shipping: { division, district, upazila, address: address.trim(), note: note.trim() || undefined },
       paymentMethod: method,
@@ -249,18 +284,126 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
 
   const mfsInfo = (m: "MANUAL_BKASH" | "MANUAL_NAGAD") => (m === "MANUAL_BKASH" ? { n: pay.bkashNumber, kind: pay.bkashKind, app: s.bkash } : { n: pay.nagadNumber, kind: pay.nagadKind, app: s.nagad });
 
+  const orderBumpsNode = availableBumps.length > 0 ? (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }} data-testid="checkout-order-bumps">
+      {availableBumps.map((b) => {
+        const isSelected = selectedBumpIds.includes(b.id);
+        const title = (lang === "bn" && b.titleBn) ? b.titleBn : b.title;
+        const hl = (lang === "bn" && b.highlightTextBn) ? b.highlightTextBn : b.highlightText;
+        const desc = (lang === "bn" && b.descriptionBn) ? b.descriptionBn : b.description;
+        return (
+          <div
+            key={b.id}
+            data-testid={`order-bump-card-${b.id}`}
+            onClick={() => {
+              setSelectedBumpIds((prev) =>
+                prev.includes(b.id) ? prev.filter((id) => id !== b.id) : [...prev, b.id]
+              );
+            }}
+            style={{
+              cursor: "pointer",
+              border: isSelected ? "2px solid #10b981" : "2px dashed #f59e0b",
+              backgroundColor: isSelected ? "rgba(16, 185, 129, 0.08)" : "rgba(245, 158, 11, 0.04)",
+              borderRadius: 10,
+              padding: "12px 14px",
+              position: "relative",
+              transition: "all 0.2s ease-in-out",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6, gap: 6 }}>
+              <span style={{ fontSize: 12.5, fontWeight: 700, color: "#d97706", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                ⚡ {hl || (lang === "bn" ? "এককালীন বিশেষ অফার!" : "ONE TIME SPECIAL OFFER!")}
+              </span>
+              {b.savings > 0 && (
+                <span className="pill green" style={{ fontSize: 11, padding: "2px 8px", fontWeight: 700 }}>
+                  {lang === "bn" ? `${money(b.savings, lang)} সাশ্রয়!` : `SAVE ${money(b.savings, lang)}!`}
+                </span>
+              )}
+            </div>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={() => {
+                  setSelectedBumpIds((prev) =>
+                    prev.includes(b.id) ? prev.filter((id) => id !== b.id) : [...prev, b.id]
+                  );
+                }}
+                onClick={(e) => e.stopPropagation()}
+                style={{ width: 18, height: 18, marginTop: 3, accentColor: "#10b981", cursor: "pointer" }}
+                data-testid={`order-bump-check-${b.id}`}
+              />
+              {b.imageUrl && (
+                <img
+                  src={b.imageUrl}
+                  alt={title}
+                  style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 6, border: "1px solid var(--border, #e5e7eb)" }}
+                />
+              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                  <span style={{ fontWeight: 600, fontSize: 14 }}>{title}</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: "var(--brand, #059669)" }}>
+                    {money(b.bumpPrice, lang)}
+                  </span>
+                  {b.regularPrice > b.bumpPrice && (
+                    <del style={{ fontSize: 12, color: "var(--ink-muted, #9ca3af)" }}>
+                      {money(b.regularPrice, lang)}
+                    </del>
+                  )}
+                </div>
+                {desc && (
+                  <p style={{ margin: "4px 0 0", fontSize: 12.5, color: "var(--ink-2, #6b7280)", lineHeight: 1.4 }}>
+                    {desc}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  ) : null;
+
   const summary = (
     <div className="card" data-testid="order-summary">
       <div style={{ marginBottom: 6 }}>
         {(quote?.lines ?? []).map((l) => (
-          <div key={l.variantId} className="totals" style={{ marginBottom: 8 }}>
-            <div className="r"><span>{productTitle(lang, l.productTitle, l.productTitleBn)}{l.variantTitle.toLowerCase() !== "default" ? ` (${l.variantTitle})` : ""} × {l.quantity}</span><span className="num">{money(l.lineTotal, lang)}</span></div>
+          <div key={`${l.variantId}-${l.isBump ? "bump" : "normal"}`} className="totals" style={{ marginBottom: 8 }}>
+            <div className="r">
+              <span>
+                {l.isBump && (
+                  <span className="pill green" style={{ fontSize: 10, marginRight: 6, padding: "1px 5px", textTransform: "uppercase" }}>
+                    {lang === "bn" ? "অর্ডার বাম্প" : "Order Bump"}
+                  </span>
+                )}
+                {l.bundleTitle && (
+                  <span className="pill blue" style={{ fontSize: 10, marginRight: 6, padding: "1px 5px" }}>
+                    {l.bundleTitle}
+                  </span>
+                )}
+                {productTitle(lang, l.productTitle, l.productTitleBn)}{l.variantTitle.toLowerCase() !== "default" ? ` (${l.variantTitle})` : ""} × {l.quantity}
+              </span>
+              <span className="num">{money(l.lineTotal, lang)}</span>
+            </div>
           </div>
         ))}
       </div>
       <div className="totals">
         <div className="r"><span>{s.subtotal}</span><span className="num">{money(quote?.subtotal ?? 0, lang)}</span></div>
         {quote && quote.discount > 0 && <div className="r"><span>{s.discount} {quote.couponCode}</span><span className="num">−{money(quote.discount, lang)}</span></div>}
+        {quote && quote.bundleSavings != null && quote.bundleSavings > 0 && (
+          <div className="r" style={{ color: "var(--success, #10b981)" }}>
+            <span>{lang === "bn" ? "কম্বো অফার ছাড়" : "Bundle Savings"}</span>
+            <span className="num">−{money(quote.bundleSavings, lang)}</span>
+          </div>
+        )}
+        {quote && quote.bumpSavings != null && quote.bumpSavings > 0 && (
+          <div className="r" style={{ color: "var(--success, #10b981)" }}>
+            <span>{lang === "bn" ? "বাম্প অফার ছাড়" : "Order Bump Savings"}</span>
+            <span className="num">−{money(quote.bumpSavings, lang)}</span>
+          </div>
+        )}
         {quote && quote.loyalty.tierDiscount > 0 && <div className="r" data-testid="vip-line"><span>{loyalty?.s.vipDiscountLine}</span><span className="num">−{money(quote.loyalty.tierDiscount, lang)}</span></div>}
         {quote && quote.loyalty.referralDiscount > 0 && <div className="r" data-testid="referral-line"><span>{loyalty?.s.referralDiscountLine}</span><span className="num">−{money(quote.loyalty.referralDiscount, lang)}</span></div>}
         {quote && quote.loyalty.pointsDiscount > 0 && <div className="r" data-testid="points-line"><span>{loyalty?.s.pointsDiscountLine}</span><span className="num">−{money(quote.loyalty.pointsDiscount, lang)}</span></div>}
@@ -513,9 +656,14 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
             )}
           </section>
         )}
+
+        <div className="mobile-summary" style={{ marginTop: 14 }}>
+          {orderBumpsNode}
+        </div>
       </div>
 
       <aside className="aside">
+        {orderBumpsNode}
         {summary}
         <div style={{ marginTop: 14 }}>
           {formError && <div className="notice" role="alert" style={{ marginBottom: 10 }}>{formError}</div>}

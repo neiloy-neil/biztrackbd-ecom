@@ -123,13 +123,93 @@ async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof Cr
     }
   }
 
+  // Check for active order bumps among wanted variants
+  const activeBumps = variantIds.length
+    ? await tx.orderBump.findMany({
+        where: { variantId: { in: variantIds }, status: "ACTIVE" },
+      })
+    : [];
+
+  // Check for bundle if supplied
+  const activeBundleId = input.bundleId || input.items.find((it) => it.bundleId)?.bundleId;
+  const activeBundle = activeBundleId
+    ? await tx.productBundle.findFirst({
+        where: { id: activeBundleId, status: "ACTIVE" },
+        include: { items: true },
+      })
+    : null;
+
+  const bumpsToRecord: { id: string; revenue: number }[] = [];
+
   const lines = variantIds.map((id) => {
     const v = variants.find((x) => x.id === id)!;
     const quantity = wanted.get(id)!;
-    const unitPrice = Number(v.price);
-    return { v, quantity, unitPrice, totalPrice: money(unitPrice * quantity) };
+
+    const isBump = input.items.some((it) => it.variantId === id && it.isBump) ||
+      (input.bumpIds?.some((bId) => activeBumps.some((ab) => ab.id === bId && ab.variantId === id)) ?? false);
+    const matchedBump = isBump ? activeBumps.find((ab) => ab.variantId === id) : null;
+
+    let unitPrice = Number(v.price);
+    if (matchedBump) {
+      unitPrice = Number(matchedBump.bumpPrice);
+      bumpsToRecord.push({ id: matchedBump.id, revenue: money(unitPrice * quantity) });
+    }
+
+    const itemBundleId = input.items.find((it) => it.variantId === id)?.bundleId || (activeBundle ? activeBundle.id : null);
+    const isBundleLine = Boolean(activeBundle && (itemBundleId === activeBundle.id || activeBundle.items.some((bi) => bi.productId === v.productId)));
+
+    return {
+      v,
+      quantity,
+      unitPrice,
+      totalPrice: money(unitPrice * quantity),
+      bundleId: isBundleLine ? activeBundle?.id : null,
+      bundleTitle: isBundleLine ? activeBundle?.title : null,
+      isBump: Boolean(matchedBump),
+    };
   });
+
+  // Apply bundle discount if all required bundle products are present
+  if (activeBundle) {
+    const bundleLines = lines.filter((l) => l.bundleId === activeBundle.id);
+    if (bundleLines.length >= 2) {
+      const regularBundleTotal = bundleLines.reduce((s, l) => s + l.totalPrice, 0);
+      let promotionalBundleTotal = regularBundleTotal;
+      const val = Number(activeBundle.discountValue);
+
+      if (activeBundle.discountType === "FIXED_PRICE") {
+        promotionalBundleTotal = Math.min(val, regularBundleTotal);
+      } else if (activeBundle.discountType === "PERCENTAGE") {
+        promotionalBundleTotal = Math.max(0, regularBundleTotal * (1 - val / 100));
+      } else if (activeBundle.discountType === "FIXED_DISCOUNT") {
+        promotionalBundleTotal = Math.max(0, regularBundleTotal - val);
+      }
+
+      const bundleSavings = Math.max(0, regularBundleTotal - promotionalBundleTotal);
+      if (bundleSavings > 0 && regularBundleTotal > 0) {
+        const ratio = promotionalBundleTotal / regularBundleTotal;
+        for (const bl of bundleLines) {
+          bl.unitPrice = money(bl.unitPrice * ratio);
+          bl.totalPrice = money(bl.unitPrice * bl.quantity);
+        }
+      }
+    }
+  }
+
   const subtotal = money(lines.reduce((s, l) => s + l.totalPrice, 0));
+
+  // Calculate coupon-eligible subtotal: skip items from bundles or bumps that have allowCoupon: false
+  let couponEligibleSubtotal = subtotal;
+  if (activeBundle && !activeBundle.allowCoupon) {
+    const bundleLinesSum = lines.filter((l) => l.bundleId === activeBundle.id).reduce((s, l) => s + l.totalPrice, 0);
+    couponEligibleSubtotal = Math.max(0, couponEligibleSubtotal - bundleLinesSum);
+  }
+  const noCouponBumpsSum = lines.filter((l) => {
+    if (!l.isBump) return false;
+    const b = activeBumps.find((ab) => ab.variantId === l.v.id);
+    return b && !b.allowCoupon;
+  }).reduce((s, l) => s + l.totalPrice, 0);
+  couponEligibleSubtotal = Math.max(0, couponEligibleSubtotal - noCouponBumpsSum);
 
   // Delivery zone: exact district match first, then the catch-all "*" zone.
   const zones = await tx.shippingZone.findMany();
@@ -145,12 +225,12 @@ async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof Cr
   if (input.couponCode) {
     const code = input.couponCode.toUpperCase();
     const c = await tx.coupon.findFirst({ where: { code } });
-    assertCouponUsable(c, subtotal);
+    assertCouponUsable(c, couponEligibleSubtotal > 0 ? couponEligibleSubtotal : subtotal);
     const used = await tx.order.count({ where: { customerPhone: phone, couponId: c.id, status: { not: "CANCELLED" } } });
     if (used >= c.perCustomerLimit) throw new CouponError("You have already used this coupon");
     const claimed = await tx.$executeRaw`UPDATE "Coupon" SET "usageCount" = "usageCount" + 1 WHERE "id" = ${c.id} AND ("usageLimit" IS NULL OR "usageCount" < "usageLimit")`;
     if (claimed === 0) throw new CouponError("This coupon has been fully claimed");
-    const applied = discountFor(c, subtotal);
+    const applied = discountFor(c, couponEligibleSubtotal);
     discount = applied.discount;
     if (applied.freeShipping) deliveryCharge = 0;
     couponId = c.id;
@@ -236,11 +316,23 @@ async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof Cr
         create: lines.map((l) => ({
           tenantId, productId: l.v.productId, variantId: l.v.id, productTitle: l.v.product.title,
           variantTitle: l.v.title, sku: l.v.sku, unitPrice: l.unitPrice, unitCost: l.v.product.costPrice, quantity: l.quantity, totalPrice: l.totalPrice,
+          bundleId: l.bundleId, bundleTitle: l.bundleTitle, isBump: l.isBump,
         })),
       },
       stateLogs: { create: { tenantId, fromStatus: "PENDING", toStatus: "PENDING", actorType: "CUSTOMER", reason: "Order placed" } },
     },
   });
+
+  // Increment telemetry for accepted order bumps
+  for (const b of bumpsToRecord) {
+    await tx.orderBump.update({
+      where: { id: b.id },
+      data: {
+        acceptedCount: { increment: 1 },
+        revenueGenerated: { increment: b.revenue },
+      },
+    });
+  }
 
   // Points taken, the pending earn written, the referral recorded: all inside this order's transaction.
   const applied = await recordAtOrder(tx, { tenantId, orderId: order.id, orderNumber, customerId: customer.id, customerName: input.customer.name, phone, address: input.shipping.address, district: input.shipping.district, subtotal, couponDiscount: discount, pricing: loyalty });

@@ -9,6 +9,7 @@ import { Listing } from "./listing";
 import { ProductCard } from "./product-card";
 import { tintFor } from "./product-image";
 import { PurchasePanel } from "./purchase-panel";
+import { ProductBundlesCard } from "./product-bundles-card";
 import { ViewContent } from "./tracker";
 
 /**
@@ -64,6 +65,8 @@ export function ProductMain({ ctx, s, lang, t, id }: { ctx: ProductCtx; s: S; la
             hasChoices={hasChoices}
             text={{ size: t("size"), chooseSize: t("chooseSize"), quantity: t("quantity"), addToCart: t("addToCart"), buyNow: t("buyNow"), added: t("added"), viewCart: t("viewCart"), soldOut: t("soldOut"), notifyTitle: t("notifyTitle"), notifyPhone: t("notifyPhone"), notifyButton: t("notifyButton"), notifySent: t("notifySent"), notifyWaiting: t("notifyWaiting"), notifyBad: t("notifyBad"), onlyLeft: t("onlyLeft", { n: "{n}", size: "{size}" }), priceLabel: prices }}
           />
+
+          <ProductBundlesCard productId={p.id} lang={lang} />
 
           {on(s.showAssurance) && (
             <div className="assure">

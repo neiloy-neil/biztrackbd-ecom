@@ -363,3 +363,35 @@ export {
   type ManagedAppCatalogItem,
 } from "./platform/modules-control";
 
+// Product Bundles & 1-Click Checkout Order Bumps
+export {
+  BundleDiscountTypeSchema,
+  BundleStatusSchema,
+  BumpTriggerTypeSchema,
+  BumpStatusSchema,
+  CreateBundleInput,
+  UpdateBundleInput,
+  CreateOrderBumpInput,
+  UpdateOrderBumpInput,
+  listBundles,
+  getBundle,
+  createBundle,
+  updateBundle,
+  deleteBundle,
+  listOrderBumps,
+  getOrderBump,
+  createOrderBump,
+  updateOrderBump,
+  deleteOrderBump,
+  getBundleAnalytics,
+  getActiveBundlesForProduct,
+  getCheckoutOrderBumps,
+  type BundleDiscountType,
+  type BundleStatus,
+  type BumpTriggerType,
+  type BumpStatus,
+  type StorefrontBundle,
+  type StorefrontOrderBump,
+} from "./bundles/service";
+
+

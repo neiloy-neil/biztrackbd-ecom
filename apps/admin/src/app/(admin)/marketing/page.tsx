@@ -120,6 +120,25 @@ export default async function MarketingOverviewPage() {
           </Link>
         </div>
 
+        {/* Product Bundles & Order Bumps */}
+        <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 20 }}>🎁</span>
+                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Bundles & Order Bumps</h3>
+              </div>
+              <span className="pill green">AOV Booster</span>
+            </div>
+            <p className="muted" style={{ fontSize: 13, margin: "0 0 12px" }}>
+              1-Click checkout order bumps and "Frequently Bought Together" combo deals with component stock tracking and margin protection.
+            </p>
+          </div>
+          <Link href="/marketing/bundles" className="btn btn-secondary btn-sm" style={{ width: "100%", textAlign: "center" }} prefetch={false}>
+            Manage Bundles & Bumps →
+          </Link>
+        </div>
+
         {/* Broadcast Campaigns */}
         <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div>

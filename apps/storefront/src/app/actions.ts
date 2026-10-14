@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { DomainError, quoteOrder, type Quote } from "@biztrackbd/core";
+import { DomainError, quoteOrder, getCheckoutOrderBumps, getActiveBundlesForProduct, type Quote, type StorefrontOrderBump, type StorefrontBundle } from "@biztrackbd/core";
 import { LANG_COOKIE } from "@/lib/i18n";
 import { SESSION_COOKIE, getCustomerSession } from "@/lib/session";
 import { getStore } from "@/lib/tenant";
@@ -21,7 +21,9 @@ export async function signOut(): Promise<void> {
 }
 
 export interface QuoteRequest {
-  items: { variantId: string; quantity: number }[];
+  items: { variantId: string; quantity: number; bundleId?: string; isBump?: boolean }[];
+  bundleId?: string;
+  bumpIds?: string[];
   district?: string;
   couponCode?: string;
   phone?: string;
@@ -42,3 +44,28 @@ export async function quoteCartAction(req: QuoteRequest): Promise<{ ok: true; qu
     return { ok: false, error: "Could not update prices." };
   }
 }
+
+/** Fetch active checkout order bumps matching cart items */
+export async function fetchCheckoutBumpsAction(cartProductIds: string[]): Promise<{ ok: boolean; bumps: StorefrontOrderBump[] }> {
+  const store = await getStore();
+  try {
+    const bumps = await getCheckoutOrderBumps(store.id, cartProductIds);
+    return { ok: true, bumps };
+  } catch (e) {
+    console.error("fetchCheckoutBumpsAction failed", e);
+    return { ok: false, bumps: [] };
+  }
+}
+
+/** Fetch active bundles for a product page */
+export async function fetchProductBundlesAction(productId: string): Promise<{ ok: boolean; bundles: StorefrontBundle[] }> {
+  const store = await getStore();
+  try {
+    const bundles = await getActiveBundlesForProduct(store.id, productId);
+    return { ok: true, bundles };
+  } catch (e) {
+    console.error("fetchProductBundlesAction failed", e);
+    return { ok: false, bundles: [] };
+  }
+}
+

@@ -8,7 +8,7 @@ import { getStore } from "@/lib/tenant";
 
 export interface PlaceOrderPayload {
   idempotencyKey: string;
-  items: { variantId: string; quantity: number }[];
+  items: { variantId: string; quantity: number; bundleId?: string; isBump?: boolean }[];
   customer: { name: string; phone: string; email?: string };
   shipping: { division: string; district: string; upazila: string; address: string; note?: string };
   paymentMethod: "COD" | "MANUAL_BKASH" | "MANUAL_NAGAD" | "GATEWAY_UDDOKTAPAY";
@@ -16,6 +16,8 @@ export interface PlaceOrderPayload {
   couponCode?: string;
   redeemPoints?: number;
   referralCode?: string;
+  bundleId?: string;
+  bumpIds?: string[];
   /** Browser cookies and address, so the server-side Purchase can be matched to the visitor. */
   tracking?: { fbp?: string; fbc?: string; url?: string };
 }
@@ -41,6 +43,8 @@ export async function placeOrderAction(p: PlaceOrderPayload): Promise<PlaceOrder
       customer: { name: p.customer.name, phone: p.customer.phone, email: p.customer.email?.trim() || undefined },
       shipping: { address: p.shipping.address, city: p.shipping.upazila, district: p.shipping.district, division: p.shipping.division },
       items: p.items,
+      bundleId: p.bundleId,
+      bumpIds: p.bumpIds,
       paymentMethod: p.paymentMethod,
       mfs: p.paymentMethod === "COD" || p.paymentMethod === "GATEWAY_UDDOKTAPAY" ? undefined : p.mfs,
       couponCode: p.couponCode?.trim() || undefined,

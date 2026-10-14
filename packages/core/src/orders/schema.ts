@@ -17,7 +17,15 @@ export const CreateOrderInput = z.object({
     postalCode: z.string().max(10).optional(),
   }),
   // Client-sent prices are never read. Only ids and quantities.
-  items: z.array(z.object({ variantId: z.string().min(8), quantity: z.number().int().min(1).max(50) })).min(1).max(50),
+  items: z.array(z.object({
+    variantId: z.string().min(8),
+    quantity: z.number().int().min(1).max(50),
+    bundleId: z.string().optional(),
+    bundleTitle: z.string().optional(),
+    isBump: z.boolean().optional(),
+  })).min(1).max(50),
+  bundleId: z.string().optional(),
+  bumpIds: z.array(z.string()).optional(),
   paymentMethod: z.enum(PAYMENT_METHODS).default("COD"),
   mfs: z.object({ senderNumber: z.string(), trxId: z.string() }).optional(),
   couponCode: z.string().trim().max(40).optional(),

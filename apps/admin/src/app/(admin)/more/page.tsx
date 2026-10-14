@@ -11,6 +11,7 @@ export const metadata: Metadata = { title: "More" };
 const ITEMS: { href: string; label: string; area: Area }[] = [
   { href: "/orders/new", label: "Quick order", area: "orders" },
   { href: "/inventory", label: "Inventory", area: "products" },
+  { href: "/marketing/bundles", label: "Bundles and upsells", area: "marketing" },
   { href: "/marketing/coupons", label: "Discounts and coupons", area: "marketing" },
   { href: "/abandoned", label: "Abandoned checkouts", area: "customers" },
   { href: "/reviews", label: "Reviews", area: "marketing" },
