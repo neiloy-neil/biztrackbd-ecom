@@ -10,7 +10,9 @@
     "./geo": "./src/geo/bd-geo.ts",
     "./builder-client": "./src/builder/client.ts",
     "./messages-client": "./src/messaging/shared.ts",
-    "./backup": "./src/backup/index.ts"
+    "./backup": "./src/backup/index.ts",
+    "./barcode-render": "./src/admin/barcode-render.ts",
+    "./reports-presets": "./src/admin/reports-presets.ts"
   },
   "scripts": {
     "build": "echo \"core is consumed from source\"",

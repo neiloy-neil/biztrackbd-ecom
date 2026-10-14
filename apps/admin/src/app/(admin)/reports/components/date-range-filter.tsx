@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { REPORT_PRESETS } from "@biztrackbd/core";
+import { REPORT_PRESETS } from "@biztrackbd/core/reports-presets";
 
 export function DateRangeFilter({
   basePath,

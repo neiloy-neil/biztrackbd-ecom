@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { divisionNames, districtsOf } from "@biztrackbd/core";
+import { divisionNames, districtsOf } from "@biztrackbd/core/geo";
 import { SubmitButton } from "@/components/ui";
 import { createCustomerAction } from "./actions";
 

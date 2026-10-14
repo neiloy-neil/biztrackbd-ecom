@@ -1,15 +1,8 @@
 import { ValidationError } from "../errors";
 import { addDays, dhakaDate } from "./dashboard";
 
-export const REPORT_PRESETS: { key: string; label: string }[] = [
-  { key: "today", label: "Today" },
-  { key: "yesterday", label: "Yesterday" },
-  { key: "7", label: "Last 7 days" },
-  { key: "30", label: "Last 30 days" },
-  { key: "month", label: "This month" },
-  { key: "last_month", label: "Last month" },
-  { key: "90", label: "Last 90 days" },
-];
+export { REPORT_PRESETS } from "./reports-presets";
+import { REPORT_PRESETS } from "./reports-presets";
 
 export interface ResolvedReportRange {
   from: string; // YYYY-MM-DD

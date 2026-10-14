@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { renderCode128Svg } from "@biztrackbd/core";
+import { renderCode128Svg } from "@biztrackbd/core/barcode-render";
 import { taka } from "@/lib/format";
 import {
   type BarcodePrintItem,

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { divisionNames, districtsOf, type CustomerAddressView } from "@biztrackbd/core";
+import type { CustomerAddressView } from "@biztrackbd/core";
+import { divisionNames, districtsOf } from "@biztrackbd/core/geo";
 import { SubmitButton } from "@/components/ui";
 import { taka } from "@/lib/format";
 import {
