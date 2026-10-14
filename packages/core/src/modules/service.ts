@@ -342,7 +342,7 @@ export async function setModule(tenantId: string, actor: StaffActor, key: string
     if (enabled && cap !== Infinity) {
       const rows = await tx.tenantModule.findMany();
       const on = new Set(rows.filter((r) => r.isEnabled).map((r) => r.moduleKey));
-      for (const m of MODULES) if (m.built && !rows.some((r) => r.moduleKey === m.key)) on.add(m.key);
+      if (!rows.some((r) => r.moduleKey === "loyalty") && def("loyalty")?.built) on.add("loyalty");
       on.add(modKey);
       if (on.size > cap) throw new ValidationError(`Your plan includes ${cap} module${cap === 1 ? "" : "s"}. Switch another one off first.`);
     }

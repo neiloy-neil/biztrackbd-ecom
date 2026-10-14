@@ -114,6 +114,8 @@ export * from "./platform/templates";
 export { installTemplatePages } from "./builder/versions";
 export { createEmailProof, emailProofValid, sendSignupCode, confirmSignupEmail, verificationRequired, type ConfirmedEmail } from "./platform/signup-verify";
 export { signupStore, checkSubdomain, SignupInput, THEMES, SUBDOMAIN_MESSAGES, type SignedUp, type SubdomainCheck } from "./platform/signup";
+export { createAutoLoginToken, verifyAutoLoginToken, createAutoLoginSessionCookie, verifyAutoLoginSessionCookie, AUTO_LOGIN_COOKIE, type AutoLoginPayload } from "./auth/auto-login";
+export { CATEGORY_CATALOG_PRESETS, getCategoryStarterPreset, type StarterCatalogPreset, type StarterProductPreset } from "./demo/catalog-presets";
 export {
   listPublicPlans, getBillingOverview, getStoreAccess, submitPaymentProof, cancelPendingProof, paymentTargets, toPlanView, ProofInput,
   type PlanView, type BillingOverview, type ProofView, type PayTo,

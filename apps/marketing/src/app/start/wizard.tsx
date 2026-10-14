@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useActionState, useEffect, useRef, useState } from "react";
-import { checkAddressAction, confirmEmailAction, sendCodeAction, signupAction, type SignupState } from "./actions";
+import { checkAddressAction, signupAction, type SignupState } from "./actions";
 
 interface Plan {
   tier: string;
@@ -16,20 +16,66 @@ interface Theme {
   name: string;
   blurb: string;
   live: boolean;
-  /** The original template whose pictures stand in for this one (a published template is drawn on one of the originals' looks). */
   look?: string;
 }
 
-const STEPS = ["You", "Your store", "Address", "Template and plan", "Create"] as const;
+export type StoreCategory = "FASHION" | "BEAUTY" | "ELECTRONICS" | "GROCERY" | "GENERAL";
+
+export const CATEGORY_OPTIONS = [
+  {
+    id: "FASHION" as StoreCategory,
+    name: "Fashion & Apparel",
+    bn: "ফ্যাশন ও পোশাক",
+    icon: "👗",
+    hint: "শাড়ি, পাঞ্জাবি, থ্রি-পিস, জুতা ও ক্লোথিং",
+    theme: "kapor",
+  },
+  {
+    id: "BEAUTY" as StoreCategory,
+    name: "Beauty & Cosmetics",
+    bn: "রূপচর্চা ও প্রসাধনী",
+    icon: "💄",
+    hint: "স্কিনকেয়ার, মেকআপ ও পার্সোনাল কেয়ার",
+    theme: "shondor",
+  },
+  {
+    id: "ELECTRONICS" as StoreCategory,
+    name: "Electronics & Gadgets",
+    bn: "ইলেকট্রনিক্স ও গ্যাজেট",
+    icon: "📱",
+    hint: "মোবাইল এক্সেসরিজ, অডিও ও স্মার্ট ডিভাইস",
+    theme: "boithok",
+  },
+  {
+    id: "GROCERY" as StoreCategory,
+    name: "Grocery & Organics",
+    bn: "মুদি ও অর্গানিক ফুড",
+    icon: "🍯",
+    hint: "মধু, ঘি, মসলা ও খাঁটি অর্গানিক ফুড",
+    theme: "rokomari",
+  },
+  {
+    id: "GENERAL" as StoreCategory,
+    name: "General Store",
+    bn: "জেনারেল স্টোর",
+    icon: "🛍️",
+    hint: "সব ধরণের পণ্য ও বহুমুখী কালেকশন",
+    theme: "kapor",
+  },
+] as const;
+
+const STEPS = ["Store & Category", "Store Address", "Account & Launch"] as const;
+
 const FIELD_STEP: Record<string, number> = {
-  ownerName: 0,
-  email: 0,
-  phone: 0,
-  storeName: 1,
-  tagline: 1,
-  subdomain: 2,
-  theme: 3,
-  plan: 3,
+  storeName: 0,
+  category: 0,
+  tagline: 0,
+  theme: 0,
+  subdomain: 1,
+  ownerName: 2,
+  email: 2,
+  phone: 2,
+  password: 2,
 };
 
 const taka = (n: number) => `৳ ${n.toLocaleString("en-IN")}`;
@@ -48,7 +94,6 @@ export function Wizard({
   initialTheme,
   keepCode = "",
   keptProductsCount,
-  verify = true,
 }: {
   verify?: boolean;
   keepCode?: string;
@@ -62,29 +107,28 @@ export function Wizard({
   const [state, action, pending] = useActionState<SignupState, FormData>(signupAction, {});
   const [step, setStep] = useState(0);
   const [v, setV] = useState({
+    storeName: "",
+    category: "FASHION" as StoreCategory,
+    tagline: "",
+    subdomain: "",
     ownerName: "",
     email: "",
     phone: "",
-    storeName: "",
-    tagline: "",
-    subdomain: "",
-    plan: initialPlan,
-    theme: initialTheme,
+    password: "",
+    confirmPassword: "",
+    plan: initialPlan || "PRO",
+    theme: initialTheme || "kapor",
     demoData: true,
   });
-  // Confirming the email with a code, before anything is created (docs/45).
-  const [proof, setProof] = useState("");
-  const [phase, setPhase] = useState<"form" | "code">("form");
-  const [code, setCode] = useState("");
-  const [pw, setPw] = useState("");
-  const [pw2, setPw2] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
-  const [resendSent, setResendSent] = useState(false);
+
   const [touchedAddress, setTouchedAddress] = useState(false);
+  const [touchedTheme, setTouchedTheme] = useState(false);
   const [address, setAddress] = useState<{ ok: boolean; message: string } | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showThemePicker, setShowThemePicker] = useState(false);
   const checkId = useRef(0);
+
   const set = <K extends keyof typeof v>(k: K, val: (typeof v)[K]) => setV((o) => ({ ...o, [k]: val }));
 
   const [migrationInfo, setMigrationInfo] = useState<{ platform: string; totalProducts: number } | null>(null);
@@ -101,21 +145,14 @@ export function Wizard({
     } catch {}
   }, []);
 
-  // Cooldown countdown for resending verification code
+  // Suggest an address from the store name until the owner types their own
   useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const t = setInterval(() => {
-      setResendCooldown((c) => (c > 0 ? c - 1 : 0));
-    }, 1000);
-    return () => clearInterval(t);
-  }, [resendCooldown]);
-
-  // Suggest an address from the store name until the owner types their own.
-  useEffect(() => {
-    if (!touchedAddress) setV((o) => ({ ...o, subdomain: slug(o.storeName) }));
+    if (!touchedAddress && v.storeName) {
+      setV((o) => ({ ...o, subdomain: slug(o.storeName) }));
+    }
   }, [v.storeName, touchedAddress]);
 
-  // Live address check, a moment after typing stops.
+  // Live address check, a moment after typing stops
   useEffect(() => {
     if (v.subdomain.length < 3) {
       setAddress(null);
@@ -136,68 +173,52 @@ export function Wizard({
     }
   }, [state]);
 
+  function handleCategorySelect(catId: StoreCategory) {
+    const cat = CATEGORY_OPTIONS.find((c) => c.id === catId);
+    set("category", catId);
+    if (!touchedTheme && cat) {
+      // Suggest matching theme if available
+      const matching = themes.find((t) => t.id === cat.theme && t.live);
+      if (matching) {
+        set("theme", matching.id);
+      }
+    }
+  }
+
   function validate(s: number): string | null {
     if (s === 0) {
-      if (v.ownerName.trim().length < 2) return "Enter your name";
-      if (!/^\S+@\S+\.\S+$/.test(v.email.trim())) return "Enter a valid email address";
-      if (!/^(\+?88)?01[3-9]\d{8}$/.test(v.phone.replace(/[\s-]/g, "")))
-        return "Enter a valid mobile number, like 01712345678";
+      if (v.storeName.trim().length < 2) return "Enter your store name (at least 2 letters)";
     }
-    if (s === 1 && v.storeName.trim().length < 2) return "Enter your store name";
-    if (s === 2) {
+    if (s === 1) {
       if (v.subdomain.length < 3) return "Choose an address of at least 3 letters or numbers";
       if (address && !address.ok) return address.message;
+    }
+    if (s === 2) {
+      if (v.ownerName.trim().length < 2) return "Enter your full name";
+      if (!/^\S+@\S+\.\S+$/.test(v.email.trim())) return "Enter a valid email address for store admin login";
+      const cleanPhone = v.phone.replace(/[\s-]/g, "");
+      if (!/^(\+?88)?01[3-9]\d{8}$/.test(cleanPhone)) {
+        return "Enter a valid Bangladeshi mobile number (e.g. 01712345678)";
+      }
+      if (v.password.length < 8) return "Password must be at least 8 characters";
+      if (v.password !== v.confirmPassword) return "The two passwords do not match";
     }
     return null;
   }
 
-  async function next() {
+  function next() {
     const p = validate(step);
     setProblem(p);
     if (p) return;
-    if (step === 0 && verify && !proof) {
-      setBusy(true);
-      const r = await sendCodeAction(v.email, "both").catch(() => ({ ok: false, error: "We could not send the code. Please try again." }));
-      setBusy(false);
-      if (!r.ok) return setProblem(r.error ?? "We could not send the code.");
-      setCode("");
-      setResendCooldown(30);
-      return setPhase("code");
-    }
+    setProblem(null);
     setStep(step + 1);
   }
 
-  async function handleResendCode() {
-    if (resendCooldown > 0 || busy) return;
-    setBusy(true);
-    setProblem(null);
-    const r = await sendCodeAction(v.email, "both").catch(() => ({ ok: false, error: "We could not send the code. Please try again." }));
-    setBusy(false);
-    if (!r.ok) {
-      setProblem(r.error ?? "We could not send the code.");
-      return;
-    }
-    setResendCooldown(30);
-    setResendSent(true);
-    setTimeout(() => setResendSent(false), 3000);
-  }
-
-  async function confirm() {
-    if (pw !== pw2) return setProblem("The two passwords are not the same.");
-    setBusy(true);
-    const r = await confirmEmailAction(v.email, code, pw).catch(() => ({ error: "We could not check the code. Please try again." }) as { error?: string; proof?: string });
-    setBusy(false);
-    if (!("proof" in r) || !r.proof) return setProblem(r.error ?? "That code is not right.");
-    setProblem(null);
-    setProof(r.proof);
-    setPw("");
-    setPw2("");
-    setPhase("form");
-    setStep(1);
-  }
-
-  const chosenPlan = plans.find((p) => p.tier === v.plan);
-  const chosenTheme = themes.find((t) => t.id === v.theme);
+  const chosenCat = CATEGORY_OPTIONS.find((c) => c.id === v.category) || CATEGORY_OPTIONS[0];
+  const defaultTheme: Theme = { id: "kapor", name: "Kapor", blurb: "Modern fashion & apparel theme", live: true };
+  const chosenTheme: Theme = themes.find((t) => t.id === v.theme) ?? themes[0] ?? defaultTheme;
+  const defaultPlan: Plan = { tier: "PRO", name: "Pro Plan", priceMonthly: 1499, blurb: "Full features with 14-day free trial" };
+  const chosenPlan: Plan = plans.find((p) => p.tier === v.plan) ?? plans[0] ?? defaultPlan;
   const displayHost = rootDomain.replace(/:\d+$/, "");
 
   return (
@@ -211,14 +232,33 @@ export function Wizard({
         )}
 
         <form action={action} className="wizard" data-testid="wizard" noValidate>
-          <div style={{ marginBottom: 24 }}>
-            <span className="eyebrow" style={{ marginBottom: 8 }}>14-Day Free Trial</span>
-            <h1 style={{ margin: 0 }}>Open your store</h1>
-            <p className="muted" style={{ marginTop: 6, fontSize: 15 }}>
-              Launch your online store in a day. Sell with bKash, Nagad, and Cash on Delivery.
+          <div style={{ marginBottom: 20 }}>
+            <span
+              className="eyebrow"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "4px 10px",
+                borderRadius: 99,
+                background: "var(--tint)",
+                color: "var(--brand)",
+                fontWeight: 700,
+                fontSize: 12,
+                marginBottom: 10,
+              }}
+            >
+              <span>✨</span> 14-Day Free Pro Trial · No Credit Card Required
+            </span>
+            <h1 style={{ margin: 0, fontSize: "clamp(24px, 4vw, 32px)", lineHeight: 1.2 }}>
+              Launch your online store in 30 seconds
+            </h1>
+            <p className="muted" style={{ marginTop: 6, fontSize: 14.5 }}>
+              Sell online across Bangladesh with Cash on Delivery, bKash, and automated courier pickup.
             </p>
           </div>
 
+          {/* Stepper Indicator */}
           <div
             className="progress"
             role="progressbar"
@@ -226,22 +266,42 @@ export function Wizard({
             aria-valuemax={STEPS.length}
             aria-valuenow={step + 1}
             aria-label={`Step ${step + 1} of ${STEPS.length}: ${STEPS[step]}`}
+            style={{ marginBottom: 24 }}
           >
             {STEPS.map((s, i) => (
-              <i key={s} className={i <= step ? "on" : ""} />
+              <div key={s} style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+                <i className={i <= step ? "on" : ""} style={{ height: 6 }} />
+                <span
+                  style={{
+                    fontSize: 11.5,
+                    fontWeight: i === step ? 700 : 500,
+                    color: i === step ? "var(--brand)" : i < step ? "var(--ink-2)" : "var(--ink-3)",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {i + 1}. {s}
+                </span>
+              </div>
             ))}
           </div>
 
-          {/* Hidden values posted with form */}
-          {Object.entries(v).map(([k, val]) =>
-            k === "demoData" ? (
-              val ? <input key={k} type="hidden" name={k} value="on" /> : null
-            ) : (
-              <input key={k} type="hidden" name={k} value={String(val)} />
-            )
-          )}
-          <input type="hidden" name="proof" value={proof} />
+          {/* Hidden Form Inputs */}
+          <input type="hidden" name="storeName" value={v.storeName} />
+          <input type="hidden" name="category" value={v.category} />
+          <input type="hidden" name="tagline" value={v.tagline} />
+          <input type="hidden" name="subdomain" value={v.subdomain} />
+          <input type="hidden" name="ownerName" value={v.ownerName} />
+          <input type="hidden" name="email" value={v.email} />
+          <input type="hidden" name="phone" value={v.phone} />
+          <input type="hidden" name="password" value={v.password} />
+          <input type="hidden" name="plan" value={v.plan} />
+          <input type="hidden" name="theme" value={v.theme} />
+          {v.demoData && <input type="hidden" name="demoData" value="on" />}
           {keepCode && <input type="hidden" name="from" value={keepCode} />}
+
+          {/* Honeypot field */}
           <div className="hp" aria-hidden="true">
             <label>
               Website
@@ -250,130 +310,208 @@ export function Wizard({
           </div>
 
           {migrationInfo && (
-            <div style={{ background: "var(--tint)", border: "1px solid var(--tint-border)", borderRadius: "var(--radius-sm)", padding: "10px 14px", marginBottom: 16, display: "flex", alignItems: "center", gap: 10, fontSize: 13.5, color: "var(--ink)" }}>
+            <div
+              style={{
+                background: "var(--tint)",
+                border: "1px solid var(--tint-border)",
+                borderRadius: "var(--radius-sm)",
+                padding: "10px 14px",
+                marginBottom: 16,
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                fontSize: 13.5,
+                color: "var(--ink)",
+              }}
+            >
               <span style={{ fontSize: 16 }}>📦</span>
               <div>
-                <b>{migrationInfo.totalProducts} products detected from {migrationInfo.platform.toUpperCase()}</b>. After your store is created, your catalog can be imported directly in Store Admin &rarr; Products &rarr; Import.
+                <b>{migrationInfo.totalProducts} products detected from {migrationInfo.platform.toUpperCase()}</b>.
+                After your store is created, your catalog can be imported directly in Store Admin &rarr; Products &rarr; Import.
               </div>
             </div>
           )}
 
-          {/* Step 0: You */}
-          {step === 0 && phase === "code" && (
-            <div data-testid="step-code">
-              <h2 style={{ fontSize: 20, marginBottom: 8, color: "var(--ink)" }}>Confirm your email</h2>
-              <p className="muted" style={{ marginBottom: 16, fontSize: 15 }}>We sent a code to <b>{v.email}</b>. Type it here, then choose a password for signing in.</p>
-              <label className="field">
-                <span className="label">Code from the email</span>
-                <input className="input" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={(e) => setCode(e.target.value)} data-testid="f-code" />
-              </label>
-              <label className="field">
-                <span className="label">Choose a password</span>
-                <input className="input" type="password" autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} data-testid="f-password" />
-                <span className="hint">At least 10 characters. If you already use BizTrackBD with this email, leave both password boxes empty and your new store joins your account.</span>
-              </label>
-              <label className="field">
-                <span className="label">Type the password again</span>
-                <input className="input" type="password" autoComplete="new-password" value={pw2} onChange={(e) => setPw2(e.target.value)} data-testid="f-password2" />
-              </label>
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", marginTop: 14 }}>
-                <button type="button" className="btn btn-primary btn-lg" onClick={confirm} disabled={busy} data-testid="confirm-email">{busy ? "Checking…" : "Confirm and continue"}</button>
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-lg"
-                  onClick={handleResendCode}
-                  disabled={busy || resendCooldown > 0}
-                  data-testid="resend-code"
-                >
-                  {resendCooldown > 0 ? `Resend code (${resendCooldown}s)` : "Resend code"}
-                </button>
-                <button type="button" className="btn btn-secondary btn-lg" onClick={() => { setProblem(null); setPhase("form"); }}>Change email</button>
-                {resendSent && <span style={{ color: "#059669", fontSize: 13.5, fontWeight: 600 }}>✓ Code sent!</span>}
-              </div>
-            </div>
-          )}
+          {/* STEP 1: Store & Category */}
+          {step === 0 && (
+            <div data-testid="step-store-category">
+              <h2 style={{ fontSize: 19, marginBottom: 14, color: "var(--ink)", fontWeight: 700 }}>
+                1. What is your store called & what do you sell?
+              </h2>
 
-          {step === 0 && phase === "form" && (
-            <div data-testid="step-you">
-              <h2 style={{ fontSize: 20, marginBottom: 16, color: "var(--ink)" }}>Who are you?</h2>
               <label className="field">
-                <span className="label">Your name</span>
+                <span className="label">Store name *</span>
                 <input
                   className="input"
-                  autoComplete="name"
-                  placeholder="e.g. Tanvir Ahmed"
-                  value={v.ownerName}
-                  onChange={(e) => set("ownerName", e.target.value)}
-                  data-testid="f-ownerName"
-                />
-              </label>
-              <label className="field">
-                <span className="label">Email address</span>
-                <input
-                  className="input"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="tanvir@example.com"
-                  value={v.email}
-                  onChange={(e) => { set("email", e.target.value); setProof(""); }}
-                  data-testid="f-email"
-                />
-                <span className="hint">For your store admin login and receipts.</span>
-              </label>
-              <label className="field">
-                <span className="label">Mobile number</span>
-                <input
-                  className="input"
-                  type="tel"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  placeholder="01712345678"
-                  value={v.phone}
-                  onChange={(e) => set("phone", e.target.value)}
-                  data-testid="f-phone"
-                />
-                <span className="hint">We use this for SMS security codes and Dhaka support.</span>
-              </label>
-            </div>
-          )}
-
-          {/* Step 1: Your store */}
-          {step === 1 && (
-            <div data-testid="step-store">
-              <h2 style={{ fontSize: 20, marginBottom: 16, color: "var(--ink)" }}>What is your store called?</h2>
-              <label className="field">
-                <span className="label">Store name</span>
-                <input
-                  className="input"
-                  placeholder="e.g. Dhaka Artisan Crafts"
+                  autoFocus
+                  placeholder="e.g. Dhaka Artisan Crafts, Aarohi Fashion, Gadget Pulse"
                   value={v.storeName}
                   onChange={(e) => set("storeName", e.target.value)}
                   data-testid="f-storeName"
                 />
+                <span className="hint">This appears on your storefront, customer invoices, and SMS receipts.</span>
               </label>
-              <label className="field">
+
+              <div className="field" style={{ marginTop: 14 }}>
+                <span className="label">Select your business category *</span>
+                <span className="hint" style={{ marginBottom: 6 }}>
+                  Pre-configures your starter catalog, sizes, attributes, and courier shipping zones.
+                </span>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+                    gap: 10,
+                  }}
+                >
+                  {CATEGORY_OPTIONS.map((cat) => {
+                    const selected = v.category === cat.id;
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        data-testid={`category-${cat.id.toLowerCase()}`}
+                        onClick={() => handleCategorySelect(cat.id)}
+                        style={{
+                          textAlign: "left",
+                          padding: "12px 14px",
+                          borderRadius: 12,
+                          border: selected ? "2px solid var(--brand)" : "1.5px solid var(--line)",
+                          background: selected ? "var(--tint)" : "#FFFFFF",
+                          cursor: "pointer",
+                          transition: "all 0.15s ease",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 4,
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <span style={{ fontSize: 22 }}>{cat.icon}</span>
+                          {selected && (
+                            <span
+                              style={{
+                                fontSize: 11,
+                                fontWeight: 700,
+                                color: "#FFFFFF",
+                                background: "var(--brand)",
+                                padding: "2px 6px",
+                                borderRadius: 6,
+                              }}
+                            >
+                              Selected
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontWeight: 700, fontSize: 13.5, color: "var(--ink)" }}>{cat.name}</div>
+                        <div style={{ fontSize: 11.5, color: "var(--brand)", fontWeight: 600 }}>{cat.bn}</div>
+                        <div style={{ fontSize: 11.5, color: "var(--ink-3)", lineHeight: 1.3, marginTop: 2 }}>
+                          {cat.hint}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <label className="field" style={{ marginTop: 16 }}>
                 <span className="label">
-                  One-line tagline <span className="hint">(optional)</span>
+                  One-line tagline <span className="hint" style={{ fontWeight: 400 }}>(optional)</span>
                 </span>
                 <input
                   className="input"
                   maxLength={120}
-                  placeholder="Handloom sarees and cotton panjabis from Narayanganj"
+                  placeholder="e.g. Authentic handloom sarees & pure cotton panjabi from Narayanganj"
                   value={v.tagline}
                   onChange={(e) => set("tagline", e.target.value)}
                   data-testid="f-tagline"
                 />
               </label>
+
+              {/* Collapsible Storefront Template Selection */}
+              <div
+                style={{
+                  marginTop: 18,
+                  padding: "14px 16px",
+                  border: "1px solid var(--line)",
+                  borderRadius: 12,
+                  background: "var(--soft)",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div>
+                    <span style={{ fontSize: 13.5, fontWeight: 700, color: "var(--ink)" }}>
+                      Storefront Template: <b>{chosenTheme.name}</b>
+                    </span>
+                    <p style={{ margin: "2px 0 0", fontSize: 12.5, color: "var(--ink-3)" }}>
+                      Tailored for {chosenCat.name}. You can switch themes at any time.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowThemePicker(!showThemePicker)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "var(--brand)",
+                      fontWeight: 700,
+                      fontSize: 12.5,
+                      cursor: "pointer",
+                      padding: "4px 8px",
+                    }}
+                  >
+                    {showThemePicker ? "Hide options ▲" : "Change template ▼"}
+                  </button>
+                </div>
+
+                {showThemePicker && (
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))",
+                      gap: 8,
+                      marginTop: 12,
+                      paddingTop: 12,
+                      borderTop: "1px solid var(--line)",
+                    }}
+                  >
+                    {themes.map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => {
+                          setTouchedTheme(true);
+                          set("theme", t.id);
+                        }}
+                        disabled={!t.live}
+                        style={{
+                          textAlign: "left",
+                          padding: "8px 10px",
+                          borderRadius: 8,
+                          border: v.theme === t.id ? "2px solid var(--brand)" : "1px solid var(--line)",
+                          background: v.theme === t.id ? "#FFFFFF" : "transparent",
+                          cursor: t.live ? "pointer" : "not-allowed",
+                          opacity: t.live ? 1 : 0.5,
+                        }}
+                      >
+                        <b style={{ fontSize: 12.5, color: "var(--ink)" }}>{t.name}</b>
+                        <div style={{ fontSize: 11, color: "var(--ink-3)", marginTop: 2 }}>{t.blurb}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
-          {/* Step 2: Address */}
-          {step === 2 && (
+          {/* STEP 2: Store Web Address */}
+          {step === 1 && (
             <div data-testid="step-address">
-              <h2 style={{ fontSize: 20, marginBottom: 16, color: "var(--ink)" }}>Choose your store web address</h2>
+              <h2 style={{ fontSize: 19, marginBottom: 14, color: "var(--ink)", fontWeight: 700 }}>
+                2. Choose your store web address
+              </h2>
               <div className="field">
                 <label className="label" htmlFor="sub">
-                  Free web address
+                  Store Subdomain URL *
                 </label>
                 <div className="addr">
                   <input
@@ -390,18 +528,52 @@ export function Wizard({
                     aria-invalid={address ? !address.ok : undefined}
                     aria-describedby="sub-msg"
                     data-testid="f-subdomain"
+                    placeholder="yourshop"
                   />
                   <span>.{displayHost}</span>
                 </div>
-                <div id="sub-msg" aria-live="polite" data-testid="address-status" style={{ marginTop: 6 }}>
+
+                <div id="sub-msg" aria-live="polite" data-testid="address-status" style={{ marginTop: 8 }}>
                   {address &&
                     (address.ok ? (
-                      <span className="ok">✓ {v.subdomain}.{displayHost} is available!</span>
+                      <div
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 6,
+                          background: "#ECFDF5",
+                          border: "1px solid #A7F3D0",
+                          borderRadius: 8,
+                          padding: "6px 12px",
+                          color: "#065F46",
+                          fontSize: 13,
+                          fontWeight: 600,
+                        }}
+                      >
+                        <span>✓</span>
+                        <span>{v.subdomain}.{displayHost} is free & ready to claim!</span>
+                      </div>
                     ) : (
                       <div>
-                        <span className="err">✗ {address.message}</span>
+                        <div
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 6,
+                            background: "#FEF2F2",
+                            border: "1px solid #FECACA",
+                            borderRadius: 8,
+                            padding: "6px 12px",
+                            color: "#991B1B",
+                            fontSize: 13,
+                            fontWeight: 600,
+                          }}
+                        >
+                          <span>✗</span>
+                          <span>{address.message}</span>
+                        </div>
                         {address.message.toLowerCase().includes("taken") && (
-                          <div style={{ marginTop: 8, fontSize: 13 }}>
+                          <div style={{ marginTop: 10, fontSize: 13 }}>
                             <span className="muted" style={{ marginRight: 6 }}>Available suggestions:</span>
                             {[
                               `${v.subdomain}-bd`,
@@ -420,10 +592,11 @@ export function Wizard({
                                     marginTop: 4,
                                     fontSize: 12.5,
                                     fontWeight: 600,
-                                    padding: "3px 10px",
+                                    padding: "4px 10px",
                                     border: "1px solid var(--line, #e2e8f0)",
                                     borderRadius: 6,
                                     background: "#fff",
+                                    color: "var(--brand)",
                                   }}
                                   onClick={() => {
                                     setTouchedAddress(true);
@@ -438,133 +611,135 @@ export function Wizard({
                       </div>
                     ))}
                 </div>
-                <span className="hint">
-                  You can connect your own custom domain (e.g. yourbrand.com) at any time.
-                </span>
+
+                <div
+                  style={{
+                    marginTop: 14,
+                    padding: "12px 14px",
+                    background: "var(--soft)",
+                    borderRadius: 10,
+                    border: "1px solid var(--line)",
+                    fontSize: 13,
+                    color: "var(--ink-2)",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  💡 <b>Custom Domains Included:</b> You can connect your own custom domain (e.g.{" "}
+                  <code style={{ background: "#fff", padding: "1px 5px", borderRadius: 4 }}>www.{v.subdomain || "yourbrand"}.com</code>
+                  ) with free automated SSL certificate at any time inside Store Admin.
+                </div>
               </div>
             </div>
           )}
 
-          {/* Step 3: Template and plan */}
-          {step === 3 && (
-            <div data-testid="step-plan">
-              <h2 style={{ fontSize: 20, marginBottom: 16, color: "var(--ink)" }}>Pick a storefront template & plan</h2>
-              
-              <fieldset className="field" style={{ border: 0, padding: 0 }}>
-                <legend className="label" style={{ marginBottom: 10 }}>
-                  Choose storefront look
-                </legend>
-                <div className="choice">
-                  {themes.map((t) => (
-                    <label
-                      key={t.id}
-                      className={`opt${t.live ? "" : " disabled"}`}
+          {/* STEP 3: Owner Credentials & Launch */}
+          {step === 2 && (
+            <div data-testid="step-account">
+              <h2 style={{ fontSize: 19, marginBottom: 14, color: "var(--ink)", fontWeight: 700 }}>
+                3. Store owner credentials & password
+              </h2>
+
+              <label className="field">
+                <span className="label">Your full name *</span>
+                <input
+                  className="input"
+                  autoComplete="name"
+                  placeholder="e.g. Tanvir Ahmed"
+                  value={v.ownerName}
+                  onChange={(e) => set("ownerName", e.target.value)}
+                  data-testid="f-ownerName"
+                />
+              </label>
+
+              <label className="field">
+                <span className="label">Mobile number *</span>
+                <input
+                  className="input"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  placeholder="01712345678"
+                  value={v.phone}
+                  onChange={(e) => set("phone", e.target.value)}
+                  data-testid="f-phone"
+                />
+                <span className="hint">Used for SMS order alerts, courier sync, and Dhaka support.</span>
+              </label>
+
+              <label className="field">
+                <span className="label">Email address *</span>
+                <input
+                  className="input"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="tanvir@example.com"
+                  value={v.email}
+                  onChange={(e) => set("email", e.target.value)}
+                  data-testid="f-email"
+                />
+                <span className="hint">Your main Store Admin login email.</span>
+              </label>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <label className="field">
+                  <span className="label">Choose password *</span>
+                  <div style={{ position: "relative" }}>
+                    <input
+                      className="input"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      placeholder="At least 8 chars"
+                      value={v.password}
+                      onChange={(e) => set("password", e.target.value)}
+                      data-testid="f-password"
+                      style={{ paddingRight: 40 }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
                       style={{
-                        borderColor: v.theme === t.id ? "var(--brand)" : "var(--line)",
-                        background: v.theme === t.id ? "var(--tint)" : "#FFFFFF",
+                        position: "absolute",
+                        right: 10,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        fontSize: 14,
+                        color: "var(--ink-3)",
                       }}
+                      tabIndex={-1}
+                      title={showPassword ? "Hide password" : "Show password"}
                     >
-                      <input
-                        type="radio"
-                        name="theme_pick"
-                        checked={v.theme === t.id}
-                        disabled={!t.live}
-                        onChange={() => set("theme", t.id)}
-                      />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <b>{t.name}</b>
-                          {!t.live && <span className="pill">Coming soon</span>}
-                        </div>
-                        <div className="muted" style={{ fontSize: 13.5, marginTop: 2 }}>
-                          {t.blurb}
-                        </div>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
+                      {showPassword ? "🙈" : "👁️"}
+                    </button>
+                  </div>
+                </label>
 
-              <fieldset className="field" style={{ border: 0, padding: 0, marginTop: 14 }}>
-                <legend className="label" style={{ marginBottom: 10 }}>
-                  Select your 14-day free trial plan
-                </legend>
-                <div className="choice">
-                  {plans.map((p) => {
-                    const isSelected = v.plan === p.tier;
-                    return (
-                      <label
-                        key={p.tier}
-                        className="opt"
-                        data-testid={`pick-${p.tier}`}
-                        style={{
-                          borderColor: isSelected ? "var(--brand)" : "var(--line)",
-                          background: isSelected ? "var(--tint)" : "#FFFFFF",
-                        }}
-                      >
-                        <input
-                          type="radio"
-                          name="plan_pick"
-                          checked={isSelected}
-                          onChange={() => set("plan", p.tier)}
-                        />
-                        <div style={{ flex: 1 }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                            <b>{p.name}</b>
-                            <span className="num" style={{ fontWeight: 700, color: "var(--brand)" }}>
-                              {taka(p.priceMonthly)} / month
-                            </span>
-                          </div>
-                          <div className="muted" style={{ fontSize: 13.5, marginTop: 2 }}>
-                            {p.blurb} · <strong>14 days free (৳ 0 today)</strong>
-                          </div>
-                        </div>
-                      </label>
-                    );
-                  })}
-                </div>
-                <span className="hint" style={{ marginTop: 6 }}>
-                  No payment needed today. You can switch or cancel plans at any time.
-                </span>
-              </fieldset>
-            </div>
-          )}
+                <label className="field">
+                  <span className="label">Confirm password *</span>
+                  <input
+                    className="input"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    placeholder="Repeat password"
+                    value={v.confirmPassword}
+                    onChange={(e) => set("confirmPassword", e.target.value)}
+                    data-testid="f-confirmPassword"
+                  />
+                </label>
+              </div>
 
-          {/* Step 4: Create */}
-          {step === 4 && (
-            <div data-testid="step-create">
-              <h2 style={{ fontSize: 20, marginBottom: 16, color: "var(--ink)" }}>Ready to launch your store</h2>
-              <div
-                className="card"
+              {/* Starter Catalog Pre-seeding checkbox */}
+              <label
+                className="opt"
                 style={{
-                  marginBottom: 18,
-                  background: "var(--soft)",
-                  border: "1px solid var(--line)",
-                  borderRadius: 12,
-                  padding: 18,
+                  marginTop: 10,
+                  marginBottom: 16,
+                  borderColor: v.demoData ? "var(--brand)" : "var(--line)",
+                  background: v.demoData ? "var(--tint)" : "#FFFFFF",
                 }}
               >
-                <dl style={{ margin: 0, display: "grid", gridTemplateColumns: "auto 1fr", gap: "10px 20px" }}>
-                  <dt className="muted">Store</dt>
-                  <dd style={{ margin: 0, fontWeight: 700, color: "var(--ink)" }}>{v.storeName}</dd>
-                  <dt className="muted">Address</dt>
-                  <dd style={{ margin: 0, color: "var(--brand)", fontWeight: 600, fontFamily: "monospace" }}>
-                    {v.subdomain}.{displayHost}
-                  </dd>
-                  <dt className="muted">Owner</dt>
-                  <dd style={{ margin: 0, color: "var(--ink)" }}>
-                    {v.ownerName} ({v.email})
-                  </dd>
-                  <dt className="muted">Template</dt>
-                  <dd style={{ margin: 0, color: "var(--ink)" }}>{chosenTheme?.name}</dd>
-                  <dt className="muted">Plan</dt>
-                  <dd style={{ margin: 0, color: "var(--ink)" }}>
-                    {chosenPlan?.name} (14 days free trial, no card needed)
-                  </dd>
-                </dl>
-              </div>
-
-              <label className="opt" style={{ marginBottom: 18 }}>
                 <input
                   type="checkbox"
                   checked={v.demoData}
@@ -572,28 +747,55 @@ export function Wizard({
                   data-testid="f-demo"
                 />
                 <div>
-                  <b>Populate sample products</b>
-                  <div className="muted" style={{ fontSize: 13.5, marginTop: 2 }}>
-                    Add three starter products with prices and sizes so you can test orders and courier bookings immediately. You can delete or replace them anytime.
+                  <b style={{ color: "var(--ink)", fontSize: 14 }}>
+                    Pre-populate {chosenCat.name} sample catalog ({chosenCat.icon})
+                  </b>
+                  <div className="muted" style={{ fontSize: 13, marginTop: 2, lineHeight: 1.4 }}>
+                    Includes 3 sample products with Bangladeshi pricing, size/weight variants, and Dhaka / Outside Dhaka delivery rates. You can test orders immediately and edit or delete them anytime.
                   </div>
                 </div>
               </label>
 
+              {/* 14-day Free Pro Trial Banner */}
+              <div
+                style={{
+                  border: "1.5px solid #A7F3D0",
+                  background: "#ECFDF5",
+                  borderRadius: 12,
+                  padding: "14px 16px",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 12,
+                  marginBottom: 14,
+                }}
+              >
+                <span style={{ fontSize: 22 }}>🎁</span>
+                <div style={{ flex: 1, fontSize: 13.5, color: "#065F46" }}>
+                  <b style={{ display: "block", fontSize: 14, marginBottom: 2 }}>
+                    Pro Plan Free Trial Activated (14 Days · ৳0 Today)
+                  </b>
+                  <span>
+                    Includes POS billing, Barcode generator, Steadfast/Pathao courier booking, and bKash/Nagad checkout. No credit card required.
+                  </span>
+                </div>
+              </div>
+
               {state.error && (
                 <div className="notice bad" role="alert" style={{ marginBottom: 14 }} data-testid="signup-error">
-                  {state.error}
+                  ⚠️ {state.error}
                 </div>
               )}
             </div>
           )}
 
-          {problem && step < 4 && (
+          {problem && (
             <div className="err" role="alert" style={{ marginBottom: 14 }} data-testid="step-problem">
               ⚠️ {problem}
             </div>
           )}
 
-          <div className="nav-row" style={{ marginTop: 20, ...(step === 0 && phase === "code" ? { display: "none" } : {}) }}>
+          {/* Navigation Buttons */}
+          <div className="nav-row" style={{ marginTop: 20 }}>
             {step > 0 && (
               <button
                 key="back"
@@ -603,20 +805,21 @@ export function Wizard({
                   setProblem(null);
                   setStep(step - 1);
                 }}
+                disabled={pending}
               >
-                Back
+                ← Back
               </button>
             )}
-            {step < 4 ? (
+            {step < 2 ? (
               <button
                 key="next"
                 type="button"
                 className="btn btn-primary btn-lg"
                 onClick={next}
-                disabled={busy}
+                disabled={pending}
                 data-testid="next"
               >
-                {busy ? "Sending the code…" : "Next Step →"}
+                Continue to {STEPS[step + 1]} →
               </button>
             ) : (
               <button
@@ -625,14 +828,18 @@ export function Wizard({
                 className="btn btn-primary btn-lg"
                 disabled={pending}
                 data-testid="create"
+                style={{
+                  background: pending ? "#4338CA" : "var(--brand)",
+                  boxShadow: "0 4px 14px rgba(79, 70, 229, 0.35)",
+                }}
               >
-                {pending ? "Creating your store…" : "Launch my store 🚀"}
+                {pending ? "Creating your store…" : "Launch My Store 🚀"}
               </button>
             )}
           </div>
 
-          <p className="hint" style={{ marginTop: 18, fontSize: 13, lineHeight: 1.5 }}>
-            By opening a store, you agree to our Terms. We never hold your customer money or take commissions.
+          <p className="hint" style={{ marginTop: 18, fontSize: 12.5, lineHeight: 1.5, textAlign: "center" }}>
+            By creating a store, you agree to BizTrackBD Terms. 100% of customer payments go directly to your personal or merchant account. 0% sales commission.
           </p>
         </form>
       </div>
@@ -640,20 +847,31 @@ export function Wizard({
       {/* Right Column: Dynamic Live Preview & Timeline Sidebar */}
       <aside className="split-side" aria-label="Store Preview & Guarantee">
         <div className="side-card">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
             <span className="eyebrow" style={{ margin: 0, fontSize: 11.5 }}>Live Store Preview</span>
-            <span className="pill live" style={{ fontSize: 11 }}>14 Days Free</span>
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: "#065F46",
+                background: "#D1FAE5",
+                padding: "2px 8px",
+                borderRadius: 99,
+              }}
+            >
+              14 Days Free Pro
+            </span>
           </div>
 
           <div
             style={{
               position: "relative",
-              height: 190,
+              height: 185,
               borderRadius: 12,
               overflow: "hidden",
               background: "var(--soft)",
               border: "1px solid var(--line)",
-              marginBottom: 16,
+              marginBottom: 14,
             }}
           >
             <Image
@@ -686,10 +904,16 @@ export function Wizard({
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13.5 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 9, fontSize: 13 }}>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
               <span style={{ color: "var(--ink-3)", fontWeight: 600 }}>Store name:</span>
-              <b style={{ color: "var(--ink)" }}>{v.storeName || "My Online Store"}</b>
+              <b style={{ color: "var(--ink)", textAlign: "right" }}>{v.storeName || "My Online Store"}</b>
+            </div>
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+              <span style={{ color: "var(--ink-3)", fontWeight: 600 }}>Category:</span>
+              <span style={{ color: "var(--ink)", fontWeight: 600 }}>
+                {chosenCat.icon} {chosenCat.name}
+              </span>
             </div>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
               <span style={{ color: "var(--ink-3)", fontWeight: 600 }}>Web address:</span>
@@ -702,43 +926,43 @@ export function Wizard({
               <span style={{ color: "var(--ink)", fontWeight: 600 }}>{chosenTheme?.name || "Kapor"}</span>
             </div>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--ink-3)", fontWeight: 600 }}>Selected plan:</span>
+              <span style={{ color: "var(--ink-3)", fontWeight: 600 }}>Plan:</span>
               <span style={{ color: "var(--ink)", fontWeight: 600 }}>
-                {chosenPlan?.name} ({taka(chosenPlan?.priceMonthly || 699)}/mo)
+                {chosenPlan?.name} (Free Trial, {taka(chosenPlan?.priceMonthly || 699)}/mo after)
               </span>
             </div>
           </div>
         </div>
 
         <div className="side-card">
-          <span className="eyebrow" style={{ fontSize: 11.5, marginBottom: 14 }}>
-            What happens next
+          <span className="eyebrow" style={{ fontSize: 11.5, marginBottom: 12 }}>
+            What happens immediately
           </span>
-          <div style={{ display: "grid", gap: 16 }}>
+          <div style={{ display: "grid", gap: 14 }}>
             <div className="timeline-item">
               <div className="timeline-dot">1</div>
               <div>
-                <b style={{ fontSize: 14, color: "var(--ink)" }}>Store opens immediately</b>
-                <p className="muted" style={{ fontSize: 13, marginTop: 2, lineHeight: 1.5 }}>
-                  Your store goes live at your address. Add your products and upload photos from your phone.
+                <b style={{ fontSize: 13.5, color: "var(--ink)" }}>1-Click Auto Login</b>
+                <p className="muted" style={{ fontSize: 12.5, marginTop: 2, lineHeight: 1.4 }}>
+                  No password re-prompts or verification blockers. You will be logged straight into your Store Admin dashboard.
                 </p>
               </div>
             </div>
             <div className="timeline-item">
               <div className="timeline-dot">2</div>
               <div>
-                <b style={{ fontSize: 14, color: "var(--ink)" }}>Connect bKash & Nagad</b>
-                <p className="muted" style={{ fontSize: 13, marginTop: 2, lineHeight: 1.5 }}>
-                  Enter your merchant or personal bKash number. 100% of customer money goes directly to your wallet.
+                <b style={{ fontSize: 13.5, color: "var(--ink)" }}>Starter Catalog Ready</b>
+                <p className="muted" style={{ fontSize: 12.5, marginTop: 2, lineHeight: 1.4 }}>
+                  Your {chosenCat.name} starter items, variants, and Dhaka delivery fees are pre-loaded to test orders right away.
                 </p>
               </div>
             </div>
             <div className="timeline-item">
               <div className="timeline-dot">3</div>
               <div>
-                <b style={{ fontSize: 14, color: "var(--ink)" }}>Ship with local couriers</b>
-                <p className="muted" style={{ fontSize: 13, marginTop: 2, lineHeight: 1.5 }}>
-                  Enter your Steadfast or Pathao API keys for 1-click automated pickup dispatch.
+                <b style={{ fontSize: 13.5, color: "var(--ink)" }}>bKash & Courier Integration</b>
+                <p className="muted" style={{ fontSize: 12.5, marginTop: 2, lineHeight: 1.4 }}>
+                  Connect your Steadfast/Pathao API and bKash merchant number with a single click.
                 </p>
               </div>
             </div>
@@ -747,19 +971,19 @@ export function Wizard({
           <div
             style={{
               borderTop: "1px solid var(--line)",
-              marginTop: 18,
-              paddingTop: 14,
+              marginTop: 16,
+              paddingTop: 12,
               display: "flex",
-              gap: 12,
-              flexWrap: "wrap",
-              fontSize: 12.5,
+              flexDirection: "column",
+              gap: 6,
+              fontSize: 12,
               color: "var(--ink-2)",
               fontWeight: 600,
             }}
           >
-            <span>🔒 We never touch your money</span>
-            <span>💳 0% sales commission</span>
-            <span>📱 Bangla SMS notifications</span>
+            <div>🔒 100% money goes directly to you (0% commission)</div>
+            <div>🚚 Steadfast, Pathao & RedX 1-click booking</div>
+            <div>🇧🇩 Dhaka support hotline & Bengali SMS updates</div>
           </div>
         </div>
       </aside>

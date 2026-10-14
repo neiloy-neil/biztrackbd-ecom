@@ -31,7 +31,10 @@ export function resolveReportRange(
 
   const requestedKey = params.range?.toLowerCase().trim();
 
-  if (params.from && params.to && DATE_REGEX.test(params.from) && DATE_REGEX.test(params.to)) {
+  if (params.from || params.to) {
+    if (!params.from || !params.to || !DATE_REGEX.test(params.from) || !DATE_REGEX.test(params.to)) {
+      throw new ValidationError("Choose valid 'From' and 'To' dates in YYYY-MM-DD format");
+    }
     if (params.from > params.to) {
       throw new ValidationError("'From' date must be before or equal to 'To' date");
     }

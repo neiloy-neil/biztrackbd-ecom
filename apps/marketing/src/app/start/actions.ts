@@ -29,10 +29,24 @@ export async function signupAction(_prev: SignupState, form: FormData): Promise<
   const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
   if (tooMany(ip)) return { error: "Too many stores started from this connection. Please try again in an hour." };
 
-  // The email must have been confirmed with a code first (see sendCodeAction and confirmEmailAction).
-  if (!emailProofValid(String(form.get("proof") ?? ""), String(form.get("email") ?? ""))) {
-    return { error: "Please confirm your email address first.", field: "email" };
-  }
+  const ownerName = String(form.get("ownerName") ?? "").trim();
+  const email = String(form.get("email") ?? "").trim().toLowerCase();
+  const phone = String(form.get("phone") ?? "").trim();
+  const password = String(form.get("password") ?? "");
+  const storeName = String(form.get("storeName") ?? "").trim();
+  const category = (String(form.get("category") ?? "GENERAL").toUpperCase()) as "FASHION" | "BEAUTY" | "ELECTRONICS" | "GROCERY" | "GENERAL";
+  const tagline = String(form.get("tagline") ?? "").trim();
+  const subdomain = String(form.get("subdomain") ?? "").trim().toLowerCase();
+  const plan = (String(form.get("plan") ?? "PRO").toUpperCase()) as "STARTER" | "PRO" | "BUSINESS";
+  const theme = String(form.get("theme") ?? "kapor");
+  const demoData = form.get("demoData") !== "off";
+
+  if (!ownerName || ownerName.length < 2) return { error: "Enter your full name", field: "ownerName" };
+  if (!email || !/^\S+@\S+\.\S+$/.test(email)) return { error: "Enter a valid email address", field: "email" };
+  if (!phone || phone.length < 10) return { error: "Enter a valid mobile number (e.g. 01712345678)", field: "phone" };
+  if (password && password.length < 8) return { error: "Password must be at least 8 characters", field: "password" };
+  if (!storeName || storeName.length < 2) return { error: "Enter your store name", field: "storeName" };
+  if (!subdomain || subdomain.length < 3) return { error: "Choose a valid web address", field: "subdomain" };
 
   // A demo the visitor chose to keep: its secret code arrives as a hidden field. The core checks it; a wrong or used code just means sample products.
   const keepCode = String(form.get("from") ?? "").slice(0, 120);
@@ -40,9 +54,17 @@ export async function signupAction(_prev: SignupState, form: FormData): Promise<
   let signed;
   try {
     signed = await signupStore({
-      ownerName: String(form.get("ownerName") ?? ""), email: String(form.get("email") ?? ""), phone: String(form.get("phone") ?? ""),
-      storeName: String(form.get("storeName") ?? ""), tagline: String(form.get("tagline") ?? "") || undefined, subdomain: String(form.get("subdomain") ?? ""),
-      plan: String(form.get("plan") ?? "PRO"), theme: String(form.get("theme") ?? "kapor"), demoData: form.get("demoData") === "on",
+      ownerName,
+      email,
+      phone,
+      password: password || undefined,
+      storeName,
+      category: category || "GENERAL",
+      tagline: tagline || undefined,
+      subdomain,
+      plan: plan || "PRO",
+      theme,
+      demoData,
     }, { pictures: samplePictures() ?? undefined, ...(keepCode && copier ? { keep: { code: keepCode, copyImage: copier } } : {}) });
   } catch (e) {
     if (e instanceof DomainError) return { error: e.message, field: typeof e.details?.field === "string" ? e.details.field : undefined };
@@ -66,6 +88,7 @@ export async function signupAction(_prev: SignupState, form: FormData): Promise<
     email: signed.ownerEmail,
     ends: signed.trialEndsAt.toISOString(),
     plan: signed.plan,
+    ...(signed.autoLoginToken ? { token: signed.autoLoginToken } : {}),
     ...(signed.quarantined ? { review: "1" } : {}),
     ...(signed.kept ? { kept: String(signed.kept) } : {}),
   });

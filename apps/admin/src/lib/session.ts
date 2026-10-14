@@ -1,7 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import {
-  AuthFailure, ForbiddenError, ReadOnlyError, can, decodeClaims, loadDemoTenant, verifyDemoCookie, getStoreAccess, getUserFromToken, staffMemberships, verifyImpersonationSessionCookie, type Access, type Area, type AuthUser, type StaffActor, type StaffMembership,
+  AuthFailure, ForbiddenError, ReadOnlyError, can, decodeClaims, loadDemoTenant, verifyDemoCookie, getStoreAccess, getUserFromToken, staffMemberships, verifyImpersonationSessionCookie, AUTO_LOGIN_COOKIE, verifyAutoLoginSessionCookie, type Access, type Area, type AuthUser, type StaffActor, type StaffMembership,
 } from "@biztrackbd/core";
 import { resolveTenantByHost, withTenant, type StaffRole } from "@biztrackbd/db";
 import { AT, DEMO, TENANT, authMode } from "@/lib/auth";
@@ -83,6 +83,35 @@ export async function getImpersonationSession(): Promise<AdminSession | null> {
   });
 }
 
+export async function getOnboardingSession(): Promise<AdminSession | null> {
+  const jar = await cookies();
+  const raw = jar.get(AUTO_LOGIN_COOKIE)?.value;
+  if (!raw) return null;
+  const verified = verifyAutoLoginSessionCookie(raw);
+  if (!verified) return null;
+
+  const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim();
+  return withTenant(verified.tenantId, async (tx) => {
+    const t = await tx.tenant.findUnique({ where: { id: verified.tenantId }, select: { id: true, subdomain: true } });
+    if (!t) return null;
+    const user = await tx.tenantUser.findFirst({ where: { id: verified.userId, isActive: true } });
+    if (!user) return null;
+    return {
+      tenantId: t.id,
+      tenantSubdomain: t.subdomain,
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      actor: {
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        ip,
+      },
+      access: await getStoreAccess(t.id),
+    };
+  });
+}
+
 /** Where someone who is not fully signed in should go. */
 export type AuthState =
   | { state: "anon" }
@@ -123,6 +152,8 @@ export async function getSessionOrNull(): Promise<AdminSession | null> {
   if (demo) return demo;
   const imp = await getImpersonationSession();
   if (imp) return imp;
+  const ob = await getOnboardingSession();
+  if (ob) return ob;
   if (authMode() === "dev") return devSession();
   const a = await resolveAuth();
   if (a.state !== "ok") return null;
@@ -149,6 +180,8 @@ export async function getSession(): Promise<AdminSession> {
   if (demo) return demo;
   const imp = await getImpersonationSession();
   if (imp) return imp;
+  const ob = await getOnboardingSession();
+  if (ob) return ob;
   if (authMode() === "dev") {
     const s = await devSession();
     if (!s) throw new Error("No active staff account for this store. Run the seed.");
