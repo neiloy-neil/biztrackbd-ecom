@@ -35,13 +35,17 @@ const config: NextConfig = {
   poweredByHeader: false,
   async headers() {
     // Production needs NEXT_PUBLIC_ADMIN_URL; without it the editor preview cannot be framed (it fails closed).
-    const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? (process.env.NODE_ENV === "production" ? "" : "http://localhost:3001");
+    // If it is not set, the admin is taken to be admin.<root domain>, which is where the platform puts it.
+    const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+    const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? (process.env.NODE_ENV === "production" ? (root ? `https://admin.${root}` : "") : "http://localhost:3001");
     const admin = adminUrl ? new URL(adminUrl).origin : "";
     return [
       { source: "/:path*", headers: securityHeaders("'self'") },
       // The editor shows /preview and /l/<page>?preview=... in an iframe. Both need the signed link to show anything.
       { source: "/preview", headers: securityHeaders(`'self' ${admin}`.trim()) },
       { source: "/l/:path*", headers: securityHeaders(`'self' ${admin}`.trim()) },
+      // The header and footer editor frames this one.
+      { source: "/chrome-preview", headers: securityHeaders(`'self' ${admin}`.trim()) },
     ];
   },
 };
