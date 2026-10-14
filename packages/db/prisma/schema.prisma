@@ -156,6 +156,11 @@ model Tenant {
   productBundles   ProductBundle[]
   orderBumps       OrderBump[]
   bundleItems      ProductBundleItem[]
+  whatsAppConfig       WhatsAppConfig?
+  whatsAppTemplates    WhatsAppTemplate[]
+  whatsAppMessageLogs  WhatsAppMessageLog[]
+  whatsAppConversations WhatsAppConversation[]
+  whatsAppChatMessages WhatsAppChatMessage[]
 
   @@index([subdomain])
   @@index([customDomain])
@@ -515,6 +520,7 @@ model Order {
   refunds             RefundLedger[]
   settledLines        CourierSettledOrder[]
   courierEvents       CourierEvent[]
+  whatsAppMessageLogs WhatsAppMessageLog[]
   
   deletedAt           DateTime?
   createdAt           DateTime          @default(now())
@@ -647,6 +653,7 @@ model Customer {
   orders           Order[]
   reviews          Review[]
   loyaltyAccount   CustomerLoyaltyAccount?
+  whatsAppConversations WhatsAppConversation[]
   
   tenant           Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt        DateTime               @default(now())
@@ -2184,4 +2191,162 @@ model OrderBump {
   @@index([tenantId, status])
   @@index([tenantId, triggerType])
 }
+
+// ==========================================
+// 15. AUTOMATED WHATSAPP COMMERCE SUITE (ZERO-META)
+// ==========================================
+
+enum WhatsAppProviderMode {
+  QR_SESSION
+  GATEWAY_API
+  MANUAL_LINKS
+}
+
+enum WhatsAppSessionStatus {
+  DISCONNECTED
+  SCAN_QR
+  CONNECTED
+  PAIRING
+  ERROR
+}
+
+enum WhatsAppEventType {
+  COD_CONFIRMATION
+  ORDER_CONFIRMED
+  DISPATCHED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  DELIVERY_FAILED
+  ABANDONED_CART_STAGE_1
+  ABANDONED_CART_STAGE_2
+}
+
+enum WhatsAppMessageDirection {
+  OUTBOUND
+  INBOUND
+}
+
+enum WhatsAppMessageStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  READ
+  FAILED
+  FALLBACK_TO_SMS
+}
+
+enum WhatsAppConversationStatus {
+  BOT_HANDLED
+  OPEN
+  RESOLVED
+}
+
+model WhatsAppConfig {
+  id                        String                @id @default(cuid())
+  tenantId                  String                @unique
+  providerMode              WhatsAppProviderMode  @default(QR_SESSION)
+  status                    WhatsAppSessionStatus @default(DISCONNECTED)
+  phoneNumber               String?
+  sessionData               String?               @db.Text
+  qrCodeData                String?               @db.Text
+  gatewayUrl                String?
+  gatewayApiKey             String?
+  webhookSecret             String?
+  autoConfirmCod            Boolean               @default(true)
+  shippingUpdatesEnabled    Boolean               @default(true)
+  abandonedRecoveryEnabled  Boolean               @default(true)
+  botEnabled                Boolean               @default(true)
+  smsFallbackEnabled        Boolean               @default(true)
+  followUpReminderHours     Int                   @default(12)
+  lastConnectedAt           DateTime?
+  createdAt                 DateTime              @default(now())
+  updatedAt                 DateTime              @updatedAt
+
+  tenant                    Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}
+
+model WhatsAppTemplate {
+  id              String            @id @default(cuid())
+  tenantId        String
+  event           WhatsAppEventType
+  name            String
+  bodyEn          String            @db.Text
+  bodyBn          String?           @db.Text
+  isActive        Boolean           @default(true)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  tenant          Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, event])
+  @@index([tenantId])
+}
+
+model WhatsAppMessageLog {
+  id              String                    @id @default(cuid())
+  tenantId        String
+  orderId         String?
+  phone           String
+  direction       WhatsAppMessageDirection  @default(OUTBOUND)
+  event           WhatsAppEventType?
+  status          WhatsAppMessageStatus     @default(QUEUED)
+  messageBody     String                    @db.Text
+  externalMsgId   String?
+  errorDetails    String?                   @db.Text
+  metadata        Json?
+  sentAt          DateTime?
+  deliveredAt     DateTime?
+  readAt          DateTime?
+  createdAt       DateTime                  @default(now())
+
+  tenant          Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order           Order?                    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, phone])
+  @@index([tenantId, orderId])
+  @@index([tenantId, event, status])
+}
+
+model WhatsAppConversation {
+  id              String                      @id @default(cuid())
+  tenantId        String
+  customerId      String?
+  customerPhone   String
+  customerName    String?
+  status          WhatsAppConversationStatus  @default(BOT_HANDLED)
+  unreadCount     Int                         @default(0)
+  lastMessageAt   DateTime                    @default(now())
+  lastMessageText String?                     @db.Text
+  assignedUserId  String?
+  createdAt       DateTime                    @default(now())
+  updatedAt       DateTime                    @updatedAt
+
+  tenant          Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer        Customer?                   @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  messages        WhatsAppChatMessage[]
+
+  @@unique([tenantId, customerPhone])
+  @@index([tenantId, status, lastMessageAt])
+}
+
+model WhatsAppChatMessage {
+  id              String                    @id @default(cuid())
+  conversationId  String
+  tenantId        String
+  sender          String                    // "CUSTOMER" | "BOT" | "STAFF"
+  staffUserId     String?
+  body            String                    @db.Text
+  mediaUrl        String?
+  externalMsgId   String?
+  createdAt       DateTime                  @default(now())
+
+  conversation    WhatsAppConversation      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  tenant          Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@index([tenantId])
+}
+
 

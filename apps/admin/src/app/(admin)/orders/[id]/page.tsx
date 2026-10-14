@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { COURIER_STATUS_LABELS, can, getCourierRates, getOrderDetail, listConnectedCouriers, listOrderTags, type OrderDetail } from "@biztrackbd/core";
+import { COURIER_STATUS_LABELS, can, getCourierRates, getOrderDetail, listConnectedCouriers, listOrderTags, getStoreSettings, buildWhatsAppOrderLink, type OrderDetail } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
 import { dateTime, prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
@@ -31,19 +31,58 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
   const s = await requireAccess("orders");
   const o = await getOrderDetail(s.tenantId, s.actor, id).catch(() => null);
   if (!o) notFound();
-  const [couriers, rates, knownTags] = await Promise.all([listConnectedCouriers(s.tenantId), getCourierRates(s.tenantId, s.actor), listOrderTags(s.tenantId, s.actor)]);
+  const [couriers, rates, knownTags, settings] = await Promise.all([
+    listConnectedCouriers(s.tenantId),
+    getCourierRates(s.tenantId, s.actor),
+    listOrderTags(s.tenantId, s.actor),
+    getStoreSettings(s.tenantId, s.actor).catch(() => null),
+  ]);
   const canEdit = can(s.user.role, "orders", "edit");
   const step = canEdit ? nextStep(o) : null;
   const err = one(sp.err);
   const isMfs = o.paymentMethod.startsWith("MANUAL_");
   const canCancel = canEdit && ["PENDING", "CONFIRMED", "PROCESSING"].includes(o.status);
-  const wa = `https://wa.me/88${o.customerPhone}`;
   const canBook = canEdit && (o.status === "CONFIRMED" || o.status === "PROCESSING") && !o.courier.consignmentId;
   const held = o.risk.review === "HELD";
   const open = ["PENDING", "CONFIRMED", "PROCESSING"].includes(o.status);
   const preferred = couriers.find((c) => c.provider === rates.defaultCourier)?.provider ?? couriers[0]?.provider;
   const trust = o.risk.lookup.network;
   const courierName = (p: string) => (p === "MANUAL" ? "Delivered by you" : p === "STEADFAST" ? "Steadfast" : p === "PATHAO" ? "Pathao" : p === "REDX" ? "RedX" : p);
+
+  const storeName = settings?.storeName || s.tenantSubdomain;
+  const itemsSummary = o.items.map((i) => `${i.title} (${i.quantity})`).join(", ");
+  const waConfirmLink = buildWhatsAppOrderLink({
+    phone: o.customerPhone,
+    orderNumber: o.orderNumber,
+    customerName: o.customerName,
+    orderTotal: o.totals.total,
+    itemsSummary,
+    deliveryAddress: o.address.line ? `${o.address.line}, ${o.address.district}` : o.address.district,
+    storeName,
+    lang: "bn",
+    type: "COD_CONFIRM",
+  });
+  const waShippingLink = buildWhatsAppOrderLink({
+    phone: o.customerPhone,
+    orderNumber: o.orderNumber,
+    customerName: o.customerName,
+    orderTotal: o.totals.total,
+    courierName: o.courier.provider ? courierName(o.courier.provider) : null,
+    trackingCode: o.courier.trackingCode,
+    trackingUrl: o.courier.trackingUrl,
+    storeName,
+    lang: "bn",
+    type: "SHIPPING_UPDATE",
+  });
+  const waCashReminderLink = buildWhatsAppOrderLink({
+    phone: o.customerPhone,
+    orderNumber: o.orderNumber,
+    customerName: o.customerName,
+    orderTotal: o.totals.total,
+    storeName,
+    lang: "bn",
+    type: "CASH_REMINDER",
+  });
 
   return (
     <div className={step ? "has-sticky" : undefined}>
@@ -52,6 +91,42 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
         <h1 data-testid="order-title">{o.orderNumber}</h1>
         <div className="row"><PaymentPill method={o.paymentMethod} status={o.paymentStatus} /><OrderPill status={o.status} /></div>
         <div className="actions">
+          {o.status === "PENDING" && (
+            <a
+              href={waConfirmLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-sm"
+              style={{ background: "#25D366", color: "#FFF", borderColor: "#25D366", fontWeight: 600 }}
+              data-testid="wa-confirm-btn"
+            >
+              💬 WhatsApp Confirm
+            </a>
+          )}
+          {o.status === "SHIPPED" && (
+            <a
+              href={waShippingLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-sm"
+              style={{ background: "#25D366", color: "#FFF", borderColor: "#25D366", fontWeight: 600 }}
+              data-testid="wa-tracking-btn"
+            >
+              🚚 Send Tracking
+            </a>
+          )}
+          {(o.status === "CONFIRMED" || o.status === "PROCESSING") && (
+            <a
+              href={waCashReminderLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-sm"
+              style={{ background: "#25D366", color: "#FFF", borderColor: "#25D366", fontWeight: 600 }}
+              data-testid="wa-cash-btn"
+            >
+              🛵 Cash Reminder
+            </a>
+          )}
           <Link href={`/orders/print?ids=${o.id}&doc=invoice`} target="_blank" className="btn btn-secondary btn-sm" prefetch={false}>Print invoice</Link>
           <Link href={`/orders/print?ids=${o.id}&doc=slip`} target="_blank" className="btn btn-secondary btn-sm" prefetch={false}>Packing slip</Link>
         </div>
@@ -190,7 +265,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
             <div style={{ fontWeight: 700 }}>{o.customerName}</div>
             <div className="row" style={{ marginTop: 4 }}>
               <a className="link num" href={`tel:${o.customerPhone}`}>{prettyPhone(o.customerPhone)}</a>
-              <a className="link" href={wa} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+              <a className="link" href={waConfirmLink} target="_blank" rel="noopener noreferrer" style={{ color: "#16A34A", fontWeight: 600 }}>💬 WhatsApp Chat</a>
             </div>
             {o.customerEmail && <div className="muted" style={{ fontSize: 13.5 }}>{o.customerEmail}</div>}
             {o.customer && (

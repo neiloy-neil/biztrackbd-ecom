@@ -139,6 +139,26 @@ export default async function MarketingOverviewPage() {
           </Link>
         </div>
 
+        {/* Automated WhatsApp Commerce */}
+        <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 20 }}>💬</span>
+                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>WhatsApp Automation</h3>
+              </div>
+              <span className="pill green">Zero-Meta</span>
+            </div>
+            <p className="muted" style={{ fontSize: 13, margin: "0 0 12px" }}>
+              QR Linked Device engine. Automated COD order confirmation, shipping tracking alerts, 2-stage cart recovery, and smart bot.
+            </p>
+          </div>
+          <Link href="/marketing/whatsapp" className="btn btn-secondary btn-sm" style={{ width: "100%", textAlign: "center" }} prefetch={false}>
+            Configure WhatsApp →
+          </Link>
+        </div>
+
+
         {/* Broadcast Campaigns */}
         <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div>
