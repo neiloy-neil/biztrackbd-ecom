@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { can, exchangeOptions, getReturnMetrics, listReturns, returnTabCounts, type ReturnRow, type ReturnTab } from "@biztrackbd/core";
+import { can, exchangeOptions, getModuleStatus, getReturnMetrics, listReturns, returnTabCounts, type ReturnRow, type ReturnTab } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
+import { AppDisabledNotice } from "@/components/app-disabled-notice";
 import { dateOnly, prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
@@ -112,6 +113,20 @@ function DeclineForm({ id, tab }: { id: string; tab: ReturnTab }) {
 export default async function Returns({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
   const s = await requireAccess("orders");
+  const mod = await getModuleStatus(s.tenantId, "customer_returns");
+
+  if (!mod.active) {
+    return (
+      <AppDisabledNotice
+        appName="Customer Returns & Reverse Logistics"
+        appKey="customer_returns"
+        planTier={mod.planTier}
+        minPlan="STARTER"
+        description="Self-service storefront return requests, courier return parcel tracking, inspection workflows, and automated bKash/Nagad/credit refunds."
+      />
+    );
+  }
+
   const tab = (TABS.find((t) => t.key === one(sp.tab))?.key ?? "requested") as ReturnTab;
   const canEdit = can(s.user.role, "orders", "edit");
   const [rows, counts, metrics, options] = await Promise.all([

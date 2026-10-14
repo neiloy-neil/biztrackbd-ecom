@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LANDING_TEMPLATES, can, landingTotals, listLandingPages } from "@biztrackbd/core";
+import { LANDING_TEMPLATES, can, getModuleStatus, landingTotals, listLandingPages } from "@biztrackbd/core";
 import { withTenant } from "@biztrackbd/db";
 import { SubmitButton } from "@/components/ui";
+import { AppDisabledNotice } from "@/components/app-disabled-notice";
 import { dateOnly } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
@@ -16,6 +17,20 @@ export const metadata: Metadata = { title: "Landing pages" };
 export default async function Landing({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
   const s = await requireAccess("design");
+  const mod = await getModuleStatus(s.tenantId, "landing_builder");
+
+  if (!mod.active) {
+    return (
+      <AppDisabledNotice
+        appName="Landing Page & Sales Funnel Studio"
+        appKey="landing_builder"
+        planTier={mod.planTier}
+        minPlan="PRO"
+        description="Single-product high-converting sales landing pages with direct cash-on-delivery checkout forms, urgency countdown timers, and conversion tracking."
+      />
+    );
+  }
+
   const canEdit = can(s.user.role, "design", "edit");
   const [pages, products] = await Promise.all([
     listLandingPages(s.tenantId, s.actor),

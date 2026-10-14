@@ -148,6 +148,27 @@ function AppIcon({ icon }: { icon: string }) {
           <line x1="1" y1="10" x2="23" y2="10" />
         </svg>
       );
+    case "tag":
+      return (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z" />
+          <path d="M7 7h.01" />
+        </svg>
+      );
+    case "layout":
+      return (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <line x1="3" y1="9" x2="21" y2="9" />
+          <line x1="9" y1="21" x2="9" y2="9" />
+        </svg>
+      );
+    case "star":
+      return (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+      );
     default:
       return (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -441,8 +462,8 @@ export function AppStoreClient({
                   </Link>
 
                   <div className="row" style={{ gap: 8 }}>
-                    {/* Toggle form for plan addon modules */}
-                    {app.tier === "ADDON" && app.built && canEdit && !isLocked && (
+                    {/* Toggle form for plan addon and toggleable modules */}
+                    {(app.tier === "ADDON" || app.key === "customer_returns" || app.key === "product_reviews") && app.built && canEdit && !isLocked && (
                       <form action={setModuleAction.bind(null, app.key, !app.enabled)}>
                         <SubmitButton className="btn btn-secondary btn-sm" pending="…">
                           {app.enabled ? "Turn Off" : "Turn On"}
@@ -1583,6 +1604,230 @@ export function AppStoreClient({
                   </form>
                 );
               })()}
+
+              {/* 14. WHATSAPP COMMERCE SUITE */}
+              {activeModal === "whatsapp_commerce" && (
+                <div className="stack" style={{ gap: 16 }}>
+                  <p style={{ fontSize: 14, lineHeight: 1.5 }}>
+                    Zero-Meta linked device engine for automated Bangladesh commerce. Confirms Cash-on-Delivery orders, sends out-for-delivery cash reminders, recovers abandoned carts, and powers your Live Support Desk.
+                  </p>
+
+                  <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 14 }}>Module Status</div>
+                        <div className="muted" style={{ fontSize: 12 }}>
+                          {currentApp.enabled ? "Active for this store" : "Turned off"}
+                        </div>
+                      </div>
+                      {canEdit && (
+                        <form action={setModuleAction.bind(null, "whatsapp_commerce", !currentApp.enabled)}>
+                          <SubmitButton className={`btn btn-sm ${currentApp.enabled ? "btn-secondary" : "btn-primary"}`} pending="…">
+                            {currentApp.enabled ? "Turn Off App" : "Turn On App"}
+                          </SubmitButton>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-2" style={{ gap: 10 }}>
+                    <Link href="/marketing/whatsapp" className="btn btn-primary" style={{ textAlign: "center", padding: "10px 14px", textDecoration: "none" }}>
+                      Open WhatsApp Automation Manager →
+                    </Link>
+                    <Link href="/inbox" className="btn btn-secondary" style={{ textAlign: "center", padding: "10px 14px", textDecoration: "none" }}>
+                      Open Live Support Desk Inbox →
+                    </Link>
+                  </div>
+
+                  <div className="card" style={{ border: "1px solid rgba(37, 211, 102, 0.25)", background: "rgba(37, 211, 102, 0.04)", padding: 16 }}>
+                    <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "#16A34A" }}>
+                      Key Features Included:
+                    </h4>
+                    <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.6 }}>
+                      <li><b>Linked Device QR Pairing:</b> Connect any WhatsApp number without Meta Cloud API verification.</li>
+                      <li><b>2-Way Confirmation Bot:</b> Customer taps [Confirm Order] or [Cancel] directly in WhatsApp.</li>
+                      <li><b>Out-for-Delivery Cash Preparation:</b> Alerts customer when parcel is picked up by Steadfast/Pathao with exact BDT total.</li>
+                      <li><b>Live Desk:</b> Chat with shoppers directly from your admin panel.</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* 15. PRODUCT BUNDLES & ORDER BUMPS */}
+              {activeModal === "product_bundles" && (
+                <div className="stack" style={{ gap: 16 }}>
+                  <p style={{ fontSize: 14, lineHeight: 1.5 }}>
+                    Increase your store&apos;s Average Order Value (AOV). Offer &quot;Frequently Bought Together&quot; combo packages with percentage discounts and high-converting 1-click checkout order bumps.
+                  </p>
+
+                  <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 14 }}>Module Status</div>
+                        <div className="muted" style={{ fontSize: 12 }}>
+                          {currentApp.enabled ? "Active on storefront" : "Turned off"}
+                        </div>
+                      </div>
+                      {canEdit && (
+                        <form action={setModuleAction.bind(null, "product_bundles", !currentApp.enabled)}>
+                          <SubmitButton className={`btn btn-sm ${currentApp.enabled ? "btn-secondary" : "btn-primary"}`} pending="…">
+                            {currentApp.enabled ? "Turn Off App" : "Turn On App"}
+                          </SubmitButton>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Link href="/marketing/bundles" className="btn btn-primary" style={{ display: "block", textAlign: "center", padding: "10px 14px", textDecoration: "none" }}>
+                      Open Bundles &amp; Order Bumps Studio →
+                    </Link>
+                  </div>
+
+                  <div className="card" style={{ border: "1px solid rgba(245, 158, 11, 0.25)", background: "rgba(245, 158, 11, 0.04)", padding: 16 }}>
+                    <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "#D97706" }}>
+                      Upsell Tools Available:
+                    </h4>
+                    <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.6 }}>
+                      <li><b>Frequently Bought Together:</b> Multi-item packages displayed below the product page with 1-click add-all.</li>
+                      <li><b>Checkout Order Bumps:</b> Impulse addons (e.g. socks, accessories, gift wrap) on the checkout form.</li>
+                      <li><b>Unified Inventory:</b> Automatic deduction of individual product and variant stocks when bundles sell.</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* 16. LANDING PAGE & SALES FUNNELS */}
+              {activeModal === "landing_builder" && (
+                <div className="stack" style={{ gap: 16 }}>
+                  <p style={{ fontSize: 14, lineHeight: 1.5 }}>
+                    Build high-converting, single-product sales landing pages (/l/[slug]) with integrated cash-on-delivery order forms, urgency countdown timers, and dedicated conversion tracking.
+                  </p>
+
+                  <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 14 }}>Module Status</div>
+                        <div className="muted" style={{ fontSize: 12 }}>
+                          {currentApp.enabled ? "Active for this store" : "Turned off"}
+                        </div>
+                      </div>
+                      {canEdit && (
+                        <form action={setModuleAction.bind(null, "landing_builder", !currentApp.enabled)}>
+                          <SubmitButton className={`btn btn-sm ${currentApp.enabled ? "btn-secondary" : "btn-primary"}`} pending="…">
+                            {currentApp.enabled ? "Turn Off App" : "Turn On App"}
+                          </SubmitButton>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Link href="/landing" className="btn btn-primary" style={{ display: "block", textAlign: "center", padding: "10px 14px", textDecoration: "none" }}>
+                      Open Landing Page Funnel Studio →
+                    </Link>
+                  </div>
+
+                  <div className="card" style={{ border: "1px solid rgba(139, 92, 246, 0.25)", background: "rgba(139, 92, 246, 0.04)", padding: 16 }}>
+                    <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "#7C3AED" }}>
+                      Conversion Highlights:
+                    </h4>
+                    <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.6 }}>
+                      <li><b>Zero Distraction:</b> Removes header navigation and footer clutter for 100% ad focus.</li>
+                      <li><b>Built-in COD Order Form:</b> Name, phone, and full address capture in 1 screen.</li>
+                      <li><b>Meta Pixel &amp; CAPI:</b> Seamless tracking for Facebook and TikTok ad optimization.</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* 17. CUSTOMER RETURNS & REVERSE LOGISTICS */}
+              {activeModal === "customer_returns" && (
+                <div className="stack" style={{ gap: 16 }}>
+                  <p style={{ fontSize: 14, lineHeight: 1.5 }}>
+                    Manage customer returns and exchanges professionally. Provide self-service return requests, log courier return tracking codes, inspect items upon receipt, and record refunds or store credits.
+                  </p>
+
+                  <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 14 }}>Module Status</div>
+                        <div className="muted" style={{ fontSize: 12 }}>
+                          {currentApp.enabled ? "Active for this store" : "Turned off"}
+                        </div>
+                      </div>
+                      {canEdit && (
+                        <form action={setModuleAction.bind(null, "customer_returns", !currentApp.enabled)}>
+                          <SubmitButton className={`btn btn-sm ${currentApp.enabled ? "btn-secondary" : "btn-primary"}`} pending="…">
+                            {currentApp.enabled ? "Turn Off App" : "Turn On App"}
+                          </SubmitButton>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Link href="/returns" className="btn btn-primary" style={{ display: "block", textAlign: "center", padding: "10px 14px", textDecoration: "none" }}>
+                      Open Customer Returns Manager →
+                    </Link>
+                  </div>
+
+                  <div className="card" style={{ border: "1px solid rgba(59, 130, 246, 0.25)", background: "rgba(59, 130, 246, 0.04)", padding: 16 }}>
+                    <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "#2563EB" }}>
+                      Returns Workflow:
+                    </h4>
+                    <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.6 }}>
+                      <li><b>Review &amp; Approve:</b> Customers request returns with order number and phone number.</li>
+                      <li><b>Courier Tracking:</b> Log return tracking numbers when Steadfast/Pathao brings the parcel back.</li>
+                      <li><b>Restocking Control:</b> Flag damaged goods or automatically restock inventory on approval.</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* 18. PRODUCT REVIEWS & SOCIAL PROOF */}
+              {activeModal === "product_reviews" && (
+                <div className="stack" style={{ gap: 16 }}>
+                  <p style={{ fontSize: 14, lineHeight: 1.5 }}>
+                    Collect authentic verified buyer photo reviews and 5-star ratings. Moderate submissions, reply to customer feedback, and display rich social proof across product pages.
+                  </p>
+
+                  <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 14 }}>Module Status</div>
+                        <div className="muted" style={{ fontSize: 12 }}>
+                          {currentApp.enabled ? "Active on storefront" : "Turned off"}
+                        </div>
+                      </div>
+                      {canEdit && (
+                        <form action={setModuleAction.bind(null, "product_reviews", !currentApp.enabled)}>
+                          <SubmitButton className={`btn btn-sm ${currentApp.enabled ? "btn-secondary" : "btn-primary"}`} pending="…">
+                            {currentApp.enabled ? "Turn Off App" : "Turn On App"}
+                          </SubmitButton>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Link href="/reviews" className="btn btn-primary" style={{ display: "block", textAlign: "center", padding: "10px 14px", textDecoration: "none" }}>
+                      Open Product Reviews Moderation →
+                    </Link>
+                  </div>
+
+                  <div className="card" style={{ border: "1px solid rgba(245, 158, 11, 0.25)", background: "rgba(245, 158, 11, 0.04)", padding: 16 }}>
+                    <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "#D97706" }}>
+                      Social Proof Highlights:
+                    </h4>
+                    <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.6 }}>
+                      <li><b>Verified Buyer Badges:</b> Only customers with delivered orders can submit reviews.</li>
+                      <li><b>Photo Uploads:</b> Customers can attach photos of real received items.</li>
+                      <li><b>Merchant Replies:</b> Public replies from store staff displayed under reviews.</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
 
             </div>
           </div>

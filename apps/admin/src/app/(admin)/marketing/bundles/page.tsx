@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import {
   can,
+  getModuleStatus,
   listBundles,
   listOrderBumps,
   getBundleAnalytics,
 } from "@biztrackbd/core";
 import { withTenant } from "@biztrackbd/db";
 import { requireAccess } from "@/lib/session";
+import { AppDisabledNotice } from "@/components/app-disabled-notice";
 import { BundlesManagerClient } from "./bundles-manager-client";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +16,20 @@ export const metadata: Metadata = { title: "Product Bundles & Order Bumps" };
 
 export default async function BundlesPage() {
   const s = await requireAccess("marketing");
+  const mod = await getModuleStatus(s.tenantId, "product_bundles");
+
+  if (!mod.active) {
+    return (
+      <AppDisabledNotice
+        appName="Product Bundles & Order Bumps"
+        appKey="product_bundles"
+        planTier={mod.planTier}
+        minPlan="PRO"
+        description="Frequently Bought Together combos, checkout upsell bumps, quantity discounts, and unified inventory deduction."
+      />
+    );
+  }
+
   const canEdit = can(s.user.role, "marketing", "edit");
 
   const [bundles, orderBumps, analytics, products, categories, tenantInfo] = await Promise.all([

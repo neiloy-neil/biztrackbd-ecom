@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { can, listReviews, reviewTabCounts, reviewsAutoPublish, type ReviewTab } from "@biztrackbd/core";
+import { can, getModuleStatus, listReviews, reviewTabCounts, reviewsAutoPublish, type ReviewTab } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
+import { AppDisabledNotice } from "@/components/app-disabled-notice";
 import { dateOnly, prettyPhone } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
@@ -15,6 +16,20 @@ const TABS: { key: ReviewTab; label: string; alert?: boolean }[] = [{ key: "pend
 export default async function Reviews({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
   const s = await requireAccess("marketing");
+  const mod = await getModuleStatus(s.tenantId, "product_reviews");
+
+  if (!mod.active) {
+    return (
+      <AppDisabledNotice
+        appName="Product Reviews & Social Proof"
+        appKey="product_reviews"
+        planTier={mod.planTier}
+        minPlan="STARTER"
+        description="Collect verified buyer photo reviews, star ratings, and display authentic social proof on your product pages."
+      />
+    );
+  }
+
   const tab = (TABS.find((t) => t.key === one(sp.tab))?.key ?? "pending") as ReviewTab;
   const canEdit = can(s.user.role, "marketing", "edit");
   const [rows, counts, auto] = await Promise.all([listReviews(s.tenantId, s.actor, tab), reviewTabCounts(s.tenantId, s.actor), reviewsAutoPublish(s.tenantId)]);
