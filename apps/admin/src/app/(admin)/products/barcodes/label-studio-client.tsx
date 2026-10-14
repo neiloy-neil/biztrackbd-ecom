@@ -100,11 +100,15 @@ export function BarcodeLabelStudioClient({ initialItems, storeName }: Props) {
     setStatusMessage("");
     try {
       const res = await assignMissingBarcodesAction();
+      if (!res.ok) {
+        setStatusMessage(res.error);
+        return;
+      }
       setStatusMessage(`Generated barcodes for ${res.updatedCount} items.`);
       // Reload page to get fresh barcodes
       window.location.reload();
-    } catch (e: any) {
-      setStatusMessage(e.message || "Failed to generate missing barcodes.");
+    } catch {
+      setStatusMessage("Could not create the barcodes. Please try again.");
     } finally {
       setBusy(false);
     }

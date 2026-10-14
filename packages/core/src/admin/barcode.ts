@@ -1,4 +1,4 @@
-import { withTenant } from "@biztrackbd/db";
+import { Prisma, withTenant } from "@biztrackbd/db";
 import { assertCan, type StaffActor } from "../permissions";
 import { NotFoundError, ValidationError } from "../errors";
 
@@ -20,13 +20,17 @@ export function calculateCheckDigit(numStr: string): number {
  * Auto-generates a unique standard 12-digit barcode for a store product variant.
  * Format: 880 (BD Prefix) + 4-digit store hash + 4-digit random sequence + 1 check digit.
  */
-export function generateBarcodeValue(tenantId: string): string {
+function storeSeedOf(tenantId: string): string {
   // Hash tenantId into a stable 4-digit number
   let hash = 0;
   for (let i = 0; i < tenantId.length; i++) {
     hash = (hash * 31 + tenantId.charCodeAt(i)) % 9000;
   }
-  const storeSeed = String(1000 + Math.abs(hash)).slice(0, 4);
+  return String(1000 + Math.abs(hash)).slice(0, 4);
+}
+
+export function generateBarcodeValue(tenantId: string): string {
+  const storeSeed = storeSeedOf(tenantId);
 
   // Generate random 4-digit sequence
   const randomSeq = String(Math.floor(1000 + Math.random() * 9000));
@@ -144,5 +148,41 @@ export async function findVariantByBarcode(
       stockQuantity: variant.stockQuantity,
       imageUrl: variant.imageUrl || variant.product.images[0]?.url || null,
     };
+  });
+}
+
+/**
+ * Gives every variant that has no barcode one, in a single transaction. Numbers are handed out in order from the store's own range
+ * (880 + store seed + 4-digit sequence + check digit), skipping any already in use, so two variants can never get the same one and a
+ * store with hundreds of variants finishes in a moment. (The old way opened one transaction per variant, which timed out on a real catalogue.)
+ */
+export async function assignMissingBarcodes(tenantId: string, actor: StaffActor): Promise<{ updatedCount: number }> {
+  assertCan(actor, "products", "edit");
+  const prefix = `880${storeSeedOf(tenantId)}`;
+  return withTenant(tenantId, async (tx) => {
+    const missing = await tx.productVariant.findMany({ where: { barcode: null }, select: { id: true }, orderBy: { createdAt: "asc" } });
+    if (missing.length === 0) return { updatedCount: 0 };
+    const used = new Set((await tx.productVariant.findMany({ where: { barcode: { not: null } }, select: { barcode: true } })).map((v) => v.barcode!));
+    let seq = 1000;
+    const assigned: { id: string; barcode: string }[] = [];
+    for (const v of missing) {
+      let candidate = "";
+      while (seq <= 9999) {
+        const base = `${prefix}${seq++}`;
+        const c = `${base}${calculateCheckDigit(base)}`;
+        if (!used.has(c)) { candidate = c; break; }
+      }
+      if (!candidate) throw new ValidationError("This store has too many items for automatic barcodes. Assign the rest by hand.");
+      used.add(candidate);
+      assigned.push({ id: v.id, barcode: candidate });
+    }
+    for (let i = 0; i < assigned.length; i += 300) {
+      const chunk = assigned.slice(i, i + 300);
+      await tx.$executeRaw`
+        UPDATE "ProductVariant" AS v SET "barcode" = d.b, "updatedAt" = now()
+        FROM (VALUES ${Prisma.join(chunk.map((a) => Prisma.sql`(${a.id}, ${a.barcode})`))}) AS d(id, b)
+        WHERE v."id" = d.id AND v."barcode" IS NULL`;
+    }
+    return { updatedCount: assigned.length };
   });
 }

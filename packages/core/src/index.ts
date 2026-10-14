@@ -281,6 +281,7 @@ export {
   calculateCheckDigit,
   generateBarcodeValue,
   assignVariantBarcode,
+  assignMissingBarcodes,
   findVariantByBarcode,
   type BarcodeRenderOptions,
 } from "./admin/barcode";
@@ -393,5 +394,13 @@ export {
   type StorefrontBundle,
   type StorefrontOrderBump,
 } from "./bundles/service";
+
+// Automated WhatsApp Commerce Suite (Zero-Meta Architecture)
+export * from "./whatsapp/types";
+export * from "./whatsapp/deep-links";
+export * from "./whatsapp/session";
+export * from "./whatsapp/service";
+export * from "./whatsapp/bot";
+
 
 

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { withTenant } from "@biztrackbd/db";
-import { assignVariantBarcode, renderCode128Svg } from "@biztrackbd/core";
+import { DomainError, assignMissingBarcodes, renderCode128Svg } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 
 export interface BarcodePrintItem {
@@ -52,27 +52,18 @@ export async function fetchProductsForBarcodesAction(): Promise<BarcodePrintItem
   });
 }
 
-export async function assignMissingBarcodesAction(): Promise<{ updatedCount: number }> {
+export async function assignMissingBarcodesAction(): Promise<{ ok: true; updatedCount: number } | { ok: false; error: string }> {
   const s = await requireAction("products", "edit");
-
-  return withTenant(s.tenantId, async (tx) => {
-    const missing = await tx.productVariant.findMany({
-      where: {
-        barcode: null,
-      },
-      select: { id: true },
-    });
-
-    let count = 0;
-    for (const v of missing) {
-      await assignVariantBarcode(s.tenantId, s.actor, v.id);
-      count++;
-    }
-
+  try {
+    const r = await assignMissingBarcodes(s.tenantId, s.actor);
     revalidatePath("/products/barcodes");
     revalidatePath("/products");
-    return { updatedCount: count };
-  });
+    return { ok: true, updatedCount: r.updatedCount };
+  } catch (e) {
+    if (e instanceof DomainError) return { ok: false, error: e.message };
+    console.error("assignMissingBarcodesAction failed", e instanceof Error ? e.name : "unknown");
+    return { ok: false, error: "Could not create the barcodes. Nothing was changed. Please try again." };
+  }
 }
 
 export async function renderBarcodeSvgAction(barcode: string): Promise<string> {
