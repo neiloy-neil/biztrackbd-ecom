@@ -27,11 +27,11 @@ function Img({ src, alt = "", className }: { src: string; alt?: string; classNam
   return <img src={src} alt={alt} className={className} loading="lazy" decoding="async" />;
 }
 
-function Cta({ href, className, children, attrs }: { href: string; className: string; children: React.ReactNode; attrs?: Record<string, string> }) {
+function Cta({ href, className, children, attrs, style }: { href: string; className: string; children: React.ReactNode; attrs?: Record<string, string>; style?: React.CSSProperties }) {
   // In the editor a button without a link is still drawn, so its words can be typed.
-  if (!href) return attrs && Object.keys(attrs).length ? <span className={className} {...attrs}>{children}</span> : null;
-  if (attrs && Object.keys(attrs).length) return <span className={className} {...attrs}>{children}</span>;
-  return href.startsWith("/") ? <Link href={href} className={className}>{children}</Link> : <a href={href} className={className} rel="noopener noreferrer">{children}</a>;
+  if (!href) return attrs && Object.keys(attrs).length ? <span className={className} style={style} {...attrs}>{children}</span> : null;
+  if (attrs && Object.keys(attrs).length) return <span className={className} style={style} {...attrs}>{children}</span>;
+  return href.startsWith("/") ? <Link href={href} className={className} style={style}>{children}</Link> : <a href={href} className={className} style={style} rel="noopener noreferrer">{children}</a>;
 }
 
 /** What a landing page knows about its offers, for the sections that show a price or the stock. */
@@ -405,6 +405,175 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
           <a href="#order" className={`btn btn-primary btn-round${pro ? "" : " btn-block"}`} {...ed("text")}>{L(s, "text", lang)}</a>
         </div>
       );
+    case "countdown-timer": {
+      const end = parseEndsAt(str(s.endsAt));
+      const title = L(s, "title", lang);
+      const subhead = L(s, "subhead", lang);
+      const badge = L(s, "badge", lang);
+      const ctaText = L(s, "ctaText", lang);
+      const bgColor = str(s.bgColor) || "#1E1B4B";
+      const textColor = str(s.textColor) || "#FFFFFF";
+      const link = str(s.ctaLink);
+
+      return (
+        <div className="wrap" data-section={id}>
+          <section className="bt-countdown-sec" style={{ background: bgColor, color: textColor }}>
+            {badge && <span className="bt-countdown-badge" {...ed("badge")}>{badge}</span>}
+            <h2 className="bt-countdown-title" style={{ color: textColor }} {...ed("title")}>{title}</h2>
+            {subhead && <p className="bt-countdown-subhead" {...ed("subhead")}>{subhead}</p>}
+            {end && end.getTime() > Date.now() ? (
+              <div className="bt-countdown-clock">
+                <Countdown endsAt={end.toISOString()} labels={{ d: t("lpDays"), h: t("lpHours"), m: t("lpMinutes"), s: t("lpSeconds") }} />
+              </div>
+            ) : editing ? (
+              <div className="muted" style={{ marginBottom: 20 }}>Countdown ends at {str(s.endsAt) || "date not set"}</div>
+            ) : null}
+            {ctaText && (
+              <Cta href={link} className="btn btn-primary btn-round" attrs={ed("ctaText")}>
+                {ctaText}
+              </Cta>
+            )}
+          </section>
+        </div>
+      );
+    }
+    case "accordion-faq": {
+      const title = L(s, "title", lang);
+      const intro = L(s, "intro", lang);
+      const items = (Array.isArray(s.items) ? (s.items as S[]) : []);
+
+      return (
+        <div className="wrap" data-section={id}>
+          <section className="bt-faq-sec">
+            <div className="bt-faq-head">
+              <h2 {...ed("title")}>{title}</h2>
+              {intro && <p {...ed("intro")}>{intro}</p>}
+            </div>
+            <div className="bt-faq-list">
+              {items.map((item, idx) => {
+                const q = lang === "bn" && str(item.qBn) ? str(item.qBn) : str(item.q);
+                const a = lang === "bn" && str(item.aBn) ? str(item.aBn) : str(item.a);
+                return (
+                  <details key={idx} className="bt-faq-item">
+                    <summary className="bt-faq-trigger">
+                      <span>{q}</span>
+                      <svg className="bt-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </summary>
+                    <div className="bt-faq-content">{a}</div>
+                  </details>
+                );
+              })}
+            </div>
+          </section>
+        </div>
+      );
+    }
+    case "marquee-ticker": {
+      const text = L(s, "text", lang);
+      if (!text && !editing) return null;
+      const speed = str(s.speed) || "normal";
+      const speedClass = speed === "fast" ? "bt-marquee-fast" : speed === "slow" ? "bt-marquee-slow" : "";
+      const bgColor = str(s.bgColor) || "#4F46E5";
+      const textColor = str(s.textColor) || "#FFFFFF";
+      const icon = str(s.icon) || "lightning";
+      const iconChar = icon === "truck" ? "🚚" : icon === "gift" ? "🎁" : icon === "fire" ? "🔥" : icon === "star" ? "⭐" : "⚡";
+      const link = str(s.link);
+
+      const content = (
+        <div className={`bt-marquee-track ${speedClass}`}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <span key={i} className="bt-marquee-item" style={{ color: textColor }}>
+              <span>{iconChar}</span>
+              <span {...(i === 0 ? ed("text") : {})}>{text}</span>
+            </span>
+          ))}
+        </div>
+      );
+
+      return (
+        <div className="bt-marquee-sec" style={{ background: bgColor }} data-section={id}>
+          {link && !editing ? <Cta href={link} className="b-announce-link" style={{ width: "100%" }}>{content}</Cta> : content}
+        </div>
+      );
+    }
+    case "video-reels": {
+      const title = L(s, "title", lang);
+      const subhead = L(s, "subhead", lang);
+      const videoUrl = str(s.videoUrl);
+      const ytId = videoUrl ? youtubeId(videoUrl) : null;
+      const aspect = str(s.aspectRatio) === "9-16" ? "aspect-9-16" : "aspect-16-9";
+      const ctaText = L(s, "ctaText", lang);
+      const link = str(s.ctaLink);
+
+      return (
+        <div className="wrap" data-section={id}>
+          <section className="bt-video-sec">
+            <div className="section-head" style={{ textAlign: "center", marginBottom: 20 }}>
+              <h2 {...ed("title")}>{title}</h2>
+              {subhead && <p className="muted" {...ed("subhead")}>{subhead}</p>}
+            </div>
+            <div className={`bt-video-wrap ${aspect}`}>
+              {ytId ? (
+                <iframe
+                  className="bt-video-iframe"
+                  src={`https://www.youtube-nocookie.com/embed/${ytId}?rel=0&modestbranding=1`}
+                  title={title || "Product video"}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : videoUrl ? (
+                <video className="bt-video-iframe" controls src={videoUrl} poster={str(s.poster)} />
+              ) : (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#9CA3AF" }}>
+                  <span>🎬 Add YouTube or video link in settings</span>
+                </div>
+              )}
+            </div>
+            {ctaText && (
+              <div style={{ marginTop: 20 }}>
+                <Cta href={link} className="btn btn-secondary btn-round" attrs={ed("ctaText")}>
+                  {ctaText}
+                </Cta>
+              </div>
+            )}
+          </section>
+        </div>
+      );
+    }
+    case "floating-contact": {
+      const phone = str(s.phone) || site?.phone || "";
+      const rawWa = str(s.whatsapp) || site?.whatsapp || "";
+      const cleanWa = rawWa.replace(/[^0-9]/g, "");
+      const waNumber = cleanWa.startsWith("88") ? cleanWa : `88${cleanWa}`;
+      const msg = encodeURIComponent(L(s, "message", lang) || "Hello! I have a question.");
+      const pos = str(s.position) === "bottom-left" ? "pos-left" : "pos-right";
+      const label = L(s, "label", lang);
+
+      return (
+        <div className={`bt-floating-contact ${pos}`} data-section={id}>
+          {label && <span className="bt-floating-tooltip" {...ed("label")}>{label}</span>}
+          {phone && (
+            <a href={`tel:${phone}`} className="bt-floating-btn bt-floating-phone" title={`Call: ${phone}`} aria-label={`Call ${phone}`}>
+              <PhoneIcon />
+            </a>
+          )}
+          {cleanWa && (
+            <a
+              href={`https://wa.me/${waNumber}?text=${msg}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bt-floating-btn"
+              title="Chat on WhatsApp"
+              aria-label="Chat on WhatsApp"
+            >
+              <WaIcon size={28} />
+            </a>
+          )}
+        </div>
+      );
+    }
     default:
       // The product, collection and cart blocks (docs/39) need the page's own data.
       return <>{renderPageBlock(section.type, id, s, ctx, lang, t, editing)}</>;

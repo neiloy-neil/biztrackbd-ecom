@@ -284,6 +284,190 @@ export const SECTIONS: SectionDef[] = [
     fields: [t("text", "Button text", 40), tb("text", "Button text", 40)],
     defaults: { text: "Order now", textBn: "অর্ডার করুন" },
   },
+
+  // ---- Modern High-Converting Sections (Store-wide: home, custom, product, collection, cart)
+  {
+    type: "countdown-timer",
+    label: "Flash Sale Countdown",
+    description: "Urgency countdown clock for seasonal sales, Eid discounts, and flash deals.",
+    page: "home",
+    pages: ["custom", "product", "collection", "cart"],
+    max: 2,
+    fields: [
+      t("badge", "Urgency badge", 40), tb("badge", "Urgency badge", 40),
+      t("title", "Headline", 80), tb("title", "Headline", 80),
+      area("subhead", "Line under it", 200), areab("subhead", "Line under it", 200),
+      { key: "endsAt", label: "Offer ends", type: "text", max: 16, hint: "Bangladesh time, e.g. 2026-12-31 23:59. Countdown ticks down to this date." },
+      t("ctaText", "Button text", 30), tb("ctaText", "Button text", 30),
+      link("ctaLink", "Button link"),
+      { key: "bgColor", label: "Background colour", type: "color" },
+      { key: "textColor", label: "Text colour", type: "color" },
+    ],
+    defaults: {
+      badge: "LIMITED TIME SALE", badgeBn: "সীমিত সময়ের অফার",
+      title: "Mega Flash Sale · Up to 40% Off", titleBn: "মেগা ফ্ল্যাশ সেল · ৪০% পর্যন্ত ছাড়",
+      subhead: "Special discounts on our most popular items. Order before time runs out!", subheadBn: "আমাদের জনপ্রিয় পণ্যে বিশেষ মূল্যছাড়। অফার শেষ হবার আগেই অর্ডার করুন!",
+      endsAt: "2026-12-31 23:59",
+      ctaText: "Shop Flash Sale", ctaTextBn: "অফার দেখুন",
+      ctaLink: "/search?sale=1",
+      bgColor: "#1E1B4B",
+      textColor: "#FFFFFF",
+    },
+    check: (s) => (s.endsAt && parseEndsAt(String(s.endsAt)) === null ? "write the end as a date and time, like 2026-12-31 23:59" : null),
+  },
+  {
+    type: "accordion-faq",
+    label: "Accordion FAQ",
+    description: "Expandable questions & answers for sizing, delivery charges, cash on delivery, and exchange policies.",
+    page: "home",
+    pages: ["custom", "product", "collection", "cart"],
+    max: 3,
+    fields: [
+      t("title", "Heading", 80), tb("title", "Heading", 80),
+      area("intro", "Intro line (optional)", 200), areab("intro", "Intro line (optional)", 200),
+    ],
+    list: {
+      key: "items",
+      label: "Questions",
+      itemLabel: "Question",
+      min: 1,
+      max: 10,
+      fields: [
+        t("q", "Question", 120), tb("q", "Question", 120),
+        area("a", "Answer", 600), areab("a", "Answer", 600),
+      ],
+      defaultItem: {
+        q: "What is your delivery charge and time?",
+        qBn: "ডেলিভারি চার্জ এবং সময় কত?",
+        a: "Delivery inside Dhaka is ৳70 (1-2 days). Outside Dhaka is ৳130 (3-4 days).",
+        aBn: "ঢাকা সিটির ভেতরে ডেলিভারি চার্জ ৭০ টাকা (১-২ দিন)। ঢাকার বাইরে ১৩০ টাকা (৩-৪ দিন)।",
+      },
+    },
+    defaults: {
+      title: "Frequently Asked Questions",
+      titleBn: "সাধারণ কিছু জিজ্ঞাসা",
+      intro: "Got questions before placing your order? Here are the answers.",
+      introBn: "অর্ডার করার আগে কোনো প্রশ্ন থাকলে নিচের উত্তরগুলো দেখে নিন।",
+      items: [
+        {
+          q: "Do you offer Cash on Delivery (COD)?",
+          qBn: "আপনারা কি ক্যাশ অন ডেলিভারি দেন?",
+          a: "Yes! We offer 100% Cash on Delivery across all 64 districts in Bangladesh.",
+          aBn: "হ্যাঁ! সারা বাংলাদেশের যেকোনো প্রান্তে ক্যাশ অন ডেলিভারিতে অর্ডার গ্রহণ করা হয়।",
+        },
+        {
+          q: "What is your size exchange policy?",
+          qBn: "সাইজ পরিবর্তন বা এক্সচেঞ্জের নিয়ম কী?",
+          a: "If the size does not fit, simply message us within 3 days and we will exchange it smoothly.",
+          aBn: "পণ্য হাতে পাওয়ার ৩ দিনের মধ্যে সাইজ পরিবর্তনের জন্য আমাদের ইনবক্স করলে সাথে সাথেই ব্যবস্থা নেওয়া হবে।",
+        },
+        {
+          q: "Can I inspect the parcel before paying the courier?",
+          qBn: "ডেলিভারি ম্যানের সামনে পণ্য দেখে নেয়া যাবে?",
+          a: "Yes, you can check the parcel in front of the delivery agent before paying.",
+          aBn: "অবশ্যই, ডেলিভারি ম্যানের উপস্থিতিতে পণ্য দেখে নিশ্চিত হয়ে মূল্য পরিশোধ করতে পারবেন।",
+        },
+      ],
+    },
+  },
+  {
+    type: "marquee-ticker",
+    label: "Announcement Marquee",
+    description: "An animated continuous scrolling ribbon for coupons, shipping perks, and festival highlights.",
+    page: "home",
+    pages: ["custom", "product", "collection", "cart"],
+    max: 2,
+    fields: [
+      t("text", "Primary ticker text", 180), tb("text", "Primary ticker text", 180),
+      { key: "speed", label: "Scroll speed", type: "select", options: [{ value: "normal", label: "Normal" }, { value: "slow", label: "Gentle" }, { value: "fast", label: "Fast" }] },
+      { key: "icon", label: "Badge icon", type: "select", options: [{ value: "lightning", label: "⚡ Lightning" }, { value: "truck", label: "🚚 Delivery" }, { value: "gift", label: "🎁 Gift" }, { value: "fire", label: "🔥 Hot Sale" }, { value: "star", label: "⭐ Star" }] },
+      link("link", "Link (optional)"),
+      { key: "bgColor", label: "Background", type: "color" },
+      { key: "textColor", label: "Text colour", type: "color" },
+    ],
+    defaults: {
+      text: "FREE DELIVERY INSIDE DHAKA ON ORDERS OVER ৳2,500 · 100% CASH ON DELIVERY IN 64 DISTRICTS · EASY 3-DAY EXCHANGE",
+      textBn: "২,৫০০ টাকার অর্ডারে ঢাকা সিটিতে ফ্রি ডেলিভারি · ৬৪ জেলায় ক্যাশ অন ডেলিভারি · ৩ দিনের সহজ এক্সচেঞ্জ সুবিধা",
+      speed: "normal",
+      icon: "lightning",
+      link: "",
+      bgColor: "#4F46E5",
+      textColor: "#FFFFFF",
+    },
+  },
+  {
+    type: "video-reels",
+    label: "Product Video Showcase",
+    description: "Responsive video player for product demonstrations, unboxing, and styling tutorials.",
+    page: "home",
+    pages: ["custom", "product", "collection", "cart"],
+    max: 3,
+    fields: [
+      t("title", "Heading", 80), tb("title", "Heading", 80),
+      area("subhead", "Line under it (optional)", 200), areab("subhead", "Line under it (optional)", 200),
+      { key: "videoUrl", label: "YouTube or Video address", type: "url", max: 300, hint: "Paste YouTube address (e.g. https://youtu.be/...) or direct video link" },
+      { key: "aspectRatio", label: "Aspect ratio", type: "select", options: [{ value: "16-9", label: "Widescreen (16:9)" }, { value: "9-16", label: "Vertical Reel (9:16)" }] },
+      image("poster", "Poster picture (optional)"),
+      t("ctaText", "Button text (optional)", 30), tb("ctaText", "Button text (optional)", 30),
+      link("ctaLink", "Button link (optional)"),
+    ],
+    defaults: {
+      title: "See It in Action",
+      titleBn: "ভিডিওতে পণ্যের বিস্তারিত দেখুন",
+      subhead: "Watch how our products are crafted and styled in real life.",
+      subheadBn: "বাস্তবে পণ্যের ফেব্রিক, ফিটিং ও ফিনিশিং ভিডিওতে দেখুন।",
+      videoUrl: "",
+      aspectRatio: "16-9",
+      poster: "",
+      ctaText: "Shop This Look",
+      ctaTextBn: "কালেকশন দেখুন",
+      ctaLink: "/search",
+    },
+    check: (s) => (s.videoUrl && !safeUrl(String(s.videoUrl)) ? "enter a valid video address" : null),
+  },
+  {
+    type: "floating-contact",
+    label: "Floating WhatsApp & Call",
+    description: "Persistent floating WhatsApp chat & direct hotline phone button for instant customer inquiries.",
+    page: "home",
+    pages: ["custom", "product", "collection", "cart"],
+    max: 1,
+    fields: [
+      t("phone", "Direct call phone number", 20, { hint: "e.g. 01712345678" }),
+      t("whatsapp", "WhatsApp number", 20, { hint: "e.g. 01712345678 or +8801712345678" }),
+      { key: "position", label: "Screen position", type: "select", options: [{ value: "bottom-right", label: "Bottom Right" }, { value: "bottom-left", label: "Bottom Left" }] },
+      area("message", "Pre-filled WhatsApp message", 200),
+      areab("message", "Pre-filled WhatsApp message", 200),
+      t("label", "Tooltip badge text", 30),
+      tb("label", "Tooltip badge text", 30),
+    ],
+    defaults: {
+      phone: "01712345678",
+      whatsapp: "01712345678",
+      position: "bottom-right",
+      message: "Hello! I am browsing your store and would like to ask a question.",
+      messageBn: "আসসালামু আলাইকুম! আপনাদের স্টোরের প্রোডাক্ট সম্পর্কে জানতে চাচ্ছিলাম।",
+      label: "Need Help? Chat with us",
+      labelBn: "সাহায্য প্রয়োজন? ইনবক্স করুন",
+    },
+  },
+];
+
+export interface StoreSectionCategory {
+  id: string;
+  title: string;
+  icon: string;
+  types: string[];
+}
+
+/** Standard organized category tabs for browsing sections in Store Pages */
+export const STORE_SECTION_CATEGORIES: StoreSectionCategory[] = [
+  { id: "all", title: "All Sections", icon: "✨", types: [] },
+  { id: "hero", title: "Header & Hero", icon: "🖼️", types: ["hero", "banner", "announcement-bar"] },
+  { id: "products", title: "Product Showcases", icon: "🛍️", types: ["featured-products", "category-grid", "product-related", "collection-products"] },
+  { id: "trust", title: "Trust & Social Proof", icon: "⭐", types: ["trust-strip", "product-reviews", "video-reels"] },
+  { id: "promotions", title: "Promotions & Urgency", icon: "⚡", types: ["countdown-timer", "marquee-ticker", "floating-contact"] },
+  { id: "content", title: "Content & FAQs", icon: "📝", types: ["rich-text", "accordion-faq", "contact-block"] },
 ];
 
 /** The 11-character id of a YouTube video from a pasted address (watch, youtu.be, embed, shorts), or null. Nothing else is ever put in a page. */

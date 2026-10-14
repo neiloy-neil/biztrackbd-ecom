@@ -9,7 +9,7 @@ import {
   type Field, type ListSpec, type PageJson, type PageKind, type PageSection, type SectionDef, type ThemeSettings,
 } from "@biztrackbd/core/builder-client";
 import { ImagePicker } from "@/components/image-picker";
-import { LANDING_GROUPS, SectionThumb } from "./section-thumbs";
+import { LANDING_GROUPS, STORE_SECTION_CATEGORIES, SectionThumb } from "./section-thumbs";
 import { discardDraftAction, publishAction, rollbackAction, saveDraftAction } from "./actions";
 
 export interface VersionItem { version: number; label: string | null; createdAt: string; isLive: boolean }
@@ -230,6 +230,8 @@ export function Builder(props: Props) {
   const [label, setLabel] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
   const [library, setLibrary] = useState(false);
+  const [libraryCategory, setLibraryCategory] = useState("all");
+  const [librarySearch, setLibrarySearch] = useState("");
   // Where a section chosen from the gallery goes: the gap that was clicked on the page, or the end.
   const [addAt, setAddAt] = useState<number | null>(null);
   // A click on a picture in the preview asks for that picture to be changed.
@@ -396,10 +398,15 @@ export function Builder(props: Props) {
       [next[i], next[j]] = [next[j]!, next[i]!];
       return { ...p, sections: next };
     });
+    setTimeout(() => { post({ type: "bt-preview:focus", id }); }, 100);
   }
   function reorder(from: number, to: number) {
     if (from === to) return;
+    const movedId = page.sections[from]?.id;
     edit((p) => { const next = [...p.sections]; const [m] = next.splice(from, 1); next.splice(to, 0, m!); return { ...p, sections: next }; });
+    if (movedId) {
+      setTimeout(() => { post({ type: "bt-preview:focus", id: movedId }); }, 100);
+    }
   }
   function duplicate(s: PageSection) {
     if (full(s.type)) return;
@@ -697,7 +704,57 @@ export function Builder(props: Props) {
         </aside>
       </div>
 
-      <Drawer open={library} onClose={() => { setLibrary(false); setAddAt(null); }} title="Add a section">
+      <Drawer
+        open={library}
+        onClose={() => {
+          setLibrary(false);
+          setAddAt(null);
+          setLibrarySearch("");
+          setLibraryCategory("all");
+        }}
+        title="Add a section"
+      >
+        <div className="bld-search-box">
+          <span className="bld-search-icon" aria-hidden>🔍</span>
+          <input
+            type="search"
+            className="input"
+            style={{ paddingLeft: 34, paddingRight: librarySearch ? 32 : 12 }}
+            placeholder="Search sections (e.g. countdown, FAQ, video)..."
+            value={librarySearch}
+            onChange={(e) => setLibrarySearch(e.target.value)}
+            aria-label="Search sections"
+          />
+          {librarySearch && (
+            <button
+              type="button"
+              className="bld-search-clear"
+              onClick={() => setLibrarySearch("")}
+              aria-label="Clear search"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {kind !== "landing" && (
+          <div className="bld-cat-pills" role="tablist" aria-label="Section categories">
+            {STORE_SECTION_CATEGORIES.map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                role="tab"
+                aria-selected={libraryCategory === cat.id}
+                className={`bld-cat-pill${libraryCategory === cat.id ? " on" : ""}`}
+                onClick={() => setLibraryCategory(cat.id)}
+              >
+                <span>{cat.icon}</span>
+                <span>{cat.title}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         {(() => {
           const card = (d: (typeof defs)[number]) => (
             <button key={d.type} type="button" className="bld-card bld-card-pic" disabled={full(d.type)} onClick={() => add(d.type)} data-testid={`lib-${d.type}`}>
@@ -705,13 +762,54 @@ export function Builder(props: Props) {
               <span className="bld-card-txt"><b>{d.label}</b><span>{d.description}</span>{d.max && count(d.type) >= d.max && <em>Already on the page</em>}</span>
             </button>
           );
-          if (kind !== "landing") return <div className="bld-lib">{defs.map(card)}</div>;
+
+          const q = librarySearch.trim().toLowerCase();
+          const matchesSearch = (d: (typeof defs)[number]) => !q || d.label.toLowerCase().includes(q) || d.description.toLowerCase().includes(q) || d.type.toLowerCase().includes(q);
+
+          if (kind !== "landing") {
+            const activeCategory = STORE_SECTION_CATEGORIES.find((c) => c.id === libraryCategory);
+            const filteredDefs = defs.filter((d) => {
+              if (libraryCategory !== "all" && activeCategory && !activeCategory.types.includes(d.type)) {
+                return false;
+              }
+              return matchesSearch(d);
+            });
+
+            if (filteredDefs.length === 0) {
+              return (
+                <div className="bld-empty" style={{ padding: "28px 12px" }}>
+                  <b>No sections found</b>
+                  <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>Try a different category or search keyword.</p>
+                </div>
+              );
+            }
+
+            return <div className="bld-lib">{filteredDefs.map(card)}</div>;
+          }
+
+          const activeLandingGroups = LANDING_GROUPS.map((g) => {
+            const groupDefs = g.types
+              .map((t) => defs.find((d) => d.type === t))
+              .filter((d): d is NonNullable<typeof d> => Boolean(d))
+              .filter(matchesSearch);
+            return { title: g.title, defs: groupDefs };
+          }).filter((g) => g.defs.length > 0);
+
+          if (activeLandingGroups.length === 0) {
+            return (
+              <div className="bld-empty" style={{ padding: "28px 12px" }}>
+                <b>No sections found</b>
+                <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>Try a different search keyword.</p>
+              </div>
+            );
+          }
+
           return (
             <div className="stack" style={{ gap: 14 }}>
-              {LANDING_GROUPS.map((g) => (
+              {activeLandingGroups.map((g) => (
                 <section key={g.title} aria-label={g.title}>
                   <div className="bld-gh" style={{ marginBottom: 6 }}>{g.title}</div>
-                  <div className="bld-lib">{g.types.map((t) => defs.find((d) => d.type === t)).filter((d): d is NonNullable<typeof d> => Boolean(d)).map(card)}</div>
+                  <div className="bld-lib">{g.defs.map(card)}</div>
                 </section>
               ))}
             </div>

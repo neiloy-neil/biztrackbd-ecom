@@ -29,6 +29,7 @@ const KIND: Record<string, keyof typeof DRAWINGS> = {
   "lp-countdown": "clock", "lp-stock": "bar", "lp-offer-bar": "price", "trust-strip": "bar", "lp-faq": "faq", "lp-order-form": "form", "lp-sticky-cta": "bar", "lp-header": "bar", "lp-marquee": "bar", "lp-compare": "split", "lp-steps": "list", "lp-screens": "gallery", "contact-block": "text",
   hero: "hero", banner: "split", "rich-text": "text", "featured-products": "gallery", "category-grid": "gallery", "announcement-bar": "bar",
   "product-main": "split", "product-reviews": "reviews", "product-related": "gallery", "collection-header": "text", "collection-products": "gallery", "cart-main": "form",
+  "countdown-timer": "clock", "accordion-faq": "faq", "marquee-ticker": "bar", "video-reels": "video", "floating-contact": "bar",
 };
 
 export function SectionThumb({ type }: { type: string }) {
@@ -39,6 +40,8 @@ export function SectionThumb({ type }: { type: string }) {
     </svg>
   );
 }
+
+export { STORE_SECTION_CATEGORIES, type StoreSectionCategory } from "@biztrackbd/core/builder-client";
 
 /** How the cards are grouped on a landing page; other pages show one list. */
 export const LANDING_GROUPS: { title: string; types: string[] }[] = [

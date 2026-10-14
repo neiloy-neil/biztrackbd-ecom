@@ -73,6 +73,17 @@ details.bld-group[open] > summary.bld-gh::after { transform: rotate(180deg); }
 .bld-card span { font-size: 13px; color: var(--ink-3); }
 .bld-card em { font-size: 12px; font-style: normal; color: var(--warning); font-weight: 700; }
 
+/* ---- Visual Library Categories & Search ---- */
+.bld-cat-pills { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 14px; scrollbar-width: none; }
+.bld-cat-pills::-webkit-scrollbar { display: none; }
+.bld-cat-pill { padding: 6px 12px; border-radius: 9999px; border: 1px solid var(--line-2); background: var(--surface); font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); transition: all .15s ease; }
+.bld-cat-pill:hover { border-color: var(--brand); color: var(--brand); }
+.bld-cat-pill.on { background: var(--brand); color: #fff; border-color: var(--brand); }
+.bld-search-box { position: relative; margin-bottom: 12px; }
+.bld-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--ink-3); pointer-events: none; font-size: 14px; }
+.bld-search-clear { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); border: 0; background: none; cursor: pointer; color: var(--ink-3); font-size: 14px; padding: 4px; border-radius: 4px; }
+.bld-search-clear:hover { color: var(--ink); }
+
 /* ---- Phone: the store on top, the panel below */
 @media (max-width: 899px) {
   .bld-exit span { display: none; }
