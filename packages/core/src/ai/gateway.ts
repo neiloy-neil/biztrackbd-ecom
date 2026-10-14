@@ -40,8 +40,9 @@ export async function resolveGeminiApiKey(tenantId: string): Promise<ResolvedAiK
       };
     }
 
-    const dbKey = await tx.platformConfig.findUnique({ where: { key: "gemini_api_key" } });
-    const platformKey = dbKey?.value?.trim() || process.env.GEMINI_API_KEY?.trim();
+    // The platform AI key, set in Platform settings, through the one function a store connection may use (migration 36).
+    const dbKey = (await tx.$queryRaw<{ v: string | null }[]>`SELECT platform_config_value('gemini_api_key') AS v`)[0]?.v;
+    const platformKey = dbKey?.trim() || process.env.GEMINI_API_KEY?.trim();
     if (!platformKey) {
       throw new ValidationError(
         "AI engine is not configured on this platform. Please add your own Google Gemini API key in Store Settings > AI Suite."

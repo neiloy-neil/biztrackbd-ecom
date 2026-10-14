@@ -1,3 +1,4 @@
+import { Prisma, getBasePrisma } from "@biztrackbd/db";
 import { normalizeBdPhone } from "../phone";
 import type { CourierFraudStats } from "./assess";
 
@@ -40,19 +41,56 @@ export interface ExternalCourierFraudData {
   cachedAt?: number;
 }
 
-const DEFAULT_API_ENDPOINT = "https://fraudchecker.smartposbd.com/api/v1/fraud-check";
-const DEFAULT_API_KEY = "fraud_noxKDzJPjwEtWNM6FiWU1gQVF99OtjPc";
+export const DEFAULT_FRAUD_CHECKER_ENDPOINT = "https://fraudchecker.smartposbd.com/api/v1/fraud-check";
 const CACHE_TTL_MS = 15 * 24 * 60 * 60 * 1000; // 15 days local cache
 
 // In-memory verification cache for sub-20ms speed on repeated searches
 const memoryCache = new Map<string, { data: ExternalCourierFraudData; expiresAt: number }>();
 
-export function getFraudCheckerApiKey(): string {
-  return process.env.FRAUD_CHECKER_API_KEY || DEFAULT_API_KEY;
+export interface FraudCheckerConfig {
+  /** null when nobody has set a key: the checker then answers "no data" instead of calling out. */
+  apiKey: string | null;
+  endpoint: string;
+  source: "DATABASE" | "ENV" | "NONE";
+}
+
+const CONFIG_TTL_MS = 60_000;
+let configCache: { at: number; value: FraudCheckerConfig } | null = null;
+
+/** One named platform setting, through the function that allows only the fraud checker keys (migration 36). */
+async function readPlatformValue(key: string): Promise<string | null> {
+  try {
+    const rows = await getBasePrisma().$queryRaw<{ v: string | null }[]>(Prisma.sql`SELECT platform_config_value(${key}) AS v`);
+    return rows[0]?.v?.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The fraud checker key and address. The platform admin sets them in Platform settings (stored in PlatformConfig); the environment
+ * variables FRAUD_CHECKER_API_KEY and FRAUD_CHECKER_API_URL are the fallback. There is no key in the code. Remembered for a minute.
+ */
+export async function getFraudCheckerConfig(): Promise<FraudCheckerConfig> {
+  if (configCache && Date.now() - configCache.at < CONFIG_TTL_MS) return configCache.value;
+  const [dbKey, dbUrl] = await Promise.all([readPlatformValue("fraud_checker_api_key"), readPlatformValue("fraud_checker_api_url")]);
+  const envKey = process.env.FRAUD_CHECKER_API_KEY?.trim() || null;
+  const value: FraudCheckerConfig = {
+    apiKey: dbKey ?? envKey,
+    endpoint: dbUrl ?? process.env.FRAUD_CHECKER_API_URL?.trim() ?? DEFAULT_FRAUD_CHECKER_ENDPOINT,
+    source: dbKey ? "DATABASE" : envKey ? "ENV" : "NONE",
+  };
+  configCache = { at: Date.now(), value };
+  return value;
+}
+
+export async function getFraudCheckerApiKey(): Promise<string | null> {
+  return (await getFraudCheckerConfig()).apiKey;
 }
 
 export function clearFraudCheckerCache(): void {
   memoryCache.clear();
+  configCache = null;
 }
 
 /**
@@ -81,8 +119,10 @@ export async function fetchUnifiedCourierFraud(
     }
   }
 
-  const endpoint = process.env.FRAUD_CHECKER_API_URL || DEFAULT_API_ENDPOINT;
-  const apiKey = getFraudCheckerApiKey();
+  const cfg = await getFraudCheckerConfig();
+  if (!cfg.apiKey) return null;
+  const endpoint = cfg.endpoint;
+  const apiKey = cfg.apiKey;
   const fetcher = options?.fetchImpl ?? globalThis.fetch;
 
   try {

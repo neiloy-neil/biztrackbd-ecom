@@ -7,7 +7,9 @@ import type {
   PlatformCourierConfigView,
   PlatformUddoktaPayConfigView,
   PlatformMailConfigView,
+  PlatformFraudConfigView,
 } from "@biztrackbd/core";
+import { FraudCheckerSettings } from "./fraud-checker-settings";
 import {
   savePlatformAiConfigAction,
   testPlatformAiConnectionAction,
@@ -26,9 +28,10 @@ interface Props {
   initialCourierConfig: PlatformCourierConfigView;
   initialUddoktaConfig: PlatformUddoktaPayConfigView;
   initialMailConfig: PlatformMailConfigView;
+  initialFraudConfig: PlatformFraudConfigView;
 }
 
-type TabType = "ai" | "sms" | "couriers" | "payments" | "mail";
+type TabType = "ai" | "sms" | "couriers" | "payments" | "mail" | "fraud";
 
 export function PlatformSettingsClient({
   initialAiConfig,
@@ -36,6 +39,7 @@ export function PlatformSettingsClient({
   initialCourierConfig,
   initialUddoktaConfig,
   initialMailConfig,
+  initialFraudConfig,
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabType>("ai");
 
@@ -350,7 +354,26 @@ export function PlatformSettingsClient({
         >
           ✉️ Mail & Branding
         </button>
+        <button
+          type="button"
+          onClick={() => { setActiveTab("fraud"); setNotice(null); }}
+          data-testid="tab-fraud"
+          style={{
+            padding: "8px 16px",
+            border: "none",
+            borderBottom: activeTab === "fraud" ? "3px solid #5B4FE8" : "3px solid transparent",
+            background: "none",
+            color: activeTab === "fraud" ? "#5B4FE8" : "#4B4B73",
+            fontWeight: 700,
+            fontSize: 14,
+            cursor: "pointer",
+          }}
+        >
+          🛡️ Fraud checker
+        </button>
       </div>
+
+      {activeTab === "fraud" && <FraudCheckerSettings initial={initialFraudConfig} />}
 
       {/* 1. AI SUITE TAB */}
       {activeTab === "ai" && (

@@ -98,9 +98,9 @@ export async function getCourierReport(
     // 3. Return reasons from customer returns or order events
     const returnEvents = await tx.$queryRaw<{ reason: string | null; count: number }[]>`
       SELECT 
-        COALESCE(cr.reason, 'Customer changed mind / unreachable') AS reason,
+        COALESCE(NULLIF(cr.reason, ''), 'Customer changed mind / unreachable') AS reason,
         COUNT(*)::int AS count
-      FROM "CustomerReturn" cr
+      FROM "ReturnRequest" cr
       WHERE cr."createdAt"::date BETWEEN ${range.from}::date AND ${range.to}::date
       GROUP BY 1
       ORDER BY count DESC

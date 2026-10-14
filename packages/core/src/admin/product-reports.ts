@@ -82,7 +82,7 @@ export async function getProductReport(
       LEFT JOIN "Category" c ON c.id = p."categoryId"
       WHERE o."deletedAt" IS NULL 
         AND o.status NOT IN ('CANCELLED')
-        AND (("createdAt" AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Dhaka')::date BETWEEN ${range.from}::date AND ${range.to}::date
+        AND ((o."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Dhaka')::date BETWEEN ${range.from}::date AND ${range.to}::date
       GROUP BY oi."productId"
       ORDER BY sales DESC
     `;
@@ -112,7 +112,7 @@ export async function getProductReport(
       JOIN "Order" o ON o.id = oi."orderId"
       WHERE o."deletedAt" IS NULL
         AND o.status NOT IN ('CANCELLED', 'RETURNED', 'REFUNDED')
-        AND (("createdAt" AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Dhaka')::date >= ${thirtyDaysAgo}::date
+        AND ((o."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Dhaka')::date >= ${thirtyDaysAgo}::date
       GROUP BY oi."productId"
     `;
     const velocityMap = new Map(velocityRows.map((v) => [v.productId, v.units30d / 30]));
@@ -125,7 +125,7 @@ export async function getProductReport(
       JOIN "Order" o ON o.id = oi."orderId"
       WHERE o."deletedAt" IS NULL
         AND o.status NOT IN ('CANCELLED')
-        AND (("createdAt" AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Dhaka')::date >= ${sixtyDaysAgo}::date
+        AND ((o."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Dhaka')::date >= ${sixtyDaysAgo}::date
     `;
     const soldIn60d = new Set(sold60dRows.map((s) => s.productId));
 

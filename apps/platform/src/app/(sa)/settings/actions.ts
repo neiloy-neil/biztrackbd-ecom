@@ -16,6 +16,8 @@ import {
   testPlatformUddoktaPay,
   getPlatformMailConfig,
   savePlatformMailConfig,
+  savePlatformFraudConfig,
+  testPlatformFraudChecker,
   DomainError,
 } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
@@ -137,4 +139,23 @@ export async function savePlatformMailConfigAction(input: {
     if (err instanceof DomainError) return { ok: false as const, error: err.message };
     return { ok: false as const, error: "Failed to save platform mail configuration." };
   }
+}
+
+// 6. Fraud checker
+export async function savePlatformFraudConfigAction(input: { apiKey?: string; endpoint?: string }) {
+  const s = await requireAction("audit");
+  try {
+    await savePlatformFraudConfig(s.actor, input);
+    revalidatePath("/settings");
+    return { ok: true as const };
+  } catch (err) {
+    if (err instanceof DomainError) return { ok: false as const, error: err.message };
+    console.error("savePlatformFraudConfigAction error", err instanceof Error ? err.name : "unknown");
+    return { ok: false as const, error: "Failed to save the fraud checker settings." };
+  }
+}
+
+export async function testPlatformFraudCheckerAction(apiKey?: string) {
+  await requireAction("audit");
+  return testPlatformFraudChecker(apiKey);
 }

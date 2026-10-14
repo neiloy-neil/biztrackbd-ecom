@@ -1,5 +1,6 @@
 import { getPlatformPrisma, type PrismaClient } from "@biztrackbd/db";
 import { ForbiddenError, ValidationError } from "../errors";
+import { DEFAULT_FRAUD_CHECKER_ENDPOINT, clearFraudCheckerCache } from "../fraud/courier-api";
 import type { PlatformActor } from "./admin";
 
 export interface PlatformAiConfigView {
@@ -52,6 +53,15 @@ export interface PlatformMailConfigView {
   smtpHost: string | null;
   smtpPort: number | null;
   smtpUser: string | null;
+  source: "DATABASE" | "ENV" | "NONE";
+  updatedAt: Date | null;
+  updatedBy: string | null;
+}
+
+export interface PlatformFraudConfigView {
+  hasKey: boolean;
+  maskedKey: string | null;
+  endpoint: string;
   source: "DATABASE" | "ENV" | "NONE";
   updatedAt: Date | null;
   updatedBy: string | null;
@@ -834,4 +844,90 @@ export async function getPlatformHealthMatrix(deps?: Deps): Promise<PlatformHeal
       payments: { status: payStatus, latencyMs: 25 },
     },
   };
+}
+
+// ------------------------------------------------------------------------------------------------
+// FRAUD CHECKER (the courier fraud screening service the marketing tool and the orders list use)
+// ------------------------------------------------------------------------------------------------
+
+export async function getPlatformFraudConfig(deps?: Deps): Promise<PlatformFraudConfigView> {
+  const db = dbOf(deps);
+  const rows = await db.platformConfig.findMany({ where: { key: { in: ["fraud_checker_api_key", "fraud_checker_api_url"] } } });
+  const map = new Map(rows.map((r) => [r.key, r]));
+  const keyRow = map.get("fraud_checker_api_key");
+  const envKey = process.env.FRAUD_CHECKER_API_KEY?.trim() || null;
+  const key = keyRow?.value?.trim() || envKey;
+  return {
+    hasKey: Boolean(key),
+    maskedKey: mask(key),
+    endpoint: map.get("fraud_checker_api_url")?.value?.trim() || process.env.FRAUD_CHECKER_API_URL?.trim() || DEFAULT_FRAUD_CHECKER_ENDPOINT,
+    source: keyRow?.value ? "DATABASE" : envKey ? "ENV" : "NONE",
+    updatedAt: keyRow?.updatedAt ?? null,
+    updatedBy: keyRow?.updatedBy ?? null,
+  };
+}
+
+/** Saves the key and the address. An empty key removes the saved key. The key itself is never written to the audit log. */
+export async function savePlatformFraudConfig(actor: PlatformActor, input: { apiKey?: string; endpoint?: string }, deps?: Deps): Promise<{ ok: true }> {
+  assertPlatformAdmin(actor);
+  const db = dbOf(deps);
+  if (input.endpoint !== undefined) {
+    const e = input.endpoint.trim();
+    if (e) {
+      let u: URL;
+      try { u = new URL(e); } catch { throw new ValidationError("The address is not a valid web address"); }
+      if (u.protocol !== "https:") throw new ValidationError("The address must start with https://");
+      await db.platformConfig.upsert({
+        where: { key: "fraud_checker_api_url" },
+        create: { key: "fraud_checker_api_url", value: u.toString(), description: "Fraud checker API address", updatedBy: actor.email },
+        update: { value: u.toString(), updatedBy: actor.email },
+      });
+    } else {
+      await db.platformConfig.deleteMany({ where: { key: "fraud_checker_api_url" } });
+    }
+  }
+  let keyChanged = false;
+  if (input.apiKey !== undefined) {
+    const cleaned = input.apiKey.trim();
+    if (cleaned && (cleaned.length < 12 || /\s/.test(cleaned))) throw new ValidationError("That does not look like an API key");
+    if (cleaned) {
+      await db.platformConfig.upsert({
+        where: { key: "fraud_checker_api_key" },
+        create: { key: "fraud_checker_api_key", value: cleaned, description: "Fraud checker API key", updatedBy: actor.email },
+        update: { value: cleaned, updatedBy: actor.email },
+      });
+    } else {
+      await db.platformConfig.deleteMany({ where: { key: "fraud_checker_api_key" } });
+    }
+    keyChanged = true;
+  }
+  await db.platformAuditLog.create({
+    data: { actorId: actor.id, action: "PLATFORM_FRAUD_CHECKER_CONFIG_UPDATED", details: { keyChanged, endpointChanged: input.endpoint !== undefined }, ipAddress: actor.ip ?? null },
+  });
+  clearFraudCheckerCache();
+  return { ok: true };
+}
+
+/** One real call to the service with a sample number, to see that the key and address work. Uses the key typed in the form, else the saved one. */
+export async function testPlatformFraudChecker(apiKey?: string, deps?: Deps): Promise<{ ok: boolean; latencyMs: number; message: string }> {
+  const db = dbOf(deps);
+  const saved = await getPlatformFraudConfig(deps);
+  const keyRow = await db.platformConfig.findUnique({ where: { key: "fraud_checker_api_key" } });
+  const key = apiKey?.trim() || keyRow?.value?.trim() || process.env.FRAUD_CHECKER_API_KEY?.trim();
+  if (!key) return { ok: false, latencyMs: 0, message: "No key to test. Enter one first." };
+  const started = Date.now();
+  try {
+    const res = await fetch(saved.endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json", "X-API-KEY": key, Authorization: `Bearer ${key}` },
+      body: JSON.stringify({ phone: "01700000000" }),
+      signal: AbortSignal.timeout(8000),
+    });
+    const latencyMs = Date.now() - started;
+    if (res.status === 401 || res.status === 403) return { ok: false, latencyMs, message: "The service refused this key." };
+    if (!res.ok) return { ok: false, latencyMs, message: `The service answered with an error (${res.status}).` };
+    return { ok: true, latencyMs, message: "The key works." };
+  } catch {
+    return { ok: false, latencyMs: Date.now() - started, message: "Could not reach the service." };
+  }
 }

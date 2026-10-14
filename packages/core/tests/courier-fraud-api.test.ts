@@ -8,6 +8,7 @@ import {
 
 describe("Unified 5-Courier Fraud API Engine", () => {
   beforeEach(() => {
+    process.env.FRAUD_CHECKER_API_KEY = "test-key-0123456789";
     clearFraudCheckerCache();
   });
 

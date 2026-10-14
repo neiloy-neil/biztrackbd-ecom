@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { InventoryRow } from "@biztrackbd/core";
+import { AdjustForm } from "./adjust-form";
 import { quickAdjustStockAction } from "./actions";
 
 export function InlineStockStepper({
@@ -162,11 +163,12 @@ export function InlineStockStepper({
 export function InventoryTableRow({
   r,
   canEdit,
-  adjustForm,
+  back,
 }: {
   r: InventoryRow;
   canEdit: boolean;
-  adjustForm?: (row: InventoryRow) => ReactNode;
+  /** Where to come back to after a save: the list with its filters. */
+  back: string;
 }) {
   const [stock, setStock] = useState(r.available);
   const state: InventoryRow["state"] = stock <= 0 ? "out" : stock <= r.reorderLevel ? "low" : "ok";
@@ -196,7 +198,7 @@ export function InventoryTableRow({
           {state === "out" ? "Out" : state === "low" ? "Low" : "OK"}
         </span>
       </td>
-      {canEdit && <td style={{ minWidth: 90 }}>{adjustForm ? adjustForm(updatedRow) : null}</td>}
+      {canEdit && <td style={{ minWidth: 90 }}><AdjustForm r={updatedRow} back={back} /></td>}
     </tr>
   );
 }
@@ -204,11 +206,12 @@ export function InventoryTableRow({
 export function InventoryMobileCard({
   r,
   canEdit,
-  adjustForm,
+  back,
 }: {
   r: InventoryRow;
   canEdit: boolean;
-  adjustForm?: (row: InventoryRow) => ReactNode;
+  /** Where to come back to after a save: the list with its filters. */
+  back: string;
 }) {
   const [stock, setStock] = useState(r.available);
   const state: InventoryRow["state"] = stock <= 0 ? "out" : stock <= r.reorderLevel ? "low" : "ok";
@@ -250,7 +253,7 @@ export function InventoryMobileCard({
           <span><b className="num" data-testid="available">{stock}</b> available</span>
         )}
       </div>
-      {canEdit && adjustForm && <div style={{ marginTop: 8 }}>{adjustForm(updatedRow)}</div>}
+      {canEdit && <div style={{ marginTop: 8 }}><AdjustForm r={updatedRow} back={back} /></div>}
     </div>
   );
 }

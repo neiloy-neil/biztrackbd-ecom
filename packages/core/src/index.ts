@@ -82,7 +82,7 @@ export {
   type FlaggedOrder, type FraudOverview, type BlockedRow, type PhoneLookup,
 } from "./fraud/service";
 export {
-  fetchUnifiedCourierFraud, toCourierFraudStats, clearFraudCheckerCache, getFraudCheckerApiKey,
+  fetchUnifiedCourierFraud, toCourierFraudStats, clearFraudCheckerCache, getFraudCheckerApiKey, getFraudCheckerConfig, DEFAULT_FRAUD_CHECKER_ENDPOINT,
   type ExternalCourierFraudData, type CourierNetworkStats,
 } from "./fraud/courier-api";
 export {
@@ -312,6 +312,10 @@ export {
   getPlatformMailConfig,
   savePlatformMailConfig,
   getPlatformHealthMatrix,
+  getPlatformFraudConfig,
+  savePlatformFraudConfig,
+  testPlatformFraudChecker,
+  type PlatformFraudConfigView,
   type PlatformAiConfigView,
   type PlatformSmsConfigView,
   type PlatformCourierConfigView,
