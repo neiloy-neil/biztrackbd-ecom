@@ -39,7 +39,10 @@ export { resetDemoStore, DEMO_TEMPLATE_IDS, type DemoDeps, type DemoResult } fro
 export { isDemoStore, assertNotDemo } from "./demo/guard";
 export { productSvg, bannerSvg, ART_KINDS, type ArtKind, type Palette } from "./demo/art";
 export { adminSearch, shellCounts, type SearchHit, type ShellCounts } from "./admin/shell";
-export { getDashboard, DASHBOARD_RANGES, type DashboardRange, dhakaDate, addDays, STORE_TZ, type Dashboard, type SetupStep } from "./admin/dashboard";
+export {
+  getDashboard, DASHBOARD_RANGES, type DashboardRange, dhakaDate, addDays, STORE_TZ, type Dashboard, type SetupStep,
+  type FunnelStage, type FulfillmentFunnel, type CodCashflowLedger, type CourierHealth, type CourierShareItem,
+} from "./admin/dashboard";
 export { listInventory, adjustStock, updateStockSettings, listStockHistory, STOCK_REASONS, type InventoryRow, type InventorySummary, type StockFilter, type AdjustInput } from "./admin/inventory";
 export {
   listCustomers, getCustomerDetail, updateCustomer, createCustomer, setCustomerBlocked, customersCsv,

@@ -31,6 +31,44 @@ export interface SetupStep {
 export type DashboardRange = 7 | 30 | 90;
 export const DASHBOARD_RANGES: DashboardRange[] = [7, 30, 90];
 
+export interface FunnelStage {
+  count: number;
+  amount: number;
+}
+
+export interface FulfillmentFunnel {
+  unverified: FunnelStage;
+  toPack: FunnelStage;
+  inTransit: FunnelStage;
+  delivered: FunnelStage;
+  returns: FunnelStage;
+}
+
+export interface CodCashflowLedger {
+  inTransitAmount: number;
+  inTransitOrders: number;
+  awaitingPayoutAmount: number;
+  awaitingPayoutOrders: number;
+  settledAmount: number;
+  settledOrders: number;
+  directMfsAmount: number;
+  directMfsOrders: number;
+}
+
+export interface CourierShareItem {
+  courier: string;
+  count: number;
+  percentage: number;
+}
+
+export interface CourierHealth {
+  successRate: number;
+  returnRate: number;
+  isReturnRateElevated: boolean;
+  totalShipped: number;
+  courierBreakdown: CourierShareItem[];
+}
+
 export interface Dashboard {
   today: DayTotals;
   yesterday: DayTotals;
@@ -45,6 +83,9 @@ export interface Dashboard {
   lowStock: { variantId: string; productTitle: string; variantTitle: string; stock: number }[];
   outOfStock: { count: number; examples: string[] };
   setup: { steps: SetupStep[]; done: number };
+  funnel: FulfillmentFunnel;
+  codLedger: CodCashflowLedger;
+  courierHealth: CourierHealth;
 }
 
 interface DayRow { d: string; orders: number; sales: number }
@@ -119,6 +160,122 @@ export async function getDashboard(tenantId: string, actor: StaffActor, now = ne
       { key: "publish", done: tenant.productCount > 0 && !settings?.ordersPaused && (tenant.status === "ACTIVE" || tenant.status === "TRIAL") },
     ];
 
+    // Compute Funnel, COD Ledger, and Courier Health metrics across active orders
+    const allOrders = await tx.order.findMany({
+      where: { deletedAt: null },
+      select: {
+        status: true,
+        paymentStatus: true,
+        paymentMethod: true,
+        settlementStatus: true,
+        totalAmount: true,
+        courierProvider: true,
+      },
+    });
+
+    let unverifiedCount = 0, unverifiedAmt = 0;
+    let toPackFunnelCount = 0, toPackFunnelAmt = 0;
+    let inTransitCount = 0, inTransitAmt = 0;
+    let deliveredCount = 0, deliveredAmt = 0;
+    let returnsCount = 0, returnsAmt = 0;
+
+    let codInTransitAmt = 0, codInTransitOrders = 0;
+    let codAwaitingAmt = 0, codAwaitingOrders = 0;
+    let codSettledAmt = 0, codSettledOrders = 0;
+    let directMfsAmt = 0, directMfsOrders = 0;
+
+    const courierCounts: Record<string, number> = {};
+
+    for (const ord of allOrders) {
+      const amt = Number(ord.totalAmount) || 0;
+
+      // Fulfillment Funnel
+      if (ord.paymentStatus === "PENDING_VERIFICATION" && ord.status !== "CANCELLED" && ord.status !== "REFUNDED") {
+        unverifiedCount++;
+        unverifiedAmt += amt;
+      }
+      if (ord.status === "CONFIRMED" || ord.status === "PROCESSING") {
+        toPackFunnelCount++;
+        toPackFunnelAmt += amt;
+      }
+      if (ord.status === "SHIPPED") {
+        inTransitCount++;
+        inTransitAmt += amt;
+      }
+      if (ord.status === "DELIVERED") {
+        deliveredCount++;
+        deliveredAmt += amt;
+      }
+      if (ord.status === "RETURNED" || ord.status === "CANCELLED") {
+        returnsCount++;
+        returnsAmt += amt;
+      }
+
+      // 3-Way COD Cashflow Ledger
+      const isCod = ord.paymentMethod === "COD";
+      const isMfs = ord.paymentMethod === "MANUAL_BKASH" || ord.paymentMethod === "MANUAL_NAGAD" || ord.paymentMethod === "MANUAL_ROCKET" || ord.paymentMethod === "GATEWAY_SSLCOMMERZ" || ord.paymentMethod === "GATEWAY_UDDOKTAPAY";
+
+      if (isCod) {
+        if (ord.status === "SHIPPED" && ord.paymentStatus !== "PAID") {
+          codInTransitOrders++;
+          codInTransitAmt += amt;
+        } else if (ord.status === "DELIVERED" && ord.settlementStatus !== "SETTLED") {
+          codAwaitingOrders++;
+          codAwaitingAmt += amt;
+        } else if (ord.settlementStatus === "SETTLED" || (ord.status === "DELIVERED" && ord.paymentStatus === "PAID")) {
+          codSettledOrders++;
+          codSettledAmt += amt;
+        }
+      } else if (isMfs && ord.paymentStatus === "PAID") {
+        directMfsOrders++;
+        directMfsAmt += amt;
+      }
+
+      // Courier distribution
+      if (ord.courierProvider) {
+        courierCounts[ord.courierProvider] = (courierCounts[ord.courierProvider] ?? 0) + 1;
+      }
+    }
+
+    const funnel: FulfillmentFunnel = {
+      unverified: { count: unverifiedCount, amount: Math.round(unverifiedAmt) },
+      toPack: { count: toPackFunnelCount, amount: Math.round(toPackFunnelAmt) },
+      inTransit: { count: inTransitCount, amount: Math.round(inTransitAmt) },
+      delivered: { count: deliveredCount, amount: Math.round(deliveredAmt) },
+      returns: { count: returnsCount, amount: Math.round(returnsAmt) },
+    };
+
+    const codLedger: CodCashflowLedger = {
+      inTransitAmount: Math.round(codInTransitAmt),
+      inTransitOrders: codInTransitOrders,
+      awaitingPayoutAmount: Math.round(codAwaitingAmt),
+      awaitingPayoutOrders: codAwaitingOrders,
+      settledAmount: Math.round(codSettledAmt),
+      settledOrders: codSettledOrders,
+      directMfsAmount: Math.round(directMfsAmt),
+      directMfsOrders: directMfsOrders,
+    };
+
+    const totalResolved = deliveredCount + returnsCount;
+    const successRate = totalResolved > 0 ? Math.round((deliveredCount / totalResolved) * 1000) / 10 : 100;
+    const returnRate = totalResolved > 0 ? Math.round((returnsCount / totalResolved) * 1000) / 10 : 0;
+    const isReturnRateElevated = returnRate > 12.0;
+
+    const totalCouriers = Object.values(courierCounts).reduce((a, b) => a + b, 0);
+    const courierBreakdown: CourierShareItem[] = Object.entries(courierCounts).map(([courier, count]) => ({
+      courier,
+      count,
+      percentage: totalCouriers > 0 ? Math.round((count / totalCouriers) * 100) : 0,
+    })).sort((a, b) => b.count - a.count);
+
+    const courierHealth: CourierHealth = {
+      successRate,
+      returnRate,
+      isReturnRateElevated,
+      totalShipped: inTransitCount + deliveredCount + returnsCount,
+      courierBreakdown,
+    };
+
     return {
       today: get(today),
       yesterday: get(addDays(today, -1)),
@@ -134,6 +291,9 @@ export async function getDashboard(tenantId: string, actor: StaffActor, now = ne
       lowStock: low.map((r) => ({ variantId: r.id, productTitle: r.product, variantTitle: r.variant, stock: r.stock })),
       outOfStock: { count: out.length, examples: out.slice(0, 3).map((r) => (r.variant.toLowerCase() === "default" ? r.product : `${r.product}, ${r.variant}`)) },
       setup: { steps, done: steps.filter((s) => s.done).length },
+      funnel,
+      codLedger,
+      courierHealth,
     };
   });
 }
