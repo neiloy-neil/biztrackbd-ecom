@@ -25,6 +25,13 @@ export interface StoreInfo {
   offlineMessage: string | null;
   /** The owner has paused orders: customers can look around but cannot place one. */
   ordersPaused: boolean;
+  flashSaleActive?: boolean;
+  flashSaleEndsAt?: Date | null;
+  flashSaleCoupon?: string | null;
+  aiChatbotEnabled?: boolean;
+  aiChatbotName?: string | null;
+  aiChatbotWelcome?: string | null;
+  aiChatbotEscalatePhone?: string | null;
 }
 
 export async function getStoreInfo(tenantId: string): Promise<StoreInfo> {
@@ -37,6 +44,8 @@ export async function getStoreInfo(tenantId: string): Promise<StoreInfo> {
       storeName: t.name, tagline: null, contactPhone: null, whatsappNumber: null, facebookUrl: null, instagramUrl: null, addressLine: null,
       logoUrl: null, announcement: null, announcementBn: null, bkashNumber: null, bkashKind: "PERSONAL", nagadNumber: null, nagadKind: "PERSONAL",
       paymentNote: null, offlineMessage: null, ordersPaused: false,
+      flashSaleActive: false, flashSaleEndsAt: null, flashSaleCoupon: null,
+      aiChatbotEnabled: false, aiChatbotName: null, aiChatbotWelcome: null, aiChatbotEscalatePhone: null,
     };
   });
 }
@@ -190,7 +199,7 @@ export async function listProducts(tenantId: string, opts: ListProductsOptions =
     const rows = await tx.product.findMany({
       relationLoadStrategy: "join",
       where, orderBy: ORDER[opts.sort ?? "newest"], skip: (page - 1) * pageSize, take: pageSize,
-      include: { images: { orderBy: { sortOrder: "asc" }, take: 1 }, category: { select: { name: true } }, variants: { select: { stockQuantity: true } } },
+      include: { images: { orderBy: { sortOrder: "asc" }, take: 1 }, category: { select: { name: true } }, variants: { where: { isActive: true }, select: { stockQuantity: true } } },
     });
     const total = await tx.product.count({ where });
     return {
@@ -225,10 +234,10 @@ export async function getProductBySlug(tenantId: string, slug: string): Promise<
     const p = await tx.product.findFirst({
       relationLoadStrategy: "join",
       where: { slug, status: "ACTIVE", deletedAt: null },
-      include: { images: { orderBy: { sortOrder: "asc" } }, category: { select: { name: true } }, variants: { orderBy: { createdAt: "asc" } } },
+      include: { images: { orderBy: { sortOrder: "asc" } }, category: { select: { name: true } }, variants: { where: { isActive: true }, orderBy: { createdAt: "asc" } } },
     });
     if (!p) return null;
-    const cardInclude = { images: { orderBy: { sortOrder: "asc" as const }, take: 1 }, category: { select: { name: true } }, variants: { select: { stockQuantity: true } } };
+    const cardInclude = { images: { orderBy: { sortOrder: "asc" as const }, take: 1 }, category: { select: { name: true } }, variants: { where: { isActive: true }, select: { stockQuantity: true } } };
     const base = { status: "ACTIVE" as const, deletedAt: null, id: { not: p.id } };
     const agg = await tx.review.aggregate({ where: { productId: p.id, isPublished: true }, _avg: { rating: true }, _count: true });
     // "Goes well with": other categories first (a shirt with trousers), then more of the same category if the store is small.

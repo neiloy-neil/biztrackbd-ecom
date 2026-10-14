@@ -21,19 +21,113 @@ function RiskPill({ level, score }: { level: string; score: number }) {
 
 function LookupResult({ r }: { r: PhoneLookup }) {
   const n = r.network;
+  const c = r.courier;
+  const cd = r.courierDetails;
+
+  const courierList = cd ? [
+    { name: "Steadfast", stats: cd.response?.steadfast, color: "#059669" },
+    { name: "Pathao", stats: cd.response?.pathao, color: "#DC2626" },
+    { name: "RedX", stats: cd.response?.redx, color: "#EA580C" },
+    { name: "CarryBee", stats: cd.response?.carrybee, color: "#2563EB" },
+    { name: "Paperfly", stats: cd.response?.paperfly, color: "#4F46E5" },
+  ] : [];
+
   return (
     <section className="card" data-testid="lookup-result" style={{ marginTop: 14 }}>
       <div className="card-head">
         <h2>{prettyPhone(r.phone)}</h2>
-        <span className={`pill ${n.level === "HIGH" ? "bad" : n.level === "MEDIUM" ? "warn" : n.level === "TRUSTED" ? "ok" : "grey"}`}>{TRUST_LABELS[n.level]}{n.score != null ? ` · ${n.score}` : ""}</span>
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          {r.unifiedScore != null && (
+            <span className={`pill ${r.unifiedLevel === "HIGH" ? "bad" : r.unifiedLevel === "MEDIUM" ? "warn" : "ok"}`}>
+              Score: {r.unifiedScore}/100 ({r.unifiedLevel === "HIGH" ? "High risk" : r.unifiedLevel === "MEDIUM" ? "Medium" : "Low risk"})
+            </span>
+          )}
+          <span className={`pill ${n.level === "HIGH" ? "bad" : n.level === "MEDIUM" ? "warn" : n.level === "TRUSTED" ? "ok" : "grey"}`}>
+            Network: {TRUST_LABELS[n.level]}{n.score != null ? ` · ${n.score}` : ""}
+          </span>
+        </div>
       </div>
       <dl className="kv">
-        <dt>Across all stores</dt><dd>{n.level === "NEW" ? "No parcels sent to this number yet" : `${n.delivered} delivered, ${n.failed} came back${n.refused ? `, ${n.refused} refused in the last 60 days` : ""}${n.stores > 1 ? ` (${n.stores} stores)` : ""}`}</dd>
-        <dt>In your store</dt><dd>{r.here.orders} orders · {r.here.delivered} delivered · {r.here.returned} returned · {r.here.cancelled} cancelled</dd>
-        <dt>Your blocklist</dt><dd>{r.blocked ? "Blocked" : "Not blocked"}</dd>
+        <dt>Across all stores</dt>
+        <dd>
+          {n.level === "NEW"
+            ? "No parcels sent to this number yet"
+            : `${n.delivered} delivered, ${n.failed} came back${n.refused ? `, ${n.refused} refused in the last 60 days` : ""}${n.stores > 1 ? ` (${n.stores} stores)` : ""}`}
+        </dd>
+        <dt>In your store</dt>
+        <dd>
+          {r.here.orders} orders · {r.here.delivered} delivered · {r.here.returned} returned · {r.here.cancelled} cancelled
+        </dd>
+        {c && (
+          <>
+            <dt>5-Courier Record</dt>
+            <dd>
+              <strong>{c.totalParcels}</strong> parcels · <strong style={{ color: "#15803D" }}>{c.deliveredParcels}</strong> delivered ({c.successRatio}% success) · <strong style={{ color: "#DC2626" }}>{c.cancelledParcels}</strong> returned/cancelled
+            </dd>
+          </>
+        )}
+        <dt>Your blocklist</dt>
+        <dd>{r.blocked ? "Blocked" : "Not blocked"}</dd>
       </dl>
-      <p className="muted" style={{ marginTop: 10, fontSize: 13.5 }}>
-        {n.level === "HIGH" ? "Pause booking. Ask for ৳100 in advance by bKash." : n.level === "MEDIUM" ? "Call the customer or send a confirmation message before packing." : n.level === "TRUSTED" ? "Safe to pack and ship cash on delivery." : "Normal processing. Check the address is complete."}
+
+      {/* 5-Courier Network Breakdown Grid if available */}
+      {cd && (
+        <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid var(--line, #E2E8F0)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <h3 style={{ fontSize: 14, fontWeight: 700, margin: 0 }}>5-Courier Delivery Breakdown</h3>
+            <span style={{ fontSize: 12, color: "#64748B" }}>Steadfast, Pathao, RedX, CarryBee, Paperfly</span>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10 }}>
+            {courierList.map((item) => {
+              const s = item.stats;
+              const hasData = s && s.status && s.data.total > 0;
+              return (
+                <div
+                  key={item.name}
+                  style={{
+                    padding: "10px 12px",
+                    borderRadius: 8,
+                    background: hasData ? "#F8FAFC" : "transparent",
+                    border: "1px solid #E2E8F0",
+                    fontSize: 13,
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 600, color: item.color, marginBottom: 4 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: item.color, display: "inline-block" }} />
+                    {item.name}
+                  </div>
+                  {hasData ? (
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 15 }}>{s.data.deliveredPercentage}%</div>
+                      <div className="muted" style={{ fontSize: 11.5 }}>
+                        {s.data.success}/{s.data.total} delivered
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="muted" style={{ fontSize: 12 }}>No record</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {cd.community_reports && cd.community_reports.length > 0 && (
+            <div style={{ marginTop: 12, padding: "10px 12px", background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, fontSize: 13, color: "#991B1B" }}>
+              <strong>Caution ({cd.community_reports.length} report):</strong> {cd.community_reports[0]?.details || "Reported for refused delivery by online merchants."}
+            </div>
+          )}
+        </div>
+      )}
+
+      <p className="muted" style={{ marginTop: 12, fontSize: 13.5 }}>
+        {n.level === "HIGH" || r.unifiedLevel === "HIGH"
+          ? "Pause booking. Ask for ৳100 in advance by bKash."
+          : n.level === "MEDIUM" || r.unifiedLevel === "MEDIUM"
+            ? "Call the customer or send a confirmation message before packing."
+            : n.level === "TRUSTED"
+              ? "Safe to pack and ship cash on delivery."
+              : "Normal processing. Check the address is complete."}
       </p>
       <p className="muted" style={{ fontSize: 12.5 }}>Only counts are shared between stores. Other stores' customers, addresses and items are never shown.</p>
     </section>

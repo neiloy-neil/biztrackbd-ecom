@@ -10,6 +10,7 @@ const ITEMS: { href: string; label: string; area: Area }[] = [
   { href: "/settings/domains", label: "Domains", area: "billing" },
   { href: "/settings/notifications", label: "Customer messages", area: "design" },
   { href: "/settings/invoices", label: "Invoices", area: "design" },
+  { href: "/settings/ai", label: "AI & Chatbot", area: "design" },
   { href: "/settings/apps", label: "Apps & Integrations", area: "billing" },
   { href: "/settings/staff", label: "Team", area: "team" },
   { href: "/settings/audit", label: "Audit log", area: "team" },

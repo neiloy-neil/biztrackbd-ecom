@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { DomainError, createOrder, createUddoktaPayCharge, getStoreUddoktaPayConfig, hashClient, isValidAddress, normalizeBdPhone, sendServerPurchase, signOrderAccess } from "@biztrackbd/core";
+import { DomainError, createOrder, createUddoktaPayCharge, getStoreUddoktaPayConfig, hashClient, isValidAddress, normalizeBdPhone, parseCustomerDetailsWithAi, sendServerPurchase, signOrderAccess } from "@biztrackbd/core";
 import { clientIp } from "@/lib/ip";
 import { getCustomerSession } from "@/lib/session";
 import { getStore } from "@/lib/tenant";
@@ -95,5 +95,16 @@ export async function placeOrderAction(p: PlaceOrderPayload): Promise<PlaceOrder
     }
     console.error("placeOrderAction failed", e instanceof Error ? e.name : "unknown", await clientIp());
     return { ok: false, error: "Something went wrong. Your order was not placed. Please try again." };
+  }
+}
+
+export async function parseAddressTextAction(text: string) {
+  const store = await getStore();
+  try {
+    const result = await parseCustomerDetailsWithAi(store.id, text.slice(0, 1500));
+    return { ok: true, result };
+  } catch (err) {
+    console.error("parseAddressTextAction failed:", err);
+    return { ok: false, error: "Failed to parse address" };
   }
 }

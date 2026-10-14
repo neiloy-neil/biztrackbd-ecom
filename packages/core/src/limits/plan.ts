@@ -24,7 +24,17 @@ export async function getPlanLimits(tx: TenantTx): Promise<PlanLimits & { timezo
   const tenant = await tx.tenant.findFirstOrThrow({ select: { planTier: true, timezone: true } });
   const plan = await tx.plan.findUnique({ where: { tier: tenant.planTier } });
   const limits = (plan?.limits ?? {}) as Record<string, unknown>;
-  return { products: num(limits.products), ordersPerMonth: num(limits.ordersPerMonth), staff: num(limits.staff), storageGb: num(limits.storageGb), timezone: tenant.timezone, tier: tenant.planTier };
+
+  const adjustments = await tx.tenantQuotaAdjustment.findMany({
+    where: { type: "PRODUCT_LIMIT" },
+    select: { amount: true },
+  }).catch(() => []);
+  const extraProducts = adjustments.reduce((acc, a) => acc + a.amount, 0);
+
+  const baseProducts = num(limits.products);
+  const products = baseProducts !== null ? baseProducts + extraProducts : null;
+
+  return { products, ordersPerMonth: num(limits.ordersPerMonth), staff: num(limits.staff), storageGb: num(limits.storageGb), timezone: tenant.timezone, tier: tenant.planTier };
 }
 
 /** First day of the current month in the store's own timezone, as YYYY-MM-01. A store in Dhaka rolls over at Dhaka midnight. */

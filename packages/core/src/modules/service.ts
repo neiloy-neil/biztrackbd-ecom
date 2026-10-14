@@ -17,6 +17,10 @@ export interface ModuleDef {
 
 export const MODULES: ModuleDef[] = [
   { key: "loyalty", label: "Loyalty, VIP levels and referrals", description: "Reward points, Silver, Gold and Platinum levels, birthday vouchers and refer-a-friend.", built: true },
+  { key: "pos_barcode", label: "POS & Barcode Studio", description: "Omnichannel retail counter cashier terminal, barcode scanning, and thermal roll printing.", built: true },
+  { key: "ai_suite", label: "Gemini AI Assistant Suite", description: "AI copywriter, product description generator, chat address parser, and storefront chatbot.", built: true },
+  { key: "marketing_campaigns", label: "Marketing Command Center", description: "Broadcast SMS & Email campaigns, urgent storefront flash banners, and auto notifications.", built: true },
+  { key: "fraud_shield", label: "Unified Courier Fraud Defense", description: "Cross-courier delivery record screening, fraud score calculation, and developer API.", built: true },
   { key: "bespoke", label: "Made to order", description: "Tailoring and custom sizes with measurements and a quote.", built: false },
   { key: "drops", label: "Limited drops", description: "Timed releases with a countdown and a waiting list.", built: false },
   { key: "baby_profiles", label: "Baby profiles", description: "Saved baby sizes and birthdays for a children's store.", built: false },
@@ -31,16 +35,57 @@ async function allowance(tx: TenantTx): Promise<number> {
   const t = await tx.tenant.findFirstOrThrow({ select: { planTier: true } });
   const plan = await tx.plan.findUnique({ where: { tier: t.planTier } });
   const v = (plan?.features as Record<string, unknown> | null)?.modules;
-  return v === "all" ? Infinity : typeof v === "number" ? v : 0;
+  if (v === "all") return Infinity;
+  if (typeof v === "number") return v;
+  return t.planTier === "PRO" || t.planTier === "BUSINESS" ? Infinity : 0;
 }
 
 /** Is this module on for the store? Built modules are on by default when the plan includes modules, until the owner switches them off. */
 export async function isModuleOn(tx: TenantTx, key: string): Promise<boolean> {
-  const d = def(key);
+  const modKey = key === "loyalty_vip" ? "loyalty" : key;
+  const d = def(modKey);
   if (!d?.built) return false;
+  const row = await tx.tenantModule.findFirst({ where: { moduleKey: modKey } });
+  if (row?.isEnabled === true) return true;
   if ((await allowance(tx)) <= 0) return false;
-  const row = await tx.tenantModule.findFirst({ where: { moduleKey: key } });
   return row ? row.isEnabled : true;
+}
+
+export async function isModuleActive(tenantId: string, key: string): Promise<boolean> {
+  return withTenant(tenantId, async (tx) => isModuleOn(tx, key));
+}
+
+export async function getModuleStatus(tenantId: string, key: string): Promise<{
+  active: boolean;
+  isPlanLocked: boolean;
+  planTier: string;
+}> {
+  return withTenant(tenantId, async (tx) => {
+    const t = await tx.tenant.findFirstOrThrow({ select: { planTier: true } });
+    const cap = await allowance(tx);
+    const isPlanLocked = cap <= 0;
+    const active = await isModuleOn(tx, key);
+    return {
+      active,
+      isPlanLocked,
+      planTier: t.planTier,
+    };
+  });
+}
+
+export async function getTenantActiveModules(tenantId: string): Promise<Record<string, boolean>> {
+  return withTenant(tenantId, async (tx) => {
+    const cap = await allowance(tx);
+    const rows = await tx.tenantModule.findMany();
+    const explicit = new Map(rows.map((r) => [r.moduleKey, r.isEnabled]));
+    return {
+      loyalty: explicit.get("loyalty") ?? (cap > 0),
+      pos_barcode: explicit.get("pos_barcode") ?? (cap > 0),
+      ai_suite: explicit.get("ai_suite") ?? (cap > 0),
+      marketing_campaigns: explicit.get("marketing_campaigns") ?? (cap > 0),
+      fraud_shield: explicit.get("fraud_shield") ?? (cap > 0),
+    };
+  });
 }
 
 export interface ModuleView extends ModuleDef {
@@ -241,7 +286,9 @@ export async function listAppStoreCatalog(tenantId: string, actor: StaffActor): 
       // 6. Generic Plan Addon Modules (Wholesale, Drops, Bespoke)
       if (item.tier === "ADDON") {
         const isPlanLocked = cap <= 0;
-        const enabled = cap > 0 && (moduleOn.get(item.key) ?? false);
+        const modKey = item.key === "loyalty_vip" ? "loyalty" : item.key;
+        const explicitOn = moduleOn.get(modKey);
+        const enabled = cap > 0 && (explicitOn !== undefined ? explicitOn : true);
 
         if (enabled) {
           usedAddons++;
@@ -258,7 +305,7 @@ export async function listAppStoreCatalog(tenantId: string, actor: StaffActor): 
           statusLabel,
           enabled: Boolean(enabled && !isPlanLocked),
           configured: true,
-          blockedReason: isPlanLocked ? "Not included in your current plan tier" : isOverLimit ? "Plan addon limit reached" : null,
+          blockedReason: isPlanLocked ? "Upgrade to Pro or Business to activate this app" : isOverLimit ? "Plan addon limit reached" : null,
         };
       }
 

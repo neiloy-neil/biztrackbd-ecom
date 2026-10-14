@@ -32,7 +32,19 @@ export function Announcement({ info, lang, chrome }: { info: StoreInfo; lang: La
     return <div className="announce" role="note" style={style}>{inner}</div>;
   }
   const text = lang === "bn" && info.announcementBn ? info.announcementBn : info.announcement;
-  return text ? <div className="announce" role="note">{text}</div> : null;
+  if (!text && !info.flashSaleActive) return null;
+  const isFlash = Boolean(info.flashSaleActive);
+  const flashStyle = isFlash ? { background: "#dc2626", color: "#ffffff" } : undefined;
+  return (
+    <div className={`announce ${isFlash ? "flash-sale" : ""}`} role="note" style={flashStyle}>
+      <span>{text}</span>
+      {isFlash && info.flashSaleCoupon && (
+        <span style={{ marginLeft: 8, padding: "2px 6px", background: "#ffffff", color: "#dc2626", borderRadius: 4, fontWeight: 700, fontSize: 12 }}>
+          {lang === "bn" ? `কোড: ${info.flashSaleCoupon}` : `Use code: ${info.flashSaleCoupon}`}
+        </span>
+      )}
+    </div>
+  );
 }
 
 export function Header({ info, categories, lang, t, points, chrome }: { info: StoreInfo; categories: CategoryCard[]; lang: Lang; t: T; points?: { available: number; worthBdt: number } | null; chrome?: Chrome | null }) {

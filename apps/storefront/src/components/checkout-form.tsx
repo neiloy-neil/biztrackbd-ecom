@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Quote } from "@biztrackbd/core";
 import { BD_GEO } from "@biztrackbd/core/geo";
 import { quoteCartAction } from "@/app/actions";
-import { placeOrderAction } from "@/app/(store)/checkout/actions";
+import { placeOrderAction, parseAddressTextAction } from "@/app/(store)/checkout/actions";
 import { captureAction } from "@/app/growth-actions";
 import { fmt, money, productTitle, type Lang } from "@/lib/i18n-core";
 import type { CHECKOUT_STRINGS, LOYALTY_STRINGS } from "@/lib/strings";
@@ -90,6 +90,35 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showAiPaste, setShowAiPaste] = useState(false);
+  const [pasteText, setPasteText] = useState("");
+  const [parsingAddress, setParsingAddress] = useState(false);
+  const [aiParseSuccess, setAiParseSuccess] = useState(false);
+
+  async function handleAiParse() {
+    if (!pasteText.trim() || parsingAddress) return;
+    setParsingAddress(true);
+    setAiParseSuccess(false);
+    try {
+      const res = await parseAddressTextAction(pasteText);
+      if (res.ok && res.result) {
+        const p = res.result;
+        if (p.phone) setPhone(cleanPhoneDigits(p.phone));
+        if (p.name) setName(p.name);
+        if (p.division && p.district) {
+          setDivision(p.division);
+          setDistrict(p.district);
+        }
+        if (p.upazila) setUpazila(p.upazila);
+        if (p.address) setAddress(p.address);
+        if (p.notes && !note) setNote(p.notes);
+        setAiParseSuccess(true);
+        setTimeout(() => setShowAiPaste(false), 900);
+      }
+    } finally {
+      setParsingAddress(false);
+    }
+  }
   const seq = useRef(0);
   const restored = useRef(false);
   const began = useRef(false);
@@ -254,6 +283,66 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
           <summary className="summary-toggle"><span className="grow">{fmt(s.showSummary, { n: itemCount })}</span><span className="price num">{total == null ? money(quote?.subtotal ?? 0, lang) : money(total, lang)}</span></summary>
           <div style={{ marginTop: 10 }}>{summary}</div>
         </details>
+
+        <section className="card" style={{ background: "linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%)", borderColor: "rgba(99, 102, 241, 0.25)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 600, fontSize: 14 }}>
+                <span>✨</span>
+                <span>{lang === "bn" ? "এক ক্লিকে স্বয়ংক্রিয় ঠিকানা পূরণ" : "One-Click AI Address Auto-Fill"}</span>
+                <span className="pill green" style={{ fontSize: 10, padding: "1px 6px" }}>Gemini AI</span>
+              </div>
+              <p style={{ margin: "4px 0 0", fontSize: 12.5, color: "var(--ink-2, #6b7280)" }}>
+                {lang === "bn"
+                  ? "মেসেঞ্জার বা নোট থেকে নাম, ফোন ও ঠিকানা একবারে পেস্ট করুন।"
+                  : "Paste customer name, phone and address directly from WhatsApp/Messenger."}
+              </p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ fontSize: 13, padding: "6px 12px", border: "1px solid rgba(99, 102, 241, 0.3)" }}
+              onClick={() => setShowAiPaste(!showAiPaste)}
+            >
+              {showAiPaste
+                ? (lang === "bn" ? "বন্ধ করুন" : "Close")
+                : (lang === "bn" ? "📋 পেস্ট করুন" : "📋 Paste Text")}
+            </button>
+          </div>
+
+          {showAiPaste && (
+            <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px dashed rgba(99, 102, 241, 0.2)" }}>
+              <textarea
+                className="textarea"
+                rows={3}
+                style={{ width: "100%", fontSize: 13, resize: "vertical" }}
+                value={pasteText}
+                onChange={(e) => setPasteText(e.target.value)}
+                placeholder={lang === "bn"
+                  ? "যেমন: তানিয়া আক্তার, ০১৭xxxxxxxx, মিরপুর ১০, ব্লক সি রোড ৭ বাসা ১৪, ঢাকা।"
+                  : "e.g. Tania Akter, 01712345678, Road 7, House 14, Block C, Mirpur 10, Dhaka."}
+              />
+              <div style={{ marginTop: 8, display: "flex", justifyContent: "flex-end", gap: 8, alignItems: "center" }}>
+                {aiParseSuccess && (
+                  <span style={{ color: "#16a34a", fontSize: 13, fontWeight: 500 }}>
+                    ✓ {lang === "bn" ? "ঠিকানা পূরণ সম্পন্ন!" : "Form auto-filled!"}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  style={{ fontSize: 13, padding: "6px 14px" }}
+                  disabled={parsingAddress || !pasteText.trim()}
+                  onClick={handleAiParse}
+                >
+                  {parsingAddress
+                    ? (lang === "bn" ? "যাচাই হচ্ছে..." : "AI Parsing...")
+                    : (lang === "bn" ? "⚡ তথ্য পূরণ করুন" : "⚡ Auto-Fill Fields")}
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
 
         <section className="card">
           <h2>{s.contactSection}</h2>

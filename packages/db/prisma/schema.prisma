@@ -136,9 +136,14 @@ model Tenant {
   blockedContacts  BlockedContact[]
   themeVersions    ThemeVersion[]
   messageTemplates MessageTemplate[]
+  campaigns        MarketingCampaign[]
   storeSettings    StoreSettings?
+  posRegisters     PosRegister[]
+  posSessions      PosSession[]
+  posMovements     PosCashMovement[]
   orderEvents      OrderEvent[]
   stockAdjustments StockAdjustment[]
+  quotaAdjustments TenantQuotaAdjustment[]
   customerOtps     CustomerOtp[]
   staffInvites     StaffInvite[]
   modules          TenantModule[]
@@ -341,6 +346,7 @@ model ProductVariant {
   stockQuantity  Int         @default(0)   // single central warehouse per store (docs/05); no per-location stock
   reorderLevel   Int         @default(5)
   shelfCode      String?     // optional bin or shelf label
+  isActive       Boolean     @default(true)
   
   options        Json        // { "Size": "L", "Color": "Black" }
   imageUrl       String?
@@ -354,6 +360,7 @@ model ProductVariant {
 
   @@index([tenantId, productId])
   @@index([tenantId, sku])
+  @@index([tenantId, barcode])
 }
 
 // ==========================================
@@ -481,6 +488,9 @@ model Order {
   utmMedium           String?
   // The landing page this order came from, when it did (docs/46)
   landingPageId       String?
+  posRegisterId       String?
+  posSessionId        String?
+  paymentSplits       Json?
   
   notes               String?           @db.Text
   staffNotes          String?           @db.Text
@@ -1372,6 +1382,26 @@ model MessageTemplate {
   @@unique([tenantId, event, channel, locale])
 }
 
+model MarketingCampaign {
+  id              String    @id @default(cuid())
+  tenantId        String
+  name            String
+  channel         String    // "SMS" | "EMAIL"
+  targetSegment   String    // "ALL" | "VIP" | "REPEAT" | "DORMANT" | "DHAKA" | "OUTSIDE_DHAKA"
+  subject         String?   // For email campaigns
+  body            String    @db.Text
+  recipientsCount Int       @default(0)
+  creditsUsed     Int       @default(0)
+  status          String    @default("SENT") // "SENT" | "SCHEDULED" | "FAILED"
+  sentAt          DateTime?
+  
+  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([tenantId, createdAt])
+}
+
 model StaffInvite {
   id         String    @id @default(cuid())
   tenantId   String
@@ -1619,6 +1649,36 @@ model Announcement {
   createdAt  DateTime  @default(now())
 }
 
+model PlatformConfig {
+  key         String   @id
+  value       String   @db.Text
+  description String?
+  updatedBy   String?
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+}
+
+model SubscriptionPromo {
+  id              String    @id @default(cuid())
+  code            String    @unique
+  discountType    String    // "PERCENTAGE" | "FIXED_BDT"
+  discountValue   Decimal   @db.Decimal(10, 2)
+  applicableTiers String[]  @default(["ALL"])
+  billingInterval String    @default("ANY")   // "ANY" | "MONTHLY" | "YEARLY"
+  maxUses         Int?
+  usedCount       Int       @default(0)
+  validFrom       DateTime  @default(now())
+  validUntil      DateTime?
+  isActive        Boolean   @default(true)
+  createdBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([code, isActive])
+}
+
+
+
 enum InquiryStatus {
   NEW
   CONTACTED
@@ -1691,6 +1751,9 @@ model StoreSettings {
   logoUrl        String?
   announcement   String?  // the thin bar above the header
   announcementBn String?
+  flashSaleActive Boolean   @default(false)
+  flashSaleEndsAt DateTime?
+  flashSaleCoupon String?
   bkashNumber    String?  // customers send money here when they choose bKash
   bkashKind      String   @default("PERSONAL")   // "PERSONAL" | "AGENT" | "MERCHANT"
   nagadNumber    String?
@@ -1725,6 +1788,12 @@ model StoreSettings {
   tiktokPixelId          String?   // TikTok Pixel ID (e.g. CXXXXXXXXXXXXX)
   ga4ApiSecret           String?   // GA4 Measurement Protocol API Secret for server-side events
   metaDomainVerification String?   // Meta domain verification code for <meta name="facebook-domain-verification">
+  // AI Suite & Storefront Chatbot
+  customGeminiApiKey     String?   // Merchant BYO Gemini API Key
+  aiChatbotEnabled       Boolean   @default(true)
+  aiChatbotName          String    @default("শপ অ্যাসিস্ট্যান্ট")
+  aiChatbotWelcome       String?
+  aiChatbotEscalatePhone String?
   // Loyalty points, VIP tiers and referrals (docs/26)
   loyaltyEnabled         Boolean @default(false)
   loyaltySpendPerPoint   Int     @default(100)   // every ৳ this much of a delivered order earns 1 point (before the tier multiplier)
@@ -1905,4 +1974,93 @@ model StockAlert {
 
   @@unique([variantId, phone])
   @@index([tenantId, notifiedAt])
+}
+
+
+// ==========================================
+// 19. POINT OF SALE (POS) & CASH REGISTERS
+// ==========================================
+
+enum CashMovementType {
+  CASH_IN
+  CASH_OUT
+}
+
+model PosRegister {
+  id                   String        @id @default(cuid())
+  tenantId             String
+  name                 String
+  code                 String
+  isActive             Boolean       @default(true)
+  receiptPrinterWidth  Int           @default(80)
+  autoPrintReceipt     Boolean       @default(true)
+
+  tenant               Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sessions             PosSession[]
+
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+}
+
+model PosSession {
+  id              String            @id @default(cuid())
+  tenantId        String
+  registerId      String
+  openedByUserId  String
+  closedByUserId  String?
+
+  openedAt        DateTime          @default(now())
+  closedAt        DateTime?
+
+  openingFloat    Decimal           @db.Decimal(12, 2)
+  closingCounted  Decimal?          @db.Decimal(12, 2)
+  expectedCash    Decimal?          @db.Decimal(12, 2)
+  cashDifference  Decimal?          @db.Decimal(12, 2)
+
+  note            String?
+  status          String            @default("OPEN")
+
+  tenant          Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  register        PosRegister       @relation(fields: [registerId], references: [id], onDelete: Cascade)
+  movements       PosCashMovement[]
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([tenantId, registerId, status])
+  @@index([tenantId, openedAt])
+}
+
+model PosCashMovement {
+  id          String            @id @default(cuid())
+  tenantId    String
+  sessionId   String
+  userId      String
+  type        CashMovementType
+  amount      Decimal           @db.Decimal(12, 2)
+  reason      String
+
+  tenant      Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  session     PosSession        @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime          @default(now())
+
+  @@index([tenantId, sessionId])
+}
+
+model TenantQuotaAdjustment {
+  id        String   @id @default(cuid())
+  tenantId  String
+  type      String   // "SMS_CREDITS" | "PRODUCT_LIMIT" | "STAFF_LIMIT"
+  amount    Int
+  reason    String
+  actorId   String   // PlatformUser id
+  createdAt DateTime @default(now())
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
 }

@@ -3,14 +3,53 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
-  DomainError, createDraftOrder, draftLink, createQuickOrder, findCustomerForOrder, parseOrderMessage, quoteOrder, searchVariantsForOrder, type ParsedMessage, type Quote,
+  DomainError,
+  createDraftOrder,
+  draftLink,
+  createQuickOrder,
+  findCustomerForOrder,
+  parseOrderMessage,
+  parseCustomerDetailsWithAi,
+  quoteOrder,
+  searchVariantsForOrder,
+  type ParsedMessage,
+  type Quote,
 } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 
-export async function parseMessageAction(text: string): Promise<ParsedMessage> {
+export async function parseMessageAction(
+  text: string
+): Promise<ParsedMessage & { parsedWithAi?: boolean; notes?: string }> {
   const s = await requireAction("orders", "edit");
   const catalog = await searchVariantsForOrder(s.tenantId, s.actor, "", 50);
-  return parseOrderMessage(text.slice(0, 2000), catalog);
+  const regexParsed = parseOrderMessage(text.slice(0, 2000), catalog);
+  try {
+    const aiResult = await parseCustomerDetailsWithAi(s.tenantId, text.slice(0, 2000));
+    const payment =
+      aiResult.paymentMethod === "BKASH"
+        ? "MANUAL_BKASH"
+        : aiResult.paymentMethod === "NAGAD"
+        ? "MANUAL_NAGAD"
+        : aiResult.paymentMethod === "COD"
+        ? "COD"
+        : regexParsed.payment;
+
+    return {
+      phone: aiResult.phone || regexParsed.phone,
+      name: aiResult.name || regexParsed.name,
+      division: aiResult.division || regexParsed.division,
+      district: aiResult.district || regexParsed.district,
+      upazila: aiResult.upazila || regexParsed.upazila,
+      addressHint: aiResult.address || regexParsed.addressHint,
+      items: regexParsed.items,
+      payment,
+      notes: aiResult.notes ?? undefined,
+      parsedWithAi: true,
+    };
+  } catch (err) {
+    console.error("AI parse failed, fallback to regex:", err);
+    return { ...regexParsed, parsedWithAi: false };
+  }
 }
 
 export async function lookupCustomerAction(phone: string) {

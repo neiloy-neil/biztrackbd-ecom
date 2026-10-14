@@ -67,3 +67,30 @@ export async function stockSettingsAction(variantId: string, form: FormData): Pr
   revalidatePath("/inventory");
   back(form, "ok=1");
 }
+
+export type QuickAdjustResult =
+  | { ok: true; quantityAfter: number; delta: number }
+  | { ok: false; error: string };
+
+/** Fast inline stock adjustment from table/cards. Logs CORRECTION and triggers afterRestock if increased. */
+export async function quickAdjustStockAction(
+  variantId: string,
+  mode: "delta" | "setTo",
+  amount: number,
+): Promise<QuickAdjustResult> {
+  const s = await requireAction("products", "edit");
+  try {
+    const input =
+      mode === "setTo"
+        ? { setTo: amount, reason: "CORRECTION" as const, note: "Quick inline adjustment" }
+        : { delta: amount, reason: "CORRECTION" as const, note: "Quick inline adjustment" };
+    const res = await adjustStock(s.tenantId, s.actor, variantId, input);
+    revalidatePath("/inventory");
+    revalidatePath("/products");
+    return { ok: true, quantityAfter: res.quantityAfter, delta: res.delta };
+  } catch (e) {
+    if (e instanceof DomainError) return { ok: false, error: e.message };
+    console.error("quickAdjustStockAction error", e instanceof Error ? e.name : "unknown");
+    return { ok: false, error: "Failed to update stock" };
+  }
+}

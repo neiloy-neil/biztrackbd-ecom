@@ -120,6 +120,7 @@ export const SaveProductInput = z.object({
       stockBefore: z.number().int().min(0).max(1_000_000).optional(),
       reorderLevel: z.number().int().min(0).max(100_000).default(5),
       shelfCode: z.string().trim().max(20).optional().nullable(),
+      isActive: z.boolean().default(true),
       options: z.record(z.string().max(40), z.string().max(60)).default({}),
     }))
     .min(1, "Add at least one variant")
@@ -152,9 +153,9 @@ export async function saveProduct(tenantId: string, actor: StaffActor, raw: unkn
     if (p.newCategoryName) {
       const name = p.newCategoryName;
       const slug = slugify(name);
-      const existing = await tx.category.findFirst({ where: { slug } });
+      const existing = await tx.category.findFirst({ where: { tenantId, slug } });
       categoryId = existing?.id ?? (await tx.category.create({ data: { tenantId, name, slug } })).id;
-    } else if (categoryId && !(await tx.category.findFirst({ where: { id: categoryId } }))) {
+    } else if (categoryId && !(await tx.category.findFirst({ where: { tenantId, id: categoryId } }))) {
       throw new ValidationError("Choose a category from the list", { field: "categoryId" });
     }
 
@@ -187,7 +188,7 @@ export async function saveProduct(tenantId: string, actor: StaffActor, raw: unkn
         await tx.productVariant.create({
           data: {
             tenantId, productId: id, title: v.title, sku: v.sku?.trim().toUpperCase() || null, price: v.price, compareAtPrice: v.compareAtPrice ?? null,
-            stockQuantity: v.stockQuantity, reorderLevel: v.reorderLevel, shelfCode: v.shelfCode?.trim() || null, options: v.options,
+            stockQuantity: v.stockQuantity, reorderLevel: v.reorderLevel, shelfCode: v.shelfCode?.trim() || null, isActive: v.isActive ?? true, options: v.options,
           },
         });
       }
@@ -200,7 +201,7 @@ export async function saveProduct(tenantId: string, actor: StaffActor, raw: unkn
       for (const v of p.variants) {
         const data = {
           title: v.title, sku: v.sku?.trim().toUpperCase() || null, price: v.price, compareAtPrice: v.compareAtPrice ?? null,
-          reorderLevel: v.reorderLevel, shelfCode: v.shelfCode?.trim() || null, options: v.options,
+          reorderLevel: v.reorderLevel, shelfCode: v.shelfCode?.trim() || null, isActive: v.isActive ?? true, options: v.options,
         };
         const current = v.id ? existing.variants.find((x) => x.id === v.id) : undefined;
         if (v.id && !current) throw new ValidationError("A variant on this page no longer exists. Reload and try again.");
@@ -262,7 +263,7 @@ export async function getProductForEdit(tenantId: string, actor: StaffActor, pro
       images: p.images.map((i) => ({ url: i.url, alt: i.altText })),
       variants: p.variants.map((v) => ({
         id: v.id, title: v.title, sku: v.sku, price: Number(v.price), compareAtPrice: v.compareAtPrice != null ? Number(v.compareAtPrice) : null,
-        stockQuantity: v.stockQuantity, reorderLevel: v.reorderLevel, shelfCode: v.shelfCode, options: (v.options ?? {}) as Record<string, string>,
+        stockQuantity: v.stockQuantity, reorderLevel: v.reorderLevel, shelfCode: v.shelfCode, isActive: v.isActive, options: (v.options ?? {}) as Record<string, string>,
       })),
     };
   });

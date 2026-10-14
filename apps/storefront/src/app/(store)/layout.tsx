@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getLiveChrome, getStorefrontTracking, getPointsSummary, listCategories, getStoreInfo, listFooterPages, listPublishedPosts } from "@biztrackbd/core";
+import { getLiveChrome, getStorefrontTracking, getPointsSummary, listCategories, getStoreInfo, listFooterPages, listPublishedPosts, isModuleActive } from "@biztrackbd/core";
 import { CartProvider } from "@/components/cart-provider";
 import { Footer } from "@/components/footer";
 import { Announcement, Header } from "@/components/header";
@@ -9,6 +9,7 @@ import { DemoRibbon } from "@/components/demo-ribbon";
 import { PausedBanner } from "@/components/paused-notice";
 import { StorefrontTracker } from "@/components/tracker";
 import { WhatsAppFloatingButton } from "@/components/whatsapp-floating-button";
+import { AiChatWidget } from "@/components/ai-chat-widget";
 import { getLang, makeT } from "@/lib/i18n";
 import { getOrigin } from "@/lib/origin";
 import { getCustomerSession } from "@/lib/session";
@@ -45,11 +46,12 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   const [footerPages, blog] = await Promise.all([listFooterPages(store.id), listPublishedPosts(store.id, { pageSize: 1 })]);
   // The header and footer the merchant built and published (docs/47 part C). None: today's header and footer.
   const chrome = await getLiveChrome(store.id).catch(() => null);
-  const [info, categories, tracking, points] = await Promise.all([
+  const [info, categories, tracking, points, isAiActive] = await Promise.all([
     getStoreInfo(store.id),
     listCategories(store.id),
     getStorefrontTracking(store.id),
     session ? getPointsSummary(store.id, session.customerId) : Promise.resolve(null),
+    isModuleActive(store.id, "ai_suite").catch(() => false),
   ]);
   return (
     <CartProvider>
@@ -63,6 +65,15 @@ export default async function StoreLayout({ children }: { children: React.ReactN
       <main id="main">{children}</main>
       <Footer info={info} categories={categories} lang={lang} t={t} pages={footerPages} hasBlog={blog.total > 0} chrome={chrome} />
       <WhatsAppFloatingButton whatsappNumber={info.whatsappNumber} />
+      {isAiActive && (
+        <AiChatWidget
+          enabled={info.aiChatbotEnabled}
+          botName={info.aiChatbotName}
+          welcomeMessage={info.aiChatbotWelcome}
+          escalatePhone={info.aiChatbotEscalatePhone || info.whatsappNumber}
+          storeName={info.storeName}
+        />
+      )}
     </CartProvider>
   );
 }

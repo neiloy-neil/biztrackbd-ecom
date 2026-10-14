@@ -44,7 +44,7 @@ export function addressLooksIncomplete(address: string): boolean {
 }
 
 export interface CourierFraudStats {
-  provider: "STEADFAST" | "PATHAO" | "REDX" | "NONE";
+  provider: "STEADFAST" | "PATHAO" | "REDX" | "CARRYBEE" | "PAPERFLY" | "MULTI_COURIER" | "NONE";
   totalParcels: number;
   deliveredParcels: number;
   cancelledParcels: number;

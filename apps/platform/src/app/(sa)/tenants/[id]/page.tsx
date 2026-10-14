@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ACCESS_LABELS, canPlatform, getTenantDetail } from "@biztrackbd/core";
+import { ACCESS_LABELS, canPlatform, getTenantDetail, listTenantQuotaAdjustments, APP_CATALOG } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
 import { dateOnly, dateTime, prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
@@ -14,6 +14,8 @@ import {
   quarantineAction,
   reactivateAction,
   suspendAction,
+  addQuotaAdjustmentAction,
+  overrideTenantModuleAction,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +28,8 @@ const DONE_MESSAGES: Record<string, string> = {
   plan: "Plan updated.",
   approved: "Store brand review approved.",
   noted: "Internal note saved.",
+  quota_adjusted: "Quota adjustment applied successfully.",
+  module_updated: "Tenant module entitlement updated.",
 };
 
 const TABS = [
@@ -48,6 +52,7 @@ export default async function TenantDetail({
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   const s = await requireAccess("tenants");
   const t = await getTenantDetail(s.actor, id).catch(() => null);
+  const quotaAdjustments = await listTenantQuotaAdjustments(s.actor, id).catch(() => []);
   if (!t) notFound();
 
   const canSuspend = canPlatform(s.user.role, "suspend", "edit");
@@ -441,19 +446,75 @@ export default async function TenantDetail({
           )}
 
           {tab === "usage" && (
-            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
-              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Detailed Store Usage Metrics</div>
-              <dl className="kv" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <dt>Products in Catalog</dt><dd className="num">{t.usage.products}</dd>
-                <dt>Active Staff Accounts</dt><dd className="num">{t.usage.staff}</dd>
-                <dt>Orders This Month</dt><dd className="num">{t.usage.ordersThisMonth}</dd>
-                <dt>All-time Total Orders</dt><dd className="num">{t.usage.ordersTotal}</dd>
-                <dt>Orders in Last 30 Days</dt><dd className="num">{t.usage.orders30Days}</dd>
-                <dt>Delivered Sales (30 Days)</dt><dd className="num">{taka(t.usage.gmv30Days)}</dd>
-                <dt>Registered Customers</dt><dd className="num">{t.usage.customers}</dd>
-                <dt>SMS Credits Used</dt><dd className="num">{t.usage.smsUsed}</dd>
-                <dt>Storage Consumed</dt><dd className="num">{t.usage.storageMb} MB ({storageUsedGb} GB)</dd>
-              </dl>
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
+                <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Detailed Store Usage Metrics</div>
+                <dl className="kv" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <dt>Products in Catalog</dt><dd className="num">{t.usage.products}</dd>
+                  <dt>Active Staff Accounts</dt><dd className="num">{t.usage.staff}</dd>
+                  <dt>Orders This Month</dt><dd className="num">{t.usage.ordersThisMonth}</dd>
+                  <dt>All-time Total Orders</dt><dd className="num">{t.usage.ordersTotal}</dd>
+                  <dt>Orders in Last 30 Days</dt><dd className="num">{t.usage.orders30Days}</dd>
+                  <dt>Delivered Sales (30 Days)</dt><dd className="num">{taka(t.usage.gmv30Days)}</dd>
+                  <dt>Registered Customers</dt><dd className="num">{t.usage.customers}</dd>
+                  <dt>SMS Credits Used</dt><dd className="num">{t.usage.smsUsed}</dd>
+                  <dt>Storage Consumed</dt><dd className="num">{t.usage.storageMb} MB ({storageUsedGb} GB)</dd>
+                </dl>
+              </div>
+
+              {/* Manual Quota Adjustments Card */}
+              <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
+                <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 8 }}>Manual Quota Top-Ups & Overrides</div>
+                <p style={{ fontSize: 13, color: "#6B6B8D", margin: "0 0 16px 0" }}>
+                  Grant bonus SMS credits or additional product slots directly without altering the merchant's plan tier.
+                </p>
+
+                {canAdjust && (
+                  <form action={addQuotaAdjustmentAction.bind(null, id)} style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end", paddingBottom: 16, borderBottom: "1px solid #E7E7F0" }}>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>Quota Type</label>
+                      <select name="type" className="select" defaultValue="SMS_CREDITS" style={{ height: 38, fontSize: 13 }}>
+                        <option value="SMS_CREDITS">SMS Credits</option>
+                        <option value="PRODUCT_LIMIT">Product Capacity</option>
+                        <option value="STAFF_LIMIT">Staff Account Slots</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>Amount (+)</label>
+                      <input name="amount" type="number" required min="1" placeholder="500" className="input" style={{ width: 110, height: 38, fontSize: 13 }} />
+                    </div>
+
+                    <div style={{ flex: "1 1 200px" }}>
+                      <label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>Audit Reason</label>
+                      <input name="reason" type="text" required placeholder="e.g. VIP goodwill top-up for Eid campaign" className="input" style={{ width: "100%", height: 38, fontSize: 13 }} />
+                    </div>
+
+                    <button type="submit" className="btn btn-primary" style={{ height: 38, fontSize: 13 }}>
+                      Grant Quota
+                    </button>
+                  </form>
+                )}
+
+                <div style={{ marginTop: 14 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>Granted Overrides History:</div>
+                  {quotaAdjustments.length === 0 ? (
+                    <div style={{ fontSize: 12.5, color: "#6B6B8D" }}>No custom quota overrides granted to this store.</div>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                      {quotaAdjustments.map((q) => (
+                        <div key={q.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "#FAFAFC", borderRadius: 6, fontSize: 12.5 }}>
+                          <div>
+                            <span style={{ fontWeight: 700, color: "#5B4FE8" }}>+{q.amount} {q.type.replace("_", " ")}</span>
+                            <span style={{ color: "#4B4B73", marginLeft: 8 }}>"{q.reason}"</span>
+                          </div>
+                          <span style={{ color: "#6B6B8D", fontSize: 11.5 }}>{dateTime(q.createdAt)} · {q.actorId}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 
@@ -482,20 +543,42 @@ export default async function TenantDetail({
 
           {tab === "modules" && (
             <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
-              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Industry & Platform Modules</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
-                {t.modules.length === 0 ? (
-                  <div style={{ color: "#6B6B8D", fontSize: 13.5 }}>No specialized modules activated.</div>
-                ) : (
-                  t.modules.map((m) => (
-                    <div key={m.key} style={{ padding: 14, borderRadius: 8, border: "1px solid #E7E7F0", background: m.isEnabled ? "#F4F3FF" : "#FAFAFC" }}>
-                      <div style={{ fontWeight: 600, color: m.isEnabled ? "#5B4FE8" : "#4B4B73" }}>{m.label}</div>
-                      <div style={{ fontSize: 12, color: "#6B6B8D", marginTop: 4 }}>
-                        Status: {m.isEnabled ? "Enabled" : "Disabled"}
+              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 6 }}>Module Entitlements & Overrides</div>
+              <p style={{ fontSize: 13, color: "#6B6B8D", margin: "0 0 16px 0" }}>
+                Super Admin can grant explicit VIP overrides to activate specialized apps regardless of the merchant's plan tier.
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14 }}>
+                {APP_CATALOG.map((app) => {
+                  const currentMod = t.modules.find((m) => m.key === app.key);
+                  const isEnabled = currentMod ? currentMod.isEnabled : false;
+                  return (
+                    <div key={app.key} style={{ padding: 16, borderRadius: 8, border: isEnabled ? "1.5px solid #5B4FE8" : "1px solid #E7E7F0", background: isEnabled ? "#F4F3FF" : "#FAFAFC", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                      <div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{ fontWeight: 700, fontSize: 14, color: isEnabled ? "#5B4FE8" : "#1A1A4E" }}>{app.label}</span>
+                          <span style={{ padding: "2px 8px", borderRadius: 8, fontSize: 11, fontWeight: 700, background: isEnabled ? "#E8F6EE" : "#EFEFF6", color: isEnabled ? "#15803D" : "#5B5B7B" }}>
+                            {isEnabled ? "Active" : "Disabled"}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 12, color: "#6B6B8D", marginTop: 4 }}>
+                          Tier: {app.tierLabel} {app.minPlan ? `(Min: ${app.minPlan})` : ""}
+                        </div>
                       </div>
+
+                      {canAdjust && (
+                        <form action={overrideTenantModuleAction.bind(null, id, app.key, !isEnabled)} style={{ marginTop: 12 }}>
+                          <button
+                            type="submit"
+                            className={`btn btn-sm ${isEnabled ? "btn-secondary" : "btn-primary"}`}
+                            style={{ width: "100%", fontSize: 12 }}
+                          >
+                            {isEnabled ? "Revoke Entitlement" : "Grant VIP Access"}
+                          </button>
+                        </form>
+                      )}
                     </div>
-                  ))
-                )}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -527,20 +610,32 @@ export default async function TenantDetail({
 
           {tab === "audit" && (
             <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
-              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Platform Audit Log</div>
+              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Platform Audit Log & Impersonations</div>
               {t.audit.length === 0 ? (
                 <div style={{ color: "#6B6B8D", fontSize: 13.5 }}>No audit log entries recorded.</div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {t.audit.map((al) => (
-                    <div key={al.id} style={{ padding: "10px 14px", borderRadius: 8, background: "#FAFAFC", border: "1px solid #E7E7F0", fontSize: 13 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 600 }}>
-                        <span>{al.action}</span>
-                        <span style={{ color: "#6B6B8D", fontSize: 12 }}>{dateTime(al.createdAt)}</span>
+                  {t.audit.map((al) => {
+                    const isImpersonate = al.action === "IMPERSONATE";
+                    return (
+                      <div key={al.id} style={{ padding: "12px 14px", borderRadius: 8, background: isImpersonate ? "#FFF8F0" : "#FAFAFC", border: isImpersonate ? "1.5px solid #F59E0B" : "1px solid #E7E7F0", fontSize: 13 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontWeight: 600 }}>
+                          <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            {al.action}
+                            {isImpersonate && (
+                              <span style={{ fontSize: 10.5, padding: "2px 6px", borderRadius: 6, background: "#FEF3E2", color: "#92400E", fontWeight: 700 }}>
+                                IMPERSONATION SESSION
+                              </span>
+                            )}
+                          </span>
+                          <span style={{ color: "#6B6B8D", fontSize: 12 }}>{dateTime(al.createdAt)}</span>
+                        </div>
+                        <div style={{ color: "#4B4B73", marginTop: 4 }}>
+                          Actor: <b>{al.actorId}</b>
+                        </div>
                       </div>
-                      <div style={{ color: "#4B4B73", marginTop: 4 }}>Actor: {al.actorId}</div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

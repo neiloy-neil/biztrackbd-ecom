@@ -8,6 +8,7 @@ export interface AppCatalogItem {
   categoryLabel: string;
   tier: AppTier;
   tierLabel: string;
+  minPlan?: "STARTER" | "PRO" | "BUSINESS";
   description: string;
   longDescription: string;
   built: boolean;
@@ -115,6 +116,29 @@ export const APP_CATALOG: AppCatalogItem[] = [
     docsSummary: "Copy the live catalog feed URL and paste it as a Scheduled Feed in Meta Commerce Manager.",
   },
 
+  {
+    key: "marketing_campaigns",
+    label: "Marketing Command Center & Campaigns",
+    category: "MARKETING",
+    categoryLabel: "Marketing & Tracking",
+    tier: "ADDON",
+    tierLabel: "Pro / Business Plan Addon",
+    minPlan: "PRO",
+    description: "Broadcast SMS & Email campaigns with smart customer segmentation, urgent flash sale banners, and automated notifications.",
+    longDescription: "Engage repeat buyers and boost sales during Eid, Puja, and seasonal campaigns. Create targeted SMS and email broadcast campaigns segmented by VIP tiers or inactive buyers, display high-converting countdown flash sale banners on your storefront, and automate order lifecycle SMS notifications.",
+    built: true,
+    icon: "megaphone",
+    badge: "High Growth",
+    configureHref: "/marketing/campaigns",
+    features: [
+      "Multi-channel SMS & Email broadcast manager",
+      "Customer segmentation (VIP tiers, Inactive buyers, All)",
+      "Storefront top announcement bar with urgency countdown timer",
+      "Automated SMS order lifecycle notifications",
+    ],
+    keywords: ["marketing", "campaigns", "sms", "broadcast", "banner", "flash sale", "notifications"],
+    docsSummary: "Pro and Business plan feature. Accessible under Marketing > Campaigns and Marketing > Banner.",
+  },
   // --- 2. COURIERS & LOGISTICS ---
   {
     key: "steadfast_courier",
@@ -253,12 +277,37 @@ export const APP_CATALOG: AppCatalogItem[] = [
 
   // --- 4. AUTOMATION & PROTECTION ---
   {
+    key: "ai_suite",
+    label: "Gemini AI Merchant & Chatbot Suite",
+    category: "AUTOMATION",
+    categoryLabel: "Automation & Protection",
+    tier: "ADDON",
+    tierLabel: "Pro / Business Plan Addon",
+    minPlan: "PRO",
+    description: "AI-powered product copywriter, storefront 24/7 sales assistant chatbot, and one-click customer message address parser.",
+    longDescription: "Empower your store with Google Gemini 2.5 AI. Automatically generate high-converting SEO titles, descriptions, and Facebook ad copy in Bengali or English. Extract customer addresses from unstructured chat messages into quick orders with 1 click, and assist storefront shoppers with an interactive sales chatbot.",
+    built: true,
+    icon: "sparkles",
+    badge: "AI Powered",
+    configureHref: "/settings/ai",
+    features: [
+      "AI product title & description copywriter",
+      "One-click Bengali customer chat message address extractor",
+      "Storefront 24/7 conversational sales assistant chatbot",
+      "System-provided Gemini quota + Bring-Your-Own-Key (BYOK)",
+    ],
+    keywords: ["ai", "gemini", "copywriter", "chatbot", "assistant", "parser", "bangla"],
+    docsSummary: "Pro and Business plan feature. Manage settings and API keys under Settings > AI Suite.",
+  },
+
+  {
     key: "fraud_shield",
     label: "Unified Fraud Shield",
     category: "AUTOMATION",
     categoryLabel: "Automation & Protection",
-    tier: "INCLUDED",
-    tierLabel: "Included in all plans",
+    tier: "ADDON",
+    tierLabel: "Pro / Business Plan Addon",
+    minPlan: "PRO",
     description: "Hybrid multi-source fraud defense combining Steadfast courier delivery records, BizTrack cross-store network trust, and local store history.",
     longDescription: "Automatically scores every customer order from 0 to 100 based on verified Bangladesh courier history. Flags incomplete addresses, high-value COD orders from new numbers, and auto-holds suspicious orders for staff review to save delivery return fees.",
     built: true,
@@ -363,6 +412,31 @@ export const APP_CATALOG: AppCatalogItem[] = [
   },
 
   // --- 5. COMMERCE & SPECIALIZED SALES ---
+  {
+    key: "pos_barcode",
+    label: "Omnichannel POS & Barcode Studio",
+    category: "COMMERCE",
+    categoryLabel: "Commerce & Specialized Sales",
+    tier: "ADDON",
+    tierLabel: "Pro / Business Plan Addon",
+    minPlan: "PRO",
+    description: "High-speed retail counter cashier desk with hardware barcode wedge scanning, thermal roll printing, and instant inventory sync.",
+    longDescription: "Transform any laptop, tablet, or PC into an omnichannel retail point of sale counter. Features instant USB/Bluetooth barcode scanning with audio beeps, 80mm/58mm thermal receipt printing, cash shift drawer reconciliation, split payments (Cash, bKash, Card), and real-time stock deductions.",
+    built: true,
+    icon: "barcode",
+    badge: "Retail Essential",
+    configureHref: "/pos",
+    features: [
+      "Instant USB/Bluetooth barcode scanning",
+      "Thermal roll label studio (50x30mm, 38x25mm, A4)",
+      "Shift opening float & closing cash reconciliation",
+      "Split payments (Cash + bKash/Card)",
+      "Unified real-time stock sync with online storefront",
+    ],
+    keywords: ["pos", "barcode", "thermal", "receipt", "counter", "retail", "cashier", "offline"],
+    docsSummary: "Pro and Business plan feature. Accessible at /pos and /products/barcodes.",
+  },
+
   {
     key: "wholesale_b2b",
     label: "Wholesale & B2B Pricing",

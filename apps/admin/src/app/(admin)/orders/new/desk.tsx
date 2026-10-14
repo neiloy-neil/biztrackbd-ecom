@@ -98,8 +98,13 @@ export function QuickOrderDesk({ prefill }: { prefill?: Prefill }) {
     return () => clearTimeout(t);
   }, [lines, district, pay, coupon]);
 
+  const [parsing, setParsing] = useState(false);
+  const [aiParsed, setAiParsed] = useState(false);
+
   async function fillFromMessage() {
-    if (!message.trim()) return;
+    if (!message.trim() || parsing) return;
+    setParsing(true);
+    try {
     const p = await parseMessageAction(message);
     if (p.phone) setPhone(digits(p.phone));
     if (p.name) setName(p.name);
@@ -107,6 +112,8 @@ export function QuickOrderDesk({ prefill }: { prefill?: Prefill }) {
     if (p.upazila) setUpazila(p.upazila);
     if (p.addressHint) setAddress(p.addressHint);
     if (p.payment === "MANUAL_BKASH" || p.payment === "MANUAL_NAGAD" || p.payment === "COD") setPay(p.payment);
+    if (p.notes && !note) setNote(p.notes);
+    setAiParsed(Boolean(p.parsedWithAi));
     const first = p.items[0];
     if (first) {
       if (first.variantId) {
@@ -116,6 +123,9 @@ export function QuickOrderDesk({ prefill }: { prefill?: Prefill }) {
       } else {
         setQ(first.label);
       }
+    }
+    } finally {
+      setParsing(false);
     }
   }
 
@@ -195,7 +205,32 @@ export function QuickOrderDesk({ prefill }: { prefill?: Prefill }) {
               <span className="label">Paste the customer's message <span className="opt">(optional)</span></span>
               <textarea className="textarea" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Tania Akter, 01712345678, মিরপুর ১০, ব্লক সি রোড ৭ বাসা ১৪। Panjabi L, 1 pcs. COD" data-testid="desk-message" />
             </label>
-            <div className="row"><button type="button" className="btn btn-secondary" onClick={fillFromMessage} data-testid="desk-fill">Fill the form</button><span className="muted" style={{ fontSize: 13 }}>We suggest the phone, name, place and product. Check each field before you save.</span></div>
+            <div className="row" style={{ alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={fillFromMessage}
+                  disabled={parsing || !message.trim()}
+                  data-testid="desk-fill"
+                >
+                  {parsing ? (
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                      <span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} />
+                      <span>Parsing with Gemini AI...</span>
+                    </span>
+                  ) : (
+                    <span>✨ AI Smart Parse</span>
+                  )}
+                </button>
+                {aiParsed && (
+                  <span className="pill green" style={{ fontSize: 11, padding: "2px 8px" }}>
+                    ⚡ Parsed with Gemini AI
+                  </span>
+                )}
+              </div>
+              <span className="muted" style={{ fontSize: 13 }}>Paste full Messenger/WhatsApp chat in English or Bangla. Gemini AI extracts phone, name, thana & address.</span>
+            </div>
           </section>
 
           <section className="card">

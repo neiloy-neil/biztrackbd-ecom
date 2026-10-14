@@ -291,3 +291,50 @@ export async function deleteZone(tenantId: string, actor: StaffActor, zoneId: st
     await audit(tx, tenantId, actor, "shipping.zone_deleted", { name: z.name });
   });
 }
+
+export interface BannerSettingsView {
+  announcement: string | null;
+  announcementBn: string | null;
+  flashSaleActive: boolean;
+  flashSaleEndsAt: Date | null;
+  flashSaleCoupon: string | null;
+}
+
+export async function getBannerSettings(tenantId: string, actor: StaffActor): Promise<BannerSettingsView> {
+  assertCan(actor, "marketing", "view");
+  return withTenant(tenantId, async (tx) => {
+    const s = await tx.storeSettings.findFirst();
+    return {
+      announcement: s?.announcement ?? null,
+      announcementBn: s?.announcementBn ?? null,
+      flashSaleActive: s?.flashSaleActive ?? false,
+      flashSaleEndsAt: s?.flashSaleEndsAt ?? null,
+      flashSaleCoupon: s?.flashSaleCoupon ?? null,
+    };
+  });
+}
+
+export async function saveBannerSettings(
+  tenantId: string,
+  actor: StaffActor,
+  input: {
+    announcement?: string | null;
+    announcementBn?: string | null;
+    flashSaleActive?: boolean;
+    flashSaleEndsAt?: Date | null;
+    flashSaleCoupon?: string | null;
+  },
+): Promise<void> {
+  assertCan(actor, "marketing", "edit");
+  await withTenant(tenantId, async (tx) => {
+    const data = {
+      announcement: input.announcement?.trim().slice(0, 300) || null,
+      announcementBn: input.announcementBn?.trim().slice(0, 300) || null,
+      flashSaleActive: Boolean(input.flashSaleActive),
+      flashSaleEndsAt: input.flashSaleEndsAt ?? null,
+      flashSaleCoupon: input.flashSaleCoupon?.trim().slice(0, 40) || null,
+    };
+    await upsertSettings(tx, tenantId, data);
+    await audit(tx, tenantId, actor, "store.banner_updated", data);
+  });
+}

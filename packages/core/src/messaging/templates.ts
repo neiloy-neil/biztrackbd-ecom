@@ -3,8 +3,8 @@ import { audit } from "../audit/service";
 import { recordOrderEvent } from "../admin/order-events";
 import { currentSmsSender, signOrderAccess } from "../customers/auth";
 import { consumeSmsCredit } from "../growth/abandoned";
-import { NotFoundError, ValidationError } from "../errors";
-import { assertCan, type StaffActor } from "../permissions";
+import { ForbiddenError, NotFoundError, ValidationError } from "../errors";
+import { can, type StaffActor } from "../permissions";
 
 import {
   DEFAULT_MESSAGES, EVENT_BY_NAME, MESSAGE_EVENTS, MESSAGE_LOCALES, renderMessage, smsParts, validateMessage,
@@ -28,7 +28,7 @@ export interface MessageTemplateView {
 const localeOf = (l: string): MessageLocale => (l.startsWith("bn") ? "bn" : "en");
 
 export async function listMessageTemplates(tenantId: string, actor: StaffActor): Promise<{ templates: MessageTemplateView[]; storeName: string; smsCredits: { used: number; limit: number | null } }> {
-  assertCan(actor, "design", "view");
+  if (!can(actor.role, "design", "view") && !can(actor.role, "marketing", "view")) throw new ForbiddenError();
   return withTenant(tenantId, async (tx) => {
     const t = await tx.tenant.findFirstOrThrow({ select: { name: true, locale: true, planTier: true } });
     const settings = await tx.storeSettings.findFirst({ select: { storeName: true } });
@@ -58,7 +58,7 @@ export async function listMessageTemplates(tenantId: string, actor: StaffActor):
 export async function saveMessageTemplate(
   tenantId: string, actor: StaffActor, input: { event: MessageEvent; texts?: Partial<Record<MessageLocale, string>>; enabled?: boolean },
 ): Promise<void> {
-  assertCan(actor, "design", "edit");
+  if (!can(actor.role, "design", "edit") && !can(actor.role, "marketing", "edit")) throw new ForbiddenError();
   const info = EVENT_BY_NAME.get(input.event);
   if (!info) throw new ValidationError("Unknown message");
   const clean: Partial<Record<MessageLocale, string>> = {};
@@ -89,7 +89,7 @@ export async function saveMessageTemplate(
 
 /** Puts the ready-made text back for one message. If the message was only on because it had been saved, it stays as it was. */
 export async function resetMessageTemplate(tenantId: string, actor: StaffActor, event: MessageEvent, locale: MessageLocale): Promise<void> {
-  assertCan(actor, "design", "edit");
+  if (!can(actor.role, "design", "edit") && !can(actor.role, "marketing", "edit")) throw new ForbiddenError();
   const info = EVENT_BY_NAME.get(event);
   if (!info) throw new ValidationError("Unknown message");
   await withTenant(tenantId, async (tx) => {

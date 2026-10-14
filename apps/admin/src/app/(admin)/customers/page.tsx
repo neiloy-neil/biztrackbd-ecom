@@ -8,6 +8,8 @@ import { friendlyDate, prettyPhone, taka } from "@/lib/format";
 import { one, pageOf, qs } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 
+import { AddCustomerModal } from "./add-customer-modal";
+
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Customers" };
 
@@ -23,6 +25,8 @@ export default async function Customers({ searchParams }: { searchParams: Promis
   const segment = (SEGMENTS.find((x) => x.key === one(sp.segment))?.key ?? "all") as CustomerSegment;
   const q = one(sp.q)?.trim() ?? "";
   const page = pageOf(one(sp.page));
+  const err = one(sp.err);
+  const ok = one(sp.ok);
   const list = await listCustomers(s.tenantId, s.actor, { segment, q: q || undefined, page });
   const base = { segment: segment === "all" ? undefined : segment, q };
 
@@ -30,8 +34,15 @@ export default async function Customers({ searchParams }: { searchParams: Promis
     <>
       <div className="page-head">
         <h1>Customers</h1>
-        <div className="actions">{can(s.user.role, "customers", "edit") && <Link href="/customers/import" className="btn btn-secondary" prefetch={false} data-testid="import-customers">Import</Link>} <a className="btn btn-secondary" href="/customers/export" download>Export CSV</a></div>
+        <div className="actions">
+          {can(s.user.role, "customers", "edit") && <AddCustomerModal />}
+          {can(s.user.role, "customers", "edit") && <Link href="/customers/import" className="btn btn-secondary" prefetch={false} data-testid="import-customers">Import</Link>}
+          <a className="btn btn-secondary" href="/customers/export" download>Export CSV</a>
+        </div>
       </div>
+      {err && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{err}</div>}
+      {ok && <div className="notice good" role="status" style={{ marginBottom: 12 }}>Saved.</div>}
+
       <div className="grid grid-4" style={{ marginBottom: 14 }}>
         <div className="stat"><div className="k">All customers</div><div className="v num">{list.summary.all}</div></div>
         <div className="stat"><div className="k">New this month</div><div className="v num">{list.summary.newThisMonth}</div></div>

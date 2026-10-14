@@ -120,3 +120,9 @@ export class ReadOnlyError extends DomainError {
     super("READ_ONLY", locked ? "This store is locked until the plan is paid." : "Your store is read-only until the plan is paid. You can still look at everything and download your data.", 403);
   }
 }
+
+export class AiQuotaExhaustedError extends DomainError {
+  constructor(message = "Monthly AI generation quota reached for your plan. Add your own free Google Gemini API key in Store Settings for unlimited generations.") {
+    super("AI_QUOTA_EXHAUSTED", message, 429);
+  }
+}

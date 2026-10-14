@@ -20,7 +20,7 @@ export default async function NewProduct() {
     <>
       <Link href="/products" className="back" prefetch={false}>← Products</Link>
       <div className="page-head"><h1>Add product</h1></div>
-      <ProductEditor initial={EMPTY} categories={categories.map((c) => ({ id: c.id, name: c.name }))} canPublish />
+      <ProductEditor initial={EMPTY} categories={categories.map((c) => ({ id: c.id, name: c.name, parentId: c.parentId }))} canPublish />
     </>
   );
 }

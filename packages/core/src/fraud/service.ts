@@ -9,6 +9,7 @@ import { loadCredentials } from "../vault/integrations";
 import {
   FLAG_LABELS, computeUnifiedFraudScore, type CourierFraudStats, type UnifiedFraudReport,
 } from "./assess";
+import { fetchUnifiedCourierFraud, toCourierFraudStats, type ExternalCourierFraudData } from "./courier-api";
 import { lookupTrust, type TrustScore } from "./trust";
 
 const actorName = (a: StaffActor) => a.name ?? a.email;
@@ -154,6 +155,7 @@ export interface PhoneLookup {
   here: { orders: number; delivered: number; returned: number; cancelled: number };
   blocked: boolean;
   courier?: CourierFraudStats | null;
+  courierDetails?: ExternalCourierFraudData | null;
   unifiedScore?: number;
   unifiedLevel?: string;
 }
@@ -187,7 +189,12 @@ export async function fetchSteadfastFraudStats(tenantId: string, phone: string):
   }
 }
 
-async function lookup(tx: TenantTx, phone: string, courierStats: CourierFraudStats | null = null): Promise<PhoneLookup> {
+async function lookup(
+  tx: TenantTx,
+  phone: string,
+  courierStats: CourierFraudStats | null = null,
+  courierDetails: ExternalCourierFraudData | null = null
+): Promise<PhoneLookup> {
   const [network, orders, delivered, returned, cancelled, blocked] = await Promise.all([
     lookupTrust(tx, phone),
     tx.order.count({ where: { customerPhone: phone } }),
@@ -212,6 +219,7 @@ async function lookup(tx: TenantTx, phone: string, courierStats: CourierFraudSta
     here: { orders, delivered, returned, cancelled },
     blocked: Boolean(blocked),
     courier: courierStats,
+    courierDetails: courierDetails ?? null,
     unifiedScore: unified.score,
     unifiedLevel: unified.level,
   };
@@ -222,17 +230,31 @@ export async function lookupPhone(tenantId: string, actor: StaffActor, phoneInpu
   assertCan(actor, "orders", "view");
   const phone = normalizeBdPhone(phoneInput);
   if (!/^01[3-9]\d{8}$/.test(phone)) throw new ValidationError("Enter a Bangladesh mobile number, for example 01712345678");
-  const courierStats = await fetchSteadfastFraudStats(tenantId, phone);
-  return withTenant(tenantId, (tx) => lookup(tx, phone, courierStats));
+
+  // 1. Check unified 5-courier API (Steadfast, Pathao, RedX, CarryBee, Paperfly)
+  const unifiedData = await fetchUnifiedCourierFraud(phone);
+  let courierStats = unifiedData ? toCourierFraudStats(unifiedData) : null;
+
+  // 2. Fallback to store vault Steadfast credentials if unified API was unavailable
+  if (!courierStats) {
+    courierStats = await fetchSteadfastFraudStats(tenantId, phone);
+  }
+
+  return withTenant(tenantId, (tx) => lookup(tx, phone, courierStats, unifiedData));
 }
 
 /** The same lookup for an order's own number, inside the order screen. */
-export async function lookupInTx(tx: TenantTx, phone: string, courierStats: CourierFraudStats | null = null): Promise<PhoneLookup> {
-  return lookup(tx, phone, courierStats);
+export async function lookupInTx(
+  tx: TenantTx,
+  phone: string,
+  courierStats: CourierFraudStats | null = null,
+  courierDetails: ExternalCourierFraudData | null = null
+): Promise<PhoneLookup> {
+  return lookup(tx, phone, courierStats, courierDetails);
 }
 
 /**
- * Re-queries Steadfast live for the order customer's phone number, recomputes the unified blended fraud score,
+ * Re-queries the unified 5-courier engine (with store vault fallback), recomputes the unified blended fraud score,
  * updates the order, and logs an order timeline event.
  */
 export async function refreshOrderFraudReport(tenantId: string, actor: StaffActor, orderId: string): Promise<UnifiedFraudReport> {
@@ -241,8 +263,16 @@ export async function refreshOrderFraudReport(tenantId: string, actor: StaffActo
     const o = await tx.order.findFirst({ where: { id: orderId } });
     if (!o) throw new NotFoundError("Order");
 
-    const [courierStats, trust, storeOrders, storeDelivered, storeReturned, storeCancelled] = await Promise.all([
-      fetchSteadfastFraudStats(tenantId, o.customerPhone),
+    // 1. Query unified 5-courier fraud engine
+    const unifiedData = await fetchUnifiedCourierFraud(o.customerPhone);
+    let courierStats = unifiedData ? toCourierFraudStats(unifiedData) : null;
+
+    // 2. Fallback to store vault Steadfast credentials if unified engine returned null
+    if (!courierStats) {
+      courierStats = await fetchSteadfastFraudStats(tenantId, o.customerPhone);
+    }
+
+    const [trust, storeOrders, storeDelivered, storeReturned, storeCancelled] = await Promise.all([
       lookupTrust(tx, o.customerPhone),
       tx.order.count({ where: { customerPhone: o.customerPhone } }),
       tx.order.count({ where: { customerPhone: o.customerPhone, status: "DELIVERED" } }),
@@ -269,7 +299,9 @@ export async function refreshOrderFraudReport(tenantId: string, actor: StaffActo
     });
 
     const courierMsg = courierStats
-      ? `Steadfast courier stats: ${courierStats.totalParcels} parcels, ${courierStats.deliveredParcels} delivered (${courierStats.successRatio}% success)`
+      ? unifiedData
+        ? `5-Courier Network stats: ${courierStats.totalParcels} parcels, ${courierStats.deliveredParcels} delivered (${courierStats.successRatio}% success) across Steadfast, Pathao, RedX, CarryBee, Paperfly`
+        : `Steadfast courier stats: ${courierStats.totalParcels} parcels, ${courierStats.deliveredParcels} delivered (${courierStats.successRatio}% success)`
       : "No external courier history recorded";
 
     await recordOrderEvent(tx, tenantId, orderId, {
@@ -280,6 +312,7 @@ export async function refreshOrderFraudReport(tenantId: string, actor: StaffActo
         score: report.score,
         level: report.level,
         courier: courierStats,
+        courierDetails: unifiedData ?? null,
       },
     });
 

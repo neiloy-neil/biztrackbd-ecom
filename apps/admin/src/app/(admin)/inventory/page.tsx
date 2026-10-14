@@ -8,6 +8,7 @@ import { taka } from "@/lib/format";
 import { one, pageOf, qs } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { adjustAction, stockSettingsAction } from "./actions";
+import { InventoryMobileCard, InventoryTableRow } from "./inline-stepper";
 import { StockHistory } from "./stock-history";
 
 export const dynamic = "force-dynamic";
@@ -95,27 +96,35 @@ export default async function Inventory({ searchParams }: { searchParams: Promis
         <>
           <div className="only-mobile">
             {list.rows.map((r) => (
-              <div key={r.variantId} className="list-card" data-testid="inv-row">
-                <div className="top"><b>{r.productTitle}{r.variantTitle.toLowerCase() !== "default" ? ` · ${r.variantTitle}` : ""}</b><StatePill r={r} /></div>
-                <div className="muted" style={{ fontSize: 13 }}>{r.sku ?? "No SKU"}{r.shelf ? ` · Shelf ${r.shelf}` : ""}</div>
-                <div className="row" style={{ marginTop: 8, justifyContent: "space-between" }}>
-                  <span><b className="num" data-testid="available">{r.available}</b> available · {r.committed} committed · reorder at {r.reorderLevel}</span>
-                </div>
-                {canEdit && <div style={{ marginTop: 8 }}><AdjustForm r={r} back={here} /></div>}
-              </div>
+              <InventoryMobileCard
+                key={r.variantId}
+                r={r}
+                canEdit={canEdit}
+                adjustForm={(row) => <AdjustForm r={row} back={here} />}
+              />
             ))}
           </div>
           <table className="table only-desktop" data-testid="inventory-table">
-            <thead><tr><th>Product</th><th>SKU</th><th>Shelf</th><th className="r">Committed</th><th className="r">Reorder at</th><th className="r">Available</th><th>Status</th>{canEdit && <th></th>}</tr></thead>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>SKU</th>
+                <th>Shelf</th>
+                <th className="r">Committed</th>
+                <th className="r">Reorder at</th>
+                <th className="r" style={{ minWidth: 140 }}>Available</th>
+                <th>Status</th>
+                {canEdit && <th></th>}
+              </tr>
+            </thead>
             <tbody>
               {list.rows.map((r) => (
-                <tr key={r.variantId} data-testid="inv-row">
-                  <td><b>{r.productTitle}</b>{r.variantTitle.toLowerCase() !== "default" && <div className="muted" style={{ fontSize: 12.5 }}>{r.variantTitle}</div>}</td>
-                  <td className="muted">{r.sku ?? "—"}</td><td className="muted">{r.shelf ?? "—"}</td>
-                  <td className="r num">{r.committed}</td><td className="r num">{r.reorderLevel}</td><td className="r num"><b data-testid="available">{r.available}</b></td>
-                  <td><StatePill r={r} /></td>
-                  {canEdit && <td style={{ minWidth: 90 }}><AdjustForm r={r} back={here} /></td>}
-                </tr>
+                <InventoryTableRow
+                  key={r.variantId}
+                  r={r}
+                  canEdit={canEdit}
+                  adjustForm={(row) => <AdjustForm r={row} back={here} />}
+                />
               ))}
             </tbody>
           </table>

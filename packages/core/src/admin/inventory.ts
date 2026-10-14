@@ -54,7 +54,7 @@ export async function listInventory(
              COALESCE((SELECT sum(oi.quantity) FROM "OrderItem" oi JOIN "Order" o ON o.id = oi."orderId"
                        WHERE oi."variantId" = v.id AND o.status IN ('PENDING', 'CONFIRMED', 'PROCESSING') AND o."deletedAt" IS NULL), 0)::int AS committed
       FROM "ProductVariant" v JOIN "Product" p ON p.id = v."productId"
-      WHERE p."deletedAt" IS NULL
+      WHERE p."deletedAt" IS NULL AND v."isActive" = true
         AND (${filter} = 'all' OR (${filter} = 'out' AND v."stockQuantity" <= 0) OR (${filter} = 'low' AND v."stockQuantity" > 0 AND v."stockQuantity" <= v."reorderLevel"))
         AND (${like}::text IS NULL OR p.title ILIKE ${like} OR v.sku ILIKE ${like} OR v.title ILIKE ${like})
         AND (${shelf}::text IS NULL OR v."shelfCode" = ${shelf})
@@ -62,7 +62,7 @@ export async function listInventory(
       LIMIT ${pageSize} OFFSET ${(page - 1) * pageSize}`;
     const [count] = await tx.$queryRaw<{ n: number }[]>`
       SELECT count(*)::int AS n FROM "ProductVariant" v JOIN "Product" p ON p.id = v."productId"
-      WHERE p."deletedAt" IS NULL
+      WHERE p."deletedAt" IS NULL AND v."isActive" = true
         AND (${filter} = 'all' OR (${filter} = 'out' AND v."stockQuantity" <= 0) OR (${filter} = 'low' AND v."stockQuantity" > 0 AND v."stockQuantity" <= v."reorderLevel"))
         AND (${like}::text IS NULL OR p.title ILIKE ${like} OR v.sku ILIKE ${like} OR v.title ILIKE ${like})
         AND (${shelf}::text IS NULL OR v."shelfCode" = ${shelf})`;
@@ -71,7 +71,7 @@ export async function listInventory(
              COALESCE(sum(GREATEST(v."stockQuantity", 0) * COALESCE(p."costPrice", 0)), 0)::float8 AS value,
              count(*) FILTER (WHERE v."stockQuantity" > 0 AND v."stockQuantity" <= v."reorderLevel")::int AS low,
              count(*) FILTER (WHERE v."stockQuantity" <= 0)::int AS out
-      FROM "ProductVariant" v JOIN "Product" p ON p.id = v."productId" WHERE p."deletedAt" IS NULL`;
+      FROM "ProductVariant" v JOIN "Product" p ON p.id = v."productId" WHERE p."deletedAt" IS NULL AND v."isActive" = true`;
     const shelves = await tx.$queryRaw<{ shelf: string }[]>`
       SELECT DISTINCT v."shelfCode" AS shelf FROM "ProductVariant" v WHERE v."shelfCode" IS NOT NULL ORDER BY 1`;
 

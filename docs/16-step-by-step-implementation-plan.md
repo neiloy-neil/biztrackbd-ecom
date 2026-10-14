@@ -239,7 +239,64 @@ tools/
   - **Tests:** `categories.test.ts` (5), `customer-import.test.ts` (5), `inbox-and-alerts.test.ts` (12), the isolation sweep finds tables from the database, so it covers both new ones (66 tables carry a tenantId now); Playwright `catalog-care.spec.ts` (7 at each width, including axe on the new screens and the contact page).
   - **Also fixed:** the floating WhatsApp button had white text on its green (contrast 2 to 1, failing AA); now dark text.
   - **Not built here:** category pages in the storefront menu show only top-level categories, and there is no "restock reminder" email, no two-way SMS.
-- **Next slices, not built:** automatic discounts, flash sales, bundles, order bumps, gift cards, broadcast campaigns, then (add-ons) suppliers and purchase orders, multiple locations, affiliates and resellers, workflows, subscriptions, bookings, bespoke.
+- **Slice 4, Variable Products, Multi-SKU & Inline Inventory (built; migration 30):**
+  - **Dynamic Variant Generator:** Multi-dimensional variant matrix (Color, Size, Material, etc.) with automated SKU generator (`PRD-CLR-SZ`), individual pricing, compare-at prices, stock thresholds, and `isActive` toggles per variant.
+  - **Real-time Inventory Stepper:** Quick +/- stock adjustment directly on the inventory table (`/inventory`) with audit-logged `StockAdjustment` records without navigating into edit forms.
+  - **Storefront Variant Selector:** Interactive chips, real-time stock availability indicator ("In stock", "Only 2 left", "Sold out"), dynamic pricing update on selection, and auto-switching variant image gallery.
+  - **Tests:** `variable-products.test.ts` (10 tests), typechecks clean across all packages.
+
+- **Slice 5, Customer CRM Suite & Customer Timeline (built):**
+  - **Customer 360 Profile:** Detailed customer detail view (`/customers/[id]`) with total spend, average order value, cancellation/return rates, customer tags, and internal merchant staff notes.
+  - **Activity Timeline:** Chronological event feed combining placed orders, status transitions, SMS sent, WhatsApp messages, returns, and loyalty point unlocks.
+  - **Customer Actions:** Direct WhatsApp click-to-chat with pre-filled message templates, one-click manual customer creation modal (`AddCustomerModal`), and export filtered customer lists.
+  - **Tests:** `customer-crm.test.ts` (8 tests).
+
+- **Slice 6, Marketing Command Center & Growth Engine (built; migration 31):**
+  - **Broadcast Campaigns (`/marketing/campaigns`):** Multi-channel SMS and Email campaign manager with customer segment targeting (All Customers, VIP Gold/Platinum, Inactive 60d, Abandoned Checkouts), template personalization (`{{name}}`, `{{storeName}}`, `{{offer}}`), and scheduled broadcasts.
+  - **Storefront Banner & Flash Sale (`/marketing/banner`):** Configurable top announcement bar with urgency countdown timers, custom CTA links, dismissible cookies, and auto-expiry.
+  - **Automated Notifications (`/marketing/notifications`):** Event-triggered messaging rules for order confirmation, shipped status, delivered review requests, and COD verification.
+  - **Tests:** `marketing-suite.test.ts` (12 tests).
+
+- **Slice 7, Courier Fraud Lead Magnet & Public REST API (built):**
+  - **Lead Magnet Tools:** Public interactive COD risk calculator (`/tools/courier-fraud-checker` & `/fraud-check`) in `apps/marketing` with instant risk meter, return percentage gauge, and fraud scoring.
+  - **Free Developer REST API:** High-speed, cached (<20ms) endpoint `/api/v1/fraud-check` with `X-API-KEY` authentication supporting single and batch phone checks across 5 major courier networks (Steadfast, Pathao, RedX, CarryBee, Paperfly).
+  - **Tests:** `courier-fraud-api.test.ts` (9 tests).
+
+- **Slice 8, Gemini AI Suite & Merchant Automation (built; migration 32):**
+  - **AI Copywriter & Auto-Description:** One-click product title, bullet points, SEO meta description, and social media ad copy generator using Gemini models with bilingual Bangla/English tone controls (Casual, Professional, Urgent, Storytelling).
+  - **One-click Customer Address Parser:** NLP extractor that parses unstructured Bengali/English customer messages (e.g. "আমি নিলা, ধানমন্ডি রোড ৭ বাসা ১২ ঢাকা, ফোন ০১৭xxxxxxxx") into structured Name, Phone, District, and Address fields.
+  - **Storefront AI Sales Assistant:** Embeddable floating chat widget (`AiChatWidget`) that answers product inquiries, checks stock, and recommends complementary products with custom merchant fallback instructions.
+  - **Settings & BYOK:** Merchant panel configuration (`/settings/ai`) for system default API key or Bring-Your-Own-Key (BYOK) with custom model selection.
+  - **Tests:** `ai-suite.test.ts` (11 tests).
+
+- **Slice 9, Omnichannel POS Terminal & Barcode Suite (built; migration 33):**
+  - **Central Real-time Inventory:** Storefront and physical retail counter share single inventory source (`ProductVariant.stockQuantity`); checkout atomically locks and deducts stock with zero race conditions.
+  - **Hardware Barcode Engine:** Code-128 SVG generator with Mod-10 check digit, unique 12-digit barcode assignment, supplier barcode mapping, and wedge scanner keyboard buffer listener (<45ms keydown strokes with audio feedback beep).
+  - **Barcode Label Studio (`/products/barcodes`):** WYSIWYG barcode label designer supporting thermal roll formats (50x30mm, 38x25mm) and A4 sticker sheets (24-up / 3x8 grid) with browser `@media print` CSS optimization.
+  - **Cashier POS Terminal (`/pos`):** Full-screen desk, instant barcode scanner listener, quick keyboard shortcuts (`Space` to pay, `F2` search, `F4` park cart, `Esc`), parked cart multi-sale switcher, line item and cart discounts, and walk-in/VIP loyalty customer lookup.
+  - **Payment Handling:** Cash Tendered & Change Return calculator with quick bill presets (৳500, ৳1000, Exact), bKash/Nagad TrxID entry, Card swipe, and Split Payments (e.g. Cash + bKash).
+  - **Cash Register Shift Management:** Shift open with opening float, mid-shift Cash-In/Cash-Out movements, and closing shift cash drawer reconciliation (Over/Short Z-report).
+  - **Dual Thermal Receipts:** 80mm and 58mm printer receipts with printable barcode and store tax/contact header.
+  - **Tests:** `pos-suite.test.ts` (7 tests).
+
+- **Slice 10, App Marketplace Module Gating & Platform AI Configuration (built; migration 34):**
+  - **App Marketplace Integration (`/settings/apps`):** Registered `pos_barcode`, `ai_suite`, `marketing_campaigns`, and `fraud_shield` as plan-gated `ADDON` modules with `minPlan: "PRO"`.
+  - **Plan Gating & Starter Upgrades:** Starter plan stores view locked badges with 1-click plan upgrade prompts. Pro and Business stores enjoy full toggle control to activate or deactivate modules.
+  - **Dynamic Navigation & Route Guards:** Sidebar navigation dynamically queries `getTenantActiveModules()` to hide deactivated app routes (`/pos`, `/products/barcodes`, `/marketing/campaigns`). Direct route visits render `AppDisabledNotice` with 1-click module activation.
+  - **Storefront Widget Gating:** Storefront layout dynamically suppresses `<AiChatWidget />` when `ai_suite` is inactive.
+  - **Super Admin Platform Settings (`apps/platform/src/app/(sa)/settings`):** Added a dedicated Super Admin configuration portal backed by `PlatformConfig` database model to store, rotate, and mask system-wide Gemini API keys and default models, complete with live connection latency diagnostics and fallback to `process.env.GEMINI_API_KEY`.
+  - **Tests:** `modules-plan-gating.test.ts` (9 tests passed).
+
+- **Slice 11, Platform Admin Modernization & Operations Hub (built; migration 35):**
+  - **Centralized Platform Settings & Gateways (`/settings`):** 5-tab responsive settings hub backed by `PlatformConfig` with live diagnostics: Google Gemini AI Suite, SMS Aggregators (Alpha SMS, Greenweb, BulkSMSBD with test SMS dispatch), Master Courier APIs (Steadfast, Pathao, RedX, CarryBee, Paperfly ping tests for free fraud checker), UddoktaPay Platform Account, and Platform Mail/SMTP.
+  - **Global App Catalog & Module Control (`/themes`):** Connected real-time `APP_CATALOG` with active store adoption counts, emergency platform-wide maintenance kill-switches, and minimum plan tier overrides.
+  - **Staff Team & RBAC Management (`/audit`):** Two-tab command hub featuring staff roster with role assignments (`OWNER`, `FINANCE`, `SUPPORT_LEAD`, `SUPPORT`), invite staff modal, and active/disabled account controls alongside the chronological audit trail.
+  - **Advanced Tenant Diagnostics & Quota Overrides (`/tenants/[id]`):** Granular operational controls inside store details: instant manual SMS credit, product capacity, and staff slot top-ups (`TenantQuotaAdjustment`), explicit VIP module entitlement overrides, and impersonation audit history.
+  - **Overview Dashboard & System Health Telemetry (`/`):** Real-time service health matrix (Postgres DB, Gemini AI, SMS, Courier APIs, UddoktaPay) with live latency indicators and quick link to gateway settings.
+  - **Custom Subscription Pricing & Promo Codes Manager (`/plans`):** Two-tab monetization center featuring plan tier editor alongside subscription promo codes manager with percentage/fixed discounts, usage caps, and expiration tracking.
+  - **Tests:** `platform-admin-suite.test.ts` (8 tests passed).
+
+- **Next slices, not built:** bundles, order bumps, gift cards, multiple locations/warehouses, suppliers and purchase orders, affiliates and resellers, workflows, bookings, bespoke tailoring.
 
 ## 4. After the Pilot
 

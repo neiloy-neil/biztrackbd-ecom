@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { ROLE_LABELS, can, getActiveAnnouncementsForTenant, getStoreSettings, shellCounts, type Area } from "@biztrackbd/core";
+import { ROLE_LABELS, can, getActiveAnnouncementsForTenant, getStoreSettings, getTenantActiveModules, shellCounts, type Area } from "@biztrackbd/core";
 import { withTenant } from "@biztrackbd/db";
 import { ChartIcon, CustomersIcon, GearIcon, HomeIcon, MoreIcon, OrdersIcon, ProductsIcon, PuzzleIcon, StoreIcon, TagIcon } from "@/components/icons";
 import { NavLink } from "@/components/nav";
@@ -22,7 +22,7 @@ import { switchDevUser } from "./dev-actions";
 // Every admin page depends on who is signed in, so nothing here may be prerendered at build time.
 export const dynamic = "force-dynamic";
 
-interface Item { href: string; label: string; area: Area; exact?: boolean; badge?: "check" }
+interface Item { href: string; label: string; area: Area; exact?: boolean; badge?: "check"; moduleKey?: string }
 interface Group { id: string; label: string; icon: React.ReactNode; items: Item[]; activePrefixes?: string[] }
 // Nine groups, as in the design canvas' sidebar. Every existing page is still one click away inside its group.
 const GROUPS: Group[] = [
@@ -31,17 +31,58 @@ const GROUPS: Group[] = [
     id: "orders", label: "Orders", icon: <OrdersIcon />,
     items: [
       { href: "/orders", label: "Orders", area: "orders", badge: "check" },
+      { href: "/pos", label: "POS Terminal", area: "orders", moduleKey: "pos_barcode" },
       { href: "/orders/new", label: "Quick order", area: "orders" },
       { href: "/returns", label: "Returns", area: "orders" },
       { href: "/abandoned", label: "Abandoned checkouts", area: "customers" },
-      { href: "/fraud", label: "Fraud check", area: "orders" },
+      { href: "/fraud", label: "Fraud check", area: "orders", moduleKey: "fraud_shield" },
     ],
+    activePrefixes: ["/orders", "/pos", "/returns", "/fraud"],
   },
-  { id: "products", label: "Products", icon: <ProductsIcon />, items: [{ href: "/products", label: "Products", area: "products" }, { href: "/inventory", label: "Inventory", area: "products" }, { href: "/products/categories", label: "Categories", area: "products" }] },
-  { id: "customers", label: "Customers", icon: <CustomersIcon />, items: [{ href: "/customers", label: "Customers", area: "customers" }, { href: "/inbox", label: "Inbox", area: "customers" }, { href: "/reviews", label: "Reviews", area: "marketing" }, { href: "/marketing/loyalty", label: "Loyalty and referrals", area: "marketing" }] },
-  { id: "marketing", label: "Marketing", icon: <TagIcon />, items: [{ href: "/marketing/coupons", label: "Discounts", area: "marketing" }, { href: "/marketing/pixels", label: "Pixels", area: "marketing" }] },
+  {
+    id: "products",
+    label: "Products",
+    icon: <ProductsIcon />,
+    items: [
+      { href: "/products", label: "Products", area: "products" },
+      { href: "/inventory", label: "Inventory", area: "products" },
+      { href: "/products/barcodes", label: "Barcode Studio", area: "products", moduleKey: "pos_barcode" },
+      { href: "/products/categories", label: "Categories", area: "products" },
+    ],
+    activePrefixes: ["/products", "/inventory"],
+  },
+  { id: "customers", label: "Customers", icon: <CustomersIcon />, items: [{ href: "/customers", label: "Customers", area: "customers" }, { href: "/inbox", label: "Inbox", area: "customers" }, { href: "/reviews", label: "Reviews", area: "marketing" }, { href: "/marketing/loyalty", label: "Loyalty and referrals", area: "marketing", moduleKey: "loyalty" }] },
+  {
+    id: "marketing",
+    label: "Marketing",
+    icon: <TagIcon />,
+    items: [
+      { href: "/marketing", label: "Overview", area: "marketing", exact: true },
+      { href: "/marketing/coupons", label: "Discounts", area: "marketing" },
+      { href: "/marketing/campaigns", label: "Campaigns", area: "marketing", moduleKey: "marketing_campaigns" },
+      { href: "/marketing/notifications", label: "Notifications", area: "marketing", moduleKey: "marketing_campaigns" },
+      { href: "/marketing/banner", label: "Banner & Flash sale", area: "marketing", moduleKey: "marketing_campaigns" },
+      { href: "/marketing/pixels", label: "Pixels & CAPI", area: "marketing" },
+      { href: "/marketing/loyalty", label: "Loyalty & Referrals", area: "marketing" },
+      { href: "/abandoned", label: "Abandoned checkouts", area: "customers" },
+    ],
+    activePrefixes: ["/marketing", "/abandoned"],
+  },
   { id: "store", label: "Online store", icon: <StoreIcon />, items: [{ href: "/design", label: "Store design", area: "design" }, { href: "/landing", label: "Landing pages", area: "design" }, { href: "/pages", label: "Pages built from sections", area: "design" }, { href: "/content", label: "Pages and blog", area: "design" }] },
-  { id: "reports", label: "Reports", icon: <ChartIcon />, items: [{ href: "/reports", label: "Reports", area: "reports" }, { href: "/finance/cod", label: "COD payouts", area: "reports" }, { href: "/finance/profit", label: "Profit and loss", area: "reports" }] },
+  {
+    id: "reports",
+    label: "Reports",
+    icon: <ChartIcon />,
+    items: [
+      { href: "/reports", label: "Overview & Sales", area: "reports", exact: true },
+      { href: "/reports/products", label: "Products & Stock", area: "reports" },
+      { href: "/reports/couriers", label: "Courier Performance", area: "reports" },
+      { href: "/reports/customers", label: "Customer Analytics", area: "reports" },
+      { href: "/finance/cod", label: "COD payouts", area: "reports" },
+      { href: "/finance/profit", label: "Profit and loss", area: "reports" },
+    ],
+    activePrefixes: ["/reports", "/finance"],
+  },
   { id: "apps", label: "Apps", icon: <PuzzleIcon />, items: [{ href: "/settings/apps", label: "Apps & Integrations", area: "billing" }] },
   {
     id: "settings", label: "Settings", icon: <GearIcon />,
@@ -62,11 +103,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const s = await getSession();
   const role = s.user.role;
   const lang = asLang((await cookies()).get(LANG_COOKIE)?.value);
-  const [staff, settings, counts, announcements] = await Promise.all([
+  const [staff, settings, counts, announcements, activeModules] = await Promise.all([
     withTenant(s.tenantId, (tx) => tx.tenantUser.findMany({ where: { isActive: true }, orderBy: { createdAt: "asc" }, select: { email: true, name: true, role: true } })),
     can(role, "design") ? getStoreSettings(s.tenantId, s.actor) : Promise.resolve(null),
     shellCounts(s.tenantId, s.actor),
     getActiveAnnouncementsForTenant(s.tenantId),
+    getTenantActiveModules(s.tenantId),
   ]);
   const storeName = settings?.storeName ?? s.tenantSubdomain;
   const check = counts.check;
@@ -80,7 +122,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   // What this person may open, translated, for the side menu and the search box.
   const groups: NavGroup[] = GROUPS.flatMap((g) => {
-    const items = g.items.filter((it) => can(role, it.area)).map((it) => ({ href: it.href, label: tr(lang, it.label), exact: it.exact, badge: it.badge }));
+    const items = g.items.filter((it) => can(role, it.area) && (!it.moduleKey || Boolean(activeModules[it.moduleKey]))).map((it) => ({ href: it.href, label: tr(lang, it.label), exact: it.exact, badge: it.badge }));
     return items.length ? [{ id: g.id, label: tr(lang, g.label), icon: g.icon, items, activePrefixes: g.activePrefixes }] : [];
   });
   const pages: Page[] = groups.flatMap((g) => g.items.map((i) => ({ href: i.href, label: i.label, group: g.label })));

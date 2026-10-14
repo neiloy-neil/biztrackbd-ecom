@@ -32,7 +32,7 @@ export default async function EditProduct({ params, searchParams }: { params: Pr
     id: p.id, title: p.title, titleBn: p.titleBn ?? "", descriptionHtml: p.descriptionHtml, basePrice: p.basePrice, compareAtPrice: p.compareAtPrice, costPrice: p.costPrice,
     status: p.status === "ACTIVE" ? "ACTIVE" : "DRAFT", categoryId: p.categoryId, tags: p.tags, seoTitle: p.seoTitle ?? "", seoDescription: p.seoDescription ?? "", isFeatured: p.isFeatured,
     images: p.images, slug: p.slug, options: optionsOf(p.variants),
-    variants: p.variants.map((v) => ({ id: v.id, title: v.title, sku: v.sku ?? "", price: v.price, stockQuantity: v.stockQuantity, stockBefore: v.stockQuantity, reorderLevel: v.reorderLevel, options: v.options })),
+    variants: p.variants.map((v) => ({ id: v.id, title: v.title, sku: v.sku ?? "", price: v.price, stockQuantity: v.stockQuantity, stockBefore: v.stockQuantity, reorderLevel: v.reorderLevel, isActive: v.isActive ?? true, options: v.options })),
   };
   return (
     <>
@@ -43,7 +43,7 @@ export default async function EditProduct({ params, searchParams }: { params: Pr
         <div className="actions"><a className="btn btn-secondary btn-sm" href={`http://${s.tenantSubdomain}.localhost:3000/products/${p.slug}`} target="_blank" rel="noopener noreferrer">View on store</a></div>
       </div>
       {one(sp.saved) && <div className="notice good" role="status" style={{ marginBottom: 14 }} data-testid="saved">Saved.</div>}
-      <ProductEditor key={`${p.id}-${one(sp.saved) ?? ""}`} initial={initial} categories={categories.map((c) => ({ id: c.id, name: c.name }))} canPublish />
+      <ProductEditor key={`${p.id}-${one(sp.saved) ?? ""}`} initial={initial} categories={categories.map((c) => ({ id: c.id, name: c.name, parentId: c.parentId }))} canPublish />
       <section className="card" style={{ marginTop: 14 }}>
         <details>
           <summary className="link" style={{ cursor: "pointer" }}>Delete this product</summary>

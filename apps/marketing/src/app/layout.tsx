@@ -169,6 +169,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div className="foot-col">
                 <h4>Logistics &amp; Pay</h4>
                 <nav aria-label="Integrations Links">
+                  <Link href="/tools/courier-fraud-checker" prefetch={false}>Free Fraud Checker API</Link>
                   <Link href="/couriers#steadfast" prefetch={false}>Steadfast Automation</Link>
                   <Link href="/couriers#pathao" prefetch={false}>Pathao Delivery</Link>
                   <Link href="/couriers#redx" prefetch={false}>RedX Integration</Link>

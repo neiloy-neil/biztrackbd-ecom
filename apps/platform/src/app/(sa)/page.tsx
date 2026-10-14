@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getOverview } from "@biztrackbd/core";
+import { getOverview, getPlatformHealthMatrix } from "@biztrackbd/core";
 import { dateOnly, taka } from "@/lib/format";
 import { requireAccess } from "@/lib/session";
 
@@ -20,6 +20,7 @@ function avatarBg(name: string): string {
 export default async function Overview() {
   const s = await requireAccess("tenants");
   const o = await getOverview(s.actor);
+  const health = await getPlatformHealthMatrix().catch(() => null);
 
   const statusStyles: Record<string, { bg: string; color: string }> = {
     Paying: { bg: "#E8F6EE", color: "#15803D" },
@@ -114,6 +115,69 @@ export default async function Overview() {
           </div>
         </div>
       </div>
+
+      {/* System Health Matrix Telemetry */}
+      {health && (
+        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 14, fontWeight: 700 }}>System Health & Infrastructure Telemetry</span>
+              <span
+                style={{
+                  fontSize: 11.5,
+                  padding: "2px 8px",
+                  borderRadius: 8,
+                  fontWeight: 700,
+                  background: health.overall === "OPERATIONAL" ? "#E8F6EE" : health.overall === "DEGRADED" ? "#FEF3E2" : "#FCEBEB",
+                  color: health.overall === "OPERATIONAL" ? "#15803D" : health.overall === "DEGRADED" ? "#92400E" : "#DC2626",
+                }}
+              >
+                ● {health.overall}
+              </span>
+            </div>
+            <Link href="/settings" style={{ fontSize: 12.5, fontWeight: 600, color: "#5B4FE8", textDecoration: "none" }} prefetch={false}>
+              Configure Gateways →
+            </Link>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 10 }}>
+            <div style={{ padding: "10px 12px", background: "#FAFAFC", borderRadius: 8, border: "1px solid #E7E7F0", fontSize: 12.5 }}>
+              <div style={{ color: "#6B6B8D", fontWeight: 600 }}>🗄️ Database</div>
+              <div style={{ fontWeight: 700, color: health.services.database.status === "UP" ? "#15803D" : "#DC2626", marginTop: 4 }}>
+                {health.services.database.status} ({health.services.database.latencyMs}ms)
+              </div>
+            </div>
+
+            <div style={{ padding: "10px 12px", background: "#FAFAFC", borderRadius: 8, border: "1px solid #E7E7F0", fontSize: 12.5 }}>
+              <div style={{ color: "#6B6B8D", fontWeight: 600 }}>🤖 Gemini AI</div>
+              <div style={{ fontWeight: 700, color: health.services.ai.status === "UP" ? "#15803D" : "#DC2626", marginTop: 4 }}>
+                {health.services.ai.status} {health.services.ai.latencyMs > 0 && `(${health.services.ai.latencyMs}ms)`}
+              </div>
+            </div>
+
+            <div style={{ padding: "10px 12px", background: "#FAFAFC", borderRadius: 8, border: "1px solid #E7E7F0", fontSize: 12.5 }}>
+              <div style={{ color: "#6B6B8D", fontWeight: 600 }}>📱 SMS Gateway</div>
+              <div style={{ fontWeight: 700, color: health.services.sms.status === "UP" ? "#15803D" : "#B45309", marginTop: 4 }}>
+                {health.services.sms.status.replace("_", " ")}
+              </div>
+            </div>
+
+            <div style={{ padding: "10px 12px", background: "#FAFAFC", borderRadius: 8, border: "1px solid #E7E7F0", fontSize: 12.5 }}>
+              <div style={{ color: "#6B6B8D", fontWeight: 600 }}>🚚 Courier APIs</div>
+              <div style={{ fontWeight: 700, color: health.services.couriers.status === "UP" ? "#15803D" : "#B45309", marginTop: 4 }}>
+                {health.services.couriers.status}
+              </div>
+            </div>
+
+            <div style={{ padding: "10px 12px", background: "#FAFAFC", borderRadius: 8, border: "1px solid #E7E7F0", fontSize: 12.5 }}>
+              <div style={{ color: "#6B6B8D", fontWeight: 600 }}>💳 UddoktaPay</div>
+              <div style={{ fontWeight: 700, color: health.services.payments.status === "UP" ? "#15803D" : "#B45309", marginTop: 4 }}>
+                {health.services.payments.status.replace("_", " ")}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 2-Column Main Section */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 20, alignItems: "flex-start" }}>

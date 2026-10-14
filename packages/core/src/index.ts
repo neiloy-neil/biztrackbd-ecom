@@ -41,15 +41,26 @@ export { productSvg, bannerSvg, ART_KINDS, type ArtKind, type Palette } from "./
 export { adminSearch, shellCounts, type SearchHit, type ShellCounts } from "./admin/shell";
 export { getDashboard, DASHBOARD_RANGES, type DashboardRange, dhakaDate, addDays, STORE_TZ, type Dashboard, type SetupStep } from "./admin/dashboard";
 export { listInventory, adjustStock, updateStockSettings, listStockHistory, STOCK_REASONS, type InventoryRow, type InventorySummary, type StockFilter, type AdjustInput } from "./admin/inventory";
-export { listCustomers, getCustomerDetail, updateCustomer, createCustomer, setCustomerBlocked, customersCsv, VIP_SPENT, VIP_ORDERS, type CustomerRow, type CustomerSegment } from "./admin/customers";
+export {
+  listCustomers, getCustomerDetail, updateCustomer, createCustomer, setCustomerBlocked, customersCsv,
+  adjustCustomerStoreCredit, sendCustomerDirectSms, saveCustomerAddress, deleteCustomerAddress,
+  VIP_SPENT, VIP_ORDERS,
+  type CustomerRow, type CustomerSegment, type CustomerActivityItem, type CustomerAddressView,
+  type CustomerDetailView, type CreateCustomerInput, type UpdateCustomerInput,
+} from "./admin/customers";
 export { listCoupons, saveCoupon, setCouponActive, deleteCoupon, couponStatus, CouponInput, type CouponStatus } from "./admin/coupons";
 export { submitContactMessage, listContactMessages, markContactRead, replyToContact, closeContact, ContactRateLimitError, CONTACT_MESSAGE_MAX, CONTACT_REPLY_MAX, type ContactInput, type ContactRow, type ContactStatus, type ContactTab } from "./admin/contact-inbox";
 export { requestStockAlert, listStockAlerts, notifyRestocked, sweepStockAlerts, removeStockAlerts, type StockAlertRow, type RestockSummary } from "./admin/stock-alerts";
 export { storeOriginFor } from "./storefront/origin";
 export { importCustomersCsv, CUSTOMER_IMPORT_MAX_ROWS, CUSTOMER_IMPORT_TEMPLATE, type CustomerImportResult } from "./admin/customer-import";
 export { type CategoryAdminRow, type CategoryInput, listAdminProducts, bulkProductAction, importProductsCsv, IMPORT_TEMPLATE, IMPORT_MAX_ROWS, type ProductImportResult, saveProduct, getProductForEdit, setProductStatus, listCategoriesAdmin, saveCategory, deleteCategory, slugify, SaveProductInput, type AdminProductRow, type ProductTab } from "./admin/products";
-export { getSalesReport, salesReportCsv, lastDays, changePercent, type SalesReport, type PeriodTotals } from "./admin/reports";
-export { getStoreSettings, getPrintSettings, saveStoreDetails, saveInvoiceSettings, INVOICE_PAPERS, type InvoicePaper, type InvoiceSettingsInput, setOrdersPaused, savePaymentSettings, listZones, saveZone, deleteZone, ALL_OTHER_DISTRICTS, type StoreSettingsView, type StoreDetailsInput, type PaymentSettingsInput, type ZoneInput } from "./admin/settings";
+export { getSalesReport, salesReportCsv, lastDays, changePercent, REPORT_PRESETS, resolveReportRange, createCsvDocument, escapeCsvCell, takaNum, type SalesReport, type PeriodTotals, type ResolvedReportRange } from "./admin/reports";
+export { getProductReport, productReportCsv, type ProductReport, type ProductPerformanceItem, type CategorySalesSummary, type StockRunwayItem } from "./admin/product-reports";
+export { getCourierReport, courierReportCsv, type CourierReport, type CourierComparisonRow, type DistrictDeliveryRow, type ReturnReasonSummary } from "./admin/courier-reports";
+export { getCustomerReport, customerReportCsv, type CustomerReport, type BuyerSegmentSummary, type VipCustomerRow, type RfmCohortSummary } from "./admin/customer-reports";
+export { getStoreSettings, getPrintSettings, saveStoreDetails, saveInvoiceSettings, INVOICE_PAPERS, type InvoicePaper, type InvoiceSettingsInput, setOrdersPaused, savePaymentSettings, listZones, saveZone, deleteZone, ALL_OTHER_DISTRICTS, getBannerSettings, saveBannerSettings, type StoreSettingsView, type StoreDetailsInput, type PaymentSettingsInput, type ZoneInput, type BannerSettingsView } from "./admin/settings";
+export { getMarketingOverview, type MarketingOverview, type MarketingKpiSummary, type MarketingRecentEvent } from "./admin/marketing";
+export { estimateAudience, sendBroadcastCampaign, listCampaigns, calculateSmsParts, type CampaignSegment, type CreateCampaignInput, type CampaignRow } from "./admin/campaigns";
 export { parseOrderMessage, findCustomerForOrder, searchVariantsForOrder, createQuickOrder, QUICK_SOURCES, QuickOrderInput, type ParsedMessage, type CatalogVariant, type QuickSource } from "./admin/quick-order";
 export * from "./couriers/types";
 export { setAdapterFactory, defaultAdapterFactory, type AdapterFactory } from "./couriers/factory";
@@ -70,6 +81,10 @@ export {
   refreshOrderFraudReport, fetchSteadfastFraudStats,
   type FlaggedOrder, type FraudOverview, type BlockedRow, type PhoneLookup,
 } from "./fraud/service";
+export {
+  fetchUnifiedCourierFraud, toCourierFraudStats, clearFraudCheckerCache, getFraudCheckerApiKey,
+  type ExternalCourierFraudData, type CourierNetworkStats,
+} from "./fraud/courier-api";
 export {
   getOrderTrackingTimeline, buildCourierTrackingUrl,
   type OrderTrackingTimeline, type MilestoneStage, type TrackingCheckpoint,
@@ -170,7 +185,7 @@ export { saveContent, deleteContent, listContent, getContent, bodyToHtml, slugOf
 export * from "./auth/supabase";
 export * from "./auth/membership";
 export {
-  MODULES, isModuleOn, listModules, setModule, listAppStoreCatalog,
+  MODULES, isModuleOn, isModuleActive, getModuleStatus, getTenantActiveModules, listModules, setModule, listAppStoreCatalog,
   APP_CATALOG, getAppCatalogItem, CATEGORY_LABELS,
   type ModuleDef, type ModuleView, type AppCatalogItem, type AppCategory, type AppTier, type AppStoreItemView, type AppStoreOverview,
 } from "./modules/service";
@@ -204,3 +219,138 @@ export * from "./catalog/import-parser";
 export { notifyOwner, emailStaffInvite, sendSignInCode, setCodeHooks, setMailSender, formatMailDate, type MailSendResult, type OwnerMailExtra } from "./mail/send";
 export { buildMail, buildAuthMail, authMailsForTests as AUTH_MAILS_FOR_TESTS, MAIL_KIND_LIST, URGENT_KINDS, type MailKind, type MailVars } from "./mail/templates";
 export { esc as escapeMailText, type MailLang } from "./mail/layout";
+
+// AI Suite & Copilot
+export {
+  PLAN_AI_QUOTAS,
+  resolveGeminiApiKey,
+  recordAiGeneration,
+  getAiSettings,
+  saveAiSettings,
+  testGeminiApiKey,
+  callGemini,
+  type ResolvedAiKey,
+  type AiSettingsView,
+  type SaveAiSettingsInput,
+  type CallGeminiParams,
+} from "./ai/gateway";
+export {
+  TONE_LABELS,
+  SYSTEM_PROMPT_PRODUCT_WRITER,
+  SYSTEM_PROMPT_COPYWRITER,
+  SYSTEM_PROMPT_CUSTOMER_PARSER,
+  SYSTEM_PROMPT_STOREFRONT_CHATBOT,
+  type AiTonePreset,
+} from "./ai/prompts";
+export {
+  generateProductListing,
+  GeneratedProductSchema,
+  type GeneratedProductListing,
+  type ProductGenerateOptions,
+} from "./ai/product-generator";
+export {
+  generateSocialPost,
+  generateSmsCampaignCopy,
+  generateBannerCopy,
+  SocialPostSchema,
+  SmsCampaignSchema,
+  BannerCopySchema,
+  type GeneratedSocialPost,
+  type GeneratedSmsCampaign,
+  type GeneratedBannerCopy,
+  type CopywriterOptions,
+} from "./ai/copywriter";
+export {
+  parseCustomerDetailsWithAi,
+  ParsedCustomerDetailsSchema,
+  type ParsedCustomerDetails,
+} from "./ai/customer-parser";
+export {
+  handleStorefrontChat,
+  type ChatMessage,
+  type ChatInput,
+  type ChatResponse,
+} from "./ai/chatbot";
+export {
+  renderCode128Svg,
+  calculateCheckDigit,
+  generateBarcodeValue,
+  assignVariantBarcode,
+  findVariantByBarcode,
+  type BarcodeRenderOptions,
+} from "./admin/barcode";
+export {
+  getOrCreateDefaultRegister,
+  listPosRegisters,
+  getActivePosSession,
+  openPosSession,
+  recordPosCashMovement,
+  closePosSession,
+  searchProductsForPos,
+  createPosOrder,
+  type PosPaymentSplit,
+  type PosCheckoutItem,
+  type PosCheckoutInput,
+  type PosReceiptData,
+} from "./admin/pos";
+
+
+
+export {
+  getPlatformAiConfig,
+  savePlatformAiConfig,
+  testPlatformGeminiApiKey,
+  getPlatformSmsConfig,
+  savePlatformSmsConfig,
+  testPlatformSms,
+  getPlatformCourierConfig,
+  savePlatformCourierConfig,
+  testPlatformCouriers,
+  getPlatformUddoktaPayConfig,
+  savePlatformUddoktaPayConfig,
+  testPlatformUddoktaPay,
+  getPlatformMailConfig,
+  savePlatformMailConfig,
+  getPlatformHealthMatrix,
+  type PlatformAiConfigView,
+  type PlatformSmsConfigView,
+  type PlatformCourierConfigView,
+  type PlatformUddoktaPayConfigView,
+  type PlatformMailConfigView,
+  type PlatformHealthMatrixView,
+} from "./platform/config";
+
+export {
+  listSubscriptionPromos,
+  createSubscriptionPromo,
+  toggleSubscriptionPromo,
+  deleteSubscriptionPromo,
+  validateSubscriptionPromo,
+  type SubscriptionPromoView,
+  type CreateSubscriptionPromoInput,
+  type PromoValidationResult,
+} from "./platform/promos";
+
+export {
+  listPlatformUsers,
+  invitePlatformUser,
+  updatePlatformUserRole,
+  togglePlatformUserActive,
+  type PlatformUserView,
+} from "./platform/team";
+
+export {
+  listTenantQuotaAdjustments,
+  addTenantQuotaAdjustment,
+  getTenantBonusQuota,
+  type QuotaAdjustmentView,
+  type AddQuotaAdjustmentInput,
+} from "./platform/quota";
+
+export {
+  getAppCatalogWithTelemetry,
+  toggleGlobalModuleMaintenance,
+  setModulePlanOverride,
+  type ManagedAppCatalogItem,
+} from "./platform/modules-control";
+
