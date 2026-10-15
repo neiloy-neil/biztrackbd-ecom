@@ -7,6 +7,7 @@ import type {
   WhatsAppConfigView,
   WhatsAppTemplateView,
   WhatsAppEventType,
+  CampaignRow,
 } from "@biztrackbd/core";
 import {
   startWhatsAppSessionAction,
@@ -23,6 +24,7 @@ interface Props {
   initialTemplates: WhatsAppTemplateView[];
   initialLogs: any[];
   totalLogs: number;
+  initialCampaigns?: CampaignRow[];
   planTier: string;
   isProOrHigher: boolean;
   isTrialActive: boolean;
@@ -33,15 +35,17 @@ export function WhatsAppManagerClient({
   initialTemplates,
   initialLogs,
   totalLogs,
+  initialCampaigns = [],
   planTier,
   isProOrHigher,
   isTrialActive,
 }: Props) {
   const router = useRouter();
-  const [tab, setTab] = useState<"connection" | "automations" | "telemetry">("connection");
+  const [tab, setTab] = useState<"connection" | "automations" | "telemetry" | "broadcasts">("connection");
   const [config, setConfig] = useState<WhatsAppConfigView>(initialConfig);
   const [templates, setTemplates] = useState<WhatsAppTemplateView[]>(initialTemplates);
   const [logs] = useState<any[]>(initialLogs);
+  const [campaigns] = useState<CampaignRow[]>(initialCampaigns);
 
   // Connection UI states
   const [isStartingSession, setIsStartingSession] = useState(false);
@@ -392,6 +396,14 @@ export function WhatsAppManagerClient({
           style={{ borderRadius: "8px 8px 0 0" }}
         >
           📊 Telemetry & Delivery Logs ({totalLogs})
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab("broadcasts")}
+          className={`btn btn-sm ${tab === "broadcasts" ? "btn-primary" : "btn-secondary"}`}
+          style={{ borderRadius: "8px 8px 0 0" }}
+        >
+          📢 WhatsApp Broadcasts ({campaigns.length})
         </button>
       </div>
 
@@ -1288,6 +1300,252 @@ export function WhatsAppManagerClient({
                         </td>
                         <td style={{ padding: "10px 16px", maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "#334155" }}>
                           {log.messageBody}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: WHATSAPP BROADCASTS & MASS MARKETING */}
+      {tab === "broadcasts" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          {/* Top Broadcast Cockpit Card */}
+          <div
+            className="card"
+            style={{
+              padding: 24,
+              background: "linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)",
+              border: "1px solid #86EFAC",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                  <span style={{ fontSize: 22 }}>📢</span>
+                  <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#065F46" }}>
+                    WhatsApp Broadcast Campaigns
+                  </h3>
+                  <span className="pill ok" style={{ fontSize: 11, fontWeight: 700 }}>
+                    ZERO META FEES
+                  </span>
+                </div>
+                <p style={{ margin: 0, fontSize: 13.5, color: "#047857", maxWidth: 620, lineHeight: 1.5 }}>
+                  Broadcast flash sales, festive greetings, and automated abandoned cart recoveries directly to your customers' WhatsApp. Protected with built-in anti-ban human pacing.
+                </p>
+              </div>
+
+              <div style={{ display: "flex", gap: 10 }}>
+                <Link
+                  href="/marketing/campaigns?channel=WHATSAPP"
+                  className="btn btn-primary"
+                  style={{
+                    background: "#059669",
+                    borderColor: "#047857",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontWeight: 600,
+                  }}
+                >
+                  <span>⚡</span>
+                  <span>+ New WhatsApp Broadcast</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Anti-Ban 3-Tile Meter */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                gap: 12,
+                marginTop: 20,
+              }}
+            >
+              <div
+                style={{
+                  background: "#fff",
+                  padding: "12px 16px",
+                  borderRadius: 10,
+                  border: "1px solid #BBF7D0",
+                }}
+              >
+                <div style={{ fontSize: 12, color: "#64748B", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
+                  <span>🛡️</span> Anti-Ban Human Pacing
+                </div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginTop: 4 }}>
+                  4-12s Randomized Delay
+                </div>
+                <div style={{ fontSize: 11.5, color: "#10B981", marginTop: 2 }}>
+                  Simulates natural typing rhythm
+                </div>
+              </div>
+
+              <div
+                style={{
+                  background: "#fff",
+                  padding: "12px 16px",
+                  borderRadius: 10,
+                  border: "1px solid #BBF7D0",
+                }}
+              >
+                <div style={{ fontSize: 12, color: "#64748B", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
+                  <span>⏱️</span> Safe Hourly Velocity
+                </div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginTop: 4 }}>
+                  60 - 120 msgs / hr
+                </div>
+                <div style={{ fontSize: 11.5, color: "#10B981", marginTop: 2 }}>
+                  Safe threshold against account flags
+                </div>
+              </div>
+
+              <div
+                style={{
+                  background: "#fff",
+                  padding: "12px 16px",
+                  borderRadius: 10,
+                  border: "1px solid #BBF7D0",
+                }}
+              >
+                <div style={{ fontSize: 12, color: "#64748B", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
+                  <span>📱</span> Device Connection
+                </div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginTop: 4 }}>
+                  {config.status === "CONNECTED" ? (config.phoneNumber || "Connected") : "Disconnected"}
+                </div>
+                <div style={{ fontSize: 11.5, color: config.status === "CONNECTED" ? "#10B981" : "#EF4444", marginTop: 2 }}>
+                  {config.status === "CONNECTED" ? "🟢 Multi-Device Ready" : "⚠️ Connect in Tab 1"}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick-Launch Playbooks */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
+            <div className="card" style={{ padding: 18, border: "1px solid var(--line, #E2E8F0)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <span style={{ fontSize: 20 }}>🛒</span>
+                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>Abandoned Cart Recovery</h4>
+              </div>
+              <p className="muted" style={{ margin: "0 0 14px", fontSize: 13, lineHeight: 1.4 }}>
+                Target customers who entered their phone in checkout over the last 24-72 hours with a personalized cart restoration link.
+              </p>
+              <Link
+                href="/marketing/campaigns?channel=WHATSAPP"
+                className="btn btn-secondary btn-sm"
+                style={{ width: "100%", textAlign: "center", justifyContent: "center" }}
+              >
+                Launch Recovery Blast →
+              </Link>
+            </div>
+
+            <div className="card" style={{ padding: 18, border: "1px solid var(--line, #E2E8F0)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <span style={{ fontSize: 20 }}>👑</span>
+                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>VIP Flash Sale</h4>
+              </div>
+              <p className="muted" style={{ margin: "0 0 14px", fontSize: 13, lineHeight: 1.4 }}>
+                Reward your top buyers (৳15k+ spent or 5+ orders) with exclusive promo codes and private collection access.
+              </p>
+              <Link
+                href="/marketing/campaigns?channel=WHATSAPP"
+                className="btn btn-secondary btn-sm"
+                style={{ width: "100%", textAlign: "center", justifyContent: "center" }}
+              >
+                Launch VIP Campaign →
+              </Link>
+            </div>
+
+            <div className="card" style={{ padding: 18, border: "1px solid var(--line, #E2E8F0)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <span style={{ fontSize: 20 }}>👥</span>
+                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>All-Store Announcement</h4>
+              </div>
+              <p className="muted" style={{ margin: "0 0 14px", fontSize: 13, lineHeight: 1.4 }}>
+                Reach your full opted-in customer base with new arrival notifications, holiday discounts, and coupon drops.
+              </p>
+              <Link
+                href="/marketing/campaigns?channel=WHATSAPP"
+                className="btn btn-secondary btn-sm"
+                style={{ width: "100%", textAlign: "center", justifyContent: "center" }}
+              >
+                Launch Storewide Blast →
+              </Link>
+            </div>
+          </div>
+
+          {/* WhatsApp Broadcast History Table */}
+          <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>WhatsApp Broadcast History ({campaigns.length})</h4>
+                <p className="muted" style={{ margin: "2px 0 0", fontSize: 12.5 }}>
+                  Tracking delivery progression and recipient response across campaigns.
+                </p>
+              </div>
+              <Link href="/marketing/campaigns" className="btn btn-secondary btn-sm" style={{ fontSize: 12 }}>
+                View All Campaigns Hub →
+              </Link>
+            </div>
+
+            {campaigns.length === 0 ? (
+              <div style={{ padding: 36, textAlign: "center" }}>
+                <div style={{ fontSize: 28, marginBottom: 8 }}>📢</div>
+                <div style={{ fontWeight: 600, fontSize: 14 }}>No WhatsApp broadcasts sent yet</div>
+                <p className="muted" style={{ margin: "4px 0 16px", fontSize: 13 }}>
+                  Launch your first WhatsApp campaign to boost repeat orders with zero Meta conversation charges.
+                </p>
+                <Link href="/marketing/campaigns?channel=WHATSAPP" className="btn btn-primary btn-sm">
+                  + Create First Broadcast
+                </Link>
+              </div>
+            ) : (
+              <div style={{ overflowX: "auto" }}>
+                <table className="table" style={{ margin: 0 }}>
+                  <thead>
+                    <tr style={{ background: "#F8FAFC" }}>
+                      <th style={{ padding: "10px 16px" }}>Campaign Name</th>
+                      <th style={{ padding: "10px 16px" }}>Audience</th>
+                      <th style={{ padding: "10px 16px" }} className="r">Progress</th>
+                      <th style={{ padding: "10px 16px" }}>Status</th>
+                      <th style={{ padding: "10px 16px" }}>Dispatched</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {campaigns.map((c) => (
+                      <tr key={c.id} style={{ borderBottom: "1px solid #F1F5F9" }}>
+                        <td style={{ padding: "10px 16px" }}>
+                          <div style={{ fontWeight: 600 }}>{c.name}</div>
+                          {c.couponCode && (
+                            <span style={{ fontSize: 11, color: "#059669", fontWeight: 600 }}>
+                              🏷️ {c.couponCode}
+                            </span>
+                          )}
+                        </td>
+                        <td style={{ padding: "10px 16px", fontSize: 12.5, color: "#64748B" }}>
+                          {c.targetSegment === "ABANDONED_CART" ? "🛒 Abandoned Cart" : c.targetSegment}
+                        </td>
+                        <td style={{ padding: "10px 16px", fontSize: 13 }} className="r num">
+                          <b>{c.sentCount > 0 ? c.sentCount : c.recipientsCount}</b> / {c.recipientsCount}
+                        </td>
+                        <td style={{ padding: "10px 16px" }}>
+                          <span
+                            className={`pill ${
+                              c.status === "SENT" ? "ok" : c.status === "SCHEDULED" ? "warn" : "grey"
+                            }`}
+                            style={{ fontSize: 11, fontWeight: 600 }}
+                          >
+                            {c.status}
+                          </span>
+                        </td>
+                        <td style={{ padding: "10px 16px", fontSize: 12.5, color: "#64748B" }}>
+                          {new Date(c.sentAt || c.createdAt).toLocaleDateString()}
                         </td>
                       </tr>
                     ))}

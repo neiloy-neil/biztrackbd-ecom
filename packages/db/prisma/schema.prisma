@@ -1428,13 +1428,18 @@ model MarketingCampaign {
   id              String    @id @default(cuid())
   tenantId        String
   name            String
-  channel         String // "SMS" | "EMAIL"
-  targetSegment   String // "ALL" | "VIP" | "REPEAT" | "DORMANT" | "DHAKA" | "OUTSIDE_DHAKA"
+  channel         String // "SMS" | "EMAIL" | "WHATSAPP"
+  targetSegment   String // "ALL" | "VIP" | "REPEAT" | "DORMANT" | "DHAKA" | "OUTSIDE_DHAKA" | "ABANDONED_CART"
   subject         String? // For email campaigns
   body            String    @db.Text
+  mediaUrl        String?   // Optional image/banner URL
+  couponCode      String?   // Optional attached discount coupon
   recipientsCount Int       @default(0)
+  sentCount       Int       @default(0)
+  failedCount     Int       @default(0)
   creditsUsed     Int       @default(0)
-  status          String    @default("SENT") // "SENT" | "SCHEDULED" | "FAILED"
+  status          String    @default("SENT") // "DRAFT" | "SCHEDULED" | "SENDING" | "SENT" | "PAUSED" | "CANCELLED" | "FAILED"
+  scheduledFor    DateTime?
   sentAt          DateTime?
 
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -1442,6 +1447,7 @@ model MarketingCampaign {
   updatedAt DateTime @updatedAt
 
   @@index([tenantId, createdAt])
+  @@index([tenantId, status, scheduledFor])
 }
 
 model StaffInvite {

@@ -12,6 +12,7 @@ import {
   confirmWhatsAppPairing,
   sendWhatsAppNotification,
   getWhatsAppMessageLogs,
+  listCampaigns,
   type WhatsAppConfigView,
   type WhatsAppEventType,
 } from "@biztrackbd/core";
@@ -20,10 +21,11 @@ import { requireAccess } from "@/lib/session";
 
 export async function getWhatsAppManagerDataAction() {
   const s = await requireAccess("marketing");
-  const [config, templates, logsData, tenant] = await Promise.all([
+  const [config, templates, logsData, campaigns, tenant] = await Promise.all([
     getWhatsAppConfig(s.tenantId),
     getWhatsAppTemplates(s.tenantId),
     getWhatsAppMessageLogs(s.tenantId, { limit: 40 }),
+    listCampaigns(s.tenantId, s.actor, "WHATSAPP"),
     withTenant(s.tenantId, (tx) =>
       tx.tenant.findUnique({
         where: { id: s.tenantId },
@@ -42,6 +44,7 @@ export async function getWhatsAppManagerDataAction() {
     templates,
     logs: logsData.logs,
     totalLogs: logsData.total,
+    campaigns,
     planTier,
     isProOrHigher,
     isTrialActive,

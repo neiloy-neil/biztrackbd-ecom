@@ -64,7 +64,7 @@ export { getCourierReport, courierReportCsv, type CourierReport, type CourierCom
 export { getCustomerReport, customerReportCsv, type CustomerReport, type BuyerSegmentSummary, type VipCustomerRow, type RfmCohortSummary } from "./admin/customer-reports";
 export { getStoreSettings, getPrintSettings, saveStoreDetails, saveInvoiceSettings, INVOICE_PAPERS, type InvoicePaper, type InvoiceSettingsInput, setOrdersPaused, savePaymentSettings, listZones, saveZone, deleteZone, ALL_OTHER_DISTRICTS, getBannerSettings, saveBannerSettings, type StoreSettingsView, type StoreDetailsInput, type PaymentSettingsInput, type ZoneInput, type BannerSettingsView } from "./admin/settings";
 export { getMarketingOverview, type MarketingOverview, type MarketingKpiSummary, type MarketingRecentEvent } from "./admin/marketing";
-export { estimateAudience, sendBroadcastCampaign, listCampaigns, calculateSmsParts, type CampaignSegment, type CreateCampaignInput, type CampaignRow } from "./admin/campaigns";
+export { estimateAudience, sendBroadcastCampaign, listCampaigns, cancelCampaign, interpolateVariables, calculateSmsParts, type CampaignChannel, type CampaignSegment, type CreateCampaignInput, type CampaignRow } from "./admin/campaigns";
 export { parseOrderMessage, findCustomerForOrder, searchVariantsForOrder, createQuickOrder, QUICK_SOURCES, QuickOrderInput, type ParsedMessage, type CatalogVariant, type QuickSource } from "./admin/quick-order";
 export * from "./couriers/types";
 export { setAdapterFactory, defaultAdapterFactory, type AdapterFactory } from "./couriers/factory";

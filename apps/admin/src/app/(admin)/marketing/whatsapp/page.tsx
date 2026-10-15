@@ -34,6 +34,7 @@ export default async function WhatsAppManagerPage() {
       initialTemplates={data.templates}
       initialLogs={data.logs}
       totalLogs={data.totalLogs}
+      initialCampaigns={data.campaigns}
       planTier={data.planTier}
       isProOrHigher={data.isProOrHigher}
       isTrialActive={data.isTrialActive}

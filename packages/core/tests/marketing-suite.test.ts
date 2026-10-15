@@ -100,3 +100,36 @@ describe("Marketing Suite - Campaign Input Validations", () => {
     await expect(saveBannerSettings("t1", packerActor, { flashSaleActive: true })).rejects.toThrow(ForbiddenError);
   });
 });
+
+describe("Marketing Suite - WhatsApp Broadcast Engine & Personalization", () => {
+  it("interpolates dynamic template variables correctly", async () => {
+    const { interpolateVariables } = await import("../src");
+    const template = "Hi {{customerName}}! Welcome to {{storeName}}. Use code {{discountCode}} at {{cartUrl}}.";
+    const result = interpolateVariables(template, {
+      customerName: "Rahim",
+      storeName: "Dhaka Mart",
+      discountCode: "EID25",
+      cartUrl: "https://dhakamart.com/checkout",
+    });
+
+    expect(result).toBe("Hi Rahim! Welcome to Dhaka Mart. Use code EID25 at https://dhakamart.com/checkout.");
+  });
+
+  it("handles missing variables gracefully without crashing", async () => {
+    const { interpolateVariables } = await import("../src");
+    const template = "Hello {{customerName}}, your coupon is {{discountCode}}.";
+    const result = interpolateVariables(template, {
+      customerName: "Karim",
+    });
+
+    expect(result).toBe("Hello Karim, your coupon is {{discountCode}}.");
+  });
+
+  it("calculates estimated time with anti-ban pacing for WhatsApp broadcasts", async () => {
+    const { estimateAudience } = await import("../src");
+    const res = await estimateAudience("cm00000000000000000000001", ownerActor, "WHATSAPP", "ALL", "Special offer!");
+    expect(res).toHaveProperty("count");
+    expect(res).toHaveProperty("estimatedSeconds");
+    expect(res.estimatedSeconds).toBe(res.count * 6);
+  });
+});
