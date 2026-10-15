@@ -21,6 +21,7 @@ import { ServiceCardsSection } from "./verticals/service-cards";
 import { TeamGridSection } from "./verticals/team-grid";
 import { PortfolioGridSection } from "./verticals/portfolio-grid";
 import { DownloadCardSection } from "./verticals/download-card";
+import { ContactFormSection } from "./verticals/contact-form";
 
 /**
  * Draws a page built in the editor. It has no server-only code, so the live store (server) and the editor's preview
@@ -850,6 +851,20 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
           fileLabel={str(s.fileLabel)}
           buttonText={str(s.buttonText)}
           buttonTextBn={str(s.buttonTextBn)}
+          lang={lang}
+        />
+      );
+    case "contact-form":
+      return (
+        <ContactFormSection
+          heading={str(s.heading)}
+          headingBn={str(s.headingBn)}
+          subhead={str(s.subhead)}
+          subheadBn={str(s.subheadBn)}
+          buttonText={str(s.buttonText)}
+          buttonTextBn={str(s.buttonTextBn)}
+          directPhone={str(s.directPhone)}
+          directEmail={str(s.directEmail)}
           lang={lang}
         />
       );

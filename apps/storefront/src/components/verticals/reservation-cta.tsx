@@ -32,6 +32,7 @@ export function ReservationCtaSection({
   const [renderedAt] = useState(() => Date.now());
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [whatsAppUrl, setWhatsAppUrl] = useState<string | null>(null);
 
   const heading = lang === "bn" && titleBn ? titleBn : title || (lang === "bn" ? "টেবিল বুকিং রিকোয়েস্ট" : "Table Reservation Request");
   const sub = lang === "bn" && subtitleBn ? subtitleBn : subtitle || (lang === "bn" ? "আপনার পছন্দের সময় ও অতিথির সংখ্যা জানিয়ে রিকোয়েস্ট পাঠান। আমরা নিশ্চিত করব।" : "Submit your preferred date and party size. We will confirm via WhatsApp or Phone.");
@@ -59,17 +60,24 @@ export function ReservationCtaSection({
           name: name.trim(),
           phone: phone.trim(),
           partySize: Number(guests) || 2,
-          preferredDate: date,
-          preferredTime: time,
+          requestedDate: date,
+          requestedTime: time,
           message: notes.trim(),
           type: "RESERVATION",
-          sourceUrl: typeof window !== "undefined" ? window.location.pathname : "",
+          sourcePage: typeof window !== "undefined" ? window.location.pathname : "",
+          locale: lang,
+          elapsedMs: Date.now() - renderedAt,
+          hp: honeypot,
         }),
       });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || (lang === "bn" ? "অনুরোধ পাঠানো যায়নি। আবার চেষ্টা করুন।" : "Could not submit. Please try again."));
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || json.ok === false) {
+        throw new Error(json.error || (lang === "bn" ? "অনুরোধ পাঠানো যায়নি। আবার চেষ্টা করুন।" : "Could not submit. Please try again."));
+      }
+
+      if (json.data?.whatsAppFollowUpUrl) {
+        setWhatsAppUrl(json.data.whatsAppFollowUpUrl);
       }
       setStatus("success");
     } catch (err) {
@@ -110,11 +118,34 @@ export function ReservationCtaSection({
             <h3 style={{ fontSize: "1.2rem", fontWeight: 700, margin: "0 0 6px", color: "#15803d" }}>
               {lang === "bn" ? "বুকিং রিকোয়েস্ট সফলভাবে পাঠানো হয়েছে!" : "Reservation Request Received!"}
             </h3>
-            <p style={{ fontSize: "0.92rem", color: "#166534", margin: 0, lineHeight: 1.5 }}>
+            <p style={{ fontSize: "0.92rem", color: "#166534", margin: "0 0 16px", lineHeight: 1.5 }}>
               {lang === "bn"
                 ? `ধন্যবাদ ${name}! আমাদের টিম শীঘ্রই (${phone})-এ যোগাযোগ করে আপনার টেবিল নিশ্চিত করবে।`
                 : `Thank you ${name}! Our staff will contact you at ${phone} to confirm your reservation shortly.`}
             </p>
+            {whatsAppUrl && (
+              <a
+                href={whatsAppUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "10px 20px",
+                  backgroundColor: "#25D366",
+                  color: "#FFFFFF",
+                  borderRadius: "var(--radius, 8px)",
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  textDecoration: "none",
+                  boxShadow: "0 4px 12px rgba(37, 211, 102, 0.3)",
+                }}
+              >
+                <span>💬</span>
+                {lang === "bn" ? "হোয়াটসঅ্যাপে দ্রুত কনফার্মেশন নিন" : "Continue on WhatsApp for Quick Confirmation"}
+              </a>
+            )}
           </div>
         ) : (
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>

@@ -424,6 +424,9 @@ export * from "./affiliate/service";
 // Limited Drops & Pre-Orders Suite
 export * from "./drops";
 
-// BizTrack Business — Site Mode & Capabilities
+// BizTrack Business — Site Mode, Capabilities, Leads, Bookings & Templates
 export * from "./site/mode";
 export * from "./site/capabilities";
+export * from "./site/leads";
+export * from "./site/bookings";
+export * from "./site/templates/manifests";

@@ -42,4 +42,15 @@ export type {
   WholesaleCustomer,
   WholesalePrice,
   SupportQuickReply,
+  // BizTrack Business
+  SiteLeadType,
+  SiteLeadStatus,
+  BookingRequestStatus,
+  SiteContentKind,
+  SiteLead,
+  BookingRequest,
+  MenuCategory,
+  MenuItem,
+  SiteContentItem,
+  SiteDownload,
 } from "@prisma/client";

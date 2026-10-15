@@ -789,6 +789,36 @@ export const SECTIONS: SectionDef[] = [
       buttonTextBn: "ডাউনলোড PDF",
     },
   },
+  {
+    type: "contact-form",
+    label: "Contact & inquiry form",
+    description: "Lead capture form for customer messages, quote inquiries, and project requests.",
+    page: "custom",
+    pages: ["home", "custom"],
+    max: 2,
+    category: "contact",
+    capabilities: ["leads"],
+    fields: [
+      t("heading", "Heading", 80),
+      tb("heading", "Heading", 80),
+      area("subhead", "Subhead / Description", 200),
+      areab("subhead", "Subhead / Description", 200),
+      t("buttonText", "Button text", 40),
+      tb("buttonText", "Button text", 40),
+      t("directPhone", "Direct hotline phone (optional)", 30),
+      t("directEmail", "Direct email (optional)", 80),
+    ],
+    defaults: {
+      heading: "Get in Touch",
+      headingBn: "যোগাযোগ করুন",
+      subhead: "Send us a message and our team will get back to you promptly.",
+      subheadBn: "আমাদের বার্তা পাঠান, আমরা দ্রুত আপনার সাথে যোগাযোগ করব।",
+      buttonText: "Send Message",
+      buttonTextBn: "বার্তা পাঠান",
+      directPhone: "",
+      directEmail: "",
+    },
+  },
 ];
 
 export interface StoreSectionCategory {
