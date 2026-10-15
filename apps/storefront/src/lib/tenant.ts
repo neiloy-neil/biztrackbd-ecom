@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { DEMO_SUBDOMAINS, HEADERS } from "@biztrackbd/core";
+import { DEMO_SUBDOMAINS, HEADERS, getTenantCapabilities } from "@biztrackbd/core";
 
 export interface StoreContext {
   id: string;
@@ -38,4 +38,14 @@ export async function getStore(): Promise<StoreContext> {
   const store = await findStore();
   if (!store) notFound();
   return store;
+}
+
+export const getStoreCapabilities = cache(async (tenantId: string) => {
+  return getTenantCapabilities(tenantId);
+});
+
+export async function requireCommerce(tenantId: string) {
+  const caps = await getStoreCapabilities(tenantId);
+  if (!caps.commerce) notFound();
+  return caps;
 }

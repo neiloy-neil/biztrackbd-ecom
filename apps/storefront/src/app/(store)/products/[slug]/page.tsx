@@ -5,7 +5,7 @@ import { Sections } from "@/components/sections";
 import { getLang, makeT, money, productTitle } from "@/lib/i18n";
 import { absolute, getOrigin } from "@/lib/origin";
 import { getPageLayout, loadProductCtx } from "@/lib/page-layout";
-import { getStore } from "@/lib/tenant";
+import { getStore, requireCommerce } from "@/lib/tenant";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +14,8 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const store = await getStore();
+  const caps = await requireCommerce(store.id).catch(() => null);
+  if (!caps) return { title: "Not found", robots: { index: false } };
   const [p, info, origin] = await Promise.all([getProductBySlug(store.id, slug), getStoreInfo(store.id), getOrigin()]);
   if (!p) return { title: "Not found" };
   const lang = await getLang(store.locale);
@@ -33,6 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
   const store = await getStore();
+  await requireCommerce(store.id);
   const [product, info, origin, lang, layout, tracking] = await Promise.all([
     loadProductCtx(store.id, slug),
     getStoreInfo(store.id),

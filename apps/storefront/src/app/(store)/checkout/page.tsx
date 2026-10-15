@@ -6,7 +6,7 @@ import { PausedCard } from "@/components/paused-notice";
 import { getLang, makeT, pickStrings } from "@/lib/i18n";
 import { getCustomerSession } from "@/lib/session";
 import { CHECKOUT_STRINGS, LOYALTY_STRINGS } from "@/lib/strings";
-import { getStore } from "@/lib/tenant";
+import { getStore, requireCommerce } from "@/lib/tenant";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Checkout", robots: { index: false, follow: false } };
@@ -27,6 +27,7 @@ const ERRORS = {
 export default async function Checkout({ searchParams }: { searchParams: Promise<{ recover?: string }> }) {
   const { recover } = await searchParams;
   const store = await getStore();
+  await requireCommerce(store.id);
   const lang = await getLang(store.locale);
   const info = await getStoreInfo(store.id);
   // The owner paused orders: show the "short break" notice instead of a form that could not be sent.

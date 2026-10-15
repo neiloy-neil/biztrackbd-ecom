@@ -8,12 +8,12 @@ import { PlatformCredit } from "./platform-credit";
 type Pages = { title: string; slug: string }[];
 
 /** The default three columns: the store's name and story, the shop, and help. Kept exactly as it has always been. */
-function DefaultColumns({ info, categories, t, pages, hasBlog }: { info: StoreInfo; categories: CategoryCard[]; t: T; pages: Pages; hasBlog: boolean }) {
+function DefaultColumns({ info, categories, t, pages, hasBlog, commerce = true }: { info: StoreInfo; categories: CategoryCard[]; t: T; pages: Pages; hasBlog: boolean; commerce?: boolean }) {
   return (
     <div className="cols">
       <About info={info} />
-      <Shop title={t("shop")} categories={categories} t={t} />
-      <Help title={t("help")} info={info} t={t} pages={pages} hasBlog={hasBlog} />
+      {commerce && <Shop title={t("shop")} categories={categories} t={t} />}
+      <Help title={t("help")} info={info} t={t} pages={pages} hasBlog={hasBlog} commerce={commerce} />
     </div>
   );
 }
@@ -31,16 +31,16 @@ const Shop = ({ title, categories, t }: { title: string; categories: CategoryCar
     <Link href="/search">{t("all")}</Link>
   </div>
 );
-const Help = ({ title, info, t, pages, hasBlog }: { title: string; info: StoreInfo; t: T; pages: Pages; hasBlog: boolean }) => (
+const Help = ({ title, info, t, pages, hasBlog, commerce = true }: { title: string; info: StoreInfo; t: T; pages: Pages; hasBlog: boolean; commerce?: boolean }) => (
   <div>
     <b>{title}</b>
     {info.contactPhone && <a href={`tel:${info.contactPhone}`}>{t("contact")} {info.contactPhone}</a>}
     {info.whatsappNumber && <a href={`https://wa.me/88${info.whatsappNumber}`} rel="noopener noreferrer">WhatsApp</a>}
     {info.facebookUrl && <a href={info.facebookUrl} rel="noopener noreferrer">Facebook</a>}
-    <Link href="/account">{t("account")}</Link>
+    {commerce && <Link href="/account">{t("account")}</Link>}
     <Link href="/contact">{t("contact")}</Link>
     {hasBlog && <Link href="/blog">{t("blog")}</Link>}
-    {pages.map((p) => <Link key={p.slug} href={`/p/${p.slug}`}>{p.title}</Link>)}
+    {pages.map((p) => <Link key={p.slug} href={`/${p.slug}`}>{p.title}</Link>)}
   </div>
 );
 
@@ -99,7 +99,7 @@ function Column({ c, info, categories, lang, t, pages, hasBlog }: { c: FooterCol
   }
 }
 
-export function Footer({ info, categories, lang, t, pages = [], hasBlog = false, chrome }: { info: StoreInfo; categories: CategoryCard[]; lang: Lang; t: T; pages?: Pages; hasBlog?: boolean; chrome?: Chrome | null }) {
+export function Footer({ info, categories, lang, t, pages = [], hasBlog = false, chrome, commerce = true }: { info: StoreInfo; categories: CategoryCard[]; lang: Lang; t: T; pages?: Pages; hasBlog?: boolean; chrome?: Chrome | null; commerce?: boolean }) {
   const other: Lang = lang === "bn" ? "en" : "bn";
   const cols = chrome?.footer.columns;
   // The first column is wider when it is the store's own name and story, as in the default footer.
@@ -112,7 +112,7 @@ export function Footer({ info, categories, lang, t, pages = [], hasBlog = false,
           <div className="cols" style={{ ["--cols" as string]: template }}>
             {cols.map((c) => <Column key={c.id} c={c} info={info} categories={categories} lang={lang} t={t} pages={pages} hasBlog={hasBlog} />)}
           </div>
-        ) : <DefaultColumns info={info} categories={categories} t={t} pages={pages} hasBlog={hasBlog} />}
+        ) : <DefaultColumns info={info} categories={categories} t={t} pages={pages} hasBlog={hasBlog} commerce={commerce} />}
         <div className="legal">
           <span>{copyright || `© ${new Date().getFullYear()} ${info.storeName}`}</span>
           <form action={setLanguage.bind(null, other)}><button className="lang-btn" type="submit" lang={other} style={{ color: "inherit", minHeight: 32 }}>{t("switchLang")}</button></form>

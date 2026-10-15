@@ -9,7 +9,7 @@ import { signOut } from "@/app/actions";
 import { getLang, makeT, money, num, pickStrings, toBnDigits, type Key } from "@/lib/i18n";
 import { LOGIN_STRINGS } from "@/lib/strings";
 import { getCustomerSession } from "@/lib/session";
-import { getStore } from "@/lib/tenant";
+import { getStore, requireCommerce } from "@/lib/tenant";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Account", robots: { index: false, follow: false } };
@@ -19,6 +19,7 @@ const tone = (status: string) => (status === "DELIVERED" ? "ok" : status === "CA
 
 export default async function Account() {
   const store = await getStore();
+  await requireCommerce(store.id);
   const lang = await getLang(store.locale);
   const t = makeT(lang);
   const session = await getCustomerSession(store.id);

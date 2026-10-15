@@ -12,7 +12,11 @@ import { customKey } from "./versions";
  */
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const RESERVED = new Set(["new", "edit", "api", "admin"]);
+const RESERVED = new Set([
+  "new", "edit", "api", "admin", "cart", "checkout", "products", "c", "p", "blog", "l",
+  "order", "account", "login", "search", "draft", "wholesale", "media", "go", "ref", "partner",
+  "icon.svg", "robots.txt", "sitemap.xml", "manifest.json"
+]);
 const slugify = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60);
 
 /** How many pages built from sections a plan allows. A plan's own `limits.customPages` wins (null = no limit); otherwise 3, 10 and 50. */

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { ROLE_LABELS, can, getActiveAnnouncementsForTenant, getStoreSettings, getTenantActiveModules, shellCounts, type Area } from "@biztrackbd/core";
+import { ROLE_LABELS, can, getActiveAnnouncementsForTenant, getStoreSettings, getTenantActiveModules, getTenantCapabilities, shellCounts, type Area, type TenantCapabilities } from "@biztrackbd/core";
 import { withTenant } from "@biztrackbd/db";
 import { ChartIcon, CustomersIcon, GearIcon, HomeIcon, MoreIcon, OrdersIcon, ProductsIcon, PuzzleIcon, StoreIcon, TagIcon } from "@/components/icons";
 import { NavLink } from "@/components/nav";
@@ -22,13 +22,14 @@ import { switchDevUser } from "./dev-actions";
 // Every admin page depends on who is signed in, so nothing here may be prerendered at build time.
 export const dynamic = "force-dynamic";
 
-interface Item { href: string; label: string; area: Area; exact?: boolean; badge?: "check"; moduleKey?: string }
-interface Group { id: string; label: string; icon: React.ReactNode; items: Item[]; activePrefixes?: string[] }
+interface Item { href: string; label: string; area: Area; exact?: boolean; badge?: "check"; moduleKey?: string; capability?: keyof TenantCapabilities }
+interface Group { id: string; label: string; icon: React.ReactNode; items: Item[]; activePrefixes?: string[]; capability?: keyof TenantCapabilities }
 // Nine groups, as in the design canvas' sidebar. Every existing page is still one click away inside its group.
 const GROUPS: Group[] = [
   { id: "home", label: "Home", icon: <HomeIcon />, items: [{ href: "/", label: "Home", area: "orders", exact: true }] },
   {
     id: "orders", label: "Orders", icon: <OrdersIcon />,
+    capability: "commerce",
     items: [
       { href: "/orders", label: "Orders", area: "orders", badge: "check" },
       { href: "/pos", label: "POS Terminal", area: "orders", moduleKey: "pos_barcode" },
@@ -43,6 +44,7 @@ const GROUPS: Group[] = [
     id: "products",
     label: "Products",
     icon: <ProductsIcon />,
+    capability: "commerce",
     items: [
       { href: "/products", label: "Products", area: "products" },
       { href: "/inventory", label: "Inventory", area: "products" },
@@ -52,24 +54,24 @@ const GROUPS: Group[] = [
     ],
     activePrefixes: ["/products", "/inventory"],
   },
-  { id: "customers", label: "Customers", icon: <CustomersIcon />, items: [{ href: "/customers", label: "Customers", area: "customers" }, { href: "/inbox", label: "Inbox", area: "customers" }, { href: "/reviews", label: "Reviews", area: "marketing", moduleKey: "product_reviews" }, { href: "/marketing/loyalty", label: "Loyalty and referrals", area: "marketing", moduleKey: "loyalty" }] },
+  { id: "customers", label: "Customers", icon: <CustomersIcon />, items: [{ href: "/customers", label: "Customers", area: "customers", capability: "commerce" }, { href: "/inbox", label: "Inbox", area: "customers" }, { href: "/reviews", label: "Reviews", area: "marketing", moduleKey: "product_reviews", capability: "commerce" }, { href: "/marketing/loyalty", label: "Loyalty and referrals", area: "marketing", moduleKey: "loyalty", capability: "commerce" }] },
   {
     id: "marketing",
     label: "Marketing",
     icon: <TagIcon />,
     items: [
       { href: "/marketing", label: "Overview", area: "marketing", exact: true },
-      { href: "/marketing/drops", label: "Limited Drops & Pre-Orders", area: "marketing", moduleKey: "limited_drops" },
-      { href: "/marketing/bundles", label: "Bundles & Upsells", area: "marketing", moduleKey: "product_bundles" },
+      { href: "/marketing/drops", label: "Limited Drops & Pre-Orders", area: "marketing", moduleKey: "limited_drops", capability: "commerce" },
+      { href: "/marketing/bundles", label: "Bundles & Upsells", area: "marketing", moduleKey: "product_bundles", capability: "commerce" },
       { href: "/marketing/whatsapp", label: "WhatsApp Automation", area: "marketing", moduleKey: "whatsapp_commerce" },
-      { href: "/marketing/affiliates", label: "Affiliates & Influencers", area: "marketing" },
-      { href: "/marketing/coupons", label: "Discounts", area: "marketing" },
+      { href: "/marketing/affiliates", label: "Affiliates & Influencers", area: "marketing", capability: "commerce" },
+      { href: "/marketing/coupons", label: "Discounts", area: "marketing", capability: "commerce" },
       { href: "/marketing/campaigns", label: "Campaigns", area: "marketing", moduleKey: "marketing_campaigns" },
       { href: "/marketing/notifications", label: "Notifications", area: "marketing", moduleKey: "marketing_campaigns" },
       { href: "/marketing/banner", label: "Banner & Flash sale", area: "marketing", moduleKey: "marketing_campaigns" },
       { href: "/marketing/pixels", label: "Pixels & CAPI", area: "marketing" },
-      { href: "/marketing/loyalty", label: "Loyalty & Referrals", area: "marketing", moduleKey: "loyalty" },
-      { href: "/abandoned", label: "Abandoned checkouts", area: "customers" },
+      { href: "/marketing/loyalty", label: "Loyalty & Referrals", area: "marketing", moduleKey: "loyalty", capability: "commerce" },
+      { href: "/abandoned", label: "Abandoned checkouts", area: "customers", capability: "commerce" },
     ],
     activePrefixes: ["/marketing", "/abandoned"],
   },
@@ -80,11 +82,11 @@ const GROUPS: Group[] = [
     icon: <ChartIcon />,
     items: [
       { href: "/reports", label: "Overview & Sales", area: "reports", exact: true },
-      { href: "/reports/products", label: "Products & Stock", area: "reports" },
-      { href: "/reports/couriers", label: "Courier Performance", area: "reports" },
-      { href: "/reports/customers", label: "Customer Analytics", area: "reports" },
-      { href: "/finance/cod", label: "COD payouts", area: "reports" },
-      { href: "/finance/profit", label: "Profit and loss", area: "reports" },
+      { href: "/reports/products", label: "Products & Stock", area: "reports", capability: "commerce" },
+      { href: "/reports/couriers", label: "Courier Performance", area: "reports", capability: "commerce" },
+      { href: "/reports/customers", label: "Customer Analytics", area: "reports", capability: "commerce" },
+      { href: "/finance/cod", label: "COD payouts", area: "reports", capability: "commerce" },
+      { href: "/finance/profit", label: "Profit and loss", area: "reports", capability: "commerce" },
     ],
     activePrefixes: ["/reports", "/finance"],
   },
@@ -108,12 +110,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const s = await getSession();
   const role = s.user.role;
   const lang = asLang((await cookies()).get(LANG_COOKIE)?.value);
-  const [staff, settings, counts, announcements, activeModules] = await Promise.all([
+  const [staff, settings, counts, announcements, activeModules, capabilities] = await Promise.all([
     withTenant(s.tenantId, (tx) => tx.tenantUser.findMany({ where: { isActive: true }, orderBy: { createdAt: "asc" }, select: { email: true, name: true, role: true } })),
     can(role, "design") ? getStoreSettings(s.tenantId, s.actor) : Promise.resolve(null),
     shellCounts(s.tenantId, s.actor),
     getActiveAnnouncementsForTenant(s.tenantId),
     getTenantActiveModules(s.tenantId),
+    getTenantCapabilities(s.tenantId),
   ]);
   const storeName = settings?.storeName ?? s.tenantSubdomain;
   const check = counts.check;
@@ -127,23 +130,43 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   // What this person may open, translated, for the side menu and the search box.
   const groups: NavGroup[] = GROUPS.flatMap((g) => {
-    const items = g.items.filter((it) => can(role, it.area) && (!it.moduleKey || Boolean(activeModules[it.moduleKey]))).map((it) => ({ href: it.href, label: tr(lang, it.label), exact: it.exact, badge: it.badge }));
+    if (g.capability && !capabilities[g.capability]) return [];
+    const items = g.items
+      .filter((it) => can(role, it.area) && (!it.moduleKey || Boolean(activeModules[it.moduleKey])) && (!it.capability || Boolean(capabilities[it.capability])))
+      .map((it) => ({ href: it.href, label: tr(lang, it.label), exact: it.exact, badge: it.badge }));
     return items.length ? [{ id: g.id, label: tr(lang, g.label), icon: g.icon, items, activePrefixes: g.activePrefixes }] : [];
   });
   const pages: Page[] = groups.flatMap((g) => g.items.map((i) => ({ href: i.href, label: i.label, group: g.label })));
 
   const bottom: { href: string; label: string; area: Area; exact?: boolean; icon: React.ReactNode; badge?: number }[] = [
     { href: "/", label: tr(lang, "Home"), area: "orders", exact: true, icon: <HomeIcon /> },
-    { href: "/orders", label: tr(lang, "Orders"), area: "orders", icon: <OrdersIcon />, badge: check },
-    { href: "/products", label: tr(lang, "Products"), area: "products", icon: <ProductsIcon /> },
-    { href: "/customers", label: tr(lang, "Customers"), area: "customers", icon: <CustomersIcon /> },
+    ...(capabilities.commerce
+      ? [
+          { href: "/orders", label: tr(lang, "Orders"), area: "orders" as Area, icon: <OrdersIcon />, badge: check },
+          { href: "/products", label: tr(lang, "Products"), area: "products" as Area, icon: <ProductsIcon /> },
+          { href: "/customers", label: tr(lang, "Customers"), area: "customers" as Area, icon: <CustomersIcon /> },
+        ]
+      : [
+          { href: "/inbox", label: tr(lang, "Inbox"), area: "customers" as Area, icon: <CustomersIcon /> },
+          { href: "/pages", label: tr(lang, "Pages"), area: "design" as Area, icon: <StoreIcon /> },
+          { href: "/design", label: tr(lang, "Design"), area: "design" as Area, icon: <GearIcon /> },
+        ]),
     { href: "/more", label: tr(lang, "More"), area: "orders", icon: <MoreIcon /> },
   ];
   const storeHref = storefrontOrigin(s.tenantSubdomain);
   const trialPct = a.state === "TRIAL" && a.daysLeft !== null ? Math.max(4, Math.min(100, Math.round(((14 - a.daysLeft) / 14) * 100))) : null;
 
+  const strings = {
+    ...STRINGS[lang],
+    searchPlaceholder: capabilities.commerce
+      ? STRINGS[lang].searchPlaceholder
+      : lang === "bn"
+      ? "পেজ, লিড, ব্লগ খুঁজুন"
+      : "Search pages, leads, blog",
+  };
+
   return (
-    <ShellProvider initial={counts} pages={pages} strings={STRINGS[lang]}>
+    <ShellProvider initial={counts} pages={pages} strings={strings}>
       {s.demo && <DemoBanner expiresAt={s.demo.expiresAt} keepHref={trialHref(s.demo.keep)} now={Date.now()} />}
       {s.impersonation && (
         <ImpersonationBanner

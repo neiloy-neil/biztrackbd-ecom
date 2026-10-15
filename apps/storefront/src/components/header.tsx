@@ -47,15 +47,17 @@ export function Announcement({ info, lang, chrome }: { info: StoreInfo; lang: La
   );
 }
 
-export function Header({ info, categories, lang, t, points, chrome }: { info: StoreInfo; categories: CategoryCard[]; lang: Lang; t: T; points?: { available: number; worthBdt: number } | null; chrome?: Chrome | null }) {
+export function Header({ info, categories, lang, t, points, chrome, commerce = true }: { info: StoreInfo; categories: CategoryCard[]; lang: Lang; t: T; points?: { available: number; worthBdt: number } | null; chrome?: Chrome | null; commerce?: boolean }) {
   const custom = chrome && !chrome.menu.auto;
   const nav = custom
     ? chrome.menu.items.map((l) => ({ href: linkHref(l), label: linkLabel(l, lang, t, categories) }))
-    : [{ href: "/search?sort=newest", label: t("newArrivals") }, ...categories.slice(0, 4).map((c) => ({ href: `/c/${c.slug}`, label: c.name })), { href: "/search?sale=1", label: t("sale") }];
+    : commerce
+    ? [{ href: "/search?sort=newest", label: t("newArrivals") }, ...categories.slice(0, 4).map((c) => ({ href: `/c/${c.slug}`, label: c.name })), { href: "/search?sale=1", label: t("sale") }]
+    : [{ href: "/contact", label: t("contact") }];
   const other: Lang = lang === "bn" ? "en" : "bn";
   const h = chrome?.header;
-  const search = h?.search ?? "bar";
-  const showAccount = h?.showAccount ?? true;
+  const search = commerce ? (h?.search ?? "bar") : "none";
+  const showAccount = commerce && (h?.showAccount ?? true);
   const showLanguage = h?.showLanguage ?? true;
   const tools = (
     <>
@@ -68,10 +70,10 @@ export function Header({ info, categories, lang, t, points, chrome }: { info: St
         )}
         {search === "icon" && <Link href="/search" className="icon-btn" aria-label={t("search")}><SearchIcon /></Link>}
         {showLanguage && <form action={setLanguage.bind(null, other)}><button className="lang-btn" type="submit" lang={other}>{t("switchLang")}</button></form>}
-          {points && <Link href="/account" className="pts-pill" data-testid="points-pill" aria-label={`${t("pointsCount", { n: points.available })}, ${t("pointsWorth", { v: points.worthBdt })}`}>{points.available} <span className="muted">({money(points.worthBdt, lang)})</span></Link>}
+        {commerce && points && <Link href="/account" className="pts-pill" data-testid="points-pill" aria-label={`${t("pointsCount", { n: points.available })}, ${t("pointsWorth", { v: points.worthBdt })}`}>{points.available} <span className="muted">({money(points.worthBdt, lang)})</span></Link>}
         {showAccount && <Link href="/account" className="icon-btn" aria-label={t("account")}><UserIcon /></Link>}
       </div>
-      <CartLink label={t("cart")} labelWithCount={t("cartItems", { n: "{n}" })} />
+      {commerce && <CartLink label={t("cart")} labelWithCount={t("cartItems", { n: "{n}" })} />}
     </>
   );
   return (

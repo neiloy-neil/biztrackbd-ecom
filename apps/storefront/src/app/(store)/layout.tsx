@@ -12,8 +12,7 @@ import { WhatsAppFloatingButton } from "@/components/whatsapp-floating-button";
 import { AiChatWidget } from "@/components/ai-chat-widget";
 import { getLang, makeT } from "@/lib/i18n";
 import { getOrigin } from "@/lib/origin";
-import { getCustomerSession } from "@/lib/session";
-import { findStore } from "@/lib/tenant";
+import { findStore, getStoreCapabilities } from "@/lib/tenant";
 
 export async function generateMetadata(): Promise<Metadata> {
   const store = await findStore();
@@ -77,17 +76,19 @@ export default async function StoreLayout({ children }: { children: React.ReactN
       </main>
     );
   }
-  const lang = await getLang(store.locale);
+  const [capabilities, lang] = await Promise.all([
+    getStoreCapabilities(store.id),
+    getLang(store.locale),
+  ]);
   const t = makeT(lang);
-  const session = await getCustomerSession(store.id);
   const [footerPages, blog] = await Promise.all([listFooterPages(store.id), listPublishedPosts(store.id, { pageSize: 1 })]);
   // The header and footer the merchant built and published (docs/47 part C). None: today's header and footer.
   const chrome = await getLiveChrome(store.id).catch(() => null);
   const [info, categories, tracking, points, isAiActive] = await Promise.all([
     getStoreInfo(store.id),
-    listCategories(store.id),
+    capabilities.commerce ? listCategories(store.id) : Promise.resolve([]),
     getStorefrontTracking(store.id),
-    session ? getPointsSummary(store.id, session.customerId) : Promise.resolve(null),
+    capabilities.commerce ? getPointsSummary(store.id, store.id).catch(() => null) : Promise.resolve(null),
     isModuleActive(store.id, "ai_suite").catch(() => false),
   ]);
   return (
@@ -98,9 +99,9 @@ export default async function StoreLayout({ children }: { children: React.ReactN
       {info.ordersPaused && <PausedBanner t={t} />}
       <Announcement info={info} lang={lang} chrome={chrome} />
       <ReferralBanner tenantId={store.id} lang={lang} t={t} />
-      <Header info={info} categories={categories} lang={lang} t={t} points={points} chrome={chrome} />
+      <Header info={info} categories={categories} lang={lang} t={t} points={points} chrome={chrome} commerce={capabilities.commerce} />
       <main id="main">{children}</main>
-      <Footer info={info} categories={categories} lang={lang} t={t} pages={footerPages} hasBlog={blog.total > 0} chrome={chrome} />
+      <Footer info={info} categories={categories} lang={lang} t={t} pages={footerPages} hasBlog={blog.total > 0} chrome={chrome} commerce={capabilities.commerce} />
       <WhatsAppFloatingButton whatsappNumber={info.whatsappNumber} />
       {isAiActive && (
         <AiChatWidget

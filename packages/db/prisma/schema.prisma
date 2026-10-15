@@ -93,6 +93,10 @@ model Tenant {
   demoKeepToken    String? // secret code that lets a signup carry this SESSION copy into a real store; cleared once used
   quarantineReason String?
 
+  // BizTrack Business Site Mode & Vertical
+  siteMode         String    @default("ECOMMERCE")
+  businessVertical String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -171,6 +175,14 @@ model Tenant {
   limitedDrops          LimitedDrop[]
   dropProducts          DropProduct[]
   dropSubscribers       DropWaitlistSubscriber[]
+
+  // BizTrack Business Relations
+  siteLeads             SiteLead[]
+  bookingRequests       BookingRequest[]
+  menuCategories        MenuCategory[]
+  menuItems             MenuItem[]
+  siteContentItems      SiteContentItem[]
+  siteDownloads         SiteDownload[]
 
   @@index([subdomain])
   @@index([customDomain])
@@ -2657,4 +2669,182 @@ model DropWaitlistSubscriber {
   @@unique([dropId, phone])
   @@index([tenantId, dropId, notifiedAt])
 }
+
+// ==========================================
+// 18. BIZTRACK BUSINESS — PORTFOLIO & SERVICES
+// ==========================================
+
+enum SiteLeadType {
+  CONTACT
+  QUOTE
+  APPOINTMENT
+  RESERVATION
+  MEDIA_BOOKING
+}
+
+enum SiteLeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  WON
+  CLOSED
+  SPAM
+}
+
+model SiteLead {
+  id             String         @id @default(cuid())
+  tenantId       String
+  type           SiteLeadType   @default(CONTACT)
+  status         SiteLeadStatus @default(NEW)
+  name           String
+  phone          String?
+  email          String?
+  message        String?
+  metadata       Json?          // Structured request metadata
+  sourcePage     String?
+  utmSource      String?
+  utmMedium      String?
+  utmCampaign    String?
+  referrer       String?
+  locale         String         @default("en")
+  consentGivenAt DateTime?
+  privateNotes   String?
+
+  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  bookingRequest BookingRequest?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([tenantId, status])
+  @@index([tenantId, type])
+  @@index([tenantId, createdAt])
+}
+
+enum BookingRequestStatus {
+  REQUESTED
+  CONTACTED
+  CONFIRMED
+  DECLINED
+  CANCELLED
+  COMPLETED
+}
+
+model BookingRequest {
+  id            String               @id @default(cuid())
+  tenantId      String
+  leadId        String?              @unique
+  serviceName   String?
+  providerName  String?              // e.g. Doctor name or Staff specialist
+  requestedDate DateTime?
+  requestedTime String?              // e.g. "10:30 AM" or "Evening Chamber"
+  partySize     Int?                 // e.g. For restaurant reservation
+  status        BookingRequestStatus @default(REQUESTED)
+  privateNotes  String?
+
+  tenant        Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  lead          SiteLead?            @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  @@index([tenantId, status])
+  @@index([tenantId, requestedDate])
+}
+
+model MenuCategory {
+  id            String     @id @default(cuid())
+  tenantId      String
+  name          String
+  nameBn        String?
+  description   String?
+  descriptionBn String?
+  sortOrder     Int        @default(0)
+  isActive      Boolean    @default(true)
+
+  tenant        Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items         MenuItem[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@index([tenantId, sortOrder])
+  @@index([tenantId, isActive])
+}
+
+model MenuItem {
+  id            String       @id @default(cuid())
+  tenantId      String
+  categoryId    String
+  name          String
+  nameBn        String?
+  description   String?
+  descriptionBn String?
+  price         Decimal      @db.Decimal(12, 2)
+  compareAtPrice Decimal?    @db.Decimal(12, 2)
+  imageUrl      String?
+  dietaryLabels Json?        // e.g. ["halal", "spicy", "vegetarian", "chef_special"]
+  isAvailable   Boolean      @default(true)
+  sortOrder     Int          @default(0)
+
+  tenant        Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  category      MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([tenantId, categoryId, sortOrder])
+  @@index([tenantId, isAvailable])
+}
+
+enum SiteContentKind {
+  SERVICE
+  PORTFOLIO
+  TEAM
+  CREDENTIAL
+  PUBLICATION
+  EVENT
+}
+
+model SiteContentItem {
+  id          String          @id @default(cuid())
+  tenantId    String
+  kind        SiteContentKind
+  slug        String
+  title       String
+  titleBn     String?
+  summary     String?
+  summaryBn   String?
+  bodyHtml    String?
+  bodyHtmlBn  String?
+  mediaUrl    String?
+  data        Json?           // Typed schema data per kind
+  sortOrder   Int             @default(0)
+  isPublished Boolean         @default(true)
+
+  tenant      Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@unique([tenantId, kind, slug])
+  @@index([tenantId, kind, isPublished, sortOrder])
+}
+
+model SiteDownload {
+  id            String   @id @default(cuid())
+  tenantId      String
+  label         String
+  labelBn       String?
+  kind          String   @default("FILE") // "CV" | "BROCHURE" | "PROFILE" | "MENU_PDF"
+  fileUrl       String
+  fileName      String
+  fileSize      Int?     // bytes
+  mimeType      String?  // e.g. "application/pdf"
+  isPublic      Boolean  @default(true)
+  downloadCount Int      @default(0)
+  sortOrder     Int      @default(0)
+
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([tenantId, isPublic, sortOrder])
+}
+
 
