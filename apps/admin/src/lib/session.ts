@@ -54,33 +54,42 @@ export async function getImpersonationSession(): Promise<AdminSession | null> {
   const verified = verifyImpersonationSessionCookie(raw);
   if (!verified) return null;
 
-  const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim();
-  return withTenant(verified.tenantId, async (tx) => {
-    const t = await tx.tenant.findUnique({ where: { id: verified.tenantId }, select: { id: true, subdomain: true } });
-    if (!t) return null;
-    const owner = await tx.tenantUser.findFirst({ where: { role: "STORE_OWNER", isActive: true } });
-    if (!owner) return null;
+  try {
+    const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim();
+    const data = await withTenant(verified.tenantId, async (tx) => {
+      const t = await tx.tenant.findUnique({ where: { id: verified.tenantId }, select: { id: true, subdomain: true } });
+      if (!t) return null;
+      const owner = await tx.tenantUser.findFirst({ where: { role: "STORE_OWNER", isActive: true } });
+      if (!owner) return null;
+      return { t, owner };
+    });
+    if (!data) return null;
+
+    const access = await getStoreAccess(data.t.id);
     return {
-      tenantId: t.id,
-      tenantSubdomain: t.subdomain,
-      user: { id: owner.id, name: owner.name, email: owner.email, role: owner.role },
+      tenantId: data.t.id,
+      tenantSubdomain: data.t.subdomain,
+      user: { id: data.owner.id, name: data.owner.name, email: data.owner.email, role: data.owner.role },
       actor: {
-        userId: owner.id,
-        email: owner.email,
-        name: owner.name,
-        role: owner.role,
+        userId: data.owner.id,
+        email: data.owner.email,
+        name: data.owner.name,
+        role: data.owner.role,
         ip,
         isImpersonator: true,
         impersonatedBy: verified.actorEmail,
       },
-      access: await getStoreAccess(t.id),
+      access,
       impersonation: {
         actorId: verified.actorId,
         actorEmail: verified.actorEmail,
         expiresAt: verified.expiresAt,
       },
     };
-  });
+  } catch (err) {
+    console.error("getImpersonationSession error", err);
+    return null;
+  }
 }
 
 export async function getOnboardingSession(): Promise<AdminSession | null> {
@@ -90,26 +99,35 @@ export async function getOnboardingSession(): Promise<AdminSession | null> {
   const verified = verifyAutoLoginSessionCookie(raw);
   if (!verified) return null;
 
-  const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim();
-  return withTenant(verified.tenantId, async (tx) => {
-    const t = await tx.tenant.findUnique({ where: { id: verified.tenantId }, select: { id: true, subdomain: true } });
-    if (!t) return null;
-    const user = await tx.tenantUser.findFirst({ where: { id: verified.userId, isActive: true } });
-    if (!user) return null;
+  try {
+    const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim();
+    const data = await withTenant(verified.tenantId, async (tx) => {
+      const t = await tx.tenant.findUnique({ where: { id: verified.tenantId }, select: { id: true, subdomain: true } });
+      if (!t) return null;
+      const user = await tx.tenantUser.findFirst({ where: { id: verified.userId, isActive: true } });
+      if (!user) return null;
+      return { t, user };
+    });
+    if (!data) return null;
+
+    const access = await getStoreAccess(data.t.id);
     return {
-      tenantId: t.id,
-      tenantSubdomain: t.subdomain,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      tenantId: data.t.id,
+      tenantSubdomain: data.t.subdomain,
+      user: { id: data.user.id, name: data.user.name, email: data.user.email, role: data.user.role },
       actor: {
-        userId: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
+        userId: data.user.id,
+        email: data.user.email,
+        name: data.user.name,
+        role: data.user.role,
         ip,
       },
-      access: await getStoreAccess(t.id),
+      access,
     };
-  });
+  } catch (err) {
+    console.error("getOnboardingSession error", err);
+    return null;
+  }
 }
 
 /** Where someone who is not fully signed in should go. */

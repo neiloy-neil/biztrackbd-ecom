@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { decodeClaims, type TokenSet } from "@biztrackbd/core";
+import { decodeClaims, type TokenSet, AUTO_LOGIN_COOKIE } from "@biztrackbd/core";
 
 /**
  * Cookie plumbing for real sign-in. The tokens live in httpOnly cookies, so no script on any page can read them.
@@ -32,7 +32,7 @@ export async function setSessionCookies(t: Pick<TokenSet, "accessToken" | "refre
 
 export async function clearSessionCookies(): Promise<void> {
   const jar = await cookies();
-  for (const n of [AT, RT, TENANT]) jar.delete(n);
+  for (const n of [AT, RT, TENANT, DEMO, DEMO_PREV, AUTO_LOGIN_COOKIE, "impersonator_session"]) jar.delete(n);
 }
 
 /** Only a path on this site. A sign-in link must never be able to send someone to another address afterwards. */

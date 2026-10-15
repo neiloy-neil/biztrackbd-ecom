@@ -1,5 +1,5 @@
 import { assertNotInDemo } from "../demo/guard";
-import { Prisma, getBasePrisma, withTenant } from "@biztrackbd/db";
+import { Prisma, getBasePrisma, withTenant, type TenantTx } from "@biztrackbd/db";
 import { z } from "zod";
 import { audit } from "../audit/service";
 import { NotFoundError, ValidationError } from "../errors";
@@ -91,7 +91,12 @@ const toProof = (p: { id: string; planTier: string; billingPeriod: string; amoun
 });
 
 /** The state a store is in right now. Used by the admin on every request, so it is one small read. */
-export async function getStoreAccess(tenantId: string, now: Date = new Date()): Promise<Access> {
+export async function getStoreAccess(tenantId: string, now: Date = new Date(), clientTx?: TenantTx): Promise<Access> {
+  if (clientTx) {
+    const t = await clientTx.tenant.findFirstOrThrow({ select: { status: true, trialEndsAt: true, suspendedReason: true } });
+    const sub = await clientTx.subscription.findFirst({ select: { amount: true, currentPeriodEnd: true } });
+    return accessState({ status: t.status, trialEndsAt: t.trialEndsAt, suspendedReason: t.suspendedReason, subscription: sub ? { amount: Number(sub.amount), currentPeriodEnd: sub.currentPeriodEnd } : null }, now);
+  }
   return withTenant(tenantId, async (tx) => {
     const t = await tx.tenant.findFirstOrThrow({ select: { status: true, trialEndsAt: true, suspendedReason: true } });
     const sub = await tx.subscription.findFirst({ select: { amount: true, currentPeriodEnd: true } });
