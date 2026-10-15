@@ -837,6 +837,10 @@ export function PlatformSettingsClient({
           </form>
         </div>
       )}
+
+      {activeTab === "fraud" && (
+        <FraudCheckerSettings initial={initialFraudConfig} />
+      )}
     </div>
   );
 }

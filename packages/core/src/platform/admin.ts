@@ -27,14 +27,14 @@ export interface Deps {
 const dbOf = (d?: Deps) => d?.db ?? getPlatformPrisma();
 const nowOf = (d?: Deps) => d?.now ?? new Date();
 
-export type PlatformArea = "tenants" | "payments" | "plans" | "audit" | "suspend" | "adjust" | "tickets" | "announcements";
+export type PlatformArea = "tenants" | "payments" | "plans" | "audit" | "suspend" | "adjust" | "tickets" | "announcements" | "settings";
 type Level = "none" | "view" | "edit";
 const N = "none", V = "view", E = "edit";
 export const PLATFORM_PERMISSIONS: Record<PlatformRole, Record<PlatformArea, Level>> = {
-  OWNER:        { tenants: E, payments: E, plans: E, audit: V, suspend: E, adjust: E, tickets: E, announcements: E },
-  FINANCE:      { tenants: V, payments: E, plans: V, audit: V, suspend: N, adjust: E, tickets: V, announcements: V },
-  SUPPORT_LEAD: { tenants: V, payments: V, plans: V, audit: N, suspend: E, adjust: E, tickets: E, announcements: E },
-  SUPPORT:      { tenants: V, payments: N, plans: N, audit: N, suspend: N, adjust: N, tickets: E, announcements: V },
+  OWNER:        { tenants: E, payments: E, plans: E, audit: E, suspend: E, adjust: E, tickets: E, announcements: E, settings: E },
+  FINANCE:      { tenants: V, payments: E, plans: V, audit: V, suspend: N, adjust: E, tickets: V, announcements: V, settings: N },
+  SUPPORT_LEAD: { tenants: V, payments: V, plans: V, audit: N, suspend: E, adjust: E, tickets: E, announcements: E, settings: E },
+  SUPPORT:      { tenants: V, payments: N, plans: N, audit: N, suspend: N, adjust: N, tickets: E, announcements: V, settings: N },
 };
 const RANK = { none: 0, view: 1, edit: 2 } as const;
 export const canPlatform = (role: PlatformRole, area: PlatformArea, level: "view" | "edit" = "view") => RANK[PLATFORM_PERMISSIONS[role]?.[area] ?? "none"] >= RANK[level];

@@ -19,12 +19,13 @@ import {
   savePlatformFraudConfig,
   testPlatformFraudChecker,
   DomainError,
+  ForbiddenError,
 } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 
 // 1. AI Actions
 export async function getPlatformAiConfigAction() {
-  await requireAction("audit");
+  await requireAction("settings", "view");
   return getPlatformAiConfig();
 }
 
@@ -32,21 +33,27 @@ export async function savePlatformAiConfigAction(input: {
   apiKey?: string;
   defaultModel?: string;
 }) {
-  const s = await requireAction("audit");
   try {
+    const s = await requireAction("settings", "edit");
     await savePlatformAiConfig(s.actor, input);
     revalidatePath("/settings");
     return { ok: true as const };
   } catch (err) {
+    if (err instanceof ForbiddenError) return { ok: false as const, error: "Access denied: Platform Owner or Support Lead role required." };
     if (err instanceof DomainError) return { ok: false as const, error: err.message };
     console.error("savePlatformAiConfigAction error", err);
-    return { ok: false as const, error: "Failed to save platform AI configuration." };
+    return { ok: false as const, error: err instanceof Error ? err.message : "Failed to save platform AI configuration." };
   }
 }
 
 export async function testPlatformAiConnectionAction(apiKey?: string, model?: string) {
-  await requireAction("audit");
-  return testPlatformGeminiApiKey(apiKey, model);
+  try {
+    await requireAction("settings", "view");
+    return await testPlatformGeminiApiKey(apiKey, model);
+  } catch (err) {
+    if (err instanceof ForbiddenError) return { ok: false, latencyMs: 0, model: model ?? "gemini-2.5-flash", error: "Access denied to test platform AI." };
+    return { ok: false, latencyMs: 0, model: model ?? "gemini-2.5-flash", error: err instanceof Error ? err.message : "Test connection failed." };
+  }
 }
 
 // 2. SMS Actions
@@ -55,20 +62,27 @@ export async function savePlatformSmsConfigAction(input: {
   apiKey?: string;
   senderId?: string;
 }) {
-  const s = await requireAction("audit");
   try {
+    const s = await requireAction("settings", "edit");
     await savePlatformSmsConfig(s.actor, input);
     revalidatePath("/settings");
     return { ok: true as const };
   } catch (err) {
+    if (err instanceof ForbiddenError) return { ok: false as const, error: "Access denied: Platform Owner or Support Lead role required." };
     if (err instanceof DomainError) return { ok: false as const, error: err.message };
-    return { ok: false as const, error: "Failed to save SMS gateway settings." };
+    console.error("savePlatformSmsConfigAction error", err);
+    return { ok: false as const, error: err instanceof Error ? err.message : "Failed to save SMS gateway settings." };
   }
 }
 
 export async function testPlatformSmsAction(phoneNumber: string) {
-  await requireAction("audit");
-  return testPlatformSms(phoneNumber);
+  try {
+    await requireAction("settings", "view");
+    return await testPlatformSms(phoneNumber);
+  } catch (err) {
+    if (err instanceof ForbiddenError) return { ok: false, latencyMs: 0, message: "Access denied to test SMS gateway." };
+    return { ok: false, latencyMs: 0, message: err instanceof Error ? err.message : "SMS test failed." };
+  }
 }
 
 // 3. Courier Logistics Actions
@@ -82,20 +96,29 @@ export async function savePlatformCourierConfigAction(input: {
   carrybeeApiKey?: string;
   paperflyApiKey?: string;
 }) {
-  const s = await requireAction("audit");
   try {
+    const s = await requireAction("settings", "edit");
     await savePlatformCourierConfig(s.actor, input);
     revalidatePath("/settings");
     return { ok: true as const };
   } catch (err) {
+    if (err instanceof ForbiddenError) return { ok: false as const, error: "Access denied: Platform Owner or Support Lead role required." };
     if (err instanceof DomainError) return { ok: false as const, error: err.message };
-    return { ok: false as const, error: "Failed to save courier credentials." };
+    console.error("savePlatformCourierConfigAction error", err);
+    return { ok: false as const, error: err instanceof Error ? err.message : "Failed to save courier credentials." };
   }
 }
 
 export async function testPlatformCouriersAction() {
-  await requireAction("audit");
-  return testPlatformCouriers();
+  try {
+    await requireAction("settings", "view");
+    return await testPlatformCouriers();
+  } catch (err) {
+    if (err instanceof ForbiddenError) {
+      return { ok: false, overallLatencyMs: 0, providers: {} };
+    }
+    return { ok: false, overallLatencyMs: 0, providers: {} };
+  }
 }
 
 // 4. UddoktaPay Actions
@@ -104,20 +127,27 @@ export async function savePlatformUddoktaPayConfigAction(input: {
   apiKey?: string;
   webhookSecret?: string;
 }) {
-  const s = await requireAction("audit");
   try {
+    const s = await requireAction("settings", "edit");
     await savePlatformUddoktaPayConfig(s.actor, input);
     revalidatePath("/settings");
     return { ok: true as const };
   } catch (err) {
+    if (err instanceof ForbiddenError) return { ok: false as const, error: "Access denied: Platform Owner or Support Lead role required." };
     if (err instanceof DomainError) return { ok: false as const, error: err.message };
-    return { ok: false as const, error: "Failed to save UddoktaPay settings." };
+    console.error("savePlatformUddoktaPayConfigAction error", err);
+    return { ok: false as const, error: err instanceof Error ? err.message : "Failed to save UddoktaPay settings." };
   }
 }
 
 export async function testPlatformUddoktaPayAction() {
-  await requireAction("audit");
-  return testPlatformUddoktaPay();
+  try {
+    await requireAction("settings", "view");
+    return await testPlatformUddoktaPay();
+  } catch (err) {
+    if (err instanceof ForbiddenError) return { ok: false, latencyMs: 0, message: "Access denied to test UddoktaPay." };
+    return { ok: false, latencyMs: 0, message: err instanceof Error ? err.message : "Test failed." };
+  }
 }
 
 // 5. Mail Actions
@@ -130,25 +160,28 @@ export async function savePlatformMailConfigAction(input: {
   smtpUser?: string;
   smtpPass?: string;
 }) {
-  const s = await requireAction("audit");
   try {
+    const s = await requireAction("settings", "edit");
     await savePlatformMailConfig(s.actor, input);
     revalidatePath("/settings");
     return { ok: true as const };
   } catch (err) {
+    if (err instanceof ForbiddenError) return { ok: false as const, error: "Access denied: Platform Owner or Support Lead role required." };
     if (err instanceof DomainError) return { ok: false as const, error: err.message };
-    return { ok: false as const, error: "Failed to save platform mail configuration." };
+    console.error("savePlatformMailConfigAction error", err);
+    return { ok: false as const, error: err instanceof Error ? err.message : "Failed to save platform mail configuration." };
   }
 }
 
 // 6. Fraud checker
 export async function savePlatformFraudConfigAction(input: { apiKey?: string; endpoint?: string }) {
-  const s = await requireAction("audit");
   try {
+    const s = await requireAction("settings", "edit");
     await savePlatformFraudConfig(s.actor, input);
     revalidatePath("/settings");
     return { ok: true as const };
   } catch (err) {
+    if (err instanceof ForbiddenError) return { ok: false as const, error: "Access denied: Platform Owner or Support Lead role required." };
     if (err instanceof DomainError) return { ok: false as const, error: err.message };
     console.error("savePlatformFraudConfigAction error", err instanceof Error ? err.name : "unknown");
     return { ok: false as const, error: "Failed to save the fraud checker settings." };
@@ -156,6 +189,11 @@ export async function savePlatformFraudConfigAction(input: { apiKey?: string; en
 }
 
 export async function testPlatformFraudCheckerAction(apiKey?: string) {
-  await requireAction("audit");
-  return testPlatformFraudChecker(apiKey);
+  try {
+    await requireAction("settings", "view");
+    return await testPlatformFraudChecker(apiKey);
+  } catch (err) {
+    if (err instanceof ForbiddenError) return { ok: false, latencyMs: 0, message: "Access denied to test fraud checker." };
+    return { ok: false, latencyMs: 0, message: err instanceof Error ? err.message : "Fraud test failed." };
+  }
 }

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PlatformSettingsPage() {
-  await requireAccess("audit");
+  await requireAccess("settings");
 
   const [aiConfig, smsConfig, courierConfig, uddoktaConfig, mailConfig, fraudConfig] = await Promise.all([
     getPlatformAiConfig(),
