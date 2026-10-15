@@ -67,6 +67,26 @@ export interface PlatformFraudConfigView {
   updatedBy: string | null;
 }
 
+export interface PlatformGoogleConfigView {
+  // 1. Google OAuth 2.0 Credentials
+  hasOAuthSecret: boolean;
+  oauthClientId: string | null;
+  maskedOAuthSecret: string | null;
+  oauthEnabled: boolean;
+  // 2. Google Cloud Storage & Project
+  gcsBucketName: string | null;
+  gcsProjectId: string | null;
+  hasServiceAccountKey: boolean;
+  maskedServiceAccountKey: string | null;
+  gcsEnabled: boolean;
+  // 3. Google Merchant Center & Search Console Defaults
+  merchantCenterId: string | null;
+  siteVerificationCode: string | null;
+  source: "DATABASE" | "ENV" | "NONE";
+  updatedAt: Date | null;
+  updatedBy: string | null;
+}
+
 export interface PlatformHealthMatrixView {
   timestamp: string;
   overall: "OPERATIONAL" | "DEGRADED" | "DOWN";
@@ -929,5 +949,155 @@ export async function testPlatformFraudChecker(apiKey?: string, deps?: Deps): Pr
     return { ok: true, latencyMs, message: "The key works." };
   } catch {
     return { ok: false, latencyMs: Date.now() - started, message: "Could not reach the service." };
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
+// 7. GOOGLE CLOUD CONSOLE SUITE (OAuth 2.0, GCS Storage, Merchant Center & Search Console)
+// ------------------------------------------------------------------------------------------------
+
+export async function getPlatformGoogleConfig(deps?: Deps): Promise<PlatformGoogleConfigView> {
+  const db = dbOf(deps);
+  const rows = await db.platformConfig.findMany({
+    where: {
+      key: {
+        in: [
+          "google_oauth_client_id",
+          "google_oauth_client_secret",
+          "google_oauth_enabled",
+          "gcs_bucket_name",
+          "gcs_project_id",
+          "gcs_service_account_key",
+          "gcs_storage_enabled",
+          "google_merchant_id",
+          "google_site_verification",
+        ],
+      },
+    },
+  });
+
+  const map = new Map(rows.map((r) => [r.key, r]));
+  const getV = (k: string, envVal?: string) => map.get(k)?.value?.trim() || envVal?.trim() || null;
+
+  const oauthClientId = getV("google_oauth_client_id", process.env.GOOGLE_CLIENT_ID);
+  const oauthSecret = getV("google_oauth_client_secret", process.env.GOOGLE_CLIENT_SECRET);
+  const oauthEnabled = map.get("google_oauth_enabled")?.value === "true" || (!map.has("google_oauth_enabled") && Boolean(oauthClientId));
+
+  const gcsBucketName = getV("gcs_bucket_name", process.env.GCS_BUCKET_NAME);
+  const gcsProjectId = getV("gcs_project_id", process.env.GCP_PROJECT_ID);
+  const serviceAccountKey = getV("gcs_service_account_key", process.env.GCP_SERVICE_ACCOUNT_KEY);
+  const gcsEnabled = map.get("gcs_storage_enabled")?.value === "true" || (!map.has("gcs_storage_enabled") && Boolean(gcsBucketName));
+
+  const merchantCenterId = getV("google_merchant_id", process.env.GOOGLE_MERCHANT_ID);
+  const siteVerificationCode = getV("google_site_verification", process.env.GOOGLE_SITE_VERIFICATION);
+
+  const hasDbRows = rows.length > 0;
+  const anyRow = rows[0];
+
+  return {
+    hasOAuthSecret: Boolean(oauthSecret),
+    oauthClientId,
+    maskedOAuthSecret: mask(oauthSecret),
+    oauthEnabled,
+    gcsBucketName,
+    gcsProjectId,
+    hasServiceAccountKey: Boolean(serviceAccountKey),
+    maskedServiceAccountKey: mask(serviceAccountKey),
+    gcsEnabled,
+    merchantCenterId,
+    siteVerificationCode,
+    source: hasDbRows ? "DATABASE" : (oauthClientId || gcsBucketName) ? "ENV" : "NONE",
+    updatedAt: anyRow?.updatedAt ?? null,
+    updatedBy: anyRow?.updatedBy ?? null,
+  };
+}
+
+export async function savePlatformGoogleConfig(
+  actor: PlatformActor,
+  input: {
+    oauthClientId?: string;
+    oauthClientSecret?: string;
+    oauthEnabled?: boolean;
+    gcsBucketName?: string;
+    gcsProjectId?: string;
+    gcsServiceAccountKey?: string;
+    gcsEnabled?: boolean;
+    merchantCenterId?: string;
+    siteVerificationCode?: string;
+  },
+  deps?: Deps,
+): Promise<{ ok: true }> {
+  assertPlatformAdmin(actor);
+  const db = dbOf(deps);
+
+  const setOrDel = async (key: string, val: string | undefined, desc: string) => {
+    if (val === undefined) return;
+    const cleaned = val.trim();
+    if (cleaned) {
+      await db.platformConfig.upsert({
+        where: { key },
+        create: { key, value: cleaned, description: desc, updatedBy: actor.email },
+        update: { value: cleaned, updatedBy: actor.email },
+      });
+    } else {
+      await db.platformConfig.deleteMany({ where: { key } });
+    }
+  };
+
+  await setOrDel("google_oauth_client_id", input.oauthClientId, "Google OAuth 2.0 Client ID");
+  await setOrDel("google_oauth_client_secret", input.oauthClientSecret, "Google OAuth 2.0 Client Secret");
+  if (input.oauthEnabled !== undefined) {
+    await db.platformConfig.upsert({
+      where: { key: "google_oauth_enabled" },
+      create: { key: "google_oauth_enabled", value: String(input.oauthEnabled), description: "Google OAuth active flag", updatedBy: actor.email },
+      update: { value: String(input.oauthEnabled), updatedBy: actor.email },
+    });
+  }
+
+  await setOrDel("gcs_bucket_name", input.gcsBucketName, "Google Cloud Storage bucket name");
+  await setOrDel("gcs_project_id", input.gcsProjectId, "Google Cloud Project ID");
+  await setOrDel("gcs_service_account_key", input.gcsServiceAccountKey, "Google Cloud Service Account credentials JSON");
+  if (input.gcsEnabled !== undefined) {
+    await db.platformConfig.upsert({
+      where: { key: "gcs_storage_enabled" },
+      create: { key: "gcs_storage_enabled", value: String(input.gcsEnabled), description: "Google Cloud Storage active flag", updatedBy: actor.email },
+      update: { value: String(input.gcsEnabled), updatedBy: actor.email },
+    });
+  }
+
+  await setOrDel("google_merchant_id", input.merchantCenterId, "Google Merchant Center ID default");
+  await setOrDel("google_site_verification", input.siteVerificationCode, "Google Search Console default verification code");
+
+  await db.platformAuditLog.create({
+    data: {
+      actorId: actor.id,
+      action: "PLATFORM_GOOGLE_CONFIG_UPDATED",
+      details: {
+        oauthUpdated: input.oauthClientId !== undefined || input.oauthClientSecret !== undefined,
+        gcsUpdated: input.gcsBucketName !== undefined || input.gcsServiceAccountKey !== undefined,
+        merchantUpdated: input.merchantCenterId !== undefined,
+      },
+      ipAddress: actor.ip ?? null,
+    },
+  });
+
+  return { ok: true };
+}
+
+export async function testPlatformGoogleConnection(
+  deps?: Deps,
+): Promise<{ ok: boolean; latencyMs: number; message: string }> {
+  const started = Date.now();
+  try {
+    const res = await fetch("https://accounts.google.com/.well-known/openid-configuration", {
+      signal: AbortSignal.timeout(6000),
+    });
+    const latencyMs = Date.now() - started;
+    if (res.ok) {
+      return { ok: true, latencyMs, message: "Google Cloud OpenID Discovery endpoints reachable & healthy." };
+    }
+    return { ok: false, latencyMs, message: `Google responded with HTTP ${res.status}.` };
+  } catch (e) {
+    return { ok: false, latencyMs: Date.now() - started, message: "Could not reach Google Cloud endpoints." };
   }
 }

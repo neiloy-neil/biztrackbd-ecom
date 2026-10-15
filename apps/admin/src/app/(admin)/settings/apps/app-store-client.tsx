@@ -23,6 +23,10 @@ interface StoreSettingsData {
   googleTagManagerId?: string | null;
   tiktokPixelId?: string | null;
   metaDomainVerification?: string | null;
+  googleSiteVerification?: string | null;
+  googleOAuthClientId?: string | null;
+  googleOAuthClientSecret?: string | null;
+  googleMerchantCenterId?: string | null;
   loyaltyEnabled?: boolean;
   loyaltySpendPerPoint?: number;
   loyaltyPointsPerBlock?: number;
@@ -1063,7 +1067,7 @@ export function AppStoreClient({
                 );
               })()}
 
-              {/* 6. GOOGLE ANALYTICS & TAG MANAGER */}
+              {/* 6. GOOGLE CLOUD SUITE, ANALYTICS & TAG MANAGER */}
               {activeModal === "google_analytics" && (
                 <form
                   onSubmit={(e) => {
@@ -1073,6 +1077,10 @@ export function AppStoreClient({
                       const res = await saveTrackingPixelsAction({
                         googleAnalyticsId: String(fd.get("googleAnalyticsId") ?? ""),
                         googleTagManagerId: String(fd.get("googleTagManagerId") ?? ""),
+                        googleSiteVerification: String(fd.get("googleSiteVerification") ?? ""),
+                        googleMerchantCenterId: String(fd.get("googleMerchantCenterId") ?? ""),
+                        googleOAuthClientId: String(fd.get("googleOAuthClientId") ?? ""),
+                        googleOAuthClientSecret: String(fd.get("googleOAuthClientSecret") ?? ""),
                       });
                       setFormMsg(res);
                     });
@@ -1104,9 +1112,70 @@ export function AppStoreClient({
                     />
                   </div>
 
+                  <div>
+                    <label className="label">Google Search Console Verification (Token or Meta Tag)</label>
+                    <input
+                      type="text"
+                      name="googleSiteVerification"
+                      defaultValue={storeSettings?.googleSiteVerification ?? ""}
+                      placeholder='e.g. abc123xyz or <meta name="google-site-verification" content="..." />'
+                      className="input"
+                      style={{ width: "100%" }}
+                    />
+                    <span className="hint" style={{ fontSize: 12, color: "var(--ink-3, #6B6B8D)", marginTop: 4, display: "block" }}>
+                      Injected automatically into your store &lt;head&gt; for domain ownership verification.
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="label">Google Merchant Center Account ID</label>
+                    <input
+                      type="text"
+                      name="googleMerchantCenterId"
+                      defaultValue={storeSettings?.googleMerchantCenterId ?? ""}
+                      placeholder="e.g. 539120384"
+                      className="input"
+                      style={{ width: "100%" }}
+                    />
+                    <span className="hint" style={{ fontSize: 12, color: "var(--ink-3, #6B6B8D)", marginTop: 4, display: "block" }}>
+                      Feed URL: <code>{storefrontOrigin}/api/feed/google.xml</code>
+                    </span>
+                  </div>
+
+                  <div style={{ borderTop: "1px solid var(--line, #E7E7F0)", paddingTop: 12 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>Storefront Customer Google Sign-In (OAuth 2.0)</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                      <div>
+                        <label className="label" style={{ fontSize: 12 }}>Google OAuth Client ID</label>
+                        <input
+                          type="text"
+                          name="googleOAuthClientId"
+                          defaultValue={storeSettings?.googleOAuthClientId ?? ""}
+                          placeholder="e.g. 123456789-xxx.apps.googleusercontent.com"
+                          className="input"
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                      <div>
+                        <label className="label" style={{ fontSize: 12 }}>Google OAuth Client Secret</label>
+                        <input
+                          type="password"
+                          name="googleOAuthClientSecret"
+                          defaultValue={storeSettings?.googleOAuthClientSecret ? "••••••••••••••••" : ""}
+                          placeholder="GOCSPX-xxxxxxxxxxxxxxxx"
+                          className="input"
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                      <span className="hint" style={{ fontSize: 11.5, color: "var(--ink-3, #6B6B8D)" }}>
+                        Redirect URI: <code>{storefrontOrigin}/api/auth/callback/google</code>
+                      </span>
+                    </div>
+                  </div>
+
                   <div style={{ marginTop: 8 }}>
                     <button type="submit" className="btn btn-primary" disabled={isPending} style={{ width: "100%" }}>
-                      {isPending ? "Saving…" : "Save Google Tracking"}
+                      {isPending ? "Saving…" : "Save Google Cloud Suite"}
                     </button>
                   </div>
                 </form>

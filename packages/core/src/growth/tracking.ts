@@ -43,6 +43,10 @@ export interface TrackingConfig {
   tiktokPixelId: string | null;
   ga4ApiSecret: string | null;
   metaDomainVerification: string | null;
+  googleSiteVerification: string | null;
+  googleOAuthClientId: string | null;
+  googleOAuthClientSecret: string | null;
+  googleMerchantCenterId: string | null;
   capiConnected: boolean;
   capiMode: "TEST" | "LIVE" | null;
   capiStatus: string | null;
@@ -56,6 +60,7 @@ export interface StorefrontTracking {
   googleTagManagerId: string | null;
   tiktokPixelId: string | null;
   metaDomainVerification: string | null;
+  googleSiteVerification?: string | null;
 }
 
 /** What the storefront may know: public pixel and container IDs. Access tokens never leave the server. */
@@ -68,6 +73,7 @@ export async function getStorefrontTracking(tenantId: string): Promise<Storefron
         googleTagManagerId: true,
         tiktokPixelId: true,
         metaDomainVerification: true,
+        googleSiteVerification: true,
       },
     });
     return {
@@ -76,6 +82,7 @@ export async function getStorefrontTracking(tenantId: string): Promise<Storefron
       googleTagManagerId: s?.googleTagManagerId ?? null,
       tiktokPixelId: s?.tiktokPixelId ?? null,
       metaDomainVerification: s?.metaDomainVerification ?? null,
+      googleSiteVerification: s?.googleSiteVerification ?? null,
     };
   });
 }
@@ -95,7 +102,18 @@ export async function getTrackingConfig(tenantId: string, actor: StaffActor): Pr
   const [sf, row, s] = await Promise.all([
     getStorefrontTracking(tenantId),
     capiRow(tenantId),
-    withTenant(tenantId, (tx) => tx.storeSettings.findFirst({ select: { ga4ApiSecret: true, metaDomainVerification: true } })),
+    withTenant(tenantId, (tx) =>
+      tx.storeSettings.findFirst({
+        select: {
+          ga4ApiSecret: true,
+          metaDomainVerification: true,
+          googleSiteVerification: true,
+          googleOAuthClientId: true,
+          googleOAuthClientSecret: true,
+          googleMerchantCenterId: true,
+        },
+      }),
+    ),
   ]);
   return {
     pixelId: sf.pixelId,
@@ -104,6 +122,10 @@ export async function getTrackingConfig(tenantId: string, actor: StaffActor): Pr
     tiktokPixelId: sf.tiktokPixelId,
     ga4ApiSecret: s?.ga4ApiSecret ?? null,
     metaDomainVerification: s?.metaDomainVerification ?? null,
+    googleSiteVerification: s?.googleSiteVerification ?? null,
+    googleOAuthClientId: s?.googleOAuthClientId ?? null,
+    googleOAuthClientSecret: s?.googleOAuthClientSecret ?? null,
+    googleMerchantCenterId: s?.googleMerchantCenterId ?? null,
     capiConnected: Boolean(row),
     capiMode: (row?.mode as "TEST" | "LIVE" | undefined) ?? null,
     capiStatus: row?.status ?? null,
@@ -116,6 +138,13 @@ export async function savePixelId(tenantId: string, actor: StaffActor, input: st
   await saveTrackingConfig(tenantId, actor, { pixelId: input });
 }
 
+function cleanVerification(v?: string | null): string | null {
+  if (!v) return null;
+  const s = v.trim();
+  const match = s.match(/content=["']([^"']+)["']/i);
+  return (match?.[1] ? match[1] : s).trim() || null;
+}
+
 export async function saveTrackingConfig(
   tenantId: string,
   actor: StaffActor,
@@ -126,6 +155,10 @@ export async function saveTrackingConfig(
     tiktokPixelId?: string | null;
     ga4ApiSecret?: string | null;
     metaDomainVerification?: string | null;
+    googleSiteVerification?: string | null;
+    googleOAuthClientId?: string | null;
+    googleOAuthClientSecret?: string | null;
+    googleMerchantCenterId?: string | null;
   },
 ): Promise<void> {
   assertCan(actor, "marketing", "edit");
@@ -139,8 +172,11 @@ export async function saveTrackingConfig(
   if (tiktok && !/^[A-Za-z0-9_-]{10,40}$/.test(tiktok)) throw new ValidationError("Enter a valid TikTok Pixel ID (10 to 40 characters).");
   const ga4Secret = input.ga4ApiSecret?.trim() || null;
   if (ga4Secret && !/^[A-Za-z0-9_-]{10,64}$/.test(ga4Secret)) throw new ValidationError("Enter a valid GA4 Measurement Protocol API Secret.");
-  const domainVerif = input.metaDomainVerification?.trim() || null;
-  if (domainVerif && !/^[A-Za-z0-9_-]{16,80}$/.test(domainVerif)) throw new ValidationError("Enter a valid Meta Domain Verification code.");
+  const domainVerif = cleanVerification(input.metaDomainVerification);
+  const googleVerif = cleanVerification(input.googleSiteVerification);
+  const googleOAuthClientId = input.googleOAuthClientId?.trim() || null;
+  const googleOAuthClientSecret = input.googleOAuthClientSecret?.trim() || null;
+  const googleMerchantCenterId = input.googleMerchantCenterId?.trim() || null;
 
   await withTenant(tenantId, async (tx) => {
     const { count } = await tx.storeSettings.updateMany({
@@ -151,6 +187,10 @@ export async function saveTrackingConfig(
         tiktokPixelId: tiktok,
         ga4ApiSecret: ga4Secret,
         metaDomainVerification: domainVerif,
+        googleSiteVerification: googleVerif,
+        googleOAuthClientId,
+        googleOAuthClientSecret,
+        googleMerchantCenterId,
       },
     });
     if (count === 0) throw new NotFoundError("Store settings");
@@ -161,6 +201,9 @@ export async function saveTrackingConfig(
       tiktokPixelId: tiktok,
       ga4ApiSecret: ga4Secret ? "[secret]" : null,
       metaDomainVerification: domainVerif,
+      googleSiteVerification: googleVerif,
+      googleOAuthClientId,
+      googleMerchantCenterId,
     });
   });
 }

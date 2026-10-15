@@ -227,6 +227,90 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
           </section>
         </div>
 
+        {/* Google Cloud Console, Search Console & Customer OAuth */}
+        <section className="card" data-testid="google-cloud-suite-card" style={{ padding: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap", marginBottom: 20 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 10, background: "#4285F4", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+              </svg>
+            </div>
+            <div style={{ flexGrow: 1 }}>
+              <div style={{ fontSize: 16, fontWeight: 700 }}>Google Cloud Console &amp; Search Console</div>
+              <div style={{ fontSize: 13, color: "var(--ink-2, #4B4B73)", marginTop: 2 }}>
+                Site ownership verification, Google Shopping Merchant Center, and Storefront Customer OAuth 2.0 sign-in.
+              </div>
+            </div>
+            <span className={`pill ${c.googleSiteVerification || c.googleMerchantCenterId || c.googleOAuthClientId ? "ok" : "grey"}`}>
+              {c.googleSiteVerification || c.googleMerchantCenterId || c.googleOAuthClientId ? "Configured" : "Optional"}
+            </span>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 18, borderTop: "1px solid var(--line, #E7E7F0)", paddingTop: 18 }}>
+            {/* Search Console Site Verification */}
+            <label className="field" style={{ marginBottom: 0, gridColumn: "1 / -1" }}>
+              <span className="label">Google Search Console Verification Token / Meta Tag</span>
+              <input
+                className="input"
+                name="googleSiteVerification"
+                defaultValue={c.googleSiteVerification ?? ""}
+                placeholder='e.g. abc123xyz or <meta name="google-site-verification" content="..." />'
+                disabled={!canEdit}
+                data-testid="google-site-verification"
+              />
+              <span className="hint">
+                Copy from Google Search Console &rarr; Settings &rarr; Ownership verification &rarr; HTML tag. We extract the token and automatically inject it into your store &lt;head&gt;.
+              </span>
+            </label>
+
+            {/* Google Merchant Center ID */}
+            <label className="field" style={{ marginBottom: 0 }}>
+              <span className="label">Google Merchant Center Account ID</span>
+              <input
+                className="input"
+                name="googleMerchantCenterId"
+                inputMode="numeric"
+                defaultValue={c.googleMerchantCenterId ?? ""}
+                placeholder="e.g. 539120384"
+                disabled={!canEdit}
+                data-testid="google-merchant-id"
+              />
+              <span className="hint">Found in the top-right of your Google Merchant Center dashboard.</span>
+            </label>
+
+            {/* Google Customer OAuth Client ID */}
+            <label className="field" style={{ marginBottom: 0 }}>
+              <span className="label">Google OAuth Client ID (Storefront Customer Sign-In)</span>
+              <input
+                className="input"
+                name="googleOAuthClientId"
+                defaultValue={c.googleOAuthClientId ?? ""}
+                placeholder="e.g. 123456789-xxx.apps.googleusercontent.com"
+                disabled={!canEdit}
+                data-testid="google-oauth-client-id"
+              />
+              <span className="hint">Google Cloud Console &rarr; APIs &amp; Services &rarr; Credentials &rarr; OAuth 2.0 Client ID.</span>
+            </label>
+
+            {/* Google Customer OAuth Client Secret */}
+            <label className="field" style={{ marginBottom: 0, gridColumn: "1 / -1" }}>
+              <span className="label">Google OAuth Client Secret</span>
+              <input
+                className="input"
+                name="googleOAuthClientSecret"
+                type="password"
+                defaultValue={c.googleOAuthClientSecret ? "••••••••••••••••" : ""}
+                placeholder="GOCSPX-xxxxxxxxxxxxxxxx"
+                disabled={!canEdit}
+                data-testid="google-oauth-client-secret"
+              />
+              <span className="hint">
+                Set Authorized redirect URI in Google Cloud Console to: <code style={{ background: "var(--bg-subtle, #FAFAFC)", padding: "2px 6px", borderRadius: 4 }}>{storefrontOrigin(s.tenantSubdomain)}/api/auth/callback/google</code>
+              </span>
+            </label>
+          </div>
+        </section>
+
         {/* Dynamic Product Catalog Feed Card for Facebook & Google */}
         <section className="card" data-testid="catalog-feed-card" style={{ padding: 22 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>

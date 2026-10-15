@@ -24,9 +24,12 @@ export async function generateMetadata(): Promise<Metadata> {
     title: { default: info.tagline ? `${info.storeName} | ${info.tagline}` : info.storeName, template: `%s | ${info.storeName}` },
     description: info.tagline ?? `Shop online at ${info.storeName}. Cash on delivery, bKash and Nagad across Bangladesh.`,
     openGraph: { siteName: info.storeName, type: "website", locale: store.locale.replace("-", "_") },
-    other: tracking.metaDomainVerification
-      ? { "facebook-domain-verification": tracking.metaDomainVerification }
-      : undefined,
+    verification: {
+      google: tracking.googleSiteVerification ?? undefined,
+      other: tracking.metaDomainVerification
+        ? { "facebook-domain-verification": tracking.metaDomainVerification }
+        : undefined,
+    },
   };
 }
 

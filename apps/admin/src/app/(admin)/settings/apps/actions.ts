@@ -110,6 +110,10 @@ export async function saveTrackingPixelsAction(input: {
   googleTagManagerId?: string;
   tiktokPixelId?: string;
   metaDomainVerification?: string;
+  googleSiteVerification?: string;
+  googleOAuthClientId?: string;
+  googleOAuthClientSecret?: string;
+  googleMerchantCenterId?: string;
 }): Promise<ActionResult> {
   const s = await requireAction("marketing", "edit");
   try {
@@ -119,6 +123,10 @@ export async function saveTrackingPixelsAction(input: {
       googleTagManagerId: input.googleTagManagerId ?? "",
       tiktokPixelId: input.tiktokPixelId ?? "",
       metaDomainVerification: input.metaDomainVerification ?? "",
+      googleSiteVerification: input.googleSiteVerification ?? "",
+      googleOAuthClientId: input.googleOAuthClientId ?? "",
+      googleOAuthClientSecret: input.googleOAuthClientSecret ?? "",
+      googleMerchantCenterId: input.googleMerchantCenterId ?? "",
     });
 
     if (input.capiAccessToken?.trim()) {

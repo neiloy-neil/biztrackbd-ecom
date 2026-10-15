@@ -18,6 +18,8 @@ import {
   savePlatformMailConfig,
   savePlatformFraudConfig,
   testPlatformFraudChecker,
+  savePlatformGoogleConfig,
+  testPlatformGoogleConnection,
   DomainError,
   ForbiddenError,
 } from "@biztrackbd/core";
@@ -195,5 +197,40 @@ export async function testPlatformFraudCheckerAction(apiKey?: string) {
   } catch (err) {
     if (err instanceof ForbiddenError) return { ok: false, latencyMs: 0, message: "Access denied to test fraud checker." };
     return { ok: false, latencyMs: 0, message: err instanceof Error ? err.message : "Fraud test failed." };
+  }
+}
+
+// 7. Google Cloud Console Suite
+export async function savePlatformGoogleConfigAction(input: {
+  oauthClientId?: string;
+  oauthClientSecret?: string;
+  oauthEnabled?: boolean;
+  gcsBucketName?: string;
+  gcsProjectId?: string;
+  gcsServiceAccountKey?: string;
+  gcsEnabled?: boolean;
+  merchantCenterId?: string;
+  siteVerificationCode?: string;
+}) {
+  try {
+    const s = await requireAction("settings", "edit");
+    await savePlatformGoogleConfig(s.actor, input);
+    revalidatePath("/settings");
+    return { ok: true as const };
+  } catch (err) {
+    if (err instanceof ForbiddenError) return { ok: false as const, error: "Access denied: Platform Owner or Support Lead role required." };
+    if (err instanceof DomainError) return { ok: false as const, error: err.message };
+    console.error("savePlatformGoogleConfigAction error", err);
+    return { ok: false as const, error: err instanceof Error ? err.message : "Failed to save Google Cloud Console settings." };
+  }
+}
+
+export async function testPlatformGoogleConnectionAction() {
+  try {
+    await requireAction("settings", "view");
+    return await testPlatformGoogleConnection();
+  } catch (err) {
+    if (err instanceof ForbiddenError) return { ok: false, latencyMs: 0, message: "Access denied." };
+    return { ok: false, latencyMs: 0, message: err instanceof Error ? err.message : "Google Cloud test failed." };
   }
 }

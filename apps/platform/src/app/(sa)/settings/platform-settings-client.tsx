@@ -8,6 +8,7 @@ import type {
   PlatformUddoktaPayConfigView,
   PlatformMailConfigView,
   PlatformFraudConfigView,
+  PlatformGoogleConfigView,
 } from "@biztrackbd/core";
 import { FraudCheckerSettings } from "./fraud-checker-settings";
 import {
@@ -20,6 +21,8 @@ import {
   savePlatformUddoktaPayConfigAction,
   testPlatformUddoktaPayAction,
   savePlatformMailConfigAction,
+  savePlatformGoogleConfigAction,
+  testPlatformGoogleConnectionAction,
 } from "./actions";
 
 interface Props {
@@ -29,9 +32,10 @@ interface Props {
   initialUddoktaConfig: PlatformUddoktaPayConfigView;
   initialMailConfig: PlatformMailConfigView;
   initialFraudConfig: PlatformFraudConfigView;
+  initialGoogleConfig: PlatformGoogleConfigView;
 }
 
-type TabType = "ai" | "sms" | "couriers" | "payments" | "mail" | "fraud";
+type TabType = "ai" | "sms" | "couriers" | "payments" | "mail" | "fraud" | "google";
 
 export function PlatformSettingsClient({
   initialAiConfig,
@@ -40,8 +44,29 @@ export function PlatformSettingsClient({
   initialUddoktaConfig,
   initialMailConfig,
   initialFraudConfig,
+  initialGoogleConfig,
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabType>("ai");
+
+  // Google Cloud Suite State
+  const [googleOauthClientId, setGoogleOauthClientId] = useState(initialGoogleConfig.oauthClientId || "");
+  const [googleOauthClientSecret, setGoogleOauthClientSecret] = useState("");
+  const [googleOauthMaskedSecret, setGoogleOauthMaskedSecret] = useState(initialGoogleConfig.maskedOAuthSecret || "");
+  const [googleOauthEnabled, setGoogleOauthEnabled] = useState(initialGoogleConfig.oauthEnabled);
+  const [googleGcsBucket, setGoogleGcsBucket] = useState(initialGoogleConfig.gcsBucketName || "");
+  const [googleGcsProject, setGoogleGcsProject] = useState(initialGoogleConfig.gcsProjectId || "");
+  const [googleGcsKey, setGoogleGcsKey] = useState("");
+  const [googleGcsMaskedKey, setGoogleGcsMaskedKey] = useState(initialGoogleConfig.maskedServiceAccountKey || "");
+  const [googleGcsEnabled, setGoogleGcsEnabled] = useState(initialGoogleConfig.gcsEnabled);
+  const [googleMerchantId, setGoogleMerchantId] = useState(initialGoogleConfig.merchantCenterId || "");
+  const [googleSiteVerification, setGoogleSiteVerification] = useState(initialGoogleConfig.siteVerificationCode || "");
+  const [googleTesting, setGoogleTesting] = useState(false);
+  const [googleTestResult, setGoogleTestResult] = useState<{
+    ok: boolean;
+    latencyMs: number;
+    message: string;
+  } | null>(null);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // AI State
   const [aiApiKey, setAiApiKey] = useState("");
@@ -251,6 +276,54 @@ export function PlatformSettingsClient({
     }
   }
 
+  function copyToClipboard(text: string, fieldName: string) {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedField(fieldName);
+      setTimeout(() => setCopiedField(null), 2500);
+    }
+  }
+
+  async function handleSaveGoogle(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setNotice(null);
+    const res = await savePlatformGoogleConfigAction({
+      oauthClientId: googleOauthClientId.trim() || undefined,
+      oauthClientSecret: googleOauthClientSecret.trim() || undefined,
+      oauthEnabled: googleOauthEnabled,
+      gcsBucketName: googleGcsBucket.trim() || undefined,
+      gcsProjectId: googleGcsProject.trim() || undefined,
+      gcsServiceAccountKey: googleGcsKey.trim() || undefined,
+      gcsEnabled: googleGcsEnabled,
+      merchantCenterId: googleMerchantId.trim() || undefined,
+      siteVerificationCode: googleSiteVerification.trim() || undefined,
+    });
+    setSaving(false);
+    if (res.ok) {
+      if (googleOauthClientSecret.trim()) {
+        const s = googleOauthClientSecret.trim();
+        setGoogleOauthMaskedSecret(s.length > 8 ? `${s.slice(0, 4)}••••••••${s.slice(-4)}` : "••••••••");
+        setGoogleOauthClientSecret("");
+      }
+      if (googleGcsKey.trim()) {
+        setGoogleGcsMaskedKey("•••••••• (Service Account Key Saved)");
+        setGoogleGcsKey("");
+      }
+      setNotice({ good: "Google Cloud Platform settings saved successfully." });
+    } else {
+      setNotice({ bad: res.error });
+    }
+  }
+
+  async function handleTestGoogle() {
+    setGoogleTesting(true);
+    setGoogleTestResult(null);
+    const res = await testPlatformGoogleConnectionAction();
+    setGoogleTesting(false);
+    setGoogleTestResult(res);
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {/* Page Header */}
@@ -371,9 +444,24 @@ export function PlatformSettingsClient({
         >
           Fraud Shield
         </button>
+        <button
+          type="button"
+          onClick={() => { setActiveTab("google"); setNotice(null); }}
+          data-testid="tab-google"
+          style={{
+            padding: "8px 16px",
+            border: "none",
+            borderBottom: activeTab === "google" ? "3px solid #5B4FE8" : "3px solid transparent",
+            background: "none",
+            color: activeTab === "google" ? "#5B4FE8" : "#4B4B73",
+            fontWeight: 700,
+            fontSize: 14,
+            cursor: "pointer",
+          }}
+        >
+          Google Cloud Suite
+        </button>
       </div>
-
-      {activeTab === "fraud" && <FraudCheckerSettings initial={initialFraudConfig} />}
 
       {/* 1. AI SUITE TAB */}
       {activeTab === "ai" && (
@@ -840,6 +928,309 @@ export function PlatformSettingsClient({
 
       {activeTab === "fraud" && (
         <FraudCheckerSettings initial={initialFraudConfig} />
+      )}
+
+      {/* 7. GOOGLE CLOUD SUITE TAB */}
+      {activeTab === "google" && (
+        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: 24 }}>
+          <form onSubmit={handleSaveGoogle} style={{ display: "flex", flexDirection: "column", gap: 24, maxWidth: 760 }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: "#1F1F38" }}>Google Cloud Platform & Console Suite</div>
+                <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 12, background: "#E8F0FE", color: "#1A73E8" }}>
+                  GCP Enterprise
+                </span>
+              </div>
+              <div style={{ fontSize: 13, color: "#6B6B8D", marginTop: 4 }}>
+                Centralized Google Cloud infrastructure: OAuth 2.0 Customer & Staff Login, Google Cloud Storage (GCS) assets, Search Console site verification, and Merchant Center Shopping catalog.
+              </div>
+            </div>
+
+            {/* Service Status Badges */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10 }}>
+              <div style={{ padding: "10px 14px", background: "#F8F8FD", border: "1px solid #E7E7F0", borderRadius: 8 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "#6B6B8D", textTransform: "uppercase" }}>OAuth 2.0 SSO</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4, color: googleOauthEnabled && (googleOauthClientId || googleOauthMaskedSecret) ? "#15803D" : "#6B6B8D" }}>
+                  {googleOauthEnabled && (googleOauthClientId || googleOauthMaskedSecret) ? "● Active" : "○ Inactive"}
+                </div>
+              </div>
+              <div style={{ padding: "10px 14px", background: "#F8F8FD", border: "1px solid #E7E7F0", borderRadius: 8 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "#6B6B8D", textTransform: "uppercase" }}>GCS Storage</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4, color: googleGcsEnabled && (googleGcsBucket || googleGcsMaskedKey) ? "#15803D" : "#6B6B8D" }}>
+                  {googleGcsEnabled && (googleGcsBucket || googleGcsMaskedKey) ? "● Active" : "○ Inactive"}
+                </div>
+              </div>
+              <div style={{ padding: "10px 14px", background: "#F8F8FD", border: "1px solid #E7E7F0", borderRadius: 8 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "#6B6B8D", textTransform: "uppercase" }}>Search Console</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4, color: googleSiteVerification ? "#15803D" : "#6B6B8D" }}>
+                  {googleSiteVerification ? "● Verified" : "○ Not Set"}
+                </div>
+              </div>
+              <div style={{ padding: "10px 14px", background: "#F8F8FD", border: "1px solid #E7E7F0", borderRadius: 8 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "#6B6B8D", textTransform: "uppercase" }}>Merchant Center</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4, color: googleMerchantId ? "#15803D" : "#6B6B8D" }}>
+                  {googleMerchantId ? "● Linked" : "○ Not Set"}
+                </div>
+              </div>
+            </div>
+
+            {/* 1. Google OAuth 2.0 Section */}
+            <div style={{ border: "1px solid #E7E7F0", borderRadius: 10, padding: 18, background: "#FAFAFD" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: "#1F1F38" }}>1. Google OAuth 2.0 (Customer & Staff SSO)</div>
+                  <div style={{ fontSize: 12.5, color: "#6B6B8D" }}>
+                    Enables "Continue with Google" one-tap sign-in on platform super admin and tenant storefronts.
+                  </div>
+                </div>
+                <label style={{ display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
+                  <input
+                    type="checkbox"
+                    checked={googleOauthEnabled}
+                    onChange={(e) => setGoogleOauthEnabled(e.target.checked)}
+                    style={{ width: 16, height: 16, cursor: "pointer" }}
+                  />
+                  Enable SSO
+                </label>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div>
+                  <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>Google Client ID</label>
+                  <input
+                    type="text"
+                    value={googleOauthClientId}
+                    onChange={(e) => setGoogleOauthClientId(e.target.value)}
+                    placeholder="e.g. 1092837465-xxx.apps.googleusercontent.com"
+                    style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 13.5 }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>
+                    Google Client Secret {googleOauthMaskedSecret && <span style={{ color: "#15803D", fontWeight: 400 }}>({googleOauthMaskedSecret})</span>}
+                  </label>
+                  <input
+                    type="password"
+                    value={googleOauthClientSecret}
+                    onChange={(e) => setGoogleOauthClientSecret(e.target.value)}
+                    placeholder={googleOauthMaskedSecret ? "Leave blank to keep existing secret, or enter new..." : "GOCSPX-xxxxxxxxxxxxxxxx"}
+                    style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 13.5 }}
+                  />
+                </div>
+
+                {/* Authorized Redirect URIs Helper */}
+                <div style={{ marginTop: 6, padding: "12px 14px", background: "#fff", border: "1px dashed #D5D5E4", borderRadius: 8 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#4B4B73", marginBottom: 6 }}>
+                    Required in Google Cloud Console &rarr; Credentials &rarr; Authorized redirect URIs:
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {[
+                      "https://platform.biztrack.bd/api/auth/callback/google",
+                      "https://admin.biztrack.bd/api/auth/callback/google",
+                      "https://biztrack.bd/api/auth/callback/google",
+                    ].map((uri) => (
+                      <div key={uri} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#F4F3FF", padding: "6px 10px", borderRadius: 6 }}>
+                        <code style={{ fontSize: 12, color: "#5B4FE8" }}>{uri}</code>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(uri, uri)}
+                          style={{ fontSize: 11, padding: "3px 8px", background: "#fff", border: "1px solid #C4C0F8", borderRadius: 4, cursor: "pointer", fontWeight: 600, color: "#5B4FE8" }}
+                        >
+                          {copiedField === uri ? "Copied!" : "Copy URI"}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Google Cloud Storage (GCS) */}
+            <div style={{ border: "1px solid #E7E7F0", borderRadius: 10, padding: 18, background: "#FAFAFD" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: "#1F1F38" }}>2. Google Cloud Storage (GCS Bucket)</div>
+                  <div style={{ fontSize: 12.5, color: "#6B6B8D" }}>
+                    Store merchant media, invoices, product images, and automated platform backups on Google Cloud.
+                  </div>
+                </div>
+                <label style={{ display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
+                  <input
+                    type="checkbox"
+                    checked={googleGcsEnabled}
+                    onChange={(e) => setGoogleGcsEnabled(e.target.checked)}
+                    style={{ width: 16, height: 16, cursor: "pointer" }}
+                  />
+                  Enable GCS
+                </label>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <div>
+                    <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>GCP Project ID</label>
+                    <input
+                      type="text"
+                      value={googleGcsProject}
+                      onChange={(e) => setGoogleGcsProject(e.target.value)}
+                      placeholder="e.g. biztrackbd-production"
+                      style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 13.5 }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>GCS Bucket Name</label>
+                    <input
+                      type="text"
+                      value={googleGcsBucket}
+                      onChange={(e) => setGoogleGcsBucket(e.target.value)}
+                      placeholder="e.g. biztrackbd-media"
+                      style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 13.5 }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>
+                    Service Account Key JSON {googleGcsMaskedKey && <span style={{ color: "#15803D", fontWeight: 400 }}>({googleGcsMaskedKey})</span>}
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={googleGcsKey}
+                    onChange={(e) => setGoogleGcsKey(e.target.value)}
+                    placeholder={googleGcsMaskedKey ? "Leave blank to retain active Service Account Key JSON, or paste replacement JSON..." : '{\n  "type": "service_account",\n  "project_id": "...",\n  "private_key": "..."\n}'}
+                    style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 12, fontFamily: "monospace" }}
+                  />
+                  <div style={{ fontSize: 11.5, color: "#6B6B8D", marginTop: 4 }}>
+                    Requires role: <code style={{ background: "#F0F0F8", padding: "2px 4px", borderRadius: 4 }}>Storage Object Admin (roles/storage.objectAdmin)</code>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Search Console & Merchant Center */}
+            <div style={{ border: "1px solid #E7E7F0", borderRadius: 10, padding: 18, background: "#FAFAFD" }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "#1F1F38", marginBottom: 4 }}>
+                3. Search Console & Merchant Center Catalog Feed
+              </div>
+              <div style={{ fontSize: 12.5, color: "#6B6B8D", marginBottom: 14 }}>
+                Master domain verification tag and Google Merchant Center product catalog feed.
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <div>
+                  <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>
+                    Google Search Console Site Verification Token / Meta Tag
+                  </label>
+                  <input
+                    type="text"
+                    value={googleSiteVerification}
+                    onChange={(e) => setGoogleSiteVerification(e.target.value)}
+                    placeholder='e.g. google-site-verification=abc123xyz or <meta name="google-site-verification" content="..." />'
+                    style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 13.5 }}
+                  />
+                  <div style={{ fontSize: 11.5, color: "#6B6B8D", marginTop: 4 }}>
+                    Automatically parsed and injected into HTML &lt;head&gt; across platform portals.
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <div>
+                    <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>
+                      Merchant Center ID
+                    </label>
+                    <input
+                      type="text"
+                      value={googleMerchantId}
+                      onChange={(e) => setGoogleMerchantId(e.target.value)}
+                      placeholder="e.g. 539120384"
+                      style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 13.5 }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>
+                      Public Google Shopping XML Feed
+                    </label>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <input
+                        type="text"
+                        readOnly
+                        value="https://biztrack.bd/api/feed/google.xml"
+                        style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 12, background: "#F5F5F9" }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard("https://biztrack.bd/api/feed/google.xml", "feed-url")}
+                        style={{ padding: "8px 12px", background: "#F4F3FF", color: "#5B4FE8", border: "1px solid #5B4FE8", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
+                      >
+                        {copiedField === "feed-url" ? "Copied!" : "Copy Feed URL"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Test Connection Output */}
+            {googleTestResult && (
+              <div
+                style={{
+                  padding: "14px 16px",
+                  borderRadius: 8,
+                  fontSize: 13.5,
+                  fontWeight: 600,
+                  background: googleTestResult.ok ? "#E8F6EE" : "#FCEBEB",
+                  color: googleTestResult.ok ? "#15803D" : "#DC2626",
+                  border: `1px solid ${googleTestResult.ok ? "#A3E635" : "#F87171"}`,
+                }}
+              >
+                <div>{googleTestResult.message}</div>
+                <div style={{ fontSize: 12, fontWeight: 400, marginTop: 4, display: "flex", gap: 14 }}>
+                  <span>Latency: {googleTestResult.latencyMs}ms</span>
+                  <span>OAuth: {googleOauthClientId || googleOauthMaskedSecret ? "Configured" : "Not Set"}</span>
+                  <span>GCS Storage: {googleGcsBucket || googleGcsMaskedKey ? "Configured" : "Not Set"}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Submit & Test Buttons */}
+            <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
+              <button
+                type="submit"
+                disabled={saving}
+                style={{
+                  padding: "11px 24px",
+                  background: "#5B4FE8",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 8,
+                  fontWeight: 700,
+                  fontSize: 14,
+                  cursor: "pointer",
+                }}
+              >
+                {saving ? "Saving…" : "Save Google Cloud Settings"}
+              </button>
+              <button
+                type="button"
+                onClick={handleTestGoogle}
+                disabled={googleTesting}
+                style={{
+                  padding: "11px 20px",
+                  background: "#F4F3FF",
+                  color: "#5B4FE8",
+                  border: "1px solid #5B4FE8",
+                  borderRadius: 8,
+                  fontWeight: 700,
+                  fontSize: 14,
+                  cursor: "pointer",
+                }}
+              >
+                {googleTesting ? "Testing Connection…" : "Ping Google Services"}
+              </button>
+            </div>
+          </form>
+        </div>
       )}
     </div>
   );
