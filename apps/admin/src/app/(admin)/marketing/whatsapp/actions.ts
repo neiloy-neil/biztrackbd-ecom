@@ -11,6 +11,7 @@ import {
   disconnectWhatsAppSession,
   confirmWhatsAppPairing,
   sendWhatsAppNotification,
+  recordDirectWhatsAppDispatch,
   getWhatsAppMessageLogs,
   listCampaigns,
   type WhatsAppConfigView,
@@ -126,5 +127,19 @@ export async function sendTestWhatsAppMessageAction(phone: string, text: string)
     body: text,
     fallbackToSms: true,
   });
+  revalidatePath("/marketing/whatsapp");
+  return result;
+}
+
+export async function recordDirectWhatsAppDispatchAction(phone: string, text: string) {
+  const s = await requireAccess("marketing");
+  if (!can(s.user.role, "marketing", "edit")) {
+    throw new Error("You do not have permission to log messages.");
+  }
+  const result = await recordDirectWhatsAppDispatch(s.tenantId, {
+    phone,
+    body: text,
+  });
+  revalidatePath("/marketing/whatsapp");
   return result;
 }

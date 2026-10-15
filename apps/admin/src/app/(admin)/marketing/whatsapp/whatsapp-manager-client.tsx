@@ -17,6 +17,7 @@ import {
   saveWhatsAppTemplateAction,
   resetWhatsAppTemplateAction,
   sendTestWhatsAppMessageAction,
+  recordDirectWhatsAppDispatchAction,
 } from "./actions";
 
 interface Props {
@@ -99,6 +100,7 @@ export function WhatsAppManagerClient({
   const [testPhone, setTestPhone] = useState(initialPhone);
   const [testMessage, setTestMessage] = useState("Hi from BizTrack! Your order is being packed. 🌸");
   const [isSendingTest, setIsSendingTest] = useState(false);
+  const [isLoggingDirect, setIsLoggingDirect] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; msg: string } | null>(null);
 
   // Template editor states
@@ -292,7 +294,37 @@ export function WhatsAppManagerClient({
     }
   };
 
-  // Handle Send Test Message
+  // Handle 1-Click Direct WhatsApp Send (wa.me)
+  const handleDirectSend = async () => {
+    const local = parseBdMobileForDisplay(testPhone);
+    if (!/^01[3-9]\d{8}$/.test(local)) {
+      alert("Please enter a valid 11-digit Bangladeshi mobile number (e.g. 01886675596).");
+      return;
+    }
+    if (!testMessage.trim()) {
+      alert("Please enter a message body.");
+      return;
+    }
+
+    const targetUrl = `https://wa.me/88${local}?text=${encodeURIComponent(testMessage.trim())}`;
+    window.open(targetUrl, "_blank", "noopener,noreferrer");
+
+    try {
+      setIsLoggingDirect(true);
+      await recordDirectWhatsAppDispatchAction(`0${local.slice(1)}`, testMessage.trim());
+      setTestResult({
+        success: true,
+        msg: `🚀 WhatsApp Web / App opened! Tap the send arrow inside WhatsApp to deliver this message immediately to 0${local.slice(1)}.`,
+      });
+      router.refresh();
+    } catch {
+      // Direct send window already launched
+    } finally {
+      setIsLoggingDirect(false);
+    }
+  };
+
+  // Handle Send Test Message via Automated Gateway
   const handleSendTest = async () => {
     if (!testPhone.trim() || !testMessage.trim()) {
       alert("Please enter a phone number and message text.");
@@ -962,17 +994,22 @@ export function WhatsAppManagerClient({
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
             {/* Quick Test Message Sender */}
             <div className="card" style={{ padding: 20 }}>
-              <h3 style={{ margin: "0 0 10px", fontSize: 16, fontWeight: 700 }}>
-                🧪 Send Live Test Message
-              </h3>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>
+                  🧪 Send Live Test Message
+                </h3>
+                <span className="pill green" style={{ fontSize: 11, fontWeight: 700 }}>
+                  Instant WhatsApp Send
+                </span>
+              </div>
               <p className="muted" style={{ fontSize: 13, margin: "0 0 14px" }}>
-                Send a real test notification to verify your connection and SMS fallback.
+                Send a real test notification directly to your phone or any Bangladeshi mobile number.
               </p>
 
               {testResult && (
                 <div
                   className={`notice ${testResult.success ? "ok" : "bad"}`}
-                  style={{ marginBottom: 12, fontSize: 13 }}
+                  style={{ marginBottom: 12, fontSize: 13, lineHeight: 1.4 }}
                 >
                   {testResult.msg}
                 </div>
@@ -980,7 +1017,26 @@ export function WhatsAppManagerClient({
 
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 <label className="field" style={{ margin: 0 }}>
-                  <span className="label">Recipient Phone (Bangladeshi Mobile)</span>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                    <span className="label" style={{ margin: 0 }}>Recipient Phone (Bangladeshi Mobile)</span>
+                    {pairingPhone && (
+                      <button
+                        type="button"
+                        onClick={() => setTestPhone(parseBdMobileForDisplay(pairingPhone))}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "var(--primary, #0284C7)",
+                          fontSize: 11.5,
+                          cursor: "pointer",
+                          fontWeight: 600,
+                          padding: 0,
+                        }}
+                      >
+                        👤 Use My Number ({parseBdMobileForDisplay(pairingPhone)})
+                      </button>
+                    )}
+                  </div>
                   <input
                     type="text"
                     className="input"
@@ -1000,15 +1056,44 @@ export function WhatsAppManagerClient({
                   />
                 </label>
 
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={handleSendTest}
-                  disabled={isSendingTest}
-                  style={{ alignSelf: "flex-start" }}
-                >
-                  {isSendingTest ? "Sending…" : "Send Test Notification"}
-                </button>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleDirectSend}
+                    disabled={isLoggingDirect}
+                    style={{
+                      background: "#25D366",
+                      borderColor: "#128C7E",
+                      color: "#FFFFFF",
+                      fontWeight: 700,
+                      fontSize: 14,
+                      padding: "10px 18px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 8,
+                    }}
+                  >
+                    <span style={{ fontSize: 16 }}>💬</span>
+                    <span>{isLoggingDirect ? "Opening WhatsApp…" : "Open & Send in WhatsApp (Direct)"}</span>
+                  </button>
+
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8, paddingTop: 4 }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={handleSendTest}
+                      disabled={isSendingTest}
+                      style={{ fontSize: 12 }}
+                    >
+                      {isSendingTest ? "Testing Gateway…" : "⚡ Test Background Gateway (Automated)"}
+                    </button>
+                    <span className="muted" style={{ fontSize: 11.5 }}>
+                      {config.gatewayUrl ? "Gateway configured" : "No gateway connected (requires URL or SMS)"}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1522,46 +1607,66 @@ export function WhatsAppManagerClient({
                       <th style={{ padding: "10px 16px" }}>Event</th>
                       <th style={{ padding: "10px 16px" }}>Status</th>
                       <th style={{ padding: "10px 16px" }}>Message Preview</th>
+                      <th style={{ padding: "10px 16px" }}>Direct Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {logs.map((log) => (
-                      <tr key={log.id} style={{ borderBottom: "1px solid #F1F5F9" }}>
-                        <td style={{ padding: "10px 16px", whiteSpace: "nowrap", color: "#64748B", fontSize: 12.5 }}>
-                          {new Date(log.createdAt).toLocaleString()}
-                        </td>
-                        <td style={{ padding: "10px 16px", fontWeight: 600 }}>
-                          {log.phone}
-                        </td>
-                        <td style={{ padding: "10px 16px" }}>
-                          <span className={`pill ${log.direction === "INBOUND" ? "info" : "grey"}`} style={{ fontSize: 11 }}>
-                            {log.direction}
-                          </span>
-                        </td>
-                        <td style={{ padding: "10px 16px", fontSize: 12.5 }}>
-                          {log.event || "CHAT_MESSAGE"}
-                        </td>
-                        <td style={{ padding: "10px 16px" }}>
-                          <span
-                            className={`pill ${
-                              log.status === "SENT" || log.status === "DELIVERED"
-                                ? "ok"
-                                : log.status === "FALLBACK_TO_SMS"
-                                ? "warn"
-                                : log.status === "FAILED"
-                                ? "bad"
-                                : "grey"
-                            }`}
-                            style={{ fontSize: 11 }}
-                          >
-                            {log.status}
-                          </span>
-                        </td>
-                        <td style={{ padding: "10px 16px", maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "#334155" }}>
-                          {log.messageBody}
-                        </td>
-                      </tr>
-                    ))}
+                    {logs.map((log) => {
+                      const cleanPhone = log.phone.replace(/\D/g, "");
+                      const intlPhone = cleanPhone.startsWith("88") ? cleanPhone : `88${cleanPhone}`;
+                      const waHref = `https://wa.me/${intlPhone}?text=${encodeURIComponent(log.messageBody)}`;
+
+                      return (
+                        <tr key={log.id} style={{ borderBottom: "1px solid #F1F5F9" }}>
+                          <td style={{ padding: "10px 16px", whiteSpace: "nowrap", color: "#64748B", fontSize: 12.5 }}>
+                            {new Date(log.createdAt).toLocaleString()}
+                          </td>
+                          <td style={{ padding: "10px 16px", fontWeight: 600 }}>
+                            {log.phone}
+                          </td>
+                          <td style={{ padding: "10px 16px" }}>
+                            <span className={`pill ${log.direction === "INBOUND" ? "info" : "grey"}`} style={{ fontSize: 11 }}>
+                              {log.direction}
+                            </span>
+                          </td>
+                          <td style={{ padding: "10px 16px", fontSize: 12.5 }}>
+                            {log.event || "CHAT_MESSAGE"}
+                          </td>
+                          <td style={{ padding: "10px 16px" }}>
+                            <span
+                              className={`pill ${
+                                log.status === "SENT" || log.status === "DELIVERED"
+                                  ? "ok"
+                                  : log.status === "FALLBACK_TO_SMS"
+                                  ? "warn"
+                                  : log.status === "FAILED"
+                                  ? "bad"
+                                  : "grey"
+                              }`}
+                              style={{ fontSize: 11 }}
+                            >
+                              {log.status}
+                            </span>
+                          </td>
+                          <td style={{ padding: "10px 16px", maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "#334155" }}>
+                            {log.messageBody}
+                          </td>
+                          <td style={{ padding: "10px 16px", whiteSpace: "nowrap" }}>
+                            <a
+                              href={waHref}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="btn btn-secondary btn-sm"
+                              style={{ fontSize: 11.5, padding: "3px 9px", display: "inline-flex", alignItems: "center", gap: 4 }}
+                              title="Open and send directly via WhatsApp"
+                            >
+                              <span>💬</span>
+                              <span>Open in WhatsApp</span>
+                            </a>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

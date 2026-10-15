@@ -335,41 +335,36 @@ export async function sendWhatsAppNotification(
     let externalId: string | undefined;
     let errorDetail: string | undefined;
 
-    // Attempt WhatsApp delivery if connected or if custom gateway URL is specified
-    if (isConnected || config?.gatewayUrl) {
+    // Attempt WhatsApp delivery if custom gateway URL is specified
+    const gatewayUrl = config?.gatewayUrl || process.env.WHATSAPP_GATEWAY_URL;
+    if (gatewayUrl) {
       try {
-        const gatewayUrl = config?.gatewayUrl || process.env.WHATSAPP_GATEWAY_URL;
-        if (gatewayUrl) {
-          const res = await fetch(`${gatewayUrl}/message/send`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              ...(config?.gatewayApiKey ? { Authorization: `Bearer ${config.gatewayApiKey}` } : {}),
-            },
-            body: JSON.stringify({
-              tenantId,
-              to: formattedPhone,
-              text: body,
-            }),
-            signal: AbortSignal.timeout(8_000),
-          });
-          if (res.ok) {
-            const json = await res.json() as { messageId?: string };
-            externalId = json.messageId;
-            sentViaWhatsApp = true;
-          } else {
-            errorDetail = `Gateway returned ${res.status}: ${await res.text().catch(() => "")}`;
-          }
-        } else {
-          // If native session is connected in simulated/embedded mode
-          externalId = `wamid_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        const res = await fetch(`${gatewayUrl}/message/send`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(config?.gatewayApiKey ? { Authorization: `Bearer ${config.gatewayApiKey}` } : {}),
+          },
+          body: JSON.stringify({
+            tenantId,
+            to: formattedPhone,
+            text: body,
+          }),
+          signal: AbortSignal.timeout(8_000),
+        });
+        if (res.ok) {
+          const json = (await res.json()) as { messageId?: string };
+          externalId = json.messageId;
           sentViaWhatsApp = true;
+        } else {
+          errorDetail = `Gateway returned ${res.status}: ${await res.text().catch(() => "")}`;
         }
       } catch (e) {
         errorDetail = e instanceof Error ? e.message : "WhatsApp delivery network error";
       }
     } else {
-      errorDetail = "WhatsApp session is not connected";
+      errorDetail =
+        "No automated WhatsApp gateway URL configured (e.g. Evolution API, WAHA, or Meta Cloud API). For immediate free delivery, use the 1-click wa.me link.";
     }
 
     if (sentViaWhatsApp) {
@@ -487,5 +482,37 @@ export async function getWhatsAppMessageLogs(
     ]);
 
     return { total, logs, limit, offset };
+  });
+}
+
+/**
+ * Records a direct 1-click wa.me dispatch by store staff in the audit trail.
+ */
+export async function recordDirectWhatsAppDispatch(
+  tenantId: string,
+  params: {
+    phone: string;
+    body: string;
+    event?: WhatsAppEventType;
+    orderId?: string;
+  }
+): Promise<{ success: boolean; id: string }> {
+  const formattedPhone = formatWhatsAppPhone(params.phone);
+  return withTenant(tenantId, async (tx) => {
+    const log = await tx.whatsAppMessageLog.create({
+      data: {
+        tenantId,
+        orderId: params.orderId || null,
+        phone: formattedPhone,
+        direction: "OUTBOUND",
+        event: params.event || null,
+        status: "SENT",
+        messageBody: params.body,
+        externalMsgId: `wame_${Date.now()}`,
+        metadata: { channel: "WA_ME_DIRECT", clientDispatched: true },
+        sentAt: new Date(),
+      },
+    });
+    return { success: true, id: log.id };
   });
 }
