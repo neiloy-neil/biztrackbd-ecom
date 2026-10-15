@@ -289,9 +289,6 @@ export function PlatformSettingsClient({
     setSaving(true);
     setNotice(null);
     const res = await savePlatformGoogleConfigAction({
-      oauthClientId: googleOauthClientId.trim() || undefined,
-      oauthClientSecret: googleOauthClientSecret.trim() || undefined,
-      oauthEnabled: googleOauthEnabled,
       gcsBucketName: googleGcsBucket.trim() || undefined,
       gcsProjectId: googleGcsProject.trim() || undefined,
       gcsServiceAccountKey: googleGcsKey.trim() || undefined,
@@ -301,16 +298,11 @@ export function PlatformSettingsClient({
     });
     setSaving(false);
     if (res.ok) {
-      if (googleOauthClientSecret.trim()) {
-        const s = googleOauthClientSecret.trim();
-        setGoogleOauthMaskedSecret(s.length > 8 ? `${s.slice(0, 4)}••••••••${s.slice(-4)}` : "••••••••");
-        setGoogleOauthClientSecret("");
-      }
       if (googleGcsKey.trim()) {
         setGoogleGcsMaskedKey("•••••••• (Service Account Key Saved)");
         setGoogleGcsKey("");
       }
-      setNotice({ good: "Google Cloud Platform settings saved successfully." });
+      setNotice({ good: "Google Platform settings saved successfully." });
     } else {
       setNotice({ bad: res.error });
     }
@@ -942,24 +934,12 @@ export function PlatformSettingsClient({
                 </span>
               </div>
               <div style={{ fontSize: 13, color: "#6B6B8D", marginTop: 4 }}>
-                Centralized Google Cloud infrastructure: OAuth 2.0 Customer & Staff Login, Google Cloud Storage (GCS) assets, Search Console site verification, and Merchant Center Shopping catalog.
+                Google Cloud infrastructure: Google Search Console site verification, Merchant Center Shopping catalog feed, and Google Cloud Storage (GCS) assets.
               </div>
             </div>
 
             {/* Service Status Badges */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10 }}>
-              <div style={{ padding: "10px 14px", background: "#F8F8FD", border: "1px solid #E7E7F0", borderRadius: 8 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "#6B6B8D", textTransform: "uppercase" }}>OAuth 2.0 SSO</div>
-                <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4, color: googleOauthEnabled && (googleOauthClientId || googleOauthMaskedSecret) ? "#15803D" : "#6B6B8D" }}>
-                  {googleOauthEnabled && (googleOauthClientId || googleOauthMaskedSecret) ? "● Active" : "○ Inactive"}
-                </div>
-              </div>
-              <div style={{ padding: "10px 14px", background: "#F8F8FD", border: "1px solid #E7E7F0", borderRadius: 8 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "#6B6B8D", textTransform: "uppercase" }}>GCS Storage</div>
-                <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4, color: googleGcsEnabled && (googleGcsBucket || googleGcsMaskedKey) ? "#15803D" : "#6B6B8D" }}>
-                  {googleGcsEnabled && (googleGcsBucket || googleGcsMaskedKey) ? "● Active" : "○ Inactive"}
-                </div>
-              </div>
               <div style={{ padding: "10px 14px", background: "#F8F8FD", border: "1px solid #E7E7F0", borderRadius: 8 }}>
                 <div style={{ fontSize: 11, fontWeight: 600, color: "#6B6B8D", textTransform: "uppercase" }}>Search Console</div>
                 <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4, color: googleSiteVerification ? "#15803D" : "#6B6B8D" }}>
@@ -972,85 +952,19 @@ export function PlatformSettingsClient({
                   {googleMerchantId ? "● Linked" : "○ Not Set"}
                 </div>
               </div>
-            </div>
-
-            {/* 1. Google OAuth 2.0 Section */}
-            <div style={{ border: "1px solid #E7E7F0", borderRadius: 10, padding: 18, background: "#FAFAFD" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                <div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#1F1F38" }}>1. Google OAuth 2.0 (Customer & Staff SSO)</div>
-                  <div style={{ fontSize: 12.5, color: "#6B6B8D" }}>
-                    Enables "Continue with Google" one-tap sign-in on platform super admin and tenant storefronts.
-                  </div>
-                </div>
-                <label style={{ display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
-                  <input
-                    type="checkbox"
-                    checked={googleOauthEnabled}
-                    onChange={(e) => setGoogleOauthEnabled(e.target.checked)}
-                    style={{ width: 16, height: 16, cursor: "pointer" }}
-                  />
-                  Enable SSO
-                </label>
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                <div>
-                  <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>Google Client ID</label>
-                  <input
-                    type="text"
-                    value={googleOauthClientId}
-                    onChange={(e) => setGoogleOauthClientId(e.target.value)}
-                    placeholder="e.g. 1092837465-xxx.apps.googleusercontent.com"
-                    style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 13.5 }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>
-                    Google Client Secret {googleOauthMaskedSecret && <span style={{ color: "#15803D", fontWeight: 400 }}>({googleOauthMaskedSecret})</span>}
-                  </label>
-                  <input
-                    type="password"
-                    value={googleOauthClientSecret}
-                    onChange={(e) => setGoogleOauthClientSecret(e.target.value)}
-                    placeholder={googleOauthMaskedSecret ? "Leave blank to keep existing secret, or enter new..." : "GOCSPX-xxxxxxxxxxxxxxxx"}
-                    style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 13.5 }}
-                  />
-                </div>
-
-                {/* Authorized Redirect URIs Helper */}
-                <div style={{ marginTop: 6, padding: "12px 14px", background: "#fff", border: "1px dashed #D5D5E4", borderRadius: 8 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "#4B4B73", marginBottom: 6 }}>
-                    Required in Google Cloud Console &rarr; Credentials &rarr; Authorized redirect URIs:
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                    {[
-                      "https://platform.biztrack.bd/api/auth/callback/google",
-                      "https://admin.biztrack.bd/api/auth/callback/google",
-                      "https://biztrack.bd/api/auth/callback/google",
-                    ].map((uri) => (
-                      <div key={uri} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#F4F3FF", padding: "6px 10px", borderRadius: 6 }}>
-                        <code style={{ fontSize: 12, color: "#5B4FE8" }}>{uri}</code>
-                        <button
-                          type="button"
-                          onClick={() => copyToClipboard(uri, uri)}
-                          style={{ fontSize: 11, padding: "3px 8px", background: "#fff", border: "1px solid #C4C0F8", borderRadius: 4, cursor: "pointer", fontWeight: 600, color: "#5B4FE8" }}
-                        >
-                          {copiedField === uri ? "Copied!" : "Copy URI"}
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+              <div style={{ padding: "10px 14px", background: "#F8F8FD", border: "1px solid #E7E7F0", borderRadius: 8 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "#6B6B8D", textTransform: "uppercase" }}>GCS Storage</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4, color: googleGcsEnabled && (googleGcsBucket || googleGcsMaskedKey) ? "#15803D" : "#6B6B8D" }}>
+                  {googleGcsEnabled && (googleGcsBucket || googleGcsMaskedKey) ? "● Active" : "○ Inactive"}
                 </div>
               </div>
             </div>
 
-            {/* 2. Google Cloud Storage (GCS) */}
+            {/* 1. Google Cloud Storage (GCS) */}
             <div style={{ border: "1px solid #E7E7F0", borderRadius: 10, padding: 18, background: "#FAFAFD" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
                 <div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#1F1F38" }}>2. Google Cloud Storage (GCS Bucket)</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: "#1F1F38" }}>1. Google Cloud Storage (GCS Bucket)</div>
                   <div style={{ fontSize: 12.5, color: "#6B6B8D" }}>
                     Store merchant media, invoices, product images, and automated platform backups on Google Cloud.
                   </div>
@@ -1108,10 +1022,10 @@ export function PlatformSettingsClient({
               </div>
             </div>
 
-            {/* 3. Search Console & Merchant Center */}
+            {/* 2. Search Console & Merchant Center */}
             <div style={{ border: "1px solid #E7E7F0", borderRadius: 10, padding: 18, background: "#FAFAFD" }}>
               <div style={{ fontSize: 15, fontWeight: 700, color: "#1F1F38", marginBottom: 4 }}>
-                3. Search Console & Merchant Center Catalog Feed
+                2. Search Console &amp; Merchant Center Catalog Feed
               </div>
               <div style={{ fontSize: 12.5, color: "#6B6B8D", marginBottom: 14 }}>
                 Master domain verification tag and Google Merchant Center product catalog feed.

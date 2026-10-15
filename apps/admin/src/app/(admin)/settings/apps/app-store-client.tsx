@@ -1079,8 +1079,6 @@ export function AppStoreClient({
                         googleTagManagerId: String(fd.get("googleTagManagerId") ?? ""),
                         googleSiteVerification: String(fd.get("googleSiteVerification") ?? ""),
                         googleMerchantCenterId: String(fd.get("googleMerchantCenterId") ?? ""),
-                        googleOAuthClientId: String(fd.get("googleOAuthClientId") ?? ""),
-                        googleOAuthClientSecret: String(fd.get("googleOAuthClientSecret") ?? ""),
                       });
                       setFormMsg(res);
                     });
@@ -1142,40 +1140,9 @@ export function AppStoreClient({
                     </span>
                   </div>
 
-                  <div style={{ borderTop: "1px solid var(--line, #E7E7F0)", paddingTop: 12 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>Storefront Customer Google Sign-In (OAuth 2.0)</div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                      <div>
-                        <label className="label" style={{ fontSize: 12 }}>Google OAuth Client ID</label>
-                        <input
-                          type="text"
-                          name="googleOAuthClientId"
-                          defaultValue={storeSettings?.googleOAuthClientId ?? ""}
-                          placeholder="e.g. 123456789-xxx.apps.googleusercontent.com"
-                          className="input"
-                          style={{ width: "100%" }}
-                        />
-                      </div>
-                      <div>
-                        <label className="label" style={{ fontSize: 12 }}>Google OAuth Client Secret</label>
-                        <input
-                          type="password"
-                          name="googleOAuthClientSecret"
-                          defaultValue={storeSettings?.googleOAuthClientSecret ? "••••••••••••••••" : ""}
-                          placeholder="GOCSPX-xxxxxxxxxxxxxxxx"
-                          className="input"
-                          style={{ width: "100%" }}
-                        />
-                      </div>
-                      <span className="hint" style={{ fontSize: 11.5, color: "var(--ink-3, #6B6B8D)" }}>
-                        Redirect URI: <code>{storefrontOrigin}/api/auth/callback/google</code>
-                      </span>
-                    </div>
-                  </div>
-
                   <div style={{ marginTop: 8 }}>
                     <button type="submit" className="btn btn-primary" disabled={isPending} style={{ width: "100%" }}>
-                      {isPending ? "Saving…" : "Save Google Cloud Suite"}
+                      {isPending ? "Saving…" : "Save Google Suite"}
                     </button>
                   </div>
                 </form>

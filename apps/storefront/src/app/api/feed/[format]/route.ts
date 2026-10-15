@@ -42,9 +42,9 @@ export async function GET(
         orderBy: { createdAt: "desc" },
         take: 1000,
         include: {
-          images: { orderBy: { sortOrder: "asc" }, take: 1 },
+          images: { orderBy: { sortOrder: "asc" }, take: 10 },
           category: { select: { name: true } },
-          variants: { select: { stockQuantity: true } },
+          variants: { select: { stockQuantity: true, sku: true, barcode: true }, take: 50 },
         },
       }),
     ),
@@ -60,8 +60,30 @@ export async function GET(
           ? rawImage
           : `${origin}${rawImage}`
         : `${origin}/placeholder-product.png`;
-      const priceBdt = `${Number(p.basePrice).toFixed(2)} BDT`;
+
+      const base = Number(p.basePrice);
+      const compare = p.compareAtPrice ? Number(p.compareAtPrice) : 0;
+      const isOnSale = compare > base;
+      const regularPriceBdt = `${(isOnSale ? compare : base).toFixed(2)} BDT`;
+      const salePriceBdt = `${base.toFixed(2)} BDT`;
+
       const cleanDesc = p.descriptionHtml ? stripHtml(p.descriptionHtml).slice(0, 4500) : p.title;
+
+      const additionalImages = p.images
+        .slice(1)
+        .map((img) => {
+          const u = img.url.startsWith("http") ? img.url : `${origin}${img.url}`;
+          return `      <g:additional_image_link>${escapeXml(u)}</g:additional_image_link>`;
+        })
+        .join("\n");
+
+      const gtin = p.variants.find((v) => v.barcode?.trim())?.barcode?.trim();
+      const mpn = p.variants.find((v) => v.sku?.trim())?.sku?.trim();
+      const identifierTags = gtin
+        ? `      <g:gtin>${escapeXml(gtin)}</g:gtin>`
+        : mpn
+        ? `      <g:mpn>${escapeXml(mpn)}</g:mpn>`
+        : `      <g:identifier_exists>no</g:identifier_exists>`;
 
       return `    <item>
       <g:id>prod_${escapeXml(p.id)}</g:id>
@@ -69,17 +91,13 @@ export async function GET(
       <g:description><![CDATA[${cleanDesc}]]></g:description>
       <g:link>${escapeXml(productUrl)}</g:link>
       <g:image_link>${escapeXml(imageUrl)}</g:image_link>
-      <g:brand><![CDATA[${info.storeName}]]></g:brand>
+${additionalImages ? `${additionalImages}\n` : ""}      <g:brand><![CDATA[${info.storeName}]]></g:brand>
       <g:condition>new</g:condition>
       <g:availability>${inStock ? "in stock" : "out of stock"}</g:availability>
-      <g:price>${priceBdt}</g:price>
-      ${
-        p.compareAtPrice && Number(p.compareAtPrice) > Number(p.basePrice)
-          ? `<g:sale_price>${priceBdt}</g:sale_price>`
-          : ""
-      }
+      <g:price>${regularPriceBdt}</g:price>
+      ${isOnSale ? `<g:sale_price>${salePriceBdt}</g:sale_price>` : ""}
       ${p.category?.name ? `<g:product_type><![CDATA[${p.category.name}]]></g:product_type>` : ""}
-      <g:identifier_exists>false</g:identifier_exists>
+${identifierTags}
     </item>`;
     })
     .join("\n");
