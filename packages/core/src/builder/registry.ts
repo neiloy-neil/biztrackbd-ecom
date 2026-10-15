@@ -438,7 +438,7 @@ export const SECTIONS: SectionDef[] = [
     fields: [
       t("text", "Primary ticker text", 180), tb("text", "Primary ticker text", 180),
       { key: "speed", label: "Scroll speed", type: "select", options: [{ value: "normal", label: "Normal" }, { value: "slow", label: "Gentle" }, { value: "fast", label: "Fast" }] },
-      { key: "icon", label: "Badge icon", type: "select", options: [{ value: "lightning", label: "⚡ Lightning" }, { value: "truck", label: "🚚 Delivery" }, { value: "gift", label: "🎁 Gift" }, { value: "fire", label: "🔥 Hot Sale" }, { value: "star", label: "⭐ Star" }] },
+      { key: "icon", label: "Badge icon", type: "select", options: [{ value: "lightning", label: "Lightning" }, { value: "truck", label: "Delivery" }, { value: "gift", label: "Gift" }, { value: "fire", label: "Hot Sale" }, { value: "star", label: "Star" }] },
       link("link", "Link (optional)"),
       { key: "bgColor", label: "Background", type: "color" },
       { key: "textColor", label: "Text colour", type: "color" },
@@ -520,12 +520,12 @@ export interface StoreSectionCategory {
 
 /** Standard organized category tabs for browsing sections in Store Pages */
 export const STORE_SECTION_CATEGORIES: StoreSectionCategory[] = [
-  { id: "all", title: "All Sections", icon: "✨", types: [] },
-  { id: "hero", title: "Header & Hero", icon: "🖼️", types: ["hero", "banner", "announcement-bar"] },
-  { id: "products", title: "Product Showcases", icon: "🛍️", types: ["featured-products", "category-grid", "product-related", "collection-products"] },
-  { id: "trust", title: "Trust & Social Proof", icon: "⭐", types: ["trust-strip", "product-reviews", "video-reels"] },
-  { id: "promotions", title: "Promotions & Urgency", icon: "⚡", types: ["countdown-timer", "marquee-ticker", "floating-contact"] },
-  { id: "content", title: "Content & FAQs", icon: "📝", types: ["rich-text", "accordion-faq", "contact-block"] },
+  { id: "all", title: "All Sections", icon: "", types: [] },
+  { id: "hero", title: "Header & Hero", icon: "", types: ["hero", "banner", "announcement-bar"] },
+  { id: "products", title: "Product Showcases", icon: "", types: ["featured-products", "category-grid", "product-related", "collection-products"] },
+  { id: "trust", title: "Trust & Social Proof", icon: "", types: ["trust-strip", "product-reviews", "video-reels"] },
+  { id: "promotions", title: "Promotions & Urgency", icon: "", types: ["countdown-timer", "marquee-ticker", "floating-contact"] },
+  { id: "content", title: "Content & FAQs", icon: "", types: ["rich-text", "accordion-faq", "contact-block"] },
 ];
 
 /** The 11-character id of a YouTube video from a pasted address (watch, youtu.be, embed, shorts), or null. Nothing else is ever put in a page. */

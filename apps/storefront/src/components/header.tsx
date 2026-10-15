@@ -68,7 +68,7 @@ export function Header({ info, categories, lang, t, points, chrome }: { info: St
         )}
         {search === "icon" && <Link href="/search" className="icon-btn" aria-label={t("search")}><SearchIcon /></Link>}
         {showLanguage && <form action={setLanguage.bind(null, other)}><button className="lang-btn" type="submit" lang={other}>{t("switchLang")}</button></form>}
-          {points && <Link href="/account" className="pts-pill" data-testid="points-pill" aria-label={`${t("pointsCount", { n: points.available })}, ${t("pointsWorth", { v: points.worthBdt })}`}><span aria-hidden="true">✨</span> {points.available} <span className="muted">({money(points.worthBdt, lang)})</span></Link>}
+          {points && <Link href="/account" className="pts-pill" data-testid="points-pill" aria-label={`${t("pointsCount", { n: points.available })}, ${t("pointsWorth", { v: points.worthBdt })}`}>{points.available} <span className="muted">({money(points.worthBdt, lang)})</span></Link>}
         {showAccount && <Link href="/account" className="icon-btn" aria-label={t("account")}><UserIcon /></Link>}
       </div>
       <CartLink label={t("cart")} labelWithCount={t("cartItems", { n: "{n}" })} />

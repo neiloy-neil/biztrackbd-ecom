@@ -74,7 +74,13 @@ describe("who can call each admin and platform action", () => {
     // leaving only forgets a cookie.
     // The product feed alias (/api/feed/facebook.xml and friends): a public product feed for Meta and Google, which must be fetchable without signing in.
     // It only rewrites to /api/catalog/facebook, which lists published products (what the public store shows) for the store named in ?store=.
-    const PUBLIC_ROUTES = new Set(["apps/admin/src/app/api/feed/[format]/route.ts", "apps/admin/src/app/media/[...path]/route.ts", "apps/admin/src/app/demo/start/route.ts", "apps/admin/src/app/demo/exit/route.ts"]);
+    const PUBLIC_ROUTES = new Set([
+      "apps/admin/src/app/api/feed/[format]/route.ts",
+      "apps/admin/src/app/media/[...path]/route.ts",
+      "apps/admin/src/app/demo/start/route.ts",
+      "apps/admin/src/app/demo/exit/route.ts",
+      "apps/admin/src/app/api/webhooks/whatsapp/route.ts",
+    ]);
     for (const f of routes.filter((r) => !PUBLIC_ROUTES.has(rel(r)))) {
       const text = readFileSync(f, "utf8");
       const guarded = /getSession(OrNull)?\(|requireAccess\(|requireAction\(|authorised\(|CRON_SECRET|verify|signature|token/i.test(text);

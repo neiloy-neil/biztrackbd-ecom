@@ -87,9 +87,9 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
         {/* Tab Switcher */}
         <div style={{ display: "flex", gap: "6px", background: "#F1F5F9", padding: "4px", borderRadius: "10px" }}>
           {[
-            { id: "social", label: "📱 Facebook / Insta" },
-            { id: "sms", label: "💬 SMS Campaign" },
-            { id: "banner", label: "🎨 Banner & Slogans" },
+            { id: "social", label: "Facebook / Instagram" },
+            { id: "sms", label: "SMS Campaign" },
+            { id: "banner", label: "Banner & Slogans" },
           ].map((t) => (
             <button
               key={t.id}
@@ -208,7 +208,7 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
           className="btn btn-primary"
           style={{ width: "100%", justifyContent: "center" }}
         >
-          {isPending ? "✨ Gemini Copywriter Generating…" : "✨ Generate AI Copy"}
+          {isPending ? "Generating Content…" : "Generate Content"}
         </button>
       </div>
 
@@ -216,7 +216,7 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
       <div className="card stack">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #E2E8F0", paddingBottom: 10 }}>
           <h2 style={{ fontSize: 16, margin: 0 }}>Generated Marketing Copy</h2>
-          <span className="pill info">Google Gemini 2.5</span>
+          <span className="pill info">Content Generator</span>
         </div>
 
         {/* Tab 1: Social Media Post */}
@@ -292,7 +292,7 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
               </div>
             ) : (
               <div className="card empty" style={{ border: "none" }}>
-                Select a product or topic on the left and click <strong>Generate AI Copy</strong>.
+                Select a product or topic on the left and click <strong>Generate Content</strong>.
               </div>
             )}
           </div>
@@ -351,7 +351,7 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
                     className="btn btn-primary btn-sm"
                     style={{ width: "100%", justifyContent: "center" }}
                   >
-                    🚀 Send this in Broadcast Campaign →
+                    Use in Broadcast Campaign →
                   </Link>
                 </div>
               </div>
@@ -406,7 +406,7 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
                     className="btn btn-primary btn-sm"
                     style={{ width: "100%", justifyContent: "center" }}
                   >
-                    ⚡ Apply to Storefront Announcement Banner →
+                    Apply to Storefront Announcement Banner →
                   </Link>
                 </div>
               </div>

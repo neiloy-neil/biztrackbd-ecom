@@ -45,10 +45,10 @@ export async function handleStorefrontChat(
     return {
       reply: "আসসালামু আলাইকুম! আমি কীভাবে আপনাকে সাহায্য করতে পারি?",
       suggestedQuestions: [
-        "📦 আমার অর্ডার ট্র্যাক করুন",
-        "🚚 ডেলিভারি চার্জ কত?",
-        "🔥 সেরা অফার কী কী আছে?",
-        "💬 সরাসরি কথা বলুন",
+        "আমার অর্ডার ট্র্যাক করুন",
+        "ডেলিভারি চার্জ কত?",
+        "সেরা অফার কী কী আছে?",
+        "সরাসরি কথা বলুন",
       ],
     };
   }
@@ -187,9 +187,9 @@ Reply naturally, warmly, and concisely in Bengali (চলিত বাংলা)
       return {
         reply: aiReply.trim(),
         suggestedQuestions: [
-          "📦 আমার পার্সেল কখন পৌঁছাবে?",
-          "🚚 ডেলিভারি চার্জ কত?",
-          "💬 হোয়াটসঅ্যাপে কথা বলুন",
+          "আমার পার্সেল কখন পৌঁছাবে?",
+          "ডেলিভারি চার্জ কত?",
+          "হোয়াটসঅ্যাপে কথা বলুন",
         ],
         orderTracking: orderTrackingInfo,
         suggestedProducts: topProducts.slice(0, 3).map((p) => ({

@@ -100,7 +100,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               style={{ background: "#25D366", color: "#FFF", borderColor: "#25D366", fontWeight: 600 }}
               data-testid="wa-confirm-btn"
             >
-              💬 WhatsApp Confirm
+              WhatsApp Confirm
             </a>
           )}
           {o.status === "SHIPPED" && (
@@ -112,7 +112,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               style={{ background: "#25D366", color: "#FFF", borderColor: "#25D366", fontWeight: 600 }}
               data-testid="wa-tracking-btn"
             >
-              🚚 Send Tracking
+              Send Tracking
             </a>
           )}
           {(o.status === "CONFIRMED" || o.status === "PROCESSING") && (
@@ -124,7 +124,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               style={{ background: "#25D366", color: "#FFF", borderColor: "#25D366", fontWeight: 600 }}
               data-testid="wa-cash-btn"
             >
-              🛵 Cash Reminder
+              Cash Reminder
             </a>
           )}
           <Link href={`/orders/print?ids=${o.id}&doc=invoice`} target="_blank" className="btn btn-secondary btn-sm" prefetch={false}>Print invoice</Link>
@@ -265,7 +265,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
             <div style={{ fontWeight: 700 }}>{o.customerName}</div>
             <div className="row" style={{ marginTop: 4 }}>
               <a className="link num" href={`tel:${o.customerPhone}`}>{prettyPhone(o.customerPhone)}</a>
-              <a className="link" href={waConfirmLink} target="_blank" rel="noopener noreferrer" style={{ color: "#16A34A", fontWeight: 600 }}>💬 WhatsApp Chat</a>
+              <a className="link" href={waConfirmLink} target="_blank" rel="noopener noreferrer" style={{ color: "#16A34A", fontWeight: 600 }}>WhatsApp Chat</a>
             </div>
             {o.customerEmail && <div className="muted" style={{ fontSize: 13.5 }}>{o.customerEmail}</div>}
             {o.customer && (

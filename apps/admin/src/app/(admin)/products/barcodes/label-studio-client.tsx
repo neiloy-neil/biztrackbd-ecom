@@ -235,7 +235,7 @@ export function BarcodeLabelStudioClient({ initialItems, storeName }: Props) {
               disabled={labelsToPrint.length === 0}
               onClick={() => window.print()}
             >
-              🖨️ Print {totalSelectedLabels > 0 ? `${totalSelectedLabels} Labels` : "Labels"}
+              Print {totalSelectedLabels > 0 ? `${totalSelectedLabels} Labels` : "Labels"}
             </button>
           </div>
         </div>
@@ -275,7 +275,7 @@ export function BarcodeLabelStudioClient({ initialItems, storeName }: Props) {
                     onClick={handleAutoAssignMissing}
                     title="Auto-assigns unique standard barcodes to variants that don't have one"
                   >
-                    ⚡ Auto-Generate Missing
+                    Auto-Generate Missing
                   </button>
                 </div>
               </div>

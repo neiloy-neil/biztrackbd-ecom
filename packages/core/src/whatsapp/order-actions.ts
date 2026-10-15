@@ -47,7 +47,7 @@ export async function quickConfirmOrderFromDesk(
     });
 
     // 3. Post confirmation message into conversation
-    const replyBody = `ধন্যবাদ! আপনার অর্ডার *#${order.orderNumber}* সফলভাবে কনফার্ম করা হয়েছে। 🌸\nশীঘ্রই পার্সেল প্রস্তুত করে কুরিয়ারে হ্যান্ডওভার করা হবে।`;
+    const replyBody = `ধন্যবাদ! আপনার অর্ডার *#${order.orderNumber}* সফলভাবে কনফার্ম করা হয়েছে।\nশীঘ্রই পার্সেল প্রস্তুত করে কুরিয়ারে হ্যান্ডওভার করা হবে।`;
 
     return sendStaffWhatsAppReply(tenantId, conversationId, staffUserId, replyBody);
   });
@@ -73,7 +73,7 @@ export async function sendOrderTrackingFromDesk(
 
     let replyBody = "";
     if (tracking) {
-      replyBody = `আপনার অর্ডার *#${order.orderNumber}* সংক্রান্ত আপডেট:\n🚚 কুরিয়ার: *${courier}*\n📦 ট্র্যাকিং কোড: *${tracking}*\n\nকুরিয়ারের ওয়েবসাইট বা ট্র্যাকিং লিংক থেকে বর্তমান স্ট্যাটাস জানতে পারবেন। যেকোনো প্রয়োজনে আমাদের জানান!`;
+      replyBody = `আপনার অর্ডার *#${order.orderNumber}* সংক্রান্ত আপডেট:\nকুরিয়ার: *${courier}*\nট্র্যাকিং কোড: *${tracking}*\n\nকুরিয়ারের ওয়েবসাইট বা ট্র্যাকিং লিংক থেকে বর্তমান স্ট্যাটাস জানতে পারবেন। যেকোনো প্রয়োজনে আমাদের জানান!`;
     } else {
       replyBody = `আপনার অর্ডার *#${order.orderNumber}* বর্তমানে *${order.status}* অবস্থায় রয়েছে। কুরিয়ারে হ্যান্ডওভারের সাথে সাথেই আমরা আপনাকে ট্র্যাকিং কোড জানিয়ে দেব।`;
     }
@@ -107,7 +107,7 @@ export async function sendOrderPaymentDetailsFromDesk(
     const total = Number(order.totalAmount).toLocaleString("en-IN");
     const due = Number(order.balanceDue) > 0 ? Number(order.balanceDue).toLocaleString("en-IN") : total;
 
-    const replyBody = `আপনার অর্ডার *#${order.orderNumber}* এর পেমেন্ট সংক্রান্ত তথ্য:\n💰 মোট প্রদেয়: *৳ ${due}*\n\nবিকাশ/নগদ এর মাধ্যমে পেমেন্ট করতে রেফারেন্সে অর্ডার নম্বর *${order.orderNumber}* উল্লেখ করুন এবং পেমেন্ট শেষে TrxID টি আমাদের এখানে জানিয়ে দিন। ধন্যবাদ!`;
+    const replyBody = `আপনার অর্ডার *#${order.orderNumber}* এর পেমেন্ট সংক্রান্ত তথ্য:\nমোট প্রদেয়: *৳ ${due}*\n\nবিকাশ/নগদ এর মাধ্যমে পেমেন্ট করতে রেফারেন্সে অর্ডার নম্বর *${order.orderNumber}* উল্লেখ করুন এবং পেমেন্ট শেষে TrxID টি আমাদের এখানে জানিয়ে দিন। ধন্যবাদ!`;
 
     return sendStaffWhatsAppReply(tenantId, conversationId, staffUserId, replyBody);
   });

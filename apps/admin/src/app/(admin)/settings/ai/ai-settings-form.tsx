@@ -36,13 +36,13 @@ export function AiSettingsForm({ initial }: { initial: AiSettingsView }) {
       <section className="card">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: 18 }}>AI Engine &amp; Quota Status</h2>
+            <h2 style={{ margin: 0, fontSize: 18 }}>Quota &amp; Generation Status</h2>
             <p className="muted" style={{ margin: "4px 0 0", fontSize: 13.5 }}>
-              Active AI Provider: <strong>Google Gemini 2.5 Flash</strong>
+              Provider: <strong>Standard Content Generator</strong>
             </p>
           </div>
           <span className={`pill ${initial.hasCustomKey ? "ok" : percentUsed >= 90 ? "bad" : "warn"}`}>
-            {initial.hasCustomKey ? "✓ Custom Key (Unlimited)" : `Plan Quota (${initial.planTier})`}
+            {initial.hasCustomKey ? "Custom Key (Unlimited)" : `Plan Quota (${initial.planTier})`}
           </span>
         </div>
 
@@ -62,21 +62,21 @@ export function AiSettingsForm({ initial }: { initial: AiSettingsView }) {
               />
             </div>
             <p className="muted" style={{ fontSize: 12.5, marginTop: 8 }}>
-              Need more generations? Add your own free Google Gemini API key below to unlock <strong>Unlimited</strong> AI generations.
+              Need more generations? Add your own API key below to enable unlimited generations.
             </p>
           </div>
         ) : (
           <div style={{ padding: "12px 14px", background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 8, fontSize: 13.5, color: "#166534" }}>
-            ✓ Your custom Google Gemini API Key is active. All product descriptions, marketing copy, and chat requests run directly through your key with no monthly limits.
+            Your custom API Key is active. All description generation and chat requests run directly through your key with no monthly limits.
           </div>
         )}
       </section>
 
-      {/* Bring Your Own Key (BYOK) Section */}
+      {/* Bring Your Own Key Section */}
       <section className="card">
-        <h2 style={{ fontSize: 18, margin: "0 0 4px" }}>Bring Your Own Gemini API Key (BYOK)</h2>
+        <h2 style={{ fontSize: 18, margin: "0 0 4px" }}>Custom API Key (Optional)</h2>
         <p className="muted" style={{ fontSize: 13.5, margin: "0 0 14px" }}>
-          You can get a 100% free API key from Google AI Studio. Adding your own key unlocks unlimited AI copywriting, product generation, and customer assistance.
+          You can provide your own API key from Google AI Studio. Adding your own key unlocks unlimited description generation and customer assistant requests.
         </p>
 
         <label className="field">
@@ -131,16 +131,16 @@ export function AiSettingsForm({ initial }: { initial: AiSettingsView }) {
               color: testResult.valid ? "#065F46" : "#991B1B",
             }}
           >
-            {testResult.valid ? "✓ Connection successful! This Gemini API key is valid and working." : `✗ Error: ${testResult.error}`}
+            {testResult.valid ? "Connection successful. API key is valid." : `Error: ${testResult.error}`}
           </div>
         )}
       </section>
 
-      {/* Storefront AI Shopping Assistant Chatbot Settings */}
+      {/* Storefront Shopping Assistant Settings */}
       <section className="card">
-        <h2 style={{ fontSize: 18, margin: "0 0 4px" }}>Storefront AI Shopping Assistant Chatbot</h2>
+        <h2 style={{ fontSize: 18, margin: "0 0 4px" }}>Storefront Shopping Assistant</h2>
         <p className="muted" style={{ fontSize: 13.5, margin: "0 0 16px" }}>
-          A floating interactive assistant on your website answering product inquiries, checking order status by phone number, and explaining delivery policies.
+          A chat assistant on your website answering product inquiries, checking order status by phone number, and explaining delivery policies.
         </p>
 
         <label className="checkbox-row" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
@@ -150,7 +150,7 @@ export function AiSettingsForm({ initial }: { initial: AiSettingsView }) {
             defaultChecked={initial.chatbotEnabled}
             style={{ width: 18, height: 18, cursor: "pointer" }}
           />
-          <span style={{ fontWeight: 600 }}>Enable Storefront AI Shopping Assistant</span>
+          <span style={{ fontWeight: 600 }}>Enable Storefront Shopping Assistant</span>
         </label>
 
         <div className="row-2">
@@ -164,7 +164,7 @@ export function AiSettingsForm({ initial }: { initial: AiSettingsView }) {
               placeholder="শপ অ্যাসিস্ট্যান্ট"
               maxLength={50}
             />
-            <span className="help">Shown in the chat widget header (e.g. শপ অ্যাসিস্ট্যান্ট, Shahnaz Fashion AI).</span>
+            <span className="help">Shown in the chat widget header (e.g. শপ অ্যাসিস্ট্যান্ট, Shopping Assistant).</span>
           </label>
 
           <label className="field">
@@ -190,13 +190,13 @@ export function AiSettingsForm({ initial }: { initial: AiSettingsView }) {
             placeholder="আসসালামু আলাইকুম! কোনো পণ্য বা অর্ডারের বিষয়ে কিছু জানতে চান? আমি সাহায্য করতে পারি।"
             maxLength={300}
           />
-          <span className="help">Leave blank to use the default intelligent greeting.</span>
+          <span className="help">Leave blank to use the default greeting.</span>
         </label>
       </section>
 
       <div>
         <SubmitButton className="btn btn-primary" pending="Saving preferences…">
-          Save AI Preferences
+          Save Preferences
         </SubmitButton>
       </div>
     </form>

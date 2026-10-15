@@ -321,7 +321,7 @@ export default async function Payments({
 
                   {selected.senderSeenOnOtherStores > 0 && (
                     <div style={{ marginTop: 12, padding: "8px 10px", borderRadius: 6, background: "#FDF3E3", color: "#B45309", fontSize: 12, lineHeight: 1.4 }}>
-                      ⚠️ Sender number seen on {selected.senderSeenOnOtherStores} other {selected.senderSeenOnOtherStores === 1 ? "store" : "stores"}.
+                      Sender number seen on {selected.senderSeenOnOtherStores} other {selected.senderSeenOnOtherStores === 1 ? "store" : "stores"}.
                     </div>
                   )}
                 </div>

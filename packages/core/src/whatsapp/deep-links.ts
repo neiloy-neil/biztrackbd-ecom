@@ -60,19 +60,19 @@ export function buildWhatsAppOrderLink(options: WhatsAppOrderLinkOptions): strin
       text =
         `আসসালামু আলাইকুম ${name},\n\n` +
         `*${storeName}* থেকে আপনার অর্ডার *#${orderNumber}* সফলভাবে গ্রহণ করা হয়েছে।\n\n` +
-        (itemsSummary ? `📦 পণ্য: ${itemsSummary}\n` : "") +
-        `💰 মোট মূল্য (ক্যাশ অন ডেলিভারি): *${totalFormatted}*\n` +
-        (deliveryAddress ? `📍 ডেলিভারি ঠিকানা: ${deliveryAddress}\n\n` : "\n") +
+        (itemsSummary ? `পণ্য: ${itemsSummary}\n` : "") +
+        `মোট মূল্য (ক্যাশ অন ডেলিভারি): *${totalFormatted}*\n` +
+        (deliveryAddress ? `ডেলিভারি ঠিকানা: ${deliveryAddress}\n\n` : "\n") +
         `অর্ডারটি কনফার্ম করতে দয়া করে *1* লিখে রিপ্লাই দিন।\n` +
         `বাতিল করতে চাইলে *2* লিখে রিপ্লাই দিন।\n\n` +
-        `ধন্যবাদ! 🌸`;
+        `ধন্যবাদ!`;
     } else {
       text =
         `Hello ${name},\n\n` +
         `Thank you for ordering with *${storeName}*! We received your order *#${orderNumber}*.\n\n` +
-        (itemsSummary ? `📦 Items: ${itemsSummary}\n` : "") +
-        `💰 Cash on Delivery Total: *${totalFormatted}*\n` +
-        (deliveryAddress ? `📍 Delivery Address: ${deliveryAddress}\n\n` : "\n") +
+        (itemsSummary ? `Items: ${itemsSummary}\n` : "") +
+        `Cash on Delivery Total: *${totalFormatted}*\n` +
+        (deliveryAddress ? `Delivery Address: ${deliveryAddress}\n\n` : "\n") +
         `Reply *1* to CONFIRM your order.\n` +
         `Reply *2* to CANCEL.\n\n` +
         `Thank you!`;
@@ -81,7 +81,7 @@ export function buildWhatsAppOrderLink(options: WhatsAppOrderLinkOptions): strin
     if (lang === "bn") {
       text =
         `আসসালামু আলাইকুম ${name},\n\n` +
-        `আপনার অর্ডার *#${orderNumber}* ডেলিভারির জন্য পাঠানো হয়েছে! 🚚\n\n` +
+        `আপনার অর্ডার *#${orderNumber}* ডেলিভারির জন্য পাঠানো হয়েছে!\n\n` +
         (courierName ? `কুরিয়ার: *${courierName}*\n` : "") +
         (trackingCode ? `ট্র্যাকিং কোড: *${trackingCode}*\n` : "") +
         (trackingUrl ? `ট্র্যাকিং লিংক: ${trackingUrl}\n\n` : "\n") +
@@ -90,7 +90,7 @@ export function buildWhatsAppOrderLink(options: WhatsAppOrderLinkOptions): strin
     } else {
       text =
         `Hello ${name},\n\n` +
-        `Your order *#${orderNumber}* has been dispatched! 🚚\n\n` +
+        `Your order *#${orderNumber}* has been dispatched!\n\n` +
         (courierName ? `Courier: *${courierName}*\n` : "") +
         (trackingCode ? `Tracking Code: *${trackingCode}*\n` : "") +
         (trackingUrl ? `Track Here: ${trackingUrl}\n\n` : "\n") +
@@ -101,7 +101,7 @@ export function buildWhatsAppOrderLink(options: WhatsAppOrderLinkOptions): strin
     if (lang === "bn") {
       text =
         `আসসালামু আলাইকুম ${name},\n\n` +
-        `আপনার পার্সেলটি আজ ডেলিভারি হতে পারে! 🛵\n` +
+        `আপনার পার্সেলটি আজ ডেলিভারি হতে পারে!\n` +
         `অর্ডার নম্বর: *#${orderNumber}*\n` +
         `দয়া করে ক্যাশ অন ডেলিভারির জন্য সঠিক টাকা *${totalFormatted}* প্রস্তুত রাখুন।\n\n` +
         `ডেলিভারি এজেন্ট শীঘ্রই আপনার সাথে যোগাযোগ করবেন।\n` +
@@ -109,7 +109,7 @@ export function buildWhatsAppOrderLink(options: WhatsAppOrderLinkOptions): strin
     } else {
       text =
         `Hello ${name},\n\n` +
-        `Your package is out for delivery today! 🛵\n` +
+        `Your package is out for delivery today!\n` +
         `Order: *#${orderNumber}*\n` +
         `Please keep the exact COD amount *${totalFormatted}* ready for the delivery rider.\n\n` +
         `Thank you, *${storeName}*`;
@@ -118,17 +118,17 @@ export function buildWhatsAppOrderLink(options: WhatsAppOrderLinkOptions): strin
     if (lang === "bn") {
       text =
         `আসসালামু আলাইকুম ${name},\n\n` +
-        `আপনার অর্ডার *#${orderNumber}* পৌঁছে দেওয়া হয়েছে! 🎉\n` +
+        `আপনার অর্ডার *#${orderNumber}* পৌঁছে দেওয়া হয়েছে!\n` +
         `পণ্যটি আপনার কেমন লেগেছে? আপনার একটি ছোট রিভিউ আমাদের আরও ভালো সেবা দিতে সাহায্য করবে।\n\n` +
         (trackingUrl ? `রিভিউ দিতে ক্লিক করুন: ${trackingUrl}\n\n` : "") +
-        `*${storeName}*-এর সাথে থাকার জন্য ধন্যবাদ! ❤️`;
+        `*${storeName}*-এর সাথে থাকার জন্য ধন্যবাদ!`;
     } else {
       text =
         `Hello ${name},\n\n` +
-        `Your order *#${orderNumber}* has been delivered! 🎉\n` +
+        `Your order *#${orderNumber}* has been delivered!\n` +
         `We hope you love your purchase. Please share your feedback with us.\n\n` +
         (trackingUrl ? `Review here: ${trackingUrl}\n\n` : "") +
-        `Thank you for choosing *${storeName}*! ❤️`;
+        `Thank you for choosing *${storeName}*!`;
     }
   } else {
     // GENERAL_SUPPORT
@@ -170,17 +170,17 @@ export function buildWhatsAppAbandonedLink(options: WhatsAppAbandonedLinkOptions
       `আসসালামু আলাইকুম ${name},\n\n` +
       `*${storeName}*-এ আপনার পছন্দের পণ্য কার্টে রয়ে গেছে!` +
       (totalFormatted ? ` (মোট: *${totalFormatted}*)` : "") + "\n" +
-      (cartSummary ? `🛒 আইটেম: ${cartSummary}\n\n` : "\n") +
-      (discountCode ? `🎁 আপনার জন্য স্পেশাল অফার: কুপন কোড *${discountCode}* ব্যবহার করে এখনই অর্ডার সম্পন্ন করুন!\n\n` : "") +
+      (cartSummary ? `আইটেম: ${cartSummary}\n\n` : "\n") +
+      (discountCode ? `আপনার জন্য বিশেষ অফার: কুপন কোড *${discountCode}* ব্যবহার করে এখনই অর্ডার সম্পন্ন করুন!\n\n` : "") +
       `অর্ডারটি সম্পূর্ণ করতে এখানে ক্লিক করুন:\n${recoverUrl}\n\n` +
-      `কোনো প্রশ্ন থাকলে সরাসরি আমাদের রিপ্লাই দিন। 🌸`;
+      `কোনো প্রশ্ন থাকলে সরাসরি আমাদের রিপ্লাই দিন।`;
   } else {
     text =
       `Hello ${name},\n\n` +
       `You left items in your cart at *${storeName}*!` +
       (totalFormatted ? ` (Total: *${totalFormatted}*)` : "") + "\n" +
-      (cartSummary ? `🛒 Items: ${cartSummary}\n\n` : "\n") +
-      (discountCode ? `🎁 Special discount for you: Use code *${discountCode}* to complete your order!\n\n` : "") +
+      (cartSummary ? `Items: ${cartSummary}\n\n` : "\n") +
+      (discountCode ? `Special discount for you: Use code *${discountCode}* to complete your order!\n\n` : "") +
       `Complete your order here:\n${recoverUrl}\n\n` +
       `Feel free to reply if you need any assistance!`;
   }

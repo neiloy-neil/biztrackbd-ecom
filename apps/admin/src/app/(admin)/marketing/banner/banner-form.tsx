@@ -216,8 +216,8 @@ export function BannerForm({
               <span>Contact</span>
             </div>
             <div style={{ display: "flex", gap: 12, color: "#64748b", fontSize: 13 }}>
-              <span>🔍 Search</span>
-              <span>🛒 Cart (0)</span>
+              <span>Search</span>
+              <span>Cart (0)</span>
             </div>
           </div>
         </div>
@@ -253,7 +253,7 @@ export function BannerForm({
               value={announcement}
               disabled={!canEdit}
               maxLength={300}
-              placeholder="e.g. 🎉 Grand Eid Sale: Flat 20% OFF sitewide! Use code EID20"
+              placeholder="e.g. Grand Eid Sale: Flat 20% OFF sitewide! Use code EID20"
               onChange={(e) => setAnnouncement(e.target.value)}
               style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid var(--border)" }}
             />
@@ -274,7 +274,7 @@ export function BannerForm({
               value={announcementBn}
               disabled={!canEdit}
               maxLength={300}
-              placeholder="যেমন: 🎉 বিশেষ ঈদ ধামাকা অফার: সব অর্ডারে ফ্রি ডেলিভারি!"
+              placeholder="যেমন: বিশেষ ঈদ অফার: সব অর্ডারে ফ্রি ডেলিভারি!"
               onChange={(e) => setAnnouncementBn(e.target.value)}
               style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid var(--border)" }}
             />

@@ -68,9 +68,20 @@ export default async function AppDetailPage({
               justifyContent: "center",
               border: "1px solid var(--border, #e5e7eb)",
               fontSize: 24,
+              color: "var(--brand, #0f766e)",
             }}
           >
-            {app.category === "MARKETING" ? "📈" : app.category === "COURIERS" ? "🚚" : app.category === "GROWTH" ? "⭐" : app.category === "AUTOMATION" ? "⚡" : "💼"}
+            {app.category === "MARKETING" ? (
+              <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path d="M18 20V10M12 20V4M6 20v-6" /></svg>
+            ) : app.category === "COURIERS" ? (
+              <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true"><rect x="1" y="3" width="15" height="13" /><polygon points="16 8 20 8 23 11 23 16 16 16 16 8" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg>
+            ) : app.category === "GROWTH" ? (
+              <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path d="M23 6l-9.5 9.5-5-5L1 18" /><path d="M17 6h6v6" /></svg>
+            ) : app.category === "AUTOMATION" ? (
+              <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
+            ) : (
+              <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>
+            )}
           </div>
           <div>
             <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>

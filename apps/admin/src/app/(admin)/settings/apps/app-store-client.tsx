@@ -1619,7 +1619,7 @@ export function AppStoreClient({
               {activeModal === "whatsapp_commerce" && (
                 <div className="stack" style={{ gap: 16 }}>
                   <p style={{ fontSize: 14, lineHeight: 1.5 }}>
-                    Zero-Meta linked device engine for automated Bangladesh commerce. Confirms Cash-on-Delivery orders, sends out-for-delivery cash reminders, recovers abandoned carts, and powers your Live Support Desk.
+                    Send automated Cash-on-Delivery order confirmations, delivery tracking updates, abandoned cart recoveries, and customer support via WhatsApp.
                   </p>
 
                   <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 16 }}>
@@ -1933,11 +1933,11 @@ export function AppStoreClient({
                 </div>
               )}
 
-              {/* 21. GEMINI AI SUITE */}
+              {/* 21. STORE ASSISTANT & CONTENT TOOLS */}
               {activeModal === "ai_suite" && (
                 <div className="stack" style={{ gap: 16 }}>
                   <p style={{ fontSize: 14, lineHeight: 1.5 }}>
-                    Google Gemini 2.5 AI assistant suite tailored for Bangladeshi e-commerce. Generates persuasive bilingual product descriptions, extracts structured addresses from messy chat messages, and responds to shoppers 24/7.
+                    Automated store assistant and content tools. Generates bilingual product descriptions, extracts structured addresses from chat messages, and assists shoppers 24/7.
                   </p>
 
                   <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 16 }}>
@@ -1960,18 +1960,18 @@ export function AppStoreClient({
 
                   <div>
                     <Link href="/settings/ai" className="btn btn-primary" style={{ display: "block", textAlign: "center", padding: "10px 14px", textDecoration: "none" }}>
-                      Open AI Assistant Studio →
+                      Open Assistant Settings →
                     </Link>
                   </div>
 
                   <div className="card" style={{ border: "1px solid rgba(139, 92, 246, 0.25)", background: "rgba(139, 92, 246, 0.04)", padding: 16 }}>
                     <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "#7C3AED" }}>
-                      Gemini AI Features:
+                      Included Features:
                     </h4>
                     <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.6 }}>
-                      <li><b>Product Copywriter:</b> Generates engaging titles, bullet points, and SEO meta descriptions.</li>
-                      <li><b>Smart Address Parser:</b> Turn unformatted customer chat addresses into clean Division, District, and Upazila fields.</li>
-                      <li><b>Storefront AI Bot:</b> Answers buyer questions regarding stock, sizing, and delivery policies.</li>
+                      <li><b>Description Generator:</b> Generates titles, bullet points, and SEO descriptions.</li>
+                      <li><b>Address Parser:</b> Extract recipient addresses from customer chat text into structured fields.</li>
+                      <li><b>Storefront Assistant:</b> Responds to common shopper inquiries regarding stock, sizing, and policies.</li>
                     </ul>
                   </div>
                 </div>

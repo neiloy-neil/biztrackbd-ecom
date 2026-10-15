@@ -158,8 +158,8 @@ export async function processInboundWhatsAppMessage(
         });
 
         const reply = isBn
-          ? `ধন্যবাদ! আপনার অর্ডার *#${pendingOrder.orderNumber}* কনফার্ম করা হয়েছে। 🌸\nশীঘ্রই পার্সেল প্রস্তুত করে কুরিয়ারে পাঠানো হবে।`
-          : `Thank you! Your order *#${pendingOrder.orderNumber}* has been confirmed. 🌸\nWe are packaging your items for dispatch.`;
+          ? `ধন্যবাদ! আপনার অর্ডার *#${pendingOrder.orderNumber}* কনফার্ম করা হয়েছে।\nশীঘ্রই পার্সেল প্রস্তুত করে কুরিয়ারে পাঠানো হবে।`
+          : `Thank you! Your order *#${pendingOrder.orderNumber}* has been confirmed.\nWe are packaging your items for dispatch.`;
 
         // Send reply and log chat
         await tx.whatsAppChatMessage.create({
@@ -299,16 +299,16 @@ export async function processInboundWhatsAppMessage(
 
         if (activeOrder.status === "SHIPPED") {
           reply = isBn
-            ? `আপনার অর্ডার *#${activeOrder.orderNumber}* ডেলিভারির পথে রয়েছে! 🚚\nকুরিয়ার: *${courier}*\n` +
+            ? `আপনার অর্ডার *#${activeOrder.orderNumber}* ডেলিভারির পথে রয়েছে!\nকুরিয়ার: *${courier}*\n` +
               (trackingCode ? `ট্র্যাকিং কোড: *${trackingCode}*\n` : "") +
               (trackingUrl ? `ট্র্যাকিং লিংক: ${trackingUrl}\n` : "")
-            : `Your order *#${activeOrder.orderNumber}* is in transit! 🚚\nCourier: *${courier}*\n` +
+            : `Your order *#${activeOrder.orderNumber}* is in transit!\nCourier: *${courier}*\n` +
               (trackingCode ? `Tracking Code: *${trackingCode}*\n` : "") +
               (trackingUrl ? `Track: ${trackingUrl}\n` : "");
         } else if (activeOrder.status === "DELIVERED") {
           reply = isBn
-            ? `আপনার অর্ডার *#${activeOrder.orderNumber}* ইতিমধ্যে ডেলিভারি সম্পন্ন হয়েছে। 🎉`
-            : `Your order *#${activeOrder.orderNumber}* has been successfully delivered! 🎉`;
+            ? `আপনার অর্ডার *#${activeOrder.orderNumber}* ইতিমধ্যে ডেলিভারি সম্পন্ন হয়েছে।`
+            : `Your order *#${activeOrder.orderNumber}* has been successfully delivered!`;
         } else {
           reply = isBn
             ? `আপনার অর্ডার *#${activeOrder.orderNumber}* বর্তমানে *${activeOrder.status}* অবস্থায় রয়েছে। পার্সেল প্রস্তুত করে দ্রুত পাঠানো হবে।`

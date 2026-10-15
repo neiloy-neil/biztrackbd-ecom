@@ -63,14 +63,14 @@ export default async function Inbox({
             className="btn btn-primary btn-sm"
             style={{ borderRadius: 8 }}
           >
-            💬 WhatsApp Live Desk ({waData.total})
+            WhatsApp Live Desk ({waData.total})
           </Link>
           <Link
             href="/inbox?channel=web"
             className="btn btn-secondary btn-sm"
             style={{ borderRadius: 8 }}
           >
-            ✉️ Store Contact Form
+            Store Contact Form
           </Link>
         </div>
 
@@ -133,14 +133,14 @@ export default async function Inbox({
           className="btn btn-secondary btn-sm"
           style={{ borderRadius: 8 }}
         >
-          💬 WhatsApp Live Desk
+          WhatsApp Live Desk
         </Link>
         <Link
           href="/inbox?channel=web"
           className="btn btn-primary btn-sm"
           style={{ borderRadius: 8 }}
         >
-          ✉️ Store Contact Form
+          Store Contact Form
         </Link>
       </div>
 

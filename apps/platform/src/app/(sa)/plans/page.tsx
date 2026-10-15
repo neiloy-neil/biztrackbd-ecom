@@ -72,7 +72,7 @@ export default async function PlansPage({
             textDecoration: "none",
           }}
         >
-          🏷️ Subscription Plans ({plans.length})
+          Subscription Plans ({plans.length})
         </Link>
         <Link
           href="/plans?tab=promos"
@@ -86,7 +86,7 @@ export default async function PlansPage({
             textDecoration: "none",
           }}
         >
-          🎟️ Promo Codes & Discounts ({promos.length})
+          Promo Codes & Discounts ({promos.length})
         </Link>
       </div>
 

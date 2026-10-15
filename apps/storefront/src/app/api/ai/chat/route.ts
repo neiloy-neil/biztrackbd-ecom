@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         reply: "দুঃখিত, সংযোগে সাময়িক সমস্যা হচ্ছে। অনুগ্রহ করে একটু পরে আবার চেষ্টা করুন অথবা আমাদের হোয়াটসঅ্যাপে যোগাযোগ করুন।",
-        suggestedQuestions: ["💬 সরাসরি কথা বলুন"],
+        suggestedQuestions: ["সরাসরি কথা বলুন"],
       },
       { status: 500 }
     );

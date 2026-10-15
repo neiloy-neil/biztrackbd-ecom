@@ -84,7 +84,13 @@ export function LandingDrawer({
       <div className="lp-drawer-panel">
         <div className="lp-drawer-header">
           <div className="lp-drawer-title-group">
-            <span className="lp-drawer-icon" aria-hidden="true">⚡</span>
+            <span className="lp-drawer-icon" aria-hidden="true" style={{ display: "inline-flex", alignItems: "center" }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <path d="M16 10a4 4 0 0 1-8 0" />
+              </svg>
+            </span>
             <div>
               <h3 className="lp-drawer-title">
                 {isBn ? "দ্রুত ক্যাশ অন ডেলিভারি অর্ডার" : "Instant COD Checkout"}

@@ -142,35 +142,35 @@ export default async function Overview() {
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 10 }}>
             <div style={{ padding: "10px 12px", background: "#FAFAFC", borderRadius: 8, border: "1px solid #E7E7F0", fontSize: 12.5 }}>
-              <div style={{ color: "#6B6B8D", fontWeight: 600 }}>🗄️ Database</div>
+              <div style={{ color: "#6B6B8D", fontWeight: 600 }}>Database</div>
               <div style={{ fontWeight: 700, color: health.services.database.status === "UP" ? "#15803D" : "#DC2626", marginTop: 4 }}>
                 {health.services.database.status} ({health.services.database.latencyMs}ms)
               </div>
             </div>
 
             <div style={{ padding: "10px 12px", background: "#FAFAFC", borderRadius: 8, border: "1px solid #E7E7F0", fontSize: 12.5 }}>
-              <div style={{ color: "#6B6B8D", fontWeight: 600 }}>🤖 Gemini AI</div>
+              <div style={{ color: "#6B6B8D", fontWeight: 600 }}>AI Engine</div>
               <div style={{ fontWeight: 700, color: health.services.ai.status === "UP" ? "#15803D" : "#DC2626", marginTop: 4 }}>
                 {health.services.ai.status} {health.services.ai.latencyMs > 0 && `(${health.services.ai.latencyMs}ms)`}
               </div>
             </div>
 
             <div style={{ padding: "10px 12px", background: "#FAFAFC", borderRadius: 8, border: "1px solid #E7E7F0", fontSize: 12.5 }}>
-              <div style={{ color: "#6B6B8D", fontWeight: 600 }}>📱 SMS Gateway</div>
+              <div style={{ color: "#6B6B8D", fontWeight: 600 }}>SMS Gateway</div>
               <div style={{ fontWeight: 700, color: health.services.sms.status === "UP" ? "#15803D" : "#B45309", marginTop: 4 }}>
                 {health.services.sms.status.replace("_", " ")}
               </div>
             </div>
 
             <div style={{ padding: "10px 12px", background: "#FAFAFC", borderRadius: 8, border: "1px solid #E7E7F0", fontSize: 12.5 }}>
-              <div style={{ color: "#6B6B8D", fontWeight: 600 }}>🚚 Courier APIs</div>
+              <div style={{ color: "#6B6B8D", fontWeight: 600 }}>Courier APIs</div>
               <div style={{ fontWeight: 700, color: health.services.couriers.status === "UP" ? "#15803D" : "#B45309", marginTop: 4 }}>
                 {health.services.couriers.status}
               </div>
             </div>
 
             <div style={{ padding: "10px 12px", background: "#FAFAFC", borderRadius: 8, border: "1px solid #E7E7F0", fontSize: 12.5 }}>
-              <div style={{ color: "#6B6B8D", fontWeight: 600 }}>💳 UddoktaPay</div>
+              <div style={{ color: "#6B6B8D", fontWeight: 600 }}>Payment Gateway</div>
               <div style={{ fontWeight: 700, color: health.services.payments.status === "UP" ? "#15803D" : "#B45309", marginTop: 4 }}>
                 {health.services.payments.status.replace("_", " ")}
               </div>

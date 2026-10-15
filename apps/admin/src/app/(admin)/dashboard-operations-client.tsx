@@ -107,7 +107,7 @@ export function DashboardOperationsClient({
     if (!canEdit) return;
     try {
       await holdDashboardOrderAction(orderId);
-      showToast(`🔒 Order #${orderNumber} held for review`);
+      showToast(`Order #${orderNumber} held for review`);
       router.refresh();
     } catch (e: any) {
       alert(e.message || "Failed to hold order");
@@ -118,7 +118,7 @@ export function DashboardOperationsClient({
     if (!canEdit) return;
     try {
       await releaseDashboardOrderHoldAction(orderId);
-      showToast(`✅ Order #${orderNumber} approved for fulfillment`);
+      showToast(`Order #${orderNumber} approved for fulfillment`);
       router.refresh();
     } catch (e: any) {
       alert(e.message || "Failed to approve order");
@@ -161,7 +161,7 @@ export function DashboardOperationsClient({
       );
       if (res.success) {
         setBulkBookingFeedback(
-          `🚀 Successfully booked ${res.bookedCount} of ${selectedOrderIds.length} parcels!`
+          `Successfully booked ${res.bookedCount} of ${selectedOrderIds.length} parcels!`
         );
         setSelectedOrderIds([]);
         router.refresh();
@@ -341,16 +341,13 @@ export function DashboardOperationsClient({
               marginBottom: 12,
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 18 }}>🛡️</span>
-              <div>
-                <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>
-                  Courier Fraud Radar & Check
-                </h3>
-                <span className="muted" style={{ fontSize: 11.5 }}>
-                  5-Courier delivery records & RTO risk detection
-                </span>
-              </div>
+            <div>
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>
+                Courier Fraud Radar & Check
+              </h3>
+              <span className="muted" style={{ fontSize: 11.5 }}>
+                5-Courier delivery records & RTO risk detection
+              </span>
             </div>
 
             {/* Sub-tabs: Watchlist vs Manual Phone Lookup */}
@@ -385,7 +382,7 @@ export function DashboardOperationsClient({
                   color: activeFraudTab === "MANUAL_CHECK" ? "#FFF" : "#475569",
                 }}
               >
-                🔍 Check Number
+                Check Number
               </button>
             </div>
           </div>
@@ -395,7 +392,7 @@ export function DashboardOperationsClient({
             <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
               {fraudRadar.length === 0 ? (
                 <div style={{ padding: 24, textAlign: "center" }} className="muted">
-                  ✅ No high-risk or held orders detected. Delivery records look clear!
+                  No high-risk or held orders detected. Delivery records look clear.
                 </div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -477,7 +474,7 @@ export function DashboardOperationsClient({
                               borderColor: "#25D366",
                             }}
                           >
-                            💬 Ask ৳100 Advance
+                            Ask ৳100 Advance
                           </a>
 
                           {item.fraudReview === "HELD" ? (
@@ -487,7 +484,7 @@ export function DashboardOperationsClient({
                               className="btn btn-secondary btn-sm"
                               style={{ fontSize: 10.5, padding: "2px 8px" }}
                             >
-                              ✅ Approve COD
+                              Approve COD
                             </button>
                           ) : (
                             <button
@@ -496,7 +493,7 @@ export function DashboardOperationsClient({
                               className="btn btn-secondary btn-sm"
                               style={{ fontSize: 10.5, padding: "2px 8px", color: "#DC2626" }}
                             >
-                              🔒 Hold Order
+                              Hold Order
                             </button>
                           )}
 
@@ -505,7 +502,7 @@ export function DashboardOperationsClient({
                             className="btn btn-secondary btn-sm"
                             style={{ fontSize: 10.5, padding: "2px 8px" }}
                           >
-                            📞 Call
+                            Call
                           </a>
 
                           <Link
@@ -513,7 +510,7 @@ export function DashboardOperationsClient({
                             className="btn btn-secondary btn-sm"
                             style={{ fontSize: 10.5, padding: "2px 8px" }}
                           >
-                            🔍 5-Courier Dossier →
+                            5-Courier Dossier →
                           </Link>
                         </div>
                       </div>
@@ -627,7 +624,7 @@ export function DashboardOperationsClient({
                           : "#166534",
                     }}
                   >
-                    💡 Advice:{" "}
+                    Advice:{" "}
                     {lookupResult.unifiedLevel === "HIGH"
                       ? "High return risk. Ask for ৳100 advance delivery fee before booking."
                       : lookupResult.unifiedLevel === "MEDIUM"
@@ -671,16 +668,13 @@ export function DashboardOperationsClient({
               marginBottom: 10,
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 18 }}>🚀</span>
-              <div>
-                <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>
-                  1-Click Bulk Dispatch Queue
-                </h3>
-                <span className="muted" style={{ fontSize: 11.5 }}>
-                  {dispatchQueue.length} orders ready to pack and book
-                </span>
-              </div>
+            <div>
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>
+                1-Click Bulk Dispatch Queue
+              </h3>
+              <span className="muted" style={{ fontSize: 11.5 }}>
+                {dispatchQueue.length} orders ready to pack and book
+              </span>
             </div>
 
             <Link href="/orders/ship" className="link" style={{ fontSize: 12 }}>
@@ -699,7 +693,7 @@ export function DashboardOperationsClient({
 
           {dispatchQueue.length === 0 ? (
             <div style={{ padding: 24, textAlign: "center" }} className="muted">
-              📦 Every ready order has been booked with couriers!
+              Every ready order has been booked with couriers.
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
@@ -859,7 +853,7 @@ export function DashboardOperationsClient({
               marginBottom: 6,
             }}
           >
-            <span>⚡ RECENT STORE ACTIVITY</span>
+            <span>RECENT STORE ACTIVITY</span>
           </div>
 
           <div

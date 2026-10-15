@@ -7,7 +7,7 @@ import { WhatsAppManagerClient } from "./whatsapp-manager-client";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Automated WhatsApp Commerce",
+  title: "WhatsApp Commerce & Notifications",
 };
 
 export default async function WhatsAppManagerPage() {
@@ -17,11 +17,11 @@ export default async function WhatsAppManagerPage() {
   if (!mod.active) {
     return (
       <AppDisabledNotice
-        appName="Automated WhatsApp Commerce Suite"
+        appName="WhatsApp Commerce & Notifications"
         appKey="whatsapp_commerce"
         planTier={mod.planTier}
         minPlan="PRO"
-        description="Zero-Meta linked device QR session, 2-way bot, automated COD confirmations, out-for-delivery reminders, cart recovery, and live desk."
+        description="Connect your store's WhatsApp number to send automated COD confirmations, delivery tracking updates, and customer support."
       />
     );
   }

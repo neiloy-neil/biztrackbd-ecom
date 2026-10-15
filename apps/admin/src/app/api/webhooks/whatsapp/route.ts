@@ -7,6 +7,12 @@ import {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    // Verify internal gateway token if secret is configured
+    const gatewayToken = req.headers.get("x-gateway-token") || req.headers.get("authorization");
+    if (process.env.WHATSAPP_GATEWAY_SECRET && gatewayToken !== process.env.WHATSAPP_GATEWAY_SECRET) {
+      return NextResponse.json({ error: "Unauthorized gateway token" }, { status: 401 });
+    }
+
     const { event, tenantId, status, phone, message } = body;
 
     if (!tenantId) {

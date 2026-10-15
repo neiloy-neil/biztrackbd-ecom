@@ -69,7 +69,7 @@ export default async function CampaignsPage({
                 border: `1px solid ${waConfig.status === "CONNECTED" ? "#10B981" : "#F59E0B"}`,
               }}
             >
-              {waConfig.status === "CONNECTED" ? "🟢 WhatsApp Ready" : "⚠️ WhatsApp Offline"}
+              {waConfig.status === "CONNECTED" ? "WhatsApp Ready" : "WhatsApp Offline"}
             </span>
           </h1>
           <p className="muted" style={{ margin: "4px 0 0", fontSize: 13.5 }}>
@@ -123,25 +123,22 @@ export default async function CampaignsPage({
           href="/marketing/campaigns?channel=WHATSAPP"
           className={`btn btn-sm ${channelFilter === "WHATSAPP" ? "btn-primary" : "btn-secondary"}`}
           prefetch={false}
-          style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
         >
-          <span>📱</span> WhatsApp
+          WhatsApp
         </Link>
         <Link
           href="/marketing/campaigns?channel=SMS"
           className={`btn btn-sm ${channelFilter === "SMS" ? "btn-primary" : "btn-secondary"}`}
           prefetch={false}
-          style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
         >
-          <span>💬</span> SMS
+          SMS
         </Link>
         <Link
           href="/marketing/campaigns?channel=EMAIL"
           className={`btn btn-sm ${channelFilter === "EMAIL" ? "btn-primary" : "btn-secondary"}`}
           prefetch={false}
-          style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
         >
-          <span>✉️</span> Email
+          Email
         </Link>
       </div>
 
@@ -152,7 +149,6 @@ export default async function CampaignsPage({
 
         {campaigns.length === 0 ? (
           <div className="empty" style={{ padding: "36px 16px", textAlign: "center" }}>
-            <div style={{ fontSize: 32, marginBottom: 8 }}>📢</div>
             <p className="muted" style={{ margin: 0, fontSize: 14 }}>
               No broadcast campaigns found. Click <b>+ New Broadcast</b> to launch your first promotional blast.
             </p>
@@ -196,7 +192,7 @@ export default async function CampaignsPage({
                               marginTop: 2,
                             }}
                           >
-                            🏷️ Code: {c.couponCode}
+                            Code: {c.couponCode}
                           </span>
                         )}
                       </td>
@@ -218,11 +214,11 @@ export default async function CampaignsPage({
                               : "#334155",
                           }}
                         >
-                          {isWhatsApp ? "📱 WhatsApp" : isSms ? "💬 SMS" : "✉️ Email"}
+                          {isWhatsApp ? "WhatsApp" : isSms ? "SMS" : "Email"}
                         </span>
                       </td>
                       <td className="muted" style={{ fontSize: 12.5 }}>
-                        {c.targetSegment === "ABANDONED_CART" ? "🛒 Abandoned Cart" : c.targetSegment}
+                        {c.targetSegment === "ABANDONED_CART" ? "Abandoned Cart" : c.targetSegment}
                       </td>
                       <td className="r num" style={{ fontSize: 13 }}>
                         <b>{c.sentCount > 0 ? c.sentCount : c.recipientsCount}</b> / {c.recipientsCount}

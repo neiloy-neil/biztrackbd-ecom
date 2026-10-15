@@ -94,9 +94,7 @@ export function NewCampaignModal({ isWhatsAppConnected = false, whatsAppNumber }
         onClick={() => setOpen(true)}
         className="btn btn-primary"
         data-testid="create-campaign-modal-btn"
-        style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600 }}
       >
-        <span>⚡</span>
         <span>+ New Broadcast</span>
       </button>
 
@@ -162,18 +160,17 @@ export function NewCampaignModal({ isWhatsAppConnected = false, whatsAppNumber }
                     className={`btn ${channel === "WHATSAPP" ? "btn-primary" : "btn-secondary"}`}
                     style={{
                       display: "flex",
-                      flexDirection: "column",
                       alignItems: "center",
                       justifyContent: "center",
-                      gap: 4,
                       padding: "10px 8px",
                       borderColor: channel === "WHATSAPP" ? "#10B981" : undefined,
                       background: channel === "WHATSAPP" ? "linear-gradient(135deg, #10B981, #059669)" : undefined,
                       color: channel === "WHATSAPP" ? "#fff" : undefined,
+                      fontWeight: 600,
+                      fontSize: 13,
                     }}
                   >
-                    <span style={{ fontSize: 16 }}>📱</span>
-                    <span style={{ fontWeight: 600, fontSize: 13 }}>WhatsApp</span>
+                    WhatsApp
                   </button>
                   <button
                     type="button"
@@ -181,15 +178,14 @@ export function NewCampaignModal({ isWhatsAppConnected = false, whatsAppNumber }
                     className={`btn ${channel === "SMS" ? "btn-primary" : "btn-secondary"}`}
                     style={{
                       display: "flex",
-                      flexDirection: "column",
                       alignItems: "center",
                       justifyContent: "center",
-                      gap: 4,
                       padding: "10px 8px",
+                      fontWeight: 600,
+                      fontSize: 13,
                     }}
                   >
-                    <span style={{ fontSize: 16 }}>💬</span>
-                    <span style={{ fontWeight: 600, fontSize: 13 }}>SMS Blast</span>
+                    SMS Blast
                   </button>
                   <button
                     type="button"
@@ -197,15 +193,14 @@ export function NewCampaignModal({ isWhatsAppConnected = false, whatsAppNumber }
                     className={`btn ${channel === "EMAIL" ? "btn-primary" : "btn-secondary"}`}
                     style={{
                       display: "flex",
-                      flexDirection: "column",
                       alignItems: "center",
                       justifyContent: "center",
-                      gap: 4,
                       padding: "10px 8px",
+                      fontWeight: 600,
+                      fontSize: 13,
                     }}
                   >
-                    <span style={{ fontSize: 16 }}>✉️</span>
-                    <span style={{ fontWeight: 600, fontSize: 13 }}>Email Blast</span>
+                    Email Blast
                   </button>
                   <input type="hidden" name="channel" value={channel} />
                 </div>
@@ -226,7 +221,6 @@ export function NewCampaignModal({ isWhatsAppConnected = false, whatsAppNumber }
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 16 }}>{isWhatsAppConnected ? "🟢" : "⚠️"}</span>
                     <div>
                       <div style={{ fontWeight: 600, color: isWhatsAppConnected ? "#065F46" : "#92400E" }}>
                         {isWhatsAppConnected
@@ -235,7 +229,7 @@ export function NewCampaignModal({ isWhatsAppConnected = false, whatsAppNumber }
                       </div>
                       <div style={{ fontSize: 11.5, color: isWhatsAppConnected ? "#047857" : "#B45309" }}>
                         {isWhatsAppConnected
-                          ? "Ready for zero-Meta multi-message dispatch with smart human pacing."
+                          ? "Ready for direct WhatsApp multi-message dispatch with natural pacing."
                           : "You must connect your device via QR/Pairing code to send WhatsApp broadcasts."}
                       </div>
                     </div>
@@ -270,7 +264,7 @@ export function NewCampaignModal({ isWhatsAppConnected = false, whatsAppNumber }
                   <span className="label" style={{ fontWeight: 600 }}>Target Audience Segment *</span>
                   {audienceCount !== null && (
                     <span style={{ fontSize: 12, fontWeight: 600, color: "var(--primary, #0284C7)" }}>
-                      {isLoadingAudience ? "Estimating…" : `🎯 ${audienceCount.toLocaleString()} Recipients`}
+                      {isLoadingAudience ? "Estimating…" : `${audienceCount.toLocaleString()} Recipients`}
                     </span>
                   )}
                 </div>
@@ -280,13 +274,13 @@ export function NewCampaignModal({ isWhatsAppConnected = false, whatsAppNumber }
                   value={segment}
                   onChange={(e) => setSegment(e.target.value as CampaignSegment)}
                 >
-                  <option value="ALL">👥 All Customers (with valid phone)</option>
-                  <option value="ABANDONED_CART">🛒 Abandoned Checkouts (Leads with items in cart in last 24-72h)</option>
-                  <option value="VIP">👑 VIP Customers (Spent ৳15,000+ or 5+ orders)</option>
-                  <option value="REPEAT">🔁 Repeat Buyers (2+ orders)</option>
-                  <option value="DORMANT">💤 Dormant Customers (No order in 60 days)</option>
-                  <option value="DHAKA">📍 Inside Dhaka District</option>
-                  <option value="OUTSIDE_DHAKA">🌏 Outside Dhaka District (63 Districts)</option>
+                  <option value="ALL">All Customers (with valid phone)</option>
+                  <option value="ABANDONED_CART">Abandoned Checkouts (Leads with items in cart in last 24-72h)</option>
+                  <option value="VIP">VIP Customers (Spent ৳15,000+ or 5+ orders)</option>
+                  <option value="REPEAT">Repeat Buyers (2+ orders)</option>
+                  <option value="DORMANT">Dormant Customers (No order in 60 days)</option>
+                  <option value="DHAKA">Inside Dhaka District</option>
+                  <option value="OUTSIDE_DHAKA">Outside Dhaka District (63 Districts)</option>
                 </select>
                 <span className="muted" style={{ fontSize: 12, display: "block", marginTop: 4 }}>
                   {SEGMENT_DESCRIPTIONS[segment]}
@@ -358,7 +352,7 @@ export function NewCampaignModal({ isWhatsAppConnected = false, whatsAppNumber }
                   minLength={5}
                   placeholder={
                     channel === "WHATSAPP"
-                      ? "Hi {{customerName}}! 🎉 Special Eid sale at {{storeName}}. Use coupon code {{discountCode}} to get 20% off. Shop now: {{cartUrl}}\n\nReply STOP to unsubscribe."
+                      ? "Hi {{customerName}}! Special Eid sale at {{storeName}}. Use coupon code {{discountCode}} to get 20% off. Shop now: {{cartUrl}}\n\nReply STOP to unsubscribe."
                       : channel === "SMS"
                       ? "Hi {{customerName}}, don't miss our flash sale! Get 20% off with code {{discountCode}}. Shop: {{cartUrl}}"
                       : "Write your email promotional message or newsletter update..."
@@ -407,7 +401,7 @@ export function NewCampaignModal({ isWhatsAppConnected = false, whatsAppNumber }
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
-                    <span style={{ fontWeight: 600, color: "#065F46" }}>🛡️ Smart Anti-Ban Pacing</span>
+                    <span style={{ fontWeight: 600, color: "#065F46" }}>Smart Anti-Ban Pacing</span>
                     <span style={{ fontWeight: 600, color: "#047857" }}>
                       ETA: {formatEstimatedTime(estimatedSeconds)}
                     </span>
@@ -447,7 +441,7 @@ export function NewCampaignModal({ isWhatsAppConnected = false, whatsAppNumber }
                       Schedule for later (e.g. Evening peak at 8:30 PM)
                     </label>
                   </div>
-                  {isScheduled && <span style={{ fontSize: 12, color: "#D97706", fontWeight: 600 }}>⏰ Scheduled</span>}
+                  {isScheduled && <span style={{ fontSize: 12, color: "#D97706", fontWeight: 600 }}>Scheduled</span>}
                 </div>
                 {isScheduled && (
                   <div style={{ marginTop: 10 }}>
@@ -477,7 +471,7 @@ export function NewCampaignModal({ isWhatsAppConnected = false, whatsAppNumber }
                   className="btn btn-primary"
                   pending={isScheduled ? "Scheduling…" : "Dispatching…"}
                 >
-                  {isScheduled ? "⏰ Schedule Campaign" : "🚀 Launch Campaign Now"}
+                  {isScheduled ? "Schedule Campaign" : "Launch Campaign Now"}
                 </SubmitButton>
               </div>
             </form>

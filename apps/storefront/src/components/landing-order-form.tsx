@@ -186,12 +186,12 @@ export function LandingOrderForm({
                   {/* Badge: Most Popular or Best Value */}
                   {isBestSeller && !isBestValue && (
                     <span className="lp-deal-badge popular">
-                      {lang === "bn" ? "🔥 সর্বাধিক বিক্রিত" : "🔥 Most Popular"}
+                      {lang === "bn" ? "সর্বাধিক বিক্রিত" : "Most Popular"}
                     </span>
                   )}
                   {isBestValue && (
                     <span className="lp-deal-badge value">
-                      {lang === "bn" ? "🚚 সেরা অফার" : "🚚 Best Value"}
+                      {lang === "bn" ? "সেরা অফার" : "Best Value"}
                     </span>
                   )}
 

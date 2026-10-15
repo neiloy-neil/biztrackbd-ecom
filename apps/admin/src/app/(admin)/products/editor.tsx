@@ -163,9 +163,9 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, paddingBottom: 10, borderBottom: "1px solid var(--line, #E2E8F0)" }}>
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 700, fontSize: 14 }}>
-                    <span>✨</span> One-Click AI Product Generator
+                    One-Click Product Generator
                   </div>
-                  <div className="muted" style={{ fontSize: 12 }}>Generate titles, rich HTML descriptions &amp; SEO metadata with Gemini</div>
+                  <div className="muted" style={{ fontSize: 12 }}>Generate titles, rich HTML descriptions &amp; SEO metadata automatically</div>
                 </div>
                 <button
                   type="button"
@@ -177,7 +177,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                   }}
                   style={{ borderColor: "#818CF8", color: "#4F46E5", background: "#EEF2FF", fontWeight: 700 }}
                 >
-                  ✨ AI Auto-Fill Listing
+                  Auto-Fill Listing
                 </button>
               </div>
               {aiNotice && <div className="notice good" style={{ marginBottom: 12 }}>{aiNotice}</div>}
@@ -263,7 +263,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                               if (res.ok) setVariant(0, { barcode: res.barcode });
                             }}
                           >
-                            ⚡ Auto
+                            Auto
                           </button>
                         </div>
                       </label>
@@ -390,7 +390,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                                     if (res.ok) setVariant(i, { barcode: res.barcode });
                                   }}
                                 >
-                                  ⚡
+                                  Auto
                                 </button>
                               </div>
                             </td>
@@ -567,7 +567,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="One-Click AI Product Generator"
+          aria-label="One-Click Product Generator"
           style={{
             position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000,
             display: "flex", alignItems: "center", justifyContent: "center", padding: 16,
@@ -579,15 +579,12 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
             style={{ maxWidth: 500, width: "100%", background: "var(--card-bg, #fff)", borderRadius: 12, padding: 24, boxShadow: "0 20px 25px -5px rgba(0,0,0,0.2)" }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 20 }}>✨</span>
-                <h3 style={{ margin: 0, fontSize: 18 }}>One-Click AI Product Generator</h3>
-              </div>
+              <h3 style={{ margin: 0, fontSize: 18 }}>One-Click Product Generator</h3>
               <button type="button" style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", padding: "0 4px" }} onClick={() => setShowAiModal(false)}>×</button>
             </div>
 
             <p className="muted" style={{ fontSize: 13, margin: "6px 0 12px" }}>
-              Powered by Google Gemini. Enter a product concept or keywords to auto-generate bilingual titles, semantic HTML description, SEO tags and social copy.
+              Enter a product concept or keywords to auto-generate bilingual titles, semantic HTML description, SEO tags and social copy.
             </p>
 
             {aiError && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{aiError}</div>}
@@ -647,12 +644,12 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                     seoDescription: d.seo.metaDescription || cur.seoDescription,
                     tags: Array.from(new Set([...cur.tags, ...(d.tags || [])])),
                   }));
-                  setAiNotice("✨ AI listing generated successfully! Form fields have been populated.");
+                  setAiNotice("Product listing generated successfully! Form fields have been populated.");
                   setShowAiModal(false);
                   setTimeout(() => setAiNotice(""), 6000);
                 }}
               >
-                {aiBusy ? "✨ Generating Listing…" : "✨ Generate & Fill Listing"}
+                {aiBusy ? "Generating Listing…" : "Generate & Fill Listing"}
               </button>
             </div>
           </div>

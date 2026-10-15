@@ -104,7 +104,7 @@ export function ProductBundlesCard({ productId, lang }: Props) {
                     borderRadius: 20,
                   }}
                 >
-                  🎁 {lang === "bn" ? "কম্বো অফার" : "COMBO OFFER"}
+                  {lang === "bn" ? "কম্বো অফার" : "COMBO OFFER"}
                 </span>
                 <h3 style={{ fontSize: 17, fontWeight: 700, margin: "6px 0 0", color: "var(--ink, #111827)" }}>
                   {title}

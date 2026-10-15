@@ -48,9 +48,9 @@ export const WHATSAPP_EVENTS: WhatsAppEventInfo[] = [
     label: "Out For Delivery / Cash Reminder",
     description: "Sent on the day of delivery reminding customer to keep exact cash ready",
     defaultEn:
-      "Hi {customer_name}, your order *#{order_number}* is out for delivery today! 🛵\nPlease keep the exact Cash on Delivery amount *{order_total}* ready for the delivery rider.\n\nThank you, *{store_name}*",
+      "Hi {customer_name}, your order *#{order_number}* is out for delivery today.\nPlease keep the exact Cash on Delivery amount *{order_total}* ready for the delivery rider.\n\nThank you, *{store_name}*",
     defaultBn:
-      "আসসালামু আলাইকুম {customer_name}, আপনার অর্ডার *#{order_number}* আজ ডেলিভারি হবে! 🛵\nদয়া করে ডেলিভারি রাইডারের জন্য ক্যাশ অন ডেলিভারির মোট টাকা *{order_total}* প্রস্তুত রাখুন।\n\nধন্যবাদ, *{store_name}*",
+      "আসসালামু আলাইকুম {customer_name}, আপনার অর্ডার *#{order_number}* আজ ডেলিভারি হবে।\nদয়া করে ডেলিভারি রাইডারের জন্য ক্যাশ অন ডেলিভারির মোট টাকা *{order_total}* প্রস্তুত রাখুন।\n\nধন্যবাদ, *{store_name}*",
     vars: ["customer_name", "order_number", "order_total", "store_name"],
   },
   {
@@ -58,9 +58,9 @@ export const WHATSAPP_EVENTS: WhatsAppEventInfo[] = [
     label: "Order Delivered & Review Request",
     description: "Sent when courier marks delivery complete asking for customer review",
     defaultEn:
-      "Order *#{order_number}* has been delivered! 🎉\nThank you for choosing *{store_name}*. We hope you love your purchase! Please leave us a review: {tracking_url}",
+      "Order *#{order_number}* has been delivered.\nThank you for choosing *{store_name}*. Please leave us a review: {tracking_url}",
     defaultBn:
-      "আপনার অর্ডার *#{order_number}* পৌঁছে গেছে! 🎉\n*{store_name}*-কে বেছে নেওয়ার জন্য ধন্যবাদ। পণ্যটি কেমন লেগেছে আমাদের জানান: {tracking_url}",
+      "আপনার অর্ডার *#{order_number}* পৌঁছে গেছে।\n*{store_name}*-কে বেছে নেওয়ার জন্য ধন্যবাদ। পণ্যটি কেমন লেগেছে আমাদের জানান: {tracking_url}",
     vars: ["customer_name", "order_number", "tracking_url", "store_name"],
   },
   {
@@ -78,9 +78,9 @@ export const WHATSAPP_EVENTS: WhatsAppEventInfo[] = [
     label: "Abandoned Cart (Stage 1 - 30 Mins)",
     description: "Sent 30 minutes after customer leaves checkout with direct cart restoration link",
     defaultEn:
-      "Hi {customer_name}, you left items in your cart at *{store_name}*! Complete your order before items sell out:\n{recover_url}\n\nReply here if you have any questions!",
+      "Hi {customer_name}, you left items in your cart at *{store_name}*. Complete your order before items sell out:\n{recover_url}\n\nReply here if you have any questions.",
     defaultBn:
-      "আসসালামু আলাইকুম {customer_name}, *{store_name}*-এ আপনার পছন্দের পণ্য কার্টে রয়ে গেছে! স্টক শেষ হওয়ার আগেই অর্ডার সম্পন্ন করুন:\n{recover_url}\n\nযেকোনো প্রয়োজনে আমাদের রিপ্লাই দিন!",
+      "আসসালামু আলাইকুম {customer_name}, *{store_name}*-এ আপনার পছন্দের পণ্য কার্টে রয়ে গেছে। স্টক শেষ হওয়ার আগেই অর্ডার সম্পন্ন করুন:\n{recover_url}\n\nযেকোনো প্রয়োজনে আমাদের রিপ্লাই দিন।",
     vars: ["customer_name", "recover_url", "cart_items", "store_name"],
   },
   {
@@ -88,9 +88,9 @@ export const WHATSAPP_EVENTS: WhatsAppEventInfo[] = [
     label: "Abandoned Cart (Stage 2 - 24 Hours)",
     description: "Sent 24 hours later with an exclusive incentive discount coupon",
     defaultEn:
-      "Special gift for {customer_name}! 🎁 Use exclusive coupon code *{discount_code}* to get an extra discount on your cart at *{store_name}*:\n{recover_url}\n\nOffer valid for today only!",
+      "Special offer for {customer_name}. Use exclusive coupon code *{discount_code}* to get an extra discount on your cart at *{store_name}*:\n{recover_url}\n\nOffer valid for today only.",
     defaultBn:
-      "আপনার জন্য স্পেশাল অফার {customer_name}! 🎁 *{store_name}*-এ আপনার কার্ট সম্পূর্ণ করতে কুপন কোড *{discount_code}* ব্যবহার করুন:\n{recover_url}\n\nঅফারটি শুধুমাত্র আজকের জন্য প্রযোজ্য!",
+      "আপনার জন্য বিশেষ অফার {customer_name}। *{store_name}*-এ আপনার কার্ট সম্পূর্ণ করতে কুপন কোড *{discount_code}* ব্যবহার করুন:\n{recover_url}\n\nঅফারটি শুধুমাত্র আজকের জন্য প্রযোজ্য।",
     vars: ["customer_name", "discount_code", "recover_url", "store_name"],
   },
 ];

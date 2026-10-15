@@ -396,7 +396,7 @@ export {
   type StorefrontOrderBump,
 } from "./bundles/service";
 
-// Automated WhatsApp Commerce Suite (Zero-Meta Architecture)
+// WhatsApp Commerce & Order Notifications
 export * from "./whatsapp/types";
 export * from "./whatsapp/deep-links";
 export * from "./whatsapp/session";

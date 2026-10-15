@@ -544,14 +544,40 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
       const bgColor = str(s.bgColor) || "#4F46E5";
       const textColor = str(s.textColor) || "#FFFFFF";
       const icon = str(s.icon) || "lightning";
-      const iconChar = icon === "truck" ? "🚚" : icon === "gift" ? "🎁" : icon === "fire" ? "🔥" : icon === "star" ? "⭐" : "⚡";
+      const renderIcon = () => {
+        if (icon === "truck") {
+          return (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="1" y="3" width="15" height="13" />
+              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+              <circle cx="5.5" cy="18.5" r="2.5" />
+              <circle cx="18.5" cy="18.5" r="2.5" />
+            </svg>
+          );
+        }
+        if (icon === "gift") {
+          return (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="20 12 20 22 4 22 4 12" />
+              <rect x="2" y="7" width="20" height="5" />
+              <line x1="12" y1="22" x2="12" y2="7" />
+              <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+              <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+            </svg>
+          );
+        }
+        if (icon === "star") {
+          return <span aria-hidden="true">★</span>;
+        }
+        return <span aria-hidden="true">•</span>;
+      };
       const link = str(s.link);
 
       const content = (
         <div className={`bt-marquee-track ${speedClass}`}>
           {Array.from({ length: 4 }).map((_, i) => (
             <span key={i} className="bt-marquee-item" style={{ color: textColor }}>
-              <span>{iconChar}</span>
+              <span style={{ display: "inline-flex", alignItems: "center" }}>{renderIcon()}</span>
               <span {...(i === 0 ? ed("text") : {})}>{text}</span>
             </span>
           ))}
@@ -593,7 +619,7 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
                 <video className="bt-video-iframe" controls src={videoUrl} poster={str(s.poster)} />
               ) : (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#9CA3AF" }}>
-                  <span>🎬 Add YouTube or video link in settings</span>
+                  <span>Add YouTube or video link in settings</span>
                 </div>
               )}
             </div>

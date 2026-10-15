@@ -37,10 +37,10 @@ export function AiChatWidget({
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [suggestedPills, setSuggestedPills] = useState<string[]>([
-    "📦 আমার অর্ডার ট্র্যাক করুন",
-    "🚚 ডেলিভারি চার্জ কত?",
-    "🔥 সেরা অফার কী কী আছে?",
-    "💬 সরাসরি কথা বলুন",
+    "আমার অর্ডার ট্র্যাক করুন",
+    "ডেলিভারি চার্জ কত?",
+    "সেরা অফার কী কী আছে?",
+    "সরাসরি কথা বলুন",
   ]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -202,9 +202,11 @@ export function AiChatWidget({
         type="button"
         className="bt-ai-chat-bubble"
         onClick={() => setIsOpen(!isOpen)}
-        aria-label="Open AI Shopping Assistant"
+        aria-label="Open Store Assistant"
       >
-        <span style={{ fontSize: 18 }}>✨</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
         <span>{displayName}</span>
         <span className="bt-ai-pulse" />
       </button>
@@ -234,16 +236,17 @@ export function AiChatWidget({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: 18,
                 }}
               >
-                ✨
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
               </div>
               <div>
                 <div style={{ fontWeight: 700, fontSize: 14.5, lineHeight: 1.2 }}>{displayName}</div>
                 <div style={{ fontSize: 11.5, opacity: 0.9, display: "flex", alignItems: "center", gap: 5 }}>
                   <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80" }} />
-                  <span>24/7 AI Powered by Gemini</span>
+                  <span>Store Assistant</span>
                 </div>
               </div>
             </div>
@@ -410,7 +413,6 @@ export function AiChatWidget({
                       boxShadow: "0 2px 6px rgba(37, 211, 102, 0.3)",
                     }}
                   >
-                    <span>💬</span>
                     <span>সরাসরি হোয়াটসঅ্যাপে কথা বলুন</span>
                   </a>
                 )}
@@ -420,7 +422,7 @@ export function AiChatWidget({
             {loading && (
               <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#6b7280", fontSize: 12.5 }}>
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4f46e5", animation: "btPulse 1s infinite" }} />
-                <span>AI উত্তর তৈরি করছে...</span>
+                <span>উত্তর তৈরি হচ্ছে...</span>
               </div>
             )}
             <div ref={messagesEndRef} />
@@ -508,7 +510,10 @@ export function AiChatWidget({
               }}
               aria-label="Send message"
             >
-              ➤
+              <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
             </button>
           </form>
         </div>

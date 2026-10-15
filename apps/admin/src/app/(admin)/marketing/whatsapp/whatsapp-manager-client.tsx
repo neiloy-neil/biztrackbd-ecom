@@ -128,7 +128,7 @@ export function WhatsAppManagerClient({
 
   // Test Message UI states
   const [testPhone, setTestPhone] = useState(initialPhone);
-  const [testMessage, setTestMessage] = useState("Hi from BizTrack! Your order is being packed. 🌸");
+  const [testMessage, setTestMessage] = useState("Hi from BizTrack! Your order is being packed.");
   const [isSendingTest, setIsSendingTest] = useState(false);
   const [isLoggingDirect, setIsLoggingDirect] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; msg: string } | null>(null);
@@ -372,7 +372,7 @@ export function WhatsAppManagerClient({
       await recordDirectWhatsAppDispatchAction(`0${local.slice(1)}`, testMessage.trim());
       setTestResult({
         success: true,
-        msg: `🚀 WhatsApp Web / App opened! Tap the send arrow inside WhatsApp to deliver this message immediately to 0${local.slice(1)}.`,
+        msg: `WhatsApp opened. Tap send inside WhatsApp to deliver this message immediately to 0${local.slice(1)}.`,
       });
       router.refresh();
     } catch {
@@ -450,7 +450,7 @@ export function WhatsAppManagerClient({
         >
           <div>
             <div style={{ fontWeight: 700, fontSize: 14.5 }}>
-              ⚡ Free 1-Click WhatsApp Deep Links Active
+              Direct WhatsApp Links Active
             </div>
             <div style={{ fontSize: 13, marginTop: 2, color: "#1E3A8A" }}>
               Your Starter plan includes unlimited 1-tap <code>wa.me</code> links on all orders.
@@ -477,7 +477,7 @@ export function WhatsAppManagerClient({
             fontSize: 13,
           }}
         >
-          🎉 <b>14-Day Free Trial Active:</b> Full Pro Automated WhatsApp features are unlocked for your store!
+          <b>14-Day Free Trial Active:</b> Full Pro Automated WhatsApp features are unlocked for your store.
         </div>
       )}
 
@@ -485,8 +485,7 @@ export function WhatsAppManagerClient({
       <div className="page-head" style={{ marginBottom: 16 }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 28 }}>💬</span>
-            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>Automated WhatsApp Commerce</h1>
+            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>WhatsApp Commerce & Notifications</h1>
             <span
               className={`pill ${
                 config.status === "CONNECTED"
@@ -508,15 +507,15 @@ export function WhatsAppManagerClient({
               style={{ fontSize: 11, fontWeight: 700, padding: "3px 8px" }}
               title={
                 gatewayActive
-                  ? "Baileys WhatsApp Gateway service is running on port 5055"
-                  : "Baileys WhatsApp Gateway is offline. Run 'pnpm whatsapp:gateway' to start."
+                  ? "WhatsApp Gateway service is active on port 5055"
+                  : "WhatsApp Gateway is idle."
               }
             >
-              {gatewayActive ? "🟢 GATEWAY ONLINE" : "⚪ GATEWAY IDLE"}
+              {gatewayActive ? "GATEWAY ACTIVE (5055)" : "GATEWAY IDLE"}
             </span>
           </div>
           <p className="muted" style={{ margin: "4px 0 0", fontSize: 13.5 }}>
-            Zero-Meta Linked Device Architecture. Automated COD confirmation, shipping updates, 2-stage cart recovery, and smart bot.
+            Automated COD confirmation, delivery tracking alerts, cart recovery, and customer support.
           </p>
         </div>
       </div>
@@ -537,7 +536,7 @@ export function WhatsAppManagerClient({
           className={`btn btn-sm ${tab === "connection" ? "btn-primary" : "btn-secondary"}`}
           style={{ borderRadius: "8px 8px 0 0", borderBottom: tab === "connection" ? "none" : undefined }}
         >
-          📱 Linked Device & QR Session
+          Linked Device & Connection
         </button>
         <button
           type="button"
@@ -545,7 +544,7 @@ export function WhatsAppManagerClient({
           className={`btn btn-sm ${tab === "automations" ? "btn-primary" : "btn-secondary"}`}
           style={{ borderRadius: "8px 8px 0 0" }}
         >
-          ⚡ Automations & Bilingual Templates
+          Templates & Automations
         </button>
         <button
           type="button"
@@ -553,7 +552,7 @@ export function WhatsAppManagerClient({
           className={`btn btn-sm ${tab === "telemetry" ? "btn-primary" : "btn-secondary"}`}
           style={{ borderRadius: "8px 8px 0 0" }}
         >
-          📊 Telemetry & Delivery Logs ({totalLogs})
+          Delivery Logs ({totalLogs})
         </button>
         <button
           type="button"
@@ -561,7 +560,7 @@ export function WhatsAppManagerClient({
           className={`btn btn-sm ${tab === "broadcasts" ? "btn-primary" : "btn-secondary"}`}
           style={{ borderRadius: "8px 8px 0 0" }}
         >
-          📢 WhatsApp Broadcasts ({campaigns.length})
+          Broadcasts ({campaigns.length})
         </button>
       </div>
 
@@ -576,7 +575,7 @@ export function WhatsAppManagerClient({
                   {config.status === "CONNECTED" ? "WhatsApp Device Connected" : "Link Your WhatsApp Device"}
                 </h3>
                 <p className="muted" style={{ margin: "4px 0 0", fontSize: 13.5 }}>
-                  Bypasses Meta Business Verification and monthly conversation fees. Uses WhatsApp Web multi-device connection.
+                  Connect your store's WhatsApp number to automate customer notifications and support.
                 </p>
               </div>
               {config.status === "CONNECTED" && (
@@ -608,17 +607,16 @@ export function WhatsAppManagerClient({
                   <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                     <div
                       style={{
-                        width: 52,
-                        height: 52,
+                        width: 44,
+                        height: 44,
                         borderRadius: "50%",
                         background: "#22C55E",
                         color: "#FFF",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        fontSize: 26,
+                        fontSize: 20,
                         fontWeight: 700,
-                        boxShadow: "0 4px 12px rgba(34, 197, 94, 0.35)",
                       }}
                     >
                       ✓
@@ -654,7 +652,7 @@ export function WhatsAppManagerClient({
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span className="pill ok" style={{ fontSize: 12.5, padding: "5px 12px" }}>
-                      ● Online &amp; Active
+                      Active
                     </span>
                   </div>
                 </div>
@@ -696,7 +694,7 @@ export function WhatsAppManagerClient({
                     className="btn btn-primary btn-sm"
                     style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
                   >
-                    💬 Test WhatsApp Chat
+                    Test WhatsApp Chat
                   </a>
                   <button
                     type="button"
@@ -706,7 +704,7 @@ export function WhatsAppManagerClient({
                       setPairingCode(null);
                     }}
                   >
-                    🔄 Change Number
+                    Change Number
                   </button>
                   <button
                     type="button"
@@ -715,7 +713,7 @@ export function WhatsAppManagerClient({
                     disabled={isDisconnecting}
                     style={{ color: "#DC2626", marginLeft: "auto" }}
                   >
-                    {isDisconnecting ? "Disconnecting…" : "🔌 Disconnect Device"}
+                    {isDisconnecting ? "Disconnecting…" : "Disconnect Device"}
                   </button>
                 </div>
               </div>
@@ -772,9 +770,8 @@ export function WhatsAppManagerClient({
                         }}
                       >
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <span style={{ fontSize: 16 }}>🟢</span>
                           <div>
-                            <b>Baileys WhatsApp Gateway Active (Port 5055):</b> Official WhatsApp Web Multi-Device engine running. Scan QR or enter pairing code to link.
+                            <b>WhatsApp Gateway Active (Port 5055):</b> WhatsApp Web engine running. Scan QR or enter pairing code to link.
                           </div>
                         </div>
                       </div>
@@ -791,11 +788,11 @@ export function WhatsAppManagerClient({
                           color: "#92400E",
                         }}
                       >
-                        <div style={{ fontWeight: 700, marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
-                          <span>⚡</span> Baileys Gateway Server is Offline
+                        <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                          Gateway Server Offline
                         </div>
                         <div style={{ marginBottom: 8, lineHeight: 1.5 }}>
-                          To link via official WhatsApp <b>Settings &gt; Linked Devices</b> scanner and enable automated background messaging, start the gateway server in your terminal:
+                          To link via WhatsApp <b>Settings &gt; Linked Devices</b> scanner and enable background automated messaging, start the gateway server in your terminal:
                         </div>
                         <div
                           style={{
@@ -821,11 +818,11 @@ export function WhatsAppManagerClient({
                             }}
                             style={{ padding: "4px 10px", fontSize: 12, background: "#334155", color: "#FFF", border: "none" }}
                           >
-                            {copiedCommand ? "Copied! ✓" : "📋 Copy"}
+                            {copiedCommand ? "Copied" : "Copy"}
                           </button>
                         </div>
                         <div style={{ fontSize: 12, marginTop: 6, color: "#78350F" }}>
-                          <i>(Or click &quot;⚡ Connect 1-Click Direct Mode&quot; below for instant zero-server setup)</i>
+                          <i>(Or click &quot;Connect Direct Mode&quot; below for instant setup without a server)</i>
                         </div>
                       </div>
                     )}
@@ -848,7 +845,7 @@ export function WhatsAppManagerClient({
                         className={`btn btn-sm ${pairMode === "qr" ? "btn-primary" : "btn-secondary"}`}
                         style={{ flex: 1, padding: "8px 14px", fontWeight: 700 }}
                       >
-                        📷 Scan QR Code (Linked Devices)
+                        Scan QR Code
                       </button>
                       <button
                         type="button"
@@ -859,7 +856,7 @@ export function WhatsAppManagerClient({
                         className={`btn btn-sm ${pairMode === "code" ? "btn-primary" : "btn-secondary"}`}
                         style={{ flex: 1, padding: "8px 14px", fontWeight: 700 }}
                       >
-                        🔢 8-Digit Pairing Code (Phone Link)
+                        8-Digit Pairing Code
                       </button>
                     </div>
 
@@ -879,7 +876,7 @@ export function WhatsAppManagerClient({
                           {qrSvg || config.qrSvg ? (
                             <img
                               src={`data:image/svg+xml;utf8,${encodeURIComponent(qrSvg || config.qrSvg || "")}`}
-                              alt="Official WhatsApp Multi-Device QR Code"
+                              alt="WhatsApp Multi-Device QR Code"
                               width={240}
                               height={240}
                               style={{ display: "block" }}
@@ -893,7 +890,7 @@ export function WhatsAppManagerClient({
                                 onClick={handleStartSession}
                                 disabled={isStartingSession}
                               >
-                                {isStartingSession ? "Generating…" : "🔄 Generate Baileys QR"}
+                                {isStartingSession ? "Generating…" : "Generate QR Code"}
                               </button>
                             </div>
                           )}
@@ -901,7 +898,7 @@ export function WhatsAppManagerClient({
 
                         {/* Real-time Listening Pulse */}
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 13, color: "#166534", marginBottom: 14, fontWeight: 600 }}>
-                          <span>🟢</span> Listening for device link... (Auto-connects immediately when scanned)
+                          Listening for device link... (Auto-connects immediately when scanned)
                         </div>
 
                         {/* Step-by-Step Scan Instructions */}
@@ -918,14 +915,14 @@ export function WhatsAppManagerClient({
                             marginBottom: 14,
                           }}
                         >
-                          <div style={{ fontWeight: 800, marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}>
-                            <span>📱</span> How to scan with WhatsApp:
+                          <div style={{ fontWeight: 800, marginBottom: 6 }}>
+                            How to scan with WhatsApp:
                           </div>
                           <ol style={{ margin: 0, paddingLeft: 20 }}>
                             <li>Open <b>WhatsApp</b> on your phone ({formatBdMobileInternational(pairingPhone || config.phoneNumber)}).</li>
                             <li>Tap <b>Settings</b> (iOS) or <b>⋮ Menu</b> (Android) &gt; <b>Linked Devices</b>.</li>
                             <li>Tap <b>Link a Device</b>.</li>
-                            <li>Point your camera at this QR code. BizTrack connects automatically!</li>
+                            <li>Point your camera at this QR code. BizTrack connects automatically.</li>
                           </ol>
                         </div>
 
@@ -936,7 +933,7 @@ export function WhatsAppManagerClient({
                             onClick={handleStartSession}
                             disabled={isStartingSession}
                           >
-                            🔄 {isStartingSession ? "Refreshing…" : "Refresh QR Code"}
+                            {isStartingSession ? "Refreshing…" : "Refresh QR Code"}
                           </button>
                           <button
                             type="button"
@@ -946,7 +943,7 @@ export function WhatsAppManagerClient({
                               if (!pairingCode) handleRequestPairingCode();
                             }}
                           >
-                            🔢 Use 8-Digit Pairing Code Instead →
+                            Use 8-Digit Pairing Code Instead →
                           </button>
                         </div>
                       </div>
@@ -981,7 +978,7 @@ export function WhatsAppManagerClient({
                             }}
                           >
                             <div className="muted" style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 700 }}>
-                              Official WhatsApp 8-Digit Pairing Code
+                              WhatsApp 8-Digit Pairing Code
                             </div>
                             <div
                               style={{
@@ -1005,7 +1002,7 @@ export function WhatsAppManagerClient({
                                   setTimeout(() => setCopiedCode(false), 2000);
                                 }}
                               >
-                                {copiedCode ? "Copied to clipboard! ✓" : "📋 Copy Code"}
+                                {copiedCode ? "Copied" : "Copy Code"}
                               </button>
                               <button
                                 type="button"
@@ -1013,7 +1010,7 @@ export function WhatsAppManagerClient({
                                 onClick={handleRequestPairingCode}
                                 disabled={isRequestingPairingCode}
                               >
-                                🔄 {isRequestingPairingCode ? "Generating…" : "Request New Code"}
+                                {isRequestingPairingCode ? "Generating…" : "Request New Code"}
                               </button>
                             </div>
                           </div>
@@ -1040,7 +1037,7 @@ export function WhatsAppManagerClient({
                               disabled={isRequestingPairingCode}
                               style={{ padding: "10px 24px", fontWeight: 700 }}
                             >
-                              {isRequestingPairingCode ? "Connecting with WhatsApp Server…" : "⚡ Request 8-Digit Pairing Code"}
+                              {isRequestingPairingCode ? "Connecting with WhatsApp Server…" : "Request 8-Digit Pairing Code"}
                             </button>
                           </div>
                         )}
@@ -1058,14 +1055,14 @@ export function WhatsAppManagerClient({
                             lineHeight: 1.6,
                           }}
                         >
-                          <div style={{ fontWeight: 800, marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}>
-                            <span>📱</span> How to enter the code on your phone:
+                          <div style={{ fontWeight: 800, marginBottom: 6 }}>
+                            How to enter the code on your phone:
                           </div>
                           <ol style={{ margin: 0, paddingLeft: 20 }}>
                             <li>Open <b>WhatsApp</b> on your phone ({formatBdMobileInternational(pairingPhone || config.phoneNumber)}).</li>
                             <li>Go to <b>Settings</b> &gt; <b>Linked Devices</b> &gt; <b>Link a Device</b>.</li>
                             <li>Tap <b>&quot;Link with phone number instead&quot;</b> at the very bottom of the screen.</li>
-                            <li>Type the 8-digit code shown above. WhatsApp will link immediately!</li>
+                            <li>Type the 8-digit code shown above. WhatsApp will link immediately.</li>
                           </ol>
                         </div>
                       </div>
@@ -1092,7 +1089,7 @@ export function WhatsAppManagerClient({
                         disabled={isPairing}
                         style={{ fontWeight: 600, color: "#166534", background: "#DCFCE7", border: "1px solid #86EFAC" }}
                       >
-                        {isPairing ? "Connecting…" : "⚡ Connect 1-Click WhatsApp Direct Mode (No Server)"}
+                        {isPairing ? "Connecting…" : "Connect Direct Mode (No Server)"}
                       </button>
                       <button
                         type="button"
@@ -1108,12 +1105,11 @@ export function WhatsAppManagerClient({
                   </div>
                 ) : (
                   <div style={{ maxWidth: 500, margin: "0 auto", padding: "16px 0", textAlign: "center" }}>
-                    <div style={{ fontSize: 44, marginBottom: 12 }}>📱</div>
                     <div style={{ fontWeight: 700, fontSize: 19, marginBottom: 6 }}>
                       Connect WhatsApp to Your Store
                     </div>
                     <p className="muted" style={{ fontSize: 13.5, margin: "0 0 20px" }}>
-                      Enter your WhatsApp mobile number. It automatically connects with your storefront floating chat widget and enables 1-click order notifications. No QR scanning required!
+                      Enter your WhatsApp mobile number. It automatically connects with your storefront floating chat widget and enables 1-click order notifications.
                     </p>
 
                     <div
@@ -1144,7 +1140,7 @@ export function WhatsAppManagerClient({
                             color: "#334155",
                           }}
                         >
-                          🇧🇩 +880
+                          +880
                         </span>
                         <input
                           type="text"
@@ -1183,7 +1179,7 @@ export function WhatsAppManagerClient({
                                   gap: 5,
                                 }}
                               >
-                                <span>●</span> {op.name} · Valid 11-Digit Mobile Number ✓
+                                {op.name} · Valid 11-Digit Mobile Number
                               </span>
                             );
                           }
@@ -1211,7 +1207,7 @@ export function WhatsAppManagerClient({
                         disabled={isPairing}
                         style={{ padding: "12px 32px", fontSize: 15, fontWeight: 800 }}
                       >
-                        {isPairing ? "Connecting…" : "⚡ Connect WhatsApp to Store (Instant)"}
+                        {isPairing ? "Connecting…" : "Connect WhatsApp to Store"}
                       </button>
                     </div>
                   </div>
@@ -1226,10 +1222,10 @@ export function WhatsAppManagerClient({
             <div className="card" style={{ padding: 20 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                 <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>
-                  🧪 Send Live Test Message
+                  Send Test Message
                 </h3>
                 <span className="pill green" style={{ fontSize: 11, fontWeight: 700 }}>
-                  Instant WhatsApp Send
+                  Direct Send
                 </span>
               </div>
               <p className="muted" style={{ fontSize: 13, margin: "0 0 14px" }}>
@@ -1263,7 +1259,7 @@ export function WhatsAppManagerClient({
                           padding: 0,
                         }}
                       >
-                        👤 Use My Number ({parseBdMobileForDisplay(pairingPhone)})
+                        Use My Number ({parseBdMobileForDisplay(pairingPhone)})
                       </button>
                     )}
                   </div>
@@ -1305,7 +1301,6 @@ export function WhatsAppManagerClient({
                       gap: 8,
                     }}
                   >
-                    <span style={{ fontSize: 16 }}>💬</span>
                     <span>{isLoggingDirect ? "Opening WhatsApp…" : "Open & Send in WhatsApp (Direct)"}</span>
                   </button>
 
@@ -1317,7 +1312,7 @@ export function WhatsAppManagerClient({
                       disabled={isSendingTest}
                       style={{ fontSize: 12 }}
                     >
-                      {isSendingTest ? "Testing Gateway…" : "⚡ Test Background Gateway (Automated)"}
+                      {isSendingTest ? "Testing Gateway…" : "Test Background Gateway"}
                     </button>
                     <span className="muted" style={{ fontSize: 11.5 }}>
                       {config.gatewayUrl ? "Gateway configured" : "No gateway connected (requires URL or SMS)"}
@@ -1327,16 +1322,16 @@ export function WhatsAppManagerClient({
               </div>
             </div>
 
-            {/* Zero-Meta 1-Click Deep Links (Always Free) */}
+            {/* Direct WhatsApp Deep Links */}
             <div className="card" style={{ padding: 20 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                 <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>
-                  🔗 1-Click <code>wa.me</code> Deep Links
+                  Direct WhatsApp Links
                 </h3>
-                <span className="pill green">100% Free</span>
+                <span className="pill green">Included</span>
               </div>
               <p className="muted" style={{ fontSize: 13, margin: "0 0 14px" }}>
-                Every order in your admin dashboard includes 1-tap WhatsApp buttons that open directly in your phone or web browser with pre-filled Bangla & English messages.
+                Every order in your admin dashboard includes 1-tap WhatsApp buttons that open directly in your phone or web browser with pre-filled messages.
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <div
@@ -1348,7 +1343,7 @@ export function WhatsAppManagerClient({
                     fontSize: 12.5,
                   }}
                 >
-                  <b>💬 WhatsApp Confirm:</b> Pre-filled COD confirmation asking for 1 or 2 reply.
+                  <b>WhatsApp Confirm:</b> Pre-filled COD confirmation asking for 1 or 2 reply.
                 </div>
                 <div
                   style={{
@@ -1359,7 +1354,7 @@ export function WhatsAppManagerClient({
                     fontSize: 12.5,
                   }}
                 >
-                  <b>🚚 Send Tracking:</b> Pre-filled courier consignment and tracking URL.
+                  <b>Send Tracking:</b> Pre-filled courier consignment and tracking URL.
                 </div>
                 <div
                   style={{
@@ -1370,7 +1365,7 @@ export function WhatsAppManagerClient({
                     fontSize: 12.5,
                   }}
                 >
-                  <b>🛵 Cash Reminder:</b> Out for delivery reminder to keep exact COD amount ready.
+                  <b>Cash Reminder:</b> Out for delivery reminder to keep exact COD amount ready.
                 </div>
               </div>
             </div>
@@ -1380,7 +1375,7 @@ export function WhatsAppManagerClient({
           <div className="card" style={{ padding: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>
-                ⚙️ Multi-Device Gateway &amp; Baileys Server (Optional)
+                Gateway Server Settings (Optional)
               </h3>
               <span className="pill" style={{ fontSize: 11.5 }}>Advanced</span>
             </div>
@@ -1536,7 +1531,7 @@ export function WhatsAppManagerClient({
                   style={{ marginTop: 3 }}
                 />
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: 14 }}>Smart Bot NLP Responder</div>
+                  <div style={{ fontWeight: 600, fontSize: 14 }}>Automated Response Assistant</div>
                   <div className="muted" style={{ fontSize: 12.5 }}>
                     Parses customer replies to automatically confirm orders, restock inventory, and answer tracking status questions.
                   </div>
@@ -1564,7 +1559,7 @@ export function WhatsAppManagerClient({
                   style={{ marginTop: 3 }}
                 />
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: 14 }}>Greenweb Bulk SMS Fallback</div>
+                  <div style={{ fontWeight: 600, fontSize: 14 }}>SMS Fallback</div>
                   <div className="muted" style={{ fontSize: 12.5 }}>
                     If WhatsApp session is disconnected or recipient is unavailable, cascades seamlessly to SMS.
                   </div>
@@ -1581,7 +1576,7 @@ export function WhatsAppManagerClient({
                   Bilingual Notification Templates
                 </h3>
                 <p className="muted" style={{ margin: "2px 0 0", fontSize: 13 }}>
-                  Customize the message wording in Bangla and English with emojis, bold formatting (*text*), and dynamic variables.
+                  Customize the message wording in Bangla and English with bold formatting (*text*) and dynamic variables.
                 </p>
               </div>
               {templateSaveNotice && <span className="pill ok">{templateSaveNotice}</span>}
@@ -1626,14 +1621,14 @@ export function WhatsAppManagerClient({
                   onClick={() => setTemplateLang("bn")}
                   className={`btn btn-sm ${templateLang === "bn" ? "btn-primary" : "btn-secondary"}`}
                 >
-                  🇧🇩 বাংলা (Bangla)
+                  বাংলা (Bangla)
                 </button>
                 <button
                   type="button"
                   onClick={() => setTemplateLang("en")}
                   className={`btn btn-sm ${templateLang === "en" ? "btn-primary" : "btn-secondary"}`}
                 >
-                  🇬🇧 English
+                  English
                 </button>
               </div>
 
@@ -1890,7 +1885,6 @@ export function WhatsAppManagerClient({
                               style={{ fontSize: 11.5, padding: "3px 9px", display: "inline-flex", alignItems: "center", gap: 4 }}
                               title="Open and send directly via WhatsApp"
                             >
-                              <span>💬</span>
                               <span>Open in WhatsApp</span>
                             </a>
                           </td>
@@ -1920,16 +1914,15 @@ export function WhatsAppManagerClient({
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                  <span style={{ fontSize: 22 }}>📢</span>
                   <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#065F46" }}>
                     WhatsApp Broadcast Campaigns
                   </h3>
                   <span className="pill ok" style={{ fontSize: 11, fontWeight: 700 }}>
-                    ZERO META FEES
+                    DIRECT MESSAGING
                   </span>
                 </div>
                 <p style={{ margin: 0, fontSize: 13.5, color: "#047857", maxWidth: 620, lineHeight: 1.5 }}>
-                  Broadcast flash sales, festive greetings, and automated abandoned cart recoveries directly to your customers' WhatsApp. Protected with built-in anti-ban human pacing.
+                  Send updates, seasonal announcements, and abandoned cart recovery messages directly to customer WhatsApp chats.
                 </p>
               </div>
 
@@ -1946,8 +1939,7 @@ export function WhatsAppManagerClient({
                     fontWeight: 600,
                   }}
                 >
-                  <span>⚡</span>
-                  <span>+ New WhatsApp Broadcast</span>
+                  <span>+ New Broadcast Campaign</span>
                 </Link>
               </div>
             </div>
@@ -1969,14 +1961,14 @@ export function WhatsAppManagerClient({
                   border: "1px solid #BBF7D0",
                 }}
               >
-                <div style={{ fontSize: 12, color: "#64748B", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
-                  <span>🛡️</span> Anti-Ban Human Pacing
+                <div style={{ fontSize: 12, color: "#64748B", fontWeight: 600 }}>
+                  Rate Limiting & Pacing
                 </div>
                 <div style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginTop: 4 }}>
                   4-12s Randomized Delay
                 </div>
                 <div style={{ fontSize: 11.5, color: "#10B981", marginTop: 2 }}>
-                  Simulates natural typing rhythm
+                  Natural sending rhythm
                 </div>
               </div>
 
@@ -1988,14 +1980,14 @@ export function WhatsAppManagerClient({
                   border: "1px solid #BBF7D0",
                 }}
               >
-                <div style={{ fontSize: 12, color: "#64748B", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
-                  <span>⏱️</span> Safe Hourly Velocity
+                <div style={{ fontSize: 12, color: "#64748B", fontWeight: 600 }}>
+                  Hourly Velocity Limit
                 </div>
                 <div style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginTop: 4 }}>
                   60 - 120 msgs / hr
                 </div>
                 <div style={{ fontSize: 11.5, color: "#10B981", marginTop: 2 }}>
-                  Safe threshold against account flags
+                  Prevents account restrictions
                 </div>
               </div>
 
@@ -2007,14 +1999,14 @@ export function WhatsAppManagerClient({
                   border: "1px solid #BBF7D0",
                 }}
               >
-                <div style={{ fontSize: 12, color: "#64748B", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
-                  <span>📱</span> Device Connection
+                <div style={{ fontSize: 12, color: "#64748B", fontWeight: 600 }}>
+                  Device Connection
                 </div>
                 <div style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginTop: 4 }}>
                   {config.status === "CONNECTED" ? (config.phoneNumber || "Connected") : "Disconnected"}
                 </div>
                 <div style={{ fontSize: 11.5, color: config.status === "CONNECTED" ? "#10B981" : "#EF4444", marginTop: 2 }}>
-                  {config.status === "CONNECTED" ? "🟢 Multi-Device Ready" : "⚠️ Connect in Tab 1"}
+                  {config.status === "CONNECTED" ? "Active" : "Connect in Tab 1"}
                 </div>
               </div>
             </div>
@@ -2023,8 +2015,7 @@ export function WhatsAppManagerClient({
           {/* Quick-Launch Playbooks */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
             <div className="card" style={{ padding: 18, border: "1px solid var(--line, #E2E8F0)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                <span style={{ fontSize: 20 }}>🛒</span>
+              <div style={{ marginBottom: 8 }}>
                 <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>Abandoned Cart Recovery</h4>
               </div>
               <p className="muted" style={{ margin: "0 0 14px", fontSize: 13, lineHeight: 1.4 }}>
@@ -2035,17 +2026,16 @@ export function WhatsAppManagerClient({
                 className="btn btn-secondary btn-sm"
                 style={{ width: "100%", textAlign: "center", justifyContent: "center" }}
               >
-                Launch Recovery Blast →
+                Launch Recovery Campaign →
               </Link>
             </div>
 
             <div className="card" style={{ padding: 18, border: "1px solid var(--line, #E2E8F0)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                <span style={{ fontSize: 20 }}>👑</span>
-                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>VIP Flash Sale</h4>
+              <div style={{ marginBottom: 8 }}>
+                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>VIP Customer Campaign</h4>
               </div>
               <p className="muted" style={{ margin: "0 0 14px", fontSize: 13, lineHeight: 1.4 }}>
-                Reward your top buyers (৳15k+ spent or 5+ orders) with exclusive promo codes and private collection access.
+                Reward top buyers with exclusive promo codes and private collection access.
               </p>
               <Link
                 href="/marketing/campaigns?channel=WHATSAPP"
@@ -2057,19 +2047,18 @@ export function WhatsAppManagerClient({
             </div>
 
             <div className="card" style={{ padding: 18, border: "1px solid var(--line, #E2E8F0)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                <span style={{ fontSize: 20 }}>👥</span>
-                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>All-Store Announcement</h4>
+              <div style={{ marginBottom: 8 }}>
+                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>Storewide Announcement</h4>
               </div>
               <p className="muted" style={{ margin: "0 0 14px", fontSize: 13, lineHeight: 1.4 }}>
-                Reach your full opted-in customer base with new arrival notifications, holiday discounts, and coupon drops.
+                Reach your full customer base with new arrival notifications, seasonal updates, and discount codes.
               </p>
               <Link
                 href="/marketing/campaigns?channel=WHATSAPP"
                 className="btn btn-secondary btn-sm"
                 style={{ width: "100%", textAlign: "center", justifyContent: "center" }}
               >
-                Launch Storewide Blast →
+                Launch Storewide Campaign →
               </Link>
             </div>
           </div>
@@ -2084,16 +2073,15 @@ export function WhatsAppManagerClient({
                 </p>
               </div>
               <Link href="/marketing/campaigns" className="btn btn-secondary btn-sm" style={{ fontSize: 12 }}>
-                View All Campaigns Hub →
+                View All Campaigns →
               </Link>
             </div>
 
             {campaigns.length === 0 ? (
               <div style={{ padding: 36, textAlign: "center" }}>
-                <div style={{ fontSize: 28, marginBottom: 8 }}>📢</div>
                 <div style={{ fontWeight: 600, fontSize: 14 }}>No WhatsApp broadcasts sent yet</div>
                 <p className="muted" style={{ margin: "4px 0 16px", fontSize: 13 }}>
-                  Launch your first WhatsApp campaign to boost repeat orders with zero Meta conversation charges.
+                  Launch your first WhatsApp campaign to send order and product updates directly to customers.
                 </p>
                 <Link href="/marketing/campaigns?channel=WHATSAPP" className="btn btn-primary btn-sm">
                   + Create First Broadcast
@@ -2118,12 +2106,12 @@ export function WhatsAppManagerClient({
                           <div style={{ fontWeight: 600 }}>{c.name}</div>
                           {c.couponCode && (
                             <span style={{ fontSize: 11, color: "#059669", fontWeight: 600 }}>
-                              🏷️ {c.couponCode}
+                              {c.couponCode}
                             </span>
                           )}
                         </td>
                         <td style={{ padding: "10px 16px", fontSize: 12.5, color: "#64748B" }}>
-                          {c.targetSegment === "ABANDONED_CART" ? "🛒 Abandoned Cart" : c.targetSegment}
+                          {c.targetSegment === "ABANDONED_CART" ? "Abandoned Cart" : c.targetSegment}
                         </td>
                         <td style={{ padding: "10px 16px", fontSize: 13 }} className="r num">
                           <b>{c.sentCount > 0 ? c.sentCount : c.recipientsCount}</b> / {c.recipientsCount}

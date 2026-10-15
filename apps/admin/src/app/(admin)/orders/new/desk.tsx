@@ -217,19 +217,19 @@ export function QuickOrderDesk({ prefill }: { prefill?: Prefill }) {
                   {parsing ? (
                     <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                       <span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} />
-                      <span>Parsing with Gemini AI...</span>
+                      <span>Extracting address...</span>
                     </span>
                   ) : (
-                    <span>✨ AI Smart Parse</span>
+                    <span>Auto-Parse Address</span>
                   )}
                 </button>
                 {aiParsed && (
                   <span className="pill green" style={{ fontSize: 11, padding: "2px 8px" }}>
-                    ⚡ Parsed with Gemini AI
+                    Parsed from text
                   </span>
                 )}
               </div>
-              <span className="muted" style={{ fontSize: 13 }}>Paste full Messenger/WhatsApp chat in English or Bangla. Gemini AI extracts phone, name, thana & address.</span>
+              <span className="muted" style={{ fontSize: 13 }}>Paste customer chat message in English or Bangla to extract phone, name, thana, and delivery address.</span>
             </div>
           </section>
 

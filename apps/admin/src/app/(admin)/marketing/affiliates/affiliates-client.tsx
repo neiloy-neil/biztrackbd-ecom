@@ -303,7 +303,7 @@ export function AffiliatesClient({
                               style={{ border: "none", background: "none", cursor: "pointer", fontSize: 12, color: "#4F46E5" }}
                               title="Copy full referral link"
                             >
-                              {copiedId === `ref-${p.id}` ? "✓" : "📋"}
+                              {copiedId === `ref-${p.id}` ? "✓" : "Copy"}
                             </button>
                           </div>
                         </td>

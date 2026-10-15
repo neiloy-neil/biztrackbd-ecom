@@ -163,8 +163,8 @@ export function BundlesManagerClient({
   const [editingBump, setEditingBump] = useState<OrderBumpView | null>(null);
   const [bumpTitle, setBumpTitle] = useState("");
   const [bumpTitleBn, setBumpTitleBn] = useState("");
-  const [bumpHl, setBumpHl] = useState("🔥 EXCLUSIVE 1-TIME OFFER");
-  const [bumpHlBn, setBumpHlBn] = useState("🔥 এককালীন বিশেষ অফার");
+  const [bumpHl, setBumpHl] = useState("SPECIAL OFFER");
+  const [bumpHlBn, setBumpHlBn] = useState("এককালীন বিশেষ অফার");
   const [bumpDesc, setBumpDesc] = useState("");
   const [bumpDescBn, setBumpDescBn] = useState("");
   const [bumpProductId, setBumpProductId] = useState(products[0]?.id || "");
@@ -282,8 +282,8 @@ export function BundlesManagerClient({
     setEditingBump(null);
     setBumpTitle("");
     setBumpTitleBn("");
-    setBumpHl("🔥 EXCLUSIVE 1-TIME OFFER");
-    setBumpHlBn("🔥 এককালীন বিশেষ অফার");
+    setBumpHl("SPECIAL OFFER");
+    setBumpHlBn("এককালীন বিশেষ অফার");
     setBumpDesc("");
     setBumpDescBn("");
     const defaultProd = products[0];
@@ -303,8 +303,8 @@ export function BundlesManagerClient({
     setEditingBump(b);
     setBumpTitle(b.title);
     setBumpTitleBn(b.titleBn || "");
-    setBumpHl(b.highlightText || "🔥 EXCLUSIVE 1-TIME OFFER");
-    setBumpHlBn(b.highlightTextBn || "🔥 এককালীন বিশেষ অফার");
+    setBumpHl(b.highlightText || "SPECIAL OFFER");
+    setBumpHlBn(b.highlightTextBn || "এককালীন বিশেষ অফার");
     setBumpDesc(b.description || "");
     setBumpDescBn(b.descriptionBn || "");
     setBumpProductId(b.productId);
@@ -430,13 +430,12 @@ export function BundlesManagerClient({
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <span style={{ fontSize: 32 }}>🚀</span>
             <div>
               <div style={{ fontWeight: 700, fontSize: 16, color: "#b45309" }}>
                 Unlock Product Bundles & 1-Click Checkout Order Bumps
               </div>
               <p style={{ margin: "4px 0 0", fontSize: 13, color: "var(--ink-2, #4b5563)", maxWidth: 640 }}>
-                High-converting stores on BizTrack generate <b>+18% to +32% higher profit per checkout</b> using checkout order bumps and combo savings. Upgrade to <b>Pro</b> or <b>Business</b> to launch unlimited deals.
+                High-converting stores on BizTrack generate higher profit per checkout using checkout order bumps and combo savings. Upgrade to <b>Pro</b> or <b>Business</b> to launch unlimited deals.
               </p>
             </div>
           </div>
@@ -503,7 +502,7 @@ export function BundlesManagerClient({
           }}
           data-testid="tab-bundles"
         >
-          🎁 Product Bundles & Combos
+          Product Bundles & Combos
           <span className="pill grey" style={{ fontSize: 11, padding: "1px 6px" }}>{bundles.length}</span>
         </button>
 
@@ -525,7 +524,7 @@ export function BundlesManagerClient({
           }}
           data-testid="tab-bumps"
         >
-          ⚡ 1-Click Checkout Order Bumps
+          Checkout Order Bumps
           <span className="pill grey" style={{ fontSize: 11, padding: "1px 6px" }}>{bumps.length}</span>
         </button>
 
@@ -547,7 +546,7 @@ export function BundlesManagerClient({
           }}
           data-testid="tab-analytics"
         >
-          📊 AOV & Conversion Analytics
+          AOV & Conversion Analytics
         </button>
       </div>
 
@@ -556,7 +555,6 @@ export function BundlesManagerClient({
         <div>
           {bundles.length === 0 ? (
             <div className="card" style={{ textAlign: "center", padding: "48px 24px" }}>
-              <div style={{ fontSize: 44, marginBottom: 12 }}>🎁</div>
               <h3 style={{ margin: "0 0 6px", fontSize: 18, fontWeight: 700 }}>No Product Bundles Created Yet</h3>
               <p className="muted" style={{ margin: "0 0 20px", fontSize: 14, maxWidth: 460, marginLeft: "auto", marginRight: "auto" }}>
                 Combine 2 or more complementary products into an attractive combo package with an exclusive discount.
@@ -660,14 +658,13 @@ export function BundlesManagerClient({
         <div>
           {bumps.length === 0 ? (
             <div className="card" style={{ textAlign: "center", padding: "48px 24px" }}>
-              <div style={{ fontSize: 44, marginBottom: 12 }}>⚡</div>
               <h3 style={{ margin: "0 0 6px", fontSize: 18, fontWeight: 700 }}>No Order Bumps Configured</h3>
               <p className="muted" style={{ margin: "0 0 20px", fontSize: 14, maxWidth: 480, marginLeft: "auto", marginRight: "auto" }}>
                 Add a 1-click impulse buy offer directly on your checkout page right before customers confirm their Cash on Delivery order.
               </p>
               {canEdit && (
                 <button type="button" className="btn btn-primary" onClick={openCreateBump} data-testid="empty-create-bump">
-                  + Create 1-Click Order Bump
+                  + Create Order Bump
                 </button>
               )}
             </div>
@@ -1217,7 +1214,7 @@ export function BundlesManagerClient({
                     className="input"
                     value={bumpHl}
                     onChange={(e) => setBumpHl(e.target.value)}
-                    placeholder="🔥 EXCLUSIVE 1-TIME OFFER"
+                    placeholder="SPECIAL OFFER"
                   />
                 </div>
 
@@ -1355,7 +1352,7 @@ export function BundlesManagerClient({
                 >
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
                     <span style={{ fontSize: 12, fontWeight: 700, color: "#d97706" }}>
-                      {bumpHl || "🔥 EXCLUSIVE 1-TIME OFFER"}
+                      {bumpHl || "SPECIAL OFFER"}
                     </span>
                     {selectedBumpVariant && Number(selectedBumpVariant.price) > bumpPrice && (
                       <span className="pill green" style={{ fontSize: 10, padding: "2px 6px", fontWeight: 700 }}>
@@ -1403,7 +1400,7 @@ export function BundlesManagerClient({
                   }}
                 >
                   <div style={{ fontWeight: 600, color: "#0f172a", marginBottom: 4 }}>
-                    ⚡ Why this converts at 20%+
+                    Order Bump Performance
                   </div>
                   Customers don't have to fill out another form or re-enter payment details. When this box is checked, the order total updates immediately and component inventory is atomically locked on order submission.
                 </div>

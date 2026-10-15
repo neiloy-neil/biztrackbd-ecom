@@ -67,7 +67,13 @@ export function WholesaleRegisterForm({ lang, contactPhone, whatsappNumber }: Pr
           textAlign: "center",
         }}
       >
-        <div style={{ fontSize: 40, marginBottom: 8 }}>✅</div>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+          <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#DCFCE7", display: "flex", alignItems: "center", justifyContent: "center", color: "#16A34A" }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+        </div>
         <h2 style={{ margin: "0 0 8px", fontSize: 20, color: "#166534", fontWeight: 700 }}>
           {lang === "bn" ? "আবেদন জমা হয়েছে!" : "Wholesale Application Received!"}
         </h2>

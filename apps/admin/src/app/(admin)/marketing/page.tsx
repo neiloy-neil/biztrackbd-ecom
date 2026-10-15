@@ -7,12 +7,12 @@ import { requireAccess } from "@/lib/session";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Marketing" };
 
-const EVENT_ICONS: Record<string, string> = {
-  COUPON: "🎟️",
-  ABANDONED_RECOVERED: "🛒",
-  REVIEW: "⭐",
-  LOYALTY: "💎",
-  CAMPAIGN: "📢",
+const EVENT_TAGS: Record<string, string> = {
+  COUPON: "Discount",
+  ABANDONED_RECOVERED: "Recovery",
+  REVIEW: "Review",
+  LOYALTY: "Loyalty",
+  CAMPAIGN: "Broadcast",
 };
 
 export default async function MarketingOverviewPage() {
@@ -32,7 +32,7 @@ export default async function MarketingOverviewPage() {
         <div className="actions">
           {canEdit && (
             <Link href="/marketing/ai" className="btn btn-secondary" prefetch={false}>
-              ✨ AI Copywriter
+              Content Studio
             </Link>
           )}
           {canEdit && (
@@ -101,10 +101,7 @@ export default async function MarketingOverviewPage() {
         <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 20 }}>🎟️</span>
-                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Discounts & Coupons</h3>
-              </div>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Discounts & Coupons</h3>
               <span className={`pill ${o.coupons.activeCount > 0 ? "ok" : "grey"}`}>
                 {o.coupons.activeCount} Active
               </span>
@@ -124,10 +121,7 @@ export default async function MarketingOverviewPage() {
         <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 20 }}>🎁</span>
-                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Bundles & Order Bumps</h3>
-              </div>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Bundles & Order Bumps</h3>
               <span className="pill green">AOV Booster</span>
             </div>
             <p className="muted" style={{ fontSize: 13, margin: "0 0 12px" }}>
@@ -143,14 +137,11 @@ export default async function MarketingOverviewPage() {
         <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 20 }}>💬</span>
-                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>WhatsApp Automation</h3>
-              </div>
-              <span className="pill green">Zero-Meta</span>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>WhatsApp Automation</h3>
+              <span className="pill green">WhatsApp</span>
             </div>
             <p className="muted" style={{ fontSize: 13, margin: "0 0 12px" }}>
-              QR Linked Device engine. Automated COD order confirmation, shipping tracking alerts, 2-stage cart recovery, and smart bot.
+              Direct WhatsApp engine. Automated COD order confirmation, shipping tracking alerts, 2-stage cart recovery, and smart bot.
             </p>
           </div>
           <Link href="/marketing/whatsapp" className="btn btn-secondary btn-sm" style={{ width: "100%", textAlign: "center" }} prefetch={false}>
@@ -162,11 +153,8 @@ export default async function MarketingOverviewPage() {
         <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 20 }}>🤝</span>
-                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Affiliate & Influencers</h3>
-              </div>
-              <span className="pill green">Growth Engine</span>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Affiliate & Influencers</h3>
+              <span className="pill green">Growth</span>
             </div>
             <p className="muted" style={{ fontSize: 13, margin: "0 0 12px" }}>
               Referral link tracking, dedicated influencer coupon attribution, live commission ledger, and bKash/Nagad payout management.
@@ -181,10 +169,7 @@ export default async function MarketingOverviewPage() {
         <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 20 }}>📢</span>
-                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Broadcast Campaigns</h3>
-              </div>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Broadcast Campaigns</h3>
               <span className="pill info">{o.summary.campaignsCount} Sent</span>
             </div>
             <p className="muted" style={{ fontSize: 13, margin: "0 0 12px" }}>
@@ -202,10 +187,7 @@ export default async function MarketingOverviewPage() {
         <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 20 }}>🔔</span>
-                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Automated Notifications</h3>
-              </div>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Automated Notifications</h3>
               <span className="pill ok">Active</span>
             </div>
             <p className="muted" style={{ fontSize: 13, margin: "0 0 12px" }}>
@@ -221,10 +203,7 @@ export default async function MarketingOverviewPage() {
         <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 20 }}>⚡</span>
-                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Banner & Flash Sale</h3>
-              </div>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Banner & Flash Sale</h3>
               <span className="pill info">Storefront</span>
             </div>
             <p className="muted" style={{ fontSize: 13, margin: "0 0 12px" }}>
@@ -240,10 +219,7 @@ export default async function MarketingOverviewPage() {
         <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 20 }}>🎯</span>
-                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Pixels & CAPI</h3>
-              </div>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Pixels & CAPI</h3>
               <span className={`pill ${o.pixels.metaConnected ? "ok" : "grey"}`}>
                 {o.pixels.metaConnected ? "CAPI Synced" : "Pending"}
               </span>
@@ -261,10 +237,7 @@ export default async function MarketingOverviewPage() {
         <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 20 }}>🛒</span>
-                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Cart Recovery & Loyalty</h3>
-              </div>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Cart Recovery & Loyalty</h3>
               <span className="pill ok">Retention</span>
             </div>
             <p className="muted" style={{ fontSize: 13, margin: "0 0 12px" }}>
@@ -285,18 +258,15 @@ export default async function MarketingOverviewPage() {
         <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 20 }}>✨</span>
-                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>AI Copywriter Studio</h3>
-              </div>
-              <span className="pill ok">Gemini 2.5</span>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Marketing Content Studio</h3>
+              <span className="pill ok">Content Studio</span>
             </div>
             <p className="muted" style={{ fontSize: 13, margin: "0 0 12px" }}>
               Craft high-converting Facebook/Instagram post captions, single-part SMS campaigns, and hero banner slogans in 1 click.
             </p>
           </div>
           <Link href="/marketing/ai" className="btn btn-secondary btn-sm" style={{ width: "100%", textAlign: "center" }} prefetch={false}>
-            Open AI Studio →
+            Open Content Studio →
           </Link>
         </div>
       </div>
@@ -325,7 +295,9 @@ export default async function MarketingOverviewPage() {
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
-                  <span style={{ fontSize: 18 }}>{EVENT_ICONS[evt.type] ?? "📣"}</span>
+                  <span className="pill grey" style={{ fontSize: 11, minWidth: 70, textAlign: "center" }}>
+                    {EVENT_TAGS[evt.type] ?? "Activity"}
+                  </span>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontWeight: 600 }}>{evt.title}</div>
                     <div className="muted" style={{ fontSize: 12.5 }}>{evt.detail}</div>

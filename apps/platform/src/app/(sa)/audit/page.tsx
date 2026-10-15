@@ -69,7 +69,7 @@ export default async function AuditPage({
             textDecoration: "none",
           }}
         >
-          👥 Platform Team ({staffUsers.length})
+          Platform Team ({staffUsers.length})
         </Link>
         <Link
           href="/audit?tab=audit"
@@ -83,7 +83,7 @@ export default async function AuditPage({
             textDecoration: "none",
           }}
         >
-          📜 Audit Trail ({auditRows.length})
+          Audit Trail ({auditRows.length})
         </Link>
       </div>
 

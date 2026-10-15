@@ -230,8 +230,13 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
         {/* Dynamic Product Catalog Feed Card for Facebook & Google */}
         <section className="card" data-testid="catalog-feed-card" style={{ padding: 22 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 10, background: "#10B981", color: "#fff", fontWeight: 800, fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              📦
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: "#10B981", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
+                <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
+                <line x1="6" y1="6" x2="6.01" y2="6" />
+                <line x1="6" y1="18" x2="6.01" y2="18" />
+              </svg>
             </div>
             <div>
               <div style={{ fontSize: 15, fontWeight: 700 }}>Dynamic Product Catalog Feed</div>

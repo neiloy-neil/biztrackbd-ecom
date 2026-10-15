@@ -585,7 +585,6 @@ export function PosTerminalClient({ initialData }: Props) {
             boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)",
           }}
         >
-          <div style={{ fontSize: 48, marginBottom: 8 }}>🏪</div>
           <h1 style={{ fontSize: 24, margin: "0 0 4px" }}>Start POS Shift</h1>
           <p className="muted" style={{ fontSize: 14, margin: "0 0 20px" }}>
             Register: <strong>{initialData.register.name}</strong> ({initialData.register.code})
@@ -719,18 +718,15 @@ export function PosTerminalClient({ initialData }: Props) {
             gap: 10,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <span style={{ fontSize: 20 }}>🏪</span>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: 15, display: "flex", alignItems: "center", gap: 8 }}>
-                <span>{initialData.register.name}</span>
-                <span className="pill green" style={{ fontSize: 11, padding: "1px 6px" }}>
-                  🟢 Shift Active
-                </span>
-              </div>
-              <div style={{ fontSize: 12, color: "var(--ink-2, #6b7280)" }}>
-                Cashier: <strong>{initialData.cashierName}</strong> · Drawer Cash: <strong>{taka(session.expectedCashInDrawer)}</strong>
-              </div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 15, display: "flex", alignItems: "center", gap: 8 }}>
+              <span>{initialData.register.name}</span>
+              <span className="pill green" style={{ fontSize: 11, padding: "1px 6px" }}>
+                Shift Active
+              </span>
+            </div>
+            <div style={{ fontSize: 12, color: "var(--ink-2, #6b7280)" }}>
+              Cashier: <strong>{initialData.cashierName}</strong> · Drawer Cash: <strong>{taka(session.expectedCashInDrawer)}</strong>
             </div>
           </div>
 
@@ -740,14 +736,14 @@ export function PosTerminalClient({ initialData }: Props) {
               className="btn btn-secondary btn-sm"
               onClick={() => setShowMovementModal(true)}
             >
-              💵 Cash In / Out
+              Cash In / Out
             </button>
             <button
               type="button"
               className="btn btn-secondary btn-sm"
               onClick={() => setShowParkedModal(true)}
             >
-              📦 Parked ({parkedCarts.length})
+              Parked ({parkedCarts.length})
             </button>
             <button
               type="button"
@@ -755,7 +751,7 @@ export function PosTerminalClient({ initialData }: Props) {
               style={{ color: "#d97706" }}
               onClick={() => setShowShiftCloseModal(true)}
             >
-              🔒 Close Shift
+              Close Shift
             </button>
           </div>
         </div>
@@ -781,7 +777,6 @@ export function PosTerminalClient({ initialData }: Props) {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
-                <span style={{ position: "absolute", left: 10, top: 10, opacity: 0.5 }}>🔍</span>
               </div>
 
               {/* Barcode Scanner Input */}
@@ -789,7 +784,7 @@ export function PosTerminalClient({ initialData }: Props) {
                 <input
                   ref={barcodeInputRef}
                   className="input"
-                  style={{ width: "100%", paddingLeft: 32 }}
+                  style={{ width: "100%" }}
                   placeholder="Scan barcode or type & Enter..."
                   value={barcodeInput}
                   onChange={(e) => setBarcodeInput(e.target.value)}
@@ -800,7 +795,6 @@ export function PosTerminalClient({ initialData }: Props) {
                     }
                   }}
                 />
-                <span style={{ position: "absolute", left: 10, top: 10, opacity: 0.5 }}>🏷️</span>
               </div>
             </div>
 
@@ -882,7 +876,7 @@ export function PosTerminalClient({ initialData }: Props) {
                       {p.imageUrl ? (
                         <img src={p.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : (
-                        <span style={{ fontSize: 24, opacity: 0.3 }}>🛍️</span>
+                        <span style={{ fontSize: 12, color: "#9ca3af" }}>No image</span>
                       )}
                     </div>
                     <div>
@@ -943,8 +937,7 @@ export function PosTerminalClient({ initialData }: Props) {
             <div style={{ flex: 1, overflowY: "auto", padding: "8px 12px" }}>
               {cart.length === 0 ? (
                 <div style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "var(--ink-2, #9ca3af)", textAlign: "center" }}>
-                  <span style={{ fontSize: 36, marginBottom: 8, opacity: 0.5 }}>🛒</span>
-                  <div>Cart is empty</div>
+                  <div style={{ fontWeight: 600 }}>Cart is empty</div>
                   <div style={{ fontSize: 12 }}>Scan barcode or tap items to ring up</div>
                 </div>
               ) : (
@@ -1122,11 +1115,11 @@ export function PosTerminalClient({ initialData }: Props) {
             {/* Payment Method Selector Tabs */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 6, margin: "14px 0" }}>
               {[
-                ["CASH", "💵 Cash"],
+                ["CASH", "Cash"],
                 ["BKASH", "bKash"],
                 ["NAGAD", "Nagad"],
-                ["CARD", "💳 Card"],
-                ["SPLIT", "⚖️ Split"],
+                ["CARD", "Card"],
+                ["SPLIT", "Split"],
               ].map(([m, l]) => (
                 <button
                   key={m}
@@ -1218,7 +1211,6 @@ export function PosTerminalClient({ initialData }: Props) {
             {/* CARD PAYMENT UI */}
             {selectedPayMethod === "CARD" && (
               <div style={{ padding: "16px", background: "#f8fafc", borderRadius: 8, textAlign: "center" }}>
-                <span style={{ fontSize: 28 }}>💳</span>
                 <div style={{ fontWeight: 600, margin: "6px 0" }}>Swipe/Tap on Card Terminal</div>
                 <div style={{ fontSize: 12.5, color: "#6b7280" }}>
                   Collect {taka(netPayable)} via your physical bank POS terminal.
@@ -1421,7 +1413,7 @@ export function PosTerminalClient({ initialData }: Props) {
                 style={{ flex: 1 }}
                 onClick={() => window.print()}
               >
-                🖨️ Print Receipt
+                Print Receipt
               </button>
               <button
                 type="button"
@@ -1429,7 +1421,7 @@ export function PosTerminalClient({ initialData }: Props) {
                 style={{ flex: 1 }}
                 onClick={() => setActiveReceipt(null)}
               >
-                ✨ New Sale
+                New Sale
               </button>
             </div>
           </div>

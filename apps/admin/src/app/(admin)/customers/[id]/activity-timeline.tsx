@@ -2,13 +2,13 @@ import Link from "next/link";
 import type { CustomerActivityItem } from "@biztrackbd/core";
 import { friendlyDate } from "@/lib/format";
 
-const TYPE_CONFIG: Record<CustomerActivityItem["type"], { color: string; bg: string; icon: string }> = {
-  ORDER: { color: "#5B4FE8", bg: "#EEF2FF", icon: "📦" },
-  SMS: { color: "#2563EB", bg: "#EFF6FF", icon: "✉️" },
-  REVIEW: { color: "#D97706", bg: "#FEF3C7", icon: "⭐" },
-  LOYALTY: { color: "#059669", bg: "#ECFDF5", icon: "💎" },
-  CREDIT: { color: "#10B981", bg: "#D1FAE5", icon: "৳" },
-  STAFF: { color: "#64748B", bg: "#F1F5F9", icon: "⚙️" },
+const TYPE_CONFIG: Record<CustomerActivityItem["type"], { color: string; bg: string; label: string }> = {
+  ORDER: { color: "#5B4FE8", bg: "#EEF2FF", label: "ORD" },
+  SMS: { color: "#2563EB", bg: "#EFF6FF", label: "SMS" },
+  REVIEW: { color: "#D97706", bg: "#FEF3C7", label: "REV" },
+  LOYALTY: { color: "#059669", bg: "#ECFDF5", label: "PTS" },
+  CREDIT: { color: "#10B981", bg: "#D1FAE5", label: "৳" },
+  STAFF: { color: "#64748B", bg: "#F1F5F9", label: "LOG" },
 };
 
 export function CustomerActivityTimeline({ items }: { items: CustomerActivityItem[] }) {
@@ -33,20 +33,21 @@ export function CustomerActivityTimeline({ items }: { items: CustomerActivityIte
           >
             <div
               style={{
-                width: 28,
-                height: 28,
-                borderRadius: 14,
+                width: 32,
+                height: 24,
+                borderRadius: 4,
                 background: conf.bg,
                 color: conf.color,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                flex: "0 0 28px",
-                fontSize: 13,
+                flex: "0 0 32px",
+                fontSize: 10,
+                fontWeight: 700,
                 marginTop: 2,
               }}
             >
-              {conf.icon}
+              {conf.label}
             </div>
 
             <div style={{ flex: 1, minWidth: 0 }}>

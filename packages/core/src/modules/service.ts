@@ -18,10 +18,10 @@ export interface ModuleDef {
 export const MODULES: ModuleDef[] = [
   { key: "loyalty", label: "Loyalty, VIP levels and referrals", description: "Reward points, Silver, Gold and Platinum levels, birthday vouchers and refer-a-friend.", built: true },
   { key: "pos_barcode", label: "POS & Barcode Studio", description: "Omnichannel retail counter cashier terminal, barcode scanning, and thermal roll printing.", built: true },
-  { key: "ai_suite", label: "Gemini AI Assistant Suite", description: "AI copywriter, product description generator, chat address parser, and storefront chatbot.", built: true },
+  { key: "ai_suite", label: "Automated Assistant & Content Tools", description: "Product description generator, address parser from chat text, and storefront assistant.", built: true },
   { key: "marketing_campaigns", label: "Marketing Command Center", description: "Broadcast SMS & Email campaigns, urgent storefront flash banners, and auto notifications.", built: true },
   { key: "fraud_shield", label: "Unified Courier Fraud Defense", description: "Cross-courier delivery record screening, fraud score calculation, and developer API.", built: true },
-  { key: "whatsapp_commerce", label: "Automated WhatsApp Commerce Suite", description: "Zero-Meta linked device QR session, 2-way bot, automated COD confirmations, out-for-delivery reminders, cart recovery, and live desk.", built: true },
+  { key: "whatsapp_commerce", label: "WhatsApp Order Notifications & Support", description: "Send order confirmations, delivery updates, cart recovery, and live customer chat via WhatsApp.", built: true },
   { key: "product_bundles", label: "Product Bundles & 1-Click Order Bumps", description: "Frequently Bought Together combos, checkout upsell bumps, quantity discounts, and unified inventory deduction.", built: true },
   { key: "landing_builder", label: "Landing Page & Sales Funnel Studio", description: "Single-product high-converting sales landing pages with direct cash-on-delivery checkout forms, urgency countdown timers, and conversion analytics.", built: true },
   { key: "customer_returns", label: "Customer Returns & Reverse Logistics", description: "Storefront customer return requests, courier return parcel tracking, inspection workflows, and automated bKash/Nagad/credit refunds.", built: true },

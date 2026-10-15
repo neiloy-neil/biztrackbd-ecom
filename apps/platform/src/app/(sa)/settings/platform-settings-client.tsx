@@ -288,7 +288,7 @@ export function PlatformSettingsClient({
             cursor: "pointer",
           }}
         >
-          🤖 AI Suite (Gemini)
+          Content AI Studio
         </button>
         <button
           type="button"
@@ -304,7 +304,7 @@ export function PlatformSettingsClient({
             cursor: "pointer",
           }}
         >
-          📱 SMS Gateways
+          SMS Gateways
         </button>
         <button
           type="button"
@@ -320,7 +320,7 @@ export function PlatformSettingsClient({
             cursor: "pointer",
           }}
         >
-          🚚 Couriers & Logistics
+          Couriers & Logistics
         </button>
         <button
           type="button"
@@ -336,7 +336,7 @@ export function PlatformSettingsClient({
             cursor: "pointer",
           }}
         >
-          💳 UddoktaPay
+          Payment Gateway
         </button>
         <button
           type="button"
@@ -352,7 +352,7 @@ export function PlatformSettingsClient({
             cursor: "pointer",
           }}
         >
-          ✉️ Mail & Branding
+          Mail & Branding
         </button>
         <button
           type="button"
@@ -369,7 +369,7 @@ export function PlatformSettingsClient({
             cursor: "pointer",
           }}
         >
-          🛡️ Fraud checker
+          Fraud Shield
         </button>
       </div>
 
@@ -412,9 +412,9 @@ export function PlatformSettingsClient({
                 onChange={(e) => setAiModel(e.target.value)}
                 style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
               >
-                <option value="gemini-2.5-flash">Gemini 2.5 Flash (Ultra Fast & Recommended)</option>
+                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                 <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                <option value="gemini-1.5-pro">Gemini 1.5 Pro (Highest Accuracy)</option>
+                <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
               </select>
             </div>
 
@@ -432,7 +432,7 @@ export function PlatformSettingsClient({
                 disabled={aiTesting}
                 style={{ padding: "10px 18px", background: "#F4F3FF", color: "#5B4FE8", border: "1px solid #5B4FE8", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
               >
-                {aiTesting ? "Testing…" : "⚡ Test Latency & Ping"}
+                {aiTesting ? "Testing…" : "Test Latency & Ping"}
               </button>
             </div>
 
@@ -648,7 +648,7 @@ export function PlatformSettingsClient({
                 disabled={couriersTesting}
                 style={{ padding: "10px 18px", background: "#F4F3FF", color: "#5B4FE8", border: "1px solid #5B4FE8", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
               >
-                {couriersTesting ? "Pinging…" : "⚡ Ping Courier Networks"}
+                {couriersTesting ? "Pinging…" : "Ping Courier Networks"}
               </button>
             </div>
 
@@ -735,7 +735,7 @@ export function PlatformSettingsClient({
                 disabled={uddoktaTesting}
                 style={{ padding: "10px 18px", background: "#F4F3FF", color: "#5B4FE8", border: "1px solid #5B4FE8", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
               >
-                {uddoktaTesting ? "Testing…" : "⚡ Ping Gateway"}
+                {uddoktaTesting ? "Testing…" : "Ping Gateway"}
               </button>
             </div>
 

@@ -23,14 +23,14 @@ export const DEFAULT_BANGLA_QUICK_REPLIES: Omit<CreateQuickReplyInput, "id">[] =
     shortcut: "confirm",
     title: "Order Confirmed",
     category: "Orders",
-    body: "ধন্যবাদ! আপনার অর্ডারটি কনফার্ম করা হয়েছে। 🌸 আমরা খুব দ্রুত প্যাকেজিং শেষ করে কুরিয়ারে হ্যান্ডওভার করব।",
+    body: "ধন্যবাদ! আপনার অর্ডারটি কনফার্ম করা হয়েছে। আমরা খুব দ্রুত প্যাকেজিং শেষ করে কুরিয়ারে হ্যান্ডওভার করব।",
     sortOrder: 1,
   },
   {
     shortcut: "delivery",
     title: "Delivery Timeline",
     category: "Delivery",
-    body: "আপনার পার্সেল কুরিয়ারে পাঠানো হয়েছে। 🚚 ঢাকা সিটির ভেতরে ২৪-৪৮ ঘণ্টা এবং ঢাকার বাইরে ২-৩ কার্যদিবসের মধ্যে ডেলিভারি পৌঁছে যাবে।",
+    body: "আপনার পার্সেল কুরিয়ারে পাঠানো হয়েছে। ঢাকা সিটির ভেতরে ২৪-৪৮ ঘণ্টা এবং ঢাকার বাইরে ২-৩ কার্যদিবসের মধ্যে ডেলিভারি পৌঁছে যাবে।",
     sortOrder: 2,
   },
   {
@@ -58,7 +58,7 @@ export const DEFAULT_BANGLA_QUICK_REPLIES: Omit<CreateQuickReplyInput, "id">[] =
     shortcut: "thanks",
     title: "Thank You Note",
     category: "General",
-    body: "আমাদের স্টোরে কেনাকাটা করার জন্য আন্তরিক ধন্যবাদ! ❤️ যেকোনো প্রয়োজনে আমাদের সাথে যোগাযোগ রাখতে পারেন।",
+    body: "আমাদের স্টোরে কেনাকাটা করার জন্য আন্তরিক ধন্যবাদ! যেকোনো প্রয়োজনে আমাদের সাথে যোগাযোগ রাখতে পারেন।",
     sortOrder: 6,
   },
 ];

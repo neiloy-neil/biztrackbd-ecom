@@ -139,7 +139,9 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
               prefetch={false}
               data-testid="dock-fraud"
             >
-              <span style={{ fontSize: 13 }}>🛡️</span>
+              <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: "#0284C7" }} aria-hidden="true">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
               <span>Fraud Check</span>
             </Link>
             <Link
@@ -152,7 +154,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
               <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: "#8B5CF6" }} aria-hidden="true">
                 <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
               </svg>
-              <span>AI Studio</span>
+              <span>Content Studio</span>
             </Link>
             {can(s.user.role, "orders", "edit") && (
               <Link
@@ -430,7 +432,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
             {d.courierHealth.isReturnRateElevated && (
               <div className="notice bad" style={{ marginBottom: 12, padding: "8px 12px", fontSize: 13 }} role="alert">
-                <b>⚠️ Elevated Return Rate ({d.courierHealth.returnRate}%):</b> Returns have exceeded the 12% safe threshold. Use phone confirmation calls before dispatch or enable Fraud Shield to screen high-risk COD buyers.
+                <b>Elevated Return Rate ({d.courierHealth.returnRate}%):</b> Returns have exceeded the 12% safe threshold. Use phone confirmation calls before dispatch or enable Fraud Shield to screen high-risk COD buyers.
               </div>
             )}
 
@@ -603,8 +605,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                     <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
                   </svg>
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 600 }}>Gemini AI Studio</div>
-                    <div className="muted" style={{ fontSize: 11.5 }}>Copywriter & parsing</div>
+                    <div style={{ fontSize: 13, fontWeight: 600 }}>Marketing Content Studio</div>
+                    <div className="muted" style={{ fontSize: 11.5 }}>Copywriter & Address Parsing</div>
                   </div>
                 </div>
                 <Link href="/marketing/ai" className="btn btn-sm btn-secondary" prefetch={false}>Launch</Link>

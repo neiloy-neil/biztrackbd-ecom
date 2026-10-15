@@ -49,7 +49,7 @@ export default async function Products({ searchParams }: { searchParams: Promise
       <div className="page-head">
         <h1>Products</h1>
         <div className="actions">
-          <Link href="/products/barcodes" className="btn btn-secondary" prefetch={false}>🏷️ Barcode Labels</Link>
+          <Link href="/products/barcodes" className="btn btn-secondary" prefetch={false}>Barcode Labels</Link>
           <Link href="/inventory" className="btn btn-secondary" prefetch={false}>Inventory</Link>
           {canEdit && <Link href="/products/import" className="btn btn-secondary" prefetch={false} data-testid="import-csv">Import CSV</Link>}
           {canEdit && <Link href="/products/new" className="btn btn-primary" prefetch={false} data-testid="add-product"><PlusIcon width={18} height={18} /> Add product</Link>}

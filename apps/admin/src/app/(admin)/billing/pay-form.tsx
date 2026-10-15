@@ -65,7 +65,7 @@ export function PayForm({ plans, payTo, current, suggested }: { plans: Plan[]; p
       <div className="card" style={{ background: "linear-gradient(135deg, rgba(15,118,110,0.06), rgba(2,132,199,0.06))", borderColor: "var(--brand, #0f766e)" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
           <div>
-            <h3 style={{ margin: "0 0 4px 0", fontSize: 16 }}>⚡ Pay Instantly with UddoktaPay</h3>
+            <h3 style={{ margin: "0 0 4px 0", fontSize: 16 }}>Pay Instantly with UddoktaPay</h3>
             <p className="muted" style={{ margin: 0, fontSize: 13.5 }}>
               Auto-activates your {chosen.name} plan immediately via bKash, Nagad, Rocket, Upay or Cards.
             </p>

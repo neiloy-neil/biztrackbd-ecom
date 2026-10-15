@@ -326,7 +326,7 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
           >
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6, gap: 6 }}>
               <span style={{ fontSize: 12.5, fontWeight: 700, color: "#d97706", display: "inline-flex", alignItems: "center", gap: 4 }}>
-                ⚡ {hl || (lang === "bn" ? "এককালীন বিশেষ অফার!" : "ONE TIME SPECIAL OFFER!")}
+                {hl || (lang === "bn" ? "এককালীন বিশেষ অফার" : "ONE-TIME SPECIAL OFFER")}
               </span>
               {b.savings > 0 && (
                 <span className="pill green" style={{ fontSize: 11, padding: "2px 8px", fontWeight: 700 }}>
@@ -441,18 +441,17 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
           <div style={{ marginTop: 10 }}>{summary}</div>
         </details>
 
-        <section className="card" style={{ background: "linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%)", borderColor: "rgba(99, 102, 241, 0.25)" }}>
+        <section className="card" style={{ background: "rgba(99, 102, 241, 0.04)", borderColor: "rgba(99, 102, 241, 0.2)" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 600, fontSize: 14 }}>
-                <span>✨</span>
-                <span>{lang === "bn" ? "এক ক্লিকে স্বয়ংক্রিয় ঠিকানা পূরণ" : "One-Click AI Address Auto-Fill"}</span>
-                <span className="pill green" style={{ fontSize: 10, padding: "1px 6px" }}>Gemini AI</span>
+                <span>{lang === "bn" ? "স্বয়ংক্রিয় ঠিকানা পূরণ" : "Auto-Parse Address"}</span>
+                <span className="pill" style={{ fontSize: 10, padding: "1px 6px" }}>Auto-Fill</span>
               </div>
               <p style={{ margin: "4px 0 0", fontSize: 12.5, color: "var(--ink-2, #6b7280)" }}>
                 {lang === "bn"
                   ? "মেসেঞ্জার বা নোট থেকে নাম, ফোন ও ঠিকানা একবারে পেস্ট করুন।"
-                  : "Paste customer name, phone and address directly from WhatsApp/Messenger."}
+                  : "Paste customer name, phone and address directly from WhatsApp or messages."}
               </p>
             </div>
             <button
@@ -463,7 +462,7 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
             >
               {showAiPaste
                 ? (lang === "bn" ? "বন্ধ করুন" : "Close")
-                : (lang === "bn" ? "📋 পেস্ট করুন" : "📋 Paste Text")}
+                : (lang === "bn" ? "পেস্ট করুন" : "Paste Text")}
             </button>
           </div>
 
@@ -493,8 +492,8 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
                   onClick={handleAiParse}
                 >
                   {parsingAddress
-                    ? (lang === "bn" ? "যাচাই হচ্ছে..." : "AI Parsing...")
-                    : (lang === "bn" ? "⚡ তথ্য পূরণ করুন" : "⚡ Auto-Fill Fields")}
+                    ? (lang === "bn" ? "যাচাই হচ্ছে..." : "Parsing...")
+                    : (lang === "bn" ? "তথ্য পূরণ করুন" : "Auto-Fill Fields")}
                 </button>
               </div>
             </div>

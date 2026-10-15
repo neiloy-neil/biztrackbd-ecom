@@ -5,7 +5,7 @@ import { AppDisabledNotice } from "@/components/app-disabled-notice";
 import { AiSettingsForm } from "./ai-settings-form";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "AI & Chatbot Settings" };
+export const metadata: Metadata = { title: "Store Assistant & Content Tools" };
 
 export default async function AiSettingsPage() {
   const s = await requireAccess("design");
@@ -14,11 +14,11 @@ export default async function AiSettingsPage() {
   if (!mod.active) {
     return (
       <AppDisabledNotice
-        appName="Gemini AI Merchant & Chatbot Suite"
+        appName="Automated Assistant & Content Tools"
         appKey="ai_suite"
         planTier={mod.planTier}
         minPlan="PRO"
-        description="Access AI copywriters, chat address parsers, and the storefront 24/7 sales chatbot."
+        description="Generate product descriptions, extract chat addresses, and enable the storefront sales assistant."
       />
     );
   }
@@ -28,10 +28,10 @@ export default async function AiSettingsPage() {
   return (
     <>
       <div className="page-head">
-        <h1>AI &amp; Chatbot Settings</h1>
+        <h1>Store Assistant &amp; Content Tools</h1>
       </div>
       <p className="page-sub">
-        Configure Google Gemini AI settings, bring your own API key for unlimited generation, and customize the storefront shopping assistant.
+        Configure automated description generation, custom API keys, and storefront chat assistant options.
       </p>
 
       <AiSettingsForm initial={aiSettings} />

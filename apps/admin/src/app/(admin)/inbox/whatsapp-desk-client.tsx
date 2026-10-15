@@ -261,7 +261,7 @@ export function WhatsAppDeskClient({
             : c
         )
       );
-      setActionFeedback(nextPaused ? "⏸️ Bot paused for 24h" : "🤖 Bot resumed");
+      setActionFeedback(nextPaused ? "Bot paused for 24h" : "Bot resumed");
       setTimeout(() => setActionFeedback(null), 3500);
     } catch (e: any) {
       alert(e.message || "Failed to toggle bot");
@@ -295,7 +295,7 @@ export function WhatsAppDeskClient({
           status: "RESOLVED",
         }));
       }
-      setActionFeedback("⚡ Order confirmed & notification dispatched!");
+      setActionFeedback("Order confirmed & notification dispatched!");
       setTimeout(() => setActionFeedback(null), 4000);
     } catch (e: any) {
       alert(e.message || "Failed to confirm order");
@@ -313,7 +313,7 @@ export function WhatsAppDeskClient({
           messages: [...(prev?.messages || []), res.message],
         }));
       }
-      setActionFeedback("🚚 Tracking info sent to customer!");
+      setActionFeedback("Tracking info sent to customer!");
       setTimeout(() => setActionFeedback(null), 4000);
     } catch (e: any) {
       alert(e.message || "Failed to send tracking");
@@ -331,7 +331,7 @@ export function WhatsAppDeskClient({
           messages: [...(prev?.messages || []), res.message],
         }));
       }
-      setActionFeedback("💳 Payment instructions sent to customer!");
+      setActionFeedback("Payment instructions sent to customer!");
       setTimeout(() => setActionFeedback(null), 4000);
     } catch (e: any) {
       alert(e.message || "Failed to send payment info");
@@ -668,7 +668,7 @@ export function WhatsAppDeskClient({
                             fontWeight: isAssignedToMe ? 700 : 500,
                           }}
                         >
-                          👤 {assignedName}
+                          {assignedName}
                         </span>
                       ) : (
                         <span
@@ -681,7 +681,7 @@ export function WhatsAppDeskClient({
                             fontWeight: 600,
                           }}
                         >
-                          ⚠️ Unassigned
+                          Unassigned
                         </span>
                       )}
                     </div>
@@ -730,7 +730,7 @@ export function WhatsAppDeskClient({
                         style={{ fontSize: 11, padding: "3px 8px" }}
                         title="Assign this conversation to yourself"
                       >
-                        ✋ Claim
+                        Claim
                       </button>
                     )}
 
@@ -744,7 +744,7 @@ export function WhatsAppDeskClient({
                       <option value="">(Unassigned)</option>
                       {staffUsers.map((u) => (
                         <option key={u.id} value={u.id}>
-                          👤 {u.name} {u.id === currentUserId ? "(You)" : ""}
+                          {u.name} {u.id === currentUserId ? "(You)" : ""}
                         </option>
                       ))}
                     </select>
@@ -766,7 +766,7 @@ export function WhatsAppDeskClient({
                     }}
                     title={isBotPaused ? "Bot is paused on this thread. Click to resume." : "Bot is active. Click to pause."}
                   >
-                    {isBotPaused ? "⏸️ Bot Paused" : "🤖 Bot Active"}
+                    {isBotPaused ? "Bot Paused" : "Bot Active"}
                   </button>
 
                   {/* Status Dropdown */}
@@ -777,9 +777,9 @@ export function WhatsAppDeskClient({
                     className="input"
                     style={{ fontSize: 11.5, padding: "3px 8px", width: "auto" }}
                   >
-                    <option value="OPEN">⚠️ Open (Staff Action)</option>
-                    <option value="BOT_HANDLED">🤖 Bot Handled</option>
-                    <option value="RESOLVED">✅ Resolved</option>
+                    <option value="OPEN">Open (Staff Action)</option>
+                    <option value="BOT_HANDLED">Bot Handled</option>
+                    <option value="RESOLVED">Resolved</option>
                   </select>
 
                   <a
@@ -841,7 +841,7 @@ export function WhatsAppDeskClient({
                               marginBottom: 2,
                             }}
                           >
-                            {isBot ? "🤖 WhatsApp Bot" : "👤 Staff Reply"}
+                            {isBot ? "WhatsApp Bot" : "Staff Reply"}
                           </div>
                         )}
                         <div style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
@@ -971,7 +971,7 @@ export function WhatsAppDeskClient({
                     gap: 4,
                   }}
                 >
-                  ⚙️ Snippets
+                  Snippets
                 </button>
 
                 {quickReplies.slice(0, 7).map((qr) => (
@@ -1115,7 +1115,7 @@ export function WhatsAppDeskClient({
                   fontSize: 12,
                 }}
               >
-                ➕ Create New Order
+                + Create New Order
               </Link>
 
               {/* Recent Orders Action Cards */}
@@ -1157,7 +1157,7 @@ export function WhatsAppDeskClient({
 
                       {ord.trackingCode && (
                         <div style={{ fontSize: 10.5, color: "#1E40AF", marginTop: 3 }}>
-                          📦 {ord.courierProvider}: <code>{ord.trackingCode}</code>
+                          {ord.courierProvider}: <code>{ord.trackingCode}</code>
                         </div>
                       )}
 
@@ -1181,7 +1181,7 @@ export function WhatsAppDeskClient({
                             style={{ fontSize: 10.5, padding: "2px 4px", fontWeight: 600 }}
                             title="Confirm order & notify customer"
                           >
-                            ⚡ Confirm
+                            Confirm
                           </button>
                         )}
 
@@ -1193,7 +1193,7 @@ export function WhatsAppDeskClient({
                           style={{ fontSize: 10.5, padding: "2px 4px" }}
                           title="Send courier tracking details"
                         >
-                          🚚 Tracking
+                          Tracking
                         </button>
 
                         <button
@@ -1204,7 +1204,7 @@ export function WhatsAppDeskClient({
                           style={{ fontSize: 10.5, padding: "2px 4px" }}
                           title="Send bKash/Nagad payment info"
                         >
-                          💳 Payment
+                          Payment
                         </button>
 
                         <Link
@@ -1212,7 +1212,7 @@ export function WhatsAppDeskClient({
                           className="btn btn-secondary btn-sm"
                           style={{ fontSize: 10.5, padding: "2px 4px", textAlign: "center" }}
                         >
-                          🔍 View
+                          View
                         </Link>
                       </div>
                     </div>
@@ -1407,7 +1407,7 @@ export function WhatsAppDeskClient({
                       })
                     }
                   >
-                    ➕ New Snippet
+                    + New Snippet
                   </button>
 
                   <button
@@ -1415,7 +1415,7 @@ export function WhatsAppDeskClient({
                     className="btn btn-secondary btn-sm"
                     onClick={handleResetSnippets}
                   >
-                    🔄 Reset to Bengali Presets
+                    Reset to Bengali Presets
                   </button>
                 </div>
               )}
