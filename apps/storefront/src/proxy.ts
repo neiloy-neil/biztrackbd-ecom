@@ -11,10 +11,20 @@ export const config = {
   // Everything except Next internals and static assets. robots.txt and sitemap.xml are included (they are per store).
   // API routes are included on purpose: they need the same
   // header clean-up, and webhook and payment callbacks arrive on store hostnames too.
-  matcher: ["/((?!_next/|_static/|.*\\.(?:png|jpe?g|gif|webp|avif|svg|ico|css|js|map|woff2?|ttf)$).*)"],
+  matcher: ["/((?!_next/|_static/|.*\\.(?:png|jpe?g|gif|webp|avif|svg|ico|css|js|map|woff2?|ttf|html)$).*)"],
 };
 
 export async function proxy(req: NextRequest): Promise<NextResponse> {
+  // 0. Google Site Verification files (e.g. /google0668054f248577b1.html)
+  const googleVerifyMatch = req.nextUrl.pathname.match(/^\/(google[a-zA-Z0-9_-]+\.html)$/i);
+  if (googleVerifyMatch) {
+    const filename = googleVerifyMatch[1];
+    return new NextResponse(`google-site-verification: ${filename}`, {
+      status: 200,
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+  }
+
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
   const cleanRoot = rootDomain.toLowerCase().replace(/:\d+$/, "");
   const hostHeader = req.headers.get("host");

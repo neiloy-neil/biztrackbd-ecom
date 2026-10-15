@@ -55,9 +55,26 @@ const baseMetadata: Metadata = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const googleVerification = await getPlatformSiteVerificationCode();
+  const tokenSet = new Set<string>();
+
+  if (googleVerification) {
+    tokenSet.add(googleVerification);
+    const withoutExt = googleVerification.replace(/\.html$/i, "");
+    tokenSet.add(withoutExt);
+    if (withoutExt.toLowerCase().startsWith("google")) {
+      tokenSet.add(withoutExt.slice(6));
+    }
+  }
+
+  // Ensure user's verified token is present as fallback
+  tokenSet.add("google0668054f248577b1");
+  tokenSet.add("0668054f248577b1");
+
+  const tokens = Array.from(tokenSet).filter(Boolean);
+
   return {
     ...baseMetadata,
-    verification: googleVerification ? { google: googleVerification } : undefined,
+    verification: tokens.length > 0 ? { google: tokens } : undefined,
   };
 }
 
