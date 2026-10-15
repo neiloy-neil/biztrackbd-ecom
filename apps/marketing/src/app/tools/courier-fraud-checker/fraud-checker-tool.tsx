@@ -18,13 +18,35 @@ const SCAN_STEPS = [
   "ঝুঁকি সূচক ও ফ্রড স্কোর চূড়ান্ত করা হচ্ছে...",
 ];
 
-export function FraudCheckerTool() {
+const toBnNum = (n: number | string) => {
+  const bn = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+  return String(n).replace(/\d/g, (d) => bn[Number(d)] ?? d);
+};
+
+interface FraudCheckerToolProps {
+  initialRemaining?: number;
+}
+
+export function FraudCheckerTool({ initialRemaining = 5 }: FraudCheckerToolProps) {
   const [phone, setPhone] = useState("");
   const [isPending, startTransition] = useTransition();
   const [scanStepIndex, setScanStepIndex] = useState(0);
   const [result, setResult] = useState<FraudCheckResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [remaining, setRemaining] = useState<number>(5);
+  const [remaining, setRemaining] = useState<number>(initialRemaining);
+
+  React.useEffect(() => {
+    try {
+      const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Dhaka" }).format(new Date());
+      const saved = localStorage.getItem(`bt_fc_${today}`);
+      if (saved !== null) {
+        const val = parseInt(saved, 10);
+        if (!isNaN(val)) {
+          setRemaining((prev) => Math.min(prev, val));
+        }
+      }
+    } catch {}
+  }, []);
 
   const handleCheck = (targetPhone?: string) => {
     const query = (targetPhone ?? phone).trim();
@@ -48,6 +70,10 @@ export function FraudCheckerTool() {
         setResult(res);
         if (typeof res.remainingChecks === "number") {
           setRemaining(res.remainingChecks);
+          try {
+            const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Dhaka" }).format(new Date());
+            localStorage.setItem(`bt_fc_${today}`, String(res.remainingChecks));
+          } catch {}
         }
         if (!res.success && res.error) {
           setErrorMsg(res.error);
@@ -107,7 +133,7 @@ export function FraudCheckerTool() {
               border: remaining > 1 ? "1px solid #CBD5E1" : "1px solid #FECACA",
             }}
           >
-            আজকের ফ্রি সার্চ বাকি: <strong style={{ color: remaining > 0 ? "#2563EB" : "#DC2626" }}>{remaining}</strong>/৫
+            আজকের ফ্রি সার্চ বাকি: <strong style={{ color: remaining > 0 ? "#2563EB" : "#DC2626" }}>{toBnNum(remaining)}</strong>/৫
           </div>
         </div>
 

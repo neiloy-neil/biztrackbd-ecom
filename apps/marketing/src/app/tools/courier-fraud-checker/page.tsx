@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FraudCheckerTool } from "./fraud-checker-tool";
+import { getRemainingDailyChecks } from "./actions";
 
 export const metadata: Metadata = {
   title: "ফ্রি কুরিয়ার ফ্রড চেকার REST API | Bangladesh Multi-Courier Fraud Screening",
@@ -84,7 +85,8 @@ const structuredSchema = {
   ],
 };
 
-export default function CourierFraudCheckerPage() {
+export default async function CourierFraudCheckerPage() {
+  const initialRemaining = await getRemainingDailyChecks();
   return (
     <div style={{ background: "#F8FAFC", minHeight: "100vh", color: "#0F172A", paddingBottom: "80px" }}>
       {/* Schema.org Injection */}
@@ -176,7 +178,7 @@ export default function CourierFraudCheckerPage() {
 
       {/* Main Interactive Tool Container */}
       <section style={{ maxWidth: "1040px", margin: "-24px auto 60px", padding: "0 16px" }}>
-        <FraudCheckerTool />
+        <FraudCheckerTool initialRemaining={initialRemaining} />
       </section>
 
       {/* Educational Guide: Why COD Protection is Critical */}

@@ -26,6 +26,23 @@ function getDhakaDateStr(): string {
   return now.toISOString().slice(0, 10);
 }
 
+export async function getRemainingDailyChecks(): Promise<number> {
+  const reqCookies = await cookies();
+  const today = getDhakaDateStr();
+  const val = reqCookies.get("bt_fraud_usage")?.value;
+  if (!val) return MAX_FREE_DAILY_CHECKS;
+  try {
+    const [d, c] = val.split(":");
+    if (d === today) {
+      const count = parseInt(c || "0", 10);
+      return Math.max(0, MAX_FREE_DAILY_CHECKS - (isNaN(count) ? 0 : count));
+    }
+  } catch {
+    // ignore
+  }
+  return MAX_FREE_DAILY_CHECKS;
+}
+
 export async function checkCourierFraudAction(phoneInput: string): Promise<FraudCheckResult> {
   const reqHeaders = await headers();
   const reqCookies = await cookies();
@@ -39,13 +56,22 @@ export async function checkCourierFraudAction(phoneInput: string): Promise<Fraud
   const today = getDhakaDateStr();
   const trackerKey = `${clientCookieId}_${today}`;
 
-  const current = ipDailyChecks.get(trackerKey) ?? { count: 0, dateStr: today };
-  if (current.dateStr !== today) {
-    current.count = 0;
-    current.dateStr = today;
+  // Read persisted usage from cookie first, fallback to in-memory tracker
+  let count = 0;
+  const val = reqCookies.get("bt_fraud_usage")?.value;
+  if (val) {
+    const [d, c] = val.split(":");
+    if (d === today) {
+      count = parseInt(c || "0", 10);
+      if (isNaN(count)) count = 0;
+    }
+  }
+  const mem = ipDailyChecks.get(trackerKey);
+  if (mem && mem.dateStr === today && mem.count > count) {
+    count = mem.count;
   }
 
-  if (current.count >= MAX_FREE_DAILY_CHECKS) {
+  if (count >= MAX_FREE_DAILY_CHECKS) {
     return {
       success: false,
       rateLimited: true,
@@ -61,21 +87,27 @@ export async function checkCourierFraudAction(phoneInput: string): Promise<Fraud
     if (!/^01[3-9]\d{8}$/.test(phone)) {
       return {
         success: false,
-        remainingChecks: MAX_FREE_DAILY_CHECKS - current.count,
+        remainingChecks: Math.max(0, MAX_FREE_DAILY_CHECKS - count),
         error: "অনুগ্রহ করে একটি সঠিক ১১ ডিজিটের বাংলাদেশি মোবাইল নম্বর দিন (যেমন: 01712345678)।",
       };
     }
   } catch {
     return {
       success: false,
-      remainingChecks: MAX_FREE_DAILY_CHECKS - current.count,
+      remainingChecks: Math.max(0, MAX_FREE_DAILY_CHECKS - count),
       error: "সঠিক মোবাইল নম্বর পাওয়া যায়নি। নম্বরটি ভালো করে চেক করুন।",
     };
   }
 
-  // Increment usage count
-  current.count += 1;
-  ipDailyChecks.set(trackerKey, current);
+  // Increment usage count and persist in cookie and memory
+  count += 1;
+  ipDailyChecks.set(trackerKey, { count, dateStr: today });
+  reqCookies.set("bt_fraud_usage", `${today}:${count}`, {
+    maxAge: 24 * 60 * 60,
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+  });
 
   // Set cookie for browser session tracking if not set
   if (!reqCookies.get("bt_fraud_client_id")?.value) {
@@ -94,7 +126,7 @@ export async function checkCourierFraudAction(phoneInput: string): Promise<Fraud
       // If external API has temporary network downtime, return a structured fallback response
       return {
         success: true,
-        remainingChecks: MAX_FREE_DAILY_CHECKS - current.count,
+        remainingChecks: Math.max(0, MAX_FREE_DAILY_CHECKS - count),
         data: {
           phone,
           score: 85,
@@ -119,13 +151,13 @@ export async function checkCourierFraudAction(phoneInput: string): Promise<Fraud
     return {
       success: true,
       data: fraudData,
-      remainingChecks: MAX_FREE_DAILY_CHECKS - current.count,
+      remainingChecks: Math.max(0, MAX_FREE_DAILY_CHECKS - count),
     };
   } catch (err) {
     console.error("[fraud-checker action] error", err);
     return {
       success: false,
-      remainingChecks: MAX_FREE_DAILY_CHECKS - current.count,
+      remainingChecks: Math.max(0, MAX_FREE_DAILY_CHECKS - count),
       error: "কুরিয়ার সার্ভারে সংযোগ করতে সমস্যা হয়েছে। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।",
     };
   }
