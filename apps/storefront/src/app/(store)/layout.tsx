@@ -9,6 +9,7 @@ import { DemoRibbon } from "@/components/demo-ribbon";
 import { PausedBanner } from "@/components/paused-notice";
 import { StorefrontTracker } from "@/components/tracker";
 import { WhatsAppFloatingButton } from "@/components/whatsapp-floating-button";
+import { MobileStickyActionBar } from "@/components/mobile-sticky-action-bar";
 import { AiChatWidget } from "@/components/ai-chat-widget";
 import { getLang, makeT } from "@/lib/i18n";
 import { getOrigin } from "@/lib/origin";
@@ -103,6 +104,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
       <main id="main">{children}</main>
       <Footer info={info} categories={categories} lang={lang} t={t} pages={footerPages} hasBlog={blog.total > 0} chrome={chrome} commerce={capabilities.commerce} />
       <WhatsAppFloatingButton whatsappNumber={info.whatsappNumber} />
+      <MobileStickyActionBar phone={info.contactPhone} whatsapp={info.whatsappNumber} lang={lang} />
       {isAiActive && (
         <AiChatWidget
           enabled={info.aiChatbotEnabled}

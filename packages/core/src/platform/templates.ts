@@ -1,5 +1,5 @@
 import { getBasePrisma, getPlatformPrisma, withTenant, type PrismaClient } from "@biztrackbd/db";
-import { installTemplatePages } from "../builder/versions";
+import { installTemplatePages, installCustomPage } from "../builder/versions";
 import type { Chrome } from "../builder/chrome";
 import { installTemplateChrome, liveChromeForTemplate } from "../builder/chrome-store";
 import { BUILT_IN_CHROMES, templateChrome } from "../builder/template-chromes";
@@ -9,6 +9,8 @@ import { NotFoundError, ValidationError } from "../errors";
 import { audit } from "../audit/service";
 import { assertCan, type StaffActor } from "../permissions";
 import { assertPlatformCan, type PlatformActor } from "./admin";
+import { BUSINESS_TEMPLATES, type CustomPageManifest } from "../site/templates/manifests";
+import type { SiteMode, BusinessVertical } from "../site/mode";
 
 /**
  * Store templates that platform staff publish without a deploy (docs/46, stage 5).
@@ -43,6 +45,10 @@ export interface TemplateInfo {
   pages: TemplatePages | null;
   /** The layout and style of the header and footer. Null: the store keeps today's. */
   chrome: Chrome | null;
+  /** BizTrack Business additions */
+  siteMode?: SiteMode;
+  vertical?: BusinessVertical;
+  customPages?: CustomPageManifest[];
 }
 
 const BUILT_IN_CATEGORY: Record<string, TemplateCategory> = { kapor: "fashion", gadgetstudio: "electronics", "mini-bunny": "kids", axionwear: "streetwear", bindu: "beauty", berber: "fashion" };
@@ -52,6 +58,27 @@ const builtIns = (): TemplateInfo[] =>
   STORE_THEMES.map((t) => ({
     id: t.id, name: t.name, blurb: t.blurb, audience: t.audience, baseLook: t.id, category: BUILT_IN_CATEGORY[t.id] ?? "other", tags: [t.audience], moduleLabel: null,
     version: 1, status: "PUBLISHED" as const, builtIn: true, settings: { ...t.defaults }, pages: null, chrome: BUILT_IN_CHROMES[t.id] ?? null,
+  }));
+
+const businessBuiltIns = (): TemplateInfo[] =>
+  BUSINESS_TEMPLATES.map((bt) => ({
+    id: bt.id,
+    name: bt.name,
+    blurb: bt.blurb,
+    audience: bt.audience,
+    baseLook: bt.baseLook,
+    category: bt.category,
+    tags: bt.tags,
+    moduleLabel: bt.vertical,
+    version: 1,
+    status: "PUBLISHED" as const,
+    builtIn: true,
+    settings: { ...bt.settings },
+    pages: bt.pages,
+    chrome: bt.chrome,
+    siteMode: bt.siteMode,
+    vertical: bt.vertical,
+    customPages: bt.customPages,
   }));
 
 type Row = { id: string; name: string; blurb: string; audience: string; baseLook: string; category: string; tags: string[]; moduleLabel: string | null; status: string; version: number; settingsJson: unknown; pagesJson: unknown };
@@ -79,12 +106,13 @@ export async function listPublishedTemplates(db: PrismaClient = getBasePrisma())
   const rows = (await db.template.findMany({ where: { status: { not: "DRAFT" } }, orderBy: { publishedAt: "asc" } })) as Row[];
   const byId = new Map(rows.map((r) => [r.id, r]));
   const out: TemplateInfo[] = [];
-  for (const b of builtIns()) {
+  const allBuiltIns = [...builtIns(), ...businessBuiltIns()];
+  for (const b of allBuiltIns) {
     const r = byId.get(b.id);
     if (!r) out.push(b);
     else if (r.status === "PUBLISHED") out.push(fromRow(r));
   }
-  for (const r of rows) if (r.status === "PUBLISHED" && !STORE_THEMES.some((t) => t.id === r.id)) out.push(fromRow(r));
+  for (const r of rows) if (r.status === "PUBLISHED" && !allBuiltIns.some((t) => t.id === r.id)) out.push(fromRow(r));
   return out;
 }
 
@@ -109,11 +137,12 @@ export async function listTemplatesForStaff(actor: PlatformActor, db: PrismaClie
   const count = (id: string, isOriginal: boolean) => used.filter((u) => u.templateId === id || (isOriginal && u.templateId === null && u.themeId === id)).reduce((n, u) => n + u._count._all, 0);
   const byId = new Map(rows.map((r) => [r.id, r]));
   const out: StaffTemplateRow[] = [];
-  for (const b of builtIns()) {
+  const allBuiltIns = [...builtIns(), ...businessBuiltIns()];
+  for (const b of allBuiltIns) {
     const r = byId.get(b.id);
     out.push(r ? { ...fromRow(r), storesUsing: count(b.id, true), saved: true } : { ...b, storesUsing: count(b.id, true), saved: false });
   }
-  for (const r of rows) if (!STORE_THEMES.some((t) => t.id === r.id)) out.push({ ...fromRow(r), storesUsing: count(r.id, false), saved: true });
+  for (const r of rows) if (!allBuiltIns.some((t) => t.id === r.id)) out.push({ ...fromRow(r), storesUsing: count(r.id, false), saved: true });
   return out;
 }
 
@@ -206,7 +235,20 @@ export async function resolveTemplateForSignup(id: string, db?: PrismaClient): P
 export async function installTemplateForNewStore(tx: Parameters<typeof installTemplatePages>[0], tenantId: string, info: TemplateInfo, createdBy: string): Promise<void> {
   if (info.pages) await installTemplatePages(tx, tenantId, info.baseLook, { settings: info.settings, pages: info.pages }, "publish", createdBy);
   if (info.chrome) await installTemplateChrome(tx, tenantId, info.chrome, "publish", createdBy, info.id, info.version);
-  await tx.tenant.update({ where: { id: tenantId }, data: { templateId: info.id, templateVersion: info.version } });
+  if (info.customPages && info.customPages.length > 0) {
+    for (const cp of info.customPages) {
+      await installCustomPage(tx, tenantId, info.baseLook, cp, "publish", createdBy, info.settings);
+    }
+  }
+  await tx.tenant.update({
+    where: { id: tenantId },
+    data: {
+      templateId: info.id,
+      templateVersion: info.version,
+      ...(info.siteMode ? { siteMode: info.siteMode } : {}),
+      ...(info.vertical ? { businessVertical: info.vertical } : {}),
+    },
+  });
 }
 
 export interface TemplateUpdate { id: string; name: string; have: number; latest: number }

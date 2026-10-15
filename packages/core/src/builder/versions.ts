@@ -262,6 +262,51 @@ export async function installTemplatePages(
   return written;
 }
 
+/**
+ * Puts a template's custom page layout into a store.
+ * Creates the Page row if it does not exist yet, and installs the layout in ThemeVersion.
+ */
+export async function installCustomPage(
+  tx: TenantTx,
+  tenantId: string,
+  themeId: ThemeId,
+  pageData: { title: string; slug: string; seoTitle?: string; seoDescription?: string; layout: PageJson },
+  mode: "publish" | "draft",
+  createdBy: string,
+  themeSettings: ThemeSettings,
+): Promise<string> {
+  const existing = await tx.page.findFirst({ where: { slug: pageData.slug } });
+  let pageId = existing?.id;
+  if (!existing) {
+    const row = await tx.page.create({
+      data: {
+        tenantId,
+        title: pageData.title,
+        slug: pageData.slug,
+        contentHtml: "",
+        isPublished: mode === "publish",
+        sectionsJson: pageData.layout as object,
+        seoTitle: pageData.seoTitle ?? pageData.title,
+        seoDescription: pageData.seoDescription ?? null,
+      },
+    });
+    pageId = row.id;
+  }
+  const pageKey = `page:${pageId}`;
+  const actor = { userId: createdBy } as StaffActor;
+  if (mode === "publish") {
+    await writePublished(tx, tenantId, themeId, actor, pageKey, pageData.layout, themeSettings, "Template Initial Layout");
+  } else {
+    const existingDraft = await draftRow(tx, themeId, pageKey);
+    if (existingDraft) {
+      await tx.themeVersion.update({ where: { id: existingDraft.id }, data: { sectionsJson: pageData.layout as object, settings: themeSettings as object, createdBy } });
+    } else {
+      await tx.themeVersion.create({ data: { tenantId, themeId, pageKey, state: "DRAFT", version: 0, settings: themeSettings as object, sectionsJson: pageData.layout as object, createdBy } });
+    }
+  }
+  return pageId!;
+}
+
 /** Makes the draft live. Returns the new version number. */
 export async function publish(tenantId: string, actor: StaffActor, pageKey: string, label?: string): Promise<number> {
   assertCan(actor, "design", "edit");

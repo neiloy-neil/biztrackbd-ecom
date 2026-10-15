@@ -1,4 +1,6 @@
 import { ValidationError } from "../errors";
+import type { SiteMode, BusinessVertical } from "../site/mode";
+import type { TenantCapabilities } from "../site/capabilities";
 
 /**
  * The sections a page can be built from (docs/06). One definition drives three things, so they cannot drift apart:
@@ -51,6 +53,17 @@ export interface SectionDef {
   defaults: Record<string, unknown>;
   /** Extra rule on the cleaned settings: a plain message when they are not usable, else null. */
   check?: (settings: Record<string, unknown>) => string | null;
+
+  /** BizTrack Business modes where this section can be placed. Null/undefined = all modes compatible with its capabilities. */
+  modes?: SiteMode[];
+  /** Recommended verticals for this section in the section picker. */
+  verticals?: BusinessVertical[];
+  /** Required capability flags (e.g. ["commerce"], ["menu"], ["booking_requests"], ["leads"]). */
+  capabilities?: (keyof TenantCapabilities | string)[];
+  /** Categorization for the builder section browser. */
+  category?: "hero" | "content" | "proof" | "contact" | "vertical" | "commerce" | "promotions";
+  /** Live database feed source for the section. "settings" = uses inline settings. */
+  dataSource?: "settings" | "section" | "services" | "menu" | "events" | "portfolio";
 }
 
 const t = (key: string, label: string, max = 120, more: Partial<Field> = {}): Field => ({ key, label, type: "text", max, ...more });
@@ -521,6 +534,261 @@ export const SECTIONS: SectionDef[] = [
       labelBn: "সাহায্য প্রয়োজন? ইনবক্স করুন",
     },
   },
+  // ---- BizTrack Business Verticals
+  {
+    type: "restaurant-menu",
+    label: "Restaurant menu",
+    description: "Interactive food & beverage menu with category tabs, dish descriptions, prices and dietary badges.",
+    page: "custom",
+    pages: ["home", "custom"],
+    max: 2,
+    category: "vertical",
+    verticals: ["RESTAURANT"],
+    capabilities: ["menu"],
+    dataSource: "menu",
+    fields: [
+      t("title", "Menu title", 80),
+      tb("title", "Menu title", 80),
+      area("subtitle", "Menu subtitle", 200),
+      areab("subtitle", "Menu subtitle", 200),
+      { key: "showDietary", label: "Show dietary labels (Halal, Chef Special)", type: "checkbox" },
+    ],
+    defaults: {
+      title: "Our Menu",
+      titleBn: "আমাদের স্পেশাল মেন্যু",
+      subtitle: "Freshly prepared daily with 100% authentic Halal ingredients",
+      subtitleBn: "প্রতিদিন খাঁটি উপাদানে প্রস্তুতকৃত ১০০% হালাল খাবার",
+      showDietary: true,
+    },
+  },
+  {
+    type: "restaurant-hours-location",
+    label: "Restaurant hours & location",
+    description: "Business hours, full street address, Google Maps link, and direct table reservation prompt.",
+    page: "custom",
+    pages: ["home", "custom"],
+    max: 1,
+    category: "vertical",
+    verticals: ["RESTAURANT"],
+    fields: [
+      t("title", "Section title", 80),
+      tb("title", "Section title", 80),
+      t("hoursWeekday", "Regular hours (Sat - Thu)", 60),
+      tb("hoursWeekday", "Regular hours (Sat - Thu)", 60),
+      t("hoursWeekend", "Weekend / Friday hours", 60),
+      tb("hoursWeekend", "Weekend / Friday hours", 60),
+      area("address", "Street address", 160),
+      areab("address", "Street address", 160),
+      link("googleMapsUrl", "Google Maps link"),
+      t("phone", "Contact phone", 30),
+      link("reservationLink", "Reservation page link"),
+    ],
+    defaults: {
+      title: "Hours & Location",
+      titleBn: "সময়সূচি ও অবস্থান",
+      hoursWeekday: "Sat - Thu: 11:00 AM - 11:00 PM",
+      hoursWeekdayBn: "শনি - বৃহস্পতি: সকাল ১১:০০ - রাত ১১:০০",
+      hoursWeekend: "Friday: 2:00 PM - 11:30 PM",
+      hoursWeekendBn: "শুক্রবার: দুপুর ২:০০ - রাত ১১:৩০",
+      address: "House 12, Road 7, Dhanmondi, Dhaka",
+      addressBn: "বাড়ি ১২, রোড ৭, ধানমন্ডি, ঢাকা",
+      googleMapsUrl: "https://maps.google.com",
+      phone: "01712-345678",
+      reservationLink: "/reservations",
+    },
+  },
+  {
+    type: "reservation-cta",
+    label: "Table reservation request",
+    description: "Table booking form allowing guests to submit date, time, and party size.",
+    page: "custom",
+    pages: ["home", "custom"],
+    max: 1,
+    category: "contact",
+    verticals: ["RESTAURANT"],
+    capabilities: ["booking_requests"],
+    fields: [
+      t("title", "Heading", 80),
+      tb("title", "Heading", 80),
+      area("subtitle", "Subtitle instructions", 200),
+      areab("subtitle", "Subtitle instructions", 200),
+      area("notice", "Urgent booking notice", 140),
+      areab("notice", "Urgent booking notice", 140),
+      t("directPhone", "Direct hotline phone", 30),
+    ],
+    defaults: {
+      title: "Book a Table",
+      titleBn: "টেবিল বুকিং রিকোয়েস্ট",
+      subtitle: "Submit your preferred date and guest count. Our team will confirm via WhatsApp or Phone.",
+      subtitleBn: "আপনার পছন্দের তারিখ ও অতিথির সংখ্যা জানিয়ে রিকোয়েস্ট পাঠান। আমাদের টিম ফোনে নিশ্চিত করবে।",
+      notice: "For same-day reservations within 2 hours, please call directly.",
+      noticeBn: "জরুরি বা ২ ঘণ্টার মধ্যে টেবিল পেতে অনুগ্রহ করে সরাসরি ফোন করুন।",
+      directPhone: "01712-345678",
+    },
+  },
+  {
+    type: "doctor-hero",
+    label: "Doctor professional hero",
+    description: "Doctor profile header with BMDC registration, degrees, hospital affiliation, and appointment CTA.",
+    page: "custom",
+    pages: ["home", "custom"],
+    max: 1,
+    category: "vertical",
+    verticals: ["DOCTOR_CLINIC"],
+    fields: [
+      t("name", "Doctor full name", 80),
+      tb("name", "Doctor full name", 80),
+      t("specialty", "Specialty", 80),
+      tb("specialty", "Specialty", 80),
+      t("degrees", "Qualifications / Degrees", 100),
+      tb("degrees", "Qualifications / Degrees", 100),
+      t("designation", "Designation", 100),
+      tb("designation", "Designation", 100),
+      t("institute", "Affiliated hospital / Medical college", 120),
+      tb("institute", "Affiliated hospital / Medical college", 120),
+      t("bmdcReg", "BMDC Registration number", 40),
+      image("image", "Doctor photo"),
+      link("appointmentLink", "Appointment page link"),
+    ],
+    defaults: {
+      name: "Dr. Ahmed Tanvir",
+      nameBn: "ডাঃ আহমেদ তানভীর",
+      specialty: "Cardiologist & Specialist Physician",
+      specialtyBn: "হৃদরোগ ও মেডিসিন বিশেষজ্ঞ",
+      degrees: "MBBS, FCPS (Medicine), MD (Cardiology)",
+      degreesBn: "এমবিবিএস, এফসিপিএস (মেডিসিন), এমডি (কার্ডিওলজি)",
+      designation: "Associate Professor & Senior Consultant",
+      designationBn: "সহযোগী অধ্যাপক ও সিনিয়র কনসালট্যান্ট",
+      institute: "Dhaka Medical College & Hospital",
+      instituteBn: "ঢাকা মেডিকেল কলেজ ও হাসপাতাল",
+      bmdcReg: "BMDC Reg No: A-48291",
+      image: "",
+      appointmentLink: "/appointment",
+    },
+  },
+  {
+    type: "clinic-chambers",
+    label: "Chambers & consultation schedules",
+    description: "Chamber location cards with weekly visiting days, hours, and serial contact numbers.",
+    page: "custom",
+    pages: ["home", "custom"],
+    max: 2,
+    category: "vertical",
+    verticals: ["DOCTOR_CLINIC"],
+    capabilities: ["services"],
+    fields: [
+      t("title", "Section title", 80),
+      tb("title", "Section title", 80),
+      area("subtitle", "Subtitle", 160),
+      areab("subtitle", "Subtitle", 160),
+      link("appointmentLink", "Online request link"),
+    ],
+    defaults: {
+      title: "Chambers & Consultation Schedules",
+      titleBn: "চেম্বার ও রোগী দেখার সময়সূচি",
+      subtitle: "Direct chamber schedules and serial booking contact numbers",
+      subtitleBn: "রোগী দেখার নির্ধারিত চেম্বার ও সরাসরি সিরিয়ালের নম্বর",
+      appointmentLink: "/appointment",
+    },
+  },
+  {
+    type: "service-cards",
+    label: "Business service cards",
+    description: "Grid of professional service offerings with starting prices and quote actions.",
+    page: "custom",
+    pages: ["home", "custom"],
+    max: 3,
+    category: "proof",
+    verticals: ["SERVICE_PROVIDER", "BUSINESS_COMPANY", "DOCTOR_CLINIC"],
+    capabilities: ["services"],
+    fields: [
+      t("title", "Section title", 80),
+      tb("title", "Section title", 80),
+      area("subtitle", "Subtitle", 160),
+      areab("subtitle", "Subtitle", 160),
+    ],
+    defaults: {
+      title: "Our Professional Services",
+      titleBn: "আমাদের সেবাসমূহ",
+      subtitle: "Reliable and high-quality solutions delivered by certified specialists",
+      subtitleBn: "নিবেদিত পেশাদারদের দ্বারা দক্ষ ও নির্ভরযোগ্য সমাধান",
+    },
+  },
+  {
+    type: "team-grid",
+    label: "Team & specialist profiles",
+    description: "Photo profiles of leadership, doctors, or team members with credentials.",
+    page: "custom",
+    pages: ["home", "custom"],
+    max: 2,
+    category: "proof",
+    verticals: ["BUSINESS_COMPANY", "DOCTOR_CLINIC", "SERVICE_PROVIDER"],
+    fields: [
+      t("title", "Section title", 80),
+      tb("title", "Section title", 80),
+      area("subtitle", "Subtitle", 160),
+      areab("subtitle", "Subtitle", 160),
+    ],
+    defaults: {
+      title: "Leadership & Specialists",
+      titleBn: "আমাদের টিম",
+      subtitle: "Experienced professionals dedicated to your success",
+      subtitleBn: "অভিজ্ঞ ও নিবেদিত পেশাদারদের সমাহার",
+    },
+  },
+  {
+    type: "portfolio-grid",
+    label: "Featured projects & portfolio",
+    description: "Curated grid of completed projects, case studies, or design work.",
+    page: "custom",
+    pages: ["home", "custom"],
+    max: 3,
+    category: "proof",
+    verticals: ["PERSONAL_PORTFOLIO", "BUSINESS_COMPANY", "SERVICE_PROVIDER", "PUBLIC_FIGURE"],
+    fields: [
+      t("title", "Section title", 80),
+      tb("title", "Section title", 80),
+      area("subtitle", "Subtitle", 160),
+      areab("subtitle", "Subtitle", 160),
+    ],
+    defaults: {
+      title: "Featured Projects & Portfolio",
+      titleBn: "নির্বাচিত কাজ ও প্রজেক্ট",
+      subtitle: "A curated selection of our recently completed work and client case studies",
+      subtitleBn: "সাম্প্রতিক বাস্তবায়িত কিছু উল্লেখযোগ্য কাজের এক ঝলক",
+    },
+  },
+  {
+    type: "download-card",
+    label: "Downloadable document card",
+    description: "Download card for CV/Resume, Company Brochure, Profile, or Menu PDF.",
+    page: "custom",
+    pages: ["home", "custom"],
+    max: 2,
+    category: "content",
+    verticals: ["PERSONAL_PORTFOLIO", "BUSINESS_COMPANY", "RESTAURANT", "PUBLIC_FIGURE"],
+    capabilities: ["downloads"],
+    fields: [
+      t("title", "Card title", 80),
+      tb("title", "Card title", 80),
+      area("description", "Description", 180),
+      areab("description", "Description", 180),
+      link("fileUrl", "Downloadable file URL"),
+      t("fileLabel", "File format and size label", 40),
+      t("buttonText", "Button text", 30),
+      tb("buttonText", "Button text", 30),
+    ],
+    defaults: {
+      title: "Download CV / Resume",
+      titleBn: "সিভি ডাউনলোড করুন",
+      description: "Get a comprehensive overview of experience, education and professional credentials.",
+      descriptionBn: "আমার সম্পূর্ণ অভিজ্ঞতা, শিক্ষা ও অর্জনের সারসংক্ষেপ দেখতে পিডিএফ ডাউনলোড করুন।",
+      fileUrl: "",
+      fileLabel: "PDF Document · 2.4 MB",
+      buttonText: "Download PDF",
+      buttonTextBn: "ডাউনলোড PDF",
+    },
+  },
 ];
 
 export interface StoreSectionCategory {
@@ -533,11 +801,12 @@ export interface StoreSectionCategory {
 /** Standard organized category tabs for browsing sections in Store Pages */
 export const STORE_SECTION_CATEGORIES: StoreSectionCategory[] = [
   { id: "all", title: "All Sections", icon: "", types: [] },
-  { id: "hero", title: "Header & Hero", icon: "", types: ["hero", "banner", "announcement-bar"] },
+  { id: "business", title: "Business & Verticals", icon: "", types: ["restaurant-menu", "restaurant-hours-location", "reservation-cta", "doctor-hero", "clinic-chambers", "service-cards", "team-grid", "portfolio-grid", "download-card"] },
+  { id: "hero", title: "Header & Hero", icon: "", types: ["hero", "banner", "announcement-bar", "doctor-hero"] },
   { id: "products", title: "Product Showcases", icon: "", types: ["featured-products", "category-grid", "product-related", "collection-products"] },
-  { id: "trust", title: "Trust & Social Proof", icon: "", types: ["trust-strip", "product-reviews", "video-reels"] },
-  { id: "promotions", title: "Promotions & Urgency", icon: "", types: ["countdown-timer", "marquee-ticker", "floating-contact"] },
-  { id: "content", title: "Content & FAQs", icon: "", types: ["rich-text", "accordion-faq", "contact-block"] },
+  { id: "trust", title: "Trust & Social Proof", icon: "", types: ["trust-strip", "product-reviews", "video-reels", "team-grid", "portfolio-grid"] },
+  { id: "promotions", title: "Promotions & Urgency", icon: "", types: ["countdown-timer", "marquee-ticker", "floating-contact", "reservation-cta"] },
+  { id: "content", title: "Content & FAQs", icon: "", types: ["rich-text", "accordion-faq", "contact-block", "service-cards", "clinic-chambers", "restaurant-menu", "restaurant-hours-location", "download-card"] },
 ];
 
 /** The 11-character id of a YouTube video from a pasted address (watch, youtu.be, embed, shorts), or null. Nothing else is ever put in a page. */
@@ -609,10 +878,61 @@ export function getByPath(settings: Record<string, unknown>, path: string): unkn
   return Array.isArray(list) ? (list[Number(parts[1])] as Record<string, unknown> | undefined)?.[parts[2]!] : undefined;
 }
 
+export interface SectionFilterOptions {
+  mode?: SiteMode;
+  vertical?: BusinessVertical;
+  capabilities?: Partial<Record<keyof TenantCapabilities | string, boolean>>;
+}
+
 export const sectionDef = (type: string): SectionDef | undefined => SECTIONS.find((s) => s.type === type);
-/** Whether a section may be placed on this kind of page. */
-export const allowedOn = (def: SectionDef, kind: PageKind): boolean => def.page === kind || (def.pages?.includes(kind) ?? false);
-export const sectionsFor = (kind: PageKind): SectionDef[] => SECTIONS.filter((s) => allowedOn(s, kind));
+
+const COMMERCE_SECTIONS = new Set([
+  "featured-products",
+  "category-grid",
+  "product-main",
+  "product-reviews",
+  "product-related",
+  "collection-header",
+  "collection-products",
+  "cart-main",
+  "lp-order-form",
+  "drop-spotlight",
+]);
+
+export const isCommerceSection = (def: SectionDef): boolean =>
+  def.category === "commerce" || COMMERCE_SECTIONS.has(def.type);
+
+/** Whether a section may be placed on this kind of page, with optional capability and mode filtering. */
+export const allowedOn = (def: SectionDef, kind: PageKind, filter?: SectionFilterOptions): boolean => {
+  const pageAllowed = def.page === kind || (def.pages?.includes(kind) ?? false);
+  if (!pageAllowed) return false;
+  if (!filter) return true;
+
+  if (filter.mode && def.modes && !def.modes.includes(filter.mode)) {
+    return false;
+  }
+
+  if (isCommerceSection(def)) {
+    if (filter.mode === "PORTFOLIO") return false;
+    if (filter.capabilities && filter.capabilities.commerce === false) return false;
+  }
+
+  if (def.capabilities && filter.capabilities) {
+    for (const cap of def.capabilities) {
+      if (filter.capabilities[cap] === false) return false;
+    }
+  }
+
+  return true;
+};
+
+export const sectionsFor = (kind: PageKind, filter?: SectionFilterOptions): SectionDef[] =>
+  SECTIONS.filter((s) => allowedOn(s, kind, filter));
+
+/** Whether this section is tailored/recommended for a given business vertical. */
+export const recommendedForVertical = (def: SectionDef, vertical?: BusinessVertical | null): boolean =>
+  !!(vertical && def.verticals?.includes(vertical));
+
 /** The sections a page cannot lose. */
 export const requiredFor = (kind: PageKind): string[] => SECTIONS.filter((s) => s.required && s.page === kind).map((s) => s.type);
 

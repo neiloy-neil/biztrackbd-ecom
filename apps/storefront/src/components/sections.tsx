@@ -12,6 +12,15 @@ import { tintFor } from "./product-image";
 import { GuaranteeStrip } from "./guarantee-strip";
 import { SocialProofTicker } from "./social-proof-ticker";
 import { ReviewsCarousel } from "./reviews-carousel";
+import { RestaurantMenuSection } from "./verticals/restaurant-menu";
+import { RestaurantHoursLocationSection } from "./verticals/restaurant-hours-location";
+import { ReservationCtaSection } from "./verticals/reservation-cta";
+import { DoctorHeroSection } from "./verticals/doctor-hero";
+import { ClinicChambersSection } from "./verticals/clinic-chambers";
+import { ServiceCardsSection } from "./verticals/service-cards";
+import { TeamGridSection } from "./verticals/team-grid";
+import { PortfolioGridSection } from "./verticals/portfolio-grid";
+import { DownloadCardSection } from "./verticals/download-card";
 
 /**
  * Draws a page built in the editor. It has no server-only code, so the live store (server) and the editor's preview
@@ -729,6 +738,121 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
         </div>
       );
     }
+    case "restaurant-menu":
+      return (
+        <RestaurantMenuSection
+          title={str(s.title)}
+          titleBn={str(s.titleBn)}
+          subtitle={str(s.subtitle)}
+          subtitleBn={str(s.subtitleBn)}
+          showDietary={s.showDietary !== false}
+          lang={lang}
+        />
+      );
+    case "restaurant-hours-location":
+      return (
+        <RestaurantHoursLocationSection
+          title={str(s.title)}
+          titleBn={str(s.titleBn)}
+          hoursWeekday={str(s.hoursWeekday)}
+          hoursWeekdayBn={str(s.hoursWeekdayBn)}
+          hoursWeekend={str(s.hoursWeekend)}
+          hoursWeekendBn={str(s.hoursWeekendBn)}
+          address={str(s.address)}
+          addressBn={str(s.addressBn)}
+          googleMapsUrl={str(s.googleMapsUrl)}
+          phone={str(s.phone) || site?.phone || undefined}
+          reservationLink={str(s.reservationLink) || "/reservations"}
+          lang={lang}
+        />
+      );
+    case "reservation-cta":
+      return (
+        <ReservationCtaSection
+          title={str(s.title)}
+          titleBn={str(s.titleBn)}
+          subtitle={str(s.subtitle)}
+          subtitleBn={str(s.subtitleBn)}
+          notice={str(s.notice)}
+          noticeBn={str(s.noticeBn)}
+          directPhone={str(s.directPhone) || site?.phone || undefined}
+          lang={lang}
+        />
+      );
+    case "doctor-hero":
+      return (
+        <DoctorHeroSection
+          name={str(s.name)}
+          nameBn={str(s.nameBn)}
+          designation={str(s.designation)}
+          designationBn={str(s.designationBn)}
+          degrees={str(s.degrees)}
+          degreesBn={str(s.degreesBn)}
+          bmdcReg={str(s.bmdcReg)}
+          institute={str(s.institute)}
+          instituteBn={str(s.instituteBn)}
+          specialty={str(s.specialty)}
+          specialtyBn={str(s.specialtyBn)}
+          image={str(s.image)}
+          appointmentLink={str(s.appointmentLink) || "/appointment"}
+          lang={lang}
+        />
+      );
+    case "clinic-chambers":
+      return (
+        <ClinicChambersSection
+          title={str(s.title)}
+          titleBn={str(s.titleBn)}
+          subtitle={str(s.subtitle)}
+          subtitleBn={str(s.subtitleBn)}
+          appointmentLink={str(s.appointmentLink) || "/appointment"}
+          lang={lang}
+        />
+      );
+    case "service-cards":
+      return (
+        <ServiceCardsSection
+          title={str(s.title)}
+          titleBn={str(s.titleBn)}
+          subtitle={str(s.subtitle)}
+          subtitleBn={str(s.subtitleBn)}
+          lang={lang}
+        />
+      );
+    case "team-grid":
+      return (
+        <TeamGridSection
+          title={str(s.title)}
+          titleBn={str(s.titleBn)}
+          subtitle={str(s.subtitle)}
+          subtitleBn={str(s.subtitleBn)}
+          lang={lang}
+        />
+      );
+    case "portfolio-grid":
+      return (
+        <PortfolioGridSection
+          title={str(s.title)}
+          titleBn={str(s.titleBn)}
+          subtitle={str(s.subtitle)}
+          subtitleBn={str(s.subtitleBn)}
+          lang={lang}
+        />
+      );
+    case "download-card":
+      return (
+        <DownloadCardSection
+          title={str(s.title)}
+          titleBn={str(s.titleBn)}
+          description={str(s.description)}
+          descriptionBn={str(s.descriptionBn)}
+          fileUrl={str(s.fileUrl)}
+          fileLabel={str(s.fileLabel)}
+          buttonText={str(s.buttonText)}
+          buttonTextBn={str(s.buttonTextBn)}
+          lang={lang}
+        />
+      );
     default:
       // The product, collection and cart blocks (docs/39) need the page's own data.
       return <>{renderPageBlock(section.type, id, s, ctx, lang, t, editing)}</>;
