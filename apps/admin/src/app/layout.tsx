@@ -20,8 +20,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // "light" or "dark" is the owner's choice; anything else follows the device.
   const choice = (await cookies()).get("bt_theme")?.value;
   return (
-    <html lang={(await cookies()).get("bt_lang")?.value === "bn" ? "bn" : "en"} className={`${jakarta.variable} ${hind.variable}`} data-theme={choice === "light" || choice === "dark" ? choice : undefined}>
-      <body>{children}</body>
+    <html lang={(await cookies()).get("bt_lang")?.value === "bn" ? "bn" : "en"} className={`${jakarta.variable} ${hind.variable}`} data-theme={choice === "light" || choice === "dark" ? choice : undefined} suppressHydrationWarning>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

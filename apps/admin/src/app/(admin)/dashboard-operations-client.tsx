@@ -32,6 +32,19 @@ interface Props {
   canEdit: boolean;
 }
 
+const formatBDTime = (d: Date | string) => {
+  try {
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Dhaka",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }).format(typeof d === "string" ? new Date(d) : d);
+  } catch {
+    return "";
+  }
+};
+
 export function DashboardOperationsClient({
   telemetry,
   activityFeed,
@@ -45,6 +58,11 @@ export function DashboardOperationsClient({
   // Pulse & Auto-Refresh
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Date>(new Date());
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Fraud Radar State
   const [activeFraudTab, setActiveFraudTab] = useState<"WATCHLIST" | "MANUAL_CHECK">("WATCHLIST");
@@ -232,8 +250,8 @@ export function DashboardOperationsClient({
               <div style={{ fontWeight: 700, fontSize: 13.5, letterSpacing: "0.02em" }}>
                 LIVE OPERATIONS PULSE
               </div>
-              <div style={{ fontSize: 11, color: "#94A3B8" }}>
-                Updated {lastRefreshedAt.toLocaleTimeString()} ·{" "}
+              <div style={{ fontSize: 11, color: "#94A3B8" }} suppressHydrationWarning>
+                Updated {mounted ? formatBDTime(lastRefreshedAt) : "Just now"} ·{" "}
                 <button
                   type="button"
                   onClick={() => setAutoRefresh(!autoRefresh)}
@@ -889,11 +907,8 @@ export function DashboardOperationsClient({
                 />
                 <span style={{ fontWeight: 700 }}>#{ev.orderNumber}</span>
                 <span style={{ color: "#334155" }}>{ev.message}</span>
-                <span style={{ color: "#94A3B8", fontSize: 10 }}>
-                  {new Date(ev.createdAt).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                <span style={{ color: "#94A3B8", fontSize: 10 }} suppressHydrationWarning>
+                  {formatBDTime(ev.createdAt)}
                 </span>
               </div>
             ))}

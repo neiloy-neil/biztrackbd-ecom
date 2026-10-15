@@ -67,7 +67,7 @@ export function ImpersonationBanner({
         </span>
         <span style={{ color: "#D97706" }}>·</span>
         <span style={{ fontVariantNumeric: "tabular-nums" }}>
-          Session expires in <strong data-testid="impersonation-timer">{formatted}</strong>
+          Session expires in <strong data-testid="impersonation-timer" suppressHydrationWarning>{formatted}</strong>
         </span>
       </div>
       <form action="/api/auth/impersonate/exit" method="post" style={{ margin: 0 }}>
