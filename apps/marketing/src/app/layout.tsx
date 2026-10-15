@@ -7,9 +7,13 @@ import "./site.css";
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-jakarta", display: "swap" });
 const hind = Hind_Siliguri({ subsets: ["bengali", "latin"], weight: ["400", "500", "600", "700"], variable: "--font-hind", display: "swap" });
 
+import { getPlatformSiteVerificationCode } from "@biztrackbd/core";
+
 const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
 
-export const metadata: Metadata = {
+export const dynamic = "force-dynamic";
+
+const baseMetadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
     default: "BizTrackBD: Online Store Software for Bangladesh",
@@ -48,6 +52,14 @@ export const metadata: Metadata = {
       "Run your shop from your phone. Accept bKash, Nagad, and Cash on Delivery with zero commission. Automated Steadfast and Pathao courier pickups.",
   },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const googleVerification = await getPlatformSiteVerificationCode();
+  return {
+    ...baseMetadata,
+    verification: googleVerification ? { google: googleVerification } : undefined,
+  };
+}
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#FFFFFF" };
 
@@ -103,10 +115,14 @@ const globalJsonLd = {
 
 import { PlatformTracker } from "@/components/platform-tracker";
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const googleVerification = await getPlatformSiteVerificationCode();
   return (
     <html lang="en" data-scroll-behavior="smooth" className={`${jakarta.variable} ${hind.variable}`}>
       <head>
+        {googleVerification && (
+          <meta name="google-site-verification" content={googleVerification} />
+        )}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(globalJsonLd) }}

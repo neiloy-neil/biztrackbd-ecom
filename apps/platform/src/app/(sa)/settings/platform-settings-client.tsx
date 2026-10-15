@@ -1125,12 +1125,29 @@ export function PlatformSettingsClient({
                   <input
                     type="text"
                     value={googleSiteVerification}
-                    onChange={(e) => setGoogleSiteVerification(e.target.value)}
-                    placeholder='e.g. google-site-verification=abc123xyz or <meta name="google-site-verification" content="..." />'
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const match = val.match(/content=["']([^"']+)["']/i);
+                      if (match?.[1]) {
+                        setGoogleSiteVerification(match[1].trim());
+                      } else if (val.toLowerCase().startsWith("google-site-verification=")) {
+                        setGoogleSiteVerification(val.slice("google-site-verification=".length).trim());
+                      } else if (val.toLowerCase().startsWith("google-site-verification:")) {
+                        setGoogleSiteVerification(val.slice("google-site-verification:".length).trim());
+                      } else {
+                        setGoogleSiteVerification(val);
+                      }
+                    }}
+                    placeholder='e.g. abc123xyz or <meta name="google-site-verification" content="..." />'
                     style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 13.5 }}
                   />
+                  {googleSiteVerification && (
+                    <div style={{ marginTop: 8, padding: "8px 12px", background: "#E8F6EE", borderRadius: 6, fontSize: 12, color: "#15803D" }}>
+                      ✓ Generated Meta Tag: <code style={{ color: "#15803D" }}>&lt;meta name="google-site-verification" content="{googleSiteVerification}" /&gt;</code>
+                    </div>
+                  )}
                   <div style={{ fontSize: 11.5, color: "#6B6B8D", marginTop: 4 }}>
-                    Automatically parsed and injected into HTML &lt;head&gt; across platform portals.
+                    Automatically injected into HTML &lt;head&gt; across platform landing pages, super admin, and storefronts.
                   </div>
                 </div>
 

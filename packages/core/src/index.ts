@@ -325,6 +325,8 @@ export {
   getPlatformGoogleConfig,
   savePlatformGoogleConfig,
   testPlatformGoogleConnection,
+  cleanGoogleSiteVerification,
+  getPlatformSiteVerificationCode,
   type PlatformGoogleConfigView,
   type PlatformFraudConfigView,
   type PlatformAiConfigView,

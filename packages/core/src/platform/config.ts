@@ -989,7 +989,8 @@ export async function getPlatformGoogleConfig(deps?: Deps): Promise<PlatformGoog
   const gcsEnabled = map.get("gcs_storage_enabled")?.value === "true" || (!map.has("gcs_storage_enabled") && Boolean(gcsBucketName));
 
   const merchantCenterId = getV("google_merchant_id", process.env.GOOGLE_MERCHANT_ID);
-  const siteVerificationCode = getV("google_site_verification", process.env.GOOGLE_SITE_VERIFICATION);
+  const rawSiteVerification = getV("google_site_verification", process.env.GOOGLE_SITE_VERIFICATION);
+  const siteVerificationCode = cleanGoogleSiteVerification(rawSiteVerification) ?? "";
 
   const hasDbRows = rows.length > 0;
   const anyRow = rows[0];
@@ -1010,6 +1011,36 @@ export async function getPlatformGoogleConfig(deps?: Deps): Promise<PlatformGoog
     updatedAt: anyRow?.updatedAt ?? null,
     updatedBy: anyRow?.updatedBy ?? null,
   };
+}
+
+export function cleanGoogleSiteVerification(raw?: string | null): string | null {
+  if (!raw) return null;
+  let s = raw.trim();
+  const match = s.match(/content=["']([^"']+)["']/i);
+  if (match?.[1]) {
+    s = match[1].trim();
+  }
+  if (s.toLowerCase().startsWith("google-site-verification=")) {
+    s = s.slice("google-site-verification=".length).trim();
+  }
+  if (s.toLowerCase().startsWith("google-site-verification:")) {
+    s = s.slice("google-site-verification:".length).trim();
+  }
+  s = s.replace(/^["']|["']$/g, "").trim();
+  return s || null;
+}
+
+export async function getPlatformSiteVerificationCode(deps?: Deps): Promise<string | null> {
+  try {
+    const db = dbOf(deps);
+    const row = await db.platformConfig.findUnique({
+      where: { key: "google_site_verification" },
+      select: { value: true },
+    });
+    return cleanGoogleSiteVerification(row?.value || process.env.GOOGLE_SITE_VERIFICATION || null);
+  } catch {
+    return cleanGoogleSiteVerification(process.env.GOOGLE_SITE_VERIFICATION || null);
+  }
 }
 
 export async function savePlatformGoogleConfig(
@@ -1066,7 +1097,10 @@ export async function savePlatformGoogleConfig(
   }
 
   await setOrDel("google_merchant_id", input.merchantCenterId, "Google Merchant Center ID default");
-  await setOrDel("google_site_verification", input.siteVerificationCode, "Google Search Console default verification code");
+  const cleanedSiteVerification = input.siteVerificationCode !== undefined
+    ? (cleanGoogleSiteVerification(input.siteVerificationCode) ?? "")
+    : undefined;
+  await setOrDel("google_site_verification", cleanedSiteVerification, "Google Search Console default verification code");
 
   await db.platformAuditLog.create({
     data: {
