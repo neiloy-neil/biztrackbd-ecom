@@ -47,8 +47,16 @@ export function WhatsAppManagerClient({
   const [isStartingSession, setIsStartingSession] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [isPairing, setIsPairing] = useState(false);
-  const [pairingPhone, setPairingPhone] = useState(config.phoneNumber || "01712345678");
-  const [pairingCode, setPairingCode] = useState<string | null>(null);
+  const initialPhone = config.phoneNumber
+    ? config.phoneNumber.startsWith("+880")
+      ? "0" + config.phoneNumber.slice(4)
+      : config.phoneNumber
+    : "";
+  const [pairingPhone, setPairingPhone] = useState(initialPhone);
+  const [pairingCode, setPairingCode] = useState<string | null>(initialConfig.pairingCode || null);
+  const [qrSvg, setQrSvg] = useState<string | null>(initialConfig.qrSvg || null);
+  const [pairMode, setPairMode] = useState<"qr" | "code">("qr");
+  const [copiedCode, setCopiedCode] = useState(false);
 
   // Test Message UI states
   const [testPhone, setTestPhone] = useState("");
@@ -71,14 +79,22 @@ export function WhatsAppManagerClient({
 
   // Handle Session Start (QR Generation)
   const handleStartSession = async () => {
+    const clean = pairingPhone.replace(/[^\d]/g, "");
+    if (clean.length < 10) {
+      alert("Please enter a valid WhatsApp mobile number (e.g. 017XXXXXXXX) first.");
+      return;
+    }
     setIsStartingSession(true);
     try {
-      const res = await startWhatsAppSessionAction(pairingPhone);
+      const res = await startWhatsAppSessionAction(clean);
       setConfig((prev) => ({
         ...prev,
         status: res.status,
+        phoneNumber: clean.startsWith("0") ? "+880" + clean.slice(1) : "+880" + clean,
         qrCodeData: res.qrCodeData,
+        qrSvg: res.qrSvg,
       }));
+      if (res.qrSvg) setQrSvg(res.qrSvg);
       if (res.pairingCode) setPairingCode(res.pairingCode);
     } catch (e: any) {
       alert(e.message || "Failed to generate WhatsApp session");
@@ -96,10 +112,11 @@ export function WhatsAppManagerClient({
       setConfig((prev) => ({
         ...prev,
         status: "DISCONNECTED",
-        phoneNumber: null,
         qrCodeData: null,
+        qrSvg: null,
       }));
       setPairingCode(null);
+      setQrSvg(null);
     } catch (e: any) {
       alert(e.message || "Failed to disconnect WhatsApp");
     } finally {
@@ -109,20 +126,23 @@ export function WhatsAppManagerClient({
 
   // Handle Instant Pair / Scan Confirmation
   const handleConfirmPairing = async () => {
-    if (!pairingPhone.trim()) {
-      alert("Please enter your WhatsApp mobile number");
+    const clean = pairingPhone.replace(/[^\d]/g, "");
+    if (clean.length < 10) {
+      alert("Please enter your valid WhatsApp mobile number (e.g. 017XXXXXXXX)");
       return;
     }
     setIsPairing(true);
     try {
-      const res = await confirmWhatsAppPairingAction(pairingPhone);
+      const res = await confirmWhatsAppPairingAction(clean);
       setConfig((prev) => ({
         ...prev,
         status: res.status,
-        phoneNumber: pairingPhone,
+        phoneNumber: clean.startsWith("0") ? "+880" + clean.slice(1) : "+880" + clean,
         qrCodeData: null,
+        qrSvg: null,
       }));
       setPairingCode(null);
+      setQrSvg(null);
     } catch (e: any) {
       alert(e.message || "Failed to pair device");
     } finally {
@@ -454,145 +474,246 @@ export function WhatsAppManagerClient({
                 }}
               >
                 {config.status === "SCAN_QR" ? (
-                  <div style={{ maxWidth: 440, margin: "0 auto" }}>
-                    <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 12 }}>
-                      Scan QR Code from WhatsApp
+                  <div style={{ maxWidth: 480, margin: "0 auto" }}>
+                    <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 4 }}>
+                      Link WhatsApp: {pairingPhone || config.phoneNumber}
                     </div>
+                    <p className="muted" style={{ fontSize: 13, margin: "0 0 16px" }}>
+                      Choose your preferred connection method below:
+                    </p>
 
-                    {/* QR Code Frame */}
+                    {/* Sub-tabs: QR vs Code */}
                     <div
                       style={{
-                        background: "#FFF",
-                        padding: 18,
-                        borderRadius: 14,
-                        display: "inline-block",
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                        border: "1px solid #E2E8F0",
-                        marginBottom: 16,
+                        display: "flex",
+                        justifyContent: "center",
+                        gap: 8,
+                        marginBottom: 18,
+                        background: "#EDF2F7",
+                        padding: 4,
+                        borderRadius: 10,
                       }}
                     >
-                      <svg width="200" height="200" viewBox="0 0 200 200" fill="none">
-                        <rect width="200" height="200" fill="white" />
-                        {/* Finder pattern top-left */}
-                        <rect x="15" y="15" width="50" height="50" rx="6" fill="#1E293B" />
-                        <rect x="25" y="25" width="30" height="30" rx="3" fill="white" />
-                        <rect x="33" y="33" width="14" height="14" rx="2" fill="#1E293B" />
-                        {/* Finder pattern top-right */}
-                        <rect x="135" y="15" width="50" height="50" rx="6" fill="#1E293B" />
-                        <rect x="145" y="25" width="30" height="30" rx="3" fill="white" />
-                        <rect x="153" y="33" width="14" height="14" rx="2" fill="#1E293B" />
-                        {/* Finder pattern bottom-left */}
-                        <rect x="15" y="135" width="50" height="50" rx="6" fill="#1E293B" />
-                        <rect x="25" y="145" width="30" height="30" rx="3" fill="white" />
-                        <rect x="33" y="153" width="14" height="14" rx="2" fill="#1E293B" />
-                        {/* Data matrix dots */}
-                        <rect x="75" y="25" width="12" height="12" fill="#1E293B" />
-                        <rect x="95" y="25" width="12" height="12" fill="#1E293B" />
-                        <rect x="115" y="25" width="12" height="12" fill="#1E293B" />
-                        <rect x="75" y="45" width="12" height="12" fill="#1E293B" />
-                        <rect x="105" y="45" width="12" height="12" fill="#1E293B" />
-                        <rect x="25" y="75" width="12" height="12" fill="#1E293B" />
-                        <rect x="45" y="75" width="12" height="12" fill="#1E293B" />
-                        <rect x="65" y="75" width="12" height="12" fill="#1E293B" />
-                        <rect x="85" y="75" width="12" height="12" fill="#1E293B" />
-                        <rect x="105" y="75" width="12" height="12" fill="#1E293B" />
-                        <rect x="125" y="75" width="12" height="12" fill="#1E293B" />
-                        <rect x="145" y="75" width="12" height="12" fill="#1E293B" />
-                        <rect x="165" y="75" width="12" height="12" fill="#1E293B" />
-                        <rect x="75" y="95" width="12" height="12" fill="#1E293B" />
-                        <rect x="95" y="95" width="12" height="12" fill="#1E293B" />
-                        <rect x="115" y="95" width="12" height="12" fill="#1E293B" />
-                        <rect x="75" y="115" width="12" height="12" fill="#1E293B" />
-                        <rect x="135" y="115" width="12" height="12" fill="#1E293B" />
-                        <rect x="155" y="115" width="12" height="12" fill="#1E293B" />
-                        <rect x="75" y="135" width="12" height="12" fill="#1E293B" />
-                        <rect x="95" y="135" width="12" height="12" fill="#1E293B" />
-                        <rect x="115" y="135" width="12" height="12" fill="#1E293B" />
-                        <rect x="145" y="135" width="12" height="12" fill="#1E293B" />
-                        <rect x="75" y="155" width="12" height="12" fill="#1E293B" />
-                        <rect x="105" y="155" width="12" height="12" fill="#1E293B" />
-                        <rect x="125" y="155" width="12" height="12" fill="#1E293B" />
-                        <rect x="165" y="155" width="12" height="12" fill="#1E293B" />
-                      </svg>
+                      <button
+                        type="button"
+                        onClick={() => setPairMode("qr")}
+                        className={`btn btn-sm ${pairMode === "qr" ? "btn-primary" : "btn-secondary"}`}
+                        style={{ flex: 1, padding: "6px 12px" }}
+                      >
+                        📷 Scan QR Code
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPairMode("code")}
+                        className={`btn btn-sm ${pairMode === "code" ? "btn-primary" : "btn-secondary"}`}
+                        style={{ flex: 1, padding: "6px 12px" }}
+                      >
+                        🔢 Link with Phone Code
+                      </button>
                     </div>
 
-                    {pairingCode && (
-                      <div style={{ marginBottom: 16 }}>
-                        <div style={{ fontSize: 12, color: "#64748B" }}>Or enter pairing code on your phone:</div>
+                    {pairMode === "qr" ? (
+                      <div>
+                        {/* Real QR Code Frame */}
                         <div
                           style={{
-                            fontSize: 22,
-                            fontWeight: 800,
-                            letterSpacing: 4,
-                            background: "#F1F5F9",
-                            padding: "6px 14px",
-                            borderRadius: 8,
+                            background: "#FFF",
+                            padding: 16,
+                            borderRadius: 14,
                             display: "inline-block",
-                            marginTop: 4,
+                            boxShadow: "0 6px 16px rgba(0,0,0,0.06)",
+                            border: "1px solid #E2E8F0",
+                            marginBottom: 16,
                           }}
                         >
-                          {pairingCode}
+                          {qrSvg || config.qrSvg ? (
+                            <img
+                              src={`data:image/svg+xml;utf8,${encodeURIComponent(qrSvg || config.qrSvg || "")}`}
+                              alt="WhatsApp QR Code"
+                              width={220}
+                              height={220}
+                              style={{ display: "block" }}
+                            />
+                          ) : (
+                            <div style={{ width: 220, height: 220, display: "flex", alignItems: "center", justifyContent: "center", color: "#64748B" }}>
+                              Generating QR Code…
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Instructions */}
+                        <div
+                          style={{
+                            textAlign: "left",
+                            background: "#FFF",
+                            border: "1px solid #E2E8F0",
+                            borderRadius: 10,
+                            padding: 14,
+                            fontSize: 13,
+                            marginBottom: 16,
+                          }}
+                        >
+                          <div style={{ fontWeight: 600, marginBottom: 6 }}>Follow these steps on your phone:</div>
+                          <ol style={{ margin: 0, paddingLeft: 18, lineHeight: 1.6 }}>
+                            <li>Open WhatsApp on phone (<b>{pairingPhone || "your phone"}</b>)</li>
+                            <li>Tap <b>Menu (⋮)</b> or <b>Settings (⚙️)</b></li>
+                            <li>Tap <b>Linked Devices</b> → <b>Link a Device</b></li>
+                            <li>Point your phone camera at the QR code above</li>
+                          </ol>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        {/* 8-Char Pairing Code View */}
+                        <div
+                          style={{
+                            background: "#FFF",
+                            border: "1px solid #E2E8F0",
+                            borderRadius: 14,
+                            padding: 20,
+                            boxShadow: "0 6px 16px rgba(0,0,0,0.06)",
+                            marginBottom: 16,
+                          }}
+                        >
+                          <div className="muted" style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 700 }}>
+                            Your WhatsApp 8-Character Pairing Code
+                          </div>
+                          <div
+                            style={{
+                              fontSize: 28,
+                              fontWeight: 800,
+                              fontFamily: "monospace",
+                              letterSpacing: 6,
+                              color: "#1E293B",
+                              margin: "10px 0",
+                            }}
+                          >
+                            {pairingCode || "WAITING…"}
+                          </div>
+                          {pairingCode && (
+                            <button
+                              type="button"
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => {
+                                navigator.clipboard.writeText(pairingCode.replace("-", ""));
+                                setCopiedCode(true);
+                                setTimeout(() => setCopiedCode(false), 2000);
+                              }}
+                            >
+                              {copiedCode ? "Copied to clipboard! ✓" : "📋 Copy Code"}
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Instructions for Code */}
+                        <div
+                          style={{
+                            textAlign: "left",
+                            background: "#FFF",
+                            border: "1px solid #E2E8F0",
+                            borderRadius: 10,
+                            padding: 14,
+                            fontSize: 13,
+                            marginBottom: 16,
+                          }}
+                        >
+                          <div style={{ fontWeight: 600, marginBottom: 6 }}>Follow these steps on your phone:</div>
+                          <ol style={{ margin: 0, paddingLeft: 18, lineHeight: 1.6 }}>
+                            <li>Open WhatsApp on phone (<b>{pairingPhone || "your phone"}</b>)</li>
+                            <li>Tap <b>Linked Devices</b> → <b>Link a Device</b></li>
+                            <li>Tap <b>&quot;Link with phone number instead&quot;</b> at the bottom</li>
+                            <li>Enter the 8-character pairing code shown above</li>
+                          </ol>
                         </div>
                       </div>
                     )}
 
-                    {/* Instructions */}
-                    <div
-                      style={{
-                        textAlign: "left",
-                        background: "#FFF",
-                        border: "1px solid #E2E8F0",
-                        borderRadius: 10,
-                        padding: 14,
-                        fontSize: 13,
-                        marginBottom: 16,
-                      }}
-                    >
-                      <div style={{ fontWeight: 600, marginBottom: 6 }}>Follow these steps on your phone:</div>
-                      <ol style={{ margin: 0, paddingLeft: 18, lineHeight: 1.6 }}>
-                        <li>Open WhatsApp on your phone</li>
-                        <li>Tap <b>Menu (⋮)</b> or <b>Settings (⚙️)</b></li>
-                        <li>Tap <b>Linked Devices</b> → <b>Link a Device</b></li>
-                        <li>Point your phone camera at the QR code above</li>
-                      </ol>
-                    </div>
-
-                    <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
-                      <input
-                        type="text"
-                        className="input"
-                        placeholder="01712345678"
-                        value={pairingPhone}
-                        onChange={(e) => setPairingPhone(e.target.value)}
-                        style={{ width: 160 }}
-                      />
+                    <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 12 }}>
                       <button
                         type="button"
-                        className="btn btn-primary btn-sm"
+                        className="btn btn-primary"
                         onClick={handleConfirmPairing}
                         disabled={isPairing}
+                        style={{ padding: "8px 18px" }}
                       >
-                        {isPairing ? "Pairing…" : "Confirm Device Linked"}
+                        {isPairing ? "Connecting…" : "✓ Confirm Device Linked"}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => {
+                          setConfig((prev) => ({ ...prev, status: "DISCONNECTED", qrCodeData: null, qrSvg: null }));
+                          setPairingCode(null);
+                        }}
+                        style={{ padding: "8px 14px" }}
+                      >
+                        ← Change Number
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div style={{ maxWidth: 460, margin: "0 auto", padding: "16px 0" }}>
-                    <div style={{ fontSize: 48, marginBottom: 12 }}>📱</div>
-                    <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 6 }}>
+                  <div style={{ maxWidth: 480, margin: "0 auto", padding: "16px 0" }}>
+                    <div style={{ fontSize: 44, marginBottom: 12 }}>📱</div>
+                    <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 6 }}>
                       Connect in 30 Seconds with Zero-Meta Setup
                     </div>
                     <p className="muted" style={{ fontSize: 13.5, margin: "0 0 20px" }}>
-                      Link your regular or business WhatsApp number directly. Your store will immediately gain automated order confirmation and courier tracking.
+                      Enter your WhatsApp mobile number below. This will generate your scannable QR code and pairing code, and will automatically synchronize with your storefront floating chat widget.
                     </p>
+
+                    <div
+                      style={{
+                        background: "#FFF",
+                        border: "1px solid #E2E8F0",
+                        borderRadius: 12,
+                        padding: 18,
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                        marginBottom: 18,
+                        textAlign: "left",
+                      }}
+                    >
+                      <label className="label" style={{ fontWeight: 700, fontSize: 13, marginBottom: 6, display: "block" }}>
+                        WhatsApp Business / Mobile Number
+                      </label>
+                      <div className="row" style={{ gap: 8 }}>
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            background: "#F1F5F9",
+                            border: "1px solid var(--border, #CBD5E1)",
+                            borderRadius: 8,
+                            padding: "0 10px",
+                            fontSize: 14,
+                            fontWeight: 700,
+                            color: "#334155",
+                          }}
+                        >
+                          🇧🇩 +880
+                        </span>
+                        <input
+                          type="text"
+                          className="input"
+                          placeholder="01712345678"
+                          value={pairingPhone}
+                          onChange={(e) => setPairingPhone(e.target.value)}
+                          style={{ flex: 1, fontSize: 15 }}
+                        />
+                      </div>
+                      <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+                        Supports Grameenphone, Banglalink, Robi, Airtel, and Teletalk.
+                      </div>
+                    </div>
+
                     <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
                       <button
                         type="button"
                         className="btn btn-primary"
                         onClick={handleStartSession}
                         disabled={isStartingSession}
+                        style={{ padding: "10px 24px", fontSize: 14.5, fontWeight: 700 }}
                       >
-                        {isStartingSession ? "Generating QR Code…" : "⚡ Link WhatsApp Device"}
+                        {isStartingSession ? "Generating QR & Code…" : "⚡ Generate QR Code & Pairing Code"}
                       </button>
                     </div>
                   </div>

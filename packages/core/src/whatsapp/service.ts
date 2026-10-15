@@ -110,21 +110,41 @@ export function renderWhatsAppText(
   });
 }
 
+import { generateWhatsAppQrSvg } from "./session";
+
 /**
  * Retrieves the store's WhatsApp configuration.
  */
 export async function getWhatsAppConfig(tenantId: string): Promise<WhatsAppConfigView> {
   return withTenant(tenantId, async (tx) => {
-    const existing = await tx.whatsAppConfig.findUnique({
-      where: { tenantId },
-    });
+    const [existing, settings] = await Promise.all([
+      tx.whatsAppConfig.findUnique({
+        where: { tenantId },
+      }),
+      tx.storeSettings.findUnique({
+        where: { tenantId },
+        select: { whatsappNumber: true },
+      }),
+    ]);
+
+    const activePhone = existing?.phoneNumber || (settings?.whatsappNumber ? formatWhatsAppPhone(settings.whatsappNumber) : null);
+
+    let qrSvg: string | null = null;
+    if (existing?.status === "SCAN_QR" && existing?.qrCodeData) {
+      try {
+        qrSvg = await generateWhatsAppQrSvg(existing.qrCodeData);
+      } catch {
+        // Ignore QR error
+      }
+    }
 
     if (existing) {
       return {
         providerMode: existing.providerMode,
         status: existing.status,
-        phoneNumber: existing.phoneNumber,
+        phoneNumber: activePhone,
         qrCodeData: existing.qrCodeData,
+        qrSvg,
         gatewayUrl: existing.gatewayUrl,
         autoConfirmCod: existing.autoConfirmCod,
         shippingUpdatesEnabled: existing.shippingUpdatesEnabled,
@@ -139,8 +159,9 @@ export async function getWhatsAppConfig(tenantId: string): Promise<WhatsAppConfi
     return {
       providerMode: "QR_SESSION",
       status: "DISCONNECTED",
-      phoneNumber: null,
+      phoneNumber: activePhone,
       qrCodeData: null,
+      qrSvg: null,
       gatewayUrl: null,
       autoConfirmCod: true,
       shippingUpdatesEnabled: true,

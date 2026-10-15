@@ -476,17 +476,27 @@ export function AppStoreClient({
                         Upgrade
                       </Link>
                     ) : app.built ? (
-                      <button
-                        type="button"
-                        className="btn btn-primary btn-sm"
-                        onClick={() => {
-                          setFormMsg(null);
-                          setTestResult(null);
-                          setActiveModal(app.key);
-                        }}
-                      >
-                        {isInstalled ? "Configure" : "Set Up"}
-                      </button>
+                      app.configureHref && !app.configureHref.startsWith("/settings/apps") ? (
+                        <Link
+                          href={app.configureHref}
+                          className="btn btn-primary btn-sm"
+                          prefetch={false}
+                        >
+                          {isInstalled ? "Configure →" : "Set Up →"}
+                        </Link>
+                      ) : (
+                        <button
+                          type="button"
+                          className="btn btn-primary btn-sm"
+                          onClick={() => {
+                            setFormMsg(null);
+                            setTestResult(null);
+                            setActiveModal(app.key);
+                          }}
+                        >
+                          {isInstalled ? "Configure" : "Set Up"}
+                        </button>
+                      )
                     ) : (
                       <span className="muted" style={{ fontSize: 12 }}>
                         Soon
@@ -1872,6 +1882,258 @@ export function AppStoreClient({
                       <li><b>Flexible Payments:</b> Direct bank deposit details and partial advance deposit support.</li>
                     </ul>
                   </div>
+                </div>
+              )}
+
+              {/* 20. POS & BARCODE STUDIO */}
+              {activeModal === "pos_barcode" && (
+                <div className="stack" style={{ gap: 16 }}>
+                  <p style={{ fontSize: 14, lineHeight: 1.5 }}>
+                    Omnichannel retail counter cashier terminal, barcode scanning, thermal receipt roll printing (58mm/80mm), and real-time inventory deduction across physical and online sales.
+                  </p>
+
+                  <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 14 }}>Module Status</div>
+                        <div className="muted" style={{ fontSize: 12 }}>
+                          {currentApp.enabled ? "Active for this store" : "Turned off"}
+                        </div>
+                      </div>
+                      {canEdit && (
+                        <form action={setModuleAction.bind(null, "pos_barcode", !currentApp.enabled)}>
+                          <SubmitButton className={`btn btn-sm ${currentApp.enabled ? "btn-secondary" : "btn-primary"}`} pending="…">
+                            {currentApp.enabled ? "Turn Off App" : "Turn On App"}
+                          </SubmitButton>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-2" style={{ gap: 10 }}>
+                    <Link href="/pos" className="btn btn-primary" style={{ textAlign: "center", padding: "10px 14px", textDecoration: "none" }}>
+                      Open POS Terminal →
+                    </Link>
+                    <Link href="/products/barcodes" className="btn btn-secondary" style={{ textAlign: "center", padding: "10px 14px", textDecoration: "none" }}>
+                      Open Barcode Studio →
+                    </Link>
+                  </div>
+
+                  <div className="card" style={{ border: "1px solid rgba(59, 130, 246, 0.25)", background: "rgba(59, 130, 246, 0.04)", padding: 16 }}>
+                    <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "#2563EB" }}>
+                      POS Capabilities Included:
+                    </h4>
+                    <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.6 }}>
+                      <li><b>High-Speed Cashier Desk:</b> Instant variant search, barcode camera scanning, and walk-in customer checkout.</li>
+                      <li><b>Thermal Printing:</b> Clean 58mm and 80mm ESC/POS receipt slips with Bengali shop headers.</li>
+                      <li><b>Barcode Label Generation:</b> Bulk print Code-128 sticker labels for all variants in one click.</li>
+                      <li><b>Split Payments:</b> Accept Cash, bKash/Nagad, and Card payments at the counter.</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* 21. GEMINI AI SUITE */}
+              {activeModal === "ai_suite" && (
+                <div className="stack" style={{ gap: 16 }}>
+                  <p style={{ fontSize: 14, lineHeight: 1.5 }}>
+                    Google Gemini 2.5 AI assistant suite tailored for Bangladeshi e-commerce. Generates persuasive bilingual product descriptions, extracts structured addresses from messy chat messages, and responds to shoppers 24/7.
+                  </p>
+
+                  <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 14 }}>Module Status</div>
+                        <div className="muted" style={{ fontSize: 12 }}>
+                          {currentApp.enabled ? "Active for this store" : "Turned off"}
+                        </div>
+                      </div>
+                      {canEdit && (
+                        <form action={setModuleAction.bind(null, "ai_suite", !currentApp.enabled)}>
+                          <SubmitButton className={`btn btn-sm ${currentApp.enabled ? "btn-secondary" : "btn-primary"}`} pending="…">
+                            {currentApp.enabled ? "Turn Off App" : "Turn On App"}
+                          </SubmitButton>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Link href="/settings/ai" className="btn btn-primary" style={{ display: "block", textAlign: "center", padding: "10px 14px", textDecoration: "none" }}>
+                      Open AI Assistant Studio →
+                    </Link>
+                  </div>
+
+                  <div className="card" style={{ border: "1px solid rgba(139, 92, 246, 0.25)", background: "rgba(139, 92, 246, 0.04)", padding: 16 }}>
+                    <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "#7C3AED" }}>
+                      Gemini AI Features:
+                    </h4>
+                    <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.6 }}>
+                      <li><b>Product Copywriter:</b> Generates engaging titles, bullet points, and SEO meta descriptions.</li>
+                      <li><b>Smart Address Parser:</b> Turn unformatted customer chat addresses into clean Division, District, and Upazila fields.</li>
+                      <li><b>Storefront AI Bot:</b> Answers buyer questions regarding stock, sizing, and delivery policies.</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* 22. MARKETING COMMAND CENTER */}
+              {activeModal === "marketing_campaigns" && (
+                <div className="stack" style={{ gap: 16 }}>
+                  <p style={{ fontSize: 14, lineHeight: 1.5 }}>
+                    Engage and retain customers with targeted SMS broadcasts, promotional flash sales, and storefront announcement banners.
+                  </p>
+
+                  <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 14 }}>Module Status</div>
+                        <div className="muted" style={{ fontSize: 12 }}>
+                          {currentApp.enabled ? "Active for this store" : "Turned off"}
+                        </div>
+                      </div>
+                      {canEdit && (
+                        <form action={setModuleAction.bind(null, "marketing_campaigns", !currentApp.enabled)}>
+                          <SubmitButton className={`btn btn-sm ${currentApp.enabled ? "btn-secondary" : "btn-primary"}`} pending="…">
+                            {currentApp.enabled ? "Turn Off App" : "Turn On App"}
+                          </SubmitButton>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Link href="/marketing/campaigns" className="btn btn-primary" style={{ display: "block", textAlign: "center", padding: "10px 14px", textDecoration: "none" }}>
+                      Open Marketing Command Center →
+                    </Link>
+                  </div>
+
+                  <div className="card" style={{ border: "1px solid rgba(16, 185, 129, 0.25)", background: "rgba(16, 185, 129, 0.04)", padding: 16 }}>
+                    <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "#059669" }}>
+                      Campaign Tools:
+                    </h4>
+                    <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.6 }}>
+                      <li><b>Broadcast SMS:</b> Send segmented bulk SMS messages to previous buyers.</li>
+                      <li><b>Storefront Flash Banners:</b> Display sticky urgency bars with countdown timers.</li>
+                      <li><b>Customer Segmentation:</b> Target VIPs, repeat buyers, or dormant customers.</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* 23. ABANDONED CART RECOVERY */}
+              {activeModal === "abandoned_cart" && (
+                <div className="stack" style={{ gap: 16 }}>
+                  <p style={{ fontSize: 14, lineHeight: 1.5 }}>
+                    Recover up to 25% of uncompleted checkouts automatically. Trigger automated reminders via WhatsApp and SMS with 1-click restored cart links.
+                  </p>
+
+                  <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 14 }}>Module Status</div>
+                        <div className="muted" style={{ fontSize: 12 }}>
+                          {currentApp.enabled ? "Active for this store" : "Turned off"}
+                        </div>
+                      </div>
+                      {canEdit && (
+                        <form action={setModuleAction.bind(null, "abandoned_cart", !currentApp.enabled)}>
+                          <SubmitButton className={`btn btn-sm ${currentApp.enabled ? "btn-secondary" : "btn-primary"}`} pending="…">
+                            {currentApp.enabled ? "Turn Off App" : "Turn On App"}
+                          </SubmitButton>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Link href="/abandoned" className="btn btn-primary" style={{ display: "block", textAlign: "center", padding: "10px 14px", textDecoration: "none" }}>
+                      Open Abandoned Carts Desk →
+                    </Link>
+                  </div>
+
+                  <div className="card" style={{ border: "1px solid rgba(239, 68, 68, 0.25)", background: "rgba(239, 68, 68, 0.04)", padding: 16 }}>
+                    <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "#DC2626" }}>
+                      Recovery Features:
+                    </h4>
+                    <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.6 }}>
+                      <li><b>2-Stage Timing:</b> Send first reminder after 1 hour and follow-up with incentive coupon after 24 hours.</li>
+                      <li><b>1-Click Restore:</b> Customers tap the link on mobile and land directly on checkout with items restored.</li>
+                      <li><b>WhatsApp Priority:</b> Sends via WhatsApp first to save SMS costs.</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* UNIVERSAL FALLBACK FOR ANY OTHER APP */}
+              {![
+                "facebook_catalog",
+                "steadfast_courier",
+                "pathao_courier",
+                "redx_courier",
+                "meta_pixel_capi",
+                "google_analytics",
+                "tiktok_pixel",
+                "whatsapp_widget",
+                "loyalty_vip",
+                "fraud_shield",
+                "sms_alerts",
+                "sslcommerz_pay",
+                "uddoktapay_pay",
+                "whatsapp_commerce",
+                "product_bundles",
+                "landing_builder",
+                "customer_returns",
+                "product_reviews",
+                "wholesale_b2b",
+                "pos_barcode",
+                "ai_suite",
+                "marketing_campaigns",
+                "abandoned_cart",
+              ].includes(activeModal) && (
+                <div className="stack" style={{ gap: 16 }}>
+                  <p style={{ fontSize: 14, lineHeight: 1.5 }}>
+                    {currentApp.description}
+                  </p>
+
+                  <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 14 }}>Module Status</div>
+                        <div className="muted" style={{ fontSize: 12 }}>
+                          {currentApp.enabled ? "Active for this store" : "Turned off"}
+                        </div>
+                      </div>
+                      {canEdit && (
+                        <form action={setModuleAction.bind(null, currentApp.key, !currentApp.enabled)}>
+                          <SubmitButton className={`btn btn-sm ${currentApp.enabled ? "btn-secondary" : "btn-primary"}`} pending="…">
+                            {currentApp.enabled ? "Turn Off App" : "Turn On App"}
+                          </SubmitButton>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+
+                  {currentApp.configureHref && !currentApp.configureHref.startsWith("/settings/apps") && (
+                    <div>
+                      <Link href={currentApp.configureHref} className="btn btn-primary" style={{ display: "block", textAlign: "center", padding: "10px 14px", textDecoration: "none" }}>
+                        Open {currentApp.label} →
+                      </Link>
+                    </div>
+                  )}
+
+                  {currentApp.features && currentApp.features.length > 0 && (
+                    <div className="card" style={{ border: "1px solid var(--border, #e5e7eb)", background: "#fff", padding: 16 }}>
+                      <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700 }}>
+                        Features Included:
+                      </h4>
+                      <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.6 }}>
+                        {currentApp.features.map((feat, i) => (
+                          <li key={i}>{feat}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
 

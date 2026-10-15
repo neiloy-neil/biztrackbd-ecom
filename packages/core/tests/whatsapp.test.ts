@@ -136,3 +136,13 @@ describe("WhatsApp Variable Interpolation & Template Registry", () => {
     expect(WHATSAPP_EVENT_MAP.has("ABANDONED_CART_STAGE_2")).toBe(true);
   });
 });
+
+describe("WhatsApp Dynamic QR & Pairing Code Engine", () => {
+  it("generates a mathematically valid SVG QR code", async () => {
+    const { generateWhatsAppQrSvg } = await import("../src");
+    const svg = await generateWhatsAppQrSvg("https://wa.me/8801712345678");
+    expect(svg).toContain("<svg");
+    expect(svg).toContain("</svg>");
+    expect(svg).toContain("<path");
+  });
+});

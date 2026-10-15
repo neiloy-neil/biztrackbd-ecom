@@ -46,6 +46,8 @@ export interface WhatsAppConfigView {
   status: WhatsAppSessionStatus;
   phoneNumber: string | null;
   qrCodeData: string | null;
+  qrSvg?: string | null;
+  pairingCode?: string | null;
   gatewayUrl: string | null;
   autoConfirmCod: boolean;
   shippingUpdatesEnabled: boolean;

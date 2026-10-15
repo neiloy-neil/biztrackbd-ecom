@@ -48,12 +48,17 @@ export async function getWhatsAppManagerDataAction() {
   };
 }
 
+import { revalidatePath } from "next/cache";
+
 export async function startWhatsAppSessionAction(phoneNumber?: string) {
   const s = await requireAccess("marketing");
   if (!can(s.user.role, "marketing", "edit")) {
     throw new Error("You do not have permission to modify WhatsApp settings.");
   }
-  return startWhatsAppSession(s.tenantId, { phoneNumber });
+  const result = await startWhatsAppSession(s.tenantId, { phoneNumber });
+  revalidatePath("/marketing/whatsapp");
+  revalidatePath("/settings/apps");
+  return result;
 }
 
 export async function disconnectWhatsAppSessionAction() {
@@ -62,6 +67,8 @@ export async function disconnectWhatsAppSessionAction() {
     throw new Error("You do not have permission to disconnect WhatsApp.");
   }
   await disconnectWhatsAppSession(s.tenantId);
+  revalidatePath("/marketing/whatsapp");
+  revalidatePath("/settings/apps");
   return { success: true };
 }
 
@@ -71,6 +78,8 @@ export async function confirmWhatsAppPairingAction(phoneNumber: string) {
     throw new Error("You do not have permission to pair WhatsApp.");
   }
   const status = await confirmWhatsAppPairing(s.tenantId, phoneNumber);
+  revalidatePath("/marketing/whatsapp");
+  revalidatePath("/settings/apps");
   return { success: true, status };
 }
 

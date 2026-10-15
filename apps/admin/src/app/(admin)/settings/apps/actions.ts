@@ -161,8 +161,24 @@ export async function saveWhatsAppWidgetAction(input: {
   try {
     await withTenant(s.tenantId, async (tx) => {
       await tx.storeSettings.updateMany({ data: { whatsappNumber: phone } });
+      if (phone) {
+        const fullPhone = phone.startsWith("0") ? `+880${phone.slice(1)}` : `+880${phone}`;
+        await tx.whatsAppConfig.upsert({
+          where: { tenantId: s.tenantId },
+          create: {
+            tenantId: s.tenantId,
+            phoneNumber: fullPhone,
+            providerMode: "QR_SESSION",
+            status: "DISCONNECTED",
+          },
+          update: {
+            phoneNumber: fullPhone,
+          },
+        });
+      }
     });
     revalidatePath("/settings/apps");
+    revalidatePath("/marketing/whatsapp");
     revalidatePath("/", "layout");
     return { ok: true };
   } catch (e) {
