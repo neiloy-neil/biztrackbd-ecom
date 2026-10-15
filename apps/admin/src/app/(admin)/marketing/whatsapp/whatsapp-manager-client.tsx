@@ -629,10 +629,10 @@ export function WhatsAppManagerClient({
                 }}
               >
                 {config.status === "SCAN_QR" ? (
-                  <div style={{ maxWidth: 520, margin: "0 auto", textAlign: "center" }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 4 }}>
+                  <div style={{ maxWidth: 540, margin: "0 auto", textAlign: "center" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 8 }}>
                       <span style={{ fontWeight: 800, fontSize: 18 }}>
-                        Verify WhatsApp: {formatBdMobileInternational(pairingPhone || config.phoneNumber)}
+                        Connect WhatsApp: {formatBdMobileInternational(pairingPhone || config.phoneNumber)}
                       </span>
                       {(() => {
                         const op = getBdOperator(pairingPhone || config.phoneNumber);
@@ -652,17 +652,58 @@ export function WhatsAppManagerClient({
                         ) : null;
                       })()}
                     </div>
-                    <p className="muted" style={{ fontSize: 13, margin: "0 0 16px" }}>
-                      Scan with any smartphone camera or click directly to verify your connection:
-                    </p>
 
-                    {/* Sub-tabs: QR vs Code */}
+                    {/* Explanatory Notice */}
+                    <div
+                      style={{
+                        background: "#FEF3C7",
+                        border: "1px solid #FDE68A",
+                        borderRadius: 10,
+                        padding: "12px 16px",
+                        marginBottom: 16,
+                        textAlign: "left",
+                        fontSize: 13,
+                        color: "#92400E",
+                      }}
+                    >
+                      <div style={{ fontWeight: 700, marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
+                        <span>💡</span> No WhatsApp &quot;Linked Devices&quot; scan needed!
+                      </div>
+                      <div>
+                        BizTrack connects directly using your mobile number for storefront floating chat and 1-click order notifications. You do <b>NOT</b> need to scan inside WhatsApp &gt; Settings &gt; Linked Devices. Simply click <b>&quot;Connect WhatsApp Now&quot;</b> below!
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 20 }}>
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={handleConfirmPairing}
+                        disabled={isPairing}
+                        style={{ padding: "12px 28px", fontWeight: 800, fontSize: 15 }}
+                      >
+                        {isPairing ? "Connecting…" : "⚡ Connect WhatsApp Now (1-Click)"}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => {
+                          setConfig((prev) => ({ ...prev, status: "DISCONNECTED", qrCodeData: null, qrSvg: null }));
+                          setPairingCode(null);
+                        }}
+                        style={{ padding: "12px 18px" }}
+                      >
+                        ← Change Number
+                      </button>
+                    </div>
+
+                    {/* Sub-tabs: Optional QR vs Code */}
                     <div
                       style={{
                         display: "flex",
                         justifyContent: "center",
                         gap: 8,
-                        marginBottom: 18,
+                        marginBottom: 16,
                         background: "#EDF2F7",
                         padding: 4,
                         borderRadius: 10,
@@ -674,7 +715,7 @@ export function WhatsAppManagerClient({
                         className={`btn btn-sm ${pairMode === "qr" ? "btn-primary" : "btn-secondary"}`}
                         style={{ flex: 1, padding: "6px 12px" }}
                       >
-                        📷 Scan Camera QR Code
+                        📱 Customer Chat QR Code
                       </button>
                       <button
                         type="button"
@@ -688,7 +729,6 @@ export function WhatsAppManagerClient({
 
                     {pairMode === "qr" ? (
                       <div>
-                        {/* Real QR Code Frame */}
                         <div
                           style={{
                             background: "#FFF",
@@ -697,7 +737,7 @@ export function WhatsAppManagerClient({
                             display: "inline-block",
                             boxShadow: "0 6px 16px rgba(0,0,0,0.06)",
                             border: "1px solid #E2E8F0",
-                            marginBottom: 16,
+                            marginBottom: 14,
                           }}
                         >
                           {qrSvg || config.qrSvg ? (
@@ -715,7 +755,7 @@ export function WhatsAppManagerClient({
                           )}
                         </div>
 
-                        <div style={{ marginBottom: 16 }}>
+                        <div style={{ marginBottom: 14 }}>
                           <a
                             href={
                               directLink ||
@@ -728,33 +768,26 @@ export function WhatsAppManagerClient({
                             className="btn btn-secondary btn-sm"
                             style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600 }}
                           >
-                            💬 Click to Open WhatsApp Directly on this Device
+                            💬 Test Opening WhatsApp Chat on this PC
                           </a>
                         </div>
 
-                        {/* Instructions */}
                         <div
                           style={{
                             textAlign: "left",
                             background: "#FFF",
                             border: "1px solid #E2E8F0",
                             borderRadius: 10,
-                            padding: 14,
-                            fontSize: 13,
-                            marginBottom: 16,
+                            padding: 12,
+                            fontSize: 12.5,
+                            color: "#64748B",
                           }}
                         >
-                          <div style={{ fontWeight: 600, marginBottom: 6 }}>Follow these simple steps:</div>
-                          <ol style={{ margin: 0, paddingLeft: 18, lineHeight: 1.6 }}>
-                            <li>Open your phone camera or WhatsApp camera on <b>{formatBdMobileInternational(pairingPhone) || "your phone"}</b></li>
-                            <li>Scan the QR code above to open WhatsApp directly</li>
-                            <li>Click <b>&quot;✓ Confirm &amp; Connect WhatsApp&quot;</b> below to complete connection</li>
-                          </ol>
+                          <b>ℹ️ How this QR code works:</b> This is a direct <code>wa.me</code> customer chat link. When scanned by a standard smartphone camera, it opens a WhatsApp conversation with your store number. <i>(Do not scan inside WhatsApp &gt; Linked Devices, as that scanner is reserved for web.whatsapp.com desktop browsers).</i>
                         </div>
                       </div>
                     ) : (
                       <div>
-                        {/* Verification Code View */}
                         <div
                           style={{
                             background: "#FFF",
@@ -762,7 +795,7 @@ export function WhatsAppManagerClient({
                             borderRadius: 14,
                             padding: 20,
                             boxShadow: "0 6px 16px rgba(0,0,0,0.06)",
-                            marginBottom: 16,
+                            marginBottom: 14,
                           }}
                         >
                           <div className="muted" style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 700 }}>
@@ -801,50 +834,24 @@ export function WhatsAppManagerClient({
                             background: "#FFF",
                             border: "1px solid #E2E8F0",
                             borderRadius: 10,
-                            padding: 14,
-                            fontSize: 13,
-                            marginBottom: 16,
+                            padding: 12,
+                            fontSize: 12.5,
+                            color: "#64748B",
                           }}
                         >
-                          <div style={{ fontWeight: 600, marginBottom: 6 }}>Instructions:</div>
-                          <p style={{ margin: 0, lineHeight: 1.6 }}>
-                            This code verifies your store WhatsApp session for <b>{formatBdMobileInternational(pairingPhone)}</b>. Click <b>&quot;✓ Confirm &amp; Connect WhatsApp&quot;</b> below to activate immediately.
-                          </p>
+                          This code confirms your store session for <b>{formatBdMobileInternational(pairingPhone)}</b>. Click <b>&quot;Connect WhatsApp Now&quot;</b> above to activate.
                         </div>
                       </div>
                     )}
-
-                    <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 14 }}>
-                      <button
-                        type="button"
-                        className="btn btn-primary"
-                        onClick={handleConfirmPairing}
-                        disabled={isPairing}
-                        style={{ padding: "9px 22px", fontWeight: 700, fontSize: 14 }}
-                      >
-                        {isPairing ? "Connecting…" : "✓ Confirm & Connect WhatsApp"}
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={() => {
-                          setConfig((prev) => ({ ...prev, status: "DISCONNECTED", qrCodeData: null, qrSvg: null }));
-                          setPairingCode(null);
-                        }}
-                        style={{ padding: "9px 16px" }}
-                      >
-                        ← Change Number
-                      </button>
-                    </div>
                   </div>
                 ) : (
                   <div style={{ maxWidth: 500, margin: "0 auto", padding: "16px 0", textAlign: "center" }}>
                     <div style={{ fontSize: 44, marginBottom: 12 }}>📱</div>
                     <div style={{ fontWeight: 700, fontSize: 19, marginBottom: 6 }}>
-                      Connect WhatsApp in Seconds
+                      Connect WhatsApp to Your Store
                     </div>
                     <p className="muted" style={{ fontSize: 13.5, margin: "0 0 20px" }}>
-                      Enter your WhatsApp mobile number. It automatically connects with your storefront floating chat widget and enables 1-click order notifications.
+                      Enter your WhatsApp mobile number. It automatically connects with your storefront floating chat widget and enables 1-click order notifications. No QR scanning required!
                     </p>
 
                     <div
@@ -880,7 +887,7 @@ export function WhatsAppManagerClient({
                         <input
                           type="text"
                           className="input"
-                          placeholder="01712345678"
+                          placeholder="01886675596"
                           value={pairingPhone}
                           onChange={(e) => {
                             const val = e.target.value;
@@ -921,7 +928,7 @@ export function WhatsAppManagerClient({
                           if (local.length > 0 && local.length < 11) {
                             return (
                               <span className="muted" style={{ fontSize: 12 }}>
-                                {11 - local.length} digits remaining… (e.g. 01712345678)
+                                {11 - local.length} digits remaining… (e.g. 01886675596)
                               </span>
                             );
                           }
@@ -934,24 +941,15 @@ export function WhatsAppManagerClient({
                       </div>
                     </div>
 
-                    <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
                       <button
                         type="button"
                         className="btn btn-primary"
                         onClick={handleConfirmPairing}
-                        disabled={isPairing || isStartingSession}
-                        style={{ padding: "10px 24px", fontSize: 14.5, fontWeight: 700 }}
+                        disabled={isPairing}
+                        style={{ padding: "12px 32px", fontSize: 15, fontWeight: 800 }}
                       >
-                        {isPairing ? "Connecting…" : "⚡ Instant Connect (1-Click)"}
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={handleStartSession}
-                        disabled={isStartingSession || isPairing}
-                        style={{ padding: "10px 18px", fontSize: 14, fontWeight: 600 }}
-                      >
-                        {isStartingSession ? "Generating QR…" : "📷 Link with QR Code"}
+                        {isPairing ? "Connecting…" : "⚡ Connect WhatsApp to Store (Instant)"}
                       </button>
                     </div>
                   </div>
