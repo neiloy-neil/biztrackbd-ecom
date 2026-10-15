@@ -1,0 +1,14 @@
+services:
+  whatsapp-gateway:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "5055:5055"
+    environment:
+      - PORT=5055
+      - BIZTRACK_WEBHOOK_URL=http://localhost:3000/api/webhooks/whatsapp
+    volumes:
+      - baileys_auth:/app/.baileys_auth
+
+volumes:
+  baileys_auth:
