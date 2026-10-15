@@ -20,6 +20,7 @@ import { onCancelled, onDelivered, onReturned, priceLoyalty, recordAtOrder, refe
 import { normalizeBdPhone } from "../phone";
 import { CreateOrderInput } from "./schema";
 import { RESTOCKS_ON, assertTransition } from "./state-machine";
+import { attributeOrderToAffiliate, settleAffiliateOrderCommissions } from "../affiliate/service";
 
 const IDEMPOTENCY_TTL_MS = 24 * 3_600_000;
 const TRX_ID = /^[A-Z0-9]{8,12}$/;
@@ -31,6 +32,7 @@ export interface PlacedOrder {
   orderId: string;
   orderNumber: string;
   totalAmount: number;
+  subtotalAmount?: number;
   replayed: boolean;
 }
 
@@ -56,6 +58,17 @@ export async function createOrder(tenantId: string, rawInput: unknown): Promise<
       return { placed: p, usage: u };
     });
     if (!placed.replayed) {
+      try {
+        await attributeOrderToAffiliate(tenantId, {
+          orderId: placed.orderId,
+          subtotal: placed.subtotalAmount ?? placed.totalAmount,
+          customerPhone: phone,
+          couponCode: input.couponCode,
+          refCode: input.affiliateRef,
+        });
+      } catch (err) {
+        console.error("[Affiliate] Failed to attribute order:", err);
+      }
       await notifyOrder(tenantId, placed.orderId, "ORDER_RECEIVED");
       await publishEvent("order/created", { tenantId, orderId: placed.orderId, orderNumber: placed.orderNumber, totalAmount: placed.totalAmount });
       for (const percent of usage?.crossed ?? ([] as OrderThreshold[])) {
@@ -76,7 +89,7 @@ export async function createOrder(tenantId: string, rawInput: unknown): Promise<
 
 async function findByKey(tx: TenantTx, key: string): Promise<PlacedOrder | null> {
   const o = await tx.order.findFirst({ where: { idempotencyKey: key } });
-  return o ? { orderId: o.id, orderNumber: o.orderNumber, totalAmount: Number(o.totalAmount), replayed: true } : null;
+  return o ? { orderId: o.id, orderNumber: o.orderNumber, totalAmount: Number(o.totalAmount), subtotalAmount: Number(o.subtotalAmount), replayed: true } : null;
 }
 
 async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof CreateOrderInput.parse>, phone: string): Promise<PlacedOrder> {
@@ -380,7 +393,7 @@ async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof Cr
     },
   });
 
-  return { orderId: order.id, orderNumber, totalAmount: total, replayed: false };
+  return { orderId: order.id, orderNumber, totalAmount: total, subtotalAmount: subtotal, replayed: false };
 }
 
 export interface Actor {
@@ -467,6 +480,11 @@ export async function transitionOrder(tenantId: string, orderId: string, to: Ord
   if (RESTOCKS_ON.includes(to)) await afterRestock(tenantId);
   if (to === "CANCELLED" || to === "RETURNED" || to === "REFUNDED") {
     sendServerCancellation(tenantId, orderId, reason ?? `Order ${to}`).catch(() => undefined);
+  }
+  try {
+    await settleAffiliateOrderCommissions(tenantId, orderId, to);
+  } catch (err) {
+    console.error("[Affiliate] Failed to settle commission:", err);
   }
   return updated;
 }

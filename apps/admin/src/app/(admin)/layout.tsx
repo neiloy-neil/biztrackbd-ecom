@@ -61,6 +61,7 @@ const GROUPS: Group[] = [
       { href: "/marketing", label: "Overview", area: "marketing", exact: true },
       { href: "/marketing/bundles", label: "Bundles & Upsells", area: "marketing", moduleKey: "product_bundles" },
       { href: "/marketing/whatsapp", label: "WhatsApp Automation", area: "marketing", moduleKey: "whatsapp_commerce" },
+      { href: "/marketing/affiliates", label: "Affiliates & Influencers", area: "marketing" },
       { href: "/marketing/coupons", label: "Discounts", area: "marketing" },
       { href: "/marketing/campaigns", label: "Campaigns", area: "marketing", moduleKey: "marketing_campaigns" },
       { href: "/marketing/notifications", label: "Notifications", area: "marketing", moduleKey: "marketing_campaigns" },

@@ -1,6 +1,6 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { DomainError, districtsOf, divisionNames, hashClient, normalizeBdPhone, placeLandingOrder, recordLandingView, saveLandingLead, sendServerPurchase, signOrderAccess } from "@biztrackbd/core";
 import { clientIp } from "@/lib/ip";
 import { getStore } from "@/lib/tenant";
@@ -32,11 +32,15 @@ export async function placeLandingOrderAction(slug: string, _prev: LandingOrderS
   const bump = get("bump") === "on";
   if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) return { error: "Choose a quantity from 1 to 10.", field: "quantity" };
 
+  const cookieStore = await cookies();
+  const affiliateRef = get("affiliateRef") || cookieStore.get("bt_aff_ref")?.value?.trim() || undefined;
+
   let placed: Awaited<ReturnType<typeof placeLandingOrder>>;
   try {
     placed = await placeLandingOrder(store.id, slug, {
       idempotencyKey: get("key"), optionId: get("optionId") || undefined, bump, variantId: get("variantId"), quantity, name: get("name"), phone, address: get("address"), district, division,
       clientHash: hashClient(await clientIp()), utmSource: get("utm_source") || undefined, utmCampaign: get("utm_campaign") || undefined, utmMedium: get("utm_medium") || undefined,
+      affiliateRef,
     });
     if (!placed.replayed) {
       const ua = (await headers()).get("user-agent");

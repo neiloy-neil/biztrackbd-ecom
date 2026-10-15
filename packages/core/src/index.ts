@@ -408,6 +408,5 @@ export * from "./whatsapp/order-actions";
 // Wholesale & B2B Pricing Suite
 export * from "./wholesale";
 
-
-
-
+// Affiliate & Influencer Commission Hub
+export * from "./affiliate/service";

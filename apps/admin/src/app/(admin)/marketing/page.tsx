@@ -158,6 +158,24 @@ export default async function MarketingOverviewPage() {
           </Link>
         </div>
 
+        {/* Affiliate & Influencer Hub */}
+        <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 20 }}>🤝</span>
+                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Affiliate & Influencers</h3>
+              </div>
+              <span className="pill green">Growth Engine</span>
+            </div>
+            <p className="muted" style={{ fontSize: 13, margin: "0 0 12px" }}>
+              Referral link tracking, dedicated influencer coupon attribution, live commission ledger, and bKash/Nagad payout management.
+            </p>
+          </div>
+          <Link href="/marketing/affiliates" className="btn btn-secondary btn-sm" style={{ width: "100%", textAlign: "center" }} prefetch={false}>
+            Manage Affiliates & Payouts →
+          </Link>
+        </div>
 
         {/* Broadcast Campaigns */}
         <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>

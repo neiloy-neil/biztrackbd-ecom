@@ -322,6 +322,28 @@ export const APP_CATALOG: AppCatalogItem[] = [
     keywords: ["reviews", "ratings", "ugc", "testimonials", "social proof"],
     docsSummary: "Manage and approve incoming customer reviews in Products > Reviews.",
   },
+  {
+    key: "affiliate_influencer_hub",
+    label: "Affiliate & Influencer Hub",
+    category: "GROWTH",
+    categoryLabel: "Customer Growth & Retention",
+    tier: "INCLUDED",
+    tierLabel: "Included in all plans",
+    description: "Referral link tracking, dedicated influencer coupons, real-time commission ledger, and bKash/Nagad payout management.",
+    longDescription: "Onboard influencers and affiliate marketers with passwordless magic link partner portals. Track orders via 30-day cookie links or custom branded coupon codes, automate commission clearance upon parcel delivery, and disburse payouts directly via bKash, Nagad, Rocket, or Bank Wire.",
+    built: true,
+    icon: "users-group",
+    badge: "Viral Growth",
+    configureHref: "/marketing/affiliates",
+    features: [
+      "Custom influencer referral links & branded coupon codes",
+      "Delivery-tied commission state machine (clears only on DELIVERED)",
+      "Dedicated passwordless Partner Dashboard (/partner/[token])",
+      "One-click bKash, Nagad, Rocket, and Bank payout disbursement",
+    ],
+    keywords: ["affiliate", "influencer", "referral", "commission", "payout", "bkash", "nagad", "partner"],
+    docsSummary: "Manage affiliate partners and disburse commission payouts under Marketing > Affiliates & Influencers.",
+  },
 
   // --- 4. AUTOMATION & PROTECTION ---
   {

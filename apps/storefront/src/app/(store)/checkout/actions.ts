@@ -1,6 +1,6 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { DomainError, createOrder, createUddoktaPayCharge, getStoreUddoktaPayConfig, hashClient, isValidAddress, normalizeBdPhone, parseCustomerDetailsWithAi, sendServerPurchase, signOrderAccess } from "@biztrackbd/core";
 import { clientIp } from "@/lib/ip";
 import { getCustomerSession } from "@/lib/session";
@@ -16,6 +16,7 @@ export interface PlaceOrderPayload {
   couponCode?: string;
   redeemPoints?: number;
   referralCode?: string;
+  affiliateRef?: string;
   bundleId?: string;
   bumpIds?: string[];
   /** Browser cookies and address, so the server-side Purchase can be matched to the visitor. */
@@ -38,6 +39,8 @@ export async function placeOrderAction(p: PlaceOrderPayload): Promise<PlaceOrder
       return { ok: false, error: "Choose your division, district and upazila from the lists.", field: "district" };
     }
     normalizeBdPhone(p.customer.phone);
+    const cookieStore = await cookies();
+    const affiliateRef = p.affiliateRef?.trim() || cookieStore.get("bt_aff_ref")?.value?.trim() || undefined;
     const placed = await createOrder(store.id, {
       idempotencyKey: p.idempotencyKey,
       customer: { name: p.customer.name, phone: p.customer.phone, email: p.customer.email?.trim() || undefined },
@@ -54,6 +57,7 @@ export async function placeOrderAction(p: PlaceOrderPayload): Promise<PlaceOrder
       notes: p.shipping.note?.trim() || undefined,
       channel: "STOREFRONT",
       clientHash: hashClient(await clientIp()),
+      affiliateRef,
     });
 
     let paymentUrl: string | undefined;

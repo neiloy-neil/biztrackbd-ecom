@@ -47,6 +47,8 @@ export const CreateOrderInput = z.object({
   redeemPoints: z.number().int().min(0).max(1_000_000).optional(),
   /** A friend's code (REF-...). Needs no sign-in: the friend is new by definition. */
   referralCode: z.string().trim().max(40).optional(),
+  /** Influencer or affiliate referral code (from bt_aff_ref cookie or query param). */
+  affiliateRef: z.string().trim().max(40).optional(),
   /** Set ONLY by a server that has verified the customer's sign-in (the storefront from its session cookie). Unlocks the VIP discount and spending points. */
   verifiedCustomerId: z.string().max(64).optional(),
   /** A keyed hash of the buyer's address (see hashClient), set by the storefront. Never a raw address. Used only to refuse a referral from the referrer's own connection. */

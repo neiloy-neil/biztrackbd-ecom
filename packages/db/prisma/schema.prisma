@@ -165,6 +165,9 @@ model Tenant {
   wholesaleCustomers    WholesaleCustomer[]
   wholesalePrices       WholesalePrice[]
   supportQuickReplies   SupportQuickReply[]
+  affiliatePartners     AffiliatePartner[]
+  affiliateReferrals    AffiliateReferral[]
+  affiliatePayouts      AffiliatePayout[]
 
   @@index([subdomain])
   @@index([customDomain])
@@ -538,6 +541,7 @@ model Order {
   events              OrderEvent[]
   refunds             RefundLedger[]
   settledLines        CourierSettledOrder[]
+  affiliateReferrals  AffiliateReferral[]
   courierEvents       CourierEvent[]
   whatsAppMessageLogs WhatsAppMessageLog[]
 
@@ -1855,6 +1859,13 @@ model StoreSettings {
   vipGoldDiscount            Int       @default(5) // percent off every order
   vipPlatinumDiscount        Int       @default(10)
   birthdayVoucherBdt         Int       @default(100) // a voucher on a Silver-or-higher member's birthday; 0 = off
+  // Affiliate & Influencer Hub
+  affiliateEnabled           Boolean   @default(false)
+  affiliateDefaultType       String    @default("PERCENTAGE") // "PERCENTAGE" | "FLAT"
+  affiliateDefaultRate       Decimal   @default(10.00) @db.Decimal(10, 2)
+  affiliateMinPayoutBdt      Decimal   @default(500.00) @db.Decimal(10, 2)
+  affiliateCookieDays        Int       @default(30)
+
   // Wholesale & B2B Module
   wholesaleEnabled           Boolean   @default(false)
   wholesaleMinOrderAmount    Decimal   @default(5000.00) @db.Decimal(12, 2)
@@ -2467,4 +2478,86 @@ model WholesalePrice {
 
   @@unique([variantId, tierId, minQuantity])
   @@index([tenantId, variantId])
+}
+
+// ==========================================
+// AFFILIATE & INFLUENCER COMMISSION HUB
+// ==========================================
+
+model AffiliatePartner {
+  id             String              @id @default(cuid())
+  tenantId       String
+  name           String
+  email          String?
+  phone          String
+  code           String              // unique referral code per store e.g. "tanvir"
+  couponCode     String?             // unique discount coupon e.g. "TANVIR10"
+  commissionType String              @default("PERCENTAGE") // "PERCENTAGE" | "FLAT"
+  commissionValue Decimal            @default(10.00) @db.Decimal(10, 2)
+  status         String              @default("ACTIVE") // "ACTIVE" | "PAUSED" | "ARCHIVED"
+  payoutMethod   String              @default("BKASH") // "BKASH" | "NAGAD" | "ROCKET" | "BANK"
+  payoutAccount  String?             // e.g. "01712345678" or bank details
+  totalEarned    Decimal             @default(0.00) @db.Decimal(12, 2)
+  totalPaid      Decimal             @default(0.00) @db.Decimal(12, 2)
+  payableBalance Decimal             @default(0.00) @db.Decimal(12, 2)
+  portalToken    String              @unique @default(uuid())
+  notes          String?             @db.Text
+
+  tenant         Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  referrals      AffiliateReferral[]
+  payouts        AffiliatePayout[]
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@unique([tenantId, code])
+  @@index([tenantId, status])
+  @@index([portalToken])
+}
+
+model AffiliateReferral {
+  id               String           @id @default(cuid())
+  tenantId         String
+  affiliateId      String
+  orderId          String
+  customerPhone    String
+  orderSubtotal    Decimal          @db.Decimal(12, 2)
+  commissionAmount Decimal          @db.Decimal(12, 2)
+  commissionType   String           // "PERCENTAGE" | "FLAT"
+  commissionValue  Decimal          @db.Decimal(10, 2)
+  status           String           @default("PENDING") // "PENDING" | "APPROVED" | "PAID" | "VOID"
+  attributedVia    String           @default("LINK") // "LINK" | "COUPON"
+  settledAt        DateTime?
+
+  tenant           Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  affiliate        AffiliatePartner @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  order            Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@index([tenantId, affiliateId])
+  @@index([tenantId, orderId])
+  @@index([tenantId, status])
+}
+
+model AffiliatePayout {
+  id            String           @id @default(cuid())
+  tenantId      String
+  affiliateId   String
+  amount        Decimal          @db.Decimal(12, 2)
+  method        String           // "BKASH" | "NAGAD" | "ROCKET" | "BANK"
+  accountNumber String
+  bankDetails   String?          @db.Text
+  status        String           @default("REQUESTED") // "REQUESTED" | "PAID" | "REJECTED"
+  trxId         String?          // MFS TrxID or Bank reference
+  notes         String?          @db.Text
+  requestedAt   DateTime         @default(now())
+  processedAt   DateTime?
+
+  tenant        Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  affiliate     AffiliatePartner @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([tenantId, affiliateId])
+  @@index([tenantId, status])
 }

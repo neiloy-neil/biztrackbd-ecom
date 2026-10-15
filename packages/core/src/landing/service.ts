@@ -256,6 +256,7 @@ export interface LandingOrderInput {
   utmSource?: string;
   utmCampaign?: string;
   utmMedium?: string;
+  affiliateRef?: string;
 }
 
 /** What an order from this page will contain and how much the deals take off, from database prices. */
@@ -294,6 +295,7 @@ export async function placeLandingOrder(tenantId: string, slug: string, input: L
     utmCampaign: input.utmCampaign,
     utmMedium: input.utmMedium,
     landingPageId: landing.id,
+    affiliateRef: input.affiliateRef,
   });
   // The count is a convenience: a failure here must never lose or fail an order that was placed.
   if (!placed.replayed) {
