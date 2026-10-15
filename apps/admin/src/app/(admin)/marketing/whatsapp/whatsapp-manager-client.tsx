@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type {
@@ -13,6 +13,8 @@ import {
   startWhatsAppSessionAction,
   disconnectWhatsAppSessionAction,
   confirmWhatsAppPairingAction,
+  checkWhatsAppSessionStatusAction,
+  requestWhatsAppPairingCodeAction,
   saveWhatsAppConfigAction,
   saveWhatsAppTemplateAction,
   resetWhatsAppTemplateAction,
@@ -92,9 +94,37 @@ export function WhatsAppManagerClient({
   const [directLink, setDirectLink] = useState<string | null>(null);
   const [pairMode, setPairMode] = useState<"qr" | "code">("qr");
   const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedCommand, setCopiedCommand] = useState(false);
+  const [gatewayActive, setGatewayActive] = useState<boolean>(Boolean(initialConfig.gatewayActive));
+  const [isRequestingPairingCode, setIsRequestingPairingCode] = useState(false);
+  const [pairingNotice, setPairingNotice] = useState<string | null>(null);
   const [gatewayInput, setGatewayInput] = useState(config.gatewayUrl || "");
   const [isSavingGateway, setIsSavingGateway] = useState(false);
   const [gatewayNotice, setGatewayNotice] = useState<string | null>(null);
+
+  // Poll for connection status when scanning QR or waiting for pairing
+  useEffect(() => {
+    if (config.status !== "SCAN_QR") return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await checkWhatsAppSessionStatusAction();
+        if (res.config) {
+          if (res.config.gatewayActive !== undefined) {
+            setGatewayActive(res.config.gatewayActive);
+          }
+          if (res.config.status === "CONNECTED") {
+            setConfig(res.config);
+            router.refresh();
+          } else if (res.config.status === "SCAN_QR") {
+            if (res.config.qrSvg) setQrSvg(res.config.qrSvg);
+            if (res.config.pairingCode) setPairingCode(res.config.pairingCode);
+          }
+        }
+      } catch {}
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [config.status, router]);
 
   // Test Message UI states
   const [testPhone, setTestPhone] = useState(initialPhone);
@@ -124,6 +154,7 @@ export function WhatsAppManagerClient({
       return;
     }
     setIsStartingSession(true);
+    setPairingNotice(null);
     try {
       const res = await startWhatsAppSessionAction(local);
       setConfig((prev) => ({
@@ -138,10 +169,37 @@ export function WhatsAppManagerClient({
       if (res.qrSvg) setQrSvg(res.qrSvg);
       if (res.pairingCode) setPairingCode(res.pairingCode);
       if ((res as any).directLink) setDirectLink((res as any).directLink);
+      if ((res as any).gatewayActive !== undefined) setGatewayActive((res as any).gatewayActive);
     } catch (e: any) {
       alert(e.message || "Failed to generate WhatsApp session");
     } finally {
       setIsStartingSession(false);
+    }
+  };
+
+  // Handle Dedicated 8-Digit Pairing Code Request (Baileys Phone Number Link)
+  const handleRequestPairingCode = async () => {
+    const local = parseBdMobileForDisplay(pairingPhone);
+    if (!/^01[3-9]\d{8}$/.test(local)) {
+      alert("Please enter a valid 11-digit Bangladeshi mobile number (e.g. 01886675596).");
+      return;
+    }
+    setIsRequestingPairingCode(true);
+    setPairingNotice(null);
+    try {
+      const res = await requestWhatsAppPairingCodeAction(local);
+      if (res.gatewayActive !== undefined) setGatewayActive(res.gatewayActive);
+      if (res.success && res.pairingCode) {
+        setPairingCode(res.pairingCode);
+        setPairMode("code");
+        setPairingNotice("Official WhatsApp Pairing Code generated! Type it into WhatsApp on your phone under 'Link with phone number instead'.");
+      } else {
+        alert(res.error || "Failed to generate pairing code. Ensure 'pnpm whatsapp:gateway' is running.");
+      }
+    } catch (e: any) {
+      alert(e.message || "Failed to request pairing code");
+    } finally {
+      setIsRequestingPairingCode(false);
     }
   };
 
@@ -445,6 +503,17 @@ export function WhatsAppManagerClient({
                 ? "SCANNING QR"
                 : "DISCONNECTED"}
             </span>
+            <span
+              className={`pill ${gatewayActive ? "ok" : "grey"}`}
+              style={{ fontSize: 11, fontWeight: 700, padding: "3px 8px" }}
+              title={
+                gatewayActive
+                  ? "Baileys WhatsApp Gateway service is running on port 5055"
+                  : "Baileys WhatsApp Gateway is offline. Run 'pnpm whatsapp:gateway' to start."
+              }
+            >
+              {gatewayActive ? "🟢 GATEWAY ONLINE" : "⚪ GATEWAY IDLE"}
+            </span>
           </div>
           <p className="muted" style={{ margin: "4px 0 0", fontSize: 13.5 }}>
             Zero-Meta Linked Device Architecture. Automated COD confirmation, shipping updates, 2-stage cart recovery, and smart bot.
@@ -685,51 +754,83 @@ export function WhatsAppManagerClient({
                       })()}
                     </div>
 
-                    {/* Explanatory Notice */}
-                    <div
-                      style={{
-                        background: "#FEF3C7",
-                        border: "1px solid #FDE68A",
-                        borderRadius: 10,
-                        padding: "12px 16px",
-                        marginBottom: 16,
-                        textAlign: "left",
-                        fontSize: 13,
-                        color: "#92400E",
-                      }}
-                    >
-                      <div style={{ fontWeight: 700, marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
-                        <span>💡</span> No WhatsApp &quot;Linked Devices&quot; scan needed!
-                      </div>
-                      <div>
-                        BizTrack connects directly using your mobile number for storefront floating chat and 1-click order notifications. You do <b>NOT</b> need to scan inside WhatsApp &gt; Settings &gt; Linked Devices. Simply click <b>&quot;Connect WhatsApp Now&quot;</b> below!
-                      </div>
-                    </div>
-
-                    <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 20 }}>
-                      <button
-                        type="button"
-                        className="btn btn-primary"
-                        onClick={handleConfirmPairing}
-                        disabled={isPairing}
-                        style={{ padding: "12px 28px", fontWeight: 800, fontSize: 15 }}
-                      >
-                        {isPairing ? "Connecting…" : "⚡ Connect WhatsApp Now (1-Click)"}
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={() => {
-                          setConfig((prev) => ({ ...prev, status: "DISCONNECTED", qrCodeData: null, qrSvg: null }));
-                          setPairingCode(null);
+                    {/* Gateway Status Banner */}
+                    {gatewayActive ? (
+                      <div
+                        style={{
+                          background: "#ECFDF5",
+                          border: "1px solid #A7F3D0",
+                          borderRadius: 10,
+                          padding: "10px 14px",
+                          marginBottom: 16,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          textAlign: "left",
+                          fontSize: 13,
+                          color: "#065F46",
                         }}
-                        style={{ padding: "12px 18px" }}
                       >
-                        ← Change Number
-                      </button>
-                    </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ fontSize: 16 }}>🟢</span>
+                          <div>
+                            <b>Baileys WhatsApp Gateway Active (Port 5055):</b> Official WhatsApp Web Multi-Device engine running. Scan QR or enter pairing code to link.
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          background: "#FFFBEB",
+                          border: "1px solid #FCD34D",
+                          borderRadius: 10,
+                          padding: "12px 16px",
+                          marginBottom: 16,
+                          textAlign: "left",
+                          fontSize: 13,
+                          color: "#92400E",
+                        }}
+                      >
+                        <div style={{ fontWeight: 700, marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
+                          <span>⚡</span> Baileys Gateway Server is Offline
+                        </div>
+                        <div style={{ marginBottom: 8, lineHeight: 1.5 }}>
+                          To link via official WhatsApp <b>Settings &gt; Linked Devices</b> scanner and enable automated background messaging, start the gateway server in your terminal:
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            background: "#1E293B",
+                            color: "#F8FAFC",
+                            padding: "8px 12px",
+                            borderRadius: 8,
+                            fontFamily: "monospace",
+                            fontSize: 13,
+                          }}
+                        >
+                          <span style={{ flex: 1 }}>pnpm whatsapp:gateway</span>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => {
+                              navigator.clipboard.writeText("pnpm whatsapp:gateway");
+                              setCopiedCommand(true);
+                              setTimeout(() => setCopiedCommand(false), 2000);
+                            }}
+                            style={{ padding: "4px 10px", fontSize: 12, background: "#334155", color: "#FFF", border: "none" }}
+                          >
+                            {copiedCommand ? "Copied! ✓" : "📋 Copy"}
+                          </button>
+                        </div>
+                        <div style={{ fontSize: 12, marginTop: 6, color: "#78350F" }}>
+                          <i>(Or click &quot;⚡ Connect 1-Click Direct Mode&quot; below for instant zero-server setup)</i>
+                        </div>
+                      </div>
+                    )}
 
-                    {/* Sub-tabs: Optional QR vs Code */}
+                    {/* Sub-tabs: Official QR vs 8-Digit Pairing Code */}
                     <div
                       style={{
                         display: "flex",
@@ -745,17 +846,20 @@ export function WhatsAppManagerClient({
                         type="button"
                         onClick={() => setPairMode("qr")}
                         className={`btn btn-sm ${pairMode === "qr" ? "btn-primary" : "btn-secondary"}`}
-                        style={{ flex: 1, padding: "6px 12px" }}
+                        style={{ flex: 1, padding: "8px 14px", fontWeight: 700 }}
                       >
-                        📱 Customer Chat QR Code
+                        📷 Scan QR Code (Linked Devices)
                       </button>
                       <button
                         type="button"
-                        onClick={() => setPairMode("code")}
+                        onClick={() => {
+                          setPairMode("code");
+                          if (!pairingCode) handleRequestPairingCode();
+                        }}
                         className={`btn btn-sm ${pairMode === "code" ? "btn-primary" : "btn-secondary"}`}
-                        style={{ flex: 1, padding: "6px 12px" }}
+                        style={{ flex: 1, padding: "8px 14px", fontWeight: 700 }}
                       >
-                        🔢 Verification Code
+                        🔢 8-Digit Pairing Code (Phone Link)
                       </button>
                     </div>
 
@@ -769,112 +873,238 @@ export function WhatsAppManagerClient({
                             display: "inline-block",
                             boxShadow: "0 6px 16px rgba(0,0,0,0.06)",
                             border: "1px solid #E2E8F0",
-                            marginBottom: 14,
+                            marginBottom: 12,
                           }}
                         >
                           {qrSvg || config.qrSvg ? (
                             <img
                               src={`data:image/svg+xml;utf8,${encodeURIComponent(qrSvg || config.qrSvg || "")}`}
-                              alt="WhatsApp QR Code"
-                              width={220}
-                              height={220}
+                              alt="Official WhatsApp Multi-Device QR Code"
+                              width={240}
+                              height={240}
                               style={{ display: "block" }}
                             />
                           ) : (
-                            <div style={{ width: 220, height: 220, display: "flex", alignItems: "center", justifyContent: "center", color: "#64748B" }}>
-                              Generating QR Code…
+                            <div style={{ width: 240, height: 240, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#64748B", gap: 10 }}>
+                              <span style={{ fontSize: 13 }}>Connecting to WhatsApp server…</span>
+                              <button
+                                type="button"
+                                className="btn btn-secondary btn-sm"
+                                onClick={handleStartSession}
+                                disabled={isStartingSession}
+                              >
+                                {isStartingSession ? "Generating…" : "🔄 Generate Baileys QR"}
+                              </button>
                             </div>
                           )}
                         </div>
 
-                        <div style={{ marginBottom: 14 }}>
-                          <a
-                            href={
-                              directLink ||
-                              `https://wa.me/88${parseBdMobileForDisplay(pairingPhone || config.phoneNumber)}?text=${encodeURIComponent(
-                                "Hello! BizTrack WhatsApp connection verification."
-                              )}`
-                            }
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn btn-secondary btn-sm"
-                            style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600 }}
-                          >
-                            💬 Test Opening WhatsApp Chat on this PC
-                          </a>
+                        {/* Real-time Listening Pulse */}
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 13, color: "#166534", marginBottom: 14, fontWeight: 600 }}>
+                          <span>🟢</span> Listening for device link... (Auto-connects immediately when scanned)
                         </div>
 
+                        {/* Step-by-Step Scan Instructions */}
                         <div
                           style={{
                             textAlign: "left",
-                            background: "#FFF",
-                            border: "1px solid #E2E8F0",
+                            background: "#F0FDF4",
+                            border: "1px solid #BBF7D0",
                             borderRadius: 10,
-                            padding: 12,
-                            fontSize: 12.5,
-                            color: "#64748B",
+                            padding: "14px 18px",
+                            fontSize: 13,
+                            color: "#14532D",
+                            lineHeight: 1.6,
+                            marginBottom: 14,
                           }}
                         >
-                          <b>ℹ️ How this QR code works:</b> This is a direct <code>wa.me</code> customer chat link. When scanned by a standard smartphone camera, it opens a WhatsApp conversation with your store number. <i>(Do not scan inside WhatsApp &gt; Linked Devices, as that scanner is reserved for web.whatsapp.com desktop browsers).</i>
+                          <div style={{ fontWeight: 800, marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}>
+                            <span>📱</span> How to scan with WhatsApp:
+                          </div>
+                          <ol style={{ margin: 0, paddingLeft: 20 }}>
+                            <li>Open <b>WhatsApp</b> on your phone ({formatBdMobileInternational(pairingPhone || config.phoneNumber)}).</li>
+                            <li>Tap <b>Settings</b> (iOS) or <b>⋮ Menu</b> (Android) &gt; <b>Linked Devices</b>.</li>
+                            <li>Tap <b>Link a Device</b>.</li>
+                            <li>Point your camera at this QR code. BizTrack connects automatically!</li>
+                          </ol>
+                        </div>
+
+                        <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={handleStartSession}
+                            disabled={isStartingSession}
+                          >
+                            🔄 {isStartingSession ? "Refreshing…" : "Refresh QR Code"}
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => {
+                              setPairMode("code");
+                              if (!pairingCode) handleRequestPairingCode();
+                            }}
+                          >
+                            🔢 Use 8-Digit Pairing Code Instead →
+                          </button>
                         </div>
                       </div>
                     ) : (
                       <div>
-                        <div
-                          style={{
-                            background: "#FFF",
-                            border: "1px solid #E2E8F0",
-                            borderRadius: 14,
-                            padding: 20,
-                            boxShadow: "0 6px 16px rgba(0,0,0,0.06)",
-                            marginBottom: 14,
-                          }}
-                        >
-                          <div className="muted" style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 700 }}>
-                            Store WhatsApp Verification Code
-                          </div>
+                        {pairingNotice && (
                           <div
                             style={{
-                              fontSize: 32,
-                              fontWeight: 800,
-                              fontFamily: "monospace",
-                              letterSpacing: 4,
-                              color: "#1E293B",
-                              margin: "10px 0",
+                              background: "#ECFDF5",
+                              border: "1px solid #A7F3D0",
+                              color: "#065F46",
+                              padding: "10px 14px",
+                              borderRadius: 8,
+                              fontSize: 13,
+                              marginBottom: 14,
+                              textAlign: "left",
                             }}
                           >
-                            {pairingCode || "BT-9481"}
+                            {pairingNotice}
                           </div>
-                          {pairingCode && (
-                            <button
-                              type="button"
-                              className="btn btn-secondary btn-sm"
-                              onClick={() => {
-                                navigator.clipboard.writeText(pairingCode);
-                                setCopiedCode(true);
-                                setTimeout(() => setCopiedCode(false), 2000);
+                        )}
+
+                        {pairingCode ? (
+                          <div
+                            style={{
+                              background: "#FFF",
+                              border: "1px solid #CBD5E1",
+                              borderRadius: 14,
+                              padding: 22,
+                              boxShadow: "0 6px 16px rgba(0,0,0,0.06)",
+                              marginBottom: 16,
+                            }}
+                          >
+                            <div className="muted" style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 700 }}>
+                              Official WhatsApp 8-Digit Pairing Code
+                            </div>
+                            <div
+                              style={{
+                                fontSize: 36,
+                                fontWeight: 900,
+                                fontFamily: "monospace",
+                                letterSpacing: 4,
+                                color: "#0F172A",
+                                margin: "14px 0",
                               }}
                             >
-                              {copiedCode ? "Copied to clipboard! ✓" : "📋 Copy Code"}
+                              {pairingCode}
+                            </div>
+                            <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+                              <button
+                                type="button"
+                                className="btn btn-primary btn-sm"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(pairingCode.replace("-", ""));
+                                  setCopiedCode(true);
+                                  setTimeout(() => setCopiedCode(false), 2000);
+                                }}
+                              >
+                                {copiedCode ? "Copied to clipboard! ✓" : "📋 Copy Code"}
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-secondary btn-sm"
+                                onClick={handleRequestPairingCode}
+                                disabled={isRequestingPairingCode}
+                              >
+                                🔄 {isRequestingPairingCode ? "Generating…" : "Request New Code"}
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div
+                            style={{
+                              background: "#FFF",
+                              border: "1px solid #E2E8F0",
+                              borderRadius: 14,
+                              padding: 20,
+                              marginBottom: 16,
+                            }}
+                          >
+                            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6 }}>
+                              Link with Phone Number (No Camera Needed)
+                            </div>
+                            <p className="muted" style={{ fontSize: 13, margin: "0 0 16px" }}>
+                              WhatsApp allows linking by typing an 8-character code directly on your phone under <b>&quot;Link with phone number instead&quot;</b>.
+                            </p>
+                            <button
+                              type="button"
+                              className="btn btn-primary"
+                              onClick={handleRequestPairingCode}
+                              disabled={isRequestingPairingCode}
+                              style={{ padding: "10px 24px", fontWeight: 700 }}
+                            >
+                              {isRequestingPairingCode ? "Connecting with WhatsApp Server…" : "⚡ Request 8-Digit Pairing Code"}
                             </button>
-                          )}
-                        </div>
+                          </div>
+                        )}
 
+                        {/* Step-by-Step Code Instructions */}
                         <div
                           style={{
                             textAlign: "left",
-                            background: "#FFF",
+                            background: "#F8FAFC",
                             border: "1px solid #E2E8F0",
                             borderRadius: 10,
-                            padding: 12,
-                            fontSize: 12.5,
-                            color: "#64748B",
+                            padding: "14px 18px",
+                            fontSize: 13,
+                            color: "#334155",
+                            lineHeight: 1.6,
                           }}
                         >
-                          This code confirms your store session for <b>{formatBdMobileInternational(pairingPhone)}</b>. Click <b>&quot;Connect WhatsApp Now&quot;</b> above to activate.
+                          <div style={{ fontWeight: 800, marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}>
+                            <span>📱</span> How to enter the code on your phone:
+                          </div>
+                          <ol style={{ margin: 0, paddingLeft: 20 }}>
+                            <li>Open <b>WhatsApp</b> on your phone ({formatBdMobileInternational(pairingPhone || config.phoneNumber)}).</li>
+                            <li>Go to <b>Settings</b> &gt; <b>Linked Devices</b> &gt; <b>Link a Device</b>.</li>
+                            <li>Tap <b>&quot;Link with phone number instead&quot;</b> at the very bottom of the screen.</li>
+                            <li>Type the 8-digit code shown above. WhatsApp will link immediately!</li>
+                          </ol>
                         </div>
                       </div>
                     )}
+
+                    {/* Instant Direct Mode & Number Change */}
+                    <div
+                      style={{
+                        marginTop: 20,
+                        paddingTop: 16,
+                        borderTop: "1px solid #E2E8F0",
+                        display: "flex",
+                        gap: 10,
+                        justifyContent: "center",
+                        flexWrap: "wrap",
+                        alignItems: "center",
+                      }}
+                    >
+                      <span className="muted" style={{ fontSize: 12.5 }}>Prefer no server?</span>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={handleConfirmPairing}
+                        disabled={isPairing}
+                        style={{ fontWeight: 600, color: "#166534", background: "#DCFCE7", border: "1px solid #86EFAC" }}
+                      >
+                        {isPairing ? "Connecting…" : "⚡ Connect 1-Click WhatsApp Direct Mode (No Server)"}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => {
+                          setConfig((prev) => ({ ...prev, status: "DISCONNECTED", qrCodeData: null, qrSvg: null }));
+                          setPairingCode(null);
+                        }}
+                      >
+                        ← Change Number
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div style={{ maxWidth: 500, margin: "0 auto", padding: "16px 0", textAlign: "center" }}>

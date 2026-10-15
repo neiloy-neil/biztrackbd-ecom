@@ -49,6 +49,7 @@ export interface WhatsAppConfigView {
   qrSvg?: string | null;
   pairingCode?: string | null;
   gatewayUrl: string | null;
+  gatewayActive?: boolean;
   autoConfirmCod: boolean;
   shippingUpdatesEnabled: boolean;
   abandonedRecoveryEnabled: boolean;

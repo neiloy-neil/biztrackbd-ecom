@@ -8,6 +8,8 @@ import {
   saveWhatsAppTemplate,
   resetWhatsAppTemplate,
   startWhatsAppSession,
+  getWhatsAppSessionStatus,
+  requestWhatsAppPairingCode,
   disconnectWhatsAppSession,
   confirmWhatsAppPairing,
   sendWhatsAppNotification,
@@ -85,6 +87,21 @@ export async function confirmWhatsAppPairingAction(phoneNumber: string) {
   revalidatePath("/marketing/whatsapp");
   revalidatePath("/settings/apps");
   return { success: true, status };
+}
+
+export async function checkWhatsAppSessionStatusAction() {
+  const s = await requireAccess("marketing");
+  const config = await getWhatsAppSessionStatus(s.tenantId);
+  return { config };
+}
+
+export async function requestWhatsAppPairingCodeAction(phoneNumber: string) {
+  const s = await requireAccess("marketing");
+  if (!can(s.user.role, "marketing", "edit")) {
+    throw new Error("You do not have permission to request pairing codes.");
+  }
+  const result = await requestWhatsAppPairingCode(s.tenantId, phoneNumber);
+  return result;
 }
 
 export async function saveWhatsAppConfigAction(data: Partial<WhatsAppConfigView>) {

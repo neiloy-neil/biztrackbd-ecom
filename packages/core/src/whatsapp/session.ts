@@ -5,15 +5,23 @@ import { formatWhatsAppPhone } from "./deep-links";
 import type { WhatsAppConfigView, WhatsAppSessionStatus } from "./types";
 
 /**
+ * Resolves the active WhatsApp gateway URL.
+ * Defaults to the local Baileys gateway service on port 5055.
+ */
+export function resolveWhatsAppGatewayUrl(configUrl?: string | null, customUrl?: string): string {
+  return customUrl || configUrl || process.env.WHATSAPP_GATEWAY_URL || "http://localhost:5055";
+}
+
+/**
  * Generates a clean, scannable SVG QR code string.
  */
 export async function generateWhatsAppQrSvg(text: string): Promise<string> {
   return QRCode.toString(text, {
     type: "svg",
     margin: 1,
-    width: 220,
+    width: 240,
     color: {
-      dark: "#1E293B",
+      dark: "#0F172A",
       light: "#FFFFFF",
     },
   });
@@ -21,7 +29,7 @@ export async function generateWhatsAppQrSvg(text: string): Promise<string> {
 
 /**
  * Initiates a WhatsApp Linked Device session.
- * Generates a true QR code SVG and pairing code for the merchant to link their phone.
+ * Connects to the Baileys gateway to obtain an authentic WhatsApp multi-device pairing QR code and pairing code.
  */
 export async function startWhatsAppSession(
   tenantId: string,
@@ -32,13 +40,20 @@ export async function startWhatsAppSession(
   qrSvg: string | null;
   pairingCode?: string;
   directLink?: string;
+  gatewayActive: boolean;
 }> {
   return withTenant(tenantId, async (tx) => {
-    // If a custom gateway is provided or configured in env
-    const gatewayUrl = options?.customGatewayUrl || process.env.WHATSAPP_GATEWAY_URL;
+    const existing = await tx.whatsAppConfig.findUnique({
+      where: { tenantId },
+      select: { gatewayUrl: true },
+    });
+
+    const gatewayUrl = resolveWhatsAppGatewayUrl(existing?.gatewayUrl, options?.customGatewayUrl);
 
     let qrCodeData = "";
+    let qrSvg: string | null = null;
     let pairingCode: string | undefined;
+    let gatewayActive = false;
 
     // Clean and normalize the phone number
     let localPhone: string | null = null;
@@ -61,16 +76,23 @@ export async function startWhatsAppSession(
         const res = await fetch(`${gatewayUrl}/session/start`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tenantId, phone: formattedPhone }),
-          signal: AbortSignal.timeout(10_000),
+          body: JSON.stringify({ tenantId, phone: formattedPhone, forceRestart: true }),
+          signal: AbortSignal.timeout(6_000),
         });
         if (res.ok) {
-          const json = (await res.json()) as { qr?: string; pairingCode?: string };
-          qrCodeData = json.qr || "";
-          pairingCode = json.pairingCode;
+          const json = (await res.json()) as {
+            qr?: string;
+            qrSvg?: string;
+            pairingCode?: string;
+            status?: string;
+          };
+          gatewayActive = true;
+          if (json.qr) qrCodeData = json.qr;
+          if (json.qrSvg) qrSvg = json.qrSvg;
+          if (json.pairingCode) pairingCode = json.pairingCode;
         }
       } catch {
-        // Fallback to direct wa.me session
+        gatewayActive = false;
       }
     }
 
@@ -80,24 +102,16 @@ export async function startWhatsAppSession(
     )}`;
 
     if (!qrCodeData) {
-      // Direct scannable QR link that works on EVERY smartphone camera and WhatsApp
+      // Fallback direct wa.me link when gateway is not active
       qrCodeData = directLink;
-
-      // Standard 6-digit verification code e.g. BT-9428
-      const chars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
-      let code = "";
-      for (let i = 0; i < 6; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      pairingCode = `BT-${code}`;
     }
 
-    // Render real, mathematically scannable SVG QR code
-    let qrSvg: string | null = null;
-    try {
-      qrSvg = await generateWhatsAppQrSvg(qrCodeData);
-    } catch (e) {
-      console.error("Failed to generate QR SVG", e);
+    if (!qrSvg && qrCodeData) {
+      try {
+        qrSvg = await generateWhatsAppQrSvg(qrCodeData);
+      } catch (e) {
+        console.error("Failed to generate QR SVG", e);
+      }
     }
 
     const config = await tx.whatsAppConfig.upsert({
@@ -108,11 +122,13 @@ export async function startWhatsAppSession(
         status: "SCAN_QR",
         qrCodeData,
         phoneNumber: formattedPhone,
+        gatewayUrl: gatewayUrl !== "http://localhost:5055" ? gatewayUrl : null,
       },
       update: {
         status: "SCAN_QR",
         qrCodeData,
         phoneNumber: formattedPhone ?? undefined,
+        gatewayUrl: gatewayUrl !== "http://localhost:5055" ? gatewayUrl : undefined,
       },
     });
 
@@ -130,12 +146,71 @@ export async function startWhatsAppSession(
       qrSvg,
       pairingCode,
       directLink,
+      gatewayActive,
     };
   });
 }
 
 /**
- * Fetches the current session status and pre-renders QR SVG if in SCAN_QR state.
+ * Requests an authentic 8-character Baileys WhatsApp pairing code
+ * for "Link with phone number instead" in WhatsApp Linked Devices.
+ */
+export async function requestWhatsAppPairingCode(
+  tenantId: string,
+  phoneNumber: string,
+  customGatewayUrl?: string
+): Promise<{ success: boolean; pairingCode?: string; error?: string; gatewayActive: boolean }> {
+  let localPhone: string;
+  try {
+    localPhone = normalizeBdPhone(phoneNumber);
+  } catch {
+    const digits = phoneNumber.replace(/\D/g, "");
+    localPhone = digits.slice(-11).startsWith("0") ? digits.slice(-11) : "0" + digits.slice(-10);
+  }
+  const cleanNumber = `880${localPhone.slice(1)}`;
+
+  return withTenant(tenantId, async (tx) => {
+    const existing = await tx.whatsAppConfig.findUnique({
+      where: { tenantId },
+      select: { gatewayUrl: true },
+    });
+    const gatewayUrl = resolveWhatsAppGatewayUrl(existing?.gatewayUrl, customGatewayUrl);
+
+    try {
+      const res = await fetch(`${gatewayUrl}/session/pairing-code`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tenantId, phone: cleanNumber }),
+        signal: AbortSignal.timeout(10_000),
+      });
+
+      if (res.ok) {
+        const json = (await res.json()) as { pairingCode?: string; status?: string };
+        return {
+          success: true,
+          pairingCode: json.pairingCode,
+          gatewayActive: true,
+        };
+      } else {
+        const errJson = (await res.json().catch(() => ({}))) as { error?: string };
+        return {
+          success: false,
+          error: errJson.error || `Gateway returned ${res.status}`,
+          gatewayActive: true,
+        };
+      }
+    } catch {
+      return {
+        success: false,
+        error: "Baileys WhatsApp Gateway is offline. Please start it using 'pnpm whatsapp:gateway'.",
+        gatewayActive: false,
+      };
+    }
+  });
+}
+
+/**
+ * Fetches current session status and syncs real-time Baileys state if available.
  */
 export async function getWhatsAppSessionStatus(tenantId: string): Promise<WhatsAppConfigView | null> {
   return withTenant(tenantId, async (tx) => {
@@ -144,22 +219,67 @@ export async function getWhatsAppSessionStatus(tenantId: string): Promise<WhatsA
     });
     if (!config) return null;
 
+    const gatewayUrl = resolveWhatsAppGatewayUrl(config.gatewayUrl);
+    let gatewayActive = false;
     let qrSvg: string | null = null;
-    if (config.status === "SCAN_QR" && config.qrCodeData) {
+    let pairingCode: string | null = null;
+    let liveStatus = config.status;
+    let livePhone = config.phoneNumber;
+
+    // Check with live gateway if available
+    try {
+      const res = await fetch(`${gatewayUrl}/session/status?tenantId=${tenantId}`, {
+        signal: AbortSignal.timeout(2_500),
+      });
+      if (res.ok) {
+        gatewayActive = true;
+        const live = (await res.json()) as {
+          status: WhatsAppSessionStatus;
+          phoneNumber?: string;
+          qr?: string;
+          qrSvg?: string;
+          pairingCode?: string;
+        };
+
+        if (live.status === "CONNECTED" && config.status !== "CONNECTED") {
+          // Device linked via Baileys
+          liveStatus = "CONNECTED";
+          if (live.phoneNumber) {
+            livePhone = live.phoneNumber.startsWith("+") ? live.phoneNumber : `+${live.phoneNumber}`;
+          }
+          await tx.whatsAppConfig.update({
+            where: { tenantId },
+            data: {
+              status: "CONNECTED",
+              phoneNumber: livePhone,
+              qrCodeData: null,
+              lastConnectedAt: new Date(),
+            },
+          });
+        } else if (live.status === "SCAN_QR") {
+          if (live.qrSvg) qrSvg = live.qrSvg;
+          if (live.pairingCode) pairingCode = live.pairingCode;
+        }
+      }
+    } catch {
+      gatewayActive = false;
+    }
+
+    if (!qrSvg && liveStatus === "SCAN_QR" && config.qrCodeData) {
       try {
         qrSvg = await generateWhatsAppQrSvg(config.qrCodeData);
-      } catch {
-        // Ignore QR error
-      }
+      } catch {}
     }
 
     return {
       providerMode: config.providerMode,
-      status: config.status,
-      phoneNumber: config.phoneNumber,
+      status: liveStatus,
+      phoneNumber: livePhone,
       qrCodeData: config.qrCodeData,
       qrSvg,
+      pairingCode,
       gatewayUrl: config.gatewayUrl,
+      gatewayActive,
       autoConfirmCod: config.autoConfirmCod,
       shippingUpdatesEnabled: config.shippingUpdatesEnabled,
       abandonedRecoveryEnabled: config.abandonedRecoveryEnabled,
@@ -176,6 +296,22 @@ export async function getWhatsAppSessionStatus(tenantId: string): Promise<WhatsA
  */
 export async function disconnectWhatsAppSession(tenantId: string): Promise<void> {
   return withTenant(tenantId, async (tx) => {
+    const existing = await tx.whatsAppConfig.findUnique({
+      where: { tenantId },
+      select: { gatewayUrl: true },
+    });
+    const gatewayUrl = resolveWhatsAppGatewayUrl(existing?.gatewayUrl);
+
+    // Notify gateway to logout and clean storage
+    try {
+      await fetch(`${gatewayUrl}/session/disconnect`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tenantId }),
+        signal: AbortSignal.timeout(3_000),
+      });
+    } catch {}
+
     await tx.whatsAppConfig.updateMany({
       where: { tenantId },
       data: {

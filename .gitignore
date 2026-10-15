@@ -25,6 +25,7 @@ apps/admin/playwright-report/
 apps/admin/e2e/.dns.json
 packages/core/.drill-work
 packages/core/.drill-store
+.baileys_auth/
 
 # The project checkup: ids and a test authenticator secret (the screenshots and REPORT.md are meant to be read)
 checkup/state.json

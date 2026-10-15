@@ -14,6 +14,7 @@
     "db:seed": "pnpm --filter @biztrackbd/db db:seed",
     "canvas:preview": "pnpm --filter @biztrackbd/canvas-render preview",
     "canvas:measure": "pnpm --filter @biztrackbd/canvas-render measure",
+    "whatsapp:gateway": "node tools/whatsapp-gateway/server.mjs",
     "audit:rls": "pnpm --filter @biztrackbd/db exec tsx scripts/rls-audit.ts",
     "drill:backup": "pnpm --filter @biztrackbd/core exec tsx scripts/backup-drill.ts",
     "load:orders": "pnpm --filter @biztrackbd/core exec tsx scripts/load-orders.ts",

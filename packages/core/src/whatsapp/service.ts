@@ -2,6 +2,7 @@ import { withTenant } from "@biztrackbd/db";
 import { currentSmsSender } from "../customers/auth";
 import { formatWhatsAppPhone } from "./deep-links";
 import type {
+  WhatsAppSessionStatus,
   WhatsAppEventType,
   WhatsAppEventInfo,
   WhatsAppConfigView,
@@ -110,7 +111,7 @@ export function renderWhatsAppText(
   });
 }
 
-import { generateWhatsAppQrSvg } from "./session";
+import { generateWhatsAppQrSvg, resolveWhatsAppGatewayUrl } from "./session";
 
 /**
  * Retrieves the store's WhatsApp configuration.
@@ -129,8 +130,45 @@ export async function getWhatsAppConfig(tenantId: string): Promise<WhatsAppConfi
 
     const activePhone = existing?.phoneNumber || (settings?.whatsappNumber ? formatWhatsAppPhone(settings.whatsappNumber) : null);
 
+    const gatewayUrl = resolveWhatsAppGatewayUrl(existing?.gatewayUrl);
+    let gatewayActive = false;
     let qrSvg: string | null = null;
-    if (existing?.status === "SCAN_QR" && existing?.qrCodeData) {
+    let pairingCode: string | null = null;
+    let liveStatus = existing?.status || "DISCONNECTED";
+    let livePhone = activePhone;
+
+    try {
+      const res = await fetch(`${gatewayUrl}/session/status?tenantId=${tenantId}`, {
+        signal: AbortSignal.timeout(1_500),
+      });
+      if (res.ok) {
+        gatewayActive = true;
+        const live = (await res.json()) as {
+          status?: WhatsAppSessionStatus;
+          phoneNumber?: string;
+          qr?: string;
+          qrSvg?: string;
+          pairingCode?: string;
+        };
+        if (live.status === "CONNECTED" && existing?.status !== "CONNECTED") {
+          liveStatus = "CONNECTED";
+          if (live.phoneNumber) {
+            livePhone = live.phoneNumber.startsWith("+") ? live.phoneNumber : `+${live.phoneNumber}`;
+          }
+          await tx.whatsAppConfig.update({
+            where: { tenantId },
+            data: { status: "CONNECTED", phoneNumber: livePhone, qrCodeData: null, lastConnectedAt: new Date() },
+          });
+        } else if (live.status === "SCAN_QR") {
+          if (live.qrSvg) qrSvg = live.qrSvg;
+          if (live.pairingCode) pairingCode = live.pairingCode;
+        }
+      }
+    } catch {
+      gatewayActive = false;
+    }
+
+    if (!qrSvg && existing?.status === "SCAN_QR" && existing?.qrCodeData) {
       try {
         qrSvg = await generateWhatsAppQrSvg(existing.qrCodeData);
       } catch {
@@ -141,11 +179,13 @@ export async function getWhatsAppConfig(tenantId: string): Promise<WhatsAppConfi
     if (existing) {
       return {
         providerMode: existing.providerMode,
-        status: existing.status,
-        phoneNumber: activePhone,
+        status: liveStatus,
+        phoneNumber: livePhone,
         qrCodeData: existing.qrCodeData,
         qrSvg,
+        pairingCode,
         gatewayUrl: existing.gatewayUrl,
+        gatewayActive,
         autoConfirmCod: existing.autoConfirmCod,
         shippingUpdatesEnabled: existing.shippingUpdatesEnabled,
         abandonedRecoveryEnabled: existing.abandonedRecoveryEnabled,
@@ -162,7 +202,9 @@ export async function getWhatsAppConfig(tenantId: string): Promise<WhatsAppConfi
       phoneNumber: activePhone,
       qrCodeData: null,
       qrSvg: null,
+      pairingCode: null,
       gatewayUrl: null,
+      gatewayActive,
       autoConfirmCod: true,
       shippingUpdatesEnabled: true,
       abandonedRecoveryEnabled: true,
@@ -335,8 +377,8 @@ export async function sendWhatsAppNotification(
     let externalId: string | undefined;
     let errorDetail: string | undefined;
 
-    // Attempt WhatsApp delivery if custom gateway URL is specified
-    const gatewayUrl = config?.gatewayUrl || process.env.WHATSAPP_GATEWAY_URL;
+    // Attempt WhatsApp delivery via configured gateway or local Baileys gateway service
+    const gatewayUrl = resolveWhatsAppGatewayUrl(config?.gatewayUrl);
     if (gatewayUrl) {
       try {
         const res = await fetch(`${gatewayUrl}/message/send`, {
@@ -357,14 +399,15 @@ export async function sendWhatsAppNotification(
           externalId = json.messageId;
           sentViaWhatsApp = true;
         } else {
-          errorDetail = `Gateway returned ${res.status}: ${await res.text().catch(() => "")}`;
+          const errBody = await res.text().catch(() => "");
+          errorDetail = `Gateway returned ${res.status}: ${errBody}`;
         }
       } catch (e) {
-        errorDetail = e instanceof Error ? e.message : "WhatsApp delivery network error";
+        errorDetail = e instanceof Error ? e.message : "WhatsApp gateway delivery network error (is 'pnpm whatsapp:gateway' running?)";
       }
     } else {
       errorDetail =
-        "No automated WhatsApp gateway URL configured (e.g. Evolution API, WAHA, or Meta Cloud API). For immediate free delivery, use the 1-click wa.me link.";
+        "No automated WhatsApp gateway available. For immediate free delivery, use 1-click WhatsApp direct links.";
     }
 
     if (sentViaWhatsApp) {
