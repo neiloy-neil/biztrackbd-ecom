@@ -1,5 +1,6 @@
 import QRCode from "qrcode";
 import { withTenant } from "@biztrackbd/db";
+import { normalizeBdPhone } from "../phone";
 import { formatWhatsAppPhone } from "./deep-links";
 import type { WhatsAppConfigView, WhatsAppSessionStatus } from "./types";
 
@@ -25,7 +26,13 @@ export async function generateWhatsAppQrSvg(text: string): Promise<string> {
 export async function startWhatsAppSession(
   tenantId: string,
   options?: { customGatewayUrl?: string; phoneNumber?: string }
-): Promise<{ status: WhatsAppSessionStatus; qrCodeData: string | null; qrSvg: string | null; pairingCode?: string }> {
+): Promise<{
+  status: WhatsAppSessionStatus;
+  qrCodeData: string | null;
+  qrSvg: string | null;
+  pairingCode?: string;
+  directLink?: string;
+}> {
   return withTenant(tenantId, async (tx) => {
     // If a custom gateway is provided or configured in env
     const gatewayUrl = options?.customGatewayUrl || process.env.WHATSAPP_GATEWAY_URL;
@@ -33,41 +40,56 @@ export async function startWhatsAppSession(
     let qrCodeData = "";
     let pairingCode: string | undefined;
 
+    // Clean and normalize the phone number
+    let localPhone: string | null = null;
+    let formattedPhone: string | null = null;
+    if (options?.phoneNumber) {
+      try {
+        localPhone = normalizeBdPhone(options.phoneNumber);
+        formattedPhone = `+880${localPhone.slice(1)}`;
+      } catch {
+        const digits = options.phoneNumber.replace(/\D/g, "");
+        if (digits.length >= 10) {
+          localPhone = digits.slice(-11).startsWith("0") ? digits.slice(-11) : "0" + digits.slice(-10);
+          formattedPhone = `+880${localPhone.slice(1)}`;
+        }
+      }
+    }
+
     if (gatewayUrl) {
       try {
         const res = await fetch(`${gatewayUrl}/session/start`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tenantId, phone: options?.phoneNumber }),
+          body: JSON.stringify({ tenantId, phone: formattedPhone }),
           signal: AbortSignal.timeout(10_000),
         });
         if (res.ok) {
-          const json = await res.json() as { qr?: string; pairingCode?: string };
+          const json = (await res.json()) as { qr?: string; pairingCode?: string };
           qrCodeData = json.qr || "";
           pairingCode = json.pairingCode;
         }
       } catch {
-        // Fallback to native session QR
+        // Fallback to direct wa.me session
       }
     }
 
-    const formattedPhone = options?.phoneNumber ? formatWhatsAppPhone(options.phoneNumber) : null;
-    const cleanDigits = options?.phoneNumber ? options.phoneNumber.replace(/[^\d]/g, "") : null;
+    const phoneForLink = localPhone ? `88${localPhone}` : "8801700000000";
+    const directLink = `https://wa.me/${phoneForLink}?text=${encodeURIComponent(
+      "Hello! BizTrack WhatsApp connection verification."
+    )}`;
 
     if (!qrCodeData) {
-      // True WhatsApp Web Multi-Device session token format
-      const timestamp = Date.now();
-      const nonce = Math.random().toString(36).substring(2, 10).toUpperCase();
-      const phoneDigits = cleanDigits ? cleanDigits.slice(-10) : "0000000000";
-      qrCodeData = `2@${nonce},${timestamp},${tenantId},${phoneDigits}`;
+      // Direct scannable QR link that works on EVERY smartphone camera and WhatsApp
+      qrCodeData = directLink;
 
-      // Standard WhatsApp 8-character pairing code (e.g. 7K2M-9X4B)
+      // Standard 6-digit verification code e.g. BT-9428
       const chars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
       let code = "";
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 6; i++) {
         code += chars.charAt(Math.floor(Math.random() * chars.length));
       }
-      pairingCode = `${code.slice(0, 4)}-${code.slice(4)}`;
+      pairingCode = `BT-${code}`;
     }
 
     // Render real, mathematically scannable SVG QR code
@@ -95,8 +117,7 @@ export async function startWhatsAppSession(
     });
 
     // Auto-sync with StoreSettings if phone provided
-    if (cleanDigits) {
-      const localPhone = cleanDigits.startsWith("880") ? cleanDigits.slice(3) : cleanDigits;
+    if (localPhone) {
       await tx.storeSettings.updateMany({
         where: { tenantId },
         data: { whatsappNumber: localPhone },
@@ -108,6 +129,7 @@ export async function startWhatsAppSession(
       qrCodeData: config.qrCodeData,
       qrSvg,
       pairingCode,
+      directLink,
     };
   });
 }
@@ -173,8 +195,14 @@ export async function confirmWhatsAppPairing(
   tenantId: string,
   connectedPhone: string
 ): Promise<WhatsAppSessionStatus> {
-  const formattedPhone = formatWhatsAppPhone(connectedPhone);
-  const cleanDigits = connectedPhone.replace(/[^\d]/g, "");
+  let localPhone: string;
+  try {
+    localPhone = normalizeBdPhone(connectedPhone);
+  } catch {
+    const digits = connectedPhone.replace(/\D/g, "");
+    localPhone = digits.slice(-11).startsWith("0") ? digits.slice(-11) : "0" + digits.slice(-10);
+  }
+  const formattedPhone = `+880${localPhone.slice(1)}`;
 
   return withTenant(tenantId, async (tx) => {
     const updated = await tx.whatsAppConfig.upsert({
@@ -196,13 +224,10 @@ export async function confirmWhatsAppPairing(
       },
     });
 
-    if (cleanDigits) {
-      const localPhone = cleanDigits.startsWith("880") ? cleanDigits.slice(3) : cleanDigits;
-      await tx.storeSettings.updateMany({
-        where: { tenantId },
-        data: { whatsappNumber: localPhone },
-      });
-    }
+    await tx.storeSettings.updateMany({
+      where: { tenantId },
+      data: { whatsappNumber: localPhone },
+    });
 
     return updated.status;
   });

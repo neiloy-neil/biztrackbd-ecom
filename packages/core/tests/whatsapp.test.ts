@@ -12,9 +12,13 @@ import {
 describe("WhatsApp Deep Links & Phone Formatting", () => {
   it("formats Bangladeshi phone numbers to international digits for wa.me", () => {
     expect(formatWhatsAppPhone("01712345678")).toBe("8801712345678");
+    expect(formatWhatsAppPhone("1712345678")).toBe("8801712345678");
     expect(formatWhatsAppPhone("+8801812345678")).toBe("8801812345678");
     expect(formatWhatsAppPhone("8801912345678")).toBe("8801912345678");
+    expect(formatWhatsAppPhone("+8808801712345678")).toBe("8801712345678");
+    expect(formatWhatsAppPhone("8808801712345678")).toBe("8801712345678");
     expect(formatWhatsAppPhone("01712-345678")).toBe("8801712345678");
+    expect(formatWhatsAppPhone("017.1234.5678")).toBe("8801712345678");
     expect(formatWhatsAppPhone("০১৭১২৩৪৫৬৭৮")).toBe("8801712345678");
   });
 

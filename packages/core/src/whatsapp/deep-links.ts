@@ -4,17 +4,21 @@ import type { WhatsAppOrderLinkOptions, WhatsAppAbandonedLinkOptions } from "./t
 /**
  * Normalizes any Bangladeshi phone number to international format without the plus sign for WhatsApp.
  * Example: "01712345678" -> "8801712345678"
+ * Example: "1712345678" -> "8801712345678"
  * Example: "+8801712345678" -> "8801712345678"
+ * Example: "+8808801712345678" -> "8801712345678"
  */
 export function formatWhatsAppPhone(rawPhone: string): string {
   try {
     const bd = normalizeBdPhone(rawPhone);
     return `88${bd}`;
   } catch {
-    // If phone cannot be validated through strict regex, strip non-digits
-    const digits = rawPhone.replace(/\D/g, "");
-    if (digits.startsWith("880")) return digits;
-    if (digits.startsWith("0")) return `88${digits}`;
+    // If phone cannot be validated through strict regex, strip non-digits and normalize
+    let digits = rawPhone.replace(/\D/g, "");
+    while (digits.startsWith("880880")) digits = digits.slice(3);
+    if (digits.startsWith("880") && digits.length >= 13) return digits.slice(0, 13);
+    if (digits.startsWith("01") && digits.length === 11) return `88${digits}`;
+    if (digits.startsWith("1") && digits.length === 10) return `880${digits}`;
     return digits;
   }
 }
