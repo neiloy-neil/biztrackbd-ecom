@@ -23,7 +23,7 @@ export interface PayInfo {
   uddoktapayEnabled?: boolean;
 }
 
-type Method = "COD" | "MANUAL_BKASH" | "MANUAL_NAGAD" | "GATEWAY_UDDOKTAPAY";
+type Method = "COD" | "MANUAL_BKASH" | "MANUAL_NAGAD" | "GATEWAY_UDDOKTAPAY" | "BANK_TRANSFER";
 type Errors = Partial<Record<"phone" | "name" | "email" | "division" | "district" | "upazila" | "address" | "mfsSender" | "trxId" | "coupon" | "referral", string>>;
 
 // ---- Phone: the customer types the 10 digits after +880. Pasting 01712345678 or +8801712345678 also works.
@@ -228,6 +228,9 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
       if (!validLocal(sender)) e.mfsSender = errorsText.mfsSender!;
       if (!/^[A-Za-z0-9]{8,12}$/.test(trx.trim())) e.trxId = errorsText.trxId!;
     }
+    if (method === "BANK_TRANSFER") {
+      if (trx.trim().length < 3) e.trxId = "Please enter bank deposit reference or slip number";
+    }
     return e;
   }
 
@@ -235,6 +238,12 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
     ev.preventDefault();
     if (busy) return;
     setFormError("");
+
+    if (quote?.wholesale?.isWholesaleCustomer && !quote.wholesale.isMinOrderMet) {
+      setFormError(`Minimum wholesale order amount is ${money(quote.wholesale.minOrderAmount, lang)}. Please add ${money(quote.wholesale.deficit, lang)} more to proceed.`);
+      return;
+    }
+
     const e = validate();
     setErrors(e);
     if (Object.keys(e).length) {
@@ -258,7 +267,12 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
       customer: { name: name.trim(), phone: full(phone), email: email.trim() || undefined },
       shipping: { division, district, upazila, address: address.trim(), note: note.trim() || undefined },
       paymentMethod: method,
-      mfs: method === "MANUAL_BKASH" || method === "MANUAL_NAGAD" ? { senderNumber: full(cleanPhoneDigits(mfsSender)), trxId: trx.trim() } : undefined,
+      mfs:
+        method === "MANUAL_BKASH" || method === "MANUAL_NAGAD"
+          ? { senderNumber: full(cleanPhoneDigits(mfsSender)), trxId: trx.trim() }
+          : method === "BANK_TRANSFER"
+          ? { senderNumber: "BANK_DEPOSIT", trxId: trx.trim() }
+          : undefined,
       couponCode: coupon || undefined,
       redeemPoints: usePoints && redeem > 0 ? redeem : undefined,
       referralCode: refCode || undefined,
@@ -608,6 +622,62 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
               </div>
             );
           })}
+          {quote?.paymentOptions?.bankTransfer?.available && (
+            <div className={`pay-box ${method === "BANK_TRANSFER" ? " open" : ""}`} style={{ border: "1px solid #4f46e5" }}>
+              <label className="option" style={method === "BANK_TRANSFER" ? { padding: 14 } : undefined}>
+                <input
+                  type="radio"
+                  name="pay"
+                  checked={method === "BANK_TRANSFER"}
+                  onChange={() => setMethod("BANK_TRANSFER")}
+                  data-testid="pay-bank-transfer"
+                />
+                <div className="grow">
+                  <div className="t" style={{ color: "#4338ca", fontWeight: 700 }}>
+                    {lang === "bn" ? "ব্যাংক ডিপোজিট / ব্যাংক ট্রান্সফার" : "Direct Bank Transfer / Wire"}
+                  </div>
+                  <div className="s">
+                    {lang === "bn" ? "অফিসিয়াল ব্যাংক একাউন্টে জমা দিয়ে স্লিপ রেফারেন্স দিন" : "Transfer funds directly to official corporate account"}
+                  </div>
+                </div>
+                <span className="mfs-tag" style={{ background: "#4f46e5", color: "#fff", fontWeight: 700 }} aria-hidden="true">
+                  B2B BANK
+                </span>
+              </label>
+
+              {method === "BANK_TRANSFER" && quote?.paymentOptions.bankTransfer.bankDetails && (
+                <div className="pay-body" style={{ background: "rgba(79, 70, 229, 0.04)", padding: 14, borderRadius: 8 }}>
+                  <div className="steps" style={{ fontSize: 13, lineHeight: 1.6 }}>
+                    <div><b>Bank:</b> {quote.paymentOptions.bankTransfer.bankDetails.bankName}</div>
+                    <div><b>Branch:</b> {quote.paymentOptions.bankTransfer.bankDetails.branchName}</div>
+                    <div><b>Account Name:</b> {quote.paymentOptions.bankTransfer.bankDetails.accountName}</div>
+                    <div><b>Account No:</b> <b style={{ fontSize: 15, color: "#1e1b4b" }}>{quote.paymentOptions.bankTransfer.bankDetails.accountNumber}</b></div>
+                    {quote.paymentOptions.bankTransfer.bankDetails.routingNumber && (
+                      <div><b>Routing:</b> {quote.paymentOptions.bankTransfer.bankDetails.routingNumber}</div>
+                    )}
+                    {quote.paymentOptions.bankTransfer.bankDetails.instructions && (
+                      <div style={{ marginTop: 6, color: "#4338ca" }}>
+                        <b>Note:</b> {quote.paymentOptions.bankTransfer.bankDetails.instructions}
+                      </div>
+                    )}
+                  </div>
+
+                  <label className="field" style={{ marginTop: 12, marginBottom: 0 }}>
+                    <span className="label">Bank Deposit Slip Reference / TrxID *</span>
+                    <input
+                      id="f-bank-ref"
+                      className="input"
+                      placeholder="e.g. DEPOSIT-88392 or Cheque #"
+                      value={trx}
+                      onChange={(e) => setTrx(e.target.value)}
+                      required
+                    />
+                    {err("trxId")}
+                  </label>
+                </div>
+              )}
+            </div>
+          )}
         </section>
 
         <section className="card">

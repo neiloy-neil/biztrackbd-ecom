@@ -390,9 +390,9 @@ describe("optional modules", () => {
     const l = await listModules(S.f.tenantId, S.owner);
     expect(l.allowance).toBe(0);
     expect(l.modules.find((m) => m.key === "loyalty")).toMatchObject({ enabled: false, blocked: "Not included in your plan" });
-    expect(l.modules.find((m) => m.key === "wholesale")).toMatchObject({ enabled: false, blocked: "Not available yet" });
+    expect(l.modules.find((m) => m.key === "booking")).toMatchObject({ enabled: false, blocked: "Not available yet" });
     await fails(setModule(S.f.tenantId, S.owner, "loyalty", true), /not included in your plan/i);
-    await fails(setModule(S.f.tenantId, S.owner, "wholesale", true), /not available yet/);
+    await fails(setModule(S.f.tenantId, S.owner, "booking", true), /not available yet/);
     await fails(setModule(S.f.tenantId, S.owner, "nonsense", true), /Unknown/);
   });
 

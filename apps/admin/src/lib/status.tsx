@@ -10,13 +10,14 @@ export function OrderPill({ status }: { status: string }): ReactNode {
   return <span className={`pill ${tone}`}>{label}</span>;
 }
 
-const METHOD: Record<string, string> = { COD: "COD", MANUAL_BKASH: "bKash", MANUAL_NAGAD: "Nagad", MANUAL_ROCKET: "Rocket", GATEWAY_SSLCOMMERZ: "Card", GATEWAY_STRIPE: "Card" };
+const METHOD: Record<string, string> = { COD: "COD", MANUAL_BKASH: "bKash", MANUAL_NAGAD: "Nagad", MANUAL_ROCKET: "Rocket", GATEWAY_SSLCOMMERZ: "Card", GATEWAY_STRIPE: "Card", BANK_TRANSFER: "Bank Transfer", POS_CASH: "Cash", POS_CARD: "Card", POS_MFS: "MFS" };
 export const methodName = (m: string) => METHOD[m] ?? m;
 
 /** What the owner needs to know about payment at a glance: "Check bKash" asks them to act, "Paid" and "COD" do not. */
 export function PaymentPill({ method, status }: { method: string; status: string }): ReactNode {
   if (status === "PENDING_VERIFICATION") return <span className="pill warn">Check {methodName(method)}</span>;
   if (status === "PAID") return <span className="pill ok">Paid</span>;
+  if (status === "PARTIALLY_PAID") return <span className="pill info">Partially Paid</span>;
   if (status === "FAILED") return <span className="pill bad">Not received</span>;
   if (status === "REFUNDED" || status === "PARTIALLY_REFUNDED") return <span className="pill bad">Refunded</span>;
   return <span className="pill grey">{methodName(method)}</span>;

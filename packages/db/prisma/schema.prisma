@@ -53,114 +53,117 @@ enum MfsProvider {
 }
 
 model Tenant {
-  id               String       @id @default(cuid())
-  name             String
-  subdomain        String       @unique
-  customDomain     String?      @unique
-  status           TenantStatus @default(TRIAL)
-  planTier         PlanTier     @default(STARTER)
-  themeId          String       @default("kapor")
+  id              String       @id @default(cuid())
+  name            String
+  subdomain       String       @unique
+  customDomain    String?      @unique
+  status          TenantStatus @default(TRIAL)
+  planTier        PlanTier     @default(STARTER)
+  themeId         String       @default("kapor")
   // The template this store was started from or last updated to (docs/46 stage 5), and the version it has. Null: built from one of the original looks, untouched.
-  templateId       String?
-  templateVersion  Int?
-  locale           String       @default("bn-BD")
-  currency         String       @default("BDT")
-  timezone         String       @default("Asia/Dhaka")
-  
+  templateId      String?
+  templateVersion Int?
+  locale          String       @default("bn-BD")
+  currency        String       @default("BDT")
+  timezone        String       @default("Asia/Dhaka")
+
   // Storage & Limits Usage Counters
-  productCount     Int          @default(0)
-  orderCountMonth  Int          @default(0)
-  nextOrderNumber  Int          @default(10001)   // atomic per-tenant counter; never derive order numbers from count()
-  orderPrefix      String       @default("BT-")    // shown on invoices and SMS, editable in store details
-  storageBytesUsed BigInt       @default(0)
-  
-  trialStartsAt    DateTime     @default(now())
-  trialEndsAt      DateTime
+  productCount     Int    @default(0)
+  orderCountMonth  Int    @default(0)
+  nextOrderNumber  Int    @default(10001) // atomic per-tenant counter; never derive order numbers from count()
+  orderPrefix      String @default("BT-") // shown on invoices and SMS, editable in store details
+  storageBytesUsed BigInt @default(0)
+
+  trialStartsAt DateTime @default(now())
+  trialEndsAt   DateTime
 
   // Who signed the store up (the platform's search and support fields) and why it may be switched off
   ownerName        String?
   ownerEmail       String?
   ownerPhone       String?
-  suspendedReason  String?      // set when the platform (not an unpaid bill) switched the store off
+  suspendedReason  String? // set when the platform (not an unpaid bill) switched the store off
   suspendedAt      DateTime?
-  quarantined      Boolean      @default(false)   // brand-review hold (docs/12 section 2)
-  isDemo           Boolean      @default(false)   // a template demo store (docs/38): left out of revenue, trials and billing, never suspended, never takes real orders
-  demoKind         String?       // TEMPLATE (a public demo store) or SESSION (a visitor's private, temporary copy: docs/41)
-  demoTemplate     String?       // the template a SESSION copy was made from
-  demoExpiresAt    DateTime?     // when a SESSION copy is deleted
-  demoLastOrderAt  DateTime?     // the last sample order dropped into a SESSION copy
-  demoCreator      String?       // hash of who started it (never an address), for the per-visitor limit
-  demoKeepToken    String?       // secret code that lets a signup carry this SESSION copy into a real store; cleared once used
+  quarantined      Boolean   @default(false) // brand-review hold (docs/12 section 2)
+  isDemo           Boolean   @default(false) // a template demo store (docs/38): left out of revenue, trials and billing, never suspended, never takes real orders
+  demoKind         String? // TEMPLATE (a public demo store) or SESSION (a visitor's private, temporary copy: docs/41)
+  demoTemplate     String? // the template a SESSION copy was made from
+  demoExpiresAt    DateTime? // when a SESSION copy is deleted
+  demoLastOrderAt  DateTime? // the last sample order dropped into a SESSION copy
+  demoCreator      String? // hash of who started it (never an address), for the per-visitor limit
+  demoKeepToken    String? // secret code that lets a signup carry this SESSION copy into a real store; cleared once used
   quarantineReason String?
-  
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Platform Relations
-  subscription     Subscription?
-  paymentProofs    PaymentProof[]
-  auditLogs        AuditLog[]
-  
+  subscription  Subscription?
+  paymentProofs PaymentProof[]
+  auditLogs     AuditLog[]
+
   // Tenant Scoped Relations
-  users            TenantUser[]
-  products         Product[]
-  categories       Category[]
-  orders           Order[]
-  customers        Customer[]
-  coupons          Coupon[]
-  themeInstalls    ThemeInstall[]
-  domains          Domain[]
-  integrations     TenantIntegration[]
-  abandonedCarts   AbandonedCheckout[]
-  returnRequests   ReturnRequest[]
-  reviews          Review[]
-  shippingZones    ShippingZone[]
-  pages            Page[]
-  blogPosts        BlogPost[]
-  dailyMetrics     DailyStoreMetrics[]
-  aiUsage          TenantAiUsage[]
-  cartShortLinks   CartShortLink[]
-  contactMessages  ContactMessage[]
-  stockAlerts      StockAlert[]
-  loyaltyAccounts  CustomerLoyaltyAccount[]
-  referrals        CustomerReferral[]
-  smsOptOuts       SmsOptOut[]
-  apiKeys          ApiKeyCredential[]
-  webhookSubs      WebhookSubscription[]
-  landingPages     LandingPage[]
-  landingDaily     LandingDaily[]
-  landingLeads     LandingLead[]
-  collections      Collection[]
-  expenses         Expense[]
-  courierEvents    CourierEvent[]
-  blockedContacts  BlockedContact[]
-  themeVersions    ThemeVersion[]
-  messageTemplates MessageTemplate[]
-  campaigns        MarketingCampaign[]
-  storeSettings    StoreSettings?
-  posRegisters     PosRegister[]
-  posSessions      PosSession[]
-  posMovements     PosCashMovement[]
-  orderEvents      OrderEvent[]
-  stockAdjustments StockAdjustment[]
-  quotaAdjustments TenantQuotaAdjustment[]
-  customerOtps     CustomerOtp[]
-  staffInvites     StaffInvite[]
-  modules          TenantModule[]
-  usageCounters    UsageCounter[]
-  trackingEvents   TrackingEvent[]
-  tickets          SupportTicket[]
-  settlements      CourierSettlementInvoice[]
-  notes            TenantNote[]
-  platformMessages PlatformMessage[]
-  productBundles   ProductBundle[]
-  orderBumps       OrderBump[]
-  bundleItems      ProductBundleItem[]
-  whatsAppConfig       WhatsAppConfig?
-  whatsAppTemplates    WhatsAppTemplate[]
-  whatsAppMessageLogs  WhatsAppMessageLog[]
+  users                 TenantUser[]
+  products              Product[]
+  categories            Category[]
+  orders                Order[]
+  customers             Customer[]
+  coupons               Coupon[]
+  themeInstalls         ThemeInstall[]
+  domains               Domain[]
+  integrations          TenantIntegration[]
+  abandonedCarts        AbandonedCheckout[]
+  returnRequests        ReturnRequest[]
+  reviews               Review[]
+  shippingZones         ShippingZone[]
+  pages                 Page[]
+  blogPosts             BlogPost[]
+  dailyMetrics          DailyStoreMetrics[]
+  aiUsage               TenantAiUsage[]
+  cartShortLinks        CartShortLink[]
+  contactMessages       ContactMessage[]
+  stockAlerts           StockAlert[]
+  loyaltyAccounts       CustomerLoyaltyAccount[]
+  referrals             CustomerReferral[]
+  smsOptOuts            SmsOptOut[]
+  apiKeys               ApiKeyCredential[]
+  webhookSubs           WebhookSubscription[]
+  landingPages          LandingPage[]
+  landingDaily          LandingDaily[]
+  landingLeads          LandingLead[]
+  collections           Collection[]
+  expenses              Expense[]
+  courierEvents         CourierEvent[]
+  blockedContacts       BlockedContact[]
+  themeVersions         ThemeVersion[]
+  messageTemplates      MessageTemplate[]
+  campaigns             MarketingCampaign[]
+  storeSettings         StoreSettings?
+  posRegisters          PosRegister[]
+  posSessions           PosSession[]
+  posMovements          PosCashMovement[]
+  orderEvents           OrderEvent[]
+  stockAdjustments      StockAdjustment[]
+  quotaAdjustments      TenantQuotaAdjustment[]
+  customerOtps          CustomerOtp[]
+  staffInvites          StaffInvite[]
+  modules               TenantModule[]
+  usageCounters         UsageCounter[]
+  trackingEvents        TrackingEvent[]
+  tickets               SupportTicket[]
+  settlements           CourierSettlementInvoice[]
+  notes                 TenantNote[]
+  platformMessages      PlatformMessage[]
+  productBundles        ProductBundle[]
+  orderBumps            OrderBump[]
+  bundleItems           ProductBundleItem[]
+  whatsAppConfig        WhatsAppConfig?
+  whatsAppTemplates     WhatsAppTemplate[]
+  whatsAppMessageLogs   WhatsAppMessageLog[]
   whatsAppConversations WhatsAppConversation[]
-  whatsAppChatMessages WhatsAppChatMessage[]
+  whatsAppChatMessages  WhatsAppChatMessage[]
+  wholesaleTiers        WholesaleTier[]
+  wholesaleCustomers    WholesaleCustomer[]
+  wholesalePrices       WholesalePrice[]
 
   @@index([subdomain])
   @@index([customDomain])
@@ -169,49 +172,49 @@ model Tenant {
 }
 
 model Subscription {
-  id                   String             @id @default(cuid())
-  tenantId             String             @unique
-  planTier             PlanTier
-  interval             BillingInterval    @default(MONTHLY)
-  status               SubscriptionStatus @default(TRIALING)
-  amount               Decimal            @db.Decimal(12, 2)
-  currentPeriodStart   DateTime
-  currentPeriodEnd     DateTime
-  cancelAtPeriodEnd    Boolean            @default(false)
-  canceledAt           DateTime?
-  
-  gateway              String?            // "SSLCOMMERZ" | "STRIPE" | "MANUAL_MFS"
+  id                 String             @id @default(cuid())
+  tenantId           String             @unique
+  planTier           PlanTier
+  interval           BillingInterval    @default(MONTHLY)
+  status             SubscriptionStatus @default(TRIALING)
+  amount             Decimal            @db.Decimal(12, 2)
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean            @default(false)
+  canceledAt         DateTime?
+
+  gateway               String? // "SSLCOMMERZ" | "STRIPE" | "MANUAL_MFS"
   gatewaySubscriptionId String?
-  
-  tenant               Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([status])
 }
 
 model PaymentProof {
-  id             String             @id @default(cuid())
-  tenantId       String
-  planTier       PlanTier
-  billingPeriod  BillingInterval
-  amount         Decimal            @db.Decimal(12, 2)
-  mfsProvider    MfsProvider
-  senderNumber   String             // 01XXXXXXXXX
-  trxId          String             @unique
-  screenshotUrl  String?
-  status         PaymentProofStatus @default(PENDING)
-  
-  approvedBy     String?            // Platform Super Admin User ID
-  approvedAt     DateTime?
+  id            String             @id @default(cuid())
+  tenantId      String
+  planTier      PlanTier
+  billingPeriod BillingInterval
+  amount        Decimal            @db.Decimal(12, 2)
+  mfsProvider   MfsProvider
+  senderNumber  String // 01XXXXXXXXX
+  trxId         String             @unique
+  screenshotUrl String?
+  status        PaymentProofStatus @default(PENDING)
+
+  approvedBy      String? // Platform Super Admin User ID
+  approvedAt      DateTime?
   rejectionReason String?
-  note           String?            // the owner's own words, for example "paid from my wife's bKash"
-  appliedFrom    DateTime?          // the subscription period this payment bought
-  appliedTo      DateTime?
-  
-  tenant         Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
+  note            String? // the owner's own words, for example "paid from my wife's bKash"
+  appliedFrom     DateTime? // the subscription period this payment bought
+  appliedTo       DateTime?
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([tenantId])
   @@index([status])
@@ -240,11 +243,11 @@ model TenantUser {
   role         StaffRole @default(STORE_MANAGER)
   isActive     Boolean   @default(true)
   lastLoginAt  DateTime?
-  authUserId   String?   // the Supabase Auth account this person signs in with; set the first time they sign in with the confirmed email
-  
-  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  authUserId   String? // the Supabase Auth account this person signs in with; set the first time they sign in with the confirmed email
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, email])
   @@unique([tenantId, authUserId])
@@ -263,66 +266,67 @@ enum ProductStatus {
 }
 
 model Category {
-  id          String    @id @default(cuid())
+  id          String  @id @default(cuid())
   tenantId    String
   name        String
   slug        String
-  description String?   @db.Text
+  description String? @db.Text
   imageUrl    String?
   parentId    String?
-  sortOrder   Int       @default(0)
-  isActive    Boolean   @default(true)
-  
-  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  parent      Category? @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
-  children    Category[] @relation("CategoryHierarchy")
-  products    Product[]
-  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  sortOrder   Int     @default(0)
+  isActive    Boolean @default(true)
+
+  tenant   Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryHierarchy")
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, slug])
   @@index([tenantId, parentId])
 }
 
 model Product {
-  id              String         @id @default(cuid())
+  id              String        @id @default(cuid())
   tenantId        String
   title           String
   titleBn         String?
   slug            String
-  descriptionHtml String         @db.Text
-  shortExcerpt    String?        @db.Text
-  status          ProductStatus  @default(DRAFT)
-  
-  basePrice       Decimal        @db.Decimal(12, 2)
-  compareAtPrice  Decimal?       @db.Decimal(12, 2)
-  costPrice       Decimal?       @db.Decimal(12, 2)
-  
-  sku             String?
-  barcode         String?
-  isFeatured      Boolean        @default(false)
-  tags            String[]       @default([])
-  
-  categoryId      String?
-  category        Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  
-  images          ProductImage[]
-  variants        ProductVariant[]
-  reviews         Review[]
-  orderItems      OrderItem[]
-  collections     CollectionProduct[]
-  bundleItems     ProductBundleItem[]
-  orderBumps      OrderBump[]
-  
+  descriptionHtml String        @db.Text
+  shortExcerpt    String?       @db.Text
+  status          ProductStatus @default(DRAFT)
+
+  basePrice      Decimal  @db.Decimal(12, 2)
+  compareAtPrice Decimal? @db.Decimal(12, 2)
+  costPrice      Decimal? @db.Decimal(12, 2)
+
+  sku        String?
+  barcode    String?
+  isFeatured Boolean  @default(false)
+  tags       String[] @default([])
+  moq        Int?     @default(1)
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  images      ProductImage[]
+  variants    ProductVariant[]
+  reviews     Review[]
+  orderItems  OrderItem[]
+  collections CollectionProduct[]
+  bundleItems ProductBundleItem[]
+  orderBumps  OrderBump[]
+
   // SEO Fields
-  seoTitle        String?
-  seoDescription  String?
-  
-  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  deletedAt       DateTime?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  seoTitle       String?
+  seoDescription String?
+
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@unique([tenantId, slug])
   @@index([tenantId, status])
@@ -331,13 +335,13 @@ model Product {
 }
 
 model ProductImage {
-  id        String   @id @default(cuid())
+  id        String  @id @default(cuid())
   tenantId  String
   productId String
   url       String
   altText   String?
-  sortOrder Int      @default(0)
-  
+  sortOrder Int     @default(0)
+
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
@@ -345,30 +349,31 @@ model ProductImage {
 }
 
 model ProductVariant {
-  id             String      @id @default(cuid())
+  id             String   @id @default(cuid())
   tenantId       String
   productId      String
-  title          String      // e.g. "L / Black"
+  title          String // e.g. "L / Black"
   sku            String?
   barcode        String?
-  price          Decimal     @db.Decimal(12, 2)
-  compareAtPrice Decimal?    @db.Decimal(12, 2)
-  stockQuantity  Int         @default(0)   // single central warehouse per store (docs/05); no per-location stock
-  reorderLevel   Int         @default(5)
-  shelfCode      String?     // optional bin or shelf label
-  isActive       Boolean     @default(true)
-  
-  options        Json        // { "Size": "L", "Color": "Black" }
-  imageUrl       String?
-  
-  product        Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
-  orderItems     OrderItem[]
-  stockAlerts    StockAlert[]
-  bundleItems    ProductBundleItem[]
-  orderBumps     OrderBump[]
+  price          Decimal  @db.Decimal(12, 2)
+  compareAtPrice Decimal? @db.Decimal(12, 2)
+  stockQuantity  Int      @default(0) // single central warehouse per store (docs/05); no per-location stock
+  reorderLevel   Int      @default(5)
+  shelfCode      String? // optional bin or shelf label
+  isActive       Boolean  @default(true)
 
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  options  Json // { "Size": "L", "Color": "Black" }
+  imageUrl String?
+
+  product         Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems      OrderItem[]
+  stockAlerts     StockAlert[]
+  bundleItems     ProductBundleItem[]
+  orderBumps      OrderBump[]
+  wholesalePrices WholesalePrice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([tenantId, productId])
   @@index([tenantId, sku])
@@ -393,6 +398,7 @@ enum OrderStatus {
 enum PaymentStatus {
   UNPAID
   PENDING_VERIFICATION
+  PARTIALLY_PAID
   PAID
   PARTIALLY_REFUNDED
   REFUNDED
@@ -407,6 +413,7 @@ enum PaymentMethodType {
   GATEWAY_SSLCOMMERZ
   GATEWAY_STRIPE
   GATEWAY_UDDOKTAPAY
+  BANK_TRANSFER
 }
 
 enum CourierProvider {
@@ -424,96 +431,106 @@ enum FraudRiskLevel {
 }
 
 model Order {
-  id                  String            @id @default(cuid())
-  tenantId            String
-  orderNumber         String            // e.g. "ORD-10024"
-  idempotencyKey      String?
-  
-  customerId          String?
-  customerName        String
-  customerPhone       String            // 01XXXXXXXXX
-  customerEmail       String?
-  
-  shippingAddress     String
-  shippingCity        String
-  shippingDistrict    String
-  shippingDivision    String
-  shippingPostalCode  String?
-  deliveryZone        String            // "INSIDE_DHAKA" | "OUTSIDE_DHAKA"
-  
-  status              OrderStatus       @default(PENDING)
-  paymentStatus       PaymentStatus     @default(UNPAID)
-  paymentMethod       PaymentMethodType @default(COD)
-  
+  id             String  @id @default(cuid())
+  tenantId       String
+  orderNumber    String // e.g. "ORD-10024"
+  idempotencyKey String?
+
+  customerId    String?
+  customerName  String
+  customerPhone String // 01XXXXXXXXX
+  customerEmail String?
+
+  shippingAddress    String
+  shippingCity       String
+  shippingDistrict   String
+  shippingDivision   String
+  shippingPostalCode String?
+  deliveryZone       String // "INSIDE_DHAKA" | "OUTSIDE_DHAKA"
+
+  status        OrderStatus       @default(PENDING)
+  paymentStatus PaymentStatus     @default(UNPAID)
+  paymentMethod PaymentMethodType @default(COD)
+
   // Financial Calculations
-  subtotalAmount      Decimal           @db.Decimal(12, 2)
-  deliveryCharge      Decimal           @db.Decimal(12, 2)
-  codFee              Decimal           @default(0.00) @db.Decimal(12, 2)   // store rule: extra charge for cash on delivery
-  discountAmount      Decimal           @default(0.00) @db.Decimal(12, 2)
-  loyaltyPointsUsed   Int               @default(0)
-  loyaltyDiscountBdt  Decimal           @default(0.00) @db.Decimal(12, 2)
-  tierDiscountBdt     Decimal           @default(0.00) @db.Decimal(12, 2)   // the VIP tier's permanent discount
-  referralDiscountBdt Decimal           @default(0.00) @db.Decimal(12, 2)   // the friend's first-order discount
+  subtotalAmount      Decimal @db.Decimal(12, 2)
+  deliveryCharge      Decimal @db.Decimal(12, 2)
+  codFee              Decimal @default(0.00) @db.Decimal(12, 2) // store rule: extra charge for cash on delivery
+  discountAmount      Decimal @default(0.00) @db.Decimal(12, 2)
+  loyaltyPointsUsed   Int     @default(0)
+  loyaltyDiscountBdt  Decimal @default(0.00) @db.Decimal(12, 2)
+  tierDiscountBdt     Decimal @default(0.00) @db.Decimal(12, 2) // the VIP tier's permanent discount
+  referralDiscountBdt Decimal @default(0.00) @db.Decimal(12, 2) // the friend's first-order discount
   referralCode        String?
-  priorityPacking     Boolean           @default(false)   // a Gold or Platinum member's order: packed first
-  clientHash          String?           // keyed hash of the buyer's address, only to spot a referral from the referrer's own connection
-  deliveryWaived      Boolean           @default(false)   // delivery was free because of the member's level or a coupon, so editing the address keeps it free
-  totalAmount         Decimal           @db.Decimal(12, 2)
-  
-  couponId            String?
-  couponCode          String?
-  
+  priorityPacking     Boolean @default(false) // a Gold or Platinum member's order: packed first
+  clientHash          String? // keyed hash of the buyer's address, only to spot a referral from the referrer's own connection
+  deliveryWaived      Boolean @default(false) // delivery was free because of the member's level or a coupon, so editing the address keeps it free
+  totalAmount         Decimal @db.Decimal(12, 2)
+  isWholesale         Boolean @default(false)
+  advancePaidAmount   Decimal @default(0.00) @db.Decimal(12, 2)
+  balanceDue          Decimal @default(0.00) @db.Decimal(12, 2)
+  b2bCompanyName      String?
+  b2bTaxId            String?
+  b2bTradeLicense     String?
+
+  couponId   String?
+  couponCode String?
+
   // Manual MFS Verification Details
-  mfsSenderNumber     String?
-  mfsTrxId            String?
-  mfsVerifiedAt       DateTime?
-  mfsVerifiedBy       String?
-  
+  mfsSenderNumber String?
+  mfsTrxId        String?
+  mfsVerifiedAt   DateTime?
+  mfsVerifiedBy   String?
+
   // Courier & Consignment Details
-  courierProvider     CourierProvider?
-  consignmentId       String?
-  trackingCode        String?
-  courierTrackingUrl  String?
-  courierBookingFee   Decimal?          @db.Decimal(12, 2)
-  courierBookedAt     DateTime?
-  courierStatus       String?           // the courier's own status word, shown to the owner
-  courierStatusAt     DateTime?
-  courierSyncedAt     DateTime?         // last time the 30-minute sync looked at this parcel
-  courierBookingLock  DateTime?         // set while a booking call is in flight, so two clicks cannot book twice
-  deliveredAt         DateTime?
-  returnedAt          DateTime?
-  refusedAtDoor       Boolean           @default(false)
-  trustRecorded       String?           // which outcome (DELIVERED | RETURNED | REFUSED) was sent to the cross-store trust record
-  fraudReview         String?           // "HELD" waits for the owner, "CLEARED" was released
-  settlementStatus    SettlementStatus  @default(PENDING_DELIVERY)  // doc 28 COD reconciliation
-  
+  courierProvider    CourierProvider?
+  consignmentId      String?
+  trackingCode       String?
+  courierTrackingUrl String?
+  courierBookingFee  Decimal?         @db.Decimal(12, 2)
+  courierBookedAt    DateTime?
+  courierStatus      String? // the courier's own status word, shown to the owner
+  courierStatusAt    DateTime?
+  courierSyncedAt    DateTime? // last time the 30-minute sync looked at this parcel
+  courierBookingLock DateTime? // set while a booking call is in flight, so two clicks cannot book twice
+  deliveredAt        DateTime?
+  returnedAt         DateTime?
+  refusedAtDoor      Boolean          @default(false)
+  trustRecorded      String? // which outcome (DELIVERED | RETURNED | REFUSED) was sent to the cross-store trust record
+  fraudReview        String? // "HELD" waits for the owner, "CLEARED" was released
+  settlementStatus   SettlementStatus @default(PENDING_DELIVERY) // doc 28 COD reconciliation
+
   // Fraud Engine Delivery Trust Score
-  fraudRiskLevel      FraudRiskLevel    @default(LOW)
-  fraudTrustScore     Int               @default(85) // 0-100
-  fraudFlags          String[]          @default([])
-  
+  fraudRiskLevel  FraudRiskLevel @default(LOW)
+  fraudTrustScore Int            @default(85) // 0-100
+  fraudFlags      String[]       @default([])
+
   // Source Attribution
-  channel             String            @default("STOREFRONT") // "STOREFRONT" | "LANDING_PAGE" | "WHATSAPP_BOT" | "MESSENGER_BOT" | "TELEMARKETING" | "QUICK_MESSENGER" | "QUICK_WHATSAPP" | "QUICK_PHONE" | "QUICK_INSTAGRAM"
-  createdByUserId     String?           // staff who keyed in a quick order
-  utmSource           String?
-  utmCampaign         String?
-  utmMedium           String?
+  channel         String  @default("STOREFRONT") // "STOREFRONT" | "LANDING_PAGE" | "WHATSAPP_BOT" | "MESSENGER_BOT" | "TELEMARKETING" | "QUICK_MESSENGER" | "QUICK_WHATSAPP" | "QUICK_PHONE" | "QUICK_INSTAGRAM"
+  createdByUserId String? // staff who keyed in a quick order
+  utmSource       String?
+  utmCampaign     String?
+  utmMedium       String?
   // The landing page this order came from, when it did (docs/46)
-  landingPageId       String?
-  posRegisterId       String?
-  posSessionId        String?
-  paymentSplits       Json?
-  
-  notes               String?           @db.Text
-  staffNotes          String?           @db.Text
-  /** Short labels the team puts on an order, for example "call first" or "gift". */
-  tags                String[]          @default([])
-  /** What was said on the confirmation call. Shown at the top of the order for whoever packs it. */
-  callNote            String?           @db.Text
-  
-  tenant              Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  customer            Customer?         @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  coupon              Coupon?           @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  landingPageId   String?
+  posRegisterId   String?
+  posSessionId    String?
+  paymentSplits   Json?
+
+  notes      String?  @db.Text
+  staffNotes String?  @db.Text
+  /**
+   * Short labels the team puts on an order, for example "call first" or "gift".
+   */
+  tags       String[] @default([])
+  /**
+   * What was said on the confirmation call. Shown at the top of the order for whoever packs it.
+   */
+  callNote   String?  @db.Text
+
+  tenant              Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer            Customer?             @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  coupon              Coupon?               @relation(fields: [couponId], references: [id], onDelete: SetNull)
   items               OrderItem[]
   stateLogs           OrderStateLog[]
   events              OrderEvent[]
@@ -521,10 +538,10 @@ model Order {
   settledLines        CourierSettledOrder[]
   courierEvents       CourierEvent[]
   whatsAppMessageLogs WhatsAppMessageLog[]
-  
-  deletedAt           DateTime?
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@unique([tenantId, orderNumber])
   @@unique([tenantId, idempotencyKey])
@@ -536,34 +553,34 @@ model Order {
   @@index([tenantId, consignmentId])
   @@index([tenantId, status, courierSyncedAt])
   @@index([tenantId, landingPageId])
-  @@index([tags], type: Gin)   // the label filter on the orders list (migration 28)
+  @@index([tags], type: Gin) // the label filter on the orders list (migration 28)
 }
 
 model OrderItem {
-  id             String          @id @default(cuid())
-  tenantId       String
-  orderId        String
-  productId      String
-  variantId      String?
-  
-  productTitle   String
-  variantTitle   String?
-  sku            String?
-  unitPrice      Decimal         @db.Decimal(12, 2)
-  unitCost       Decimal?        @db.Decimal(12, 2)   // product cost at the time of the order, for the profit screen
-  quantity       Int
-  totalPrice     Decimal         @db.Decimal(12, 2)
-  
-  bundleId       String?
-  bundleTitle    String?
-  isBump         Boolean         @default(false)
-  
-  order          Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product        Product         @relation(fields: [productId], references: [id], onDelete: Restrict)
-  variant        ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
-  bundle         ProductBundle?  @relation(fields: [bundleId], references: [id], onDelete: SetNull)
-  
-  createdAt      DateTime        @default(now())
+  id        String  @id @default(cuid())
+  tenantId  String
+  orderId   String
+  productId String
+  variantId String?
+
+  productTitle String
+  variantTitle String?
+  sku          String?
+  unitPrice    Decimal  @db.Decimal(12, 2)
+  unitCost     Decimal? @db.Decimal(12, 2) // product cost at the time of the order, for the profit screen
+  quantity     Int
+  totalPrice   Decimal  @db.Decimal(12, 2)
+
+  bundleId    String?
+  bundleTitle String?
+  isBump      Boolean @default(false)
+
+  order   Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product         @relation(fields: [productId], references: [id], onDelete: Restrict)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  bundle  ProductBundle?  @relation(fields: [bundleId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
 
   @@index([tenantId, orderId])
   @@index([productId])
@@ -572,17 +589,17 @@ model OrderItem {
 }
 
 model OrderStateLog {
-  id          String      @id @default(cuid())
-  tenantId    String
-  orderId     String
-  fromStatus  OrderStatus
-  toStatus    OrderStatus
-  actorType   String      // "MERCHANT" | "CUSTOMER" | "COURIER_WEBHOOK" | "SYSTEM_CRON"
-  actorId     String?
-  reason      String?
-  createdAt   DateTime    @default(now())
+  id         String      @id @default(cuid())
+  tenantId   String
+  orderId    String
+  fromStatus OrderStatus
+  toStatus   OrderStatus
+  actorType  String // "MERCHANT" | "CUSTOMER" | "COURIER_WEBHOOK" | "SYSTEM_CRON"
+  actorId    String?
+  reason     String?
+  createdAt  DateTime    @default(now())
 
-  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, orderId])
   @@index([createdAt])
@@ -594,12 +611,12 @@ model RefundLedger {
   orderId     String
   amount      Decimal  @db.Decimal(12, 2)
   reason      String
-  method      String   // "BKASH_SEND_MONEY" | "GATEWAY_REVERSAL" | "STORE_CREDIT"
+  method      String // "BKASH_SEND_MONEY" | "GATEWAY_REVERSAL" | "STORE_CREDIT"
   trxId       String?
   processedBy String
   createdAt   DateTime @default(now())
 
-  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, orderId])
 }
@@ -631,33 +648,34 @@ enum LoyaltyTxStatus {
 }
 
 model Customer {
-  id               String                 @id @default(cuid())
-  tenantId         String
-  name             String
-  phone            String                 // 01XXXXXXXXX
-  email            String?
-  totalOrders      Int                    @default(0)
-  totalSpent       Decimal                @default(0.00) @db.Decimal(12, 2)
-  deliveryScore    Int                    @default(90) // 0-100
-  isBlacklisted    Boolean                @default(false)
-  blacklistReason  String?
-  storeCredit      Decimal                @default(0.00) @db.Decimal(12, 2)   // issued by a return; spending it at checkout is not built yet
-  tags             String[]               @default([])
-  smsConsent       Boolean                @default(false)
-  birthMonth       Int?                   // optional, given by the customer; with the day it earns a birthday voucher
-  birthDay         Int?
-  emailConsent     Boolean                @default(false)
-  notes            String?                // private note for the team
-  
-  addresses        CustomerAddress[]
-  orders           Order[]
-  reviews          Review[]
-  loyaltyAccount   CustomerLoyaltyAccount?
+  id              String   @id @default(cuid())
+  tenantId        String
+  name            String
+  phone           String // 01XXXXXXXXX
+  email           String?
+  totalOrders     Int      @default(0)
+  totalSpent      Decimal  @default(0.00) @db.Decimal(12, 2)
+  deliveryScore   Int      @default(90) // 0-100
+  isBlacklisted   Boolean  @default(false)
+  blacklistReason String?
+  storeCredit     Decimal  @default(0.00) @db.Decimal(12, 2) // issued by a return; spending it at checkout is not built yet
+  tags            String[] @default([])
+  smsConsent      Boolean  @default(false)
+  birthMonth      Int? // optional, given by the customer; with the day it earns a birthday voucher
+  birthDay        Int?
+  emailConsent    Boolean  @default(false)
+  notes           String? // private note for the team
+
+  addresses             CustomerAddress[]
+  orders                Order[]
+  reviews               Review[]
+  loyaltyAccount        CustomerLoyaltyAccount?
+  wholesaleProfile      WholesaleCustomer?
   whatsAppConversations WhatsAppConversation[]
-  
-  tenant           Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt        DateTime               @default(now())
-  updatedAt        DateTime               @updatedAt
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, phone])
   @@index([tenantId, totalSpent])
@@ -665,41 +683,41 @@ model Customer {
 }
 
 model CustomerAddress {
-  id         String   @id @default(cuid())
+  id         String  @id @default(cuid())
   tenantId   String
   customerId String
-  label      String   @default("Home") // "Home" | "Office"
+  label      String  @default("Home") // "Home" | "Office"
   address    String
   district   String
   division   String
-  upazila    String?  // upazila or thana
-  isDefault  Boolean  @default(false)
-  
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
+  upazila    String? // upazila or thana
+  isDefault  Boolean @default(false)
+
+  customer  Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
   @@index([tenantId, customerId])
 }
 
 model CustomerLoyaltyAccount {
-  id              String         @id @default(cuid())
-  tenantId        String
-  customerId      String         @unique
-  availablePoints Int            @default(0)
-  pendingPoints   Int            @default(0)
-  lifetimePoints  Int            @default(0)
-  currentTier     VipTierLevel   @default(BRONZE)
-  rollingSpend12m Decimal        @default(0.00) @db.Decimal(12, 2)
-  referralCode    String         @unique
-  birthdayVoucherYear Int?       // the last year a birthday voucher was sent
-  
-  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  customer        Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  transactions    LoyaltyTransaction[]
-  referralsMade   CustomerReferral[] @relation("Referrer")
+  id                  String       @id @default(cuid())
+  tenantId            String
+  customerId          String       @unique
+  availablePoints     Int          @default(0)
+  pendingPoints       Int          @default(0)
+  lifetimePoints      Int          @default(0)
+  currentTier         VipTierLevel @default(BRONZE)
+  rollingSpend12m     Decimal      @default(0.00) @db.Decimal(12, 2)
+  referralCode        String       @unique
+  birthdayVoucherYear Int? // the last year a birthday voucher was sent
 
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  tenant        Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer      Customer             @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  transactions  LoyaltyTransaction[]
+  referralsMade CustomerReferral[]   @relation("Referrer")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([tenantId, customerId])
   @@index([referralCode])
@@ -716,29 +734,29 @@ model LoyaltyTransaction {
   status      LoyaltyTxStatus @default(PENDING)
   description String
   expiresAt   DateTime?
-  
-  account     CustomerLoyaltyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  createdAt   DateTime        @default(now())
 
-  @@unique([accountId, orderId, type])   // one earn, one redeem, one bonus per order: a repeated delivery cannot credit twice
+  account   CustomerLoyaltyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  createdAt DateTime               @default(now())
+
+  @@unique([accountId, orderId, type]) // one earn, one redeem, one bonus per order: a repeated delivery cannot credit twice
   @@index([tenantId, accountId])
   @@index([orderId])
   @@index([expiresAt])
 }
 
 model CustomerReferral {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   tenantId        String
   referrerId      String
   refereePhone    String
-  firstOrderId    String?  @unique
-  bonusPoints     Int      @default(100)
-  isDelivered     Boolean  @default(false)
+  firstOrderId    String?   @unique
+  bonusPoints     Int       @default(100)
+  isDelivered     Boolean   @default(false)
   rewardClaimedAt DateTime?
-  
-  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  tenant          Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   referrerAccount CustomerLoyaltyAccount @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
-  createdAt       DateTime @default(now())
+  createdAt       DateTime               @default(now())
 
   @@unique([tenantId, refereePhone])
   @@index([tenantId, referrerId])
@@ -758,31 +776,31 @@ enum AbandonedStatus {
 }
 
 model AbandonedCheckout {
-  id             String          @id @default(cuid())
-  tenantId       String
-  phone          String          // 01XXXXXXXXX
-  customerName   String?
-  cartItems      Json            // Array of variantId, quantity, price
-  cartTotal      Decimal         @db.Decimal(12, 2)
-  status         AbandonedStatus @default(CAPTURED)
-  
-  callAttempts   Int             @default(0)
+  id           String          @id @default(cuid())
+  tenantId     String
+  phone        String // 01XXXXXXXXX
+  customerName String?
+  cartItems    Json // Array of variantId, quantity, price
+  cartTotal    Decimal         @db.Decimal(12, 2)
+  status       AbandonedStatus @default(CAPTURED)
+
+  callAttempts   Int       @default(0)
   lastCallAt     DateTime?
-  callAgentNotes String?         @db.Text
+  callAgentNotes String?   @db.Text
   recoveryUrl    String
-  recoveryToken  String?         @unique   // the secret in the link the customer is sent; it restores their cart
+  recoveryToken  String?   @unique // the secret in the link the customer is sent; it restores their cart
   district       String?
-  outcome        String?         // last call outcome: "WILL_ORDER" | "NO_ANSWER" | "NOT_INTERESTED" | "ORDER_CREATED"
-  lastEventAt    DateTime        @default(now())   // last time the customer touched the checkout; the 30-minute wait counts from here
-  smsClaimedAt   DateTime?       // set the moment a recovery SMS is claimed, so two sweeps cannot send it twice
+  outcome        String? // last call outcome: "WILL_ORDER" | "NO_ANSWER" | "NOT_INTERESTED" | "ORDER_CREATED"
+  lastEventAt    DateTime  @default(now()) // last time the customer touched the checkout; the 30-minute wait counts from here
+  smsClaimedAt   DateTime? // set the moment a recovery SMS is claimed, so two sweeps cannot send it twice
   smsSentAt      DateTime?
-  smsStatus      String?         // "SENT" | "FAILED" | "SKIPPED_OPTOUT" | "SKIPPED_NO_CREDITS" | "SKIPPED_LIMIT"
-  
+  smsStatus      String? // "SENT" | "FAILED" | "SKIPPED_OPTOUT" | "SKIPPED_NO_CREDITS" | "SKIPPED_LIMIT"
+
   recoveredOrderId String?
-  
-  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([tenantId, status])
   @@index([tenantId, phone])
@@ -793,26 +811,26 @@ model CartShortLink {
   id          String   @id @default(cuid())
   tenantId    String
   shortCode   String   @unique
-  payloadJson Json     // Items, customer info, coupon, channel attribution
-  source      String   // "WHATSAPP_BOT" | "MESSENGER_BOT" | "TELEMARKETING"
+  payloadJson Json // Items, customer info, coupon, channel attribution
+  source      String // "WHATSAPP_BOT" | "MESSENGER_BOT" | "TELEMARKETING"
   clicksCount Int      @default(0)
   isConverted Boolean  @default(false)
   orderId     String?
   expiresAt   DateTime
-  
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
   @@index([tenantId, shortCode])
   @@index([expiresAt])
 }
 
 model SmsOptOut {
-  id        String   @id @default(cuid())
-  tenantId  String
-  phone     String   // 01XXXXXXXXX
-  reason    String?  // "USER_STOP_REQUEST" | "BOUNCED"
-  
+  id       String  @id @default(cuid())
+  tenantId String
+  phone    String // 01XXXXXXXXX
+  reason   String? // "USER_STOP_REQUEST" | "BOUNCED"
+
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
@@ -825,15 +843,15 @@ model SmsOptOut {
 // ==========================================
 
 model TenantAiUsage {
-  id              String   @id @default(cuid())
+  id              String  @id @default(cuid())
   tenantId        String
-  periodMonth     String   // "YYYY-MM"
-  generationCount Int      @default(0)
-  tokenCount      Int      @default(0)
-  customApiKey    String?  // AES-256 encrypted BYO Gemini Key
-  
-  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  updatedAt       DateTime @updatedAt
+  periodMonth     String // "YYYY-MM"
+  generationCount Int     @default(0)
+  tokenCount      Int     @default(0)
+  customApiKey    String? // AES-256 encrypted BYO Gemini Key
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, periodMonth])
   @@index([tenantId])
@@ -846,37 +864,37 @@ model TenantAiUsage {
 model ApiKeyCredential {
   id          String    @id @default(cuid())
   tenantId    String
-  name        String    // e.g. "ManyChat Production Bot"
-  keyPrefix   String    // "bzk_live_..."
-  hashedToken String    // bcrypt hash of full secret
-  scopes      String[]  // ["orders:read", "orders:write", "products:read"]
+  name        String // e.g. "ManyChat Production Bot"
+  keyPrefix   String // "bzk_live_..."
+  hashedToken String // bcrypt hash of full secret
+  scopes      String[] // ["orders:read", "orders:write", "products:read"]
   lastUsedAt  DateTime?
   expiresAt   DateTime?
   isActive    Boolean   @default(true)
-  
-  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt   DateTime  @default(now())
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
   @@index([tenantId, keyPrefix])
 }
 
 model WebhookSubscription {
-  id            String               @id @default(cuid())
-  tenantId      String
-  targetUrl     String
-  events        String[]             // ["order.created", "order.delivered", "inventory.low"]
-  secretToken   String               // AES-256 encrypted signing secret
-  isActive      Boolean              @default(true)
-  
-  tenant        Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  deliveryLogs  WebhookDeliveryLog[]
-  createdAt     DateTime             @default(now())
+  id          String   @id @default(cuid())
+  tenantId    String
+  targetUrl   String
+  events      String[] // ["order.created", "order.delivered", "inventory.low"]
+  secretToken String // AES-256 encrypted signing secret
+  isActive    Boolean  @default(true)
+
+  tenant       Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  deliveryLogs WebhookDeliveryLog[]
+  createdAt    DateTime             @default(now())
 
   @@index([tenantId, isActive])
 }
 
 model WebhookDeliveryLog {
-  id             String              @id @default(cuid())
+  id             String  @id @default(cuid())
   tenantId       String
   subscriptionId String
   eventId        String
@@ -884,23 +902,23 @@ model WebhookDeliveryLog {
   payload        Json
   responseStatus Int?
   responseBody   String?
-  attempt        Int                 @default(1)
-  isSuccess      Boolean             @default(false)
-  
-  subscription   WebhookSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-  createdAt      DateTime            @default(now())
+  attempt        Int     @default(1)
+  isSuccess      Boolean @default(false)
+
+  subscription WebhookSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime            @default(now())
 
   @@index([tenantId, subscriptionId, createdAt])
 }
 
 model IdempotencyRecord {
-  id          String   @id @default(cuid())
-  tenantId    String
+  id             String   @id @default(cuid())
+  tenantId       String
   idempotencyKey String
-  responseJson Json
-  statusCode  Int
-  createdAt   DateTime @default(now())
-  expiresAt   DateTime
+  responseJson   Json
+  statusCode     Int
+  createdAt      DateTime @default(now())
+  expiresAt      DateTime
 
   @@unique([tenantId, idempotencyKey])
   @@index([expiresAt])
@@ -911,41 +929,41 @@ model IdempotencyRecord {
 // ==========================================
 
 model ThemeInstall {
-  id          String   @id @default(cuid())
-  tenantId    String
-  themeId     String   // "kapor" | "gadgetstudio" | "mini-bunny" | "axionwear" | "bindu" | "berber", see docs/06 for display names
-  isActive    Boolean  @default(false)
-  settings    Json     // Custom color/font/banner tokens
-  pagesJson   Json     // Sections & block trees per route
-  version     Int      @default(1)
-  
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String  @id @default(cuid())
+  tenantId  String
+  themeId   String // "kapor" | "gadgetstudio" | "mini-bunny" | "axionwear" | "bindu" | "berber", see docs/06 for display names
+  isActive  Boolean @default(false)
+  settings  Json // Custom color/font/banner tokens
+  pagesJson Json // Sections & block trees per route
+  version   Int     @default(1)
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, themeId])
   @@index([tenantId, isActive])
 }
 
 model LandingPage {
-  id              String   @id @default(cuid())
+  id              String         @id @default(cuid())
   tenantId        String
   title           String
   slug            String
   targetProductId String
-  sectionsJson    Json     // Page builder block layout
-  isPublished     Boolean  @default(false)
+  sectionsJson    Json // Page builder block layout
+  isPublished     Boolean        @default(false)
   pixelId         String?
   // What the page sells (docs/46): one product, a choice of products, bundle deals and an optional order bump. Null = the one product above.
   offersJson      Json?
   // The short address for ads: /p/<shortCode>
-  shortCode       String?  @unique
+  shortCode       String?        @unique
   daily           LandingDaily[]
   leads           LandingLead[]
 
-  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, slug])
   @@index([tenantId])
@@ -954,13 +972,13 @@ model LandingPage {
 // Views and orders of a landing page, one row per day (docs/46). Counts only: no visitor is identified.
 model LandingDaily {
   landingPageId String
-  day           DateTime    @db.Date
+  day           DateTime @db.Date
   tenantId      String
-  views         Int         @default(0)
-  orders        Int         @default(0)
+  views         Int      @default(0)
+  orders        Int      @default(0)
 
-  page          LandingPage @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
-  tenant        Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  page   LandingPage @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
+  tenant Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@id([landingPageId, day])
   @@index([tenantId, day])
@@ -968,7 +986,7 @@ model LandingDaily {
 
 // A visitor who typed a name and number on a landing page and may not have finished (docs/46). Kept 30 days, shown to the seller to call.
 model LandingLead {
-  id            String      @id @default(cuid())
+  id            String   @id @default(cuid())
   tenantId      String
   landingPageId String
   name          String
@@ -977,60 +995,60 @@ model LandingLead {
   utmSource     String?
   utmCampaign   String?
   // NEW until an order from the same number arrives, then ORDERED
-  status        String      @default("NEW")
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  status        String   @default("NEW")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  page          LandingPage @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
-  tenant        Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  page   LandingPage @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
+  tenant Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([landingPageId, phone])
   @@index([tenantId, createdAt])
 }
 
 model Coupon {
-  id              String       @id @default(cuid())
-  tenantId        String
-  code            String
-  type            String       // "PERCENTAGE" | "FIXED_AMOUNT" | "FREE_SHIPPING"
-  value           Decimal      @db.Decimal(12, 2)
-  minOrderValue   Decimal?     @db.Decimal(12, 2)
-  usageLimit      Int?
-  usageCount      Int          @default(0)
-  perCustomerLimit Int         @default(1)
-  startsAt        DateTime     @default(now())
-  expiresAt       DateTime?
-  isActive        Boolean      @default(true)
-  
-  tenant          Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  orders          Order[]
-  
-  createdAt       DateTime     @default(now())
+  id               String    @id @default(cuid())
+  tenantId         String
+  code             String
+  type             String // "PERCENTAGE" | "FIXED_AMOUNT" | "FREE_SHIPPING"
+  value            Decimal   @db.Decimal(12, 2)
+  minOrderValue    Decimal?  @db.Decimal(12, 2)
+  usageLimit       Int?
+  usageCount       Int       @default(0)
+  perCustomerLimit Int       @default(1)
+  startsAt         DateTime  @default(now())
+  expiresAt        DateTime?
+  isActive         Boolean   @default(true)
+
+  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  createdAt DateTime @default(now())
 
   @@unique([tenantId, code])
   @@index([tenantId, isActive])
 }
 
 model Review {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   tenantId      String
   productId     String
   customerId    String
-  rating        Int      @default(5)
+  rating        Int       @default(5)
   title         String?
-  body          String   @db.Text
-  photos        String[] @default([])
-  isVerified    Boolean  @default(true)
-  isPublished   Boolean  @default(true)
-  merchantReply String?  @db.Text
+  body          String    @db.Text
+  photos        String[]  @default([])
+  isVerified    Boolean   @default(true)
+  isPublished   Boolean   @default(true)
+  merchantReply String?   @db.Text
   repliedAt     DateTime?
-  decidedAt     DateTime?   // when the owner published or hid it; null while it waits
-  orderId       String?  // the delivered order that made this a verified review
-  
-  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  customer      Customer @relation(fields: [customerId], references: [id])
-  createdAt     DateTime @default(now())
+  decidedAt     DateTime? // when the owner published or hid it; null while it waits
+  orderId       String? // the delivered order that made this a verified review
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  customer  Customer @relation(fields: [customerId], references: [id])
+  createdAt DateTime @default(now())
 
   @@unique([tenantId, productId, customerId])
   @@index([tenantId, productId])
@@ -1043,71 +1061,71 @@ model ShippingZone {
   districts      String[]
   rate           Decimal  @db.Decimal(12, 2)
   freeOverAmount Decimal? @db.Decimal(12, 2)
-  etaMinDays     Int      @default(1)   // shown at checkout: "Arrives in 1 to 2 days"
+  etaMinDays     Int      @default(1) // shown at checkout: "Arrives in 1 to 2 days"
   etaMaxDays     Int      @default(3)
-  
-  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt      DateTime @default(now())
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
   @@index([tenantId])
 }
 
 model Page {
-  id          String   @id @default(cuid())
-  tenantId    String
-  title       String
-  slug        String
-  contentHtml String   @db.Text
-  isPublished Boolean  @default(true)
-  publishAt   DateTime?   // when set, the page appears at that time even if isPublished is on
+  id             String    @id @default(cuid())
+  tenantId       String
+  title          String
+  slug           String
+  contentHtml    String    @db.Text
+  isPublished    Boolean   @default(true)
+  publishAt      DateTime? // when set, the page appears at that time even if isPublished is on
   // A page built from sections in the visual editor (docs/47 part D). Null: a rich-text page, shown from contentHtml.
-  sectionsJson Json?
-  seoTitle    String?
+  sectionsJson   Json?
+  seoTitle       String?
   seoDescription String?
-  
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, slug])
   @@index([tenantId])
 }
 
 model BlogPost {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   tenantId    String
   title       String
   slug        String
   summary     String?
-  contentHtml String   @db.Text
+  contentHtml String    @db.Text
   coverImage  String?
   authorName  String?
-  tags        String[] @default([])
-  isPublished Boolean  @default(true)
-  publishAt   DateTime?   // when set, the post appears at that time even if isPublished is on
-  
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  tags        String[]  @default([])
+  isPublished Boolean   @default(true)
+  publishAt   DateTime? // when set, the post appears at that time even if isPublished is on
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, slug])
   @@index([tenantId])
 }
 
 model Domain {
-  id          String   @id @default(cuid())
-  tenantId    String
-  domain      String   @unique
-  verified    Boolean  @default(false)
-  isPrimary   Boolean  @default(false)
-  redirectWww Boolean  @default(true)   // 308 canonical redirect, docs/13
-  dnsStatus   String   @default("waiting")   // "waiting" | "wrong_record" | "found" | "verified"
-  dnsNote     String?  // plain-language reason shown to the owner
-  sslStatus   String   @default("pending")   // "pending" | "issued" | "renewal_failed" | "expiring"
+  id            String    @id @default(cuid())
+  tenantId      String
+  domain        String    @unique
+  verified      Boolean   @default(false)
+  isPrimary     Boolean   @default(false)
+  redirectWww   Boolean   @default(true) // 308 canonical redirect, docs/13
+  dnsStatus     String    @default("waiting") // "waiting" | "wrong_record" | "found" | "verified"
+  dnsNote       String? // plain-language reason shown to the owner
+  sslStatus     String    @default("pending") // "pending" | "issued" | "renewal_failed" | "expiring"
   lastCheckedAt DateTime?
-  
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
   @@index([tenantId])
 }
@@ -1124,54 +1142,54 @@ enum IntegrationStatus {
 }
 
 model TenantIntegration {
-  id             String            @id @default(cuid())
-  tenantId       String
-  provider       String            // "STEADFAST" | "PATHAO" | "REDX" | "SSLCOMMERZ" | "META_CAPI" | "GA4" | "BREVO_BYO" | "SMS_BYO"
-  mode           IntegrationMode   @default(TEST)
-  config         Json              @default("{}")   // NON-secret: store name, pickup id, pixel id, sender name
-  secretCipher   String            // AES-256-GCM encrypted secrets JSON (base64), write-only from the UI (docs/04, docs/17)
-  secretKeyId    String            // which data key encrypted it; supports rotation
-  integrationToken String          @unique          // random token in the webhook URL, identifies the tenant without exposing ids
-  status         IntegrationStatus @default(CONNECTED)
-  lastVerifiedAt DateTime?
-  lastError      String?
+  id               String            @id @default(cuid())
+  tenantId         String
+  provider         String // "STEADFAST" | "PATHAO" | "REDX" | "SSLCOMMERZ" | "META_CAPI" | "GA4" | "BREVO_BYO" | "SMS_BYO"
+  mode             IntegrationMode   @default(TEST)
+  config           Json              @default("{}") // NON-secret: store name, pickup id, pixel id, sender name
+  secretCipher     String // AES-256-GCM encrypted secrets JSON (base64), write-only from the UI (docs/04, docs/17)
+  secretKeyId      String // which data key encrypted it; supports rotation
+  integrationToken String            @unique // random token in the webhook URL, identifies the tenant without exposing ids
+  status           IntegrationStatus @default(CONNECTED)
+  lastVerifiedAt   DateTime?
+  lastError        String?
 
-  tenant         Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, provider, mode])
   @@index([tenantId])
 }
 
 model ReturnRequest {
-  id            String   @id @default(cuid())
-  tenantId      String
-  orderId       String
-  code          String   // "RT-0412"
-  reason        String
-  customerNote  String?  @db.Text
-  type          String   @default("REFUND")   // "EXCHANGE" | "REFUND" | "STORE_CREDIT"
-  items         Json     @default("[]")       // [{ orderItemId, qty }]
-  refundAmount  Decimal? @db.Decimal(12, 2)
-  exchangeVariantId String?
-  returnConsignmentId String?                 // courier pickup for the returning parcel
-  status        String   @default("PENDING")  // "PENDING" | "APPROVED" | "PICKUP_BOOKED" | "RECEIVED" | "REFUNDED" | "DECLINED"
-  photos        String[] @default([])
-  decidedBy     String?
-  decidedAt     DateTime?
-  adminNote     String?
-  returnTrackingCode String?
-  exchangeReserved Boolean @default(false)    // the replacement was taken off the shelf when the return was approved
-  receivedAt    DateTime?
-  restocked     Boolean  @default(false)
-  refundMethod  String?                       // "BKASH_SEND_MONEY" | "STORE_CREDIT"
-  refundTrxId   String?
-  refundedAt    DateTime?
+  id                  String    @id @default(cuid())
+  tenantId            String
+  orderId             String
+  code                String // "RT-0412"
+  reason              String
+  customerNote        String?   @db.Text
+  type                String    @default("REFUND") // "EXCHANGE" | "REFUND" | "STORE_CREDIT"
+  items               Json      @default("[]") // [{ orderItemId, qty }]
+  refundAmount        Decimal?  @db.Decimal(12, 2)
+  exchangeVariantId   String?
+  returnConsignmentId String? // courier pickup for the returning parcel
+  status              String    @default("PENDING") // "PENDING" | "APPROVED" | "PICKUP_BOOKED" | "RECEIVED" | "REFUNDED" | "DECLINED"
+  photos              String[]  @default([])
+  decidedBy           String?
+  decidedAt           DateTime?
+  adminNote           String?
+  returnTrackingCode  String?
+  exchangeReserved    Boolean   @default(false) // the replacement was taken off the shelf when the return was approved
+  receivedAt          DateTime?
+  restocked           Boolean   @default(false)
+  refundMethod        String? // "BKASH_SEND_MONEY" | "STORE_CREDIT"
+  refundTrxId         String?
+  refundedAt          DateTime?
 
-  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @default(now()) @updatedAt
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([tenantId, code])
   @@index([tenantId, orderId])
@@ -1179,48 +1197,48 @@ model ReturnRequest {
 }
 
 model DailyStoreMetrics {
-  id               String   @id @default(cuid())
-  tenantId         String
-  date             DateTime @db.Date // 2026-10-10
+  id       String   @id @default(cuid())
+  tenantId String
+  date     DateTime @db.Date // 2026-10-10
 
   // Financials
-  grossSalesBDT    Decimal  @default(0.00) @db.Decimal(12, 2)
-  netSalesBDT      Decimal  @default(0.00) @db.Decimal(12, 2)
+  grossSalesBDT     Decimal @default(0.00) @db.Decimal(12, 2)
+  netSalesBDT       Decimal @default(0.00) @db.Decimal(12, 2)
   discountsTotalBDT Decimal @default(0.00) @db.Decimal(12, 2)
-  shippingTotalBDT Decimal  @default(0.00) @db.Decimal(12, 2)
-  refundsTotalBDT  Decimal  @default(0.00) @db.Decimal(12, 2)
+  shippingTotalBDT  Decimal @default(0.00) @db.Decimal(12, 2)
+  refundsTotalBDT   Decimal @default(0.00) @db.Decimal(12, 2)
 
   // Volume & conversions
-  totalOrders      Int      @default(0)
-  paidOrders       Int      @default(0)
-  codOrders        Int      @default(0)
-  cancelledOrders  Int      @default(0)
-  returnedOrders   Int      @default(0)
+  totalOrders     Int @default(0)
+  paidOrders      Int @default(0)
+  codOrders       Int @default(0)
+  cancelledOrders Int @default(0)
+  returnedOrders  Int @default(0)
 
   // AOV & customers
   averageOrderValue Decimal @default(0.00) @db.Decimal(12, 2)
   newCustomersCount Int     @default(0)
   repeatOrdersCount Int     @default(0)
 
-  tenant           Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, date])
   @@index([tenantId, date])
 }
 
 model AuditLog {
-  id          String   @id @default(cuid())
-  tenantId    String
-  action      String
-  actorId     String
-  actorEmail  String
-  details     Json     @default("{}")
-  ipAddress   String?
-  
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
+  id         String  @id @default(cuid())
+  tenantId   String
+  action     String
+  actorId    String
+  actorEmail String
+  details    Json    @default("{}")
+  ipAddress  String?
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
   @@index([tenantId, createdAt])
 }
@@ -1277,26 +1295,26 @@ model Plan {
 model UsageCounter {
   id          String   @id @default(cuid())
   tenantId    String
-  metric      String   // "products" | "orders" | "sms" | "storage_bytes" | "ai_credits" | "emails"
-  periodStart DateTime @db.Date   // first day of the month, or epoch for non-periodic metrics
+  metric      String // "products" | "orders" | "sms" | "storage_bytes" | "ai_credits" | "emails"
+  periodStart DateTime @db.Date // first day of the month, or epoch for non-periodic metrics
   value       BigInt   @default(0)
 
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  updatedAt   DateTime @updatedAt
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, metric, periodStart])
   @@index([tenantId, metric])
 }
 
 model TenantModule {
-  id         String   @id @default(cuid())
-  tenantId   String
-  moduleKey  String   // "bespoke" | "drops" | "baby_profiles" | "loyalty" | "booking" | "wholesale"
-  isEnabled  Boolean  @default(true)
-  settings   Json     @default("{}")
+  id        String  @id @default(cuid())
+  tenantId  String
+  moduleKey String // "bespoke" | "drops" | "baby_profiles" | "loyalty" | "booking" | "wholesale"
+  isEnabled Boolean @default(true)
+  settings  Json    @default("{}")
 
-  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  enabledAt  DateTime @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  enabledAt DateTime @default(now())
 
   @@unique([tenantId, moduleKey])
 }
@@ -1306,32 +1324,32 @@ model TenantModule {
 // ==========================================
 
 model Collection {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   tenantId    String
   title       String
   titleBn     String?
   slug        String
-  isAutomatic Boolean  @default(false)   // rule-based collection
+  isAutomatic Boolean @default(false) // rule-based collection
   rules       Json?
-  isPublished Boolean  @default(true)
-  sortOrder   Int      @default(0)
+  isPublished Boolean @default(true)
+  sortOrder   Int     @default(0)
 
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  products    CollectionProduct[]
-  createdAt   DateTime @default(now())
+  tenant    Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  products  CollectionProduct[]
+  createdAt DateTime            @default(now())
 
   @@unique([tenantId, slug])
 }
 
 model CollectionProduct {
-  id           String     @id @default(cuid())
+  id           String @id @default(cuid())
   tenantId     String
   collectionId String
   productId    String
-  sortOrder    Int        @default(0)
+  sortOrder    Int    @default(0)
 
-  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
-  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  product    Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([collectionId, productId])
   @@index([tenantId, productId])
@@ -1339,13 +1357,13 @@ model CollectionProduct {
 
 // Costs the platform cannot see, entered by the owner for the P&L screen (docs/28 section 7)
 model Expense {
-  id        String   @id @default(cuid())
-  tenantId  String
-  category  String   // "ADS" | "PACKAGING" | "RENT_SALARY" | "OTHER"
-  note      String?
-  amount    Decimal  @db.Decimal(12, 2)
+  id         String   @id @default(cuid())
+  tenantId   String
+  category   String // "ADS" | "PACKAGING" | "RENT_SALARY" | "OTHER"
+  note       String?
+  amount     Decimal  @db.Decimal(12, 2)
   incurredOn DateTime @db.Date
-  createdBy String?
+  createdBy  String?
 
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
@@ -1355,11 +1373,11 @@ model Expense {
 
 // Per-store blocklist (docs/12). The cross-store trust score lives in PhoneTrustStat (platform level).
 model BlockedContact {
-  id        String   @id @default(cuid())
+  id        String  @id @default(cuid())
   tenantId  String
   phone     String
   reason    String
-  source    String   @default("MANUAL")   // "MANUAL" | "FRAUD_REVIEW" | "REFUSED_PARCELS"
+  source    String  @default("MANUAL") // "MANUAL" | "FRAUD_REVIEW" | "REFUSED_PARCELS"
   createdBy String?
 
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -1370,33 +1388,33 @@ model BlockedContact {
 
 // Draft and published page JSON for the section builder and landing page builder (docs/06)
 model ThemeVersion {
-  id          String   @id @default(cuid())
-  tenantId    String
-  themeId     String
-  pageKey     String   // "home" | "product" | "collection" | "landing:<slug>"
-  state       String   // "DRAFT" | "PUBLISHED"
-  settings    Json
+  id           String  @id @default(cuid())
+  tenantId     String
+  themeId      String
+  pageKey      String // "home" | "product" | "collection" | "landing:<slug>"
+  state        String // "DRAFT" | "PUBLISHED"
+  settings     Json
   sectionsJson Json
-  version     Int
-  label       String?
-  createdBy   String?
+  version      Int
+  label        String?
+  createdBy    String?
 
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt   // a draft's last save: the editor sends it back, so two people cannot silently overwrite each other
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt // a draft's last save: the editor sends it back, so two people cannot silently overwrite each other
 
   @@unique([tenantId, themeId, pageKey, state, version])
   @@index([tenantId, themeId, pageKey, state])
 }
 
 model MessageTemplate {
-  id        String   @id @default(cuid())
+  id        String  @id @default(cuid())
   tenantId  String
-  event     String   // "ORDER_RECEIVED" | "PAYMENT_CONFIRMED" | "ORDER_SHIPPED" | "OUT_FOR_DELIVERY" | "DELIVERED" | "ORDER_CANCELLED" | "ABANDONED_RECOVERY"
-  channel   String   // "SMS" | "EMAIL" | "WHATSAPP"
-  locale    String   // "en" | "bn"
-  body      String   @db.Text   // placeholders: {customer_name} {order_number} {tracking_link} {store_name}
-  isEnabled Boolean  @default(true)
+  event     String // "ORDER_RECEIVED" | "PAYMENT_CONFIRMED" | "ORDER_SHIPPED" | "OUT_FOR_DELIVERY" | "DELIVERED" | "ORDER_CANCELLED" | "ABANDONED_RECOVERY"
+  channel   String // "SMS" | "EMAIL" | "WHATSAPP"
+  locale    String // "en" | "bn"
+  body      String  @db.Text // placeholders: {customer_name} {order_number} {tracking_link} {store_name}
+  isEnabled Boolean @default(true)
 
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   updatedAt DateTime @updatedAt
@@ -1408,18 +1426,18 @@ model MarketingCampaign {
   id              String    @id @default(cuid())
   tenantId        String
   name            String
-  channel         String    // "SMS" | "EMAIL"
-  targetSegment   String    // "ALL" | "VIP" | "REPEAT" | "DORMANT" | "DHAKA" | "OUTSIDE_DHAKA"
-  subject         String?   // For email campaigns
+  channel         String // "SMS" | "EMAIL"
+  targetSegment   String // "ALL" | "VIP" | "REPEAT" | "DORMANT" | "DHAKA" | "OUTSIDE_DHAKA"
+  subject         String? // For email campaigns
   body            String    @db.Text
   recipientsCount Int       @default(0)
   creditsUsed     Int       @default(0)
   status          String    @default("SENT") // "SENT" | "SCHEDULED" | "FAILED"
   sentAt          DateTime?
-  
-  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([tenantId, createdAt])
 }
@@ -1434,24 +1452,24 @@ model StaffInvite {
   expiresAt  DateTime
   acceptedAt DateTime?
 
-  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt  DateTime  @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
   @@index([tenantId, email])
 }
 
 // Pixel and Conversions API event log, used for browser vs server dedup and the match table (docs/11)
 model TrackingEvent {
-  id        String   @id @default(cuid())
-  tenantId  String
-  provider  String   // "META" | "GA4"
-  name      String   // "PageView" | "ViewContent" | "AddToCart" | "InitiateCheckout" | "AddPaymentInfo" | "Purchase"
-  eventId   String   // shared id used for deduplication
-  origin    String   // "BROWSER" | "SERVER"
-  status    String   @default("SENT")   // "SENT" | "FAILED" | "DEDUPED"
-  orderId   String?
-  payload   Json     @default("{}")   // what was reported: value, currency, item ids (never a name, phone or address)
-  detail    String?                  // why a send failed, in words that contain no keys
+  id         String  @id @default(cuid())
+  tenantId   String
+  provider   String // "META" | "GA4"
+  name       String // "PageView" | "ViewContent" | "AddToCart" | "InitiateCheckout" | "AddPaymentInfo" | "Purchase"
+  eventId    String // shared id used for deduplication
+  origin     String // "BROWSER" | "SERVER"
+  status     String  @default("SENT") // "SENT" | "FAILED" | "DEDUPED"
+  orderId    String?
+  payload    Json    @default("{}") // what was reported: value, currency, item ids (never a name, phone or address)
+  detail     String? // why a send failed, in words that contain no keys
   httpStatus Int?
 
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -1467,49 +1485,49 @@ model TrackingEvent {
 // ==========================================
 
 enum SettlementStatus {
-  PENDING_DELIVERY     // Parcel in transit
-  COLLECTED_UNSETTLED  // Delivered, courier holding cash
-  SETTLED              // Payout disbursed to merchant bank/bKash
-  DISCREPANCY_FLAGGED  // Deductions mismatch or missing payment
+  PENDING_DELIVERY // Parcel in transit
+  COLLECTED_UNSETTLED // Delivered, courier holding cash
+  SETTLED // Payout disbursed to merchant bank/bKash
+  DISCREPANCY_FLAGGED // Deductions mismatch or missing payment
 }
 
 model CourierSettlementInvoice {
-  id                String            @id @default(cuid())
+  id                String          @id @default(cuid())
   tenantId          String
-  courierProvider   CourierProvider   // STEADFAST | PATHAO | REDX
-  invoiceNumber     String            // Courier's payout invoice ID
-  disbursedAmount   Decimal           @db.Decimal(12, 2)
-  totalCodCollected Decimal           @db.Decimal(12, 2)
-  deliveryFeesTotal Decimal           @db.Decimal(12, 2)
-  codServiceFee     Decimal           @db.Decimal(12, 2) // 1% + VAT
-  returnCharges     Decimal           @db.Decimal(12, 2)
-  paymentMethod     String            // "BEFTN_BANK" | "BKASH_COMMERCIAL"
+  courierProvider   CourierProvider // STEADFAST | PATHAO | REDX
+  invoiceNumber     String // Courier's payout invoice ID
+  disbursedAmount   Decimal         @db.Decimal(12, 2)
+  totalCodCollected Decimal         @db.Decimal(12, 2)
+  deliveryFeesTotal Decimal         @db.Decimal(12, 2)
+  codServiceFee     Decimal         @db.Decimal(12, 2) // 1% + VAT
+  returnCharges     Decimal         @db.Decimal(12, 2)
+  paymentMethod     String // "BEFTN_BANK" | "BKASH_COMMERCIAL"
   bankAccountLast4  String?
   disbursedAt       DateTime
 
-  tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  settledOrders     CourierSettledOrder[]
-  createdAt         DateTime          @default(now())
+  tenant        Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  settledOrders CourierSettledOrder[]
+  createdAt     DateTime              @default(now())
 
   @@unique([tenantId, courierProvider, invoiceNumber])
   @@index([tenantId, disbursedAt])
 }
 
 model CourierSettledOrder {
-  id              String                   @id @default(cuid())
+  id              String  @id @default(cuid())
   tenantId        String
   settlementId    String
   orderId         String
   consignmentId   String
-  codCollected    Decimal                  @db.Decimal(12, 2)
-  deliveryCharge  Decimal                  @db.Decimal(12, 2)
-  codFeeDeduction Decimal                  @db.Decimal(12, 2)
-  netPaidToStore  Decimal                  @db.Decimal(12, 2)
-  expectedNet     Decimal                  @db.Decimal(12, 2)   // what we calculated; difference drives the "Short paid" status on the canvas
-  result          String                   @default("MATCHED")  // "MATCHED" | "SHORT_PAID" | "MISSING" | "RETURNED"
+  codCollected    Decimal @db.Decimal(12, 2)
+  deliveryCharge  Decimal @db.Decimal(12, 2)
+  codFeeDeduction Decimal @db.Decimal(12, 2)
+  netPaidToStore  Decimal @db.Decimal(12, 2)
+  expectedNet     Decimal @db.Decimal(12, 2) // what we calculated; difference drives the "Short paid" status on the canvas
+  result          String  @default("MATCHED") // "MATCHED" | "SHORT_PAID" | "MISSING" | "RETURNED"
 
-  settlement      CourierSettlementInvoice @relation(fields: [settlementId], references: [id], onDelete: Cascade)
-  order           Order                    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  settlement CourierSettlementInvoice @relation(fields: [settlementId], references: [id], onDelete: Cascade)
+  order      Order                    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, orderId])
   @@index([settlementId])
@@ -1526,48 +1544,48 @@ enum TicketStatus {
 }
 
 model SupportTicket {
-  id          String       @id @default(cuid())
-  tenantId    String
-  code        String       // "T-2051"
-  subject     String
-  status      TicketStatus @default(OPEN)
-  priority    String       @default("NORMAL")   // "LOW" | "NORMAL" | "HIGH"
-  assigneeId  String?      // PlatformUser id
-  openedBy    String       // TenantUser id
+  id         String       @id @default(cuid())
+  tenantId   String
+  code       String // "T-2051"
+  subject    String
+  status     TicketStatus @default(OPEN)
+  priority   String       @default("NORMAL") // "LOW" | "NORMAL" | "HIGH"
+  assigneeId String? // PlatformUser id
+  openedBy   String // TenantUser id
 
-  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  messages    TicketMessage[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  messages  TicketMessage[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
 
   @@unique([tenantId, code])
   @@index([status, priority])
 }
 
 model TicketMessage {
-  id         String        @id @default(cuid())
+  id         String  @id @default(cuid())
   tenantId   String
   ticketId   String
-  authorType String        // "TENANT" | "PLATFORM" | "SYSTEM"
+  authorType String // "TENANT" | "PLATFORM" | "SYSTEM"
   authorId   String?
-  body       String        @db.Text
-  isInternal Boolean       @default(false)
+  body       String  @db.Text
+  isInternal Boolean @default(false)
 
-  ticket     SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  createdAt  DateTime      @default(now())
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
 
   @@index([ticketId, createdAt])
 }
 
 model TenantNote {
-  id         String    @id @default(cuid())
+  id         String   @id @default(cuid())
   tenantId   String
-  authorId   String    // PlatformUser id
+  authorId   String // PlatformUser id
   authorName String?
-  body       String    @db.Text
-  createdAt  DateTime  @default(now())
+  body       String   @db.Text
+  createdAt  DateTime @default(now())
 
-  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, createdAt])
 }
@@ -1576,21 +1594,21 @@ model TenantNote {
 // 15. INDUSTRY MODULES (enabled through TenantModule)
 // ==========================================
 
-model MeasurementProfile {      // bespoke module
-  id         String   @id @default(cuid())
+model MeasurementProfile {
+  id         String  @id @default(cuid())
   tenantId   String
   customerId String
-  label      String   @default("Default")
-  values     Json     // { "chest": 40, "waist": 34, "length": 42, ... } in inches
+  label      String  @default("Default")
+  values     Json // { "chest": 40, "waist": 34, "length": 42, ... } in inches
   notes      String?
 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([tenantId, customerId])
 }
 
-model BabyProfile {             // kids module
+model BabyProfile {
   id         String   @id @default(cuid())
   tenantId   String
   customerId String
@@ -1598,30 +1616,30 @@ model BabyProfile {             // kids module
   birthMonth DateTime @db.Date
   gender     String?
 
-  createdAt  DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([tenantId, customerId])
 }
 
-model DropLaunch {              // drops module
-  id           String   @id @default(cuid())
-  tenantId     String
-  title        String
-  productIds   String[]
-  launchesAt   DateTime
-  perCustomerLimit Int  @default(1)
-  isLive       Boolean  @default(false)
+model DropLaunch {
+  id               String   @id @default(cuid())
+  tenantId         String
+  title            String
+  productIds       String[]
+  launchesAt       DateTime
+  perCustomerLimit Int      @default(1)
+  isLive           Boolean  @default(false)
 
-  createdAt    DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([tenantId, launchesAt])
 }
 
 model DropNotify {
-  id        String   @id @default(cuid())
-  tenantId  String
-  dropId    String
-  phone     String
+  id         String    @id @default(cuid())
+  tenantId   String
+  dropId     String
+  phone      String
   notifiedAt DateTime?
 
   createdAt DateTime @default(now())
@@ -1634,41 +1652,41 @@ model DropNotify {
 // ==========================================
 
 model PlatformUser {
-  id          String   @id @default(cuid())
-  email       String   @unique
+  id          String    @id @default(cuid())
+  email       String    @unique
   name        String
-  role        String   // "OWNER" | "SUPPORT_LEAD" | "SUPPORT" | "FINANCE"
-  isActive    Boolean  @default(true)
+  role        String // "OWNER" | "SUPPORT_LEAD" | "SUPPORT" | "FINANCE"
+  isActive    Boolean   @default(true)
   lastLoginAt DateTime?
-  authUserId  String?  @unique   // the Supabase Auth account; set the first time they sign in with the confirmed email
-  createdAt   DateTime @default(now())
+  authUserId  String?   @unique // the Supabase Auth account; set the first time they sign in with the confirmed email
+  createdAt   DateTime  @default(now())
 }
 
 model PlatformAuditLog {
-  id          String   @id @default(cuid())
-  actorId     String   // PlatformUser id, or "SYSTEM"
-  action      String   // "PAYMENT_APPROVED" | "IMPERSONATE" | "PLAN_CHANGED" | "TENANT_SUSPENDED" | "THEME_RELEASED" ...
-  tenantId    String?  // target tenant, if any
-  details     Json     @default("{}")
-  ipAddress   String?
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  actorId   String // PlatformUser id, or "SYSTEM"
+  action    String // "PAYMENT_APPROVED" | "IMPERSONATE" | "PLAN_CHANGED" | "TENANT_SUSPENDED" | "THEME_RELEASED" ...
+  tenantId  String? // target tenant, if any
+  details   Json     @default("{}")
+  ipAddress String?
+  createdAt DateTime @default(now())
 
   @@index([tenantId, createdAt])
   @@index([actorId, createdAt])
 }
 
 model Announcement {
-  id         String    @id @default(cuid())
-  title      String
-  titleBn    String?
-  body       String    @db.Text
-  bodyBn     String?   @db.Text
-  audience   Json      // { "type": "ALL" | "PLAN" | "INTEGRATION" | "TENANT", "value": "..." }
-  channels   String[]  // "BANNER" | "EMAIL" | "SMS"
-  startsAt   DateTime  @default(now())
-  endsAt     DateTime?
-  createdBy  String
-  createdAt  DateTime  @default(now())
+  id        String    @id @default(cuid())
+  title     String
+  titleBn   String?
+  body      String    @db.Text
+  bodyBn    String?   @db.Text
+  audience  Json // { "type": "ALL" | "PLAN" | "INTEGRATION" | "TENANT", "value": "..." }
+  channels  String[] // "BANNER" | "EMAIL" | "SMS"
+  startsAt  DateTime  @default(now())
+  endsAt    DateTime?
+  createdBy String
+  createdAt DateTime  @default(now())
 }
 
 model PlatformConfig {
@@ -1683,10 +1701,10 @@ model PlatformConfig {
 model SubscriptionPromo {
   id              String    @id @default(cuid())
   code            String    @unique
-  discountType    String    // "PERCENTAGE" | "FIXED_BDT"
+  discountType    String // "PERCENTAGE" | "FIXED_BDT"
   discountValue   Decimal   @db.Decimal(10, 2)
   applicableTiers String[]  @default(["ALL"])
-  billingInterval String    @default("ANY")   // "ANY" | "MONTHLY" | "YEARLY"
+  billingInterval String    @default("ANY") // "ANY" | "MONTHLY" | "YEARLY"
   maxUses         Int?
   usedCount       Int       @default(0)
   validFrom       DateTime  @default(now())
@@ -1699,8 +1717,6 @@ model SubscriptionPromo {
   @@index([code, isActive])
 }
 
-
-
 enum InquiryStatus {
   NEW
   CONTACTED
@@ -1711,9 +1727,9 @@ enum InquiryStatus {
 model PlatformInquiry {
   id        String        @id @default(cuid())
   name      String
-  phone     String        // 01XXXXXXXXX
+  phone     String // 01XXXXXXXXX
   email     String
-  topic     String        // "setup" | "courier" | "bkash" | "shopify" | "billing" | "enterprise"
+  topic     String // "setup" | "courier" | "bkash" | "shopify" | "billing" | "enterprise"
   message   String        @db.Text
   status    InquiryStatus @default(NEW)
   notes     String?       @db.Text
@@ -1726,20 +1742,19 @@ model PlatformInquiry {
   @@index([topic])
 }
 
-
 model PlatformDailyMetrics {
-  id               String   @id @default(cuid())
-  date             DateTime @unique @db.Date
+  id   String   @id @default(cuid())
+  date DateTime @unique @db.Date
 
-  totalTenants     Int
-  activePaying     Int
-  activeTrials     Int
-  churnedCount     Int
-  mrrBDT           Decimal  @db.Decimal(12, 2)
-  platformGmvBDT   Decimal  @db.Decimal(12, 2)
+  totalTenants       Int
+  activePaying       Int
+  activeTrials       Int
+  churnedCount       Int
+  mrrBDT             Decimal @db.Decimal(12, 2)
+  platformGmvBDT     Decimal @db.Decimal(12, 2)
   totalParcelsBooked Int
 
-  createdAt        DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 // Cross-store delivery trust, keyed by a salted hash of the phone number (docs/12). No names or addresses are stored.
@@ -1753,7 +1768,6 @@ model PhoneTrustStat {
   updatedAt   DateTime @updatedAt
 }
 
-
 // ==========================================
 // STOREFRONT: STORE DETAILS, MANUAL PAYMENT NUMBERS AND CUSTOMER SIGN-IN
 // ==========================================
@@ -1761,102 +1775,107 @@ model PhoneTrustStat {
 // One row per store. What the storefront shows about the business and where customers send manual mobile-money payments
 // (AdmStoreDetails and AdmPayments on the canvas). Not secrets: these numbers are shown to customers at checkout.
 model StoreSettings {
-  id             String   @id @default(cuid())
-  tenantId       String   @unique
-  storeName      String
-  tagline        String?
-  contactPhone   String?  // shown in the footer and on the offline page
-  whatsappNumber String?
-  facebookUrl    String?
-  instagramUrl   String?
-  addressLine    String?
-  logoUrl        String?
-  announcement   String?  // the thin bar above the header
-  announcementBn String?
-  flashSaleActive Boolean   @default(false)
-  flashSaleEndsAt DateTime?
-  flashSaleCoupon String?
-  bkashNumber    String?  // customers send money here when they choose bKash
-  bkashKind      String   @default("PERSONAL")   // "PERSONAL" | "AGENT" | "MERCHANT"
-  nagadNumber    String?
-  nagadKind      String   @default("PERSONAL")
-  paymentNote    String?  // extra line under the payment steps
-  offlineMessage String?
-  storeNameBn    String?
-  description    String?  // search engines and social previews
-  email          String?  // for customers
-  pickupAddress  String?  // used for couriers and printed on invoices
-  ordersPaused   Boolean  @default(false)   // the owner closed the store for now: no new orders, a notice instead
+  id                         String    @id @default(cuid())
+  tenantId                   String    @unique
+  storeName                  String
+  tagline                    String?
+  contactPhone               String? // shown in the footer and on the offline page
+  whatsappNumber             String?
+  facebookUrl                String?
+  instagramUrl               String?
+  addressLine                String?
+  logoUrl                    String?
+  announcement               String? // the thin bar above the header
+  announcementBn             String?
+  flashSaleActive            Boolean   @default(false)
+  flashSaleEndsAt            DateTime?
+  flashSaleCoupon            String?
+  bkashNumber                String? // customers send money here when they choose bKash
+  bkashKind                  String    @default("PERSONAL") // "PERSONAL" | "AGENT" | "MERCHANT"
+  nagadNumber                String?
+  nagadKind                  String    @default("PERSONAL")
+  paymentNote                String? // extra line under the payment steps
+  offlineMessage             String?
+  storeNameBn                String?
+  description                String? // search engines and social previews
+  email                      String? // for customers
+  pickupAddress              String? // used for couriers and printed on invoices
+  ordersPaused               Boolean   @default(false) // the owner closed the store for now: no new orders, a notice instead
   // Payment rules (AdmPayments)
-  codEnabled     Boolean  @default(true)
-  codFee         Decimal  @default(0.00) @db.Decimal(12, 2)   // added to the total when the customer pays cash on delivery
-  codMaxAmount   Decimal? @db.Decimal(12, 2)                  // cash on delivery is not offered above this order total
-  bkashEnabled   Boolean  @default(true)
-  nagadEnabled   Boolean  @default(true)
-  bkashInstruction String?
-  nagadInstruction String?
-  invoiceFooter  String?
-  invoiceOptions Json     @default("{}")   // { showLogo, showSku, showQr, showPricesOnSlip }
+  codEnabled                 Boolean   @default(true)
+  codFee                     Decimal   @default(0.00) @db.Decimal(12, 2) // added to the total when the customer pays cash on delivery
+  codMaxAmount               Decimal?  @db.Decimal(12, 2) // cash on delivery is not offered above this order total
+  bkashEnabled               Boolean   @default(true)
+  nagadEnabled               Boolean   @default(true)
+  bkashInstruction           String?
+  nagadInstruction           String?
+  invoiceFooter              String?
+  invoiceOptions             Json      @default("{}") // { showLogo, showSku, showQr, showPricesOnSlip }
   // What the courier charges the owner (not the customer). Used to check statements and for the profit screen when the courier has not told us.
-  courierFeeInsideDhaka  Decimal @default(70.00)  @db.Decimal(12, 2)
-  courierFeeOutsideDhaka Decimal @default(130.00) @db.Decimal(12, 2)
-  courierCodFeePercent   Decimal @default(1.00)   @db.Decimal(5, 2)
-  defaultCourier         String?   // preselected on the order screen
-  reviewsAutoPublish     Boolean @default(false)   // off: a new review waits for the owner (AdmReviews)
-  abandonedSmsEnabled    Boolean @default(true)    // send the 30-minute recovery SMS
-  metaPixelId            String?   // the public Meta (Facebook) Pixel id; the server-side token lives in the vault as META_CAPI
-  googleAnalyticsId      String?   // GA4 Measurement ID (e.g. G-XXXXXXXXXX)
-  googleTagManagerId     String?   // GTM Container ID (e.g. GTM-XXXXXXX)
-  tiktokPixelId          String?   // TikTok Pixel ID (e.g. CXXXXXXXXXXXXX)
-  ga4ApiSecret           String?   // GA4 Measurement Protocol API Secret for server-side events
-  metaDomainVerification String?   // Meta domain verification code for <meta name="facebook-domain-verification">
+  courierFeeInsideDhaka      Decimal   @default(70.00) @db.Decimal(12, 2)
+  courierFeeOutsideDhaka     Decimal   @default(130.00) @db.Decimal(12, 2)
+  courierCodFeePercent       Decimal   @default(1.00) @db.Decimal(5, 2)
+  defaultCourier             String? // preselected on the order screen
+  reviewsAutoPublish         Boolean   @default(false) // off: a new review waits for the owner (AdmReviews)
+  abandonedSmsEnabled        Boolean   @default(true) // send the 30-minute recovery SMS
+  metaPixelId                String? // the public Meta (Facebook) Pixel id; the server-side token lives in the vault as META_CAPI
+  googleAnalyticsId          String? // GA4 Measurement ID (e.g. G-XXXXXXXXXX)
+  googleTagManagerId         String? // GTM Container ID (e.g. GTM-XXXXXXX)
+  tiktokPixelId              String? // TikTok Pixel ID (e.g. CXXXXXXXXXXXXX)
+  ga4ApiSecret               String? // GA4 Measurement Protocol API Secret for server-side events
+  metaDomainVerification     String? // Meta domain verification code for <meta name="facebook-domain-verification">
   // AI Suite & Storefront Chatbot
-  customGeminiApiKey     String?   // Merchant BYO Gemini API Key
-  aiChatbotEnabled       Boolean   @default(true)
-  aiChatbotName          String    @default("শপ অ্যাসিস্ট্যান্ট")
-  aiChatbotWelcome       String?
-  aiChatbotEscalatePhone String?
+  customGeminiApiKey         String? // Merchant BYO Gemini API Key
+  aiChatbotEnabled           Boolean   @default(true)
+  aiChatbotName              String    @default("শপ অ্যাসিস্ট্যান্ট")
+  aiChatbotWelcome           String?
+  aiChatbotEscalatePhone     String?
   // Loyalty points, VIP tiers and referrals (docs/26)
-  loyaltyEnabled         Boolean @default(false)
-  loyaltySpendPerPoint   Int     @default(100)   // every ৳ this much of a delivered order earns 1 point (before the tier multiplier)
-  loyaltyPointsPerBlock  Int     @default(10)    // redeeming works in blocks: this many points ...
-  loyaltyBdtPerBlock     Int     @default(10)    // ... are worth this many taka
-  loyaltyMaxCartPercent  Int     @default(30)    // points can pay at most this share of the cart
-  referralEnabled        Boolean @default(false)
-  refereeDiscountBdt     Int     @default(50)    // a friend's first order
-  refereeMinCartBdt      Int     @default(500)
-  referrerRewardPoints   Int     @default(100)   // credited when the friend's order is delivered
-  loyaltyExpiryMonths    Int     @default(0)     // points expire after this many months with no activity; 0 = never
-  vipSilverMin           Int     @default(5000)  // delivered spend in 12 months
-  vipGoldMin             Int     @default(15000)
-  vipPlatinumMin         Int     @default(35000)
-  vipGoldDiscount        Int     @default(5)     // percent off every order
-  vipPlatinumDiscount    Int     @default(10)
-  birthdayVoucherBdt     Int     @default(100)   // a voucher on a Silver-or-higher member's birthday; 0 = off
+  loyaltyEnabled             Boolean   @default(false)
+  loyaltySpendPerPoint       Int       @default(100) // every ৳ this much of a delivered order earns 1 point (before the tier multiplier)
+  loyaltyPointsPerBlock      Int       @default(10) // redeeming works in blocks: this many points ...
+  loyaltyBdtPerBlock         Int       @default(10) // ... are worth this many taka
+  loyaltyMaxCartPercent      Int       @default(30) // points can pay at most this share of the cart
+  referralEnabled            Boolean   @default(false)
+  refereeDiscountBdt         Int       @default(50) // a friend's first order
+  refereeMinCartBdt          Int       @default(500)
+  referrerRewardPoints       Int       @default(100) // credited when the friend's order is delivered
+  loyaltyExpiryMonths        Int       @default(0) // points expire after this many months with no activity; 0 = never
+  vipSilverMin               Int       @default(5000) // delivered spend in 12 months
+  vipGoldMin                 Int       @default(15000)
+  vipPlatinumMin             Int       @default(35000)
+  vipGoldDiscount            Int       @default(5) // percent off every order
+  vipPlatinumDiscount        Int       @default(10)
+  birthdayVoucherBdt         Int       @default(100) // a voucher on a Silver-or-higher member's birthday; 0 = off
+  // Wholesale & B2B Module
+  wholesaleEnabled           Boolean   @default(false)
+  wholesaleMinOrderAmount    Decimal   @default(5000.00) @db.Decimal(12, 2)
+  wholesaleDefaultMoq        Int       @default(6)
+  wholesaleAllowRegistration Boolean   @default(true)
+  wholesaleBankDetails       Json?
 
-  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // One-time sign-in codes for customers (StrAccount). Only a keyed hash of the code is stored.
 model CustomerOtp {
-  id          String    @id @default(cuid())
-  tenantId    String
-  phone       String    // 01XXXXXXXXX
-  codeHash    String
-  expiresAt   DateTime
-  attempts    Int       @default(0)
-  consumedAt  DateTime?
-  ipAddress   String?
+  id         String    @id @default(cuid())
+  tenantId   String
+  phone      String // 01XXXXXXXXX
+  codeHash   String
+  expiresAt  DateTime
+  attempts   Int       @default(0)
+  consumedAt DateTime?
+  ipAddress  String?
 
-  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt   DateTime  @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
   @@index([tenantId, phone, createdAt])
   @@index([expiresAt])
 }
-
 
 // ==========================================
 // ADMIN: ORDER TIMELINE AND STOCK HISTORY
@@ -1864,14 +1883,14 @@ model CustomerOtp {
 
 // What happened to an order, in plain words, for the Timeline on the order page (AdmOrderDetail). Append only.
 model OrderEvent {
-  id        String   @id @default(cuid())
+  id        String  @id @default(cuid())
   tenantId  String
   orderId   String
-  type      String   // "PLACED" | "PAYMENT_SUBMITTED" | "PAYMENT_VERIFIED" | "PAYMENT_REJECTED" | "STATUS" | "NOTE" | "PRINTED" | "ADDRESS_CHANGED"
+  type      String // "PLACED" | "PAYMENT_SUBMITTED" | "PAYMENT_VERIFIED" | "PAYMENT_REJECTED" | "STATUS" | "NOTE" | "PRINTED" | "ADDRESS_CHANGED"
   message   String
   actorId   String?
-  actorName String?  // "Customer", "System" or a staff member's name
-  data      Json     @default("{}")
+  actorName String? // "Customer", "System" or a staff member's name
+  data      Json    @default("{}")
 
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
@@ -1882,25 +1901,24 @@ model OrderEvent {
 
 // Every manual change to stock, with who and why. Orders and cancellations change stock too but are already on the order.
 model StockAdjustment {
-  id            String   @id @default(cuid())
+  id            String  @id @default(cuid())
   tenantId      String
   variantId     String
   productTitle  String
   variantTitle  String
   delta         Int
   quantityAfter Int
-  reason        String   // "RECOUNT" | "RECEIVED" | "DAMAGED" | "RETURNED" | "CORRECTION" | "OTHER"
+  reason        String // "RECOUNT" | "RECEIVED" | "DAMAGED" | "RETURNED" | "CORRECTION" | "OTHER"
   note          String?
   actorId       String
   actorName     String
 
-  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt     DateTime @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
   @@index([tenantId, variantId, createdAt])
   @@index([tenantId, createdAt])
 }
-
 
 // ==========================================
 // PHASE 4: COURIER WEBHOOKS AND CROSS-STORE TRUST
@@ -1908,20 +1926,20 @@ model StockAdjustment {
 
 // Every courier callback and sync result we acted on (or ignored), so a repeated delivery changes nothing (docs/10 section 1).
 model CourierEvent {
-  id            String   @id @default(cuid())
+  id            String  @id @default(cuid())
   tenantId      String
   provider      String
-  dedupeKey     String   // hash of provider, consignment, status and the courier's timestamp
+  dedupeKey     String // hash of provider, consignment, status and the courier's timestamp
   orderId       String?
   consignmentId String?
-  status        String?  // normalised: BOOKED | PICKED_UP | IN_TRANSIT | HOLD | DELIVERED | RETURNED | REFUSED
-  source        String   @default("WEBHOOK")   // "WEBHOOK" | "SYNC"
-  result        String   // "APPLIED" | "IGNORED" | "UNKNOWN_ORDER" | "ERROR"
-  payload       Json     @default("{}")
+  status        String? // normalised: BOOKED | PICKED_UP | IN_TRANSIT | HOLD | DELIVERED | RETURNED | REFUSED
+  source        String  @default("WEBHOOK") // "WEBHOOK" | "SYNC"
+  result        String // "APPLIED" | "IGNORED" | "UNKNOWN_ORDER" | "ERROR"
+  payload       Json    @default("{}")
 
-  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  order         Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
-  createdAt     DateTime @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order     Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
 
   @@unique([tenantId, provider, dedupeKey])
   @@index([tenantId, orderId])
@@ -1932,9 +1950,9 @@ model CourierEvent {
 // No names, addresses or store ids. Platform level: the app role cannot read or write it except through the SECURITY DEFINER functions.
 model PhoneTrustEvent {
   phoneHash  String
-  orderKey   String   // hash of tenant id and order id: one outcome per order, and it can be corrected
-  storeKey   String   // hash of tenant id: lets us count how many stores saw this number
-  kind       String   // "DELIVERED" | "RETURNED" | "REFUSED"
+  orderKey   String // hash of tenant id and order id: one outcome per order, and it can be corrected
+  storeKey   String // hash of tenant id: lets us count how many stores saw this number
+  kind       String // "DELIVERED" | "RETURNED" | "REFUSED"
   occurredAt DateTime
 
   @@id([phoneHash, orderKey])
@@ -1943,15 +1961,15 @@ model PhoneTrustEvent {
 
 // An email or text the platform sent to a store (docs/44). The unique key is what stops a reminder going out twice.
 model PlatformMessage {
-  id         String   @id @default(cuid())
-  tenantId   String
-  kind       String   // WELCOME, TRIAL_ENDING, PAYMENT_APPROVED ...
-  channel    String   // EMAIL | SMS
-  dedupeKey  String   // the moment it is about, e.g. the payment's id or the date a trial ends
-  status     String   // SENT | FAILED | SKIPPED
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  tenantId  String
+  kind      String // WELCOME, TRIAL_ENDING, PAYMENT_APPROVED ...
+  channel   String // EMAIL | SMS
+  dedupeKey String // the moment it is about, e.g. the payment's id or the date a trial ends
+  status    String // SENT | FAILED | SKIPPED
+  createdAt DateTime @default(now())
 
-  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, kind, channel, dedupeKey])
   @@index([tenantId, createdAt])
@@ -1959,21 +1977,21 @@ model PlatformMessage {
 
 /// A message a shopper sent through the store contact form. Answered by SMS from the admin inbox.
 model ContactMessage {
-  id          String    @id @default(cuid())
-  tenantId    String
-  name        String
-  phone       String
-  email       String?
-  message     String    @db.Text
+  id         String    @id @default(cuid())
+  tenantId   String
+  name       String
+  phone      String
+  email      String?
+  message    String    @db.Text
   /// NEW until someone opens it, then READ, then REPLIED when an answer was sent, or CLOSED when it needs none.
-  status      String    @default("NEW")
-  replyText   String?   @db.Text
-  repliedBy   String?
-  repliedAt   DateTime?
-  clientHash  String?
-  createdAt   DateTime  @default(now())
+  status     String    @default("NEW")
+  replyText  String?   @db.Text
+  repliedBy  String?
+  repliedAt  DateTime?
+  clientHash String?
+  createdAt  DateTime  @default(now())
 
-  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, status, createdAt])
   @@index([tenantId, phone, createdAt])
@@ -1991,13 +2009,12 @@ model StockAlert {
   /// Why it was not sent when the item came back, for example the customer opted out or the plan has no SMS left.
   skipReason String?
 
-  tenant     Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  variant    ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  tenant  Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
 
   @@unique([variantId, phone])
   @@index([tenantId, notifiedAt])
 }
-
 
 // ==========================================
 // 19. POINT OF SALE (POS) & CASH REGISTERS
@@ -2009,66 +2026,66 @@ enum CashMovementType {
 }
 
 model PosRegister {
-  id                   String        @id @default(cuid())
-  tenantId             String
-  name                 String
-  code                 String
-  isActive             Boolean       @default(true)
-  receiptPrinterWidth  Int           @default(80)
-  autoPrintReceipt     Boolean       @default(true)
+  id                  String  @id @default(cuid())
+  tenantId            String
+  name                String
+  code                String
+  isActive            Boolean @default(true)
+  receiptPrinterWidth Int     @default(80)
+  autoPrintReceipt    Boolean @default(true)
 
-  tenant               Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  sessions             PosSession[]
+  tenant   Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sessions PosSession[]
 
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, code])
   @@index([tenantId])
 }
 
 model PosSession {
-  id              String            @id @default(cuid())
-  tenantId        String
-  registerId      String
-  openedByUserId  String
-  closedByUserId  String?
+  id             String  @id @default(cuid())
+  tenantId       String
+  registerId     String
+  openedByUserId String
+  closedByUserId String?
 
-  openedAt        DateTime          @default(now())
-  closedAt        DateTime?
+  openedAt DateTime  @default(now())
+  closedAt DateTime?
 
-  openingFloat    Decimal           @db.Decimal(12, 2)
-  closingCounted  Decimal?          @db.Decimal(12, 2)
-  expectedCash    Decimal?          @db.Decimal(12, 2)
-  cashDifference  Decimal?          @db.Decimal(12, 2)
+  openingFloat   Decimal  @db.Decimal(12, 2)
+  closingCounted Decimal? @db.Decimal(12, 2)
+  expectedCash   Decimal? @db.Decimal(12, 2)
+  cashDifference Decimal? @db.Decimal(12, 2)
 
-  note            String?
-  status          String            @default("OPEN")
+  note   String?
+  status String  @default("OPEN")
 
-  tenant          Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  register        PosRegister       @relation(fields: [registerId], references: [id], onDelete: Cascade)
-  movements       PosCashMovement[]
+  tenant    Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  register  PosRegister       @relation(fields: [registerId], references: [id], onDelete: Cascade)
+  movements PosCashMovement[]
 
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([tenantId, registerId, status])
   @@index([tenantId, openedAt])
 }
 
 model PosCashMovement {
-  id          String            @id @default(cuid())
-  tenantId    String
-  sessionId   String
-  userId      String
-  type        CashMovementType
-  amount      Decimal           @db.Decimal(12, 2)
-  reason      String
+  id        String           @id @default(cuid())
+  tenantId  String
+  sessionId String
+  userId    String
+  type      CashMovementType
+  amount    Decimal          @db.Decimal(12, 2)
+  reason    String
 
-  tenant      Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  session     PosSession        @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  tenant  Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  session PosSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime          @default(now())
+  createdAt DateTime @default(now())
 
   @@index([tenantId, sessionId])
 }
@@ -2076,13 +2093,13 @@ model PosCashMovement {
 model TenantQuotaAdjustment {
   id        String   @id @default(cuid())
   tenantId  String
-  type      String   // "SMS_CREDITS" | "PRODUCT_LIMIT" | "STAFF_LIMIT"
+  type      String // "SMS_CREDITS" | "PRODUCT_LIMIT" | "STAFF_LIMIT"
   amount    Int
   reason    String
-  actorId   String   // PlatformUser id
+  actorId   String // PlatformUser id
   createdAt DateTime @default(now())
 
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, createdAt])
 }
@@ -2104,46 +2121,46 @@ enum BundleStatus {
 }
 
 model ProductBundle {
-  id              String             @id @default(cuid())
-  tenantId        String
-  title           String
-  titleBn         String?
-  slug            String
-  description     String?            @db.Text
-  descriptionBn   String?            @db.Text
-  bannerImage     String?
-  discountType    BundleDiscountType @default(FIXED_PRICE)
-  discountValue   Decimal            @db.Decimal(12, 2)
-  allowCoupon     Boolean            @default(false)
-  status          BundleStatus       @default(ACTIVE)
-  sortOrder       Int                @default(0)
+  id            String             @id @default(cuid())
+  tenantId      String
+  title         String
+  titleBn       String?
+  slug          String
+  description   String?            @db.Text
+  descriptionBn String?            @db.Text
+  bannerImage   String?
+  discountType  BundleDiscountType @default(FIXED_PRICE)
+  discountValue Decimal            @db.Decimal(12, 2)
+  allowCoupon   Boolean            @default(false)
+  status        BundleStatus       @default(ACTIVE)
+  sortOrder     Int                @default(0)
 
-  tenant          Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  items           ProductBundleItem[]
-  orderItems      OrderItem[]
+  tenant     Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items      ProductBundleItem[]
+  orderItems OrderItem[]
 
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, slug])
   @@index([tenantId, status])
 }
 
 model ProductBundleItem {
-  id         String          @id @default(cuid())
-  tenantId   String
-  bundleId   String
-  productId  String
-  variantId  String?
-  quantity   Int             @default(1)
-  sortOrder  Int             @default(0)
+  id        String  @id @default(cuid())
+  tenantId  String
+  bundleId  String
+  productId String
+  variantId String?
+  quantity  Int     @default(1)
+  sortOrder Int     @default(0)
 
-  tenant     Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  bundle     ProductBundle   @relation(fields: [bundleId], references: [id], onDelete: Cascade)
-  product    Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant    ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  tenant  Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  bundle  ProductBundle   @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  product Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
 
-  createdAt  DateTime        @default(now())
+  createdAt DateTime @default(now())
 
   @@index([tenantId, bundleId])
   @@index([productId])
@@ -2181,12 +2198,12 @@ model OrderBump {
   acceptedCount    Int             @default(0)
   revenueGenerated Decimal         @default(0) @db.Decimal(12, 2)
 
-  tenant           Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  product          Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant          ProductVariant  @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  tenant  Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  product Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
 
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([tenantId, status])
   @@index([tenantId, triggerType])
@@ -2242,67 +2259,67 @@ enum WhatsAppConversationStatus {
 }
 
 model WhatsAppConfig {
-  id                        String                @id @default(cuid())
-  tenantId                  String                @unique
-  providerMode              WhatsAppProviderMode  @default(QR_SESSION)
-  status                    WhatsAppSessionStatus @default(DISCONNECTED)
-  phoneNumber               String?
-  sessionData               String?               @db.Text
-  qrCodeData                String?               @db.Text
-  gatewayUrl                String?
-  gatewayApiKey             String?
-  webhookSecret             String?
-  autoConfirmCod            Boolean               @default(true)
-  shippingUpdatesEnabled    Boolean               @default(true)
-  abandonedRecoveryEnabled  Boolean               @default(true)
-  botEnabled                Boolean               @default(true)
-  smsFallbackEnabled        Boolean               @default(true)
-  followUpReminderHours     Int                   @default(12)
-  lastConnectedAt           DateTime?
-  createdAt                 DateTime              @default(now())
-  updatedAt                 DateTime              @updatedAt
+  id                       String                @id @default(cuid())
+  tenantId                 String                @unique
+  providerMode             WhatsAppProviderMode  @default(QR_SESSION)
+  status                   WhatsAppSessionStatus @default(DISCONNECTED)
+  phoneNumber              String?
+  sessionData              String?               @db.Text
+  qrCodeData               String?               @db.Text
+  gatewayUrl               String?
+  gatewayApiKey            String?
+  webhookSecret            String?
+  autoConfirmCod           Boolean               @default(true)
+  shippingUpdatesEnabled   Boolean               @default(true)
+  abandonedRecoveryEnabled Boolean               @default(true)
+  botEnabled               Boolean               @default(true)
+  smsFallbackEnabled       Boolean               @default(true)
+  followUpReminderHours    Int                   @default(12)
+  lastConnectedAt          DateTime?
+  createdAt                DateTime              @default(now())
+  updatedAt                DateTime              @updatedAt
 
-  tenant                    Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
 }
 
 model WhatsAppTemplate {
-  id              String            @id @default(cuid())
-  tenantId        String
-  event           WhatsAppEventType
-  name            String
-  bodyEn          String            @db.Text
-  bodyBn          String?           @db.Text
-  isActive        Boolean           @default(true)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  id        String            @id @default(cuid())
+  tenantId  String
+  event     WhatsAppEventType
+  name      String
+  bodyEn    String            @db.Text
+  bodyBn    String?           @db.Text
+  isActive  Boolean           @default(true)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
 
-  tenant          Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, event])
   @@index([tenantId])
 }
 
 model WhatsAppMessageLog {
-  id              String                    @id @default(cuid())
-  tenantId        String
-  orderId         String?
-  phone           String
-  direction       WhatsAppMessageDirection  @default(OUTBOUND)
-  event           WhatsAppEventType?
-  status          WhatsAppMessageStatus     @default(QUEUED)
-  messageBody     String                    @db.Text
-  externalMsgId   String?
-  errorDetails    String?                   @db.Text
-  metadata        Json?
-  sentAt          DateTime?
-  deliveredAt     DateTime?
-  readAt          DateTime?
-  createdAt       DateTime                  @default(now())
+  id            String                   @id @default(cuid())
+  tenantId      String
+  orderId       String?
+  phone         String
+  direction     WhatsAppMessageDirection @default(OUTBOUND)
+  event         WhatsAppEventType?
+  status        WhatsAppMessageStatus    @default(QUEUED)
+  messageBody   String                   @db.Text
+  externalMsgId String?
+  errorDetails  String?                  @db.Text
+  metadata      Json?
+  sentAt        DateTime?
+  deliveredAt   DateTime?
+  readAt        DateTime?
+  createdAt     DateTime                 @default(now())
 
-  tenant          Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  order           Order?                    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order  Order? @relation(fields: [orderId], references: [id], onDelete: SetNull)
 
   @@index([tenantId, phone])
   @@index([tenantId, orderId])
@@ -2310,43 +2327,116 @@ model WhatsAppMessageLog {
 }
 
 model WhatsAppConversation {
-  id              String                      @id @default(cuid())
+  id              String                     @id @default(cuid())
   tenantId        String
   customerId      String?
   customerPhone   String
   customerName    String?
-  status          WhatsAppConversationStatus  @default(BOT_HANDLED)
-  unreadCount     Int                         @default(0)
-  lastMessageAt   DateTime                    @default(now())
-  lastMessageText String?                     @db.Text
+  status          WhatsAppConversationStatus @default(BOT_HANDLED)
+  unreadCount     Int                        @default(0)
+  lastMessageAt   DateTime                   @default(now())
+  lastMessageText String?                    @db.Text
   assignedUserId  String?
-  createdAt       DateTime                    @default(now())
-  updatedAt       DateTime                    @updatedAt
+  createdAt       DateTime                   @default(now())
+  updatedAt       DateTime                   @updatedAt
 
-  tenant          Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  customer        Customer?                   @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  messages        WhatsAppChatMessage[]
+  tenant   Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer Customer?             @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  messages WhatsAppChatMessage[]
 
   @@unique([tenantId, customerPhone])
   @@index([tenantId, status, lastMessageAt])
 }
 
 model WhatsAppChatMessage {
-  id              String                    @id @default(cuid())
-  conversationId  String
-  tenantId        String
-  sender          String                    // "CUSTOMER" | "BOT" | "STAFF"
-  staffUserId     String?
-  body            String                    @db.Text
-  mediaUrl        String?
-  externalMsgId   String?
-  createdAt       DateTime                  @default(now())
+  id             String   @id @default(cuid())
+  conversationId String
+  tenantId       String
+  sender         String // "CUSTOMER" | "BOT" | "STAFF"
+  staffUserId    String?
+  body           String   @db.Text
+  mediaUrl       String?
+  externalMsgId  String?
+  createdAt      DateTime @default(now())
 
-  conversation    WhatsAppConversation      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  tenant          Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversation WhatsAppConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  tenant       Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([conversationId, createdAt])
   @@index([tenantId])
 }
 
+// ==========================================
+// 16. WHOLESALE & B2B PRICING MODULE
+// ==========================================
 
+enum WholesaleApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model WholesaleTier {
+  id                    String   @id @default(cuid())
+  tenantId              String
+  name                  String // e.g. "Standard Reseller", "VIP Distributor"
+  discountPercent       Decimal  @default(15.00) @db.Decimal(5, 2)
+  minOrderAmount        Decimal  @default(5000.00) @db.Decimal(12, 2)
+  allowCod              Boolean  @default(false)
+  partialDepositPercent Decimal? @db.Decimal(5, 2) // e.g. 20.00%
+
+  customers     WholesaleCustomer[]
+  productPrices WholesalePrice[]
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+model WholesaleCustomer {
+  id              String                     @id @default(cuid())
+  tenantId        String
+  customerId      String                     @unique
+  tierId          String?
+  companyName     String // Store or Boutique name
+  tradeLicense    String?
+  businessType    String? // "Physical Shop" | "Facebook Page" | "Online Store"
+  taxId           String? // BIN / TIN
+  whatsappNumber  String?
+  address         String?
+  district        String?
+  status          WholesaleApplicationStatus @default(PENDING)
+  approvedAt      DateTime?
+  rejectionReason String?
+  creditLimit     Decimal                    @default(0.00) @db.Decimal(12, 2)
+
+  customer  Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  tier      WholesaleTier? @relation(fields: [tierId], references: [id], onDelete: SetNull)
+  tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([tenantId, status])
+  @@index([tenantId, tierId])
+}
+
+model WholesalePrice {
+  id          String  @id @default(cuid())
+  tenantId    String
+  variantId   String
+  tierId      String? // null = applies to all wholesale customers or public volume breaks
+  minQuantity Int     @default(1)
+  price       Decimal @db.Decimal(12, 2)
+
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  tier      WholesaleTier? @relation(fields: [tierId], references: [id], onDelete: Cascade)
+  tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([variantId, tierId, minQuantity])
+  @@index([tenantId, variantId])
+}

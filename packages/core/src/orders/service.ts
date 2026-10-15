@@ -264,7 +264,13 @@ async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof Cr
   // already received (quick order desk) may leave it out.
   let mfs: { sender: string; trx: string } | null = null;
   const staffPaid = Boolean(input.alreadyPaid) && !customerFacing;
-  if (input.paymentMethod !== "COD" && !(staffPaid && !input.mfs)) {
+  if (input.paymentMethod === "BANK_TRANSFER") {
+    if (input.mfs?.trxId) {
+      const trx = input.mfs.trxId.trim().toUpperCase();
+      const sender = input.mfs.senderNumber?.trim() || "BANK_DEPOSIT";
+      mfs = { sender, trx };
+    }
+  } else if (input.paymentMethod !== "COD" && input.paymentMethod !== "GATEWAY_UDDOKTAPAY" && !(staffPaid && !input.mfs)) {
     if (!input.mfs) throw new ValidationError("Enter the sender number and transaction ID", { field: "mfs" });
     const trx = input.mfs.trxId.trim().toUpperCase();
     if (!TRX_ID.test(trx)) throw new ValidationError("That transaction ID does not look right", { field: "trxId" });

@@ -8,7 +8,7 @@ import { assertCouponUsable, deliveryFor, discountFor, money, pickZone } from ".
 export const QuoteInput = z.object({
   items: z.array(z.object({
     variantId: z.string().min(8),
-    quantity: z.number().int().min(1).max(50),
+    quantity: z.number().int().min(1).max(1000),
     bundleId: z.string().optional(),
     isBump: z.boolean().optional(),
   })).max(50),
@@ -18,7 +18,7 @@ export const QuoteInput = z.object({
   /** Only used to check "one per customer" coupon limits. */
   phone: z.string().max(20).optional(),
   /** Cash on delivery can carry a fee, so the total depends on it. */
-  paymentMethod: z.enum(["COD", "MANUAL_BKASH", "MANUAL_NAGAD", "MANUAL_ROCKET", "GATEWAY_UDDOKTAPAY"]).optional(),
+  paymentMethod: z.enum(["COD", "MANUAL_BKASH", "MANUAL_NAGAD", "MANUAL_ROCKET", "GATEWAY_UDDOKTAPAY", "BANK_TRANSFER"]).optional(),
   /** Loyalty points the signed-in customer wants to spend. */
   redeemPoints: z.number().int().min(0).max(1_000_000).optional(),
   referralCode: z.string().trim().max(40).optional(),
@@ -38,6 +38,7 @@ export interface QuoteLine {
   variantTitle: string;
   imageUrl: string | null;
   unitPrice: number;
+  regularPrice?: number;
   quantity: number;
   lineTotal: number;
   /** Stock right now. The cart shows "only 3 left" and blocks quantities above it. */
@@ -45,12 +46,15 @@ export interface QuoteLine {
   bundleId?: string | null;
   bundleTitle?: string | null;
   isBump?: boolean;
+  isWholesale?: boolean;
+  wholesaleSavings?: number;
 }
 
 export interface QuoteProblem {
   variantId: string;
-  kind: "unavailable" | "insufficient_stock";
+  kind: "unavailable" | "insufficient_stock" | "moq_not_met";
   available: number;
+  moq?: number;
 }
 
 export interface Quote {
@@ -58,6 +62,15 @@ export interface Quote {
   subtotal: number;
   bundleSavings?: number;
   bumpSavings?: number;
+  wholesaleSavings?: number;
+  wholesale?: {
+    isWholesaleCustomer: boolean;
+    tierName?: string;
+    totalSavings: number;
+    minOrderAmount: number;
+    isMinOrderMet: boolean;
+    deficit: number;
+  };
   zone: { name: string; rate: number; freeOverAmount: number | null; etaMinDays: number; etaMaxDays: number } | null;
   /** null until a district is known */
   deliveryCharge: number | null;
@@ -74,7 +87,13 @@ export interface Quote {
   total: number | null;
   problems: QuoteProblem[];
   /** Which ways to pay the store offers for this order, from its payment settings. */
-  paymentOptions: { cod: { available: boolean; fee: number; reason: string | null }; bkash: { available: boolean }; nagad: { available: boolean }; ordersPaused: boolean };
+  paymentOptions: {
+    cod: { available: boolean; fee: number; reason: string | null };
+    bkash: { available: boolean };
+    nagad: { available: boolean };
+    bankTransfer?: { available: boolean; bankDetails?: any };
+    ordersPaused: boolean;
+  };
 }
 
 /**
@@ -117,8 +136,24 @@ export async function quoteOrder(tenantId: string, rawInput: unknown): Promise<Q
         })
       : null;
 
+    // Check wholesale customer & pricing rules
+    let wholesaleCustomer: any = null;
+    if (input.verifiedCustomerId) {
+      wholesaleCustomer = await tx.wholesaleCustomer.findFirst({
+        where: { customerId: input.verifiedCustomerId, status: "APPROVED" },
+        include: { tier: true },
+      });
+    }
+
+    const wholesalePrices = wanted.size
+      ? await tx.wholesalePrice.findMany({
+          where: { variantId: { in: [...wanted.keys()] } },
+        })
+      : [];
+
     let bumpSavings = 0;
     let bundleSavings = 0;
+    let totalWholesaleSavings = 0;
 
     const lines: QuoteLine[] = [];
     const problems: QuoteProblem[] = [];
@@ -135,10 +170,49 @@ export async function quoteOrder(tenantId: string, rawInput: unknown): Promise<Q
       const matchedBump = isBump ? activeBumps.find((ab) => ab.variantId === id) : null;
 
       let unitPrice = Number(v.price);
+      const regularPrice = unitPrice;
+      let wholesaleSavingsOnLine = 0;
+      let isWholesale = false;
+
       if (matchedBump) {
         const bp = Number(matchedBump.bumpPrice);
         bumpSavings += Math.max(0, (unitPrice - bp) * quantity);
         unitPrice = bp;
+      } else {
+        // Evaluate Wholesale "Best Price Guarantee"
+        // 1. Public Volume Break
+        const pubBreaks = wholesalePrices
+          .filter((wp) => wp.variantId === id && wp.tierId === null && wp.minQuantity <= quantity)
+          .sort((a, b) => b.minQuantity - a.minQuantity);
+        const bestPub = pubBreaks[0];
+        if (bestPub && Number(bestPub.price) < unitPrice) {
+          unitPrice = Number(bestPub.price);
+          isWholesale = true;
+        }
+
+        // 2 & 3. Reseller Tier Specific Override & Flat Discount
+        if (wholesaleCustomer?.tier) {
+          const tier = wholesaleCustomer.tier;
+          const tierOverrides = wholesalePrices
+            .filter((wp) => wp.variantId === id && wp.tierId === tier.id && wp.minQuantity <= quantity)
+            .sort((a, b) => b.minQuantity - a.minQuantity);
+          const bestOverride = tierOverrides[0];
+          if (bestOverride && Number(bestOverride.price) < unitPrice) {
+            unitPrice = Number(bestOverride.price);
+            isWholesale = true;
+          } else {
+            const flatPrice = Math.round(regularPrice * (1 - Number(tier.discountPercent) / 100));
+            if (flatPrice < unitPrice) {
+              unitPrice = flatPrice;
+              isWholesale = true;
+            }
+          }
+        }
+
+        if (isWholesale) {
+          wholesaleSavingsOnLine = Math.max(0, (regularPrice - unitPrice) * quantity);
+          totalWholesaleSavings += wholesaleSavingsOnLine;
+        }
       }
 
       const itemBundleId = input.items.find((it) => it.variantId === id)?.bundleId || (activeBundle ? activeBundle.id : null);
@@ -153,12 +227,15 @@ export async function quoteOrder(tenantId: string, rawInput: unknown): Promise<Q
         variantTitle: v.title,
         imageUrl: v.imageUrl ?? v.product.images[0]?.url ?? null,
         unitPrice,
+        regularPrice,
         quantity,
         lineTotal: money(unitPrice * quantity),
         available: Math.max(v.stockQuantity, 0),
         bundleId: isBundleLine ? activeBundle?.id : null,
         bundleTitle: isBundleLine ? activeBundle?.title : null,
         isBump: Boolean(matchedBump),
+        isWholesale,
+        wholesaleSavings: wholesaleSavingsOnLine > 0 ? wholesaleSavingsOnLine : undefined,
       });
 
       if (v.stockQuantity < quantity) problems.push({ variantId: id, kind: "insufficient_stock", available: Math.max(v.stockQuantity, 0) });
@@ -252,6 +329,8 @@ export async function quoteOrder(tenantId: string, rawInput: unknown): Promise<Q
     const beforeCod = deliveryCharge != null ? money(subtotal - discount - memberDiscount + deliveryCharge) : null;
     const codMax = settings?.codMaxAmount != null ? Number(settings.codMaxAmount) : null;
     const codTooBig = codMax != null && beforeCod != null && money(beforeCod + codFeeRule) > codMax;
+    const bankDetails = (settings?.wholesaleBankDetails as any) ?? null;
+    const isBankTransferAvailable = Boolean(settings?.wholesaleEnabled && bankDetails?.accountNumber);
     const paymentOptions = {
       cod: {
         available: (settings?.codEnabled ?? true) && !codTooBig, fee: codFeeRule,
@@ -259,13 +338,28 @@ export async function quoteOrder(tenantId: string, rawInput: unknown): Promise<Q
       },
       bkash: { available: (settings?.bkashEnabled ?? true) && Boolean(settings?.bkashNumber) },
       nagad: { available: (settings?.nagadEnabled ?? true) && Boolean(settings?.nagadNumber) },
+      bankTransfer: {
+        available: isBankTransferAvailable,
+        bankDetails: isBankTransferAvailable ? bankDetails : undefined,
+      },
       ordersPaused: settings?.ordersPaused ?? false,
     };
 
     const freeOver = zone?.freeOverAmount != null ? Number(zone.freeOverAmount) : null;
+    const wholesaleMin = settings?.wholesaleMinOrderAmount ? Number(settings.wholesaleMinOrderAmount) : 0;
+
     return {
       codFee, paymentOptions,
       lines, subtotal, problems, discount, couponCode, couponError, loyalty, deliveryCharge,
+      bundleSavings, bumpSavings, wholesaleSavings: totalWholesaleSavings,
+      wholesale: {
+        isWholesaleCustomer: Boolean(wholesaleCustomer),
+        tierName: wholesaleCustomer?.tier?.name,
+        totalSavings: totalWholesaleSavings,
+        minOrderAmount: wholesaleMin,
+        isMinOrderMet: subtotal >= wholesaleMin,
+        deficit: Math.max(0, wholesaleMin - subtotal),
+      },
       zone: zone ? { name: zone.name, rate: Number(zone.rate), freeOverAmount: freeOver, etaMinDays: zone.etaMinDays, etaMaxDays: zone.etaMaxDays } : null,
       freeDeliveryRemaining: freeOver != null && subtotal < freeOver && deliveryCharge !== 0 ? money(freeOver - subtotal) : null,
       total: deliveryCharge != null ? money(subtotal - discount - memberDiscount + deliveryCharge + codFee) : null,

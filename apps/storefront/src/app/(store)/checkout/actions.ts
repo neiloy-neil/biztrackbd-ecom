@@ -11,7 +11,7 @@ export interface PlaceOrderPayload {
   items: { variantId: string; quantity: number; bundleId?: string; isBump?: boolean }[];
   customer: { name: string; phone: string; email?: string };
   shipping: { division: string; district: string; upazila: string; address: string; note?: string };
-  paymentMethod: "COD" | "MANUAL_BKASH" | "MANUAL_NAGAD" | "GATEWAY_UDDOKTAPAY";
+  paymentMethod: "COD" | "MANUAL_BKASH" | "MANUAL_NAGAD" | "GATEWAY_UDDOKTAPAY" | "BANK_TRANSFER";
   mfs?: { senderNumber: string; trxId: string };
   couponCode?: string;
   redeemPoints?: number;

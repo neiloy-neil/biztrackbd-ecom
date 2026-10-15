@@ -165,6 +165,14 @@ export interface OrderDetail {
   customer: { id: string | null; totalOrders: number; totalSpent: number; delivered: number; returned: number; cancelled: number; deliverySuccessPercent: number | null; isBlocked: boolean; since: Date | null } | null;
   nextStatuses: OrderStatus[];
   canEditAddress: boolean;
+  wholesale?: {
+    isWholesale: boolean;
+    companyName: string | null;
+    taxId: string | null;
+    tradeLicense: string | null;
+    advancePaid: number;
+    balanceDue: number;
+  };
 }
 
 export async function getOrderDetail(tenantId: string, actor: StaffActor, orderId: string): Promise<OrderDetail> {
@@ -223,6 +231,14 @@ export async function getOrderDetail(tenantId: string, actor: StaffActor, orderI
       customer,
       nextStatuses: TRANSITIONS[o.status] ?? [],
       canEditAddress: ["PENDING", "CONFIRMED", "PROCESSING"].includes(o.status),
+      wholesale: {
+        isWholesale: o.isWholesale,
+        companyName: o.b2bCompanyName,
+        taxId: o.b2bTaxId,
+        tradeLicense: o.b2bTradeLicense,
+        advancePaid: Number(o.advancePaidAmount),
+        balanceDue: Number(o.balanceDue),
+      },
     };
   });
 }

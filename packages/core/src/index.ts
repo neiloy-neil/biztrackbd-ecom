@@ -402,5 +402,9 @@ export * from "./whatsapp/session";
 export * from "./whatsapp/service";
 export * from "./whatsapp/bot";
 
+// Wholesale & B2B Pricing Suite
+export * from "./wholesale";
+
+
 
 

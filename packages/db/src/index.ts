@@ -37,4 +37,8 @@ export type {
   WhatsAppMessageLog,
   WhatsAppConversation,
   WhatsAppChatMessage,
+  WholesaleApplicationStatus,
+  WholesaleTier,
+  WholesaleCustomer,
+  WholesalePrice,
 } from "@prisma/client";

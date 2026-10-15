@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useCart } from "./cart-provider";
 import { requestStockAlertAction } from "../app/(store)/products/stock-alert-action";
 import { trackEvent } from "./tracker";
+import { WholesaleVolumeCard } from "./wholesale-volume-card";
 
 export interface PurchaseVariant {
   id: string;
@@ -113,6 +114,8 @@ export function PurchasePanel({ variants, text, hasChoices }: { variants: Purcha
           <button type="button" className="btn btn-ghost btn-round btn-block" disabled={sending} onClick={() => void notifyMe()} data-testid="notify-go">{text.notifyButton}</button>
         </div>
       )}
+
+      <WholesaleVolumeCard variantId={variantId} lang="bn" />
 
       <div style={{ marginTop: 20, display: "flex", alignItems: "center", gap: 14 }}>
         <div style={{ fontSize: 14, fontWeight: 700 }}>{text.quantity}</div>

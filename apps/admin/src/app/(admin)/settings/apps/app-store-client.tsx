@@ -1829,6 +1829,52 @@ export function AppStoreClient({
                 </div>
               )}
 
+              {/* 19. WHOLESALE & B2B PRICING SUITE */}
+              {activeModal === "wholesale_b2b" && (
+                <div className="stack" style={{ gap: 16 }}>
+                  <p style={{ fontSize: 14, lineHeight: 1.5 }}>
+                    Empower your store to sell in bulk to boutique shops and resellers alongside retail shoppers. Configure tiered volume quantity breaks, pre-approved reseller trade tiers, storewide MOQs, bank transfer checkout, and professional B2B Tax Invoices & Delivery Challans.
+                  </p>
+
+                  <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 14 }}>Module Status</div>
+                        <div className="muted" style={{ fontSize: 12 }}>
+                          {currentApp.enabled ? "Active for this store" : "Turned off"}
+                        </div>
+                      </div>
+                      {canEdit && (
+                        <form action={setModuleAction.bind(null, "wholesale_b2b", !currentApp.enabled)}>
+                          <SubmitButton className={`btn btn-sm ${currentApp.enabled ? "btn-secondary" : "btn-primary"}`} pending="…">
+                            {currentApp.enabled ? "Turn Off App" : "Turn On App"}
+                          </SubmitButton>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Link href="/products/wholesale" className="btn btn-primary" style={{ display: "block", textAlign: "center", padding: "10px 14px", textDecoration: "none" }}>
+                      Open Wholesale & B2B Management Hub →
+                    </Link>
+                  </div>
+
+                  <div className="card" style={{ border: "1px solid rgba(79, 70, 229, 0.25)", background: "rgba(79, 70, 229, 0.04)", padding: 16 }}>
+                    <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "#4F46E5" }}>
+                      B2B Suite Capabilities:
+                    </h4>
+                    <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.6 }}>
+                      <li><b>Public Volume Breaks:</b> &quot;Buy 6+ save 15%, 12+ save 25%&quot; open to general shoppers.</li>
+                      <li><b>Approved Reseller Accounts:</b> Trade license / BIN verification with 1-click approvals.</li>
+                      <li><b>Dual Minimums Engine:</b> Enforce product MOQs and storewide B2B minimum cart totals.</li>
+                      <li><b>B2B Documents:</b> Printable Tax Invoices & Delivery Challans with authorized signatures.</li>
+                      <li><b>Flexible Payments:</b> Direct bank deposit details and partial advance deposit support.</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
             </div>
           </div>
         </div>

@@ -30,13 +30,16 @@ export const MODULES: ModuleDef[] = [
   { key: "drops", label: "Limited drops", description: "Timed releases with a countdown and a waiting list.", built: false },
   { key: "baby_profiles", label: "Baby profiles", description: "Saved baby sizes and birthdays for a children's store.", built: false },
   { key: "booking", label: "Bookings", description: "Appointments and slots.", built: false },
-  { key: "wholesale", label: "Wholesale", description: "Trade prices and minimum quantities for resellers.", built: false },
+  { key: "wholesale_b2b", label: "Wholesale & B2B Pricing", description: "Trade prices, customer tiers, and minimum order quantities for bulk resellers.", built: true },
 ];
 
-const def = (key: string) => MODULES.find((m) => m.key === key);
+const def = (key: string) => {
+  const norm = key === "wholesale" ? "wholesale_b2b" : key === "loyalty_vip" ? "loyalty" : key;
+  return MODULES.find((m) => m.key === norm);
+};
 
 export function isAddonModule(key: string): boolean {
-  const modKey = key === "loyalty_vip" ? "loyalty" : key;
+  const modKey = key === "loyalty_vip" ? "loyalty" : key === "wholesale" ? "wholesale_b2b" : key;
   return modKey !== "customer_returns" && modKey !== "product_reviews";
 }
 
@@ -103,6 +106,7 @@ export async function getTenantActiveModules(tenantId: string): Promise<Record<s
       landing_builder: explicit.get("landing_builder") ?? (cap > 0),
       customer_returns: explicit.get("customer_returns") ?? true,
       product_reviews: explicit.get("product_reviews") ?? true,
+      wholesale_b2b: explicit.get("wholesale_b2b") ?? explicit.get("wholesale") ?? (cap > 0),
     };
   });
 }

@@ -2,7 +2,17 @@
 
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { DomainError, quoteOrder, getCheckoutOrderBumps, getActiveBundlesForProduct, type Quote, type StorefrontOrderBump, type StorefrontBundle } from "@biztrackbd/core";
+import {
+  DomainError,
+  quoteOrder,
+  getCheckoutOrderBumps,
+  getActiveBundlesForProduct,
+  listWholesalePrices,
+  getWholesaleCustomerProfile,
+  type Quote,
+  type StorefrontOrderBump,
+  type StorefrontBundle,
+} from "@biztrackbd/core";
 import { LANG_COOKIE } from "@/lib/i18n";
 import { SESSION_COOKIE, getCustomerSession } from "@/lib/session";
 import { getStore } from "@/lib/tenant";
@@ -68,4 +78,46 @@ export async function fetchProductBundlesAction(productId: string): Promise<{ ok
     return { ok: false, bundles: [] };
   }
 }
+
+/** Fetch volume breaks and wholesale pricing for a variant */
+export async function fetchVariantWholesaleAction(variantId: string): Promise<{
+  ok: boolean;
+  breaks: Array<{ minQuantity: number; price: number; savingsPercent: number }>;
+  tierName?: string;
+  moq?: number;
+}> {
+  const store = await getStore();
+  try {
+    const session = await getCustomerSession(store.id);
+    const prices = await listWholesalePrices(store.id, variantId);
+    const profile = session?.customerId
+      ? await getWholesaleCustomerProfile(store.id, session.customerId)
+      : null;
+
+    const eligiblePrices = prices.filter(
+      (p) => p.tierId === null || (profile?.tierId && p.tierId === profile.tierId)
+    );
+
+    const breaks = eligiblePrices.map((p) => {
+      const reg = Number(p.variant.price);
+      const pr = Number(p.price);
+      return {
+        minQuantity: p.minQuantity,
+        price: pr,
+        savingsPercent: reg > pr ? Math.round(((reg - pr) / reg) * 100) : 0,
+      };
+    });
+
+    return {
+      ok: true,
+      breaks,
+      tierName: profile?.tier?.name,
+      moq: 1,
+    };
+  } catch (e) {
+    console.error("fetchVariantWholesaleAction failed", e);
+    return { ok: false, breaks: [] };
+  }
+}
+
 

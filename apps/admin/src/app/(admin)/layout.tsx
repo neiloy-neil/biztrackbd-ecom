@@ -46,6 +46,7 @@ const GROUPS: Group[] = [
     items: [
       { href: "/products", label: "Products", area: "products" },
       { href: "/inventory", label: "Inventory", area: "products" },
+      { href: "/products/wholesale", label: "Wholesale & B2B", area: "products", moduleKey: "wholesale_b2b" },
       { href: "/products/barcodes", label: "Barcode Studio", area: "products", moduleKey: "pos_barcode" },
       { href: "/products/categories", label: "Categories", area: "products" },
     ],
