@@ -1120,7 +1120,7 @@ export function PlatformSettingsClient({
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 <div>
                   <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>
-                    Google Search Console Site Verification Token / Meta Tag
+                    Google Search Console Site Verification (biztrack.bd website only)
                   </label>
                   <input
                     type="text"
@@ -1147,7 +1147,7 @@ export function PlatformSettingsClient({
                     </div>
                   )}
                   <div style={{ fontSize: 11.5, color: "#6B6B8D", marginTop: 4 }}>
-                    Automatically injected into HTML &lt;head&gt; across platform landing pages, super admin, and storefronts.
+                    Injected into the HTML &lt;head&gt; of the main biztrack.bd website. Merchants verify their individual store domains separately in their merchant admin panel.
                   </div>
                 </div>
 
