@@ -2517,7 +2517,6 @@ model AffiliatePartner {
 
   @@unique([tenantId, code])
   @@index([tenantId, status])
-  @@index([portalToken])
 }
 
 model AffiliateReferral {
