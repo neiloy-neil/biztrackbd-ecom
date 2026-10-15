@@ -9,6 +9,7 @@ import type {
   PlatformMailConfigView,
   PlatformFraudConfigView,
   PlatformGoogleConfigView,
+  PlatformSeoConfigView,
 } from "@biztrackbd/core";
 import { FraudCheckerSettings } from "./fraud-checker-settings";
 import {
@@ -23,6 +24,7 @@ import {
   savePlatformMailConfigAction,
   savePlatformGoogleConfigAction,
   testPlatformGoogleConnectionAction,
+  savePlatformSeoConfigAction,
 } from "./actions";
 
 interface Props {
@@ -33,9 +35,10 @@ interface Props {
   initialMailConfig: PlatformMailConfigView;
   initialFraudConfig: PlatformFraudConfigView;
   initialGoogleConfig: PlatformGoogleConfigView;
+  initialSeoConfig: PlatformSeoConfigView;
 }
 
-type TabType = "ai" | "sms" | "couriers" | "payments" | "mail" | "fraud" | "google";
+type TabType = "ai" | "sms" | "couriers" | "payments" | "mail" | "fraud" | "google" | "seo";
 
 export function PlatformSettingsClient({
   initialAiConfig,
@@ -45,8 +48,18 @@ export function PlatformSettingsClient({
   initialMailConfig,
   initialFraudConfig,
   initialGoogleConfig,
+  initialSeoConfig,
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabType>("ai");
+
+  // Platform SEO & Sitemaps State (biztrack.bd)
+  const [seoTitle, setSeoTitle] = useState(initialSeoConfig.title || "");
+  const [seoDescription, setSeoDescription] = useState(initialSeoConfig.description || "");
+  const [seoKeywords, setSeoKeywords] = useState(initialSeoConfig.keywords || "");
+  const [seoOgImage, setSeoOgImage] = useState(initialSeoConfig.ogImageUrl || "");
+  const [seoSitemapUrl] = useState(initialSeoConfig.sitemapUrl);
+  const [seoRobotsUrl] = useState(initialSeoConfig.robotsUrl);
+  const [seoSiteVerification, setSeoSiteVerification] = useState(initialSeoConfig.siteVerificationCode || "");
 
   // Google Cloud Suite State
   const [googleOauthClientId, setGoogleOauthClientId] = useState(initialGoogleConfig.oauthClientId || "");
@@ -316,6 +329,25 @@ export function PlatformSettingsClient({
     setGoogleTestResult(res);
   }
 
+  async function handleSaveSeo(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setNotice(null);
+    const res = await savePlatformSeoConfigAction({
+      title: seoTitle.trim() || undefined,
+      description: seoDescription.trim() || undefined,
+      keywords: seoKeywords.trim() || undefined,
+      ogImageUrl: seoOgImage.trim() || undefined,
+      siteVerificationCode: seoSiteVerification.trim(),
+    });
+    setSaving(false);
+    if (res.ok) {
+      setNotice({ good: "biztrack.bd SEO and sitemap configuration saved successfully." });
+    } else {
+      setNotice({ bad: res.error });
+    }
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {/* Page Header */}
@@ -452,6 +484,23 @@ export function PlatformSettingsClient({
           }}
         >
           Google Cloud Suite
+        </button>
+        <button
+          type="button"
+          onClick={() => { setActiveTab("seo"); setNotice(null); }}
+          data-testid="tab-seo"
+          style={{
+            padding: "8px 16px",
+            border: "none",
+            borderBottom: activeTab === "seo" ? "3px solid #5B4FE8" : "3px solid transparent",
+            background: "none",
+            color: activeTab === "seo" ? "#5B4FE8" : "#4B4B73",
+            fontWeight: 700,
+            fontSize: 14,
+            cursor: "pointer",
+          }}
+        >
+          Platform SEO & Sitemaps
         </button>
       </div>
 
@@ -1158,6 +1207,242 @@ export function PlatformSettingsClient({
                 }}
               >
                 {googleTesting ? "Testing Connection…" : "Ping Google Services"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* TAB 8: Platform SEO & Sitemaps (biztrack.bd) */}
+      {activeTab === "seo" && (
+        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: 24 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>
+                  Platform SEO & Dynamic Sitemaps (biztrack.bd)
+                </h2>
+                <span style={{ fontSize: 11, fontWeight: 700, background: "#EEF2FF", color: "#4F46E5", padding: "3px 8px", borderRadius: 6, textTransform: "uppercase" }}>
+                  Apex Website
+                </span>
+              </div>
+              <p style={{ color: "#4B4B73", margin: "4px 0 0 0", fontSize: 13.5 }}>
+                Configure global search engine optimization, meta tags, OpenGraph social cards, search console verification, and live XML sitemaps for the <strong>biztrack.bd</strong> root landing website.
+              </p>
+            </div>
+            {initialSeoConfig.updatedAt && (
+              <span style={{ fontSize: 12, color: "#64748B", background: "#F1F5F9", padding: "4px 8px", borderRadius: 6 }}>
+                Last updated {new Date(initialSeoConfig.updatedAt).toLocaleDateString()} {initialSeoConfig.updatedBy ? `by ${initialSeoConfig.updatedBy}` : ""}
+              </span>
+            )}
+          </div>
+
+          {/* Quick-Access Live Sitemaps & Robots */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14, marginBottom: 24 }}>
+            <div style={{ padding: 14, borderRadius: 8, background: "#F8FAFC", border: "1px solid #E2E8F0" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#0F172A", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                  Live XML Sitemap
+                </span>
+                <a
+                  href={seoSitemapUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ fontSize: 12, color: "#5B4FE8", textDecoration: "none", fontWeight: 600 }}
+                >
+                  Inspect XML ↗
+                </a>
+              </div>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <input
+                  type="text"
+                  readOnly
+                  value={seoSitemapUrl}
+                  style={{ flex: 1, padding: "8px 10px", fontSize: 12.5, fontFamily: "monospace", background: "#fff", border: "1px solid #CBD5E1", borderRadius: 6 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(seoSitemapUrl);
+                    setCopiedField("sitemap");
+                    setTimeout(() => setCopiedField(null), 2500);
+                  }}
+                  style={{ padding: "8px 14px", fontSize: 12.5, fontWeight: 600, background: "#fff", border: "1px solid #CBD5E1", borderRadius: 6, cursor: "pointer" }}
+                >
+                  {copiedField === "sitemap" ? "Copied! ✓" : "Copy"}
+                </button>
+              </div>
+              <p style={{ margin: "6px 0 0", fontSize: 11.5, color: "#64748B" }}>
+                Submit this URL to Google Search Console to index all biztrack.bd landing pages, tools, and blog.
+              </p>
+            </div>
+
+            <div style={{ padding: 14, borderRadius: 8, background: "#F8FAFC", border: "1px solid #E2E8F0" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#0F172A", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                  Robots.txt Crawler Directives
+                </span>
+                <a
+                  href={seoRobotsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ fontSize: 12, color: "#5B4FE8", textDecoration: "none", fontWeight: 600 }}
+                >
+                  View Robots.txt ↗
+                </a>
+              </div>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <input
+                  type="text"
+                  readOnly
+                  value={seoRobotsUrl}
+                  style={{ flex: 1, padding: "8px 10px", fontSize: 12.5, fontFamily: "monospace", background: "#fff", border: "1px solid #CBD5E1", borderRadius: 6 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(seoRobotsUrl);
+                    setCopiedField("robots");
+                    setTimeout(() => setCopiedField(null), 2500);
+                  }}
+                  style={{ padding: "8px 14px", fontSize: 12.5, fontWeight: 600, background: "#fff", border: "1px solid #CBD5E1", borderRadius: 6, cursor: "pointer" }}
+                >
+                  {copiedField === "robots" ? "Copied! ✓" : "Copy"}
+                </button>
+              </div>
+              <p style={{ margin: "6px 0 0", fontSize: 11.5, color: "#64748B" }}>
+                Contains crawler allow/disallow instructions and points Googlebot directly to the sitemap index.
+              </p>
+            </div>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSaveSeo} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            {/* Meta Title */}
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <label style={{ fontSize: 13, fontWeight: 700, color: "#1F1F38" }}>
+                  Root Meta Title (Homepage Title)
+                </label>
+                <span style={{ fontSize: 12, color: seoTitle.length > 60 ? "#DC2626" : "#64748B" }}>
+                  {seoTitle.length} / 60 characters (Recommended: 50-60)
+                </span>
+              </div>
+              <input
+                type="text"
+                value={seoTitle}
+                onChange={(e) => setSeoTitle(e.target.value)}
+                placeholder="BizTrackBD: Online Store Software for Bangladesh"
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid #D6D6E7", borderRadius: 8, fontSize: 14 }}
+              />
+              <p style={{ margin: "4px 0 0", fontSize: 12, color: "#64748B" }}>
+                The clickable headline displayed on Google search results for biztrack.bd.
+              </p>
+            </div>
+
+            {/* Meta Description */}
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <label style={{ fontSize: 13, fontWeight: 700, color: "#1F1F38" }}>
+                  Root Meta Description
+                </label>
+                <span style={{ fontSize: 12, color: seoDescription.length > 160 ? "#DC2626" : "#64748B" }}>
+                  {seoDescription.length} / 160 characters (Recommended: 140-160)
+                </span>
+              </div>
+              <textarea
+                rows={3}
+                value={seoDescription}
+                onChange={(e) => setSeoDescription(e.target.value)}
+                placeholder="Launch your online store in a day. Sell with bKash, Nagad, and Cash on Delivery..."
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid #D6D6E7", borderRadius: 8, fontSize: 13.5, resize: "vertical" }}
+              />
+              <p style={{ margin: "4px 0 0", fontSize: 12, color: "#64748B" }}>
+                A compelling summary shown under your title in Google search results and shared social links.
+              </p>
+            </div>
+
+            {/* Meta Keywords */}
+            <div>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1F1F38", marginBottom: 6 }}>
+                Meta Keywords (Comma-separated)
+              </label>
+              <input
+                type="text"
+                value={seoKeywords}
+                onChange={(e) => setSeoKeywords(e.target.value)}
+                placeholder="online store bangladesh, ecommerce website builder bangladesh, bkash payment gateway, steadfast courier integration"
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid #D6D6E7", borderRadius: 8, fontSize: 14 }}
+              />
+              <p style={{ margin: "4px 0 0", fontSize: 12, color: "#64748B" }}>
+                Search indexing terms prioritized by search engines for regional ecommerce queries in Bangladesh.
+              </p>
+            </div>
+
+            {/* OpenGraph Social Image URL */}
+            <div>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1F1F38", marginBottom: 6 }}>
+                Social Share Image (OpenGraph / Twitter Card Banner)
+              </label>
+              <input
+                type="url"
+                value={seoOgImage}
+                onChange={(e) => setSeoOgImage(e.target.value)}
+                placeholder="https://biztrack.bd/opengraph-image"
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid #D6D6E7", borderRadius: 8, fontSize: 14 }}
+              />
+              <p style={{ margin: "4px 0 0", fontSize: 12, color: "#64748B" }}>
+                Preview image generated when biztrack.bd is shared on Facebook, WhatsApp, LinkedIn, or Twitter (1200x630px).
+              </p>
+              {seoOgImage && (
+                <div style={{ marginTop: 8, padding: 8, background: "#F8FAFC", borderRadius: 8, display: "inline-block", border: "1px solid #E2E8F0" }}>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: "#64748B", display: "block", marginBottom: 4 }}>Banner Preview:</span>
+                  <img
+                    src={seoOgImage}
+                    alt="OpenGraph Banner Preview"
+                    style={{ maxHeight: 120, maxWidth: "100%", borderRadius: 4, objectFit: "cover" }}
+                    onError={(e) => { (e.target as HTMLElement).style.display = "none"; }}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Google Search Console Verification */}
+            <div style={{ borderTop: "1px solid #E7E7F0", paddingTop: 16 }}>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1F1F38", marginBottom: 6 }}>
+                Google Search Console Verification (biztrack.bd)
+              </label>
+              <div style={{ display: "flex", gap: 8 }}>
+                <input
+                  type="text"
+                  value={seoSiteVerification}
+                  onChange={(e) => setSeoSiteVerification(e.target.value)}
+                  placeholder='google0668054f248577b1 or <meta name="google-site-verification" content="..." />'
+                  style={{ flex: 1, padding: "10px 12px", border: "1px solid #D6D6E7", borderRadius: 8, fontSize: 13.5, fontFamily: "monospace" }}
+                />
+              </div>
+              <p style={{ margin: "6px 0 0", fontSize: 12, color: "#64748B" }}>
+                Paste either the raw token or the full HTML verification meta tag provided by Google Search Console. It will be injected dynamically into the <code>&lt;head&gt;</code> of biztrack.bd.
+              </p>
+            </div>
+
+            {/* Save Button */}
+            <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+              <button
+                type="submit"
+                disabled={saving}
+                style={{
+                  padding: "11px 24px",
+                  background: "#5B4FE8",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 8,
+                  fontWeight: 700,
+                  fontSize: 14,
+                  cursor: "pointer",
+                }}
+              >
+                {saving ? "Saving…" : "Save Platform SEO Configuration"}
               </button>
             </div>
           </form>

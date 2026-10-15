@@ -34,11 +34,30 @@ export async function generateMetadata(): Promise<Metadata> {
     }
     const googleTokens = Array.from(tokens).filter(Boolean);
 
+    const siteTitle = tracking.seoTitle?.trim() || (info.tagline ? `${info.storeName} | ${info.tagline}` : info.storeName);
+    const siteDesc = tracking.seoDescription?.trim() || info.tagline || `Shop online at ${info.storeName}. Cash on delivery, bKash and Nagad across Bangladesh.`;
+    const keywordsList = tracking.seoKeywords ? tracking.seoKeywords.split(",").map((k) => k.trim()).filter(Boolean) : undefined;
+    const shareImage = tracking.socialShareImageUrl || info.logoUrl || undefined;
+
     return {
       metadataBase: new URL(origin),
-      title: { default: info.tagline ? `${info.storeName} | ${info.tagline}` : info.storeName, template: `%s | ${info.storeName}` },
-      description: info.tagline ?? `Shop online at ${info.storeName}. Cash on delivery, bKash and Nagad across Bangladesh.`,
-      openGraph: { siteName: info.storeName, type: "website", locale: store.locale.replace("-", "_") },
+      title: { default: siteTitle, template: `%s | ${info.storeName}` },
+      description: siteDesc,
+      keywords: keywordsList,
+      openGraph: {
+        siteName: info.storeName,
+        type: "website",
+        locale: store.locale.replace("-", "_"),
+        title: siteTitle,
+        description: siteDesc,
+        images: shareImage ? [{ url: shareImage }] : undefined,
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: siteTitle,
+        description: siteDesc,
+        images: shareImage ? [shareImage] : undefined,
+      },
       verification: {
         google: googleTokens.length > 0 ? (googleTokens.length === 1 ? googleTokens[0] : googleTokens) : undefined,
         other: tracking.metaDomainVerification

@@ -31,6 +31,29 @@ export const CATEGORY_LABELS: Record<AppCategory, string> = {
 export const APP_CATALOG: AppCatalogItem[] = [
   // --- 1. MARKETING & TRACKING ---
   {
+    key: "seo_suite",
+    label: "SEO & Search Engine Optimization Suite",
+    category: "MARKETING",
+    categoryLabel: "Marketing & Tracking",
+    tier: "INCLUDED",
+    tierLabel: "Included in all plans",
+    description: "Automated Google Search Console verification, Schema.org Rich Snippets, meta tags, and dynamic XML sitemaps.",
+    longDescription: "Maximize your organic Google search traffic in Bangladesh. Configures store-wide meta title and description templates, enables Schema.org Product and Breadcrumb rich snippets for Google stars and pricing in search results, provides 1-click XML sitemaps for Googlebot, and verifies domain ownership instantly.",
+    built: true,
+    icon: "search",
+    badge: "Essential",
+    configureHref: "/settings/apps?open=seo_suite",
+    features: [
+      "Dynamic XML Sitemap (/sitemap.xml) with product images",
+      "Schema.org Product & BreadcrumbList Rich Snippets",
+      "Instant Google Search Console verification (HTML tag & file)",
+      "Custom OpenGraph social preview images for WhatsApp & Facebook",
+      "Custom meta title & meta description templates",
+    ],
+    keywords: ["seo", "google", "search console", "sitemap", "rich snippets", "schema", "meta tags"],
+    docsSummary: "Configure store SEO titles, social share image, Rich Snippets, and view your live sitemap.",
+  },
+  {
     key: "meta_pixel_capi",
     label: "Meta Pixel & Conversions API (CAPI)",
     category: "MARKETING",

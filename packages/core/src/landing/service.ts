@@ -307,3 +307,12 @@ export async function placeLandingOrder(tenantId: string, slug: string, input: L
   }
   return placed;
 }
+
+export async function listPublishedLandingSlugs(tenantId: string): Promise<{ slug: string; updatedAt: Date }[]> {
+  return withTenant(tenantId, async (tx) => {
+    return tx.landingPage.findMany({
+      where: { isPublished: true },
+      select: { slug: true, updatedAt: true },
+    });
+  });
+}

@@ -1843,6 +1843,10 @@ model StoreSettings {
   ga4ApiSecret               String? // GA4 Measurement Protocol API Secret for server-side events
   metaDomainVerification     String? // Meta domain verification code for <meta name="facebook-domain-verification">
   googleSiteVerification     String? // Google Search Console verification code for <meta name="google-site-verification">
+  seoTitle                   String? // Custom store homepage SEO title
+  seoKeywords                String? // Store-wide SEO keywords
+  socialShareImageUrl        String? // Default OpenGraph / WhatsApp preview image URL
+  richSnippetsEnabled        Boolean   @default(true) // Schema.org Product, Breadcrumbs, ReturnPolicy
   googleOAuthClientId        String? // Google OAuth 2.0 Client ID for storefront customer login
   googleOAuthClientSecret    String? // Google OAuth 2.0 Client Secret
   googleMerchantCenterId     String? // Google Merchant Center Account ID (Google Shopping)

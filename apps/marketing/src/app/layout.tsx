@@ -7,59 +7,20 @@ import "./site.css";
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-jakarta", display: "swap" });
 const hind = Hind_Siliguri({ subsets: ["bengali", "latin"], weight: ["400", "500", "600", "700"], variable: "--font-hind", display: "swap" });
 
-import { getPlatformSiteVerificationCode } from "@biztrackbd/core";
+import { getPlatformSeoConfig, getPlatformSiteVerificationCode } from "@biztrackbd/core";
 
 const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
 
 export const dynamic = "force-dynamic";
 
-const baseMetadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: "BizTrackBD: Online Store Software for Bangladesh",
-    template: "%s | BizTrackBD",
-  },
-  description:
-    "Launch your online store in a day. Sell with bKash, Nagad, and Cash on Delivery. Book Pathao and Steadfast pickups straight from each order with 0% sales commission.",
-  keywords: [
-    "online store bangladesh",
-    "ecommerce website builder bangladesh",
-    "bkash payment gateway",
-    "nagad checkout",
-    "steadfast courier integration",
-    "pathao courier delivery",
-    "cash on delivery return protection",
-    "shopify alternative bangladesh",
-    "অনলাইন শপ তৈরি",
-  ],
-  alternates: {
-    canonical: siteUrl,
-  },
-  openGraph: {
-    type: "website",
-    locale: "en_BD",
-    alternateLocale: ["bn_BD"],
-    url: siteUrl,
-    siteName: "BizTrackBD",
-    title: "BizTrackBD: Online Store Software for Bangladesh",
-    description:
-      "Run your shop from your phone. Accept bKash, Nagad, and Cash on Delivery with zero commission. Automated Steadfast and Pathao courier pickups.",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "BizTrackBD: Online Store Software for Bangladesh",
-    description:
-      "Run your shop from your phone. Accept bKash, Nagad, and Cash on Delivery with zero commission. Automated Steadfast and Pathao courier pickups.",
-  },
-};
-
 export async function generateMetadata(): Promise<Metadata> {
-  const googleVerification = await getPlatformSiteVerificationCode();
+  const seoConfig = await getPlatformSeoConfig();
   const tokenSet = new Set<string>();
 
-  if (googleVerification) {
-    tokenSet.add(googleVerification);
-    const withoutExt = googleVerification.replace(/\.html$/i, "");
+  const siteCode = seoConfig.siteVerificationCode || (await getPlatformSiteVerificationCode());
+  if (siteCode) {
+    tokenSet.add(siteCode);
+    const withoutExt = siteCode.replace(/\.html$/i, "");
     tokenSet.add(withoutExt);
     if (withoutExt.toLowerCase().startsWith("google")) {
       tokenSet.add(withoutExt.slice(6));
@@ -71,9 +32,42 @@ export async function generateMetadata(): Promise<Metadata> {
   tokenSet.add("0668054f248577b1");
 
   const tokens = Array.from(tokenSet).filter(Boolean);
+  const keywordsList = seoConfig.keywords.split(",").map((k) => k.trim()).filter(Boolean);
 
   return {
-    ...baseMetadata,
+    metadataBase: new URL(siteUrl),
+    title: {
+      default: seoConfig.title,
+      template: "%s | BizTrackBD",
+    },
+    description: seoConfig.description,
+    keywords: keywordsList,
+    alternates: {
+      canonical: siteUrl,
+    },
+    openGraph: {
+      type: "website",
+      locale: "en_BD",
+      alternateLocale: ["bn_BD"],
+      url: siteUrl,
+      siteName: "BizTrackBD",
+      title: seoConfig.title,
+      description: seoConfig.description,
+      images: [
+        {
+          url: seoConfig.ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: seoConfig.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: seoConfig.title,
+      description: seoConfig.description,
+      images: [seoConfig.ogImageUrl],
+    },
     verification: tokens.length > 0 ? { google: tokens } : undefined,
   };
 }

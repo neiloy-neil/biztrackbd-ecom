@@ -20,6 +20,8 @@ import {
   testPlatformFraudChecker,
   savePlatformGoogleConfig,
   testPlatformGoogleConnection,
+  getPlatformSeoConfig,
+  savePlatformSeoConfig,
   DomainError,
   ForbiddenError,
 } from "@biztrackbd/core";
@@ -234,3 +236,30 @@ export async function testPlatformGoogleConnectionAction() {
     return { ok: false, latencyMs: 0, message: err instanceof Error ? err.message : "Google Cloud test failed." };
   }
 }
+
+// 8. Platform SEO & Sitemaps for biztrack.bd
+export async function getPlatformSeoConfigAction() {
+  await requireAction("settings", "view");
+  return getPlatformSeoConfig();
+}
+
+export async function savePlatformSeoConfigAction(input: {
+  title?: string;
+  description?: string;
+  keywords?: string;
+  ogImageUrl?: string;
+  siteVerificationCode?: string;
+}) {
+  try {
+    const s = await requireAction("settings", "edit");
+    await savePlatformSeoConfig(s.actor, input);
+    revalidatePath("/settings");
+    return { ok: true as const };
+  } catch (err) {
+    if (err instanceof ForbiddenError) return { ok: false as const, error: "Access denied: Platform Owner or Support Lead role required." };
+    if (err instanceof DomainError) return { ok: false as const, error: err.message };
+    console.error("savePlatformSeoConfigAction error", err);
+    return { ok: false as const, error: err instanceof Error ? err.message : "Failed to save platform SEO settings." };
+  }
+}
+

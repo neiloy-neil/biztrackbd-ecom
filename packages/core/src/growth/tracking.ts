@@ -54,6 +54,19 @@ export interface TrackingConfig {
   lastError: string | null;
 }
 
+export interface SeoSuiteConfig {
+  seoTitle: string | null;
+  seoDescription: string | null;
+  seoKeywords: string | null;
+  socialShareImageUrl: string | null;
+  googleSiteVerification: string | null;
+  richSnippetsEnabled: boolean;
+  storeName: string;
+  tagline: string | null;
+  sitemapUrl: string;
+  robotsUrl: string;
+}
+
 export interface StorefrontTracking {
   pixelId: string | null;
   googleAnalyticsId: string | null;
@@ -61,6 +74,11 @@ export interface StorefrontTracking {
   tiktokPixelId: string | null;
   metaDomainVerification: string | null;
   googleSiteVerification?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  seoKeywords?: string | null;
+  socialShareImageUrl?: string | null;
+  richSnippetsEnabled?: boolean;
 }
 
 /** What the storefront may know: public pixel and container IDs. Access tokens never leave the server. */
@@ -74,6 +92,11 @@ export async function getStorefrontTracking(tenantId: string): Promise<Storefron
         tiktokPixelId: true,
         metaDomainVerification: true,
         googleSiteVerification: true,
+        seoTitle: true,
+        description: true,
+        seoKeywords: true,
+        socialShareImageUrl: true,
+        richSnippetsEnabled: true,
       },
     });
     return {
@@ -83,7 +106,72 @@ export async function getStorefrontTracking(tenantId: string): Promise<Storefron
       tiktokPixelId: s?.tiktokPixelId ?? null,
       metaDomainVerification: s?.metaDomainVerification ?? null,
       googleSiteVerification: s?.googleSiteVerification ?? null,
+      seoTitle: s?.seoTitle ?? null,
+      seoDescription: s?.description ?? null,
+      seoKeywords: s?.seoKeywords ?? null,
+      socialShareImageUrl: s?.socialShareImageUrl ?? null,
+      richSnippetsEnabled: s?.richSnippetsEnabled ?? true,
     };
+  });
+}
+
+export async function getSeoSuiteConfig(tenantId: string, origin?: string): Promise<SeoSuiteConfig> {
+  return withTenant(tenantId, async (tx) => {
+    const s = await tx.storeSettings.findFirst();
+    const t = await tx.tenant.findUnique({ where: { id: tenantId }, select: { subdomain: true } });
+    const cleanOrigin = origin || `https://${t?.subdomain || "store"}.biztrack.bd`;
+    return {
+      seoTitle: s?.seoTitle ?? null,
+      seoDescription: s?.description ?? null,
+      seoKeywords: s?.seoKeywords ?? null,
+      socialShareImageUrl: s?.socialShareImageUrl ?? null,
+      googleSiteVerification: s?.googleSiteVerification ?? null,
+      richSnippetsEnabled: s?.richSnippetsEnabled ?? true,
+      storeName: s?.storeName ?? "My Store",
+      tagline: s?.tagline ?? null,
+      sitemapUrl: `${cleanOrigin}/sitemap.xml`,
+      robotsUrl: `${cleanOrigin}/robots.txt`,
+    };
+  });
+}
+
+export async function saveSeoSuiteConfig(
+  tenantId: string,
+  actor: StaffActor,
+  input: {
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+    seoKeywords?: string | null;
+    socialShareImageUrl?: string | null;
+    googleSiteVerification?: string | null;
+    richSnippetsEnabled?: boolean;
+  },
+): Promise<void> {
+  assertCan(actor, "marketing", "edit");
+  const googleVerif = cleanVerification(input.googleSiteVerification);
+  const seoTitle = input.seoTitle?.trim() || null;
+  const seoDescription = input.seoDescription?.trim() || null;
+  const seoKeywords = input.seoKeywords?.trim() || null;
+  const socialShareImageUrl = input.socialShareImageUrl?.trim() || null;
+  const richSnippetsEnabled = input.richSnippetsEnabled !== undefined ? Boolean(input.richSnippetsEnabled) : true;
+
+  await withTenant(tenantId, async (tx) => {
+    const { count } = await tx.storeSettings.updateMany({
+      data: {
+        seoTitle,
+        description: seoDescription,
+        seoKeywords,
+        socialShareImageUrl,
+        googleSiteVerification: googleVerif,
+        richSnippetsEnabled,
+      },
+    });
+    if (count === 0) throw new NotFoundError("Store settings");
+    await audit(tx, tenantId, actor, "seo.config_saved", {
+      seoTitle,
+      hasGoogleVerification: Boolean(googleVerif),
+      richSnippetsEnabled,
+    });
   });
 }
 

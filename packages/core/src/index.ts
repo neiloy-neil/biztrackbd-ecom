@@ -148,6 +148,7 @@ export {
 export {
   getPixelId, getStorefrontTracking, getTrackingConfig, savePixelId, saveTrackingConfig, trackBrowserEvent, sendServerPurchase, sendServerCancellation, recordBrowserPurchase, getTrackingOverview, sendTestEvent, setPixelFetchForTests, purchaseEventId, EVENT_NAMES,
   buildMetaOAuthUrl, exchangeMetaOAuthCode, fetchMetaPixels, sendGa4ServerEvent,
+  getSeoSuiteConfig, saveSeoSuiteConfig, type SeoSuiteConfig,
   type TrackingConfig, type StorefrontTracking, type TrackingOverview, type EventStat, type UserContext, type EventName, type SendResult, type MetaAdAccountPixel,
 } from "./growth/tracking";
 export {
@@ -327,6 +328,9 @@ export {
   testPlatformGoogleConnection,
   cleanGoogleSiteVerification,
   getPlatformSiteVerificationCode,
+  getPlatformSeoConfig,
+  savePlatformSeoConfig,
+  type PlatformSeoConfigView,
   type PlatformGoogleConfigView,
   type PlatformFraudConfigView,
   type PlatformAiConfigView,

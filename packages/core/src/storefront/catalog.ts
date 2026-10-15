@@ -260,8 +260,26 @@ export async function getProductBySlug(tenantId: string, slug: string): Promise<
   });
 }
 
-export async function listProductSlugs(tenantId: string): Promise<{ slug: string; updatedAt: Date }[]> {
-  return withTenant(tenantId, (tx) => tx.product.findMany({ where: { status: "ACTIVE", deletedAt: null }, select: { slug: true, updatedAt: true } }));
+export async function listProductSlugs(tenantId: string): Promise<{ slug: string; updatedAt: Date; imageUrl?: string | null }[]> {
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx.product.findMany({
+      where: { status: "ACTIVE", deletedAt: null },
+      select: {
+        slug: true,
+        updatedAt: true,
+        images: {
+          select: { url: true },
+          orderBy: { sortOrder: "asc" },
+          take: 1,
+        },
+      },
+    });
+    return rows.map((r) => ({
+      slug: r.slug,
+      updatedAt: r.updatedAt,
+      imageUrl: r.images[0]?.url ?? null,
+    }));
+  });
 }
 
 export async function listCategorySlugs(tenantId: string): Promise<{ slug: string }[]> {

@@ -10,6 +10,7 @@ import {
   saveIntegration,
   saveLoyaltySettings,
   saveTrackingConfig,
+  saveSeoSuiteConfig,
   setModule,
   testCourierConnection,
   type ProviderKey,
@@ -270,5 +271,26 @@ export async function savePaymentGatewayAction(
     if (e instanceof DomainError) return { error: e.message };
     console.error("savePaymentGatewayAction failed", e);
     return { error: "Could not save payment gateway credentials." };
+  }
+}
+
+export async function saveSeoSuiteAction(input: {
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  seoKeywords?: string | null;
+  socialShareImageUrl?: string | null;
+  googleSiteVerification?: string | null;
+  richSnippetsEnabled?: boolean;
+}): Promise<ActionResult> {
+  const s = await requireAction("marketing", "edit");
+  try {
+    await saveSeoSuiteConfig(s.tenantId, s.actor, input);
+    revalidatePath("/settings/apps");
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch (e) {
+    if (e instanceof DomainError) return { error: e.message };
+    console.error("saveSeoSuiteAction failed", e);
+    return { error: "Could not save store SEO configuration." };
   }
 }

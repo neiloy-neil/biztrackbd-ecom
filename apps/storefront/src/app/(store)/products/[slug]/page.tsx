@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getProductBySlug, getStoreInfo, loadPageData } from "@biztrackbd/core";
+import { getProductBySlug, getStoreInfo, getStorefrontTracking, loadPageData } from "@biztrackbd/core";
 import { Sections } from "@/components/sections";
 import { getLang, makeT, money, productTitle } from "@/lib/i18n";
 import { absolute, getOrigin } from "@/lib/origin";
@@ -33,14 +33,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
   const store = await getStore();
-  const [product, info, origin, lang, layout] = await Promise.all([loadProductCtx(store.id, slug), getStoreInfo(store.id), getOrigin(), getLang(store.locale), getPageLayout(store.id, "product")]);
+  const [product, info, origin, lang, layout, tracking] = await Promise.all([
+    loadProductCtx(store.id, slug),
+    getStoreInfo(store.id),
+    getOrigin(),
+    getLang(store.locale),
+    getPageLayout(store.id, "product"),
+    getStorefrontTracking(store.id),
+  ]);
   if (!product) notFound();
   const { p } = product;
   const t = makeT(lang);
   const inStock = p.variants.some((v) => v.stock > 0);
   const data = await loadPageData(store.id, layout);
 
-  const jsonLd = {
+  const richSnippetsEnabled = tracking.richSnippetsEnabled !== false;
+
+  const nextYear = new Date();
+  nextYear.setFullYear(nextYear.getFullYear() + 1);
+  const priceValidUntil = nextYear.toISOString().split("T")[0];
+
+  const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: p.title,
@@ -50,15 +63,74 @@ export default async function ProductPage({ params }: Props) {
     brand: { "@type": "Brand", name: info.storeName },
     ...(p.rating ? { aggregateRating: { "@type": "AggregateRating", ratingValue: p.rating.average, reviewCount: p.rating.count } } : {}),
     offers: {
-      "@type": "Offer", url: `${origin}/products/${slug}`, priceCurrency: "BDT", price: p.price,
-      availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock", itemCondition: "https://schema.org/NewCondition",
+      "@type": "Offer",
+      url: `${origin}/products/${slug}`,
+      priceCurrency: "BDT",
+      price: p.price,
+      priceValidUntil,
+      availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "BD",
+        returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+        merchantReturnDays: 7,
+        returnMethod: "https://schema.org/ReturnByMail",
+        returnFees: "https://schema.org/FreeReturn",
+      },
+      shippingDetails: {
+        "@type": "OfferShippingDetails",
+        shippingRate: {
+          "@type": "MonetaryAmount",
+          value: "60",
+          currency: "BDT",
+        },
+        shippingDestination: {
+          "@type": "DefinedRegion",
+          addressCountry: "BD",
+        },
+        deliveryTime: {
+          "@type": "ShippingDeliveryTime",
+          handlingTime: { "@type": "QuantitativeValue", minValue: 0, maxValue: 1, unitCode: "d" },
+          transitTime: { "@type": "QuantitativeValue", minValue: 1, maxValue: 3, unitCode: "d" },
+        },
+      },
     },
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: info.storeName,
+        item: origin,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Products",
+        item: `${origin}/products`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: p.title,
+        item: `${origin}/products/${slug}`,
+      },
+    ],
   };
 
   return (
     <>
-      {/* JSON.stringify output cannot contain a closing script tag once < is escaped. */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+      {richSnippetsEnabled && (
+        <>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd).replace(/</g, "\\u003c") }} />
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, "\\u003c") }} />
+        </>
+      )}
       <Sections page={layout} data={data} lang={lang} t={t} ctx={{ product }} />
     </>
   );

@@ -14,6 +14,7 @@ import {
   saveWhatsAppWidgetAction,
   setModuleAction,
   testCourierAction,
+  saveSeoSuiteAction,
 } from "./actions";
 
 interface StoreSettingsData {
@@ -27,6 +28,12 @@ interface StoreSettingsData {
   googleOAuthClientId?: string | null;
   googleOAuthClientSecret?: string | null;
   googleMerchantCenterId?: string | null;
+  seoTitle?: string | null;
+  seoKeywords?: string | null;
+  socialShareImageUrl?: string | null;
+  richSnippetsEnabled?: boolean;
+  description?: string | null;
+  storeName?: string | null;
   loyaltyEnabled?: boolean;
   loyaltySpendPerPoint?: number;
   loyaltyPointsPerBlock?: number;
@@ -73,6 +80,13 @@ function AppIcon({ icon }: { icon: string }) {
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <rect width="24" height="24" rx="6" fill="#0668E1" />
           <path d="M16.5 8C14.7 8 13.3 9.1 12 10.8C10.7 9.1 9.3 8 7.5 8C4.5 8 2.5 10.4 2.5 13.5C2.5 16.6 4.7 19 7.5 19C9.3 19 10.7 17.9 12 16.2C13.3 17.9 14.7 19 16.5 19C19.3 19 21.5 16.6 21.5 13.5C21.5 10.4 19.5 8 16.5 8ZM7.5 16.8C5.7 16.8 4.3 15.3 4.3 13.5C4.3 11.7 5.7 10.2 7.5 10.2C8.9 10.2 10.1 11.2 11.1 12.8C10.1 14.8 8.9 16.8 7.5 16.8ZM16.5 16.8C15.1 16.8 13.9 14.8 12.9 12.8C13.9 11.2 15.1 10.2 16.5 10.2C18.3 10.2 19.7 11.7 19.7 13.5C19.7 15.3 18.3 16.8 16.5 16.8Z" fill="white" />
+        </svg>
+      );
+    case "search":
+      return (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
       );
     case "google":
@@ -201,6 +215,8 @@ export function AppStoreClient({
   // Modal form states
   const [copiedFeed, setCopiedFeed] = useState(false);
   const [copiedWebhook, setCopiedWebhook] = useState(false);
+  const [copiedSitemap, setCopiedSitemap] = useState(false);
+  const [copiedRobots, setCopiedRobots] = useState(false);
   const [formMsg, setFormMsg] = useState<{ ok?: boolean; error?: string } | null>(null);
   const [testResult, setTestResult] = useState<{ ok?: boolean; error?: string } | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -615,6 +631,231 @@ export function AppStoreClient({
               )}
 
               {/* SPECIFIC APP MODAL BODIES */}
+
+              {/* 0. SEO & SEARCH ENGINE OPTIMIZATION SUITE */}
+              {activeModal === "seo_suite" && (() => {
+                const currentSitemapUrl = `${storefrontOrigin || origin}/sitemap.xml`;
+                const currentRobotsUrl = `${storefrontOrigin || origin}/robots.txt`;
+
+                return (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const fd = new FormData(e.currentTarget);
+                      startTransition(async () => {
+                        const res = await saveSeoSuiteAction({
+                          seoTitle: String(fd.get("seoTitle") ?? ""),
+                          seoDescription: String(fd.get("seoDescription") ?? ""),
+                          seoKeywords: String(fd.get("seoKeywords") ?? ""),
+                          socialShareImageUrl: String(fd.get("socialShareImageUrl") ?? ""),
+                          googleSiteVerification: String(fd.get("googleSiteVerification") ?? ""),
+                          richSnippetsEnabled: fd.get("richSnippetsEnabled") === "on",
+                        });
+                        setFormMsg(res);
+                      });
+                    }}
+                    className="stack"
+                    style={{ gap: 16 }}
+                  >
+                    <p style={{ fontSize: 13.5, lineHeight: 1.5 }}>
+                      Boost your organic rankings on Google Bangladesh. Configure automated Schema.org Product Rich Snippets, social share previews for Facebook/WhatsApp, and link Google Search Console.
+                    </p>
+
+                    {/* Live Sitemap & Robots Quick Copy */}
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
+                      <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 14 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                          <span style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "#1E293B" }}>
+                            Dynamic XML Sitemap
+                          </span>
+                          <a
+                            href={currentSitemapUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="link"
+                            style={{ fontSize: 12 }}
+                          >
+                            Test XML ↗
+                          </a>
+                        </div>
+                        <div className="row" style={{ gap: 6 }}>
+                          <input
+                            type="text"
+                            readOnly
+                            value={currentSitemapUrl}
+                            className="input"
+                            style={{ flex: 1, fontFamily: "monospace", fontSize: 12, background: "#fff" }}
+                          />
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => {
+                              navigator.clipboard.writeText(currentSitemapUrl);
+                              setCopiedSitemap(true);
+                              setTimeout(() => setCopiedSitemap(false), 2500);
+                            }}
+                          >
+                            {copiedSitemap ? "Copied! ✓" : "Copy"}
+                          </button>
+                        </div>
+                        <span className="muted" style={{ fontSize: 11, display: "block", marginTop: 4 }}>
+                          Includes products, images, categories, and landing pages.
+                        </span>
+                      </div>
+
+                      <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 14 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                          <span style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "#1E293B" }}>
+                            Robots.txt Directives
+                          </span>
+                          <a
+                            href={currentRobotsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="link"
+                            style={{ fontSize: 12 }}
+                          >
+                            View Robots ↗
+                          </a>
+                        </div>
+                        <div className="row" style={{ gap: 6 }}>
+                          <input
+                            type="text"
+                            readOnly
+                            value={currentRobotsUrl}
+                            className="input"
+                            style={{ flex: 1, fontFamily: "monospace", fontSize: 12, background: "#fff" }}
+                          />
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => {
+                              navigator.clipboard.writeText(currentRobotsUrl);
+                              setCopiedRobots(true);
+                              setTimeout(() => setCopiedRobots(false), 2500);
+                            }}
+                          >
+                            {copiedRobots ? "Copied! ✓" : "Copy"}
+                          </button>
+                        </div>
+                        <span className="muted" style={{ fontSize: 11, display: "block", marginTop: 4 }}>
+                          Crawler allow/disallow rules pointing to your sitemap.
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Meta Title */}
+                    <div>
+                      <label className="label">Store Meta Title (Homepage Title)</label>
+                      <input
+                        type="text"
+                        name="seoTitle"
+                        defaultValue={storeSettings?.seoTitle ?? ""}
+                        placeholder={storeSettings?.storeName ? `${storeSettings.storeName} | Best Online Store in Bangladesh` : "My Store | Best Online Store in Bangladesh"}
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                      <span className="muted" style={{ fontSize: 12 }}>
+                        Recommended: 50-60 characters. Appears as the main headline on Google search results.
+                      </span>
+                    </div>
+
+                    {/* Meta Description */}
+                    <div>
+                      <label className="label">Store Meta Description</label>
+                      <textarea
+                        name="seoDescription"
+                        rows={3}
+                        defaultValue={storeSettings?.description ?? ""}
+                        placeholder="Shop premium collections with fast Cash on Delivery across Bangladesh..."
+                        className="input"
+                        style={{ width: "100%", resize: "vertical" }}
+                      />
+                      <span className="muted" style={{ fontSize: 12 }}>
+                        Recommended: 140-160 characters. Displayed beneath your title in Google search results.
+                      </span>
+                    </div>
+
+                    {/* Meta Keywords */}
+                    <div>
+                      <label className="label">Meta Keywords (Comma-separated)</label>
+                      <input
+                        type="text"
+                        name="seoKeywords"
+                        defaultValue={storeSettings?.seoKeywords ?? ""}
+                        placeholder="online shopping, clothes bd, cash on delivery, panjabi"
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+
+                    {/* Social Share Image URL */}
+                    <div>
+                      <label className="label">Social Share Image (Facebook & WhatsApp Preview Banner)</label>
+                      <input
+                        type="url"
+                        name="socialShareImageUrl"
+                        defaultValue={storeSettings?.socialShareImageUrl ?? ""}
+                        placeholder="https://.../banner.jpg"
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                      <span className="muted" style={{ fontSize: 12 }}>
+                        This image appears when your store link is shared on WhatsApp, Facebook, or Messenger (1200x630px recommended).
+                      </span>
+                    </div>
+
+                    {/* Google Site Verification */}
+                    <div className="card" style={{ border: "1px solid rgba(234, 67, 53, 0.25)", background: "rgba(234, 67, 53, 0.03)", padding: 16 }}>
+                      <h4 style={{ margin: "0 0 8px", fontSize: 14, fontWeight: 700, color: "#EA4335" }}>
+                        Google Search Console Verification:
+                      </h4>
+                      <p style={{ margin: "0 0 10px", fontSize: 12.5, color: "#475569", lineHeight: 1.5 }}>
+                        Paste your Google verification token or HTML tag below. We will automatically inject it into your storefront &lt;head&gt; tag for immediate 1-click verification.
+                      </p>
+                      <input
+                        type="text"
+                        name="googleSiteVerification"
+                        defaultValue={storeSettings?.googleSiteVerification ?? ""}
+                        placeholder='e.g. google0668054f248577b1 or <meta name="google-site-verification" content="..." />'
+                        className="input"
+                        style={{ width: "100%", fontFamily: "monospace", fontSize: 13, background: "#fff" }}
+                      />
+                      <div style={{ marginTop: 10, fontSize: 12, color: "#475569" }}>
+                        <strong>Easy 3-Step Setup:</strong>
+                        <ol style={{ margin: "4px 0 0", paddingLeft: 18, lineHeight: 1.5 }}>
+                          <li>Go to <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer" style={{ color: "#2563EB" }}>Google Search Console</a> and add your store URL prefix.</li>
+                          <li>Choose <strong>HTML tag</strong> under &ldquo;Other verification methods&rdquo;.</li>
+                          <li>Copy the code and paste it above, then click Save below and verify in Google!</li>
+                        </ol>
+                      </div>
+                    </div>
+
+                    {/* Schema.org Rich Snippets Toggle */}
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "12px 14px", background: "var(--bg-subtle, #f9fafb)", borderRadius: 8, border: "1px solid var(--border, #e5e7eb)" }}>
+                      <input
+                        type="checkbox"
+                        id="richSnippetsEnabled"
+                        name="richSnippetsEnabled"
+                        defaultChecked={storeSettings?.richSnippetsEnabled ?? true}
+                        style={{ marginTop: 3 }}
+                      />
+                      <label htmlFor="richSnippetsEnabled" style={{ cursor: "pointer", fontSize: 13.5 }}>
+                        <strong style={{ display: "block" }}>Enable Schema.org Product Rich Snippets</strong>
+                        <span className="muted" style={{ fontSize: 12 }}>
+                          Automatically embeds JSON-LD structured data on all product pages with BDT pricing, stock availability, 7-day return policy, delivery details, and customer rating stars on Google.
+                        </span>
+                      </label>
+                    </div>
+
+                    <div style={{ marginTop: 8 }}>
+                      <button type="submit" className="btn btn-primary" disabled={isPending} style={{ width: "100%" }}>
+                        {isPending ? "Saving…" : "Save SEO & Search Optimization Settings"}
+                      </button>
+                    </div>
+                  </form>
+                );
+              })()}
 
               {/* 1. FACEBOOK CATALOG */}
               {activeModal === "facebook_catalog" && (

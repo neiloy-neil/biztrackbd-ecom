@@ -1135,3 +1135,107 @@ export async function testPlatformGoogleConnection(
     return { ok: false, latencyMs: Date.now() - started, message: "Could not reach Google Cloud endpoints." };
   }
 }
+
+export interface PlatformSeoConfigView {
+  title: string;
+  description: string;
+  keywords: string;
+  ogImageUrl: string;
+  sitemapUrl: string;
+  robotsUrl: string;
+  siteVerificationCode: string | null;
+  updatedAt: Date | null;
+  updatedBy: string | null;
+}
+
+export async function getPlatformSeoConfig(deps?: Deps): Promise<PlatformSeoConfigView> {
+  const db = dbOf(deps);
+  const rows = await db.platformConfig.findMany({
+    where: {
+      key: {
+        in: [
+          "platform_seo_title",
+          "platform_seo_description",
+          "platform_seo_keywords",
+          "platform_seo_og_image",
+          "google_site_verification",
+        ],
+      },
+    },
+  });
+  const map = new Map(rows.map((r: { key: string; value: string; updatedAt: Date; updatedBy: string | null }) => [r.key, r]));
+  const marketingUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "https://biztrack.bd";
+
+  const defaultTitle = "BizTrackBD: Online Store Software for Bangladesh";
+  const defaultDesc =
+    "Launch your online store in a day. Sell with bKash, Nagad, and Cash on Delivery. Book Pathao and Steadfast pickups straight from each order with 0% sales commission.";
+  const defaultKeywords =
+    "online store bangladesh, ecommerce website builder bangladesh, bkash payment gateway, nagad checkout, steadfast courier integration, pathao courier delivery, cash on delivery return protection, shopify alternative bangladesh, অনলাইন শপ তৈরি";
+
+  return {
+    title: map.get("platform_seo_title")?.value || defaultTitle,
+    description: map.get("platform_seo_description")?.value || defaultDesc,
+    keywords: map.get("platform_seo_keywords")?.value || defaultKeywords,
+    ogImageUrl: map.get("platform_seo_og_image")?.value || `${marketingUrl}/opengraph-image`,
+    sitemapUrl: `${marketingUrl}/sitemap.xml`,
+    robotsUrl: `${marketingUrl}/robots.txt`,
+    siteVerificationCode: cleanGoogleSiteVerification(map.get("google_site_verification")?.value || process.env.GOOGLE_SITE_VERIFICATION || null),
+    updatedAt: map.get("platform_seo_title")?.updatedAt ?? null,
+    updatedBy: map.get("platform_seo_title")?.updatedBy ?? null,
+  };
+}
+
+export async function savePlatformSeoConfig(
+  actor: PlatformActor,
+  input: {
+    title?: string;
+    description?: string;
+    keywords?: string;
+    ogImageUrl?: string;
+    siteVerificationCode?: string;
+  },
+  deps?: Deps,
+): Promise<{ ok: true }> {
+  assertPlatformAdmin(actor);
+  const db = dbOf(deps);
+
+  const setOrDel = async (key: string, val: string | undefined, desc: string) => {
+    if (val === undefined) return;
+    const cleaned = val.trim();
+    if (cleaned) {
+      await db.platformConfig.upsert({
+        where: { key },
+        create: { key, value: cleaned, description: desc, updatedBy: actor.email },
+        update: { value: cleaned, updatedBy: actor.email },
+      });
+    } else {
+      await db.platformConfig.deleteMany({ where: { key } });
+    }
+  };
+
+  await setOrDel("platform_seo_title", input.title, "biztrack.bd default SEO title");
+  await setOrDel("platform_seo_description", input.description, "biztrack.bd default SEO meta description");
+  await setOrDel("platform_seo_keywords", input.keywords, "biztrack.bd meta keywords");
+  await setOrDel("platform_seo_og_image", input.ogImageUrl, "biztrack.bd OpenGraph social share image");
+  if (input.siteVerificationCode !== undefined) {
+    const cleaned = cleanGoogleSiteVerification(input.siteVerificationCode) ?? "";
+    await setOrDel("google_site_verification", cleaned, "Google Search Console verification code");
+  }
+
+  await db.platformAuditLog.create({
+    data: {
+      actorId: actor.id,
+      action: "PLATFORM_SEO_CONFIG_UPDATED",
+      details: {
+        titleUpdated: input.title !== undefined,
+        descUpdated: input.description !== undefined,
+        keywordsUpdated: input.keywords !== undefined,
+        ogImageUpdated: input.ogImageUrl !== undefined,
+        siteVerificationUpdated: input.siteVerificationCode !== undefined,
+      },
+      ipAddress: actor.ip ?? null,
+    },
+  });
+
+  return { ok: true };
+}
