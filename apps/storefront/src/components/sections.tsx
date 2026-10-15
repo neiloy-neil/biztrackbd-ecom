@@ -9,6 +9,9 @@ import type { PageCtx } from "@/lib/page-ctx";
 import { renderPageBlock } from "./page-blocks";
 import { ProductCard } from "./product-card";
 import { tintFor } from "./product-image";
+import { GuaranteeStrip } from "./guarantee-strip";
+import { SocialProofTicker } from "./social-proof-ticker";
+import { ReviewsCarousel } from "./reviews-carousel";
 
 /**
  * Draws a page built in the editor. It has no server-only code, so the live store (server) and the editor's preview
@@ -52,7 +55,7 @@ export interface SectionExtras { langSwitch?: React.ReactNode }
 
 const PhoneIcon = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z" /></svg>;
 const WaIcon = ({ size = 18 }: { size?: number }) => <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .5l-.4.6-.3.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.6-.1l2 1c.3.1.5.2.6.3.1.2.1.8-.1 1.3z" /></svg>;
-const NO_REVEAL = new Set(["lp-header", "lp-hero", "lp-marquee", "lp-sticky-cta"]);
+const NO_REVEAL = new Set(["lp-header", "lp-hero", "lp-marquee", "lp-sticky-cta", "lp-social-proof"]);
 
 function Section({ section, data, lang, t, orderForm, ctx, landing, editing, site, pro, extras }: { section: PageSection; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx; landing?: LandingInfo; editing?: boolean; site?: SiteInfo; pro?: boolean; extras?: SectionExtras }) {
   const s = section.settings as S;
@@ -398,13 +401,76 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
           </div>
         </section>
       );
-    case "lp-sticky-cta":
+    case "lp-sticky-cta": {
+      const price = landing?.price;
+      const was = landing?.was;
+      const savings = was != null && price != null && was > price ? was - price : 0;
       return (
         <div className="lp-sticky" data-section={id}>
-          {pro && landing?.price != null && <div className="sum"><b>{money(landing.price, lang)}</b>{landing.was != null && landing.was > landing.price && <s>{money(landing.was, lang)}</s>}</div>}
-          <a href="#order" className={`btn btn-primary btn-round${pro ? "" : " btn-block"}`} {...ed("text")}>{L(s, "text", lang)}</a>
+          {price != null && (
+            <div className="sum">
+              <b>{money(price, lang)}</b>
+              {was != null && was > price && (
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <s>{money(was, lang)}</s>
+                  <span className="lp-sticky-save">{lang === "bn" ? `৳${savings} সাশ্রয়` : `Save ৳${savings}`}</span>
+                </div>
+              )}
+            </div>
+          )}
+          <a
+            href="#order-drawer"
+            data-open-drawer="true"
+            className={`btn btn-primary btn-round${pro ? "" : " btn-block"}`}
+            {...ed("text")}
+          >
+            {L(s, "text", lang) || (lang === "bn" ? "অর্ডার করুন" : "Order Now")}
+          </a>
         </div>
       );
+    }
+    case "lp-guarantee-strip": {
+      const items = [1, 2, 3, 4].map((i) => ({
+        icon: (i === 1 ? "cod" : i === 2 ? "delivery" : i === 3 ? "return" : "shield") as "cod" | "delivery" | "return" | "shield",
+        title: str(s[`badge${i}`]) || (i === 1 ? "Cash on Delivery" : i === 2 ? "Fast 24-48h Delivery" : i === 3 ? "3-Day Easy Return" : "100% Original Quality"),
+        titleBn: str(s[`badge${i}Bn`]),
+        subtitle: str(s[`sub${i}`]) || (i === 1 ? "Inspect & pay at your door" : i === 2 ? "Express delivery across BD" : i === 3 ? "Hassle-free size & product exchange" : "Direct from verified authentic suppliers"),
+        subtitleBn: str(s[`sub${i}Bn`]),
+      }));
+      return (
+        <div className="wrap" data-section={id}>
+          <section className="lp-block" style={{ padding: "16px 0" }}>
+            {L(s, "title", lang) && <h2 {...ed("title")} style={{ textAlign: "center", marginBottom: 20 }}>{L(s, "title", lang)}</h2>}
+            <GuaranteeStrip lang={lang} items={items} />
+          </section>
+        </div>
+      );
+    }
+    case "lp-social-proof": {
+      if (s.enabled === false) return null;
+      const interval = Number(s.interval) || 14;
+      return <SocialProofTicker lang={lang} intervalSec={interval} />;
+    }
+    case "lp-reviews-carousel": {
+      const items = (s.items as S[] | undefined) ?? [];
+      const revs = items.map((it) => ({
+        name: str(it.name) || "Customer",
+        location: str(it.location),
+        text: str(it.text),
+        rating: Number(it.rating) || 5,
+        photo: str(it.photo),
+      }));
+      return (
+        <div data-section={id}>
+          <ReviewsCarousel
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            items={revs}
+            lang={lang}
+          />
+        </div>
+      );
+    }
     case "countdown-timer": {
       const end = parseEndsAt(str(s.endsAt));
       const title = L(s, "title", lang);

@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { getPreview, getPublicLanding, getStoreInfo, getStorefrontTracking, verifyPreviewToken } from "@biztrackbd/core";
 import { setLanguage } from "@/app/actions";
 import { LandingOrderForm } from "@/components/landing-order-form";
+import { LandingDrawer } from "@/components/landing-drawer";
+import { SocialProofTicker } from "@/components/social-proof-ticker";
 import { PreviewBridge } from "@/components/preview-bridge";
 import { Sections, type LandingInfo } from "@/components/sections";
 import { ThemeStyle } from "@/components/theme-style";
@@ -106,6 +108,19 @@ export default async function LandingPage({ params, searchParams }: { params: Pr
           <Sections page={landing.page} data={data} lang={lang} t={t} orderForm={form} landing={info} site={site} extras={extras} />
         )}
       </main>
+      <LandingDrawer
+        slug={slug}
+        lang={lang}
+        s={pickStrings(lang, LP_FORM_KEYS)}
+        buttonText={buttonText || t("lpOrderSubmit")}
+        options={landing.options}
+        bump={landing.bump}
+        utm={{ source: sp.utm_source, campaign: sp.utm_campaign, medium: sp.utm_medium }}
+        track={!preview}
+      />
+      {!preview && !landing.page.sections.some((s) => s.type === "lp-social-proof") && (
+        <SocialProofTicker lang={lang} />
+      )}
       <footer className="lp-footer">{landing.product.title}<PlatformCredit t={t} /></footer>
     </>
   );

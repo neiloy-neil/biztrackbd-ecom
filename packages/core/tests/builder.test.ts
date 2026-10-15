@@ -513,9 +513,9 @@ describe("landing pages", () => {
       expect(normalizeSettings(clock, {}).endsAt).toBe("");
     });
 
-    it("ships ten templates that all validate, with no invented customer words and a hidden countdown", () => {
-      expect(LANDING_TEMPLATES).toHaveLength(10);
-      expect(new Set(LANDING_TEMPLATES.map((t) => t.id)).size).toBe(10);
+    it("ships templates that all validate, with no invented customer words and a hidden countdown", () => {
+      expect(LANDING_TEMPLATES).toHaveLength(13);
+      expect(new Set(LANDING_TEMPLATES.map((t) => t.id)).size).toBe(13);
       for (const t of LANDING_TEMPLATES) {
         expect(() => validatePage("landing", t.page), t.id).not.toThrow();
         const types = t.page.sections.map((x) => x.type);

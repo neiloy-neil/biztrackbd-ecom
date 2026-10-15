@@ -284,6 +284,64 @@ export const SECTIONS: SectionDef[] = [
     fields: [t("text", "Button text", 40), tb("text", "Button text", 40)],
     defaults: { text: "Order now", textBn: "অর্ডার করুন" },
   },
+  {
+    type: "lp-guarantee-strip", label: "Risk-reversal guarantee strip", description: "4-badge trust banner: Cash on Delivery, fast delivery, 3-day return, and 100% genuine guarantee.", page: "landing", pages: ["custom"], max: 2,
+    fields: [
+      t("title", "Heading (optional)", 80), tb("title", "Heading (optional)", 80),
+      t("badge1", "Badge 1 title", 40), tb("badge1", "Badge 1 title", 40),
+      t("sub1", "Badge 1 subtitle", 80), tb("sub1", "Badge 1 subtitle", 80),
+      t("badge2", "Badge 2 title", 40), tb("badge2", "Badge 2 title", 40),
+      t("sub2", "Badge 2 subtitle", 80), tb("sub2", "Badge 2 subtitle", 80),
+      t("badge3", "Badge 3 title", 40), tb("badge3", "Badge 3 title", 40),
+      t("sub3", "Badge 3 subtitle", 80), tb("sub3", "Badge 3 subtitle", 80),
+      t("badge4", "Badge 4 title", 40), tb("badge4", "Badge 4 title", 40),
+      t("sub4", "Badge 4 subtitle", 80), tb("sub4", "Badge 4 subtitle", 80),
+    ],
+    defaults: {
+      title: "Our Trust Guarantee", titleBn: "আমাদের বিশ্বস্ত সেবা",
+      badge1: "Cash on Delivery", badge1Bn: "ক্যাশ অন ডেলিভারি",
+      sub1: "Inspect & pay at your door", sub1Bn: "পণ্য দেখে মূল্য পরিশোধ",
+      badge2: "Fast 24-48h Delivery", badge2Bn: "দ্রুত ২৪-৪৮ ঘণ্টা ডেলিভারি",
+      sub2: "Express delivery across BD", sub2Bn: "সারা বাংলাদেশে দ্রুত হোম ডেলিভারি",
+      badge3: "3-Day Easy Return", badge3Bn: "৩ দিনে সহজ রিটার্ন",
+      sub3: "Hassle-free size & product exchange", sub3Bn: "সহজ রিটার্ন ও এক্সচেঞ্জ সুবিধা",
+      badge4: "100% Original Quality", badge4Bn: "১০০% আসল ও সেরা মান",
+      sub4: "Direct from verified authentic suppliers", sub4Bn: "শতভাগ আসল এবং প্রিমিয়াম মানের নিশ্চয়তা",
+    },
+  },
+  {
+    type: "lp-social-proof", label: "Live recent purchase ticker", description: "Floating popup toast showing simulated/real recent customer orders across Bangladesh.", page: "landing", max: 1,
+    fields: [
+      { key: "enabled", label: "Enable recent order popups", type: "checkbox" },
+      { key: "interval", label: "Seconds between notifications", type: "number", min: 8, max: 60 },
+      t("customNote", "Custom order text (optional)", 100), tb("customNote", "Custom order text (optional)", 100),
+    ],
+    defaults: { enabled: true, interval: 14, customNote: "", customNoteBn: "" },
+  },
+  {
+    type: "lp-reviews-carousel", label: "Customer reviews carousel", description: "Interactive touch slider for customer reviews with star ratings and verified buyer badges.", page: "landing", max: 1,
+    fields: [t("title", "Heading", 80), tb("title", "Heading", 80)],
+    list: {
+      key: "items", label: "Reviews", itemLabel: "Review", min: 1, max: 8,
+      fields: [
+        t("name", "Customer Name", 60),
+        t("location", "City / Area (e.g. Mirpur, Dhaka)", 60),
+        area("text", "Customer Review", 280),
+        { key: "rating", label: "Stars", type: "number", min: 1, max: 5 },
+        image("photo", "Customer photo / unboxing (optional)"),
+      ],
+      defaultItem: { name: "Tanvir Ahmed", location: "Uttara, Dhaka", text: "পণ্যটি সত্যিই অসাধারণ! ছবির সাথে মিল আছে এবং ডেলিভারিও খুব দ্রুত পেয়েছি।", rating: 5, photo: "" },
+    },
+    defaults: {
+      title: "Real Verified Customer Feedback",
+      titleBn: "গ্রাহকদের আসল মতামত ও রিভিউ",
+      items: [
+        { name: "Tanvir Ahmed", location: "Uttara, Dhaka", text: "পণ্যটি সত্যিই অসাধারণ! ছবির সাথে হুবহু মিল আছে এবং ২৪ ঘণ্টার মধ্যে ডেলিভারি পেয়েছি।", rating: 5, photo: "" },
+        { name: "Nusrat Jahan", location: "Chittagong", text: "খুব সুন্দর কোয়ালিটি এবং কাপড়ের ফিনিশিং দুর্দান্ত। ক্যাশ অন ডেলিভারিতে চেক করে নিতে পেরে নিশ্চিন্ত হয়েছি।", rating: 5, photo: "" },
+        { name: "Kamrul Hasan", location: "Mirpur, Dhaka", text: "সরাসরি হাতে পেয়ে টাকা দিয়েছি। প্যাকেজিং ও প্রডাক্ট কোয়ালিটি ১০০ তে ১০০!", rating: 5, photo: "" },
+      ],
+    },
+  },
 
   // ---- Modern High-Converting Sections (Store-wide: home, custom, product, collection, cart)
   {

@@ -38,7 +38,7 @@ const bn = (p: Pair) => p[1];
 interface Style {
   palette: string;
   marquee: Pair[];
-  layout: ("marquee" | "benefits" | "split0" | "split1" | "compare" | "steps" | "video" | "gallery" | "screens" | "urgency" | "faq")[];
+  layout: ("marquee" | "benefits" | "split0" | "split1" | "compare" | "steps" | "video" | "gallery" | "screens" | "urgency" | "faq" | "guarantee" | "social")[];
   compare?: { title: Pair; bad: Pair; good: Pair; rows: [Pair, Pair][] };
   steps?: { title: Pair; items: [Pair, Pair][] };
 }
@@ -70,6 +70,8 @@ function build(seed: Seed): LandingTemplate {
     screens: () => [sec("lp-screens", {})],
     urgency: () => [sec("lp-offer-bar", {}), sec("lp-stock", {}), sec("lp-countdown", {})],
     faq: () => [sec("lp-faq", { title: "Questions", titleBn: "প্রশ্ন", items: seed.faqs.map(([q, a]) => ({ q: en(q), qBn: bn(q), a: en(a), aBn: bn(a) })) })],
+    guarantee: () => [sec("lp-guarantee-strip", {})],
+    social: () => [sec("lp-social-proof", {})],
   };
   const sections: PageSection[] = [
     sec("lp-header", { palette: st.palette }),
@@ -178,6 +180,67 @@ const SEEDS: Seed[] = [
     split: [],
     faqs: [DELIVERY, PAY],
   },
+  {
+    id: "gadget_express",
+    name: ["Gadget & Electronics Express", "গ্যাজেট ও ইলেকট্রনিক্স এক্সপ্রেস"],
+    blurb: "High-converting single product gadget funnel with video showcase, specs, warranty, trust badges, and 1-click COD.",
+    badge: ["Official Warranty", "অফিশিয়াল ওয়ারেন্টি"],
+    headline: ["Engineered for everyday performance", "প্রতিদিনের কাজের নিখুঁত সঙ্গী"],
+    subhead: ["Compact design, premium build and real reliability. Watch it work, order now and pay when it arrives.", "কমপ্যাক্ট ডিজাইন, প্রিমিয়াম বিল্ড আর দুর্দান্ত পারফরম্যান্স। ভিডিওতে দেখুন, ক্যাশ অন ডেলিভারিতে অর্ডার করুন।"],
+    benefitsTitle: ["Why this gadget is a game-changer", "কেন এই গ্যাজেটটি সবার সেরা"],
+    benefits: [
+      [["Long-lasting battery", "দীর্ঘস্থায়ী ব্যাটারি"], ["Built for non-stop performance throughout your day.", "এক চার্জেই সারাদিনের নিশ্চিন্ত ব্যবহার।"]],
+      [["Smart & durable", "স্মার্ট ও মজবুত"], ["Rugged construction tested for heavy everyday use.", "দৈনন্দিন ব্যবহারের উপযোগী প্রিমিয়াম অ্যালয় বডি।"]],
+      [["Official Warranty", "অফিশিয়াল ওয়ারেন্টি"], ["Complete warranty and customer assistance across Bangladesh.", "সারা বাংলাদেশে পূর্ণ ওয়ারেন্টি ও সার্বক্ষণিক সাপোর্ট।"]],
+      [["Inspect, then pay", "দেখে নিশ্চিত হয়ে টাকা"], ["100% Cash on Delivery at your door.", "ক্যাশ অন ডেলিভারিতে চেক করে মূল্য পরিশোধ করুন।"]],
+    ],
+    split: [
+      { title: ["What is in the box", "বক্সে যা যা পাবেন"], text: ["1x Device, 1x High-speed cable, 1x Warranty card, User guide.", "১x ডিভাইস, ১x ফাস্ট চার্জিং কেবল, ১x ওয়ারেন্টি কার্ড ও ব্যবহার নির্দেশিকা।"] },
+      { title: ["Technical Specifications", "টেকনিক্যাল স্পেসিফিকেশন"], text: ["Battery, connectivity, dimensions and verified power standards.", "ব্যাটারি ব্যাকআপ, কানেক্টিভিটি রেঞ্জ, সাইজ ও অনুমোদিত সেফটি স্ট্যান্ডার্ড।"] },
+    ],
+    faqs: [PAY, DELIVERY, [["How do I claim warranty?", "ওয়ারেন্টি দাবি করব কীভাবে?"], ["Call our support hotline or WhatsApp us with your order number.", "আমাদের হটলাইন বা হোয়াটসঅ্যাপে অর্ডার নম্বর দিলেই সাথে সাথে ব্যবস্থা নেওয়া হবে।"]], RETURN],
+    urgency: true,
+  },
+  {
+    id: "fashion_multipack",
+    name: ["Fashion & Apparel Multi-Pack", "ফ্যাশন ও পোশাক মাল্টি-প্যাক"],
+    blurb: "Clothing & lifestyle funnel engineered for single-piece or multi-pack combos with size chart and guarantee strip.",
+    badge: ["Exclusive Edition", "এক্সক্লুসিভ কালেকশন"],
+    headline: ["Elevate your everyday style effortlessly", "প্রতিদিন স্টাইলিশ, আভিজাত্য ও আরাম একসাথে"],
+    subhead: ["Bespoke tailoring, breathable premium fabric and perfect fitting. Choose your favorite pack with instant COD.", "প্রিমিয়াম ফেব্রিক, নিখুঁত স্টিচিং আর আরামদায়ক ফিটিং। এখনই পছন্দের প্যাক বেছে নিন ক্যাশ অন ডেলিভারিতে।"],
+    benefitsTitle: ["Craftsmanship details", "আমাদের পোশাকের বিশেষত্ব"],
+    benefits: [
+      [["Breathable Cotton", "ব্রিদেবল কটন ফেব্রিক"], ["Ultra-soft fabric designed to keep you cool and fresh.", "অতিরিক্ত গরমেও সারাদিন ঠান্ডা ও আরামদায়ক অনুভূতি।"]],
+      [["Colorfast & Durable", "রং ও সেলাই দীর্ঘস্থায়ী"], ["Maintains its rich tone and neat seams wash after wash.", "যতবারই ধোবেন, রং ও ফেব্রিকের উজ্জ্বলতা থাকবে নতুনের মতো।"]],
+      [["Multi-Pack Savings", "মাল্টি-প্যাকে বিশেষ সাশ্রয়"], ["Save up to ৳200-৳400 when you buy 2 or 3 pieces together.", "একসাথে ২টি বা ৩টি কিনলে আকর্ষণীয় মূল্যছাড় ও ফ্রি ডেলিভারি।"]],
+      [["Easy Size Swap", "সহজ সাইজ বদল"], ["Size doesn't fit? We will swap it without any hassle.", "সাইজ না মিললে ৩ দিনের মধ্যে আমরা ফ্রিতে এক্সচেঞ্জ করে দেব।"]],
+    ],
+    split: [
+      { title: ["Fabric & Sizing Guide", "ফেব্রিক ও সাইজ নির্দেশিকা"], text: ["Check our detailed chest, length and shoulder measurements before ordering.", "অর্ডারের পূর্বে বুক, দৈর্ঘ্য ও শোল্ডারের বিস্তারিত মাপ দেখে সাইজ নিশ্চিত করুন।"] },
+    ],
+    faqs: [DELIVERY, [["Can I choose different colors in a multi-pack?", "মাল্টি-প্যাকে কি আলাদা আলাদা কালার নেওয়া যাবে?"], ["Yes, choose your desired colors or let us know when we call to confirm.", "হ্যাঁ, পছন্দের কালার সিলেক্ট করুন অথবা কনফার্মেশন কলের সময় জানিয়ে দিন।"]], PAY, RETURN],
+    urgency: true,
+  },
+  {
+    id: "organic_care",
+    name: ["Organic & Natural Care Funnel", "অর্গানিক ও ন্যাচারাল কেয়ার ফানেল"],
+    blurb: "Pure organic food, honey, herbal care and natural cosmetics with trust badges, routine guide, and customer proof.",
+    badge: ["100% Pure & Organic", "১০০% খাঁটি ও অর্গানিক"],
+    headline: ["Nature's finest care for you and your family", "প্রকৃতির সেরা উপাদানে আপনার ও পরিবারের যত্ন"],
+    subhead: ["Completely chemical-free, sourced directly from verified organic farms. Experience pure goodness every day.", "কোনো ভেজাল বা রাসায়নিক উপাদান ছাড়া সরাসরি নিজস্ব তত্ত্বাবধানে সংগৃহীত। আজই পরখ করে দেখুন।"],
+    benefitsTitle: ["Purity & Quality Promise", "আমাদের বিশুদ্ধতার অঙ্গীকার"],
+    benefits: [
+      [["Zero Preservatives", "কোনো রাসায়নিক প্রিজারভেটিভ নেই"], ["100% natural and unadulterated purity you can taste.", "সম্পূর্ণ ন্যাচারাল, কোনো কেমিক্যাল বা কৃত্রিম রঙ ব্যবহার করা হয় না।"]],
+      [["Lab Tested & Certified", "ল্যাব টেস্টে পরীক্ষিত ও অনুমোদিত"], ["Tested for authenticity and safety standards.", "নিরাপত্তা ও পুষ্টিমানের জন্য সম্পূর্ণ মানসম্মত ও পরীক্ষিত।"]],
+      [["Direct from Source", "সরাসরি মাঠ থেকে সংগৃহীত"], ["Fair-trade sourcing directly from local growers.", "মধ্যস্বত্বভোগী ছাড়া সরাসরি কৃষকদের কাছ থেকে সেরা মূল্যে সংগৃহীত।"]],
+      [["Pay After Delivery", "হাতে পেয়ে তারপর দাম দিন"], ["Check the parcel at your home before paying cash.", "বাসায় ডেলিভারি ম্যানের সামনে পণ্য দেখে নিশ্চিত হয়ে মূল্য দিন।"]],
+    ],
+    split: [
+      { title: ["How to use & store", "ব্যবহার ও সংরক্ষণের নিয়ম"], text: ["Simple instructions to maximize potency, freshness and benefits.", "সর্বোচ্চ কার্যকারিতা ও সতেজতা ধরে রাখার জন্য সহজ নির্দেশিকা।"] },
+    ],
+    faqs: [DELIVERY, PAY, [["How is freshness guaranteed?", "পণ্যের সতেজতা কীভাবে নিশ্চিত করা হয়?"], ["We bottle and pack in small hygienic batches just before shipping.", "অর্ডারের পর স্বাস্থ্যসম্মত উপায়ে সিলড প্যাক করে সাথে সাথেই পাঠানো হয়।"]], RETURN],
+    urgency: true,
+  },
 ];
 
 const STYLES: Record<string, Style> = {
@@ -226,6 +289,49 @@ const STYLES: Record<string, Style> = {
   minimal: {
     palette: "fresh", marquee: [["Cash on delivery", "ক্যাশ অন ডেলিভারি"], ["Easy exchange", "সহজ বদল"]],
     layout: ["benefits", "gallery", "faq"],
+  },
+  gadget_express: {
+    palette: "night",
+    marquee: [["Official Warranty Included", "অফিশিয়াল ওয়ারেন্টি সহ"], ["100% Cash on Delivery across BD", "সারা বাংলাদেশে ক্যাশ অন ডেলিভারি"], ["Fast 24-48h Delivery", "দ্রুত ২৪-৪৮ ঘণ্টা ডেলিভারি"]],
+    layout: ["video", "benefits", "split0", "compare", "screens", "urgency", "guarantee", "faq", "social"],
+    compare: {
+      title: ["Why Ours Beats the Market", "কেন আমাদেরটা বাজারের অন্য পণ্যের চেয়ে সেরা"],
+      bad: ["Cheap Alternatives", "সাধারণ নকল কপি"],
+      good: ["Our Authentic Device", "আমাদের আসল গ্যাজেট"],
+      rows: [
+        [["Low grade battery drains quickly", "দুর্বল ব্যাটারি দ্রুত শেষ হয়ে যায়"], ["High density battery lasts all day", "উচ্চ ক্ষমতার ব্যাটারি সারাদিন চলে"]],
+        [["No official warranty or hotline", "কোনো ওয়ারেন্টি বা হেল্পলাইন নেই"], ["Full official replacement warranty", "অফিশিয়াল ওয়ারেন্টি ও সার্বক্ষণিক সাপোর্ট"]],
+        [["Fragile plastic chassis", "ভঙ্গুর প্লাস্টিক বডি"], ["Engineered impact-resistant casing", "টেকসই ও শক-প্রুফ মজবুত বিল্ড"]],
+      ],
+    },
+  },
+  fashion_multipack: {
+    palette: "navy",
+    marquee: [["Buy 2 or More & Save Big", "২ বা ততোধিক কিনলে বিশাল ছাড়"], ["Cash on Delivery in 64 Districts", "৬৪ জেলায় ক্যাশ অন ডেলিভারি"], ["Free 3-Day Size Exchange", "৩ দিনের ফ্রি সাইজ এক্সচেঞ্জ"]],
+    layout: ["marquee", "benefits", "gallery", "split0", "compare", "screens", "urgency", "guarantee", "faq", "social"],
+    compare: {
+      title: ["Premium Fabric vs Ordinary", "আমাদের ফ্যাব্রিক বনাম বাজারের সাধারণ পোশাক"],
+      bad: ["Ordinary Market Pieces", "বাজারের সাধারণ পোশাক"],
+      good: ["Our Premium Garment", "আমাদের প্রিমিয়াম কালেকশন"],
+      rows: [
+        [["Fades & shrinks after 2 washes", "দুইবার ধুলেই রং চটে যায় ও ছোট হয়"], ["Colorfast cotton stays rich", "রং থাকে উজ্জ্বল ও ফিটিং থাকে অটুট"]],
+        [["Uneven, loose seam stitching", "ঢিলেঢালা অমসৃণ সেলাই"], ["Precision computerized stitching", "নিখুঁত কম্পিউটারাইজড সেলাই"]],
+        [["Complicated return process", "রিটার্ন বা বদল করা অসম্ভব"], ["Friendly same-day size exchange", "সহজ ও দ্রুত সাইজ বদলের সুবিধা"]],
+      ],
+    },
+  },
+  organic_care: {
+    palette: "fresh",
+    marquee: [["100% Natural & Chemical Free", "১০০% প্রাকৃতিক ও রাসায়নিকমুক্ত"], ["Direct Sourced From Verified Farms", "খাঁটি উৎসের নিশ্চয়তা"], ["Cash on Delivery", "হাতে পেয়ে টাকা দিন"]],
+    layout: ["marquee", "split0", "benefits", "steps", "screens", "urgency", "guarantee", "faq", "social"],
+    steps: {
+      title: ["Simple Daily Routine", "প্রতিদিনের সহজ ব্যবহার বিধি"],
+      items: [
+        [["Step 1: Prepare", "ধাপ ১: প্রস্তুত করুন"], ["Use the recommended portion clean and fresh.", "পরিষ্কার চামচ দিয়ে নির্দিষ্ট পরিমাণ প্রস্তুত করুন।"]],
+        [["Step 2: Apply or Consume", "ধাপ ২: নিয়মিত গ্রহণ করুন"], ["Follow morning or evening instructions diligently.", "সকাল বা রাতে নির্দেশিকা অনুযায়ী নিয়মিত ব্যবহার করুন।"]],
+        [["Step 3: Feel the Difference", "ধাপ ৩: উপকারিতা উপভোগ করুন"], ["Consistent pure routine delivers natural wellness.", "নিয়মিত ব্যবহারে কয়েক দিনের মধ্যেই পার্থক্য অনুভব করবেন।"]],
+      ],
+    },
   },
 };
 
