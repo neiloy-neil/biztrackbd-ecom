@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  DASHBOARD_RANGES, can, changePercent, getDashboard, getTenantActiveModules,
+  DASHBOARD_RANGES, can, changePercent, getDashboard, getTenantActiveModules, listConnectedCouriers,
   type SetupStep,
 } from "@biztrackbd/core";
 import { BoltIcon, BoxIcon, PlusIcon, SearchIcon, TagIcon } from "@/components/icons";
@@ -10,6 +10,7 @@ import { demoTick } from "@/lib/demo";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { OrderPill, PaymentPill } from "@/lib/status";
+import { DashboardOperationsClient } from "./dashboard-operations-client";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Merchant Command Center" };
@@ -35,9 +36,10 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const now = new Date();
   const range = Number(one(sp.range)) || 7;
 
-  const [d, activeModules] = await Promise.all([
+  const [d, activeModules, connectedCouriers] = await Promise.all([
     getDashboard(s.tenantId, s.actor, now, { range }),
     getTenantActiveModules(s.tenantId),
+    listConnectedCouriers(s.tenantId),
   ]);
 
   const showMoney = can(s.user.role, "reports");
@@ -129,6 +131,16 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
             >
               <SearchIcon width={15} height={15} />
               <span>Barcode Studio</span>
+            </Link>
+            <Link
+              href="/fraud?tab=check"
+              className="btn btn-sm btn-secondary"
+              style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600 }}
+              prefetch={false}
+              data-testid="dock-fraud"
+            >
+              <span style={{ fontSize: 13 }}>🛡️</span>
+              <span>Fraud Check</span>
             </Link>
             <Link
               href="/marketing/ai"
@@ -281,6 +293,16 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           </Link>
         </div>
       </section>
+
+      {/* Live Operations Cockpit: Real-time Telemetry, Fraud Radar & Bulk Dispatch Queue */}
+      <DashboardOperationsClient
+        telemetry={d.telemetry}
+        activityFeed={d.activityFeed}
+        fraudRadar={d.fraudRadar}
+        dispatchQueue={d.dispatchQueue}
+        connectedCouriers={connectedCouriers}
+        canEdit={can(s.user.role, "orders", "edit")}
+      />
 
       {/* 4-Tile Core KPI Grid */}
       <div className="grid grid-4" data-testid="dash-stats">

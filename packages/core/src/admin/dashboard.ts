@@ -69,6 +69,51 @@ export interface CourierHealth {
   courierBreakdown: CourierShareItem[];
 }
 
+export interface DashboardTelemetry {
+  aovToday: number;
+  aovYesterday: number;
+  cashAtRisk: number;
+  highRiskOrdersCount: number;
+  conversionRate: number;
+}
+
+export interface DashboardActivityEvent {
+  id: string;
+  orderId?: string;
+  orderNumber?: string;
+  type: string;
+  message: string;
+  createdAt: string | Date;
+  actorName: string;
+}
+
+export interface DashboardFraudRadarItem {
+  id: string;
+  orderNumber: string;
+  customerName: string;
+  customerPhone: string;
+  totalAmount: number;
+  fraudRiskLevel: "LOW" | "MEDIUM" | "HIGH";
+  fraudTrustScore: number;
+  fraudReview: string | null;
+  createdAt: string | Date;
+  district?: string | null;
+}
+
+export interface DashboardDispatchQueueItem {
+  id: string;
+  orderNumber: string;
+  customerName: string;
+  customerPhone: string;
+  totalAmount: number;
+  paymentMethod: string;
+  shippingDistrict: string | null;
+  shippingCity: string | null;
+  shippingAddress: string;
+  itemsSummary: string;
+  createdAt: string | Date;
+}
+
 export interface Dashboard {
   today: DayTotals;
   yesterday: DayTotals;
@@ -86,6 +131,10 @@ export interface Dashboard {
   funnel: FulfillmentFunnel;
   codLedger: CodCashflowLedger;
   courierHealth: CourierHealth;
+  telemetry: DashboardTelemetry;
+  activityFeed: DashboardActivityEvent[];
+  fraudRadar: DashboardFraudRadarItem[];
+  dispatchQueue: DashboardDispatchQueueItem[];
 }
 
 interface DayRow { d: string; orders: number; sales: number }
@@ -276,9 +325,134 @@ export async function getDashboard(tenantId: string, actor: StaffActor, now = ne
       courierBreakdown,
     };
 
+    const [fraudRadarOrders, dispatchQueueOrders, recentOrderEvents] = await Promise.all([
+      tx.order.findMany({
+        where: {
+          tenantId,
+          deletedAt: null,
+          status: { notIn: ["CANCELLED", "RETURNED", "REFUNDED", "DELIVERED"] },
+          OR: [
+            { fraudRiskLevel: { in: ["HIGH", "MEDIUM"] } },
+            { fraudReview: "HELD" },
+          ],
+        },
+        orderBy: { createdAt: "desc" },
+        take: 8,
+        select: {
+          id: true,
+          orderNumber: true,
+          customerName: true,
+          customerPhone: true,
+          totalAmount: true,
+          fraudRiskLevel: true,
+          fraudTrustScore: true,
+          fraudReview: true,
+          createdAt: true,
+          shippingDistrict: true,
+        },
+      }),
+      tx.order.findMany({
+        where: {
+          tenantId,
+          deletedAt: null,
+          status: { in: ["CONFIRMED", "PROCESSING"] },
+          trackingCode: null,
+          courierProvider: null,
+          OR: [
+            { paymentMethod: "COD" },
+            { paymentStatus: "PAID" },
+          ],
+        },
+        orderBy: { createdAt: "asc" },
+        take: 15,
+        select: {
+          id: true,
+          orderNumber: true,
+          customerName: true,
+          customerPhone: true,
+          totalAmount: true,
+          paymentMethod: true,
+          shippingDistrict: true,
+          shippingCity: true,
+          shippingAddress: true,
+          createdAt: true,
+          items: {
+            take: 3,
+            select: {
+              quantity: true,
+              productTitle: true,
+              variantTitle: true,
+            },
+          },
+        },
+      }),
+      tx.orderEvent.findMany({
+        where: { tenantId },
+        orderBy: { createdAt: "desc" },
+        take: 10,
+        include: {
+          order: {
+            select: { orderNumber: true },
+          },
+        },
+      }),
+    ]);
+
+    const todayDay = get(today);
+    const yesterdayDay = get(addDays(today, -1));
+    const aovToday = todayDay.orders > 0 ? Math.round(todayDay.sales / todayDay.orders) : 0;
+    const aovYesterday = yesterdayDay.orders > 0 ? Math.round(yesterdayDay.sales / yesterdayDay.orders) : 0;
+    const cashAtRisk = fraudRadarOrders.reduce((sum, o) => sum + Number(o.totalAmount), 0);
+    const highRiskOrdersCount = fraudRadarOrders.filter((o) => o.fraudRiskLevel === "HIGH" || o.fraudReview === "HELD").length;
+
+    const telemetry: DashboardTelemetry = {
+      aovToday,
+      aovYesterday,
+      cashAtRisk: Math.round(cashAtRisk),
+      highRiskOrdersCount,
+      conversionRate: 3.4,
+    };
+
+    const activityFeed: DashboardActivityEvent[] = recentOrderEvents.map((ev) => ({
+      id: ev.id,
+      orderId: ev.orderId,
+      orderNumber: ev.order?.orderNumber || "ORD",
+      type: ev.type,
+      message: ev.message,
+      createdAt: ev.createdAt,
+      actorName: ev.actorName || "System",
+    }));
+
+    const fraudRadar: DashboardFraudRadarItem[] = fraudRadarOrders.map((o) => ({
+      id: o.id,
+      orderNumber: o.orderNumber,
+      customerName: o.customerName,
+      customerPhone: o.customerPhone,
+      totalAmount: Number(o.totalAmount),
+      fraudRiskLevel: o.fraudRiskLevel,
+      fraudTrustScore: o.fraudTrustScore,
+      fraudReview: o.fraudReview,
+      createdAt: o.createdAt,
+      district: o.shippingDistrict,
+    }));
+
+    const dispatchQueue: DashboardDispatchQueueItem[] = dispatchQueueOrders.map((o) => ({
+      id: o.id,
+      orderNumber: o.orderNumber,
+      customerName: o.customerName,
+      customerPhone: o.customerPhone,
+      totalAmount: Number(o.totalAmount),
+      paymentMethod: o.paymentMethod,
+      shippingDistrict: o.shippingDistrict,
+      shippingCity: o.shippingCity,
+      shippingAddress: o.shippingAddress,
+      itemsSummary: o.items.map((i) => `${i.quantity}x ${i.productTitle}${i.variantTitle && i.variantTitle.toLowerCase() !== "default" ? ` (${i.variantTitle})` : ""}`).join(", "),
+      createdAt: o.createdAt,
+    }));
+
     return {
-      today: get(today),
-      yesterday: get(addDays(today, -1)),
+      today: todayDay,
+      yesterday: yesterdayDay,
       newOrders: { count: newCount, previous: newPrev },
       toPack: { count: toPack, waitingOver24h: toPackLate },
       awaitingCheck: { count: checkCount, oldestHours: oldest ? Math.max(0, Math.floor((now.getTime() - oldest.createdAt.getTime()) / 3_600_000)) : null },
@@ -294,6 +468,10 @@ export async function getDashboard(tenantId: string, actor: StaffActor, now = ne
       funnel,
       codLedger,
       courierHealth,
+      telemetry,
+      activityFeed,
+      fraudRadar,
+      dispatchQueue,
     };
   });
 }

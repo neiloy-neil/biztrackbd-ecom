@@ -42,6 +42,7 @@ export { adminSearch, shellCounts, type SearchHit, type ShellCounts } from "./ad
 export {
   getDashboard, DASHBOARD_RANGES, type DashboardRange, dhakaDate, addDays, STORE_TZ, type Dashboard, type SetupStep,
   type FunnelStage, type FulfillmentFunnel, type CodCashflowLedger, type CourierHealth, type CourierShareItem,
+  type DashboardTelemetry, type DashboardActivityEvent, type DashboardFraudRadarItem, type DashboardDispatchQueueItem,
 } from "./admin/dashboard";
 export { listInventory, adjustStock, updateStockSettings, listStockHistory, STOCK_REASONS, type InventoryRow, type InventorySummary, type StockFilter, type AdjustInput } from "./admin/inventory";
 export {
