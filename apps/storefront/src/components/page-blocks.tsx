@@ -9,6 +9,7 @@ import { Listing } from "./listing";
 import { ProductCard } from "./product-card";
 import { tintFor } from "./product-image";
 import { PurchasePanel } from "./purchase-panel";
+import { DropPreOrderCard } from "./drop-preorder-card";
 import { ProductBundlesCard } from "./product-bundles-card";
 import { ViewContent } from "./tracker";
 
@@ -59,6 +60,8 @@ export function ProductMain({ ctx, s, lang, t, id }: { ctx: ProductCtx; s: S; la
             <span className="price" data-testid="pdp-price">{money(p.price, lang)}</span>
             {onSale && <><span className="was">{money(p.compareAtPrice!, lang)}</span><span className="save">{t("save", { amount: money(p.compareAtPrice! - p.price, lang) })}</span></>}
           </div>
+
+          <DropPreOrderCard productId={p.id} lang={lang} />
 
           <PurchasePanel
             variants={p.variants.map((v) => ({ id: v.id, title: v.title, price: v.price, compareAtPrice: v.compareAtPrice, stock: v.stock }))}

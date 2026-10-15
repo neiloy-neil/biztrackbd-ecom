@@ -155,6 +155,69 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
         </div>
       );
 
+    case "drop-spotlight": {
+      const dropSlug = str(s.dropSlug);
+      const targetUrl = dropSlug ? `/drops/${encodeURIComponent(dropSlug)}` : "/";
+      const bg = str(s.bgColor) || "#0f172a";
+      const txt = str(s.textColor) || "#ffffff";
+      return (
+        <div className="wrap" data-section={id}>
+          <section
+            className="section"
+            style={{
+              background: bg,
+              color: txt,
+              borderRadius: 16,
+              padding: "40px 32px",
+              margin: "24px 0",
+              boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              textAlign: "center",
+              gap: 16,
+            }}
+          >
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "4px 12px",
+                borderRadius: 9999,
+                fontSize: 12,
+                fontWeight: 600,
+                letterSpacing: "0.05em",
+                textTransform: "uppercase",
+                background: "rgba(255, 255, 255, 0.12)",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+              }}
+            >
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#38bdf8" }} />
+              Limited Drop Spotlight
+            </div>
+            <h2 style={{ fontSize: "clamp(24px, 4vw, 36px)", fontWeight: 800, margin: 0, color: txt }} {...ed("title")}>
+              {L(s, "title", lang)}
+            </h2>
+            {L(s, "subtitle", lang) && (
+              <p style={{ maxWidth: 600, margin: 0, opacity: 0.85, fontSize: 16 }} {...ed("subtitle")}>
+                {L(s, "subtitle", lang)}
+              </p>
+            )}
+            <div style={{ marginTop: 8 }}>
+              {editing ? (
+                <span className="btn btn-primary" {...ed("ctaText")}>{L(s, "ctaText", lang)}</span>
+              ) : (
+                <Link href={targetUrl} className="btn btn-primary" style={{ background: "#38bdf8", color: "#0f172a", fontWeight: 700 }}>
+                  {L(s, "ctaText", lang)} &rarr;
+                </Link>
+              )}
+            </div>
+          </section>
+        </div>
+      );
+    }
+
     // ---- Landing
     case "lp-hero": {
       const img = str(s.image);

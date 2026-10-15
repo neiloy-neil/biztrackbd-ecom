@@ -410,3 +410,6 @@ export * from "./wholesale";
 
 // Affiliate & Influencer Commission Hub
 export * from "./affiliate/service";
+
+// Limited Drops & Pre-Orders Suite
+export * from "./drops";

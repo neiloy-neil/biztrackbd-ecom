@@ -49,3 +49,6 @@ checkup/logs/
 
 # Reference landing pages from a third-party bundle (not ours to publish)
 /Landing Page/
+
+# Office temporary lock files
+~$*

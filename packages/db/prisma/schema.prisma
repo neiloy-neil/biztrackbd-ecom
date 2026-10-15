@@ -168,6 +168,9 @@ model Tenant {
   affiliatePartners     AffiliatePartner[]
   affiliateReferrals    AffiliateReferral[]
   affiliatePayouts      AffiliatePayout[]
+  limitedDrops          LimitedDrop[]
+  dropProducts          DropProduct[]
+  dropSubscribers       DropWaitlistSubscriber[]
 
   @@index([subdomain])
   @@index([customDomain])
@@ -323,6 +326,7 @@ model Product {
   collections CollectionProduct[]
   bundleItems ProductBundleItem[]
   orderBumps  OrderBump[]
+  dropProducts DropProduct[]
 
   // SEO Fields
   seoTitle       String?
@@ -474,6 +478,8 @@ model Order {
   isWholesale         Boolean @default(false)
   advancePaidAmount   Decimal @default(0.00) @db.Decimal(12, 2)
   balanceDue          Decimal @default(0.00) @db.Decimal(12, 2)
+  isPreOrder          Boolean @default(false)
+  preOrderDropId      String?
   b2bCompanyName      String?
   b2bTaxId            String?
   b2bTradeLicense     String?
@@ -2561,3 +2567,87 @@ model AffiliatePayout {
   @@index([tenantId, affiliateId])
   @@index([tenantId, status])
 }
+
+// ==========================================
+// 26. LIMITED DROPS & PRE-ORDERS
+// ==========================================
+
+enum DropMode {
+  TEASER_WAITLIST
+  LIVE_PREORDER
+}
+
+enum DropStatus {
+  DRAFT
+  SCHEDULED
+  LIVE
+  ENDED
+  CANCELLED
+}
+
+enum DropDepositType {
+  NONE
+  FIXED
+  PERCENTAGE
+  FULL
+}
+
+model LimitedDrop {
+  id                String          @id @default(cuid())
+  tenantId          String
+  title             String
+  slug              String
+  description       String?         @db.Text
+  bannerImage       String?
+  mode              DropMode        @default(LIVE_PREORDER)
+  status            DropStatus      @default(DRAFT)
+  startsAt          DateTime
+  endsAt            DateTime?
+  estimatedShipDate DateTime?
+  depositType       DropDepositType @default(NONE)
+  depositValue      Decimal         @default(0.00) @db.Decimal(10, 2)
+  allocationCap     Int?
+  claimedUnits      Int             @default(0)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  tenant            Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  products          DropProduct[]
+  subscribers       DropWaitlistSubscriber[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId, status, startsAt])
+}
+
+model DropProduct {
+  id           String      @id @default(cuid())
+  tenantId     String
+  dropId       String
+  productId    String
+  variantId    String?
+  allocatedQty Int?
+
+  tenant       Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  drop         LimitedDrop @relation(fields: [dropId], references: [id], onDelete: Cascade)
+  product      Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([dropId, productId, variantId])
+  @@index([tenantId, dropId])
+}
+
+model DropWaitlistSubscriber {
+  id         String      @id @default(cuid())
+  tenantId   String
+  dropId     String
+  phone      String
+  name       String?
+  notifiedAt DateTime?
+  createdAt  DateTime    @default(now())
+
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  drop       LimitedDrop @relation(fields: [dropId], references: [id], onDelete: Cascade)
+
+  @@unique([dropId, phone])
+  @@index([tenantId, dropId, notifiedAt])
+}
+

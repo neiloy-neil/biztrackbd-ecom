@@ -59,6 +59,7 @@ const GROUPS: Group[] = [
     icon: <TagIcon />,
     items: [
       { href: "/marketing", label: "Overview", area: "marketing", exact: true },
+      { href: "/marketing/drops", label: "Limited Drops & Pre-Orders", area: "marketing", moduleKey: "limited_drops" },
       { href: "/marketing/bundles", label: "Bundles & Upsells", area: "marketing", moduleKey: "product_bundles" },
       { href: "/marketing/whatsapp", label: "WhatsApp Automation", area: "marketing", moduleKey: "whatsapp_commerce" },
       { href: "/marketing/affiliates", label: "Affiliates & Influencers", area: "marketing" },

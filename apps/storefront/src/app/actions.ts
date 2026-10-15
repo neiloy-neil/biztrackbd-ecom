@@ -9,6 +9,7 @@ import {
   getActiveBundlesForProduct,
   listWholesalePrices,
   getWholesaleCustomerProfile,
+  getActiveDropForProduct,
   type Quote,
   type StorefrontOrderBump,
   type StorefrontBundle,
@@ -117,6 +118,18 @@ export async function fetchVariantWholesaleAction(variantId: string): Promise<{
   } catch (e) {
     console.error("fetchVariantWholesaleAction failed", e);
     return { ok: false, breaks: [] };
+  }
+}
+
+/** Fetch active limited drop or pre-order campaign for a product */
+export async function fetchProductDropAction(productId: string) {
+  const store = await getStore();
+  try {
+    const drop = await getActiveDropForProduct(store.id, productId);
+    return { ok: true, drop };
+  } catch (e) {
+    console.error("fetchProductDropAction failed", e);
+    return { ok: false, drop: null };
   }
 }
 

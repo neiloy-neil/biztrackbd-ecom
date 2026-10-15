@@ -133,6 +133,22 @@ export default async function MarketingOverviewPage() {
           </Link>
         </div>
 
+        {/* Limited Drops & Pre-Orders */}
+        <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Limited Drops & Pre-Orders</h3>
+              <span className="pill green">Hype & Deposits</span>
+            </div>
+            <p className="muted" style={{ fontSize: 13, margin: "0 0 12px" }}>
+              Timed launch countdown clocks, buyer waitlists, and pre-orders with partial advance deposit collection and fulfillment hold protection.
+            </p>
+          </div>
+          <Link href="/marketing/drops" className="btn btn-secondary btn-sm" style={{ width: "100%", textAlign: "center" }} prefetch={false}>
+            Manage Limited Drops →
+          </Link>
+        </div>
+
         {/* Automated WhatsApp Commerce */}
         <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div>

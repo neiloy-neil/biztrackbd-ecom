@@ -110,6 +110,18 @@ export const SECTIONS: SectionDef[] = [
     type: "trust-strip", label: "Trust strip", description: "Cash on delivery, bKash and Nagad, delivery time and easy exchange, in four short lines.", page: "home", pages: ["custom", "product", "collection", "cart", "landing"], max: 1,
     fields: [], defaults: {},
   },
+  {
+    type: "drop-spotlight", label: "Drop countdown & pre-order", description: "Showcase an upcoming or live limited drop banner with link and call to action.", page: "home", pages: ["custom", "product", "collection"], max: 2,
+    fields: [
+      t("title", "Heading", 80), tb("title", "Heading", 80),
+      area("subtitle", "Subheading / Terms", 200), areab("subtitle", "Subheading / Terms", 200),
+      t("dropSlug", "Drop handle / slug", 80, { hint: "The slug of the drop from Marketing > Limited Drops" }),
+      t("ctaText", "Button text", 30), tb("ctaText", "Button text", 30),
+      { key: "bgColor", label: "Background colour", type: "color" },
+      { key: "textColor", label: "Text colour", type: "color" },
+    ],
+    defaults: { title: "Exclusive Limited Drop", titleBn: "এক্সক্লুসিভ লিমিটেড ড্রপ", subtitle: "Pre-order now before allocation caps run out.", subtitleBn: "স্টক শেষ হওয়ার আগেই প্রি-অর্ডার বুকিং করুন।", dropSlug: "", ctaText: "Explore Drop", ctaTextBn: "ড্রপ দেখুন", bgColor: "#0f172a", textColor: "#ffffff" },
+  },
 
   // ---- Product page (docs/39)
   {
