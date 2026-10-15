@@ -23,19 +23,30 @@ export async function generateMetadata(): Promise<Metadata> {
     getOrigin(),
     getStorefrontTracking(store.id),
   ]);
-  return {
-    metadataBase: new URL(origin),
-    title: { default: info.tagline ? `${info.storeName} | ${info.tagline}` : info.storeName, template: `%s | ${info.storeName}` },
-    description: info.tagline ?? `Shop online at ${info.storeName}. Cash on delivery, bKash and Nagad across Bangladesh.`,
-    openGraph: { siteName: info.storeName, type: "website", locale: store.locale.replace("-", "_") },
-    verification: {
-      google: tracking.googleSiteVerification ?? undefined,
-      other: tracking.metaDomainVerification
-        ? { "facebook-domain-verification": tracking.metaDomainVerification }
-        : undefined,
-    },
-  };
-}
+    const tokens = new Set<string>();
+    if (tracking.googleSiteVerification) {
+      tokens.add(tracking.googleSiteVerification);
+      const withoutExt = tracking.googleSiteVerification.replace(/\.html$/i, "");
+      tokens.add(withoutExt);
+      if (withoutExt.toLowerCase().startsWith("google")) {
+        tokens.add(withoutExt.slice(6));
+      }
+    }
+    const googleTokens = Array.from(tokens).filter(Boolean);
+
+    return {
+      metadataBase: new URL(origin),
+      title: { default: info.tagline ? `${info.storeName} | ${info.tagline}` : info.storeName, template: `%s | ${info.storeName}` },
+      description: info.tagline ?? `Shop online at ${info.storeName}. Cash on delivery, bKash and Nagad across Bangladesh.`,
+      openGraph: { siteName: info.storeName, type: "website", locale: store.locale.replace("-", "_") },
+      verification: {
+        google: googleTokens.length > 0 ? (googleTokens.length === 1 ? googleTokens[0] : googleTokens) : undefined,
+        other: tracking.metaDomainVerification
+          ? { "facebook-domain-verification": tracking.metaDomainVerification }
+          : undefined,
+      },
+    };
+  }
 
 export default async function StoreLayout({ children }: { children: React.ReactNode }) {
   const store = await findStore();

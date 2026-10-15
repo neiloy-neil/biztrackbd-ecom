@@ -1123,7 +1123,7 @@ export function AppStoreClient({
                       style={{ width: "100%" }}
                     />
                     <span className="hint" style={{ fontSize: 12, color: "var(--ink-3, #6B6B8D)", marginTop: 4, display: "block" }}>
-                      Injected automatically into your store &lt;head&gt; for domain ownership verification.
+                      Paste the Google Search Console HTML tag / token here to inject it into your store &lt;head&gt;. If using the HTML file method, your store handles it automatically—just click Verify in Search Console.
                     </span>
                   </div>
 

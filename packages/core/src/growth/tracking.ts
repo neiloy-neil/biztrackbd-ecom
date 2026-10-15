@@ -140,9 +140,19 @@ export async function savePixelId(tenantId: string, actor: StaffActor, input: st
 
 function cleanVerification(v?: string | null): string | null {
   if (!v) return null;
-  const s = v.trim();
+  let s = v.trim();
   const match = s.match(/content=["']([^"']+)["']/i);
-  return (match?.[1] ? match[1] : s).trim() || null;
+  if (match?.[1]) {
+    s = match[1].trim();
+  }
+  if (s.toLowerCase().startsWith("google-site-verification=")) {
+    s = s.slice("google-site-verification=".length).trim();
+  }
+  if (s.toLowerCase().startsWith("google-site-verification:")) {
+    s = s.slice("google-site-verification:".length).trim();
+  }
+  s = s.replace(/^["']|["']$/g, "").trim();
+  return s || null;
 }
 
 export async function saveTrackingConfig(

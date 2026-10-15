@@ -259,7 +259,8 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
                 data-testid="google-site-verification"
               />
               <span className="hint">
-                Copy from Google Search Console &rarr; Settings &rarr; Ownership verification &rarr; HTML tag. We extract the token and automatically inject it into your store &lt;head&gt;.
+                <b>Option 1 (HTML Tag):</b> Copy the meta tag or token from Google Search Console &rarr; Ownership verification &rarr; HTML tag and paste it here. We inject it into your store &lt;head&gt; automatically.<br />
+                <b>Option 2 (HTML File):</b> If Google gives you an HTML file (e.g. <code>googleXYZ.html</code>), your store serves it automatically at root—simply click <b>Verify</b> in Search Console without needing to upload anything!
               </span>
             </label>
 
