@@ -41,4 +41,5 @@ export type {
   WholesaleTier,
   WholesaleCustomer,
   WholesalePrice,
+  SupportQuickReply,
 } from "@prisma/client";

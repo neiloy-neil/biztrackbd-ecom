@@ -401,6 +401,8 @@ export * from "./whatsapp/deep-links";
 export * from "./whatsapp/session";
 export * from "./whatsapp/service";
 export * from "./whatsapp/bot";
+export * from "./whatsapp/quick-replies";
+export * from "./whatsapp/order-actions";
 
 // Wholesale & B2B Pricing Suite
 export * from "./wholesale";

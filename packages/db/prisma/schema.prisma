@@ -164,6 +164,7 @@ model Tenant {
   wholesaleTiers        WholesaleTier[]
   wholesaleCustomers    WholesaleCustomer[]
   wholesalePrices       WholesalePrice[]
+  supportQuickReplies   SupportQuickReply[]
 
   @@index([subdomain])
   @@index([customDomain])
@@ -246,6 +247,7 @@ model TenantUser {
   authUserId   String? // the Supabase Auth account this person signs in with; set the first time they sign in with the confirmed email
 
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  assignedWhatsAppConversations WhatsAppConversation[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -2337,15 +2339,18 @@ model WhatsAppConversation {
   lastMessageAt   DateTime                   @default(now())
   lastMessageText String?                    @db.Text
   assignedUserId  String?
+  botPausedUntil  DateTime?
   createdAt       DateTime                   @default(now())
   updatedAt       DateTime                   @updatedAt
 
-  tenant   Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  customer Customer?             @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  messages WhatsAppChatMessage[]
+  tenant       Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer     Customer?             @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  assignedUser TenantUser?           @relation(fields: [assignedUserId], references: [id], onDelete: SetNull)
+  messages     WhatsAppChatMessage[]
 
   @@unique([tenantId, customerPhone])
   @@index([tenantId, status, lastMessageAt])
+  @@index([tenantId, assignedUserId])
 }
 
 model WhatsAppChatMessage {
@@ -2364,6 +2369,23 @@ model WhatsAppChatMessage {
 
   @@index([conversationId, createdAt])
   @@index([tenantId])
+}
+
+model SupportQuickReply {
+  id        String   @id @default(cuid())
+  tenantId  String
+  shortcut  String   // e.g. "confirm", "bkash", "delivery", "address"
+  title     String   // e.g. "Order Confirmation"
+  body      String   @db.Text
+  category  String   @default("General") // "General" | "Orders" | "Payments" | "Delivery"
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, shortcut])
+  @@index([tenantId, category])
 }
 
 // ==========================================

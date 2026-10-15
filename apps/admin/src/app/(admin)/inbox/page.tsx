@@ -6,6 +6,8 @@ import {
   listContactMessages,
   markContactRead,
   listWhatsAppConversations,
+  listTenantStaffUsers,
+  listSupportQuickReplies,
   type ContactTab,
 } from "@biztrackbd/core";
 import { PageHeader } from "@biztrackbd/ui";
@@ -37,7 +39,12 @@ export default async function Inbox({
 
   // If viewing WhatsApp channel
   if (channel === "whatsapp") {
-    const waData = await listWhatsAppConversations(s.tenantId, { limit: 50 });
+    const [waData, staffUsers, quickReplies] = await Promise.all([
+      listWhatsAppConversations(s.tenantId, { limit: 100 }),
+      listTenantStaffUsers(s.tenantId),
+      listSupportQuickReplies(s.tenantId),
+    ]);
+
     return (
       <>
         <div className="page-head" style={{ marginBottom: 16 }}>
@@ -68,6 +75,9 @@ export default async function Inbox({
         </div>
 
         <WhatsAppDeskClient
+          currentUserId={s.user.id}
+          staffUsers={staffUsers}
+          initialQuickReplies={quickReplies}
           initialConversations={waData.conversations.map((c) => ({
             id: c.id,
             customerPhone: c.customerPhone,
@@ -76,13 +86,18 @@ export default async function Inbox({
             unreadCount: c.unreadCount,
             lastMessageText: c.lastMessageText,
             lastMessageAt: c.lastMessageAt,
-            customer: c.customer ? {
-              id: c.customer.id,
-              name: c.customer.name,
-              phone: c.customer.phone,
-              totalOrders: c.customer.totalOrders,
-              totalSpent: c.customer.totalSpent,
-            } : null,
+            assignedUserId: c.assignedUserId,
+            assignedUser: c.assignedUser,
+            botPausedUntil: c.botPausedUntil,
+            customer: c.customer
+              ? {
+                  id: c.customer.id,
+                  name: c.customer.name,
+                  phone: c.customer.phone,
+                  totalOrders: c.customer.totalOrders,
+                  totalSpent: c.customer.totalSpent,
+                }
+              : null,
           }))}
           canEdit={canEdit}
         />

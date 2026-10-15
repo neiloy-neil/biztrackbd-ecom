@@ -103,8 +103,9 @@ export async function processInboundWhatsAppMessage(
       },
     });
 
-    // If bot is disabled in store config, escalate to human staff
-    if (config && !config.botEnabled) {
+    // 5. Bot Handoff & Auto-Pause: If bot is disabled in store config, paused on this thread, or in OPEN human handling
+    const isBotPaused = conversation.botPausedUntil && conversation.botPausedUntil > new Date();
+    if ((config && !config.botEnabled) || isBotPaused || conversation.status === "OPEN") {
       await tx.whatsAppConversation.update({
         where: { id: conversation.id },
         data: { status: "OPEN" },
@@ -357,6 +358,7 @@ export async function listWhatsAppConversations(
   tenantId: string,
   options?: {
     status?: WhatsAppConversationStatus;
+    assignedUserId?: string | null;
     search?: string;
     limit?: number;
     offset?: number;
@@ -369,6 +371,9 @@ export async function listWhatsAppConversations(
     const where = {
       tenantId,
       ...(options?.status ? { status: options.status } : {}),
+      ...(options?.assignedUserId !== undefined
+        ? { assignedUserId: options.assignedUserId }
+        : {}),
       ...(options?.search
         ? {
             OR: [
@@ -388,6 +393,14 @@ export async function listWhatsAppConversations(
         take: limit,
         skip: offset,
         include: {
+          assignedUser: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+            },
+          },
           customer: {
             select: {
               id: true,
@@ -416,6 +429,14 @@ export async function getWhatsAppConversation(
     const conversation = await tx.whatsAppConversation.findFirst({
       where: { id: conversationId, tenantId },
       include: {
+        assignedUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
         customer: {
           include: {
             orders: {
@@ -426,6 +447,8 @@ export async function getWhatsAppConversation(
                 orderNumber: true,
                 status: true,
                 totalAmount: true,
+                advancePaidAmount: true,
+                balanceDue: true,
                 createdAt: true,
                 courierProvider: true,
                 trackingCode: true,
@@ -483,13 +506,16 @@ export async function sendStaffWhatsAppReply(
       },
     });
 
-    // Update conversation state
+    // Update conversation state: auto-pause bot for 24h & auto-assign if unassigned
+    const pauseUntil = new Date(Date.now() + 24 * 3600 * 1000);
     await tx.whatsAppConversation.update({
       where: { id: conversationId },
       data: {
         lastMessageText: text,
         lastMessageAt: new Date(),
         status: "RESOLVED",
+        botPausedUntil: pauseUntil,
+        assignedUserId: conversation.assignedUserId || staffUserId,
       },
     });
 
@@ -516,6 +542,69 @@ export async function setWhatsAppConversationStatus(
     return tx.whatsAppConversation.updateMany({
       where: { id: conversationId, tenantId },
       data: { status },
+    });
+  });
+}
+
+/**
+ * Assigns or reassigns a conversation to a staff user (or unassigns with null).
+ */
+export async function assignWhatsAppConversation(
+  tenantId: string,
+  conversationId: string,
+  staffUserId: string | null
+) {
+  return withTenant(tenantId, async (tx) => {
+    const pauseUntil = staffUserId ? new Date(Date.now() + 24 * 3600 * 1000) : undefined;
+    return tx.whatsAppConversation.update({
+      where: { id: conversationId, tenantId },
+      data: {
+        assignedUserId: staffUserId,
+        ...(staffUserId ? { status: "OPEN", botPausedUntil: pauseUntil } : {}),
+      },
+      include: {
+        assignedUser: {
+          select: { id: true, name: true, email: true, role: true },
+        },
+      },
+    });
+  });
+}
+
+/**
+ * Manually pauses or resumes the WhatsApp bot for an individual conversation thread.
+ */
+export async function setWhatsAppBotPause(
+  tenantId: string,
+  conversationId: string,
+  isPaused: boolean
+) {
+  return withTenant(tenantId, async (tx) => {
+    const pauseUntil = isPaused ? new Date(Date.now() + 24 * 3600 * 1000) : null;
+    return tx.whatsAppConversation.update({
+      where: { id: conversationId, tenantId },
+      data: {
+        botPausedUntil: pauseUntil,
+        status: isPaused ? "OPEN" : "BOT_HANDLED",
+      },
+    });
+  });
+}
+
+/**
+ * Lists active staff members for conversation assignment.
+ */
+export async function listTenantStaffUsers(tenantId: string) {
+  return withTenant(tenantId, async (tx) => {
+    return tx.tenantUser.findMany({
+      where: { tenantId, isActive: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      },
+      orderBy: { name: "asc" },
     });
   });
 }
