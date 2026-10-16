@@ -6,12 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default async function LeadsPage() {
   const session = await getSession();
-  const actor = {
-    userId: session.userId,
-    role: session.role as any,
-    email: session.email,
-    name: session.name,
-  };
+  const actor = session.actor;
 
   const { items, total, unreadCount } = await listSiteLeads(session.tenantId, actor);
 

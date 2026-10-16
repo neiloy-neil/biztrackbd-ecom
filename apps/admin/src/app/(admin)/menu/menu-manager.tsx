@@ -386,6 +386,8 @@ export function MenuManager({
                     name,
                     nameBn: nameBn || null,
                     description: description || null,
+                    sortOrder: editingCategory?.sortOrder ?? 0,
+                    isActive: true,
                   });
                   if (res.ok) {
                     setShowCategoryModal(false);
@@ -510,6 +512,7 @@ export function MenuManager({
                     imageUrl: imageUrl || null,
                     dietaryLabels: selectedLabels,
                     isAvailable: editingDish ? editingDish.isAvailable : true,
+                    sortOrder: editingDish?.sortOrder ?? 0,
                   });
                   if (res.ok) {
                     setShowDishModal(false);

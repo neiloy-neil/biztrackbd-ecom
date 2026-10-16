@@ -13,7 +13,7 @@ export async function updateLeadStatusAction(
   const session = await getSession();
   await updateSiteLeadStatus(
     session.tenantId,
-    { userId: session.userId, role: session.role as any, email: session.email, name: session.name },
+    session.actor,
     leadId,
     status,
     notes
@@ -30,7 +30,7 @@ export async function updateBookingStatusAction(
   const session = await getSession();
   await updateBookingRequestStatus(
     session.tenantId,
-    { userId: session.userId, role: session.role as any, email: session.email, name: session.name },
+    session.actor,
     bookingId,
     status,
     notes

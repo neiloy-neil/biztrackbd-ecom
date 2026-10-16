@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import type { Lang } from "@/lib/i18n-core";
 

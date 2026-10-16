@@ -70,7 +70,7 @@ export function LeadsManager({ initialLeads }: { initialLeads: LeadItem[] }) {
       await updateLeadStatusAction(leadId, newStatus);
       if (bookingId) {
         const bStatus: BookingRequestStatus =
-          newStatus === "WON" || newStatus === "CONFIRMED" ? "CONFIRMED"
+          newStatus === "QUALIFIED" || (newStatus as string) === "WON" || (newStatus as string) === "CONFIRMED" ? "CONFIRMED"
           : newStatus === "CONTACTED" ? "CONTACTED"
           : newStatus === "CLOSED" ? "DECLINED"
           : "REQUESTED";
@@ -173,7 +173,7 @@ export function LeadsManager({ initialLeads }: { initialLeads: LeadItem[] }) {
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {filtered.map((item) => {
-            const stColor = STATUS_COLORS[item.status] || STATUS_COLORS.NEW;
+            const stColor = STATUS_COLORS[item.status] ?? STATUS_COLORS.NEW ?? { bg: "#FEF3C7", text: "#92400E", border: "#FDE68A" };
             const waLink = getCleanWaLink(item.phone, item.name, item.id);
             const booking = item.bookingRequest;
 

@@ -24,7 +24,7 @@ export const UpsertCategorySchema = z.object({
   isActive: z.boolean().default(true),
 });
 
-export type UpsertCategoryInput = z.infer<typeof UpsertCategorySchema>;
+export type UpsertCategoryInput = z.input<typeof UpsertCategorySchema>;
 
 export const UpsertMenuItemSchema = z.object({
   id: z.string().optional(),
@@ -41,7 +41,7 @@ export const UpsertMenuItemSchema = z.object({
   sortOrder: z.number().int().default(0),
 });
 
-export type UpsertMenuItemInput = z.infer<typeof UpsertMenuItemSchema>;
+export type UpsertMenuItemInput = z.input<typeof UpsertMenuItemSchema>;
 
 export interface PublicMenuCategory {
   id: string;
