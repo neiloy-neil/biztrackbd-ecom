@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { Drawer, Segmented, useToast } from "@biztrackbd/ui";
 import {
   DEFAULT_THEME, FONT_LABELS, FONT_PAIRS, STYLE_FIELDS, contrast, editableField, newSection, sectionDef, sectionsFor, setByPath, validateTheme,
-  type Field, type ListSpec, type PageJson, type PageKind, type PageSection, type SectionDef, type ThemeSettings,
+  type Field, type ListSpec, type PageJson, type PageKind, type PageSection, type SectionDef, type ThemeSettings, type SiteMode, type BusinessVertical,
 } from "@biztrackbd/core/builder-client";
 import { ImagePicker } from "@/components/image-picker";
 import { LANDING_GROUPS, STORE_SECTION_CATEGORIES, SectionThumb } from "./section-thumbs";
@@ -43,6 +43,8 @@ interface Props {
   pages?: { key: string; label: string }[];
   /** Open on the Template / Page tab (after saving a landing page's details, whose notice lives there). */
   initialTab?: "theme";
+  siteMode?: SiteMode;
+  businessVertical?: BusinessVertical;
 }
 
 const DEVICE_WIDTH: Record<Device, number | null> = { desktop: null, tablet: 768, phone: 390 };
@@ -369,7 +371,7 @@ export function Builder(props: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [undo, redo]);
 
-  const defs = sectionsFor(kind);
+  const defs = sectionsFor(kind, { mode: props.siteMode, vertical: props.businessVertical });
   const count = (type: string) => page.sections.filter((s) => s.type === type).length;
   const full = (type: string) => { const d = sectionDef(type); return page.sections.length >= 30 || (!!d?.max && count(type) >= d.max); };
   const current = page.sections.find((s) => s.id === selected) ?? null;
@@ -506,7 +508,11 @@ export function Builder(props: Props) {
   async function switchPage(key: string) {
     setBusy(true);
     if (canEdit && touched.current) await flush();
-    router.push(key === "home" ? "/design" : `/design?page=${key}`);
+    if (key.startsWith("custom:")) {
+      router.push(`/pages/${key.slice(7)}`);
+    } else {
+      router.push(key === "home" ? "/design" : `/design?page=${key}`);
+    }
   }
   async function copyLink() {
     // The saved draft is what the link shows, so save first. The link works for two hours and shows nothing else about the store.
@@ -742,31 +748,52 @@ export function Builder(props: Props) {
           )}
         </div>
 
-        {kind !== "landing" && (
-          <div className="bld-cat-pills" role="tablist" aria-label="Section categories">
-            {STORE_SECTION_CATEGORIES.map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                role="tab"
-                aria-selected={libraryCategory === cat.id}
-                className={`bld-cat-pill${libraryCategory === cat.id ? " on" : ""}`}
-                onClick={() => setLibraryCategory(cat.id)}
-              >
-                {cat.icon ? <span>{cat.icon}</span> : null}
-                <span>{cat.title}</span>
-              </button>
-            ))}
-          </div>
-        )}
+        {kind !== "landing" && (() => {
+          let cats = [...STORE_SECTION_CATEGORIES];
+          if (props.siteMode === "PORTFOLIO") {
+            cats = cats.filter((c) => c.id !== "products");
+            const bIdx = cats.findIndex((c) => c.id === "business");
+            if (bIdx > 1) {
+              const [b] = cats.splice(bIdx, 1);
+              cats.splice(1, 0, b!);
+            }
+          }
+          return (
+            <div className="bld-cat-pills" role="tablist" aria-label="Section categories">
+              {cats.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={libraryCategory === cat.id}
+                  className={`bld-cat-pill${libraryCategory === cat.id ? " on" : ""}`}
+                  onClick={() => setLibraryCategory(cat.id)}
+                >
+                  {cat.icon ? <span>{cat.icon}</span> : null}
+                  <span>{cat.title}</span>
+                </button>
+              ))}
+            </div>
+          );
+        })()}
 
         {(() => {
-          const card = (d: (typeof defs)[number]) => (
-            <button key={d.type} type="button" className="bld-card bld-card-pic" disabled={full(d.type)} onClick={() => add(d.type)} data-testid={`lib-${d.type}`}>
-              <SectionThumb type={d.type} />
-              <span className="bld-card-txt"><b>{d.label}</b><span>{d.description}</span>{d.max && count(d.type) >= d.max && <em>Already on the page</em>}</span>
-            </button>
-          );
+          const card = (d: (typeof defs)[number]) => {
+            const isRecommended = Boolean(props.businessVertical && d.verticals?.includes(props.businessVertical));
+            return (
+              <button key={d.type} type="button" className="bld-card bld-card-pic" disabled={full(d.type)} onClick={() => add(d.type)} data-testid={`lib-${d.type}`}>
+                <SectionThumb type={d.type} />
+                <span className="bld-card-txt">
+                  <span className="row" style={{ gap: 6, alignItems: "center", justifyContent: "space-between" }}>
+                    <b>{d.label}</b>
+                    {isRecommended && <span className="pill ok" style={{ fontSize: 10, padding: "1px 5px", lineHeight: "14px" }}>Recommended</span>}
+                  </span>
+                  <span>{d.description}</span>
+                  {d.max && count(d.type) >= d.max && <em>Already on the page</em>}
+                </span>
+              </button>
+            );
+          };
 
           const q = librarySearch.trim().toLowerCase();
           const matchesSearch = (d: (typeof defs)[number]) => !q || d.label.toLowerCase().includes(q) || d.description.toLowerCase().includes(q) || d.type.toLowerCase().includes(q);

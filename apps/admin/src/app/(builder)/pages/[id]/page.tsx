@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { NotFoundError, can, createPreviewToken, customKey, listCustomPages, listVersions, loadForEdit } from "@biztrackbd/core";
+import type { SiteMode, BusinessVertical } from "@biztrackbd/core/builder-client";
+import { withTenant } from "@biztrackbd/db";
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { SubmitButton } from "@/components/ui";
 import { one } from "@/lib/query";
@@ -16,7 +18,15 @@ export default async function PageEdit({ params, searchParams }: { params: Promi
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   const s = await requireAccess("design");
   const canEdit = can(s.user.role, "design", "edit");
-  const row = (await listCustomPages(s.tenantId, s.actor)).find((p) => p.id === id);
+  const [allPages, tenantData] = await Promise.all([
+    listCustomPages(s.tenantId, s.actor),
+    withTenant(s.tenantId, (tx) =>
+      tx.tenant.findFirstOrThrow({
+        select: { siteMode: true, businessVertical: true },
+      })
+    ).catch(() => ({ siteMode: "ECOMMERCE", businessVertical: null })),
+  ]);
+  const row = allPages.find((p) => p.id === id);
   if (!row) notFound();
   const pageKey = customKey(id);
   const [state, versions] = await Promise.all([
@@ -30,6 +40,24 @@ export default async function PageEdit({ params, searchParams }: { params: Promi
   const err = one(sp.err);
   const done = one(sp.done);
   const DONE: Record<string, string> = { saved: "Saved.", live: "The page is live.", offline: "The page is no longer live." };
+
+  const siteMode = (tenantData.siteMode ?? "ECOMMERCE") as SiteMode;
+  const businessVertical = (tenantData.businessVertical ?? undefined) as BusinessVertical | undefined;
+
+  const pageChoices: { key: string; label: string }[] = siteMode === "PORTFOLIO"
+    ? [
+        { key: "home", label: "Home page" },
+        { key: "chrome", label: "Header and footer" },
+        ...allPages.map((cp) => ({ key: `custom:${cp.id}`, label: cp.title })),
+      ]
+    : [
+        { key: "home", label: "Home page" },
+        { key: "product", label: "Product page" },
+        { key: "collection", label: "Collection page" },
+        { key: "cart", label: "Cart page" },
+        { key: "chrome", label: "Header and footer" },
+        ...allPages.map((cp) => ({ key: `custom:${cp.id}`, label: `Page: ${cp.title}` })),
+      ];
 
   const header = (
     <>
@@ -60,6 +88,7 @@ export default async function PageEdit({ params, searchParams }: { params: Promi
       pageKey={pageKey}
       kind="custom"
       title={row.title}
+      pages={pageChoices}
       initialPage={state.page}
       initialTheme={state.theme}
       hasDraft={state.isDraft}
@@ -74,6 +103,8 @@ export default async function PageEdit({ params, searchParams }: { params: Promi
       exitHref="/pages"
       initialTab={err || (done && DONE[done]) ? "theme" : undefined}
       header={header}
+      siteMode={siteMode}
+      businessVertical={businessVertical}
     />
   );
 }

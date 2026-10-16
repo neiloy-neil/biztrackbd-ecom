@@ -1,14 +1,20 @@
 import { listCategories, listProducts, type CategoryCard, type ProductCard } from "../storefront/catalog";
 import { productKey, type PageJson } from "./registry";
+import { listContentItems, type SiteContentItem } from "../site/content-items";
+import { getPublicMenu, type PublicMenuCategory } from "../site/menu";
 
 /**
  * The live data a page's sections need. Prices and stock come from the database, never from the layout.
  * Products are keyed by what a section asks for ("new", "sale", "featured", "cat:<slug>"), so the same data can feed a page
  * that is edited live in the browser without another trip to the server.
+ *
+ * For BizTrack Business verticals, also carries active structured content items and public restaurant menus.
  */
 export interface PageData {
   products: Record<string, ProductCard[]>;
   categories: CategoryCard[];
+  contentItems?: Record<string, SiteContentItem[]>;
+  menu?: PublicMenuCategory[];
 }
 
 export const MAX_GRID = 12;
@@ -20,20 +26,52 @@ async function fetchKey(tenantId: string, key: string): Promise<ProductCard[]> {
   return (await listProducts(tenantId, { limit: MAX_GRID, sort: "newest" })).items;
 }
 
-/** For a published page: only what its sections use. With `everything`, every kind of grid (the editor preview). */
+const VERTICAL_SECTIONS = new Set([
+  "service-cards",
+  "team-grid",
+  "portfolio-grid",
+  "clinic-chambers",
+  "download-card",
+]);
+
+/** For a published page: only what its sections use. With `everything`, every kind of grid and vertical feed (the editor preview). */
 export async function loadPageData(tenantId: string, page: PageJson, opts: { everything?: boolean } = {}): Promise<PageData> {
   const keys = new Set<string>();
   let wantsCategories = !!opts.everything;
+  let wantsContentItems = !!opts.everything;
+  let wantsMenu = !!opts.everything;
+
   for (const s of page.sections) {
     if (s.disabled) continue;
     if (s.type === "featured-products") keys.add(productKey(s.settings as { source: string; categorySlug?: string }));
     if (s.type === "category-grid") wantsCategories = true;
+    if (VERTICAL_SECTIONS.has(s.type)) wantsContentItems = true;
+    if (s.type === "restaurant-menu") wantsMenu = true;
   }
   const categories = wantsCategories ? await listCategories(tenantId) : [];
   if (opts.everything) {
     for (const k of ["new", "sale", "featured"]) keys.add(k);
     for (const c of categories) keys.add(`cat:${c.slug}`);
   }
-  const entries = await Promise.all([...keys].map(async (k) => [k, await fetchKey(tenantId, k)] as const));
-  return { products: Object.fromEntries(entries), categories };
+
+  const [productEntries, rawItems, menu] = await Promise.all([
+    Promise.all([...keys].map(async (k) => [k, await fetchKey(tenantId, k)] as const)),
+    wantsContentItems ? listContentItems(tenantId, { isPublished: true }).catch(() => []) : Promise.resolve([]),
+    wantsMenu ? getPublicMenu(tenantId).catch(() => []) : Promise.resolve([]),
+  ]);
+
+  const contentItemsByKind: Record<string, SiteContentItem[]> = {};
+  for (const item of rawItems) {
+    if (!contentItemsByKind[item.kind]) {
+      contentItemsByKind[item.kind] = [];
+    }
+    contentItemsByKind[item.kind]!.push(item);
+  }
+
+  return {
+    products: Object.fromEntries(productEntries),
+    categories,
+    contentItems: contentItemsByKind,
+    menu,
+  };
 }

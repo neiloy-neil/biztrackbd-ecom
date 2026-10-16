@@ -28,6 +28,8 @@ import {
 } from "../src/platform/billing";
 import { createPublicLead } from "../src/site/leads";
 import { createPublicBooking } from "../src/site/bookings";
+import { SECTIONS, STORE_SECTION_CATEGORIES } from "../src/builder/registry";
+import { CUSTOM_PAGE_TEMPLATES } from "../src/builder/custom-pages";
 import type { SiteContentItem, SiteDownload } from "@biztrackbd/db";
 
 describe("BizTrack Business Architecture & Quality Gates (Phase 5)", () => {
@@ -295,6 +297,87 @@ describe("BizTrack Business Architecture & Quality Gates (Phase 5)", () => {
       expect(business?.priceMonthly).toBe(3990);
       expect(business?.features.hybridStore).toBe(true);
       expect(business?.features.teamProfiles).toBe(true);
+    });
+  });
+
+  describe("6. Theme & Page Builder Vertical Integration (Milestones 1-3)", () => {
+    it("features 'business' as top drawer category #2 after 'all'", () => {
+      expect(STORE_SECTION_CATEGORIES[0]?.id).toBe("all");
+      expect(STORE_SECTION_CATEGORIES[1]?.id).toBe("business");
+      expect(STORE_SECTION_CATEGORIES[1]?.title).toBe("Business & Verticals");
+    });
+
+    it("verifies all 10 vertical sections are registered in SECTIONS with proper categories and settings", () => {
+      const sectionTypes = [
+        "restaurant-menu",
+        "restaurant-hours-location",
+        "reservation-cta",
+        "doctor-hero",
+        "clinic-chambers",
+        "service-cards",
+        "team-grid",
+        "portfolio-grid",
+        "download-card",
+        "contact-form",
+      ];
+
+      for (const st of sectionTypes) {
+        const sec = SECTIONS.find((s) => s.type === st);
+        expect(sec).toBeDefined();
+        expect(sec?.label).toBeTruthy();
+        expect(sec?.description).toBeTruthy();
+      }
+
+      // Check specific vertical tags and defaults
+      const menuSec = SECTIONS.find((s) => s.type === "restaurant-menu");
+      expect(menuSec?.verticals).toContain("RESTAURANT");
+      expect(menuSec?.fields.some((f) => f.key === "source")).toBe(true);
+      expect(menuSec?.list?.key).toBe("items");
+
+      const serviceSec = SECTIONS.find((s) => s.type === "service-cards");
+      expect(serviceSec?.fields.some((f) => f.key === "source")).toBe(true);
+      expect(serviceSec?.fields.some((f) => f.key === "columns")).toBe(true);
+      expect(serviceSec?.list?.key).toBe("items");
+
+      const teamSec = SECTIONS.find((s) => s.type === "team-grid");
+      expect(teamSec?.fields.some((f) => f.key === "columns")).toBe(true);
+      expect(teamSec?.list?.key).toBe("items");
+
+      const portfolioSec = SECTIONS.find((s) => s.type === "portfolio-grid");
+      expect(portfolioSec?.fields.some((f) => f.key === "columns")).toBe(true);
+      expect(portfolioSec?.list?.key).toBe("items");
+
+      const businessCat = STORE_SECTION_CATEGORIES.find((c) => c.id === "business");
+      expect(businessCat?.types).toContain("contact-form");
+    });
+
+    it("provides all 5 vertical presets in CUSTOM_PAGE_TEMPLATES", () => {
+      const templateKeys = CUSTOM_PAGE_TEMPLATES.map((t) => t.id);
+      expect(templateKeys).toContain("services");
+      expect(templateKeys).toContain("portfolio");
+      expect(templateKeys).toContain("team");
+      expect(templateKeys).toContain("chambers");
+      expect(templateKeys).toContain("menu");
+
+      const servicesTpl = CUSTOM_PAGE_TEMPLATES.find((t) => t.id === "services");
+      expect(servicesTpl?.titleSuggestion).toBe("Services");
+      expect(servicesTpl?.build().sections.some((s) => s.type === "service-cards")).toBe(true);
+
+      const portfolioTpl = CUSTOM_PAGE_TEMPLATES.find((t) => t.id === "portfolio");
+      expect(portfolioTpl?.titleSuggestion).toBe("Portfolio");
+      expect(portfolioTpl?.build().sections.some((s) => s.type === "portfolio-grid")).toBe(true);
+
+      const teamTpl = CUSTOM_PAGE_TEMPLATES.find((t) => t.id === "team");
+      expect(teamTpl?.titleSuggestion).toBe("Our Team");
+      expect(teamTpl?.build().sections.some((s) => s.type === "team-grid")).toBe(true);
+
+      const chambersTpl = CUSTOM_PAGE_TEMPLATES.find((t) => t.id === "chambers");
+      expect(chambersTpl?.titleSuggestion).toBe("Chambers & Appointment");
+      expect(chambersTpl?.build().sections.some((s) => s.type === "clinic-chambers")).toBe(true);
+
+      const menuTpl = CUSTOM_PAGE_TEMPLATES.find((t) => t.id === "menu");
+      expect(menuTpl?.titleSuggestion).toBe("Menu");
+      expect(menuTpl?.build().sections.some((s) => s.type === "restaurant-menu")).toBe(true);
     });
   });
 });

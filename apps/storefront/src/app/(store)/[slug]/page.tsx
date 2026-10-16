@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { customKey, customPageIdBySlug, getPreview, getPublicCustomPage, getPublishedPage, getStoreInfo, loadPageData, verifyPreviewToken } from "@biztrackbd/core";
+import { customKey, customPageIdBySlug, getPreview, getPublicCustomPage, getPublishedPage, getStoreInfo, getTenantModeAndVertical, loadPageData, verifyPreviewToken } from "@biztrackbd/core";
 import { PreviewBridge } from "@/components/preview-bridge";
 import { Sections } from "@/components/sections";
 import { getLang, makeT } from "@/lib/i18n";
@@ -54,10 +54,22 @@ export default async function CleanRootStorePage({ params, searchParams }: { par
 
   const custom = await getPublicCustomPage(store.id, slug, preview ? { page: preview.page } : undefined);
   if (custom) {
-    const [info, lang] = await Promise.all([getStoreInfo(store.id), getLang(store.locale)]);
+    const [info, lang, modeMeta] = await Promise.all([
+      getStoreInfo(store.id),
+      getLang(store.locale),
+      getTenantModeAndVertical(store.id),
+    ]);
     const t = makeT(lang);
     const data = await loadPageData(store.id, custom.page, { everything: Boolean(preview) });
-    const site = { phone: info.contactPhone, whatsapp: info.whatsappNumber, address: info.addressLine };
+    const site = {
+      phone: info.contactPhone,
+      whatsapp: info.whatsappNumber,
+      address: info.addressLine,
+      logoUrl: info.logoUrl,
+      storeName: info.storeName,
+      siteMode: modeMeta.siteMode,
+      businessVertical: modeMeta.vertical ?? undefined,
+    };
     return (
       <article data-testid="store-page-sections" style={{ paddingBottom: 40 }}>
         {preview

@@ -54,6 +54,7 @@ export function PortfolioGridSection({
   subtitle,
   subtitleBn,
   projects = DEFAULT_SAMPLE_PROJECTS,
+  columns,
   lang,
 }: {
   title?: string;
@@ -61,11 +62,13 @@ export function PortfolioGridSection({
   subtitle?: string;
   subtitleBn?: string;
   projects?: ProjectItem[];
+  columns?: string;
   lang: Lang;
 }) {
   const heading = lang === "bn" && titleBn ? titleBn : title || (lang === "bn" ? "নির্বাচিত কাজ ও প্রজেক্ট" : "Featured Projects & Portfolio");
   const sub = lang === "bn" && subtitleBn ? subtitleBn : subtitle || (lang === "bn" ? "সাম্প্রতিক বাস্তবায়িত কিছু উল্লেখযোগ্য কাজের এক ঝলক" : "A curated selection of recently completed projects and client work");
   const list = projects && projects.length > 0 ? projects : DEFAULT_SAMPLE_PROJECTS;
+  const minCol = columns === "2" ? "360px" : columns === "4" ? "240px" : "300px";
 
   const categories = ["ALL", ...Array.from(new Set(list.map((p) => p.category)))];
   const [activeCategory, setActiveCategory] = useState("ALL");
@@ -109,7 +112,7 @@ export function PortfolioGridSection({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+          gridTemplateColumns: `repeat(auto-fit, minmax(${minCol}, 1fr))`,
           gap: 28,
         }}
       >

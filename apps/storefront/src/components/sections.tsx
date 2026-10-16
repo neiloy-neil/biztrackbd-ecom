@@ -12,14 +12,14 @@ import { tintFor } from "./product-image";
 import { GuaranteeStrip } from "./guarantee-strip";
 import { SocialProofTicker } from "./social-proof-ticker";
 import { ReviewsCarousel } from "./reviews-carousel";
-import { RestaurantMenuSection } from "./verticals/restaurant-menu";
+import { RestaurantMenuSection, type MenuCategoryData } from "./verticals/restaurant-menu";
 import { RestaurantHoursLocationSection } from "./verticals/restaurant-hours-location";
 import { ReservationCtaSection } from "./verticals/reservation-cta";
 import { DoctorHeroSection } from "./verticals/doctor-hero";
-import { ClinicChambersSection } from "./verticals/clinic-chambers";
-import { ServiceCardsSection } from "./verticals/service-cards";
-import { TeamGridSection } from "./verticals/team-grid";
-import { PortfolioGridSection } from "./verticals/portfolio-grid";
+import { ClinicChambersSection, type ChamberItem } from "./verticals/clinic-chambers";
+import { ServiceCardsSection, type ServiceItem } from "./verticals/service-cards";
+import { TeamGridSection, type TeamMember } from "./verticals/team-grid";
+import { PortfolioGridSection, type ProjectItem } from "./verticals/portfolio-grid";
 import { DownloadCardSection } from "./verticals/download-card";
 import { ContactFormSection } from "./verticals/contact-form";
 
@@ -59,7 +59,17 @@ export interface LandingInfo {
 }
 
 /** The store's own contact details, for the contact block of a page built from sections. They come from the store settings, never from the layout. */
-export interface SiteInfo { phone: string | null; whatsapp: string | null; address: string | null; logoUrl?: string | null; storeName?: string }
+export interface SiteInfo {
+  phone: string | null;
+  whatsapp: string | null;
+  address: string | null;
+  logoUrl?: string | null;
+  storeName?: string;
+  name?: string;
+  nameBn?: string;
+  siteMode?: string;
+  businessVertical?: string;
+}
 /** Things only the server can draw, handed in by the page (a server action cannot be imported into code the editor's preview also uses). */
 export interface SectionExtras { langSwitch?: React.ReactNode }
 
@@ -739,135 +749,322 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
         </div>
       );
     }
-    case "restaurant-menu":
+    case "restaurant-menu": {
+      let categories: MenuCategoryData[] | undefined;
+      if (s.source === "custom" && Array.isArray(s.items) && s.items.length > 0) {
+        const catMap = new Map<string, { id: string; name: string; nameBn?: string | null; items: any[] }>();
+        (s.items as S[]).forEach((it, idx) => {
+          const catName = str(it.category) || (lang === "bn" ? "মেন্যু" : "Menu");
+          if (!catMap.has(catName)) {
+            catMap.set(catName, {
+              id: `cat-${catMap.size + 1}`,
+              name: catName,
+              nameBn: str(it.categoryBn) || null,
+              items: [],
+            });
+          }
+          catMap.get(catName)!.items.push({
+            id: `custom-dish-${idx}`,
+            name: str(it.name),
+            nameBn: str(it.nameBn) || null,
+            description: str(it.description) || null,
+            descriptionBn: str(it.descriptionBn) || null,
+            price: Number(it.price) || 0,
+            dietaryTags: [
+              ...(it.isChefSpecial ? ["chef_special"] : []),
+              ...(it.isHalal !== false ? ["halal"] : []),
+            ],
+            isAvailable: true,
+          });
+        });
+        categories = Array.from(catMap.values());
+      } else if (data.menu && data.menu.length > 0) {
+        categories = data.menu.map((cat) => ({
+          id: cat.id,
+          name: cat.name,
+          nameBn: cat.nameBn,
+          items: cat.items.map((it) => ({
+            id: it.id,
+            name: it.name,
+            nameBn: it.nameBn,
+            description: it.description,
+            descriptionBn: it.descriptionBn,
+            price: it.price,
+            comparePrice: it.compareAtPrice,
+            imageUrl: it.imageUrl,
+            dietaryTags: it.dietaryLabels,
+            isAvailable: it.isAvailable,
+          })),
+        }));
+      }
+
       return (
-        <RestaurantMenuSection
-          title={str(s.title)}
-          titleBn={str(s.titleBn)}
-          subtitle={str(s.subtitle)}
-          subtitleBn={str(s.subtitleBn)}
-          showDietary={s.showDietary !== false}
-          lang={lang}
-          site={site}
-        />
+        <div data-section={id}>
+          <RestaurantMenuSection
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            subtitle={str(s.subtitle)}
+            subtitleBn={str(s.subtitleBn)}
+            categories={categories}
+            showDietary={s.showDietary !== false}
+            lang={lang}
+            site={site}
+          />
+        </div>
       );
+    }
     case "restaurant-hours-location":
       return (
-        <RestaurantHoursLocationSection
-          title={str(s.title)}
-          titleBn={str(s.titleBn)}
-          hoursWeekday={str(s.hoursWeekday)}
-          hoursWeekdayBn={str(s.hoursWeekdayBn)}
-          hoursWeekend={str(s.hoursWeekend)}
-          hoursWeekendBn={str(s.hoursWeekendBn)}
-          address={str(s.address)}
-          addressBn={str(s.addressBn)}
-          googleMapsUrl={str(s.googleMapsUrl)}
-          phone={str(s.phone) || site?.phone || undefined}
-          reservationLink={str(s.reservationLink) || "/reservations"}
-          lang={lang}
-        />
+        <div data-section={id}>
+          <RestaurantHoursLocationSection
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            hoursWeekday={str(s.hoursWeekday)}
+            hoursWeekdayBn={str(s.hoursWeekdayBn)}
+            hoursWeekend={str(s.hoursWeekend)}
+            hoursWeekendBn={str(s.hoursWeekendBn)}
+            address={str(s.address)}
+            addressBn={str(s.addressBn)}
+            googleMapsUrl={str(s.googleMapsUrl)}
+            phone={str(s.phone) || site?.phone || undefined}
+            reservationLink={str(s.reservationLink) || "/reservations"}
+            lang={lang}
+          />
+        </div>
       );
     case "reservation-cta":
       return (
-        <ReservationCtaSection
-          title={str(s.title)}
-          titleBn={str(s.titleBn)}
-          subtitle={str(s.subtitle)}
-          subtitleBn={str(s.subtitleBn)}
-          notice={str(s.notice)}
-          noticeBn={str(s.noticeBn)}
-          directPhone={str(s.directPhone) || site?.phone || undefined}
-          lang={lang}
-        />
+        <div data-section={id}>
+          <ReservationCtaSection
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            subtitle={str(s.subtitle)}
+            subtitleBn={str(s.subtitleBn)}
+            notice={str(s.notice)}
+            noticeBn={str(s.noticeBn)}
+            directPhone={str(s.directPhone) || site?.phone || undefined}
+            lang={lang}
+          />
+        </div>
       );
     case "doctor-hero":
       return (
-        <DoctorHeroSection
-          name={str(s.name)}
-          nameBn={str(s.nameBn)}
-          designation={str(s.designation)}
-          designationBn={str(s.designationBn)}
-          degrees={str(s.degrees)}
-          degreesBn={str(s.degreesBn)}
-          bmdcReg={str(s.bmdcReg)}
-          institute={str(s.institute)}
-          instituteBn={str(s.instituteBn)}
-          specialty={str(s.specialty)}
-          specialtyBn={str(s.specialtyBn)}
-          image={str(s.image)}
-          appointmentLink={str(s.appointmentLink) || "/appointment"}
-          lang={lang}
-        />
+        <div data-section={id}>
+          <DoctorHeroSection
+            name={str(s.name)}
+            nameBn={str(s.nameBn)}
+            designation={str(s.designation)}
+            designationBn={str(s.designationBn)}
+            degrees={str(s.degrees)}
+            degreesBn={str(s.degreesBn)}
+            bmdcReg={str(s.bmdcReg)}
+            institute={str(s.institute)}
+            instituteBn={str(s.instituteBn)}
+            specialty={str(s.specialty)}
+            specialtyBn={str(s.specialtyBn)}
+            image={str(s.image)}
+            appointmentLink={str(s.appointmentLink) || "/appointment"}
+            lang={lang}
+          />
+        </div>
       );
-    case "clinic-chambers":
+    case "clinic-chambers": {
+      let chambers: ChamberItem[] | undefined;
+      if (s.source === "custom" && Array.isArray(s.items) && s.items.length > 0) {
+        chambers = (s.items as S[]).map((it, idx) => ({
+          id: `chamber-${idx}`,
+          name: str(it.name),
+          nameBn: str(it.nameBn) || undefined,
+          hospital: str(it.name),
+          hospitalBn: str(it.nameBn) || undefined,
+          address: str(it.address),
+          addressBn: str(it.addressBn) || undefined,
+          days: str(it.schedule) || "Visiting Schedule",
+          daysBn: str(it.scheduleBn) || undefined,
+          hours: str(it.schedule) || "",
+          hoursBn: str(it.scheduleBn) || undefined,
+          phone: str(it.phone) || undefined,
+        }));
+      }
+
       return (
-        <ClinicChambersSection
-          title={str(s.title)}
-          titleBn={str(s.titleBn)}
-          subtitle={str(s.subtitle)}
-          subtitleBn={str(s.subtitleBn)}
-          appointmentLink={str(s.appointmentLink) || "/appointment"}
-          lang={lang}
-        />
+        <div data-section={id}>
+          <ClinicChambersSection
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            subtitle={str(s.subtitle)}
+            subtitleBn={str(s.subtitleBn)}
+            chambers={chambers}
+            appointmentLink={str(s.appointmentLink) || "/appointment"}
+            lang={lang}
+          />
+        </div>
       );
-    case "service-cards":
+    }
+    case "service-cards": {
+      let services: ServiceItem[] | undefined;
+      if (s.source === "custom" && Array.isArray(s.items) && s.items.length > 0) {
+        services = (s.items as S[]).map((it, idx) => ({
+          id: `service-${idx}`,
+          title: str(it.title),
+          titleBn: str(it.titleBn) || undefined,
+          description: str(it.description),
+          descriptionBn: str(it.descriptionBn) || undefined,
+          startingPrice: typeof it.startingPrice === "number" ? it.startingPrice : Number(it.startingPrice) || undefined,
+          icon: str(it.icon) || undefined,
+          ctaLink: str(it.ctaLink) || "/contact",
+        }));
+      } else if (data.contentItems?.SERVICE && data.contentItems.SERVICE.length > 0) {
+        services = data.contentItems.SERVICE.map((item) => {
+          const itemData = (item.data && typeof item.data === "object" ? item.data : {}) as Record<string, unknown>;
+          return {
+            id: item.id,
+            title: item.title,
+            titleBn: item.titleBn ?? undefined,
+            description: item.summary ?? "",
+            descriptionBn: item.summaryBn ?? undefined,
+            startingPrice: typeof itemData.priceStartingAt === "number" ? itemData.priceStartingAt : undefined,
+            icon: typeof itemData.icon === "string" ? itemData.icon : undefined,
+            ctaLink: typeof itemData.ctaUrl === "string" ? itemData.ctaUrl : "/contact",
+          };
+        });
+      }
+
       return (
-        <ServiceCardsSection
-          title={str(s.title)}
-          titleBn={str(s.titleBn)}
-          subtitle={str(s.subtitle)}
-          subtitleBn={str(s.subtitleBn)}
-          lang={lang}
-        />
+        <div data-section={id}>
+          <ServiceCardsSection
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            subtitle={str(s.subtitle)}
+            subtitleBn={str(s.subtitleBn)}
+            services={services}
+            columns={str(s.columns) || undefined}
+            lang={lang}
+          />
+        </div>
       );
-    case "team-grid":
+    }
+    case "team-grid": {
+      let members: TeamMember[] | undefined;
+      if (s.source === "custom" && Array.isArray(s.items) && s.items.length > 0) {
+        members = (s.items as S[]).map((it, idx) => ({
+          id: `team-${idx}`,
+          name: str(it.name),
+          nameBn: str(it.nameBn) || undefined,
+          role: str(it.role),
+          roleBn: str(it.roleBn) || undefined,
+          image: str(it.image) || undefined,
+          bio: str(it.bio) || undefined,
+          bioBn: str(it.bioBn) || undefined,
+        }));
+      } else if (data.contentItems?.TEAM && data.contentItems.TEAM.length > 0) {
+        members = data.contentItems.TEAM.map((item) => {
+          const itemData = (item.data && typeof item.data === "object" ? item.data : {}) as Record<string, unknown>;
+          return {
+            id: item.id,
+            name: item.title,
+            nameBn: item.titleBn ?? undefined,
+            role: str(itemData.role) || "Specialist",
+            roleBn: str(itemData.roleBn) || undefined,
+            image: item.mediaUrl ?? undefined,
+            bio: item.summary ?? undefined,
+            bioBn: item.summaryBn ?? undefined,
+          };
+        });
+      }
+
       return (
-        <TeamGridSection
-          title={str(s.title)}
-          titleBn={str(s.titleBn)}
-          subtitle={str(s.subtitle)}
-          subtitleBn={str(s.subtitleBn)}
-          lang={lang}
-        />
+        <div data-section={id}>
+          <TeamGridSection
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            subtitle={str(s.subtitle)}
+            subtitleBn={str(s.subtitleBn)}
+            members={members}
+            columns={str(s.columns) || undefined}
+            lang={lang}
+          />
+        </div>
       );
-    case "portfolio-grid":
+    }
+    case "portfolio-grid": {
+      let projects: ProjectItem[] | undefined;
+      if (s.source === "custom" && Array.isArray(s.items) && s.items.length > 0) {
+        projects = (s.items as S[]).map((it, idx) => ({
+          id: `project-${idx}`,
+          title: str(it.title),
+          titleBn: str(it.titleBn) || undefined,
+          category: str(it.category) || "Featured",
+          categoryBn: str(it.categoryBn) || undefined,
+          summary: str(it.description),
+          summaryBn: str(it.descriptionBn) || undefined,
+          image: str(it.image) || undefined,
+          projectUrl: str(it.link) || undefined,
+        }));
+      } else if (data.contentItems?.PORTFOLIO && data.contentItems.PORTFOLIO.length > 0) {
+        projects = data.contentItems.PORTFOLIO.map((item) => {
+          const itemData = (item.data && typeof item.data === "object" ? item.data : {}) as Record<string, unknown>;
+          return {
+            id: item.id,
+            title: item.title,
+            titleBn: item.titleBn ?? undefined,
+            category: str(itemData.clientName) || "Featured",
+            summary: item.summary ?? "",
+            summaryBn: item.summaryBn ?? undefined,
+            image: item.mediaUrl ?? undefined,
+            projectUrl: str(itemData.projectUrl) || undefined,
+          };
+        });
+      }
+
       return (
-        <PortfolioGridSection
-          title={str(s.title)}
-          titleBn={str(s.titleBn)}
-          subtitle={str(s.subtitle)}
-          subtitleBn={str(s.subtitleBn)}
-          lang={lang}
-        />
+        <div data-section={id}>
+          <PortfolioGridSection
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            subtitle={str(s.subtitle)}
+            subtitleBn={str(s.subtitleBn)}
+            projects={projects}
+            columns={str(s.columns) || undefined}
+            lang={lang}
+          />
+        </div>
       );
-    case "download-card":
+    }
+    case "download-card": {
+      const firstDownload = data.contentItems?.DOWNLOAD?.[0];
+      const downloadData = (firstDownload?.data && typeof firstDownload.data === "object" ? firstDownload.data : {}) as Record<string, unknown>;
       return (
-        <DownloadCardSection
-          title={str(s.title)}
-          titleBn={str(s.titleBn)}
-          description={str(s.description)}
-          descriptionBn={str(s.descriptionBn)}
-          fileUrl={str(s.fileUrl)}
-          fileLabel={str(s.fileLabel)}
-          buttonText={str(s.buttonText)}
-          buttonTextBn={str(s.buttonTextBn)}
-          lang={lang}
-        />
+        <div data-section={id}>
+          <DownloadCardSection
+            title={str(s.title) || firstDownload?.title || undefined}
+            titleBn={str(s.titleBn) || firstDownload?.titleBn || undefined}
+            description={str(s.description) || firstDownload?.summary || undefined}
+            descriptionBn={str(s.descriptionBn) || firstDownload?.summaryBn || undefined}
+            fileUrl={str(s.fileUrl) || firstDownload?.mediaUrl || undefined}
+            fileLabel={str(s.fileLabel) || (typeof downloadData.fileSize === "string" ? downloadData.fileSize : undefined)}
+            buttonText={str(s.buttonText)}
+            buttonTextBn={str(s.buttonTextBn)}
+            lang={lang}
+          />
+        </div>
       );
+    }
     case "contact-form":
       return (
-        <ContactFormSection
-          heading={str(s.heading)}
-          headingBn={str(s.headingBn)}
-          subhead={str(s.subhead)}
-          subheadBn={str(s.subheadBn)}
-          buttonText={str(s.buttonText)}
-          buttonTextBn={str(s.buttonTextBn)}
-          directPhone={str(s.directPhone)}
-          directEmail={str(s.directEmail)}
-          lang={lang}
-        />
+        <div data-section={id}>
+          <ContactFormSection
+            heading={str(s.heading)}
+            headingBn={str(s.headingBn)}
+            subhead={str(s.subhead)}
+            subheadBn={str(s.subheadBn)}
+            buttonText={str(s.buttonText)}
+            buttonTextBn={str(s.buttonTextBn)}
+            directPhone={str(s.directPhone) || site?.phone || undefined}
+            directEmail={str(s.directEmail)}
+            lang={lang}
+          />
+        </div>
       );
     default:
       // The product, collection and cart blocks (docs/39) need the page's own data.

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getKaporSettings, getPreview, listCategories, listProducts, loadPageData, verifyPreviewToken } from "@biztrackbd/core";
+import { getKaporSettings, getPreview, getStoreInfo, getTenantModeAndVertical, listCategories, listProducts, loadPageData, verifyPreviewToken } from "@biztrackbd/core";
 import { PreviewBridge } from "@/components/preview-bridge";
 import { getLang, pickStrings } from "@/lib/i18n";
 import { loadCollectionCtx, loadProductCtx } from "@/lib/page-layout";
@@ -33,7 +33,20 @@ export default async function Preview({ searchParams }: { searchParams: Promise<
   // The link carries a short-lived signed token for exactly this store. Anything else is a plain 404.
   if (verifyPreviewToken(token) !== store.id) notFound();
   const kind: Kind = (KINDS as readonly string[]).includes(wanted ?? "") ? (wanted as Kind) : "home";
-  const lang = await getLang(store.locale);
+  const [lang, storeInfo, modeMeta] = await Promise.all([
+    getLang(store.locale),
+    getStoreInfo(store.id),
+    getTenantModeAndVertical(store.id),
+  ]);
+  const site = {
+    phone: storeInfo.contactPhone,
+    whatsapp: storeInfo.whatsappNumber,
+    address: storeInfo.addressLine,
+    logoUrl: storeInfo.logoUrl,
+    storeName: storeInfo.storeName,
+    siteMode: modeMeta.siteMode,
+    businessVertical: modeMeta.vertical ?? undefined,
+  };
   const { page, theme } = await getPreview(store.id, kind);
   const data = await loadPageData(store.id, page, { everything: true });
 
@@ -50,5 +63,5 @@ export default async function Preview({ searchParams }: { searchParams: Promise<
     const settings = await getKaporSettings(store.id);
     ctx.cart = { freeOver: settings.freeDeliveryOver, s: pickStrings(lang, CART_STRINGS) };
   }
-  return <PreviewBridge kind={kind} initialPage={page} initialTheme={theme} data={data} lang={lang} adminOrigin={adminOrigin()} ctx={ctx} />;
+  return <PreviewBridge kind={kind} initialPage={page} initialTheme={theme} data={data} lang={lang} adminOrigin={adminOrigin()} ctx={ctx} site={site} />;
 }

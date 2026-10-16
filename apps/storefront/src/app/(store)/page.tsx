@@ -5,6 +5,7 @@ import {
   listCategories,
   listProducts,
   loadPageData,
+  getStoreInfo,
   getTenantModeAndVertical,
   getBusinessTemplateByVertical,
 } from "@biztrackbd/core";
@@ -18,21 +19,33 @@ export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const store = await getStore();
-  const lang = await getLang(store.locale);
+  const [lang, storeInfo, { siteMode, vertical }] = await Promise.all([
+    getLang(store.locale),
+    getStoreInfo(store.id),
+    getTenantModeAndVertical(store.id),
+  ]);
   const t = makeT(lang);
+  const site = {
+    phone: storeInfo.contactPhone,
+    whatsapp: storeInfo.whatsappNumber,
+    address: storeInfo.addressLine,
+    logoUrl: storeInfo.logoUrl,
+    storeName: storeInfo.storeName,
+    siteMode,
+    businessVertical: vertical ?? undefined,
+  };
 
   // A store that has published a layout in the editor shows it.
   const live = await getLive(store.id, "home");
-  if (live) return <Sections page={live.page} data={await loadPageData(store.id, live.page)} lang={lang} t={t} />;
+  if (live) return <Sections page={live.page} data={await loadPageData(store.id, live.page)} lang={lang} t={t} site={site} />;
 
   // Portfolio tenants without custom published layout render their curated vertical template manifest
-  const { siteMode, vertical } = await getTenantModeAndVertical(store.id);
   if (siteMode === "PORTFOLIO") {
     const template = getBusinessTemplateByVertical(vertical);
     const fallbackHome = template?.pages.home;
     if (fallbackHome) {
       const data = await loadPageData(store.id, fallbackHome);
-      return <Sections page={fallbackHome} data={data} lang={lang} t={t} />;
+      return <Sections page={fallbackHome} data={data} lang={lang} t={t} site={site} />;
     }
   }
 

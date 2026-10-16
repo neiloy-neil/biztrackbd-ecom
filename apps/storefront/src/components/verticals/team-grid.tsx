@@ -50,6 +50,7 @@ export function TeamGridSection({
   subtitle,
   subtitleBn,
   members = DEFAULT_SAMPLE_TEAM,
+  columns,
   lang,
 }: {
   title?: string;
@@ -57,11 +58,13 @@ export function TeamGridSection({
   subtitle?: string;
   subtitleBn?: string;
   members?: TeamMember[];
+  columns?: string;
   lang: Lang;
 }) {
   const heading = lang === "bn" && titleBn ? titleBn : title || (lang === "bn" ? "আমাদের টিম" : "Leadership & Team");
   const sub = lang === "bn" && subtitleBn ? subtitleBn : subtitle || (lang === "bn" ? "অভিজ্ঞ ও নিবেদিত পেশাদারদের সমাহার" : "Meet the experienced specialists dedicated to your success");
   const list = members && members.length > 0 ? members : DEFAULT_SAMPLE_TEAM;
+  const minCol = columns === "2" ? "320px" : columns === "4" ? "220px" : "260px";
 
   return (
     <section className="wrap" style={{ padding: "48px 0" }}>
@@ -73,7 +76,7 @@ export function TeamGridSection({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+          gridTemplateColumns: `repeat(auto-fit, minmax(${minCol}, 1fr))`,
           gap: 28,
         }}
       >

@@ -56,6 +56,7 @@ export function ServiceCardsSection({
   subtitle,
   subtitleBn,
   services = DEFAULT_SAMPLE_SERVICES,
+  columns,
   lang,
 }: {
   title?: string;
@@ -63,11 +64,13 @@ export function ServiceCardsSection({
   subtitle?: string;
   subtitleBn?: string;
   services?: ServiceItem[];
+  columns?: string;
   lang: Lang;
 }) {
   const heading = lang === "bn" && titleBn ? titleBn : title || (lang === "bn" ? "আমাদের সেবাসমূহ" : "Our Services");
   const sub = lang === "bn" && subtitleBn ? subtitleBn : subtitle || (lang === "bn" ? "নিবেদিত পেশাদারদের দ্বারা দক্ষ ও নির্ভরযোগ্য সমাধান" : "Reliable, high-quality services delivered by certified professionals");
   const list = services && services.length > 0 ? services : DEFAULT_SAMPLE_SERVICES;
+  const minCol = columns === "2" ? "340px" : columns === "4" ? "240px" : "280px";
 
   return (
     <section className="wrap" style={{ padding: "48px 0" }}>
@@ -79,7 +82,7 @@ export function ServiceCardsSection({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+          gridTemplateColumns: `repeat(auto-fit, minmax(${minCol}, 1fr))`,
           gap: 24,
         }}
       >

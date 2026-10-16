@@ -78,6 +78,47 @@ export const CUSTOM_PAGE_TEMPLATES: CustomPageTemplate[] = [
       sec("lp-faq", 1, { title: "Questions", titleBn: "প্রশ্ন", items: [{ q: "How long does delivery take?", qBn: "ডেলিভারি পেতে কত সময় লাগে?", a: "1 to 2 days inside Dhaka and 3 to 4 days outside. We call before we send it.", aBn: "ঢাকার ভেতরে ১-২ দিন, ঢাকার বাইরে ৩-৪ দিন। পাঠানোর আগে আমরা ফোন করি।" }, { q: "What if something is wrong?", qBn: "কিছু ভুল হলে কী হবে?", a: "Check the parcel when it arrives and tell us the same day. We will exchange it or refund you.", aBn: "পণ্য পেয়ে দেখে নিন এবং সেদিনই জানান। আমরা বদল বা ফেরত দেব।" }] }),
     ] }),
   },
+  {
+    id: "services", name: "Services & Pricing", blurb: "Professional service offerings, transparent pricing, FAQs, and quote contact form.", titleSuggestion: "Services", slugSuggestion: "services",
+    build: () => validatePage("custom", { version: 1, sections: [
+      sec("service-cards", 1, { title: "Our Professional Services", titleBn: "আমাদের সেবাসমূহ", subtitle: "Reliable and certified solutions tailored to your business needs", subtitleBn: "আপনার ব্যবসার প্রয়োজন অনুযায়ী নির্ভরযোগ্য ও সার্টিফাইড সেবা", source: "auto", columns: "3" }),
+      sec("accordion-faq", 1, { title: "Frequently Asked Questions", titleBn: "সাধারণ জিজ্ঞাসা", items: [{ q: "How do I request a custom quotation?", qBn: "কীভাবে কাস্টম কোটেশন পাব?", a: "Submit the inquiry form below or message us on WhatsApp with your requirements.", aBn: "নিচের ফর্মটি পূরণ করুন বা আপনার চাহিদাসহ সরাসরি আমাদের হোয়াটসঅ্যাপ করুন।" }] }),
+      sec("contact-form", 1, { heading: "Request a Free Consultation", headingBn: "বিনামূল্যে পরামর্শের জন্য যোগাযোগ করুন", subhead: "Tell us about your project and we will respond with an estimate within 24 hours.", subheadBn: "আপনার প্রজেক্টের বিস্তারিত জানান, আমরা ২৪ ঘণ্টার মধ্যে প্রাক্কলন জানাব।" }),
+    ] }),
+  },
+  {
+    id: "portfolio", name: "Portfolio & Case Studies", blurb: "Curated project showcase, client case studies, brochure downloads, and inquiry CTA.", titleSuggestion: "Portfolio", slugSuggestion: "portfolio",
+    build: () => validatePage("custom", { version: 1, sections: [
+      sec("portfolio-grid", 1, { title: "Featured Client Projects", titleBn: "নির্বাচিত ক্লায়েন্ট প্রজেক্ট", subtitle: "Proven results delivered across diverse industries", subtitleBn: "বিভিন্ন খাতে সফলভাবে বাস্তবায়িত কিছু উল্লেখযোগ্য কাজ", source: "auto", columns: "3" }),
+      sec("download-card", 1, { title: "Download Company Credentials", titleBn: "কোম্পানি প্রোফাইল ডাউনলোড করুন", description: "Get our verified brochure with comprehensive client case studies.", descriptionBn: "সম্পূর্ণ কেস স্টাডি সহ আমাদের প্রাতিষ্ঠানিক পরিচিতিপত্র দেখতে পিডিএফ ডাউনলোড করুন।" }),
+      sec("contact-form", 1, { heading: "Have a Project in Mind?", headingBn: "নতুন কোনো প্রজেক্ট নিয়ে ভাবছেন?", subhead: "Let's collaborate to bring your vision to life.", subheadBn: "আপনার লক্ষ্য অর্জনে আমাদের টিম প্রস্তুত।" }),
+    ] }),
+  },
+  {
+    id: "team", name: "Team & Leadership", blurb: "Specialist photo profiles, professional credentials, leadership story, and contact details.", titleSuggestion: "Our Team", slugSuggestion: "team",
+    build: () => validatePage("custom", { version: 1, sections: [
+      sec("lp-text", 1, text(["Our Leadership & Team", "আমাদের পরিচালনা পর্ষদ ও টিম"], ["Meet the experienced leaders and dedicated specialists driving excellence every day.", "অভিজ্ঞ নেতৃত্ব ও নিবেদিত বিশেষজ্ঞদের সাথে পরিচিত হোন যারা প্রতিদিন সেরা সেবা নিশ্চিত করেন।"])),
+      sec("team-grid", 1, { title: "Specialists & Leaders", titleBn: "আমাদের বিশেষজ্ঞ ও লিডারবৃন্দ", subtitle: "Certified professionals with decades of combined expertise", subtitleBn: "দশকেরও বেশি সম্মিলিত অভিজ্ঞতাসম্পন্ন সার্টিফাইড বিশেষজ্ঞ", source: "auto", columns: "3" }),
+      sec("contact-form", 1, { heading: "Join Our Mission or Connect", headingBn: "আমাদের সাথে যোগাযোগ করুন", subhead: "Reach out to our leadership team directly.", subheadBn: "আমাদের টিমের সাথে সরাসরি যোগাযোগ করতে মেসেজ পাঠান।" }),
+    ] }),
+  },
+  {
+    id: "chambers", name: "Chambers & Appointments", blurb: "Doctor qualifications, chamber schedules, serial hotline numbers, and booking CTA.", titleSuggestion: "Chambers & Appointment", slugSuggestion: "appointment",
+    build: () => validatePage("custom", { version: 1, sections: [
+      sec("doctor-hero", 1, {}),
+      sec("clinic-chambers", 1, { title: "Chamber Schedules", titleBn: "চেম্বার ও সময়সূচি", subtitle: "Direct visiting hours and serial booking contacts", subtitleBn: "রোগী দেখার নির্ধারিত চেম্বার ও সিরিয়াল নম্বর", source: "auto" }),
+      sec("reservation-cta", 1, { title: "Request an Appointment", titleBn: "অ্যাপয়েন্টমেন্ট রিকোয়েস্ট", subtitle: "Submit preferred chamber and date. Our assistant will confirm by phone.", subtitleBn: "পছন্দের চেম্বার ও তারিখ সিলেক্ট করে রিকোয়েস্ট পাঠান। আমাদের সহকারী ফোনে নিশ্চিত করবেন।" }),
+      sec("accordion-faq", 1, { title: "Patient Guidance & FAQs", titleBn: "রোগীদের সাধারণ জিজ্ঞাসা", items: [{ q: "How early should I arrive at the chamber?", qBn: "চেম্বারে কতক্ষণ আগে পৌঁছাতে হবে?", a: "Please arrive 15 minutes before your allocated serial time.", aBn: "অনুগ্রহ করে আপনার নির্ধারিত সিরিয়াল সময়ের ১৫ মিনিট পূর্বে চেম্বারে উপস্থিত থাকুন।" }] }),
+    ] }),
+  },
+  {
+    id: "menu", name: "Restaurant Menu & Dining", blurb: "Interactive food & beverage menu, dietary highlights, hours & location, and table reservation.", titleSuggestion: "Menu", slugSuggestion: "menu",
+    build: () => validatePage("custom", { version: 1, sections: [
+      sec("restaurant-menu", 1, { title: "Full Dining Menu", titleBn: "আমাদের সম্পূর্ণ মেন্যু", subtitle: "Freshly prepared daily with 100% Halal authentic ingredients", subtitleBn: "প্রতিদিন খাঁটি উপাদানে প্রস্তুতকৃত ১০০% হালাল খাবার", source: "auto", showDietary: true }),
+      sec("restaurant-hours-location", 1, { title: "Dine-in Hours & Location", titleBn: "ডাইন-ইন সময়সূচি ও ঠিকানা" }),
+      sec("reservation-cta", 1, { title: "Reserve a Dining Table", titleBn: "টেবিল বুকিং রিকোয়েস্ট", subtitle: "Guarantee your table for family and corporate gatherings.", subtitleBn: "পারিবারিক বা কর্পোরেট আড্ডার জন্য অগ্রিম টেবিল নিশ্চিত করুন।" }),
+    ] }),
+  },
 ];
 
 export const customPageTemplate = (id: string | undefined | null): CustomPageTemplate | undefined => CUSTOM_PAGE_TEMPLATES.find((t) => t.id === id);

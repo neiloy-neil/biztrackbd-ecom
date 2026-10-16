@@ -57,6 +57,7 @@ export async function analyzeImportContentAction(
   sourceText: string,
   sourceUrl?: string
 ): Promise<{ ok: boolean; data: AnalyzedBusinessData }> {
+  await getSession();
   const text = sourceText.trim();
   const lines = text
     .split("\n")

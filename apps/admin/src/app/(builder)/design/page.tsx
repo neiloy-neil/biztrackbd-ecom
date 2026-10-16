@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { can, createPreviewToken, getBuilderAccess, listCategories, listPublishedTemplates, listChromeVersions, listFooterPages, listVersions, loadChromeForEdit, loadForEdit, templateUpdateAvailable } from "@biztrackbd/core";
+import {
+  can, createPreviewToken, getBuilderAccess, listCategories, listCustomPages,
+  listPublishedTemplates, listChromeVersions, listFooterPages, listVersions,
+  loadChromeForEdit, loadForEdit, templateUpdateAvailable
+} from "@biztrackbd/core";
+import type { SiteMode, BusinessVertical } from "@biztrackbd/core/builder-client";
 import { withTenant } from "@biztrackbd/db";
 import { SubmitButton } from "@/components/ui";
 import { applyTemplateUpdateAction } from "./actions";
@@ -14,23 +19,48 @@ import { ThemePicker } from "./theme-picker";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Store design" };
 
-// The pages every store has one layout of (docs/39). Landing pages are edited from their own list.
+// The pages every ecommerce store has one layout of (docs/39).
 const PAGES = [
   { key: "home", label: "Home page" },
   { key: "product", label: "Product page" },
   { key: "collection", label: "Collection page" },
   { key: "cart", label: "Cart page" },
 ] as const;
-// Every page of the editor's switcher, including the header and footer (which are not a page of sections).
-const PAGE_CHOICES = [...PAGES.map((p) => ({ key: p.key as string, label: p.label as string })), { key: "chrome", label: "Header and footer" }];
 
 export default async function Design({ searchParams }: { searchParams: Promise<{ page?: string; note?: string }> }) {
   const { page, note } = await searchParams;
   const pageKey = PAGES.find((p) => p.key === page)?.key ?? "home";
   const s = await requireAccess("design");
+
   if (page === "chrome") {
-    const [state, versions, categories, pages] = await Promise.all([loadChromeForEdit(s.tenantId, s.actor), listChromeVersions(s.tenantId, s.actor), listCategories(s.tenantId), listFooterPages(s.tenantId)]);
+    const [state, versions, categories, pages, tenantData, customPages] = await Promise.all([
+      loadChromeForEdit(s.tenantId, s.actor),
+      listChromeVersions(s.tenantId, s.actor),
+      listCategories(s.tenantId),
+      listFooterPages(s.tenantId),
+      withTenant(s.tenantId, (tx) =>
+        tx.tenant.findFirstOrThrow({
+          select: { siteMode: true },
+        })
+      ).catch(() => ({ siteMode: "ECOMMERCE" })),
+      listCustomPages(s.tenantId, s.actor).catch(() => []),
+    ]);
     const origin = storefrontOrigin(s.tenantSubdomain);
+    const siteMode = (tenantData.siteMode ?? "ECOMMERCE") as SiteMode;
+    const chromeChoices = siteMode === "PORTFOLIO"
+      ? [
+          { key: "home", label: "Home page" },
+          { key: "chrome", label: "Header and footer" },
+          ...customPages.map((cp) => ({ key: `custom:${cp.id}`, label: cp.title })),
+        ]
+      : siteMode === "HYBRID"
+      ? [
+          ...PAGES.map((p) => ({ key: p.key as string, label: p.label as string })),
+          { key: "chrome", label: "Header and footer" },
+          ...customPages.map((cp) => ({ key: `custom:${cp.id}`, label: `Page: ${cp.title}` })),
+        ]
+      : [...PAGES.map((p) => ({ key: p.key as string, label: p.label as string })), { key: "chrome", label: "Header and footer" }];
+
     return (
       <ChromeEditor
         key={`${state.publishedVersion}-${state.isDraft}-${versions.length}-${state.stamp}`}
@@ -47,19 +77,48 @@ export default async function Design({ searchParams }: { searchParams: Promise<{
         liveUrl={origin}
         categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
         pages={pages}
-        pageChoices={PAGE_CHOICES}
+        pageChoices={chromeChoices}
       />
     );
   }
-  const [state, versions, access] = await Promise.all([loadForEdit(s.tenantId, s.actor, pageKey), listVersions(s.tenantId, s.actor, pageKey), getBuilderAccess(s.tenantId)]);
+
+  const [state, versions, access, tenantData, customPages] = await Promise.all([
+    loadForEdit(s.tenantId, s.actor, pageKey),
+    listVersions(s.tenantId, s.actor, pageKey),
+    getBuilderAccess(s.tenantId),
+    withTenant(s.tenantId, (tx) =>
+      tx.tenant.findFirstOrThrow({
+        select: { templateId: true, siteMode: true, businessVertical: true },
+      })
+    ).catch(() => ({ templateId: null, siteMode: "ECOMMERCE", businessVertical: null })),
+    listCustomPages(s.tenantId, s.actor).catch(() => []),
+  ]);
+
   const origin = storefrontOrigin(s.tenantSubdomain);
   const canEdit = can(s.user.role, "design", "edit");
   const token = createPreviewToken(s.tenantId);
-  const label = PAGES.find((p) => p.key === pageKey)!.label;
+  const label = PAGES.find((p) => p.key === pageKey)?.label ?? "Custom page";
+  const siteMode = (tenantData.siteMode ?? "ECOMMERCE") as SiteMode;
+  const businessVertical = (tenantData.businessVertical ?? undefined) as BusinessVertical | undefined;
+
+  const pageChoices: { key: string; label: string }[] = siteMode === "PORTFOLIO"
+    ? [
+        { key: "home", label: "Home page" },
+        { key: "chrome", label: "Header and footer" },
+        ...customPages.map((cp) => ({ key: `custom:${cp.id}`, label: cp.title })),
+      ]
+    : siteMode === "HYBRID"
+    ? [
+        ...PAGES.map((p) => ({ key: p.key as string, label: p.label as string })),
+        { key: "chrome", label: "Header and footer" },
+        ...customPages.map((cp) => ({ key: `custom:${cp.id}`, label: `Page: ${cp.title}` })),
+      ]
+    : [...PAGES.map((p) => ({ key: p.key as string, label: p.label as string })), { key: "chrome", label: "Header and footer" }];
+
   // A newer version of the template this store started from (docs/46 stage 5): offered, never forced.
   const update = canEdit ? await templateUpdateAvailable(s.tenantId).catch(() => null) : null;
   const templates = pageKey === "home" ? await listPublishedTemplates().catch(() => []) : [];
-  const currentTemplate = pageKey === "home" ? await withTenant(s.tenantId, (tx) => tx.tenant.findFirstOrThrow({ select: { templateId: true } })).then((t) => t.templateId).catch(() => null) : null;
+  const currentTemplate = tenantData.templateId;
   const notice = (
     <>
       {note === "applied" && <div className="notice good" role="status" data-testid="template-applied">The new version of the template is in your drafts. Look through each page and press Publish when you like it. Your live store has not changed.</div>}
@@ -72,13 +131,14 @@ export default async function Design({ searchParams }: { searchParams: Promise<{
       )}
     </>
   );
+
   return (
     <Builder
       key={`${pageKey}-${state.publishedVersion}-${state.isDraft}-${versions.length}-${state.stamp}`}
       pageKey={pageKey}
       kind={state.kind}
-      title={pageKey === "home" ? "Store design" : label}
-      pages={PAGE_CHOICES}
+      title={pageKey === "home" ? (siteMode === "PORTFOLIO" ? "Website design" : "Store design") : label}
+      pages={pageChoices}
       initialPage={state.page}
       initialTheme={state.theme}
       hasDraft={state.isDraft}
@@ -93,9 +153,11 @@ export default async function Design({ searchParams }: { searchParams: Promise<{
       sectionsLocked={pageKey === "home" ? !access.sectionsEditable : !access.allPagesEditable}
       exitHref="/"
       initialTab={update || note ? "theme" : undefined}
+      siteMode={siteMode}
+      businessVertical={businessVertical}
       header={pageKey === "home"
         ? <>{notice}<ThemePicker active={state.themeId} canEdit={canEdit} /><TemplateSwitcher templates={templates} currentLook={state.themeId} currentTemplate={currentTemplate} canEdit={canEdit} /></>
-        : <>{notice}<div className="notice info" role="note">Colours, fonts and the template are set once for the whole store, on the <Link className="link" href="/design">Home page</Link>.</div></>}
+        : <>{notice}<div className="notice info" role="note">Colours, fonts and the template are set once for the whole website, on the <Link className="link" href="/design">Home page</Link>.</div></>}
     />
   );
 }
