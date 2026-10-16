@@ -20,6 +20,7 @@ const securityHeaders = (frameAncestors: string) => [
 ];
 
 const config: NextConfig = {
+  outputFileTracingRoot: resolve(process.cwd(), "../../"),
   transpilePackages: ["@biztrackbd/core", "@biztrackbd/db", "@biztrackbd/ui"],
   serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg", "pg"],
   async headers() {
