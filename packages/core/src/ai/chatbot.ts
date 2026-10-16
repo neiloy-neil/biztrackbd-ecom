@@ -54,10 +54,10 @@ export async function handleStorefrontChat(
   }
 
   return withTenant(tenantId, async (tx) => {
-    // 1. Fetch store settings and catalog grounding data
-    const [settings, tenant, topProducts] = await Promise.all([
+    // 1. Fetch store settings, tenant vertical, and full business grounding data
+    const [settings, tenant, topProducts, menuCategories, contentItems, downloads] = await Promise.all([
       tx.storeSettings.findFirst(),
-      tx.tenant.findFirstOrThrow({ select: { name: true } }),
+      tx.tenant.findFirstOrThrow({ select: { name: true, siteMode: true, businessVertical: true } }),
       tx.product.findMany({
         where: { status: "ACTIVE" },
         select: {
@@ -69,13 +69,37 @@ export async function handleStorefrontChat(
         take: 8,
         orderBy: { createdAt: "desc" },
       }),
+      tx.menuCategory.findMany({
+        where: { isActive: true },
+        include: {
+          items: {
+            where: { isAvailable: true },
+            select: { name: true, nameBn: true, price: true, dietaryLabels: true },
+            take: 6,
+          },
+        },
+        take: 4,
+        orderBy: { sortOrder: "asc" },
+      }),
+      tx.siteContentItem.findMany({
+        where: { isPublished: true },
+        select: { kind: true, title: true, titleBn: true, summary: true, data: true },
+        take: 12,
+        orderBy: { sortOrder: "asc" },
+      }),
+      tx.siteDownload.findMany({
+        where: { isPublic: true },
+        select: { label: true, labelBn: true, fileName: true, fileUrl: true },
+        take: 4,
+        orderBy: { sortOrder: "asc" },
+      }),
     ]);
 
     const chatbotEnabled = settings?.aiChatbotEnabled ?? true;
     const botName = settings?.aiChatbotName || "শপ অ্যাসিস্ট্যান্ট";
     const supportPhone = settings?.aiChatbotEscalatePhone || settings?.whatsappNumber || settings?.contactPhone;
     const whatsappUrl = supportPhone
-      ? `https://wa.me/${supportPhone.replace(/[^\d]/g, "")}?text=${encodeURIComponent("হ্যালো, আমি শপ অ্যাসিস্ট্যান্ট থেকে এসেছি।")}`
+      ? `https://wa.me/${supportPhone.replace(/[^\d]/g, "")}?text=${encodeURIComponent("হ্যালো, আমি ওয়েবসাইট অ্যাসিস্ট্যান্ট থেকে এসেছি।")}`
       : null;
 
     if (!chatbotEnabled) {
@@ -118,14 +142,14 @@ export async function handleStorefrontChat(
           };
 
           matchingOrderText = `
-[ORDER FOUND FOR THIS CUSTOMER]:
+[ORDER FOUND FOR THIS CUSTOMER PHONE ${cleanPhone}]:
 Order Number: #${recentOrder.orderNumber}
 Order Status: ${recentOrder.status}
 Order Total: ৳ ${recentOrder.totalAmount}
 Courier: ${recentOrder.courierProvider || "Under processing"}
 Tracking Code: ${recentOrder.trackingCode || "Pending"}
 Tracking Link: ${recentOrder.courierTrackingUrl || "Not yet available"}
-Explain this order status politely to the customer.
+Explain this order status clearly and politely to the customer.
 `;
         }
       } catch {
@@ -133,27 +157,119 @@ Explain this order status politely to the customer.
       }
     }
 
-    // 3. Prepare grounding context
+    // 3. Format Vertical Grounding Sections
+    const mode = tenant.siteMode || "ECOMMERCE";
+    const vertical = tenant.businessVertical || "RETAIL";
+
+    const menuText = menuCategories.length > 0
+      ? menuCategories.map((cat) => {
+          const itemsStr = cat.items.map((i) => `  * ${i.name} (${i.nameBn || ""}): ৳${i.price}`).join("\n");
+          return `Menu Category: ${cat.name} (${cat.nameBn || ""})\n${itemsStr}`;
+        }).join("\n")
+      : "";
+
+    const servicesText = contentItems
+      .filter((c) => c.kind === "SERVICE")
+      .map((c) => `- ${c.title} (${c.titleBn || ""}): ${c.summary || ""}`)
+      .join("\n");
+
+    const teamText = contentItems
+      .filter((c) => c.kind === "TEAM")
+      .map((c) => `- ${c.title} (${c.titleBn || ""}): ${c.summary || ""}`)
+      .join("\n");
+
+    const credentialsText = contentItems
+      .filter((c) => c.kind === "CREDENTIAL")
+      .map((c) => `- ${c.title}: ${c.summary || ""}`)
+      .join("\n");
+
+    const portfolioText = contentItems
+      .filter((c) => c.kind === "PORTFOLIO")
+      .map((c) => `- Project: ${c.title} - ${c.summary || ""}`)
+      .join("\n");
+
+    const downloadsText = downloads
+      .map((d) => `- Download: ${d.label} (${d.fileName || "File"}) -> ${d.fileUrl}`)
+      .join("\n");
+
     const productsCatalogText = topProducts
       .map((p) => `- ${p.title}: ৳ ${Number(p.variants[0]?.price ?? 0)} (/products/${p.slug})`)
       .join("\n");
 
     const storeContext = `
-STORE NAME: ${settings?.storeName || tenant.name}
+BUSINESS NAME: ${settings?.storeName || tenant.name}
 BOT NAME: ${botName}
-DELIVERY CHARGES: Inside Dhaka ৳ ${settings?.courierFeeInsideDhaka ?? 70}, Outside Dhaka ৳ ${settings?.courierFeeOutsideDhaka ?? 130}.
-PAYMENT METHODS: Cash on Delivery (COD) ${settings?.codEnabled ? "Available" : "Not available"}, bKash: ${settings?.bkashNumber || "Available at checkout"}.
+SITE MODE: ${mode}
+VERTICAL: ${vertical}
+ABOUT / TAGLINE: ${settings?.description || settings?.tagline || ""}
+ADDRESS: ${settings?.addressLine || "Dhaka, Bangladesh"}
 WHATSAPP / HUMAN SUPPORT: ${supportPhone || "Available on store contact page"}
 
-AVAILABLE TOP PRODUCTS:
-${productsCatalogText || "Various quality items available in store"}
+DELIVERY & PAYMENT (If applicable):
+- Inside Dhaka: ৳ ${settings?.courierFeeInsideDhaka ?? 70}, Outside Dhaka: ৳ ${settings?.courierFeeOutsideDhaka ?? 130}
+- Cash on Delivery (COD): ${settings?.codEnabled ? "Available" : "Not available"}
+- bKash: ${settings?.bkashNumber || "Available at checkout"}
+
+${settings?.aiChatbotInstructions ? `MERCHANT CUSTOM INSTRUCTIONS & FAQS:\n${settings.aiChatbotInstructions}\n` : ""}
+
+${menuText ? `RESTAURANT DISHES & MENU:\n${menuText}\n` : ""}
+${servicesText ? `SERVICES & SOLUTIONS:\n${servicesText}\n` : ""}
+${teamText ? `DOCTORS / TEAM MEMBERS:\n${teamText}\n` : ""}
+${credentialsText ? `CREDENTIALS & CERTIFICATIONS:\n${credentialsText}\n` : ""}
+${portfolioText ? `PORTFOLIO & CASE STUDIES:\n${portfolioText}\n` : ""}
+${downloadsText ? `AVAILABLE BROCHURES & DOWNLOADS:\n${downloadsText}\n` : ""}
+${productsCatalogText ? `AVAILABLE PRODUCTS:\n${productsCatalogText}\n` : ""}
 
 ${matchingOrderText}
 `;
 
+    // Tailor Suggested Questions
+    let suggestedQuestions = [
+      "আমার পার্সেল কখন পৌঁছাবে?",
+      "ডেলিভারি চার্জ কত?",
+      "হোয়াটসঅ্যাপে কথা বলুন",
+    ];
+
+    if (vertical === "RESTAURANT") {
+      suggestedQuestions = [
+        "জনপ্রিয় খাবার কী কী আছে?",
+        "টেবিল বুকিং বা QR মেনু অর্ডার",
+        "ডেলিভারি ও টেকঅ্যাওয়ে তথ্য",
+        "সরাসরি কথা বলুন",
+      ];
+    } else if (vertical === "DOCTOR_CLINIC") {
+      suggestedQuestions = [
+        "ডাক্তারের চেম্বার ও সময়সূচী",
+        "সিরিয়াল কীভাবে বুক করব?",
+        "পরামর্শ ফি ও সেবা সমূহ",
+        "জরুরি সিরিয়াল সহায়তা",
+      ];
+    } else if (vertical === "SERVICE_PROVIDER") {
+      suggestedQuestions = [
+        "সার্ভিস প্যাকেজ ও মূল্যতালিকা",
+        "বাসায় এসে সার্ভিস দেন কি?",
+        "জরুরি সার্ভিস রিকোয়েস্ট",
+        "হোয়াটসঅ্যাপে বিস্তারিত জানুন",
+      ];
+    } else if (vertical === "BUSINESS_COMPANY") {
+      suggestedQuestions = [
+        "আপনাদের মূল সার্ভিসসমূহ কী?",
+        "কর্পোরেট প্রোফাইল ডাউনলোড",
+        "প্রজেক্ট কনসালটেশন বুক করুন",
+        "অফিসের সাথে যোগাযোগ",
+      ];
+    } else if (vertical === "PERSONAL_PORTFOLIO") {
+      suggestedQuestions = [
+        "কাজের পোর্টফোলিও দেখুন",
+        "সিভি / রেজুমি ডাউনলোড",
+        "নতুন প্রজেক্ট বা ফ্রিল্যান্স আলোচনা",
+        "সরাসরি মেসেজ দিন",
+      ];
+    }
+
     // 4. Resolve API key and call Gemini
     try {
-      const { apiKey, isCustom } = await resolveGeminiApiKey(tenantId);
+      const { apiKey, isCustom, model } = await resolveGeminiApiKey(tenantId);
 
       const conversationHistory = (input.history || [])
         .slice(-6)
@@ -161,7 +277,7 @@ ${matchingOrderText}
         .join("\n");
 
       const prompt = `
-STORE INFORMATION CONTEXT:
+BUSINESS INFORMATION CONTEXT:
 ${storeContext}
 
 CONVERSATION HISTORY:
@@ -170,11 +286,12 @@ ${conversationHistory}
 CUSTOMER MESSAGE:
 "${userText}"
 
-Reply naturally, warmly, and concisely in Bengali (চলিত বাংলা) or English matching the customer. If they asked about an order and an order was found in context, give them the status and reassurance.
+Reply naturally, warmly, and concisely in Bengali (চলিত বাংলা) or English matching the customer. If they asked about an order or booking and matching details exist in context, provide clear reassurance and next steps.
 `;
 
       const aiReply = await callGemini({
         apiKey,
+        model,
         prompt,
         systemInstruction: SYSTEM_PROMPT_STOREFRONT_CHATBOT,
         temperature: 0.6,
@@ -186,11 +303,7 @@ Reply naturally, warmly, and concisely in Bengali (চলিত বাংলা)
 
       return {
         reply: aiReply.trim(),
-        suggestedQuestions: [
-          "আমার পার্সেল কখন পৌঁছাবে?",
-          "ডেলিভারি চার্জ কত?",
-          "হোয়াটসঅ্যাপে কথা বলুন",
-        ],
+        suggestedQuestions,
         orderTracking: orderTrackingInfo,
         suggestedProducts: topProducts.slice(0, 3).map((p) => ({
           title: p.title,
@@ -200,11 +313,24 @@ Reply naturally, warmly, and concisely in Bengali (চলিত বাংলা)
         whatsappUrl,
       };
     } catch (err) {
-      console.warn("[storefront chatbot] Gemini call failed, returning fallback reply", err);
+      console.warn("[storefront chatbot] Gemini call failed, returning resilient fallback", err);
+
+      let fallbackText = `ধন্যবাদ আপনার বার্তার জন্য! যেকোনো জরুরি প্রয়োজনে সরাসরি আমাদের সাথে যোগাযোগ করুন: ${supportPhone || "আমাদের কন্টাক্ট পেইজে"}`;
+      if (orderTrackingInfo) {
+        fallbackText = `আপনার অর্ডার #${orderTrackingInfo.orderNumber} এর স্ট্যাটাস: ${orderTrackingInfo.status} (বিল: ৳ ${orderTrackingInfo.total})। বিস্তারিত তথ্যের জন্য আমাদের হোয়াটসঅ্যাপে সরাসরি মেসেজ দিন: ${supportPhone || ""}`;
+      } else if (settings?.aiChatbotWelcome) {
+        fallbackText = settings.aiChatbotWelcome;
+      } else if (vertical === "DOCTOR_CLINIC") {
+        fallbackText = `ধন্যবাদ আপনার বার্তার জন্য! ডাক্তারের চেম্বার ও সিরিয়াল বুকিংয়ের জন্য আমাদের চেম্বার সহকারীর সাথে যোগাযোগ করুন: ${supportPhone || ""}`;
+      } else if (vertical === "RESTAURANT") {
+        fallbackText = `ধন্যবাদ আপনার বার্তার জন্য! আমাদের মেনু ও ডাইনিং বুকিং সংক্রান্ত তথ্যের জন্য সরাসরি যোগাযোগ করুন: ${supportPhone || ""}`;
+      }
+
       return {
-        reply: `ধন্যবাদ আপনার বার্তার জন্য! আমাদের স্টোরে ক্যাশ অন ডেলিভারিতে অর্ডার করতে পারেন। যেকোনো জরুরি প্রয়োজনে আমাদের হোয়াটসঅ্যাপে সরাসরি মেসেজ দিন: ${supportPhone || ""}`,
+        reply: fallbackText,
         whatsappUrl,
         orderTracking: orderTrackingInfo,
+        suggestedQuestions,
       };
     }
   });

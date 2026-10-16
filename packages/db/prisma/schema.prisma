@@ -1868,6 +1868,7 @@ model StoreSettings {
   aiChatbotName              String    @default("শপ অ্যাসিস্ট্যান্ট")
   aiChatbotWelcome           String?
   aiChatbotEscalatePhone     String?
+  aiChatbotInstructions      String? // Custom merchant business instructions, FAQs, and policies for AI grounding
   // Loyalty points, VIP tiers and referrals (docs/26)
   loyaltyEnabled             Boolean   @default(false)
   loyaltySpendPerPoint       Int       @default(100) // every ৳ this much of a delivered order earns 1 point (before the tier multiplier)

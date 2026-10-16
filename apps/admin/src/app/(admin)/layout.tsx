@@ -11,6 +11,7 @@ import { DemoBanner } from "@/components/demo-banner";
 import { ImpersonationBanner } from "@/components/impersonation-banner";
 import { trialHref } from "@/lib/demo";
 import { CommandPalette, ShellProvider, SideNav, TopActions, type NavGroup, type Page } from "@/components/shell";
+import { AdminCopilotWidget } from "@/components/admin-copilot-widget";
 import { ThemeSwitch } from "./theme-switch";
 import { getSession } from "@/lib/session";
 import { authMode } from "@/lib/auth";
@@ -280,6 +281,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           ))}
         </nav>
         <CommandPalette />
+        <AdminCopilotWidget />
       </div>
     </ShellProvider>
   );

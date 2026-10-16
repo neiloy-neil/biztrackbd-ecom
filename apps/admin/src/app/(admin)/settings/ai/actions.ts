@@ -25,6 +25,7 @@ export async function saveAiSettingsAction(
   const chatbotName = String(form.get("aiChatbotName") ?? "শপ অ্যাসিস্ট্যান্ট");
   const chatbotWelcome = String(form.get("aiChatbotWelcome") ?? "");
   const chatbotEscalatePhone = String(form.get("aiChatbotEscalatePhone") ?? "");
+  const chatbotInstructions = String(form.get("aiChatbotInstructions") ?? "");
 
   const input: SaveAiSettingsInput = {
     customGeminiApiKey: customKeyRaw !== null ? String(customKeyRaw) : undefined,
@@ -32,6 +33,7 @@ export async function saveAiSettingsAction(
     aiChatbotName: chatbotName,
     aiChatbotWelcome: chatbotWelcome || null,
     aiChatbotEscalatePhone: chatbotEscalatePhone || null,
+    aiChatbotInstructions: chatbotInstructions || null,
   };
 
   try {

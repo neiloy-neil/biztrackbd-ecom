@@ -279,6 +279,13 @@ export {
   type ChatResponse,
 } from "./ai/chatbot";
 export {
+  handleAdminCopilotChat,
+  type AdminCopilotMessage,
+  type AdminCopilotInput,
+  type AdminCopilotResponse,
+  type AdminCopilotActionLink,
+} from "./ai/admin-copilot";
+export {
   renderCode128Svg,
   calculateCheckDigit,
   generateBarcodeValue,

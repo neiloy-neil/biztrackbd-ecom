@@ -48,7 +48,7 @@ export async function generateSocialPost(
   options: CopywriterOptions
 ): Promise<GeneratedSocialPost> {
   assertCan(actor, "design", "edit");
-  const { apiKey, isCustom } = await resolveGeminiApiKey(tenantId);
+  const { apiKey, isCustom, model } = await resolveGeminiApiKey(tenantId);
 
   const prompt = `
 Generate a high-converting Facebook and Instagram post in JSON format for:
@@ -69,6 +69,7 @@ OUTPUT SCHEMA:
 
   const rawJson = await callGemini({
     apiKey,
+    model,
     prompt,
     systemInstruction: SYSTEM_PROMPT_COPYWRITER,
     responseMimeType: "application/json",
@@ -91,7 +92,7 @@ export async function generateSmsCampaignCopy(
   options: CopywriterOptions
 ): Promise<GeneratedSmsCampaign> {
   assertCan(actor, "design", "edit");
-  const { apiKey, isCustom } = await resolveGeminiApiKey(tenantId);
+  const { apiKey, isCustom, model } = await resolveGeminiApiKey(tenantId);
 
   const prompt = `
 Generate single-message SMS marketing campaigns.
@@ -116,6 +117,7 @@ OUTPUT SCHEMA:
 
   const rawJson = await callGemini({
     apiKey,
+    model,
     prompt,
     systemInstruction: SYSTEM_PROMPT_COPYWRITER,
     responseMimeType: "application/json",
@@ -138,7 +140,7 @@ export async function generateBannerCopy(
   options: CopywriterOptions
 ): Promise<GeneratedBannerCopy> {
   assertCan(actor, "design", "edit");
-  const { apiKey, isCustom } = await resolveGeminiApiKey(tenantId);
+  const { apiKey, isCustom, model } = await resolveGeminiApiKey(tenantId);
 
   const prompt = `
 Generate catchy, punchy hero banner slogans for an online store in JSON format.
@@ -160,6 +162,7 @@ OUTPUT SCHEMA:
 
   const rawJson = await callGemini({
     apiKey,
+    model,
     prompt,
     systemInstruction: SYSTEM_PROMPT_COPYWRITER,
     responseMimeType: "application/json",

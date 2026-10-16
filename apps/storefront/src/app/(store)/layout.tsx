@@ -160,7 +160,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
       <Footer info={info} categories={categories} lang={lang} t={t} pages={footerPages} hasBlog={blog.total > 0} chrome={chrome} commerce={capabilities.commerce} />
       <WhatsAppFloatingButton whatsappNumber={info.whatsappNumber} />
       <MobileStickyActionBar phone={info.contactPhone} whatsapp={info.whatsappNumber} lang={lang} />
-      {isAiActive && (
+      {(isAiActive || info.aiChatbotEnabled) && (
         <AiChatWidget
           enabled={info.aiChatbotEnabled}
           botName={info.aiChatbotName}

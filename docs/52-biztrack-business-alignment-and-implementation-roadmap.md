@@ -160,4 +160,34 @@ graph TD
 - 100% test pass in `packages/core/tests/business-templates.test.ts` (7 tests), `security.test.ts` (10 tests), and `site-menu-qr.test.ts` (13 tests).
 - 0 TypeScript compilation errors across `@biztrackbd/core`, `@biztrackbd/marketing`, and `@biztrackbd/storefront`.
 
+---
+
+## 7. Completed Feature: AI Engine Resilience, Multi-Vertical Grounding, & In-Admin Copilot
+
+### 7.1 Resilient Gemini AI Engine (`packages/core/src/ai/gateway.ts`)
+- **Auto-Resilient Model Fallback Loop:** Resolved invalid hardcoded `gemini-2.5-flash` endpoint error. `callGemini` now auto-resolves platform default models and gracefully tries candidate fallbacks (`gemini-2.0-flash`, `gemini-1.5-flash`) on 404 or model-not-found responses.
+- **Platform Config Model Resolution:** `resolveGeminiApiKey(tenantId)` queries both `gemini_api_key` and `gemini_default_model` via secure DB function `platform_config_value()`, defaulting to production-tested `gemini-2.0-flash`.
+- **Super Admin Platform Settings Modernization (`apps/platform/`):** Model dropdown updated to production Gemini models (`gemini-2.0-flash (Recommended)`, `gemini-1.5-flash`, `gemini-1.5-pro`).
+
+### 7.2 Comprehensive Vertical Grounding for Customer Chatbot (`packages/core/src/ai/chatbot.ts`)
+- **Vertical-Aware Grounding Context:** Injects live business mode (`ECOMMERCE`, `PORTFOLIO`, `HYBRID`) and vertical entity records:
+  - `RESTAURANT`: Dishes, menu categories, pricing, dietary labels (Halal, Chef's Special, Spicy), and table QR dining instructions.
+  - `DOCTOR_CLINIC`: Doctors, BMDC credentials, chambers (Dhanmondi, Uttara), consulting hours, fees, and appointment booking workflow.
+  - `SERVICE_PROVIDER`: Repair tiers, diagnostic charges, 24/7 emergency dispatch, and warranty guarantees.
+  - `BUSINESS_COMPANY`: Corporate services, client portfolio, credentials, team bios, and brochure downloads.
+  - `PERSONAL_PORTFOLIO`: Past projects, case studies, CV download, and discovery call bookings.
+- **Custom Business Instructions & FAQs:** Added `aiChatbotInstructions` field to `StoreSettings` (migration 50) and Admin Settings UI, empowering merchants to teach the assistant their exact store rules, schedules, and policies.
+- **Tailored Customer Prompt Pills:** Dynamic vertical suggestion buttons in chat widget matching the visitor's context.
+
+### 7.3 In-Admin AI Business Copilot (`packages/core/src/ai/admin-copilot.ts` & Admin UI)
+- **Omnipresent Admin Copilot Widget (`apps/admin/src/components/admin-copilot-widget.tsx`):** Floating launcher button in the bottom-right corner of all Admin screens opening a responsive slide-up executive Copilot drawer.
+- **Live Business Telemetry Grounding:** Real-time today's sales, gross revenue, order fulfillment breakdown (Pending, Processing, Delivered), new customer leads, pending booking requests, and low-stock/out-of-stock inventory alerts.
+- **Intelligent 1-Click Action Links:** Automatically detects intent and appends direct deep links to relevant Admin screens (`/orders`, `/bookings`, `/products`, `/settings/ai`).
+- **Quota & Key Transparency:** Displays real-time quota remaining or "Custom Key (Unlimited)", with an inline warning and 1-click link to Settings -> AI if quota is exhausted.
+
+### 7.4 Quality Verification
+- 100% test pass in `packages/core/tests/ai-assistant-resilience.test.ts` (4 tests), `ai-suite.test.ts` (5 tests), `security.test.ts` (10 tests), `modules-plan-gating.test.ts` (9 tests), and business tests (37 tests).
+- Clean TypeScript compilation across `@biztrackbd/core`, `@biztrackbd/admin`, `@biztrackbd/storefront`, and `@biztrackbd/platform`.
+
+
 

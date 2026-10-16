@@ -32,6 +32,8 @@ export interface StoreInfo {
   aiChatbotName?: string | null;
   aiChatbotWelcome?: string | null;
   aiChatbotEscalatePhone?: string | null;
+  aiChatbotInstructions?: string | null;
+  customGeminiApiKey?: string | null;
 }
 
 export async function getStoreInfo(tenantId: string): Promise<StoreInfo> {
@@ -45,7 +47,7 @@ export async function getStoreInfo(tenantId: string): Promise<StoreInfo> {
       logoUrl: null, announcement: null, announcementBn: null, bkashNumber: null, bkashKind: "PERSONAL", nagadNumber: null, nagadKind: "PERSONAL",
       paymentNote: null, offlineMessage: null, ordersPaused: false,
       flashSaleActive: false, flashSaleEndsAt: null, flashSaleCoupon: null,
-      aiChatbotEnabled: false, aiChatbotName: null, aiChatbotWelcome: null, aiChatbotEscalatePhone: null,
+      aiChatbotEnabled: false, aiChatbotName: null, aiChatbotWelcome: null, aiChatbotEscalatePhone: null, aiChatbotInstructions: null, customGeminiApiKey: null,
     };
   });
 }

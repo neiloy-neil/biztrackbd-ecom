@@ -19,10 +19,11 @@ export interface ResolvedAiKey {
   apiKey: string;
   isCustom: boolean;
   remaining: number;
+  model: string;
 }
 
 /**
- * Resolves the active Gemini API Key for a tenant.
+ * Resolves the active Gemini API Key and default Model for a tenant.
  * If the merchant saved their own key, it is returned with unlimited remaining quota.
  * Otherwise, the shared platform key is used, subject to the plan's monthly generation quota.
  */
@@ -32,16 +33,25 @@ export async function resolveGeminiApiKey(tenantId: string): Promise<ResolvedAiK
       select: { customGeminiApiKey: true },
     });
 
+    // The platform AI key & default model, set in Platform settings (migration 36).
+    const [dbKeyRow, dbModelRow] = await Promise.all([
+      tx.$queryRaw<{ v: string | null }[]>`SELECT platform_config_value('gemini_api_key') AS v`,
+      tx.$queryRaw<{ v: string | null }[]>`SELECT platform_config_value('gemini_default_model') AS v`,
+    ]);
+
+    const rawModel = dbModelRow[0]?.v?.trim() || process.env.GEMINI_DEFAULT_MODEL?.trim() || "gemini-2.0-flash";
+    const resolvedModel = (rawModel === "gemini-2.5-flash" || !rawModel) ? "gemini-2.0-flash" : rawModel;
+
     if (s?.customGeminiApiKey?.trim()) {
       return {
         apiKey: s.customGeminiApiKey.trim(),
         isCustom: true,
         remaining: 999999,
+        model: resolvedModel,
       };
     }
 
-    // The platform AI key, set in Platform settings, through the one function a store connection may use (migration 36).
-    const dbKey = (await tx.$queryRaw<{ v: string | null }[]>`SELECT platform_config_value('gemini_api_key') AS v`)[0]?.v;
+    const dbKey = dbKeyRow[0]?.v;
     const platformKey = dbKey?.trim() || process.env.GEMINI_API_KEY?.trim();
     if (!platformKey) {
       throw new ValidationError(
@@ -71,6 +81,7 @@ export async function resolveGeminiApiKey(tenantId: string): Promise<ResolvedAiK
       apiKey: platformKey,
       isCustom: false,
       remaining: Math.max(0, quota - used),
+      model: resolvedModel,
     };
   });
 }
@@ -108,6 +119,7 @@ export interface AiSettingsView {
   chatbotName: string;
   chatbotWelcome: string | null;
   chatbotEscalatePhone: string | null;
+  chatbotInstructions: string | null;
 }
 
 export async function getAiSettings(tenantId: string, actor: StaffActor): Promise<AiSettingsView> {
@@ -123,6 +135,7 @@ export async function getAiSettings(tenantId: string, actor: StaffActor): Promis
           aiChatbotName: true,
           aiChatbotWelcome: true,
           aiChatbotEscalatePhone: true,
+          aiChatbotInstructions: true,
         },
       }),
       tx.tenantAiUsage.findUnique({
@@ -151,6 +164,7 @@ export async function getAiSettings(tenantId: string, actor: StaffActor): Promis
       chatbotName: settings?.aiChatbotName ?? "শপ অ্যাসিস্ট্যান্ট",
       chatbotWelcome: settings?.aiChatbotWelcome ?? null,
       chatbotEscalatePhone: settings?.aiChatbotEscalatePhone ?? null,
+      chatbotInstructions: settings?.aiChatbotInstructions ?? null,
     };
   });
 }
@@ -161,6 +175,7 @@ export interface SaveAiSettingsInput {
   aiChatbotName?: string;
   aiChatbotWelcome?: string | null;
   aiChatbotEscalatePhone?: string | null;
+  aiChatbotInstructions?: string | null;
 }
 
 export async function saveAiSettings(
@@ -204,6 +219,9 @@ export async function saveAiSettings(
     if (input.aiChatbotEscalatePhone !== undefined) {
       dataToUpdate.aiChatbotEscalatePhone = phone;
     }
+    if (input.aiChatbotInstructions !== undefined) {
+      dataToUpdate.aiChatbotInstructions = input.aiChatbotInstructions?.trim().slice(0, 3000) || null;
+    }
 
     await tx.storeSettings.update({
       where: { tenantId },
@@ -217,10 +235,12 @@ export async function saveAiSettings(
  */
 export async function testGeminiApiKey(
   apiKey: string,
+  model = "gemini-2.0-flash",
   options?: { fetchImpl?: typeof fetch }
 ): Promise<{ valid: boolean; error?: string }> {
   const fetcher = options?.fetchImpl ?? globalThis.fetch;
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey.trim()}`;
+  const safeModel = (model === "gemini-2.5-flash" || !model) ? "gemini-2.0-flash" : model;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(safeModel)}:generateContent?key=${apiKey.trim()}`;
 
   try {
     const res = await fetcher(endpoint, {
@@ -249,6 +269,7 @@ export async function testGeminiApiKey(
 
 export interface CallGeminiParams {
   apiKey: string;
+  model?: string;
   prompt: string;
   systemInstruction?: string;
   imageBase64?: { mimeType: string; data: string };
@@ -260,11 +281,18 @@ export interface CallGeminiParams {
 }
 
 /**
- * Core wrapper executing requests against the Google Gemini 2.5 Flash API.
+ * Core resilient wrapper executing requests against the Google Gemini API.
+ * Automatically tries candidate models (provided model, gemini-2.0-flash, gemini-1.5-flash)
+ * if the requested model returns 404 or unsupported.
  */
 export async function callGemini(params: CallGeminiParams): Promise<string> {
   const fetcher = params.fetchImpl ?? globalThis.fetch;
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${params.apiKey.trim()}`;
+  const preferredModel = (params.model?.trim() && params.model !== "gemini-2.5-flash")
+    ? params.model.trim()
+    : "gemini-2.0-flash";
+
+  // Build ordered, deduplicated candidate models list
+  const candidateModels = Array.from(new Set([preferredModel, "gemini-2.0-flash", "gemini-1.5-flash"]));
 
   const parts: Array<Record<string, unknown>> = [];
 
@@ -301,26 +329,45 @@ export async function callGemini(params: CallGeminiParams): Promise<string> {
     };
   }
 
-  const res = await fetcher(endpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(bodyPayload),
-  });
+  let lastError: Error | null = null;
 
-  if (!res.ok) {
-    const errJson = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
-    const msg = errJson?.error?.message || `Gemini API request failed with status ${res.status}`;
-    console.error("[gemini] api error", msg);
-    throw new Error(msg);
+  for (const modelName of candidateModels) {
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelName)}:generateContent?key=${params.apiKey.trim()}`;
+
+    try {
+      const res = await fetcher(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bodyPayload),
+      });
+
+      if (!res.ok) {
+        const errJson = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
+        const msg = errJson?.error?.message || `Gemini API request failed with status ${res.status}`;
+        // If 404/not found or unsupported model, try next candidate model
+        if (res.status === 404 || msg.toLowerCase().includes("not found")) {
+          console.warn(`[gemini] model ${modelName} not found, trying fallback candidate...`);
+          lastError = new Error(msg);
+          continue;
+        }
+        console.error("[gemini] api error", msg);
+        throw new Error(msg);
+      }
+
+      const json = (await res.json()) as {
+        candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+      };
+      const text = json?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) {
+        throw new Error("No text content returned from Gemini model");
+      }
+
+      return text;
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      // If error is network or non-404, we don't necessarily abort unless it's the last candidate
+    }
   }
 
-  const json = (await res.json()) as {
-    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
-  };
-  const text = json?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) {
-    throw new Error("No text content returned from Gemini model");
-  }
-
-  return text;
+  throw lastError ?? new Error("Failed to generate content from any available Gemini model");
 }

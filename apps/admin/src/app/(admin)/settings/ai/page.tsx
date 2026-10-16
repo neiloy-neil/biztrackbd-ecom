@@ -9,21 +9,10 @@ export const metadata: Metadata = { title: "Store Assistant & Content Tools" };
 
 export default async function AiSettingsPage() {
   const s = await requireAccess("design");
-  const mod = await getModuleStatus(s.tenantId, "ai_suite");
-
-  if (!mod.active) {
-    return (
-      <AppDisabledNotice
-        appName="Automated Assistant & Content Tools"
-        appKey="ai_suite"
-        planTier={mod.planTier}
-        minPlan="PRO"
-        description="Generate product descriptions, extract chat addresses, and enable the storefront sales assistant."
-      />
-    );
-  }
-
-  const aiSettings = await getAiSettings(s.tenantId, s.actor);
+  const [mod, aiSettings] = await Promise.all([
+    getModuleStatus(s.tenantId, "ai_suite"),
+    getAiSettings(s.tenantId, s.actor),
+  ]);
 
   return (
     <>

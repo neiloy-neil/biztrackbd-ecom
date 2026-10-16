@@ -81,7 +81,7 @@ export async function parseCustomerDetailsWithAi(
   }
 
   try {
-    const { apiKey, isCustom } = await resolveGeminiApiKey(tenantId);
+    const { apiKey, isCustom, model } = await resolveGeminiApiKey(tenantId);
 
     const prompt = `
 Extract structured customer delivery details from this raw message text:
@@ -104,6 +104,7 @@ OUTPUT SCHEMA:
 
     const rawJson = await callGemini({
       apiKey,
+      model,
       prompt,
       systemInstruction: SYSTEM_PROMPT_CUSTOMER_PARSER,
       responseMimeType: "application/json",

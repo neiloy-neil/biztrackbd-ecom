@@ -192,6 +192,21 @@ export function AiSettingsForm({ initial }: { initial: AiSettingsView }) {
           />
           <span className="help">Leave blank to use the default greeting.</span>
         </label>
+
+        <label className="field" style={{ marginTop: 12 }}>
+          <span className="label">Custom Business Instructions &amp; FAQs (AI Grounding)</span>
+          <textarea
+            name="aiChatbotInstructions"
+            className="input"
+            rows={4}
+            defaultValue={initial.chatbotInstructions ?? ""}
+            placeholder="উদাহরণ: আমাদের দোকান প্রতি শুক্রবার বন্ধ থাকে। ডেলিভারির সময় ২-৩ দিন। ডাক্তার রহমান প্রতি শনি ও সোম সন্ধ্যা ৬টা থেকে রাত ৯টা পর্যন্ত চেম্বারে থাকেন। বিশেষ যেকোনো নীতি বা নিয়ম এখানে লিখে দিন..."
+            maxLength={3000}
+          />
+          <span className="help">
+            Custom rules, doctor chamber timings, service policies, or promotions. Both the storefront assistant and Admin Copilot will automatically follow these instructions.
+          </span>
+        </label>
       </section>
 
       <div>

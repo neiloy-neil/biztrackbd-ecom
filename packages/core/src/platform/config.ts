@@ -135,7 +135,7 @@ export async function getPlatformAiConfig(deps?: Deps): Promise<PlatformAiConfig
     db.platformConfig.findUnique({ where: { key: "gemini_default_model" } }),
   ]);
 
-  const defaultModel = modelRow?.value?.trim() || process.env.GEMINI_DEFAULT_MODEL?.trim() || "gemini-2.5-flash";
+  const defaultModel = modelRow?.value?.trim() || process.env.GEMINI_DEFAULT_MODEL?.trim() || "gemini-2.0-flash";
 
   if (keyRow?.value?.trim()) {
     return {
@@ -203,7 +203,8 @@ export async function savePlatformAiConfig(
   }
 
   if (input.defaultModel !== undefined) {
-    const model = input.defaultModel.trim() || "gemini-2.5-flash";
+    const rawModel = input.defaultModel.trim();
+    const model = (!rawModel || rawModel === "gemini-2.5-flash") ? "gemini-2.0-flash" : rawModel;
     await db.platformConfig.upsert({
       where: { key: "gemini_default_model" },
       create: {
@@ -236,7 +237,7 @@ export async function savePlatformAiConfig(
 
 export async function testPlatformGeminiApiKey(
   apiKey?: string,
-  model = "gemini-2.5-flash",
+  model = "gemini-2.0-flash",
   deps?: Deps,
 ): Promise<{ ok: boolean; latencyMs: number; model: string; error?: string }> {
   let resolvedKey = apiKey?.trim();
@@ -825,7 +826,7 @@ export async function getPlatformHealthMatrix(deps?: Deps): Promise<PlatformHeal
   }
 
   // 2. AI Gateway
-  const aiTest = await testPlatformGeminiApiKey(undefined, "gemini-2.5-flash", deps);
+  const aiTest = await testPlatformGeminiApiKey(undefined, "gemini-2.0-flash", deps);
 
   // 3. SMS Gateway
   const smsConfig = await getPlatformSmsConfig(deps);

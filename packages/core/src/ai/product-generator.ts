@@ -38,7 +38,7 @@ export async function generateProductListing(
 ): Promise<GeneratedProductListing> {
   assertCan(actor, "products", "edit");
 
-  const { apiKey, isCustom } = await resolveGeminiApiKey(tenantId);
+  const { apiKey, isCustom, model } = await resolveGeminiApiKey(tenantId);
   const tone = options.tone ?? "DHAKA_YOUTH_TRENDY";
 
   const userPrompt = `
@@ -70,6 +70,7 @@ OUTPUT SCHEMA:
   try {
     const rawJson = await callGemini({
       apiKey,
+      model,
       prompt: userPrompt,
       systemInstruction: SYSTEM_PROMPT_PRODUCT_WRITER,
       imageBase64: options.imageBase64,
