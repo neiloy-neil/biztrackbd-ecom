@@ -94,10 +94,15 @@ const GROUPS: Group[] = [
     items: [
       { href: "/design", label: "Store design", area: "design" },
       { href: "/menu", label: "Menu", area: "design", capability: "menu" },
+      { href: "/services", label: "Services", area: "design", capability: "services" },
+      { href: "/portfolio", label: "Portfolio", area: "design", capability: "portfolio_items" },
+      { href: "/team", label: "Team", area: "design", capability: "team_profiles" },
+      { href: "/downloads", label: "Downloads", area: "design", capability: "downloads" },
       { href: "/landing", label: "Landing pages", area: "design", moduleKey: "landing_builder" },
       { href: "/pages", label: "Pages built from sections", area: "design" },
       { href: "/content", label: "Pages and blog", area: "design" },
     ],
+    activePrefixes: ["/design", "/menu", "/services", "/portfolio", "/team", "/downloads", "/content-items", "/landing", "/pages", "/content"],
   },
   {
     id: "reports",
@@ -118,9 +123,10 @@ const GROUPS: Group[] = [
     id: "settings", label: "Settings", icon: <GearIcon />,
     items: [
       { href: "/settings/store", label: "Settings", area: "design" },
+      { href: "/settings/import", label: "Import content", area: "design" },
       { href: "/support", label: "Help and support", area: "design" },
     ],
-    activePrefixes: ["/settings/store", "/settings/domains", "/settings/payments", "/settings/shipping", "/settings/staff", "/settings/audit", "/billing", "/support"],
+    activePrefixes: ["/settings/store", "/settings/import", "/settings/domains", "/settings/payments", "/settings/shipping", "/settings/staff", "/settings/audit", "/billing", "/support"],
   },
 ];
 

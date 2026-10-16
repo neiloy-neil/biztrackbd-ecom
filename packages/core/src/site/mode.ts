@@ -1,3 +1,5 @@
+import { withTenant } from "@biztrackbd/db";
+
 export type SiteMode = "ECOMMERCE" | "PORTFOLIO" | "HYBRID";
 
 export type BusinessVertical =
@@ -131,4 +133,19 @@ export function normalizeSiteMode(val: unknown): SiteMode {
 
 export function normalizeBusinessVertical(val: unknown): BusinessVertical | null {
   return isBusinessVertical(val) ? val : null;
+}
+
+export async function getTenantModeAndVertical(
+  tenantId: string
+): Promise<{ siteMode: SiteMode; vertical: BusinessVertical | null }> {
+  return withTenant(tenantId, async (tx) => {
+    const t = await tx.tenant.findUnique({
+      where: { id: tenantId },
+      select: { siteMode: true, businessVertical: true },
+    });
+    return {
+      siteMode: normalizeSiteMode(t?.siteMode),
+      vertical: normalizeBusinessVertical(t?.businessVertical),
+    };
+  });
 }

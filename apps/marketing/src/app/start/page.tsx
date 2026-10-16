@@ -31,7 +31,17 @@ export default async function Start({
   // The templates on offer are the published list (the originals plus any staff have published). If it cannot be read, the originals still work.
   const templates = await listPublishedTemplates().catch(() => []);
   const offered = templates.length > 0 ? templates.map((t) => ({ id: t.id, name: t.name, blurb: t.blurb, live: true, look: t.baseLook })) : THEMES.map((t) => ({ id: t.id, name: t.name, blurb: t.blurb, live: t.live, look: t.id }));
-  const initialTheme = offered.find((t) => t.id === (kept?.template || wantedTheme) && t.live)?.id ?? offered[0]?.id ?? "kapor";
+  const rawMode = typeof sp.mode === "string" ? sp.mode.toUpperCase() : "";
+  const initialMode: "ECOMMERCE" | "PORTFOLIO" | "HYBRID" = rawMode === "PORTFOLIO" || rawMode === "HYBRID" ? rawMode : "ECOMMERCE";
+  const rawVertical = typeof sp.vertical === "string" ? sp.vertical.toUpperCase() : "";
+  const validVerticals = ["RESTAURANT", "DOCTOR_CLINIC", "PUBLIC_FIGURE", "BUSINESS_COMPANY", "SERVICE_PROVIDER", "PERSONAL_PORTFOLIO"];
+  const initialVertical = validVerticals.includes(rawVertical) ? (rawVertical as any) : (initialMode === "PORTFOLIO" ? "RESTAURANT" : undefined);
+
+  let defaultTheme = "kapor";
+  if (initialVertical === "RESTAURANT") defaultTheme = "dhaka-bistro";
+  else if (initialVertical === "DOCTOR_CLINIC") defaultTheme = "modern-clinic";
+
+  const initialTheme = offered.find((t) => t.id === (kept?.template || wantedTheme || defaultTheme) && t.live)?.id ?? offered[0]?.id ?? "kapor";
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
 
   return (
@@ -42,6 +52,8 @@ export default async function Start({
       rootDomain={rootDomain}
       initialPlan={initialPlan}
       initialTheme={initialTheme}
+      initialMode={initialMode}
+      initialVertical={initialVertical}
       themes={offered}
       plans={plans.map((p) => ({
         tier: p.tier,

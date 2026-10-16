@@ -118,7 +118,7 @@ export { signupStore, checkSubdomain, SignupInput, THEMES, SUBDOMAIN_MESSAGES, t
 export { createAutoLoginToken, verifyAutoLoginToken, createAutoLoginSessionCookie, verifyAutoLoginSessionCookie, AUTO_LOGIN_COOKIE, type AutoLoginPayload } from "./auth/auto-login";
 export { CATEGORY_CATALOG_PRESETS, getCategoryStarterPreset, type StarterCatalogPreset, type StarterProductPreset } from "./demo/catalog-presets";
 export {
-  listPublicPlans, getBillingOverview, getStoreAccess, submitPaymentProof, cancelPendingProof, paymentTargets, toPlanView, ProofInput,
+  listPublicPlans, listPublicPortfolioPlans, FALLBACK_PORTFOLIO_PLANS, getBillingOverview, getStoreAccess, submitPaymentProof, cancelPendingProof, paymentTargets, toPlanView, ProofInput,
   type PlanView, type BillingOverview, type ProofView, type PayTo,
 } from "./platform/billing";
 export {
@@ -424,11 +424,13 @@ export * from "./affiliate/service";
 // Limited Drops & Pre-Orders Suite
 export * from "./drops";
 
-// BizTrack Business — Site Mode, Capabilities, Leads, Bookings & Templates
+// BizTrack Business — Site Mode, Capabilities, Leads, Bookings, Content Items, Downloads & Templates
 export * from "./site/mode";
 export * from "./site/capabilities";
 export * from "./site/leads";
 export * from "./site/bookings";
 export * from "./site/menu";
 export * from "./site/qr";
+export * from "./site/content-items";
+export * from "./site/downloads";
 export * from "./site/templates/manifests";

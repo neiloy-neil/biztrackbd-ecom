@@ -1299,3 +1299,13 @@ export const BUSINESS_TEMPLATES: BusinessTemplateManifest[] = [
 export function getBusinessTemplate(id: string): BusinessTemplateManifest | undefined {
   return BUSINESS_TEMPLATES.find((t) => t.id === id);
 }
+
+export function getBusinessTemplateByVertical(
+  vertical?: BusinessVertical | null
+): BusinessTemplateManifest | undefined {
+  if (!vertical) return BUSINESS_TEMPLATES[0];
+  return (
+    BUSINESS_TEMPLATES.find((t) => t.vertical === vertical) ||
+    BUSINESS_TEMPLATES[0]
+  );
+}

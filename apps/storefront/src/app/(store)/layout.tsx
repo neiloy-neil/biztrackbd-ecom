@@ -1,5 +1,15 @@
 import type { Metadata } from "next";
-import { getLiveChrome, getStorefrontTracking, getPointsSummary, listCategories, getStoreInfo, listFooterPages, listPublishedPosts, isModuleActive } from "@biztrackbd/core";
+import {
+  getLiveChrome,
+  getStorefrontTracking,
+  getPointsSummary,
+  listCategories,
+  getStoreInfo,
+  listFooterPages,
+  listPublishedPosts,
+  isModuleActive,
+  getTenantModeAndVertical,
+} from "@biztrackbd/core";
 import { CartProvider } from "@/components/cart-provider";
 import { Footer } from "@/components/footer";
 import { Announcement, Header } from "@/components/header";
@@ -85,18 +95,56 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   const [footerPages, blog] = await Promise.all([listFooterPages(store.id), listPublishedPosts(store.id, { pageSize: 1 })]);
   // The header and footer the merchant built and published (docs/47 part C). None: today's header and footer.
   const chrome = await getLiveChrome(store.id).catch(() => null);
-  const [info, categories, tracking, points, isAiActive] = await Promise.all([
+  const [info, categories, tracking, points, isAiActive, { siteMode, vertical }, origin] = await Promise.all([
     getStoreInfo(store.id),
     capabilities.commerce ? listCategories(store.id) : Promise.resolve([]),
     getStorefrontTracking(store.id),
     capabilities.commerce ? getPointsSummary(store.id, store.id).catch(() => null) : Promise.resolve(null),
     isModuleActive(store.id, "ai_suite").catch(() => false),
+    getTenantModeAndVertical(store.id),
+    getOrigin(),
   ]);
+
+  const schemaJson: Record<string, any> = {
+    "@context": "https://schema.org",
+    "@type":
+      siteMode === "ECOMMERCE"
+        ? "OnlineStore"
+        : vertical === "RESTAURANT"
+        ? "Restaurant"
+        : vertical === "DOCTOR_CLINIC"
+        ? "Physician"
+        : vertical === "PUBLIC_FIGURE" || vertical === "PERSONAL_PORTFOLIO"
+        ? "Person"
+        : vertical === "SERVICE_PROVIDER"
+        ? "ProfessionalService"
+        : "LocalBusiness",
+    name: info.storeName,
+    url: origin,
+    description: info.tagline || `${info.storeName} official website`,
+    ...(info.logoUrl ? { image: info.logoUrl } : {}),
+    ...(info.contactPhone || info.whatsappNumber ? { telephone: info.contactPhone || info.whatsappNumber } : {}),
+    ...(vertical === "RESTAURANT" ? { hasMenu: `${origin}/menu`, servesCuisine: "Bangladeshi, Halal" } : {}),
+    ...(info.addressLine
+      ? {
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: info.addressLine,
+            addressCountry: "BD",
+          },
+        }
+      : {}),
+  };
+
   return (
     <CartProvider>
       <ThemeStyle tenantId={store.id} />
       {store.isDemo && <DemoRibbon themeId={store.themeId} lang={lang} />}
       <StorefrontTracker tracking={tracking} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaJson) }}
+      />
       {info.ordersPaused && <PausedBanner t={t} />}
       <Announcement info={info} lang={lang} chrome={chrome} />
       <ReferralBanner tenantId={store.id} lang={lang} t={t} />

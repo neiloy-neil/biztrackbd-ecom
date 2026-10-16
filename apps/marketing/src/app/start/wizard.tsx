@@ -64,10 +64,80 @@ export const CATEGORY_OPTIONS = [
   },
 ] as const;
 
+export type BusinessVertical =
+  | "RESTAURANT"
+  | "DOCTOR_CLINIC"
+  | "PUBLIC_FIGURE"
+  | "BUSINESS_COMPANY"
+  | "SERVICE_PROVIDER"
+  | "PERSONAL_PORTFOLIO";
+
+export interface BusinessVerticalOption {
+  id: BusinessVertical;
+  name: string;
+  bn: string;
+  icon: string;
+  hint: string;
+  recommendedTheme: string;
+}
+
+export const VERTICAL_OPTIONS: BusinessVerticalOption[] = [
+  {
+    id: "RESTAURANT",
+    name: "Restaurant, Café & Food",
+    bn: "রেস্তোরাঁ, ক্যাফে ও ফুড",
+    icon: "🍽️",
+    hint: "Digital menu, table reservations & location showcase",
+    recommendedTheme: "dhaka-bistro",
+  },
+  {
+    id: "DOCTOR_CLINIC",
+    name: "Doctor, Specialist & Clinic",
+    bn: "ডাক্তার, চেম্বার ও ক্লিনিক",
+    icon: "🩺",
+    hint: "Degrees, chamber schedules & appointment requests",
+    recommendedTheme: "modern-clinic",
+  },
+  {
+    id: "BUSINESS_COMPANY",
+    name: "Company & Corporate Agency",
+    bn: "কোম্পানি, কর্পোরেট ও এজেন্সি",
+    icon: "🏢",
+    hint: "Company overview, services, case studies & client quotes",
+    recommendedTheme: "bindu",
+  },
+  {
+    id: "SERVICE_PROVIDER",
+    name: "Service Provider & Consultant",
+    bn: "সার্ভিস প্রোভাইডার ও কনসালট্যান্ট",
+    icon: "💼",
+    hint: "Services with pricing, coverage area & booking leads",
+    recommendedTheme: "boithok",
+  },
+  {
+    id: "PERSONAL_PORTFOLIO",
+    name: "Personal Portfolio & Resume",
+    bn: "ব্যক্তিগত পোর্টফোলিও ও সিভি",
+    icon: "📁",
+    hint: "Showcase creative work, career milestones & CV download",
+    recommendedTheme: "kapor",
+  },
+  {
+    id: "PUBLIC_FIGURE",
+    name: "Public Figure & Creator",
+    bn: "পাবলিক ফিগার ও কনটেন্ট ক্রিয়েটর",
+    icon: "⭐",
+    hint: "Press links, biography, event schedule & speaking booking",
+    recommendedTheme: "axionwear",
+  },
+];
+
 const STEPS = ["Store & Category", "Store Address", "Account & Launch"] as const;
 
 const FIELD_STEP: Record<string, number> = {
   storeName: 0,
+  siteMode: 0,
+  businessVertical: 0,
   category: 0,
   tagline: 0,
   theme: 0,
@@ -92,6 +162,8 @@ export function Wizard({
   rootDomain,
   initialPlan,
   initialTheme,
+  initialMode = "ECOMMERCE",
+  initialVertical = "RESTAURANT",
   keepCode = "",
   keptProductsCount,
 }: {
@@ -103,11 +175,15 @@ export function Wizard({
   rootDomain: string;
   initialPlan: string;
   initialTheme: string;
+  initialMode?: "ECOMMERCE" | "PORTFOLIO" | "HYBRID";
+  initialVertical?: BusinessVertical;
 }) {
   const [state, action, pending] = useActionState<SignupState, FormData>(signupAction, {});
   const [step, setStep] = useState(0);
   const [v, setV] = useState({
     storeName: "",
+    siteMode: (initialMode || "ECOMMERCE") as "ECOMMERCE" | "PORTFOLIO" | "HYBRID",
+    businessVertical: (initialVertical || "RESTAURANT") as BusinessVertical,
     category: "FASHION" as StoreCategory,
     tagline: "",
     subdomain: "",
@@ -176,8 +252,7 @@ export function Wizard({
   function handleCategorySelect(catId: StoreCategory) {
     const cat = CATEGORY_OPTIONS.find((c) => c.id === catId);
     set("category", catId);
-    if (!touchedTheme && cat) {
-      // Suggest matching theme if available
+    if (!touchedTheme && cat && v.siteMode === "ECOMMERCE") {
       const matching = themes.find((t) => t.id === cat.theme && t.live);
       if (matching) {
         set("theme", matching.id);
@@ -185,9 +260,37 @@ export function Wizard({
     }
   }
 
+  function handleVerticalSelect(vertId: BusinessVertical) {
+    const vert = VERTICAL_OPTIONS.find((c) => c.id === vertId);
+    set("businessVertical", vertId);
+    if (!touchedTheme && vert) {
+      const matching = themes.find((t) => t.id === vert.recommendedTheme && t.live);
+      if (matching) {
+        set("theme", matching.id);
+      }
+    }
+  }
+
+  function handleModeSelect(mode: "ECOMMERCE" | "PORTFOLIO" | "HYBRID") {
+    set("siteMode", mode);
+    if (mode === "PORTFOLIO" && !touchedTheme) {
+      const vert = VERTICAL_OPTIONS.find((o) => o.id === v.businessVertical) ?? VERTICAL_OPTIONS[0]!;
+      const matching = themes.find((t) => t.id === vert.recommendedTheme && t.live);
+      if (matching) set("theme", matching.id);
+    } else if (mode === "ECOMMERCE" && !touchedTheme) {
+      const cat = CATEGORY_OPTIONS.find((c) => c.id === v.category) ?? CATEGORY_OPTIONS[0]!;
+      const matching = themes.find((t) => t.id === cat.theme && t.live);
+      if (matching) set("theme", matching.id);
+    }
+  }
+
   function validate(s: number): string | null {
     if (s === 0) {
-      if (v.storeName.trim().length < 2) return "Enter your store name (at least 2 letters)";
+      if (v.storeName.trim().length < 2) {
+        return v.siteMode === "PORTFOLIO"
+          ? "Enter your website or business name (at least 2 letters)"
+          : "Enter your store name (at least 2 letters)";
+      }
     }
     if (s === 1) {
       if (v.subdomain.length < 3) return "Choose an address of at least 3 letters or numbers";
@@ -214,7 +317,10 @@ export function Wizard({
     setStep(step + 1);
   }
 
-  const chosenCat = CATEGORY_OPTIONS.find((c) => c.id === v.category) || CATEGORY_OPTIONS[0];
+  const chosenCat = CATEGORY_OPTIONS.find((c) => c.id === v.category) ?? CATEGORY_OPTIONS[0]!;
+  const chosenVertical = VERTICAL_OPTIONS.find((c) => c.id === v.businessVertical) ?? VERTICAL_OPTIONS[0]!;
+  const isPortfolio = v.siteMode === "PORTFOLIO";
+  const isHybrid = v.siteMode === "HYBRID";
   const defaultTheme: Theme = { id: "kapor", name: "Kapor", blurb: "Modern fashion & apparel theme", live: true };
   const chosenTheme: Theme = themes.find((t) => t.id === v.theme) ?? themes[0] ?? defaultTheme;
   const defaultPlan: Plan = { tier: "PRO", name: "Pro Plan", priceMonthly: 1499, blurb: "Full features with 14-day free trial" };
@@ -251,10 +357,18 @@ export function Wizard({
               <span>✨</span> 14-Day Free Pro Trial · No Credit Card Required
             </span>
             <h1 style={{ margin: 0, fontSize: "clamp(24px, 4vw, 32px)", lineHeight: 1.2 }}>
-              Launch your online store in 30 seconds
+              {isPortfolio
+                ? "Launch your business website in 30 seconds"
+                : isHybrid
+                ? "Launch your hybrid store & website in 30 seconds"
+                : "Launch your online store in 30 seconds"}
             </h1>
             <p className="muted" style={{ marginTop: 6, fontSize: 14.5 }}>
-              Sell online across Bangladesh with Cash on Delivery, bKash, and automated courier pickup.
+              {isPortfolio
+                ? "Showcase your services, menu, portfolio, and capture direct customer leads & booking requests."
+                : isHybrid
+                ? "Showcase your business while selling merchandise and products with online checkout."
+                : "Sell online across Bangladesh with Cash on Delivery, bKash, and automated courier pickup."}
             </p>
           </div>
 
@@ -289,6 +403,8 @@ export function Wizard({
 
           {/* Hidden Form Inputs */}
           <input type="hidden" name="storeName" value={v.storeName} />
+          <input type="hidden" name="siteMode" value={v.siteMode} />
+          <input type="hidden" name="businessVertical" value={v.businessVertical || ""} />
           <input type="hidden" name="category" value={v.category} />
           <input type="hidden" name="tagline" value={v.tagline} />
           <input type="hidden" name="subdomain" value={v.subdomain} />
@@ -332,86 +448,272 @@ export function Wizard({
             </div>
           )}
 
-          {/* STEP 1: Store & Category */}
+          {/* STEP 1: Store & Category / Business Mode */}
           {step === 0 && (
             <div data-testid="step-store-category">
               <h2 style={{ fontSize: 19, marginBottom: 14, color: "var(--ink)", fontWeight: 700 }}>
-                1. What is your store called & what do you sell?
+                1. What are you building & what is your business called?
               </h2>
 
-              <label className="field">
-                <span className="label">Store name *</span>
-                <input
-                  className="input"
-                  autoFocus
-                  placeholder="e.g. Dhaka Artisan Crafts, Aarohi Fashion, Gadget Pulse"
-                  value={v.storeName}
-                  onChange={(e) => set("storeName", e.target.value)}
-                  data-testid="f-storeName"
-                />
-                <span className="hint">This appears on your storefront, customer invoices, and SMS receipts.</span>
-              </label>
-
-              <div className="field" style={{ marginTop: 14 }}>
-                <span className="label">Select your business category *</span>
-                <span className="hint" style={{ marginBottom: 6 }}>
-                  Pre-configures your starter catalog, sizes, attributes, and courier shipping zones.
+              {/* Mode Selector */}
+              <div style={{ marginBottom: 18 }}>
+                <span className="label" style={{ display: "block", marginBottom: 8 }}>
+                  Select what you are creating *
                 </span>
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
                     gap: 10,
                   }}
                 >
-                  {CATEGORY_OPTIONS.map((cat) => {
-                    const selected = v.category === cat.id;
-                    return (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        data-testid={`category-${cat.id.toLowerCase()}`}
-                        onClick={() => handleCategorySelect(cat.id)}
-                        style={{
-                          textAlign: "left",
-                          padding: "12px 14px",
-                          borderRadius: 12,
-                          border: selected ? "2px solid var(--brand)" : "1.5px solid var(--line)",
-                          background: selected ? "var(--tint)" : "#FFFFFF",
-                          cursor: "pointer",
-                          transition: "all 0.15s ease",
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 4,
-                        }}
-                      >
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                          <span style={{ fontSize: 22 }}>{cat.icon}</span>
-                          {selected && (
-                            <span
-                              style={{
-                                fontSize: 11,
-                                fontWeight: 700,
-                                color: "#FFFFFF",
-                                background: "var(--brand)",
-                                padding: "2px 6px",
-                                borderRadius: 6,
-                              }}
-                            >
-                              Selected
-                            </span>
-                          )}
-                        </div>
-                        <div style={{ fontWeight: 700, fontSize: 13.5, color: "var(--ink)" }}>{cat.name}</div>
-                        <div style={{ fontSize: 11.5, color: "var(--brand)", fontWeight: 600 }}>{cat.bn}</div>
-                        <div style={{ fontSize: 11.5, color: "var(--ink-3)", lineHeight: 1.3, marginTop: 2 }}>
-                          {cat.hint}
-                        </div>
-                      </button>
-                    );
-                  })}
+                  <button
+                    type="button"
+                    data-testid="mode-ecommerce"
+                    onClick={() => handleModeSelect("ECOMMERCE")}
+                    style={{
+                      textAlign: "left",
+                      padding: "12px 14px",
+                      borderRadius: 12,
+                      border: v.siteMode === "ECOMMERCE" ? "2px solid var(--brand)" : "1.5px solid var(--line)",
+                      background: v.siteMode === "ECOMMERCE" ? "var(--tint)" : "#FFFFFF",
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 4,
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: 22 }}>🛍️</span>
+                      {v.siteMode === "ECOMMERCE" && (
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "#FFFFFF", background: "var(--brand)", padding: "2px 6px", borderRadius: 6 }}>
+                          Active
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: 13.5, color: "var(--ink)" }}>Online Store</div>
+                    <div style={{ fontSize: 11.5, color: "var(--ink-3)", lineHeight: 1.3 }}>
+                      Cart, checkout, bKash & courier booking
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    data-testid="mode-portfolio"
+                    onClick={() => handleModeSelect("PORTFOLIO")}
+                    style={{
+                      textAlign: "left",
+                      padding: "12px 14px",
+                      borderRadius: 12,
+                      border: v.siteMode === "PORTFOLIO" ? "2px solid var(--brand)" : "1.5px solid var(--line)",
+                      background: v.siteMode === "PORTFOLIO" ? "var(--tint)" : "#FFFFFF",
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 4,
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: 22 }}>💼</span>
+                      {v.siteMode === "PORTFOLIO" && (
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "#FFFFFF", background: "var(--brand)", padding: "2px 6px", borderRadius: 6 }}>
+                          Active
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: 13.5, color: "var(--ink)" }}>Website & Portfolio</div>
+                    <div style={{ fontSize: 11.5, color: "var(--ink-3)", lineHeight: 1.3 }}>
+                      Showcase services, menu, bookings & leads
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    data-testid="mode-hybrid"
+                    onClick={() => handleModeSelect("HYBRID")}
+                    style={{
+                      textAlign: "left",
+                      padding: "12px 14px",
+                      borderRadius: 12,
+                      border: v.siteMode === "HYBRID" ? "2px solid var(--brand)" : "1.5px solid var(--line)",
+                      background: v.siteMode === "HYBRID" ? "var(--tint)" : "#FFFFFF",
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 4,
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: 22 }}>⚡</span>
+                      {v.siteMode === "HYBRID" && (
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "#FFFFFF", background: "var(--brand)", padding: "2px 6px", borderRadius: 6 }}>
+                          Active
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: 13.5, color: "var(--ink)" }}>Hybrid Business + Store</div>
+                    <div style={{ fontSize: 11.5, color: "var(--ink-3)", lineHeight: 1.3 }}>
+                      Website with direct online merchandise sales
+                    </div>
+                  </button>
                 </div>
               </div>
+
+              <label className="field">
+                <span className="label">
+                  {isPortfolio ? "Website or business name *" : "Store name *"}
+                </span>
+                <input
+                  className="input"
+                  autoFocus
+                  placeholder={
+                    isPortfolio
+                      ? "e.g. Dhaka Bistro, Dr. Sarah Clinic, Apex Legal Counsel"
+                      : "e.g. Dhaka Artisan Crafts, Aarohi Fashion, Gadget Pulse"
+                  }
+                  value={v.storeName}
+                  onChange={(e) => set("storeName", e.target.value)}
+                  data-testid="f-storeName"
+                />
+                <span className="hint">
+                  {isPortfolio
+                    ? "This appears on your website header, meta tags, and visitor contact responses."
+                    : "This appears on your storefront, customer invoices, and SMS receipts."}
+                </span>
+              </label>
+
+              {/* Vertical Selection for Portfolio or Hybrid */}
+              {(isPortfolio || isHybrid) && (
+                <div className="field" style={{ marginTop: 14 }}>
+                  <span className="label">Select your business type & industry *</span>
+                  <span className="hint" style={{ marginBottom: 6 }}>
+                    Pre-configures your starter layout, pages, credentials, and lead forms.
+                  </span>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+                      gap: 10,
+                    }}
+                  >
+                    {VERTICAL_OPTIONS.map((vert) => {
+                      const selected = v.businessVertical === vert.id;
+                      return (
+                        <button
+                          key={vert.id}
+                          type="button"
+                          data-testid={`vertical-${vert.id.toLowerCase()}`}
+                          onClick={() => handleVerticalSelect(vert.id)}
+                          style={{
+                            textAlign: "left",
+                            padding: "12px 14px",
+                            borderRadius: 12,
+                            border: selected ? "2px solid var(--brand)" : "1.5px solid var(--line)",
+                            background: selected ? "var(--tint)" : "#FFFFFF",
+                            cursor: "pointer",
+                            transition: "all 0.15s ease",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 4,
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <span style={{ fontSize: 22 }}>{vert.icon}</span>
+                            {selected && (
+                              <span
+                                style={{
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  color: "#FFFFFF",
+                                  background: "var(--brand)",
+                                  padding: "2px 6px",
+                                  borderRadius: 6,
+                                }}
+                              >
+                                Selected
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontWeight: 700, fontSize: 13.5, color: "var(--ink)" }}>{vert.name}</div>
+                          <div style={{ fontSize: 11.5, color: "var(--brand)", fontWeight: 600 }}>{vert.bn}</div>
+                          <div style={{ fontSize: 11.5, color: "var(--ink-3)", lineHeight: 1.3, marginTop: 2 }}>
+                            {vert.hint}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Category Selection for Ecommerce or Hybrid */}
+              {(!isPortfolio || isHybrid) && (
+                <div className="field" style={{ marginTop: 14 }}>
+                  <span className="label">
+                    {isHybrid ? "Select merchandise product category *" : "Select your business category *"}
+                  </span>
+                  <span className="hint" style={{ marginBottom: 6 }}>
+                    Pre-configures your starter catalog, sizes, attributes, and courier shipping zones.
+                  </span>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+                      gap: 10,
+                    }}
+                  >
+                    {CATEGORY_OPTIONS.map((cat) => {
+                      const selected = v.category === cat.id;
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          data-testid={`category-${cat.id.toLowerCase()}`}
+                          onClick={() => handleCategorySelect(cat.id)}
+                          style={{
+                            textAlign: "left",
+                            padding: "12px 14px",
+                            borderRadius: 12,
+                            border: selected ? "2px solid var(--brand)" : "1.5px solid var(--line)",
+                            background: selected ? "var(--tint)" : "#FFFFFF",
+                            cursor: "pointer",
+                            transition: "all 0.15s ease",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 4,
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <span style={{ fontSize: 22 }}>{cat.icon}</span>
+                            {selected && (
+                              <span
+                                style={{
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  color: "#FFFFFF",
+                                  background: "var(--brand)",
+                                  padding: "2px 6px",
+                                  borderRadius: 6,
+                                }}
+                              >
+                                Selected
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontWeight: 700, fontSize: 13.5, color: "var(--ink)" }}>{cat.name}</div>
+                          <div style={{ fontSize: 11.5, color: "var(--brand)", fontWeight: 600 }}>{cat.bn}</div>
+                          <div style={{ fontSize: 11.5, color: "var(--ink-3)", lineHeight: 1.3, marginTop: 2 }}>
+                            {cat.hint}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               <label className="field" style={{ marginTop: 16 }}>
                 <span className="label">
@@ -420,14 +722,18 @@ export function Wizard({
                 <input
                   className="input"
                   maxLength={120}
-                  placeholder="e.g. Authentic handloom sarees & pure cotton panjabi from Narayanganj"
+                  placeholder={
+                    isPortfolio
+                      ? "e.g. Modern wood-fired artisan pizza & Italian espresso in Gulshan 2"
+                      : "e.g. Authentic handloom sarees & pure cotton panjabi from Narayanganj"
+                  }
                   value={v.tagline}
                   onChange={(e) => set("tagline", e.target.value)}
                   data-testid="f-tagline"
                 />
               </label>
 
-              {/* Collapsible Storefront Template Selection */}
+              {/* Collapsible Storefront / Website Template Selection */}
               <div
                 style={{
                   marginTop: 18,
@@ -440,10 +746,10 @@ export function Wizard({
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <div>
                     <span style={{ fontSize: 13.5, fontWeight: 700, color: "var(--ink)" }}>
-                      Storefront Template: <b>{chosenTheme.name}</b>
+                      {isPortfolio ? "Website Template" : "Storefront Template"}: <b>{chosenTheme.name}</b>
                     </span>
                     <p style={{ margin: "2px 0 0", fontSize: 12.5, color: "var(--ink-3)" }}>
-                      Tailored for {chosenCat.name}. You can switch themes at any time.
+                      Tailored for {isPortfolio ? chosenVertical.name : chosenCat.name}. You can switch themes at any time.
                     </p>
                   </div>
                   <button
@@ -833,13 +1139,17 @@ export function Wizard({
                   boxShadow: "0 4px 14px rgba(79, 70, 229, 0.35)",
                 }}
               >
-                {pending ? "Creating your store…" : "Launch My Store 🚀"}
+                {pending
+                  ? "Creating your website…"
+                  : isPortfolio
+                  ? "Launch My Website 🚀"
+                  : "Launch My Store 🚀"}
               </button>
             )}
           </div>
 
           <p className="hint" style={{ marginTop: 18, fontSize: 12.5, lineHeight: 1.5, textAlign: "center" }}>
-            By creating a store, you agree to BizTrackBD Terms. 100% of customer payments go directly to your personal or merchant account. 0% sales commission.
+            By creating an account, you agree to BizTrackBD Terms. 100% of customer payments go directly to your personal or merchant account. 0% sales commission.
           </p>
         </form>
       </div>
@@ -848,7 +1158,9 @@ export function Wizard({
       <aside className="split-side" aria-label="Store Preview & Guarantee">
         <div className="side-card">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-            <span className="eyebrow" style={{ margin: 0, fontSize: 11.5 }}>Live Store Preview</span>
+            <span className="eyebrow" style={{ margin: 0, fontSize: 11.5 }}>
+              {isPortfolio ? "Live Website Preview" : "Live Store Preview"}
+            </span>
             <span
               style={{
                 fontSize: 11,
@@ -906,13 +1218,21 @@ export function Wizard({
 
           <div style={{ display: "flex", flexDirection: "column", gap: 9, fontSize: 13 }}>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--ink-3)", fontWeight: 600 }}>Store name:</span>
-              <b style={{ color: "var(--ink)", textAlign: "right" }}>{v.storeName || "My Online Store"}</b>
+              <span style={{ color: "var(--ink-3)", fontWeight: 600 }}>
+                {isPortfolio ? "Website name:" : "Store name:"}
+              </span>
+              <b style={{ color: "var(--ink)", textAlign: "right" }}>
+                {v.storeName || (isPortfolio ? "My Business Website" : "My Online Store")}
+              </b>
             </div>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--ink-3)", fontWeight: 600 }}>Category:</span>
+              <span style={{ color: "var(--ink-3)", fontWeight: 600 }}>
+                {isPortfolio ? "Industry:" : "Category:"}
+              </span>
               <span style={{ color: "var(--ink)", fontWeight: 600 }}>
-                {chosenCat.icon} {chosenCat.name}
+                {isPortfolio
+                  ? `${chosenVertical.icon} ${chosenVertical.name}`
+                  : `${chosenCat.icon} ${chosenCat.name}`}
               </span>
             </div>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>

@@ -37,6 +37,9 @@ export async function signupAction(_prev: SignupState, form: FormData): Promise<
   const category = (String(form.get("category") ?? "GENERAL").toUpperCase()) as "FASHION" | "BEAUTY" | "ELECTRONICS" | "GROCERY" | "GENERAL";
   const tagline = String(form.get("tagline") ?? "").trim();
   const subdomain = String(form.get("subdomain") ?? "").trim().toLowerCase();
+  const siteMode = (String(form.get("siteMode") ?? "ECOMMERCE").toUpperCase()) as "ECOMMERCE" | "PORTFOLIO" | "HYBRID";
+  const rawVertical = form.get("businessVertical");
+  const businessVertical = rawVertical && String(rawVertical).trim() ? String(rawVertical).toUpperCase() as any : undefined;
   const plan = (String(form.get("plan") ?? "PRO").toUpperCase()) as "STARTER" | "PRO" | "BUSINESS";
   const theme = String(form.get("theme") ?? "kapor");
   const demoData = form.get("demoData") !== "off";
@@ -65,6 +68,8 @@ export async function signupAction(_prev: SignupState, form: FormData): Promise<
       plan: plan || "PRO",
       theme,
       demoData,
+      siteMode,
+      businessVertical,
     }, { pictures: samplePictures() ?? undefined, ...(keepCode && copier ? { keep: { code: keepCode, copyImage: copier } } : {}) });
   } catch (e) {
     if (e instanceof DomainError) return { error: e.message, field: typeof e.details?.field === "string" ? e.details.field : undefined };

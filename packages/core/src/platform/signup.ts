@@ -17,6 +17,8 @@ import { createAutoLoginToken } from "../auth/auto-login";
 import { adminCreateUser } from "../auth/supabase";
 import { getCategoryStarterPreset, type StarterCatalogPreset } from "../demo/catalog-presets";
 
+import { getBusinessTemplateByVertical } from "../site/templates/manifests";
+
 const EXTERNAL_AUTH = "EXTERNAL_AUTH";
 const MAX_STORES_PER_EMAIL = 3;
 
@@ -42,6 +44,15 @@ export const SignupInput = z.object({
   tagline: z.string().trim().max(120).optional(),
   locale: z.enum(["bn-BD", "en-US"]).default("bn-BD"),
   demoData: z.boolean().default(true),
+  siteMode: z.enum(["ECOMMERCE", "PORTFOLIO", "HYBRID"]).default("ECOMMERCE"),
+  businessVertical: z.enum([
+    "RESTAURANT",
+    "DOCTOR_CLINIC",
+    "PUBLIC_FIGURE",
+    "BUSINESS_COMPANY",
+    "SERVICE_PROVIDER",
+    "PERSONAL_PORTFOLIO",
+  ]).optional().nullable(),
 });
 export type SignupInput = z.input<typeof SignupInput>;
 
@@ -74,6 +85,8 @@ export interface SignedUp {
   kept?: number;
   keptPage?: boolean;
   autoLoginToken?: string;
+  siteMode?: string;
+  businessVertical?: string | null;
 }
 
 /** Three sample products so a new owner sees a working store at once. They count against the plan like any product and can be deleted. */
@@ -140,7 +153,14 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
   } catch {
     throw new ValidationError("Enter a valid Bangladeshi mobile number, like 01712345678", { field: "phone" });
   }
-  const chosen = await resolveTemplateForSignup(input.theme);
+  let requestedTheme = input.theme;
+  if (input.siteMode === "PORTFOLIO" && input.businessVertical && (requestedTheme === "kapor" || !requestedTheme)) {
+    const vertTemplate = getBusinessTemplateByVertical(input.businessVertical as any);
+    if (vertTemplate) {
+      requestedTheme = vertTemplate.id;
+    }
+  }
+  const chosen = await resolveTemplateForSignup(requestedTheme);
   // Everything about how the store is drawn follows the template's look; the template itself is remembered on the store.
   const look = chosen.baseLook;
   const sub = validateSubdomain(input.subdomain);
@@ -187,6 +207,13 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
     }
     const result = await withTenant(id, async (tx) => {
       const tenant = await tx.tenant.findFirstOrThrow();
+      await tx.tenant.update({
+        where: { id },
+        data: {
+          siteMode: input.siteMode ?? "ECOMMERCE",
+          businessVertical: input.businessVertical ?? null,
+        },
+      });
       await tx.storeSettings.create({
         data: {
           tenantId: id, storeName: input.storeName, tagline: input.tagline || kept?.settings?.tagline || null, contactPhone: phone, email: input.email,
@@ -225,7 +252,7 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
       let keptCount = 0;
       if (kept) {
         keptCount = await writeKeptCatalog(tx, id, kept, keptPictures);
-      } else if (input.demoData) {
+      } else if (input.demoData && input.siteMode !== "PORTFOLIO") {
         const hasExplicitCategory = Boolean((raw as Record<string, unknown>)?.category);
         if (hasExplicitCategory) {
           keptCount = await seedCategoryCatalog(tx, id, categoryPreset);
@@ -240,11 +267,11 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
 
       const autoLoginToken = createAutoLoginToken({ tenantId: id, userId: owner.id, email: owner.email });
 
-      await audit(tx, id, { userId: owner.id, email: owner.email }, "store.created", { plan: input.plan, theme: look, template: chosen.info.id, category: input.category, demoData: input.demoData, quarantined: brand !== null });
+      await audit(tx, id, { userId: owner.id, email: owner.email }, "store.created", { plan: input.plan, theme: look, template: chosen.info.id, category: input.category, siteMode: input.siteMode, businessVertical: input.businessVertical, demoData: input.demoData, quarantined: brand !== null });
       return {
         tenantId: id, subdomain: sub.label, storeName: input.storeName, plan: input.plan, trialEndsAt: tenant.trialEndsAt,
         quarantined: brand !== null, kept: keptCount, ownerId: owner.id, ownerEmail: owner.email, ownerName: owner.name,
-        autoLoginToken,
+        autoLoginToken, siteMode: input.siteMode, businessVertical: input.businessVertical,
       };
     });
     let keptPage = false;

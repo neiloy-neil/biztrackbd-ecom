@@ -10,6 +10,8 @@ export interface PlanCardData {
   priceYearly: number;
   monthsFree: number;
   bullets: string[];
+  forText?: string;
+  linkHref?: string;
 }
 
 const taka = (n: number) => `৳ ${n.toLocaleString("en-IN")}`;
@@ -109,7 +111,7 @@ export function PlanCards({
           const isBest = p.tier === best;
           const displayPrice = yearly ? Math.round(p.priceYearly / 12) : p.priceMonthly;
           const bulletsToShow = compactBullets ? p.bullets.slice(0, compactBullets) : p.bullets;
-          const subText = PLAN_FOR[p.tier] || "Storefront and admin desk included.";
+          const subText = p.forText || PLAN_FOR[p.tier] || "Storefront and admin desk included.";
 
           return (
             <div
@@ -172,7 +174,7 @@ export function PlanCards({
               </div>
 
               <Link
-                href={`/start?plan=${p.tier}`}
+                href={p.linkHref || `/start?plan=${p.tier}`}
                 className={`btn btn-lg ${isBest ? "btn-primary" : "btn-secondary"}`}
                 style={{
                   height: 48,

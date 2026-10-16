@@ -70,6 +70,39 @@ const FALLBACK_PUBLIC_PLANS: PlanView[] = [
   },
 ];
 
+export const FALLBACK_PORTFOLIO_PLANS: PlanView[] = [
+  {
+    tier: "STARTER",
+    name: "Portfolio Starter",
+    priceMonthly: 990,
+    priceYearly: 9900,
+    yearlyMonthsFree: 2,
+    trialDays: 14,
+    limits: { products: 10, ordersPerMonth: 50, staff: 2, storageGb: 5, smsCredits: 200, landingPages: 5 },
+    features: { customDomain: true, leadCapture: true, downloadsLimit: 5, contentItemsLimit: 15, bookingRequests: false, whatsappAlerts: true, teamProfiles: false, hybridStore: false, mode: "PORTFOLIO" },
+  },
+  {
+    tier: "PRO",
+    name: "Portfolio Pro",
+    priceMonthly: 1990,
+    priceYearly: 19900,
+    yearlyMonthsFree: 2,
+    trialDays: 14,
+    limits: { products: 50, ordersPerMonth: 200, staff: 5, storageGb: 20, smsCredits: 1000, landingPages: 25 },
+    features: { customDomain: true, leadCapture: true, downloadsLimit: "unlimited", contentItemsLimit: "unlimited", bookingRequests: true, whatsappAlerts: true, teamProfiles: true, hybridStore: false, mode: "PORTFOLIO" },
+  },
+  {
+    tier: "BUSINESS",
+    name: "Portfolio Business",
+    priceMonthly: 3990,
+    priceYearly: 39900,
+    yearlyMonthsFree: 2,
+    trialDays: 14,
+    limits: { products: 200, ordersPerMonth: 1000, staff: 15, storageGb: 100, smsCredits: 3000, landingPages: null },
+    features: { customDomain: true, leadCapture: true, downloadsLimit: "unlimited", contentItemsLimit: "unlimited", bookingRequests: true, whatsappAlerts: true, teamProfiles: true, hybridStore: true, mode: "PORTFOLIO" },
+  },
+];
+
 /** The plans on the pricing page and the upgrade screen. Prices and limits come from the Plan table, falling back to defaults if DB is unreachable. */
 export async function listPublicPlans(): Promise<PlanView[]> {
   try {
@@ -79,6 +112,10 @@ export async function listPublicPlans(): Promise<PlanView[]> {
     // fallback to preset plans if database is not yet ready or configured
   }
   return FALLBACK_PUBLIC_PLANS;
+}
+
+export async function listPublicPortfolioPlans(): Promise<PlanView[]> {
+  return FALLBACK_PORTFOLIO_PLANS;
 }
 
 export interface ProofView {

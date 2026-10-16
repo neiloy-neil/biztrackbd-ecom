@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { listPublicPlans, type PlanView } from "@biztrackbd/core";
-import { PlanCards } from "@/components/plan-cards";
-import { demoAdminUrl } from "@/lib/demo-admin";
-import { planBullets } from "@/lib/plans";
+import { listPublicPlans, listPublicPortfolioPlans, type PlanView } from "@biztrackbd/core";
+import { PricingView, type ComparisonRow } from "./pricing-view";
+import { planBullets, portfolioPlanBullets } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
 
@@ -13,10 +12,9 @@ export const metadata: Metadata = {
 };
 
 const lim = (v: number | null) => (v == null ? "Unlimited" : v.toLocaleString("en-IN"));
-const yes = (v: unknown) => (v ? "Yes" : "No");
 
-/** One row per feature that differs between plans, verified directly against the core schema. */
-const ROWS: { label: string; of: (p: PlanView) => string }[] = [
+/** Features comparison for Online Store plans */
+const STORE_ROWS_DEF: { label: string; of: (p: PlanView) => string }[] = [
   { label: "Products", of: (p) => lim(p.limits.products) },
   { label: "Orders a month", of: (p) => lim(p.limits.ordersPerMonth) },
   { label: "Staff accounts", of: (p) => lim(p.limits.staff) },
@@ -28,9 +26,66 @@ const ROWS: { label: string; of: (p: PlanView) => string }[] = [
   { label: "Photo storage", of: (p) => (p.limits.storageGb == null ? "Unlimited" : `${p.limits.storageGb} GB`) },
 ];
 
+/** Features comparison for Business Website & Portfolio plans */
+const PORTFOLIO_ROWS: ComparisonRow[] = [
+  { label: "Your own custom domain", starter: "Included (free SSL)", pro: "Included (free SSL)", business: "Included (free SSL)" },
+  { label: "Services & portfolio showcase", starter: "Up to 15 items", pro: "Unlimited", business: "Unlimited" },
+  { label: "Digital downloads & lead magnets", starter: "Up to 5 files", pro: "Unlimited", business: "Unlimited" },
+  { label: "Lead capture & WhatsApp alerts", starter: "Yes (direct inbox)", pro: "Yes (with smart routing)", business: "Yes (team dispatch)" },
+  { label: "Online booking & reservations", starter: "Contact form only", pro: "Included (with SMS alert)", business: "Included (multi-schedule)" },
+  { label: "Digital menu & QR code (food)", starter: "Included", pro: "Included", business: "Included" },
+  { label: "Team & doctor profiles", starter: "2 staff accounts", pro: "5 staff accounts", business: "15 staff accounts" },
+  { label: "Document & photo storage", starter: "5 GB", pro: "20 GB", business: "100 GB" },
+  { label: "Hybrid store (sell merchandise)", starter: "Up to 10 products", pro: "Up to 50 products", business: "Up to 200 products" },
+  { label: "Sales commission", starter: "0%", pro: "0%", business: "0%" },
+];
+
+const PORTFOLIO_FOR: Record<string, string> = {
+  STARTER: "For freelancers, doctors, and solo consultants.",
+  PRO: "For growing clinics, restaurants, and professional agencies.",
+  BUSINESS: "For established corporate firms and multi-branch companies.",
+};
+
 export default async function Pricing() {
-  const plans = await listPublicPlans().catch(() => []);
-  const best = plans.find((p) => p.tier === "PRO")?.tier;
+  const [storePlans, portfolioPlans] = await Promise.all([
+    listPublicPlans().catch(() => []),
+    listPublicPortfolioPlans().catch(() => []),
+  ]);
+
+  const bestStore = storePlans.find((p) => p.tier === "PRO")?.tier ?? "PRO";
+  const bestPortfolio = portfolioPlans.find((p) => p.tier === "PRO")?.tier ?? "PRO";
+
+  const starterStore = storePlans.find((p) => p.tier === "STARTER");
+  const proStore = storePlans.find((p) => p.tier === "PRO");
+  const businessStore = storePlans.find((p) => p.tier === "BUSINESS");
+
+  const storeRows: ComparisonRow[] = STORE_ROWS_DEF.map((r) => ({
+    label: r.label,
+    starter: starterStore ? r.of(starterStore) : "—",
+    pro: proStore ? r.of(proStore) : "—",
+    business: businessStore ? r.of(businessStore) : "—",
+  }));
+
+  const storeCardData = storePlans.map((p) => ({
+    tier: p.tier,
+    name: p.name,
+    priceMonthly: p.priceMonthly,
+    priceYearly: p.priceYearly,
+    monthsFree: p.yearlyMonthsFree,
+    bullets: planBullets(p),
+    linkHref: `/start?mode=ecommerce&plan=${p.tier}`,
+  }));
+
+  const portfolioCardData = portfolioPlans.map((p) => ({
+    tier: p.tier,
+    name: p.name,
+    priceMonthly: p.priceMonthly,
+    priceYearly: p.priceYearly,
+    monthsFree: p.yearlyMonthsFree,
+    bullets: portfolioPlanBullets(p),
+    forText: PORTFOLIO_FOR[p.tier],
+    linkHref: `/start?mode=portfolio&plan=${p.tier}`,
+  }));
 
   return (
     <section className="block">
@@ -45,68 +100,17 @@ export default async function Pricing() {
           </p>
         </div>
 
-        <div style={{ marginTop: 36, textAlign: "center" }}>
-          <PlanCards
-            plans={plans.map((p) => ({
-              tier: p.tier,
-              name: p.name,
-              priceMonthly: p.priceMonthly,
-              priceYearly: p.priceYearly,
-              monthsFree: p.yearlyMonthsFree,
-              bullets: planBullets(p),
-            }))}
-            best={best}
-          />
-        </div>
-
-        <p className="fine" style={{ textAlign: "center", marginTop: 28, fontSize: 14.5 }}>
-          Not sure yet?{" "}
-          <a href={demoAdminUrl()} className="link" data-testid="pricing-demo-admin" style={{ fontWeight: 600 }}>
-            Try the admin desk first, with no signup
-          </a>
-          .
-        </p>
-
-        {/* Comparison Table */}
-        <div style={{ marginTop: 64 }}>
-          <h2 style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.6px", marginBottom: 20 }}>
-            Compare plan features
-          </h2>
-          <div className="table-wrap" data-testid="compare" tabIndex={0} role="region" aria-label="Plan comparison">
-            <table className="compare">
-              <thead>
-                <tr>
-                  <th scope="col" style={{ width: "34%" }}>Feature</th>
-                  {plans.map((p) => (
-                    <th scope="col" key={p.tier} className={p.tier === best ? "best" : ""}>
-                      {p.name}
-                      {p.tier === best && (
-                        <div style={{ fontSize: 11, fontWeight: 700, marginTop: 2, color: "var(--brand)" }}>
-                          MOST CHOSEN
-                        </div>
-                      )}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {ROWS.map((r) => (
-                  <tr key={r.label}>
-                    <th scope="row">{r.label}</th>
-                    {plans.map((p) => (
-                      <td key={p.tier} className={p.tier === best ? "best" : ""}>
-                        {r.of(p)}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <PricingView
+          storePlans={storeCardData}
+          portfolioPlans={portfolioCardData}
+          bestStore={bestStore}
+          bestPortfolio={bestPortfolio}
+          storeRows={storeRows}
+          portfolioRows={PORTFOLIO_ROWS}
+        />
 
         {/* Payment Methods Banner matching MktPricing.dc.html */}
-        <div className="pay-panel">
+        <div className="pay-panel" style={{ marginTop: 64 }}>
           <div style={{ flex: "1 1 340px" }}>
             <h2>Pay the way that suits you</h2>
             <p>

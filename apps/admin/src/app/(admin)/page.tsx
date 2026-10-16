@@ -2,15 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   DASHBOARD_RANGES, can, changePercent, getDashboard, getTenantActiveModules, listConnectedCouriers,
+  getTenantModeAndVertical, listSiteLeads,
   type SetupStep,
 } from "@biztrackbd/core";
+import { withTenant } from "@biztrackbd/db";
 import { BoltIcon, BoxIcon, PlusIcon, SearchIcon, TagIcon } from "@/components/icons";
 import { friendlyDate, taka } from "@/lib/format";
 import { demoTick } from "@/lib/demo";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { OrderPill, PaymentPill } from "@/lib/status";
+import { storefrontOrigin } from "@/lib/store-url";
 import { DashboardOperationsClient } from "./dashboard-operations-client";
+import { PortfolioCommandCenter } from "./portfolio-command-center";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Merchant Command Center" };
@@ -35,12 +39,82 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   await demoTick(s);
   const now = new Date();
   const range = Number(one(sp.range)) || 7;
+  const hybridTab = one(sp.tab) || "store";
 
-  const [d, activeModules, connectedCouriers] = await Promise.all([
+  const [d, activeModules, connectedCouriers, modeMeta] = await Promise.all([
     getDashboard(s.tenantId, s.actor, now, { range }),
     getTenantActiveModules(s.tenantId),
     listConnectedCouriers(s.tenantId),
+    getTenantModeAndVertical(s.tenantId),
   ]);
+
+  const storeOrigin = storefrontOrigin(s.tenantSubdomain);
+
+  // If Portfolio mode or Hybrid in Website tab, load lead and vertical metrics
+  let portfolioData: any = null;
+  if (modeMeta.siteMode === "PORTFOLIO" || modeMeta.siteMode === "HYBRID") {
+    const [leadsRes, bookingCount, pendingBookingsCount, downloadCount, contentItemCount] = await withTenant(
+      s.tenantId,
+      async (tx) => {
+        return Promise.all([
+          listSiteLeads(s.tenantId, s.actor, { take: 8 }),
+          tx.bookingRequest.count({ where: { tenantId: s.tenantId } }),
+          tx.bookingRequest.count({ where: { tenantId: s.tenantId, status: "REQUESTED" } }),
+          tx.siteDownload.count({ where: { tenantId: s.tenantId } }),
+          tx.siteContentItem.count({ where: { tenantId: s.tenantId } }),
+        ]);
+      }
+    );
+
+    portfolioData = {
+      leads: leadsRes.items,
+      totalLeads: leadsRes.total,
+      unreadLeads: leadsRes.unreadCount,
+      totalBookings: bookingCount,
+      pendingBookings: pendingBookingsCount,
+      totalDownloads: downloadCount,
+      totalContentItems: contentItemCount,
+    };
+  }
+
+  // Pure Portfolio mode layout
+  if (modeMeta.siteMode === "PORTFOLIO") {
+    return (
+      <>
+        <div className="page-head">
+          <div style={{ flex: 1 }}>
+            <h1 style={{ flex: "none" }}>{greeting(now)}, {s.user.name.split(" ")[0]}</h1>
+            <p className="muted" style={{ marginTop: 2 }}>
+              {new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Dhaka", weekday: "long", day: "numeric", month: "long" }).format(now)}
+              {portfolioData.unreadLeads > 0 ? ` · ${portfolioData.unreadLeads} new inquiries waiting` : ""}
+            </p>
+          </div>
+          <div className="actions">
+            <Link href="/services" className="btn btn-secondary" prefetch={false}>
+              <PlusIcon width={18} height={18} /> Add service
+            </Link>
+            <Link href="/leads" className="btn btn-primary" prefetch={false}>
+              Inquiry inbox
+            </Link>
+          </div>
+        </div>
+
+        <PortfolioCommandCenter
+          siteMode={modeMeta.siteMode}
+          vertical={modeMeta.vertical}
+          leads={portfolioData.leads}
+          totalLeads={portfolioData.totalLeads}
+          unreadLeads={portfolioData.unreadLeads}
+          totalBookings={portfolioData.totalBookings}
+          pendingBookings={portfolioData.pendingBookings}
+          totalDownloads={portfolioData.totalDownloads}
+          totalContentItems={portfolioData.totalContentItems}
+          storeOrigin={storeOrigin}
+          userName={s.user.name}
+        />
+      </>
+    );
+  }
 
   const showMoney = can(s.user.role, "reports");
   const salesChange = changePercent(d.today.sales, d.yesterday.sales);
@@ -82,11 +156,46 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         </div>
       </div>
 
-      {one(sp.welcome) === "1" && (
-        <div className="notice good" role="status" style={{ marginBottom: 16 }}>
-          <b>Welcome to BizTrackBD!</b> Your store is open and ready. Complete the checklist below to connect your bKash/Nagad wallet and Steadfast/Pathao courier pickups.
+      {modeMeta.siteMode === "HYBRID" && (
+        <div className="segmented-tabs" style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+          <Link
+            href="/?tab=store"
+            className={`btn btn-sm ${hybridTab === "store" ? "btn-primary" : "btn-secondary"}`}
+            prefetch={false}
+          >
+            🛍️ Store Operations & Courier Dispatch
+          </Link>
+          <Link
+            href="/?tab=website"
+            className={`btn btn-sm ${hybridTab === "website" ? "btn-primary" : "btn-secondary"}`}
+            prefetch={false}
+          >
+            📊 Website Performance & Leads {portfolioData?.unreadLeads > 0 ? `(${portfolioData.unreadLeads})` : ""}
+          </Link>
         </div>
       )}
+
+      {modeMeta.siteMode === "HYBRID" && hybridTab === "website" ? (
+        <PortfolioCommandCenter
+          siteMode={modeMeta.siteMode}
+          vertical={modeMeta.vertical}
+          leads={portfolioData.leads}
+          totalLeads={portfolioData.totalLeads}
+          unreadLeads={portfolioData.unreadLeads}
+          totalBookings={portfolioData.totalBookings}
+          pendingBookings={portfolioData.pendingBookings}
+          totalDownloads={portfolioData.totalDownloads}
+          totalContentItems={portfolioData.totalContentItems}
+          storeOrigin={storeOrigin}
+          userName={s.user.name}
+        />
+      ) : (
+        <>
+          {one(sp.welcome) === "1" && (
+            <div className="notice good" role="status" style={{ marginBottom: 16 }}>
+              <b>Welcome to BizTrackBD!</b> Your store is open and ready. Complete the checklist below to connect your bKash/Nagad wallet and Steadfast/Pathao courier pickups.
+            </div>
+          )}
 
       {/* Top Quick Command Strip */}
       <div className="card" style={{ padding: "10px 14px", marginBottom: 16, background: "var(--surface)", border: "1px solid var(--line)" }} data-testid="quick-command-strip">
@@ -692,6 +801,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
       </div>
 
       <p className="muted" style={{ marginTop: 20, fontSize: 12.5 }}>Updated {friendlyDate(now, now)} · Asia/Dhaka</p>
+        </>
+      )}
     </>
   );
 }

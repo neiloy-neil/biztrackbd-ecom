@@ -1,5 +1,13 @@
 import Link from "next/link";
-import { getStorefrontSettings, getLive, listCategories, listProducts, loadPageData } from "@biztrackbd/core";
+import {
+  getStorefrontSettings,
+  getLive,
+  listCategories,
+  listProducts,
+  loadPageData,
+  getTenantModeAndVertical,
+  getBusinessTemplateByVertical,
+} from "@biztrackbd/core";
 import { Sections } from "@/components/sections";
 import { ProductCard } from "@/components/product-card";
 import { ProductImage, tintFor } from "@/components/product-image";
@@ -12,9 +20,22 @@ export default async function Home() {
   const store = await getStore();
   const lang = await getLang(store.locale);
   const t = makeT(lang);
-  // A store that has published a layout in the editor shows it. One that has not keeps the built-in home page below.
+
+  // A store that has published a layout in the editor shows it.
   const live = await getLive(store.id, "home");
   if (live) return <Sections page={live.page} data={await loadPageData(store.id, live.page)} lang={lang} t={t} />;
+
+  // Portfolio tenants without custom published layout render their curated vertical template manifest
+  const { siteMode, vertical } = await getTenantModeAndVertical(store.id);
+  if (siteMode === "PORTFOLIO") {
+    const template = getBusinessTemplateByVertical(vertical);
+    const fallbackHome = template?.pages.home;
+    if (fallbackHome) {
+      const data = await loadPageData(store.id, fallbackHome);
+      return <Sections page={fallbackHome} data={data} lang={lang} t={t} />;
+    }
+  }
+
   const [theme, categories, { items }] = await Promise.all([getStorefrontSettings(store.id), listCategories(store.id), listProducts(store.id, { limit: 8, sort: "newest" })]);
   const bn = lang === "bn";
   const heroImages = items.filter((p) => p.imageUrl).slice(0, 2);
