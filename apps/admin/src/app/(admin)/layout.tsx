@@ -54,7 +54,19 @@ const GROUPS: Group[] = [
     ],
     activePrefixes: ["/products", "/inventory"],
   },
-  { id: "customers", label: "Customers", icon: <CustomersIcon />, items: [{ href: "/customers", label: "Customers", area: "customers", capability: "commerce" }, { href: "/inbox", label: "Inbox", area: "customers" }, { href: "/reviews", label: "Reviews", area: "marketing", moduleKey: "product_reviews", capability: "commerce" }, { href: "/marketing/loyalty", label: "Loyalty and referrals", area: "marketing", moduleKey: "loyalty", capability: "commerce" }] },
+  {
+    id: "customers",
+    label: "Customers",
+    icon: <CustomersIcon />,
+    items: [
+      { href: "/leads", label: "Leads & Inquiries", area: "customers", capability: "leads" },
+      { href: "/customers", label: "Customers", area: "customers", capability: "commerce" },
+      { href: "/inbox", label: "Inbox", area: "customers" },
+      { href: "/reviews", label: "Reviews", area: "marketing", moduleKey: "product_reviews", capability: "commerce" },
+      { href: "/marketing/loyalty", label: "Loyalty and referrals", area: "marketing", moduleKey: "loyalty", capability: "commerce" },
+    ],
+    activePrefixes: ["/leads", "/customers", "/inbox"],
+  },
   {
     id: "marketing",
     label: "Marketing",
@@ -75,7 +87,18 @@ const GROUPS: Group[] = [
     ],
     activePrefixes: ["/marketing", "/abandoned"],
   },
-  { id: "store", label: "Online store", icon: <StoreIcon />, items: [{ href: "/design", label: "Store design", area: "design" }, { href: "/landing", label: "Landing pages", area: "design", moduleKey: "landing_builder" }, { href: "/pages", label: "Pages built from sections", area: "design" }, { href: "/content", label: "Pages and blog", area: "design" }] },
+  {
+    id: "store",
+    label: "Online store",
+    icon: <StoreIcon />,
+    items: [
+      { href: "/design", label: "Store design", area: "design" },
+      { href: "/menu", label: "Menu", area: "design", capability: "menu" },
+      { href: "/landing", label: "Landing pages", area: "design", moduleKey: "landing_builder" },
+      { href: "/pages", label: "Pages built from sections", area: "design" },
+      { href: "/content", label: "Pages and blog", area: "design" },
+    ],
+  },
   {
     id: "reports",
     label: "Reports",
@@ -134,7 +157,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     const items = g.items
       .filter((it) => can(role, it.area) && (!it.moduleKey || Boolean(activeModules[it.moduleKey])) && (!it.capability || Boolean(capabilities[it.capability])))
       .map((it) => ({ href: it.href, label: tr(lang, it.label), exact: it.exact, badge: it.badge }));
-    return items.length ? [{ id: g.id, label: tr(lang, g.label), icon: g.icon, items, activePrefixes: g.activePrefixes }] : [];
+    if (!items.length) return [];
+    let groupLabel = tr(lang, g.label);
+    if (g.id === "customers" && !capabilities.commerce) {
+      groupLabel = tr(lang, "Leads & Inquiries");
+    } else if (g.id === "store" && !capabilities.commerce) {
+      groupLabel = tr(lang, "Website");
+    }
+    return [{ id: g.id, label: groupLabel, icon: g.icon, items, activePrefixes: g.activePrefixes }];
   });
   const pages: Page[] = groups.flatMap((g) => g.items.map((i) => ({ href: i.href, label: i.label, group: g.label })));
 
@@ -147,7 +177,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           { href: "/customers", label: tr(lang, "Customers"), area: "customers" as Area, icon: <CustomersIcon /> },
         ]
       : [
-          { href: "/inbox", label: tr(lang, "Inbox"), area: "customers" as Area, icon: <CustomersIcon /> },
+          { href: "/leads", label: tr(lang, "Leads"), area: "customers" as Area, icon: <CustomersIcon /> },
           { href: "/pages", label: tr(lang, "Pages"), area: "design" as Area, icon: <StoreIcon /> },
           { href: "/design", label: tr(lang, "Design"), area: "design" as Area, icon: <GearIcon /> },
         ]),

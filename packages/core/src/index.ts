@@ -429,4 +429,6 @@ export * from "./site/mode";
 export * from "./site/capabilities";
 export * from "./site/leads";
 export * from "./site/bookings";
+export * from "./site/menu";
+export * from "./site/qr";
 export * from "./site/templates/manifests";

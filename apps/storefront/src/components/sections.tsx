@@ -748,6 +748,7 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
           subtitleBn={str(s.subtitleBn)}
           showDietary={s.showDietary !== false}
           lang={lang}
+          site={site}
         />
       );
     case "restaurant-hours-location":

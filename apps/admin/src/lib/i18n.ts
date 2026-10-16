@@ -12,5 +12,7 @@ const BN: Record<string, string> = {
   More: "আরও", "New order": "নতুন অর্ডার", "View store": "স্টোর দেখুন", "Search orders, products, customers": "অর্ডার, পণ্য, কাস্টমার খুঁজুন", Search: "খুঁজুন",
   Notifications: "নোটিফিকেশন", "Nothing needs your attention": "আপনার মনোযোগ দরকার এমন কিছু নেই", "Go to": "যান", "No matches": "কিছু পাওয়া যায়নি", "Type to search": "খুঁজতে লিখুন",
   Appearance: "অ্যাপিয়ারেন্স", "Sign out": "সাইন আউট", "Free trial": "ফ্রি ট্রায়াল", "Choose a plan": "প্ল্যান বেছে নিন", Orders_: "অর্ডার",
+  Leads: "লিডস", "Leads & Inquiries": "লিড ও অনুসন্ধান", Menu: "মেনু", "Restaurant Menu": "রেস্তোরাঁ মেনু",
+  Chambers: "চেম্বার ও শিডিউল", Services: "সেবাসমূহ", Projects: "প্রজেক্টসমূহ", Website: "ওয়েবসাইট",
 };
 export const tr = (lang: Lang, s: string): string => (lang === "bn" ? BN[s] ?? s : s);
