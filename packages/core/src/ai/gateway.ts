@@ -39,8 +39,10 @@ export async function resolveGeminiApiKey(tenantId: string): Promise<ResolvedAiK
       tx.$queryRaw<{ v: string | null }[]>`SELECT platform_config_value('gemini_default_model') AS v`,
     ]);
 
-    const rawModel = dbModelRow[0]?.v?.trim() || process.env.GEMINI_DEFAULT_MODEL?.trim() || "gemini-2.0-flash";
-    const resolvedModel = (rawModel === "gemini-2.5-flash" || !rawModel) ? "gemini-2.0-flash" : rawModel;
+    const rawModel = dbModelRow[0]?.v?.trim() || process.env.GEMINI_DEFAULT_MODEL?.trim() || "gemini-2.5-flash";
+    const resolvedModel = (rawModel === "gemini-2.0-flash" || !rawModel)
+      ? "gemini-2.5-flash"
+      : rawModel;
 
     if (s?.customGeminiApiKey?.trim()) {
       return {
@@ -235,36 +237,56 @@ export async function saveAiSettings(
  */
 export async function testGeminiApiKey(
   apiKey: string,
-  model = "gemini-2.0-flash",
+  model = "gemini-2.5-flash",
   options?: { fetchImpl?: typeof fetch }
 ): Promise<{ valid: boolean; error?: string }> {
   const fetcher = options?.fetchImpl ?? globalThis.fetch;
-  const safeModel = (model === "gemini-2.5-flash" || !model) ? "gemini-2.0-flash" : model;
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(safeModel)}:generateContent?key=${apiKey.trim()}`;
+  const rawModel = model?.trim() || "gemini-2.5-flash";
+  const preferredModel = (rawModel === "gemini-2.0-flash" || rawModel === "gemini-1.5-flash" || rawModel === "gemini-1.5-pro")
+    ? "gemini-2.5-flash"
+    : rawModel;
+  const candidateModels = Array.from(new Set([preferredModel, "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-latest"]));
 
-  try {
-    const res = await fetcher(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: "ping" }] }],
-        generationConfig: { maxOutputTokens: 5 },
-      }),
-    });
+  let lastError = "Network error contacting Google Gemini API";
 
-    if (!res.ok) {
+  for (const m of candidateModels) {
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent?key=${apiKey.trim()}`;
+
+    try {
+      const res = await fetcher(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: "ping" }] }],
+          generationConfig: { maxOutputTokens: 5 },
+        }),
+      });
+
+      if (res.ok) {
+        return { valid: true };
+      }
+
       const errJson = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
-      const msg = errJson?.error?.message || `HTTP ${res.status}: ${res.statusText}`;
-      return { valid: false, error: msg };
-    }
+      lastError = errJson?.error?.message || `HTTP ${res.status}: ${res.statusText}`;
 
-    return { valid: true };
-  } catch (err) {
-    return {
-      valid: false,
-      error: err instanceof Error ? err.message : "Network error contacting Google Gemini API",
-    };
+      const isUnavailable =
+        res.status === 404 ||
+        lastError.toLowerCase().includes("not found") ||
+        lastError.toLowerCase().includes("no longer available") ||
+        lastError.toLowerCase().includes("not supported") ||
+        lastError.toLowerCase().includes("high demand");
+
+      if (isUnavailable) {
+        continue;
+      }
+
+      return { valid: false, error: lastError };
+    } catch (err) {
+      lastError = err instanceof Error ? err.message : "Network error contacting Google Gemini API";
+    }
   }
+
+  return { valid: false, error: lastError };
 }
 
 export interface CallGeminiParams {
@@ -282,17 +304,23 @@ export interface CallGeminiParams {
 
 /**
  * Core resilient wrapper executing requests against the Google Gemini API.
- * Automatically tries candidate models (provided model, gemini-2.0-flash, gemini-1.5-flash)
- * if the requested model returns 404 or unsupported.
+ * Automatically tries candidate models (preferred model, gemini-2.5-flash, gemini-2.5-flash-lite, gemini-flash-latest)
+ * if the requested model returns 404, deprecated/no longer available, or unsupported.
  */
 export async function callGemini(params: CallGeminiParams): Promise<string> {
   const fetcher = params.fetchImpl ?? globalThis.fetch;
-  const preferredModel = (params.model?.trim() && params.model !== "gemini-2.5-flash")
-    ? params.model.trim()
-    : "gemini-2.0-flash";
+  const rawModel = params.model?.trim() || "gemini-2.5-flash";
+  const preferredModel = (rawModel === "gemini-2.0-flash" || rawModel === "gemini-1.5-flash" || rawModel === "gemini-1.5-pro")
+    ? "gemini-2.5-flash"
+    : rawModel;
 
   // Build ordered, deduplicated candidate models list
-  const candidateModels = Array.from(new Set([preferredModel, "gemini-2.0-flash", "gemini-1.5-flash"]));
+  const candidateModels = Array.from(new Set([
+    preferredModel,
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+    "gemini-flash-latest",
+  ]));
 
   const parts: Array<Record<string, unknown>> = [];
 
@@ -344,9 +372,16 @@ export async function callGemini(params: CallGeminiParams): Promise<string> {
       if (!res.ok) {
         const errJson = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
         const msg = errJson?.error?.message || `Gemini API request failed with status ${res.status}`;
-        // If 404/not found or unsupported model, try next candidate model
-        if (res.status === 404 || msg.toLowerCase().includes("not found")) {
-          console.warn(`[gemini] model ${modelName} not found, trying fallback candidate...`);
+        // If 404/not found or unsupported model or deprecated/high demand, try next candidate model
+        const isFallbackCandidate =
+          res.status === 404 ||
+          msg.toLowerCase().includes("not found") ||
+          msg.toLowerCase().includes("no longer available") ||
+          msg.toLowerCase().includes("not supported") ||
+          msg.toLowerCase().includes("high demand");
+
+        if (isFallbackCandidate) {
+          console.warn(`[gemini] model ${modelName} unavailable (${msg}), trying fallback candidate...`);
           lastError = new Error(msg);
           continue;
         }

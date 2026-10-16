@@ -55,8 +55,8 @@ export async function testPlatformAiConnectionAction(apiKey?: string, model?: st
     await requireAction("settings", "view");
     return await testPlatformGeminiApiKey(apiKey, model);
   } catch (err) {
-    if (err instanceof ForbiddenError) return { ok: false, latencyMs: 0, model: model ?? "gemini-2.0-flash", error: "Access denied to test platform AI." };
-    return { ok: false, latencyMs: 0, model: model ?? "gemini-2.0-flash", error: err instanceof Error ? err.message : "Test connection failed." };
+    if (err instanceof ForbiddenError) return { ok: false, latencyMs: 0, model: model ?? "gemini-2.5-flash", error: "Access denied to test platform AI." };
+    return { ok: false, latencyMs: 0, model: model ?? "gemini-2.5-flash", error: err instanceof Error ? err.message : "Test connection failed." };
   }
 }
 

@@ -47,10 +47,10 @@ describe("AI Assistant & Model Resilience", () => {
     expect(reply).toBe("Hello from fallback model");
     expect(attemptedUrls.length).toBeGreaterThanOrEqual(2);
     expect(attemptedUrls[0]).toContain("nonexistent-model");
-    expect(attemptedUrls[1]).toContain("gemini-2.0-flash");
+    expect(attemptedUrls[1]).toContain("gemini-2.5-flash");
   });
 
-  it("filters out invalid gemini-2.5-flash and uses gemini-2.0-flash as primary", async () => {
+  it("migrates deprecated gemini-2.0-flash to gemini-2.5-flash as primary", async () => {
     const attemptedUrls: string[] = [];
 
     const mockFetch = vi.fn().mockImplementation(async (url: string) => {
@@ -72,13 +72,55 @@ describe("AI Assistant & Model Resilience", () => {
 
     await callGemini({
       apiKey: "test-key",
-      model: "gemini-2.5-flash",
+      model: "gemini-2.0-flash",
       prompt: "test",
       fetchImpl: mockFetch as any,
     });
 
-    expect(attemptedUrls[0]).toContain("gemini-2.0-flash");
-    expect(attemptedUrls[0]).not.toContain("gemini-2.5-flash");
+    expect(attemptedUrls[0]).toContain("gemini-2.5-flash");
+    expect(attemptedUrls[0]).not.toContain("gemini-2.0-flash");
+  });
+
+  it("automatically falls back when a model returns 'no longer available' error", async () => {
+    const attemptedUrls: string[] = [];
+
+    const mockFetch = vi.fn().mockImplementation(async (url: string) => {
+      attemptedUrls.push(url);
+      if (url.includes("models/custom-old-model")) {
+        return {
+          ok: false,
+          status: 400,
+          json: async () => ({
+            error: { message: "This model models/custom-old-model is no longer available." },
+          }),
+        };
+      }
+
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          candidates: [
+            {
+              content: {
+                parts: [{ text: "Recovered via fallback" }],
+              },
+            },
+          ],
+        }),
+      };
+    });
+
+    const reply = await callGemini({
+      apiKey: "test-key",
+      model: "custom-old-model",
+      prompt: "test",
+      fetchImpl: mockFetch as any,
+    });
+
+    expect(reply).toBe("Recovered via fallback");
+    expect(attemptedUrls[0]).toContain("custom-old-model");
+    expect(attemptedUrls[1]).toContain("gemini-2.5-flash");
   });
 
   it("returns greeting and suggested questions for empty storefront chat message", async () => {

@@ -82,8 +82,15 @@ export function PlatformSettingsClient({
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // AI State
+  const normalizedInitialModel =
+    !initialAiConfig.defaultModel ||
+    initialAiConfig.defaultModel === "gemini-2.0-flash" ||
+    initialAiConfig.defaultModel === "gemini-1.5-flash" ||
+    initialAiConfig.defaultModel === "gemini-1.5-pro"
+      ? "gemini-2.5-flash"
+      : initialAiConfig.defaultModel;
   const [aiApiKey, setAiApiKey] = useState("");
-  const [aiModel, setAiModel] = useState(initialAiConfig.defaultModel);
+  const [aiModel, setAiModel] = useState(normalizedInitialModel);
   const [aiMasked, setAiMasked] = useState(initialAiConfig.maskedKey);
   const [aiTesting, setAiTesting] = useState(false);
   const [aiTestResult, setAiTestResult] = useState<{ ok: boolean; latencyMs: number; model?: string; error?: string } | null>(null);
@@ -541,9 +548,10 @@ export function PlatformSettingsClient({
                 onChange={(e) => setAiModel(e.target.value)}
                 style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
               >
-                <option value="gemini-2.0-flash">Gemini 2.0 Flash (Recommended)</option>
-                <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended)</option>
+                <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite (Fastest)</option>
+                <option value="gemini-flash-latest">Gemini Flash Latest</option>
+                <option value="gemini-3.8-flash">Gemini 3.8 Flash (Next-Gen Preview)</option>
               </select>
             </div>
 

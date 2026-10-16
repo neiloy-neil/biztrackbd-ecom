@@ -135,7 +135,7 @@ export async function getPlatformAiConfig(deps?: Deps): Promise<PlatformAiConfig
     db.platformConfig.findUnique({ where: { key: "gemini_default_model" } }),
   ]);
 
-  const defaultModel = modelRow?.value?.trim() || process.env.GEMINI_DEFAULT_MODEL?.trim() || "gemini-2.0-flash";
+  const defaultModel = modelRow?.value?.trim() || process.env.GEMINI_DEFAULT_MODEL?.trim() || "gemini-2.5-flash";
 
   if (keyRow?.value?.trim()) {
     return {
@@ -204,7 +204,9 @@ export async function savePlatformAiConfig(
 
   if (input.defaultModel !== undefined) {
     const rawModel = input.defaultModel.trim();
-    const model = (!rawModel || rawModel === "gemini-2.5-flash") ? "gemini-2.0-flash" : rawModel;
+    const model = (rawModel === "gemini-2.0-flash" || !rawModel)
+      ? "gemini-2.5-flash"
+      : rawModel;
     await db.platformConfig.upsert({
       where: { key: "gemini_default_model" },
       create: {
@@ -237,7 +239,7 @@ export async function savePlatformAiConfig(
 
 export async function testPlatformGeminiApiKey(
   apiKey?: string,
-  model = "gemini-2.0-flash",
+  model = "gemini-2.5-flash",
   deps?: Deps,
 ): Promise<{ ok: boolean; latencyMs: number; model: string; error?: string }> {
   let resolvedKey = apiKey?.trim();
@@ -252,34 +254,58 @@ export async function testPlatformGeminiApiKey(
     return { ok: false, latencyMs: 0, model, error: "No API key configured to test." };
   }
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(resolvedKey)}`;
-  const start = Date.now();
+  const rawModel = model?.trim() || "gemini-2.5-flash";
+  const preferredModel = (rawModel === "gemini-2.0-flash" || rawModel === "gemini-1.5-flash" || rawModel === "gemini-1.5-pro")
+    ? "gemini-2.5-flash"
+    : rawModel;
+  const candidateModels = Array.from(new Set([preferredModel, "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-latest"]));
 
-  try {
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: "Ping test. Reply with OK." }] }],
-        generationConfig: { maxOutputTokens: 10 },
-      }),
-      signal: AbortSignal.timeout(10000),
-    });
+  let lastError = "Connection failed";
+  let lastLatency = 0;
 
-    const latencyMs = Date.now() - start;
+  for (const targetModel of candidateModels) {
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(targetModel)}:generateContent?key=${encodeURIComponent(resolvedKey)}`;
+    const start = Date.now();
 
-    if (!res.ok) {
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: "Ping test. Reply with OK." }] }],
+          generationConfig: { maxOutputTokens: 10 },
+        }),
+        signal: AbortSignal.timeout(10000),
+      });
+
+      lastLatency = Date.now() - start;
+
+      if (res.ok) {
+        return { ok: true, latencyMs: lastLatency, model: targetModel };
+      }
+
       const errJson = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
-      const msg = errJson?.error?.message || `HTTP ${res.status}: ${res.statusText}`;
-      return { ok: false, latencyMs, model, error: msg };
-    }
+      lastError = errJson?.error?.message || `HTTP ${res.status}: ${res.statusText}`;
 
-    return { ok: true, latencyMs, model };
-  } catch (err) {
-    const latencyMs = Date.now() - start;
-    const msg = err instanceof Error ? err.message : "Connection failed";
-    return { ok: false, latencyMs, model, error: msg };
+      const isUnavailable =
+        res.status === 404 ||
+        lastError.toLowerCase().includes("not found") ||
+        lastError.toLowerCase().includes("no longer available") ||
+        lastError.toLowerCase().includes("not supported") ||
+        lastError.toLowerCase().includes("high demand");
+
+      if (isUnavailable && targetModel !== candidateModels[candidateModels.length - 1]) {
+        continue;
+      }
+
+      return { ok: false, latencyMs: lastLatency, model: targetModel, error: lastError };
+    } catch (err) {
+      lastLatency = Date.now() - start;
+      lastError = err instanceof Error ? err.message : "Connection failed";
+    }
   }
+
+  return { ok: false, latencyMs: lastLatency, model: candidateModels[0] || model, error: lastError };
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -826,7 +852,7 @@ export async function getPlatformHealthMatrix(deps?: Deps): Promise<PlatformHeal
   }
 
   // 2. AI Gateway
-  const aiTest = await testPlatformGeminiApiKey(undefined, "gemini-2.0-flash", deps);
+  const aiTest = await testPlatformGeminiApiKey(undefined, "gemini-2.5-flash", deps);
 
   // 3. SMS Gateway
   const smsConfig = await getPlatformSmsConfig(deps);
