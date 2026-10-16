@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { HEADERS, TRUSTED_HEADER_PREFIX, decideRoute, demoTemplate, normalizeHost } from "@biztrackbd/core";
+import { HEADERS, TRUSTED_HEADER_PREFIX, decideRoute, demoTemplate, findBusinessDemoTemplate, normalizeHost } from "@biztrackbd/core";
 import { getDirectory } from "@/lib/directory";
 
 /**
@@ -35,10 +35,12 @@ export async function proxy(req: NextRequest): Promise<NextResponse> {
   if (demoPathMatch) {
     const slug = demoPathMatch[1]!.toLowerCase();
     const demo = demoTemplate(slug);
-    if (demo) {
+    const bDemo = !demo ? findBusinessDemoTemplate(slug) : undefined;
+    const targetHost = demo ? demo.host : bDemo ? bDemo.host : null;
+    if (targetHost) {
       let demoEntry = null;
       try {
-        demoEntry = await getDirectory().lookup(`${demo.host}.${cleanRoot}`);
+        demoEntry = await getDirectory().lookup(`${targetHost}.${cleanRoot}`);
       } catch (e) {
         console.error("[proxy] demo host lookup failed", e instanceof Error ? e.name : "unknown");
       }
@@ -55,7 +57,7 @@ export async function proxy(req: NextRequest): Promise<NextResponse> {
         const targetSubPath = demoPathMatch[2] || "/";
         const rewriteUrl = new URL(targetSubPath + req.nextUrl.search, req.url);
         const res = NextResponse.rewrite(rewriteUrl, { request: { headers } });
-        res.cookies.set("bt_demo_store", demo.host, { path: "/", maxAge: 86400, sameSite: "lax" });
+        res.cookies.set("bt_demo_store", targetHost, { path: "/", maxAge: 86400, sameSite: "lax" });
         return res;
       }
     }
@@ -78,9 +80,11 @@ export async function proxy(req: NextRequest): Promise<NextResponse> {
   if (!entry && host) {
     const firstLabel = host.split(".")[0]?.toLowerCase();
     const demo = firstLabel ? demoTemplate(firstLabel) : undefined;
-    if (demo) {
+    const bDemo = !demo && firstLabel ? findBusinessDemoTemplate(firstLabel) : undefined;
+    const targetHost = demo ? demo.host : bDemo ? bDemo.host : null;
+    if (targetHost) {
       try {
-        entry = await getDirectory().lookup(`${demo.host}.${cleanRoot}`);
+        entry = await getDirectory().lookup(`${targetHost}.${cleanRoot}`);
       } catch {
         // fall through
       }
@@ -91,9 +95,11 @@ export async function proxy(req: NextRequest): Promise<NextResponse> {
   if (!entry && req.cookies.has("bt_demo_store") && !req.nextUrl.pathname.startsWith("/marketing") && !req.nextUrl.pathname.startsWith("/unknown-store")) {
     const cookieDemo = req.cookies.get("bt_demo_store")?.value.toLowerCase();
     const demo = cookieDemo ? demoTemplate(cookieDemo) : undefined;
-    if (demo) {
+    const bDemo = !demo && cookieDemo ? findBusinessDemoTemplate(cookieDemo) : undefined;
+    const targetHost = demo ? demo.host : bDemo ? bDemo.host : null;
+    if (targetHost) {
       try {
-        entry = await getDirectory().lookup(`${demo.host}.${cleanRoot}`);
+        entry = await getDirectory().lookup(`${targetHost}.${cleanRoot}`);
       } catch {
         // fall through
       }

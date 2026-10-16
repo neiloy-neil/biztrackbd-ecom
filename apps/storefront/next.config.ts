@@ -35,18 +35,27 @@ const config: NextConfig = {
   },
   poweredByHeader: false,
   async headers() {
-    // Production needs NEXT_PUBLIC_ADMIN_URL; without it the editor preview cannot be framed (it fails closed).
-    // If it is not set, the admin is taken to be admin.<root domain>, which is where the platform puts it.
     const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+    const cleanRoot = root ? root.replace(/:\d+$/, "") : "";
     const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? (process.env.NODE_ENV === "production" ? (root ? `https://admin.${root}` : "") : "http://localhost:3001");
     const admin = adminUrl ? new URL(adminUrl).origin : "";
+    const platformUrl = process.env.NEXT_PUBLIC_PLATFORM_URL ?? (root ? `https://platform.${cleanRoot}` : "");
+    const platform = platformUrl ? new URL(platformUrl).origin : "";
+
+    // Allow framing from own domain, admin, platform, marketing site, and root/subdomains (e.g. *.biztrack.bd, *.biztrack.me)
+    const allowedAncestors = [
+      "'self'",
+      admin,
+      platform,
+      cleanRoot ? `https://${cleanRoot} https://*.${cleanRoot} https://*.biztrack.bd https://*.biztrack.me` : "https://*.biztrack.bd https://*.biztrack.me",
+      "http://localhost:* http://127.0.0.1:*",
+    ].filter(Boolean).join(" ").trim();
+
     return [
-      { source: "/:path*", headers: securityHeaders("'self'") },
-      // The editor shows /preview and /l/<page>?preview=... in an iframe. Both need the signed link to show anything.
-      { source: "/preview", headers: securityHeaders(`'self' ${admin}`.trim()) },
-      { source: "/l/:path*", headers: securityHeaders(`'self' ${admin}`.trim()) },
-      // The header and footer editor frames this one.
-      { source: "/chrome-preview", headers: securityHeaders(`'self' ${admin}`.trim()) },
+      { source: "/:path*", headers: securityHeaders(allowedAncestors) },
+      { source: "/preview", headers: securityHeaders(allowedAncestors) },
+      { source: "/l/:path*", headers: securityHeaders(allowedAncestors) },
+      { source: "/chrome-preview", headers: securityHeaders(allowedAncestors) },
     ];
   },
 };
