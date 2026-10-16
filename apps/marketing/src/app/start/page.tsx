@@ -31,17 +31,44 @@ export default async function Start({
   // The templates on offer are the published list (the originals plus any staff have published). If it cannot be read, the originals still work.
   const templates = await listPublishedTemplates().catch(() => []);
   const offered = templates.length > 0 ? templates.map((t) => ({ id: t.id, name: t.name, blurb: t.blurb, live: true, look: t.baseLook })) : THEMES.map((t) => ({ id: t.id, name: t.name, blurb: t.blurb, live: t.live, look: t.id }));
+  const wantedTemplate = typeof sp.template === "string" ? sp.template.toLowerCase() : "";
+  let resolvedMode: "ECOMMERCE" | "PORTFOLIO" | "HYBRID" | null = null;
+  let resolvedVertical: string | undefined = undefined;
+
+  if (wantedTemplate === "dhaka-bistro") {
+    resolvedMode = "PORTFOLIO";
+    resolvedVertical = "RESTAURANT";
+  } else if (wantedTemplate === "modern-clinic") {
+    resolvedMode = "PORTFOLIO";
+    resolvedVertical = "DOCTOR_CLINIC";
+  } else if (wantedTemplate === "apex-corporate") {
+    resolvedMode = "PORTFOLIO";
+    resolvedVertical = "BUSINESS_COMPANY";
+  } else if (wantedTemplate === "local-service-pro") {
+    resolvedMode = "PORTFOLIO";
+    resolvedVertical = "SERVICE_PROVIDER";
+  } else if (wantedTemplate === "portfolio-focus") {
+    resolvedMode = "PORTFOLIO";
+    resolvedVertical = "PERSONAL_PORTFOLIO";
+  }
+
   const rawMode = typeof sp.mode === "string" ? sp.mode.toUpperCase() : "";
-  const initialMode: "ECOMMERCE" | "PORTFOLIO" | "HYBRID" = rawMode === "PORTFOLIO" || rawMode === "HYBRID" ? rawMode : "ECOMMERCE";
+  const initialMode: "ECOMMERCE" | "PORTFOLIO" | "HYBRID" =
+    resolvedMode ?? (rawMode === "PORTFOLIO" || rawMode === "HYBRID" ? rawMode : "ECOMMERCE");
   const rawVertical = typeof sp.vertical === "string" ? sp.vertical.toUpperCase() : "";
   const validVerticals = ["RESTAURANT", "DOCTOR_CLINIC", "PUBLIC_FIGURE", "BUSINESS_COMPANY", "SERVICE_PROVIDER", "PERSONAL_PORTFOLIO"];
-  const initialVertical = validVerticals.includes(rawVertical) ? (rawVertical as any) : (initialMode === "PORTFOLIO" ? "RESTAURANT" : undefined);
+  const initialVertical =
+    resolvedVertical ?? (validVerticals.includes(rawVertical) ? (rawVertical as any) : (initialMode === "PORTFOLIO" ? "RESTAURANT" : undefined));
 
   let defaultTheme = "kapor";
-  if (initialVertical === "RESTAURANT") defaultTheme = "dhaka-bistro";
+  if (wantedTemplate) defaultTheme = wantedTemplate;
+  else if (initialVertical === "RESTAURANT") defaultTheme = "dhaka-bistro";
   else if (initialVertical === "DOCTOR_CLINIC") defaultTheme = "modern-clinic";
+  else if (initialVertical === "BUSINESS_COMPANY") defaultTheme = "apex-corporate";
+  else if (initialVertical === "SERVICE_PROVIDER") defaultTheme = "local-service-pro";
+  else if (initialVertical === "PERSONAL_PORTFOLIO") defaultTheme = "portfolio-focus";
 
-  const initialTheme = offered.find((t) => t.id === (kept?.template || wantedTheme || defaultTheme) && t.live)?.id ?? offered[0]?.id ?? "kapor";
+  const initialTheme = offered.find((t) => t.id === (kept?.template || wantedTheme || defaultTheme) && t.live)?.id ?? defaultTheme ?? offered[0]?.id ?? "kapor";
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
 
   return (

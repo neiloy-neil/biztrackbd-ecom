@@ -149,3 +149,20 @@ export async function getTenantModeAndVertical(
     };
   });
 }
+
+export async function setTenantModeAndVertical(
+  tenantId: string,
+  siteMode: SiteMode,
+  vertical?: BusinessVertical | null
+): Promise<void> {
+  await withTenant(tenantId, async (tx) => {
+    await tx.tenant.update({
+      where: { id: tenantId },
+      data: {
+        siteMode,
+        businessVertical: vertical ?? null,
+      },
+    });
+  });
+}
+

@@ -139,7 +139,14 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   return (
     <CartProvider>
       <ThemeStyle tenantId={store.id} />
-      {store.isDemo && <DemoRibbon themeId={store.themeId} lang={lang} />}
+      {store.isDemo && (
+        <DemoRibbon
+          themeId={store.themeId}
+          lang={lang}
+          siteMode={siteMode}
+          vertical={vertical}
+        />
+      )}
       <StorefrontTracker tracking={tracking} />
       <script
         type="application/ld+json"

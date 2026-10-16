@@ -123,3 +123,41 @@ graph TD
   - 100% test pass in `packages/core/tests/site-menu-qr.test.ts` (13 tests), `security.test.ts` (10 tests), and `biztrack-business.test.ts` (17 tests).
   - Clean TypeScript typecheck across `@biztrackbd/core`, `@biztrackbd/admin`, and `@biztrackbd/storefront`.
 
+---
+
+## 6. Completed Feature: End-to-End Business Demo System & Fast-Track Onboarding
+
+### 6.1 Architecture & Verticals
+- **5 Dedicated Business Demo Verticals (`packages/core/src/demo/business-templates.ts`):**
+  1. `dhaka-bistro` (Host: `dhakabistro`, Vertical: `RESTAURANT`): Multi-course Bengali & Mughal cuisine, halal-certified dining, active table QR ordering, chef specials.
+  2. `modern-clinic` (Host: `modernclinic`, Vertical: `DOCTOR_CLINIC`): Dual-chamber consultation, BMDC doctor credentials, teleconsultation & in-person appointments, patient FAQs.
+  3. `apex-corporate` (Host: `apexcorp` / alias `corporate-trust`, Vertical: `BUSINESS_COMPANY`): Enterprise advisory & compliance, leadership bios, client case studies, corporate brochure download.
+  4. `local-service-pro` (Host: `localservice`, Vertical: `SERVICE_PROVIDER`): Transparent home appliance & AC repair tiers, 24/7 emergency dispatch, certified technicians, authentic reviews.
+  5. `portfolio-focus` (Host: `creativefolio`, Vertical: `PERSONAL_PORTFOLIO`): UI/UX designer & brand strategist portfolio, high-impact case studies, bilingual CV download, calendar booking.
+
+### 6.2 Data Seeding Engine (`packages/core/src/demo/business-seed.ts`)
+- `seedBusinessDemoStore(tenantId, templateSlug)`: Programmatically seeds store settings, theme installation, menu categories & dishes, structured content items (doctors, services, case studies, team), and digital asset downloads.
+- Integrated into `packages/core/src/platform/signup.ts` so portfolio merchants opting into demo data immediately receive authentic Bangladeshi content on signup.
+
+### 6.3 Marketing Template Gallery (`apps/marketing/src/components/template-gallery.tsx`)
+- **Top Primary Segmented Switcher:** Toggle smoothly between `[🛍️ Online Storefronts]` (eCommerce themes) and `[🏢 Business & Service Websites]` (Business verticals).
+- **Interactive Responsive Viewport Modal Previewer:**
+  - Viewport switcher: Desktop (100%), Tablet (768px), and Mobile (375px) with device frames and simulation status indicators.
+  - Deep-linkable "Start with this template" CTA leading directly to `/start?template=X`.
+  - Direct popout to preview in new tab.
+- **Routing & Aliasing (`apps/marketing/src/app/demo/[template]/page.tsx`):**
+  - Instant redirect to business demo subdomains or paths for both e-commerce and business demo templates.
+
+### 6.4 Storefront Demo Ribbon & Fast-Track Onboarding
+- **Storefront Demo Ribbon (`apps/storefront/src/components/demo-ribbon.tsx`):**
+  - Detects `siteMode` and `vertical` dynamically.
+  - Displays tailored simulation notice (e.g. *"This is an interactive demo of our Dhaka Bistro restaurant template. Orders and appointments placed here are simulated."*).
+  - Deep links to `/start?template=X&mode=portfolio` to quickly replicate the demo.
+- **Fast-Track Onboarding (`apps/marketing/src/app/start/`):**
+  - Recognizes `wantedTemplate` param, auto-locking `siteMode="PORTFOLIO"`, pre-selecting the vertical, and auto-checking the demo data seeding toggle.
+
+### 6.5 Quality Verification
+- 100% test pass in `packages/core/tests/business-templates.test.ts` (7 tests), `security.test.ts` (10 tests), and `site-menu-qr.test.ts` (13 tests).
+- 0 TypeScript compilation errors across `@biztrackbd/core`, `@biztrackbd/marketing`, and `@biztrackbd/storefront`.
+
+

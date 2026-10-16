@@ -81,4 +81,85 @@ describe("BizTrack Business Templates & Section Filtering", () => {
     expect(recommendedForVertical(chambers!, "DOCTOR_CLINIC")).toBe(true);
     expect(recommendedForVertical(chambers!, "RESTAURANT")).toBe(false);
   });
+
+  describe("Business Demo Templates & Demo Subdomains Engine", () => {
+    it("defines 5 authentic business demo templates with dedicated subdomains", async () => {
+      const { BUSINESS_DEMO_TEMPLATES, isBusinessDemoHost, findBusinessDemoTemplate } = await import(
+        "../src/demo/business-templates"
+      );
+
+      expect(BUSINESS_DEMO_TEMPLATES).toHaveLength(5);
+      const hosts = BUSINESS_DEMO_TEMPLATES.map((t) => t.host);
+      expect(hosts).toEqual([
+        "dhakabistro",
+        "modernclinic",
+        "apexcorp",
+        "localservice",
+        "creativefolio",
+      ]);
+
+      for (const tpl of BUSINESS_DEMO_TEMPLATES) {
+        expect(tpl.name).toBeTruthy();
+        expect(tpl.nameBn).toBeTruthy();
+        expect(tpl.tagline).toBeTruthy();
+        expect(tpl.taglineBn).toBeTruthy();
+        expect(tpl.phone).toBeTruthy();
+        expect(tpl.whatsapp).toBeTruthy();
+        expect(tpl.palette).toBeDefined();
+        expect(tpl.baseLook).toBeTruthy();
+      }
+
+      // Check specific vertical data presence
+      const bistro = findBusinessDemoTemplate("dhaka-bistro");
+      expect(bistro).toBeDefined();
+      expect(bistro?.vertical).toBe("RESTAURANT");
+      expect(bistro?.menuCategories?.length).toBeGreaterThan(0);
+      expect(bistro?.menuCategories?.[0]?.items?.length).toBeGreaterThan(0);
+
+      const clinic = findBusinessDemoTemplate("modern-clinic");
+      expect(clinic).toBeDefined();
+      expect(clinic?.vertical).toBe("DOCTOR_CLINIC");
+      expect(clinic?.contentItems?.some((i) => i.kind === "SERVICE")).toBe(true);
+      expect(clinic?.contentItems?.some((i) => i.kind === "CREDENTIAL")).toBe(true);
+
+      const corp = findBusinessDemoTemplate("apex-corporate");
+      expect(corp).toBeDefined();
+      expect(corp?.vertical).toBe("BUSINESS_COMPANY");
+      expect(corp?.contentItems?.some((i) => i.kind === "TEAM")).toBe(true);
+      expect(corp?.downloads?.length).toBeGreaterThan(0);
+
+      const service = findBusinessDemoTemplate("local-service-pro");
+      expect(service).toBeDefined();
+      expect(service?.vertical).toBe("SERVICE_PROVIDER");
+      expect(service?.contentItems?.some((i) => i.kind === "SERVICE")).toBe(true);
+
+      const portfolio = findBusinessDemoTemplate("portfolio-focus");
+      expect(portfolio).toBeDefined();
+      expect(portfolio?.vertical).toBe("PERSONAL_PORTFOLIO");
+      expect(portfolio?.contentItems?.some((i) => i.kind === "PORTFOLIO")).toBe(true);
+    });
+
+    it("resolves business demo templates by id, host, and aliases", async () => {
+      const { findBusinessDemoTemplate, isBusinessDemoHost } = await import(
+        "../src/demo/business-templates"
+      );
+
+      // By host
+      expect(findBusinessDemoTemplate("dhakabistro")?.id).toBe("dhaka-bistro");
+      expect(findBusinessDemoTemplate("modernclinic")?.id).toBe("modern-clinic");
+      expect(findBusinessDemoTemplate("apexcorp")?.id).toBe("apex-corporate");
+
+      // By hyphenated id
+      expect(findBusinessDemoTemplate("dhaka-bistro")?.host).toBe("dhakabistro");
+      expect(findBusinessDemoTemplate("local-service-pro")?.host).toBe("localservice");
+
+      // By alias
+      expect(findBusinessDemoTemplate("corporate-trust")?.host).toBe("apexcorp");
+
+      // isBusinessDemoHost checks
+      expect(isBusinessDemoHost("dhakabistro")).toBe(true);
+      expect(isBusinessDemoHost("modernclinic")).toBe(true);
+      expect(isBusinessDemoHost("randomstore")).toBe(false);
+    });
+  });
 });

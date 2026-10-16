@@ -1,12 +1,53 @@
 import Link from "next/link";
-import { themeDefinition } from "@biztrackbd/core";
+import {
+  themeDefinition,
+  getBusinessTemplateByVertical,
+  type BusinessVertical,
+} from "@biztrackbd/core";
 
-export function DemoRibbon({ themeId, lang }: { themeId: string; lang: "bn" | "en" }) {
-  const theme = themeDefinition(themeId);
+export function DemoRibbon({
+  themeId,
+  lang,
+  siteMode,
+  vertical,
+}: {
+  themeId: string;
+  lang: "bn" | "en";
+  siteMode?: string;
+  vertical?: string | null;
+}) {
   const bn = lang === "bn";
+  const bizTemplate = vertical ? getBusinessTemplateByVertical(vertical as BusinessVertical) : undefined;
+  const theme = themeDefinition(themeId);
   const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
-  const startUrl = root.includes("localhost") ? `http://localhost:3002/start?theme=${themeId}` : `https://biztrack.bd/start?theme=${themeId}`;
-  const templatesUrl = root.includes("localhost") ? "http://localhost:3002/templates" : "https://biztrack.bd/templates";
+
+  const startUrl = bizTemplate
+    ? root.includes("localhost")
+      ? `http://localhost:3002/start?template=${bizTemplate.id}&mode=portfolio&vertical=${vertical?.toLowerCase()}`
+      : `https://biztrack.bd/start?template=${bizTemplate.id}&mode=portfolio&vertical=${vertical?.toLowerCase()}`
+    : root.includes("localhost")
+    ? `http://localhost:3002/start?theme=${themeId}`
+    : `https://biztrack.bd/start?theme=${themeId}`;
+
+  const templatesUrl = bizTemplate
+    ? root.includes("localhost")
+      ? "http://localhost:3002/templates?tab=business"
+      : "https://biztrack.bd/templates?tab=business"
+    : root.includes("localhost")
+    ? "http://localhost:3002/templates"
+    : "https://biztrack.bd/templates";
+
+  const templateTitle = bizTemplate
+    ? `${bizTemplate.name} ${bn ? "বিজনেস ডেমো" : "Business Demo"}`
+    : `${theme.name} ${bn ? "টেমপ্লেট প্রিভিউ" : "Template Preview"}`;
+
+  const simulationNotice = bizTemplate
+    ? bn
+      ? "• ডিজিটাল মেন্যু, সার্ভিস ও বুকিং রিকোয়েস্ট সিমুলেশন মোডে কাজ করছে।"
+      : "• Interactive digital menu, services & booking requests in simulation mode."
+    : bn
+    ? "• কার্ট এবং ব্রাউজিং কাজ করে, কোনো আসল টাকা বা অর্ডার কাটা হবে না।"
+    : "• Cart and checkout are in simulation mode. No real orders are placed.";
 
   return (
     <div
@@ -38,7 +79,7 @@ export function DemoRibbon({ themeId, lang }: { themeId: string; lang: "bn" | "e
             style={{
               display: "inline-flex",
               alignItems: "center",
-              background: "#3b82f6",
+              background: bizTemplate ? "#10b981" : "#3b82f6",
               color: "#ffffff",
               fontWeight: 700,
               fontSize: "11px",
@@ -51,12 +92,10 @@ export function DemoRibbon({ themeId, lang }: { themeId: string; lang: "bn" | "e
             {bn ? "লাইভ ডেমো" : "Live Demo"}
           </span>
           <span style={{ fontWeight: 600 }}>
-            {theme.name} {bn ? "টেমপ্লেট প্রিভিউ" : "Template Preview"}
+            {templateTitle}
           </span>
           <span style={{ opacity: 0.85, fontSize: "12px" }}>
-            {bn
-              ? "• কার্ট এবং ব্রাউজিং কাজ করে, কোনো আসল টাকা বা অর্ডার কাটা হবে না।"
-              : "• Cart and checkout are in simulation mode. No real orders are placed."}
+            {simulationNotice}
           </span>
         </div>
 

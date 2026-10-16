@@ -104,7 +104,7 @@ export const VERTICAL_OPTIONS: BusinessVerticalOption[] = [
     bn: "কোম্পানি, কর্পোরেট ও এজেন্সি",
     icon: "🏢",
     hint: "Company overview, services, case studies & client quotes",
-    recommendedTheme: "bindu",
+    recommendedTheme: "apex-corporate",
   },
   {
     id: "SERVICE_PROVIDER",
@@ -112,7 +112,7 @@ export const VERTICAL_OPTIONS: BusinessVerticalOption[] = [
     bn: "সার্ভিস প্রোভাইডার ও কনসালট্যান্ট",
     icon: "💼",
     hint: "Services with pricing, coverage area & booking leads",
-    recommendedTheme: "boithok",
+    recommendedTheme: "local-service-pro",
   },
   {
     id: "PERSONAL_PORTFOLIO",
@@ -120,7 +120,7 @@ export const VERTICAL_OPTIONS: BusinessVerticalOption[] = [
     bn: "ব্যক্তিগত পোর্টফোলিও ও সিভি",
     icon: "📁",
     hint: "Showcase creative work, career milestones & CV download",
-    recommendedTheme: "kapor",
+    recommendedTheme: "portfolio-focus",
   },
   {
     id: "PUBLIC_FIGURE",

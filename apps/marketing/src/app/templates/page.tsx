@@ -13,7 +13,14 @@ export const metadata: Metadata = {
 
 const LABELS: Record<string, string> = { fashion: "Fashion", electronics: "Electronics", kids: "Kids", streetwear: "Streetwear", beauty: "Beauty", other: "More" };
 
-export default async function TemplatesPage() {
+export default async function TemplatesPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ tab?: string }>;
+}) {
+  const sp = searchParams ? await searchParams : {};
+  const initialMode = sp.tab === "business" ? "business" : "ecommerce";
+
   // Templates published by staff appear here with no deploy; an original they take down disappears. If the list cannot be read, the originals show.
   const published = await listPublishedTemplates().catch(() => []);
   const originals = new Set<string>(THEMES.map((t) => t.id));
@@ -37,7 +44,7 @@ export default async function TemplatesPage() {
               fontWeight: 800,
             }}
           >
-            Templates
+            Templates &amp; Designs
           </h1>
           <p
             className="lead"
@@ -49,23 +56,23 @@ export default async function TemplatesPage() {
               lineHeight: 1.6,
             }}
           >
-            Every template is a complete, functioning store: home page, product pages, shopping cart, and local bKash/Nagad checkout. Open a live demo, test the flow, and start your trial with the design that fits your brand.
+            Explore handcrafted designs for online retail shops, restaurants with contactless table QR menus, doctor clinics, corporate firms, and creative portfolios. Open any live demo to experience the flow.
           </p>
           <p className="fine" style={{ marginTop: 10, fontSize: 14.5 }}>
-            Want to see how you would manage orders?{" "}
+            Want to see how you would manage orders or bookings?{" "}
             <a
               href={demoAdminUrl()}
               className="link"
               data-testid="templates-demo-admin"
               style={{ fontWeight: 600 }}
             >
-              Try the admin desk on any template with sample products (no signup)
+              Try the admin desk on any template with sample data (no signup)
             </a>
             .
           </p>
         </div>
 
-        <TemplateGallery extra={extra} hidden={hidden} />
+        <TemplateGallery extra={extra} hidden={hidden} initialMode={initialMode} />
       </div>
     </section>
   );

@@ -18,6 +18,7 @@ import { adminCreateUser } from "../auth/supabase";
 import { getCategoryStarterPreset, type StarterCatalogPreset } from "../demo/catalog-presets";
 
 import { getBusinessTemplateByVertical } from "../site/templates/manifests";
+import { seedBusinessDemoStore } from "../demo/business-seed";
 
 const EXTERNAL_AUTH = "EXTERNAL_AUTH";
 const MAX_STORES_PER_EMAIL = 3;
@@ -278,6 +279,12 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
     if (kept) {
       keptPage = await copyKeptPage(kept.demoTenantId, id, { userId: result.ownerId, email: result.ownerEmail, name: result.ownerName, role: "STORE_OWNER" }, keptPictures);
       await finishKeep(kept.demoTenantId);
+    } else if (input.demoData && input.siteMode === "PORTFOLIO") {
+      try {
+        await seedBusinessDemoStore(id, input.theme || input.businessVertical || "dhaka-bistro");
+      } catch (e) {
+        console.error("seedBusinessDemoStore during signup failed", e);
+      }
     }
     await publishEvent("store/created", { tenantId: id, subdomain: sub.label, plan: input.plan });
     await notifyOwner(id, "WELCOME", { trialEndsDate: result.trialEndsAt }, { dedupeKey: id });
