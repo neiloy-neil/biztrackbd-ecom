@@ -56,7 +56,7 @@ export async function handleAdminCopilotChat(
     };
   }
 
-  return withTenant(tenantId, async (tx) => {
+  const telemetryData = await withTenant(tenantId, async (tx) => {
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
 
@@ -150,14 +150,31 @@ ${contentItems.map((c) => `- [${c.kind}] ${c.title}: ${c.summary || ""}`).join("
 ${settings?.aiChatbotInstructions ? `MERCHANT CUSTOM INSTRUCTIONS & FAQS:\n${settings.aiChatbotInstructions}` : ""}
 `;
 
-    const { apiKey, isCustom, remaining, model } = await resolveGeminiApiKey(tenantId);
+    return {
+      telemetryContext,
+      pendingOrdersCount,
+      pendingBookingsCount,
+      outOfStockVariants,
+      lowStockVariants,
+    };
+  });
 
-    const conversationHistory = (input.history || [])
-      .slice(-6)
-      .map((h) => `${h.role === "user" ? "Merchant" : "Copilot"}: ${h.text}`)
-      .join("\n");
+  const {
+    telemetryContext,
+    pendingOrdersCount,
+    pendingBookingsCount,
+    outOfStockVariants,
+    lowStockVariants,
+  } = telemetryData;
 
-    const prompt = `
+  const { apiKey, isCustom, remaining, model } = await resolveGeminiApiKey(tenantId);
+
+  const conversationHistory = (input.history || [])
+    .slice(-6)
+    .map((h) => `${h.role === "user" ? "Merchant" : "Copilot"}: ${h.text}`)
+    .join("\n");
+
+  const prompt = `
 LIVE STORE TELEMETRY CONTEXT:
 ${telemetryContext}
 
@@ -172,45 +189,44 @@ Use formatting, bullet points, and exact figures from the telemetry.
 If proposing messages to send to customers, provide ready-to-copy text with placeholders.
 `;
 
-    const aiReply = await callGemini({
-      apiKey,
-      model,
-      prompt,
-      systemInstruction: SYSTEM_PROMPT_ADMIN_COPILOT,
-      temperature: 0.5,
-      maxOutputTokens: 600,
-      fetchImpl: input.fetchImpl,
-    });
-
-    await recordAiGeneration(tenantId, isCustom);
-
-    // Formulate intelligent action links based on context
-    const actionLinks: AdminCopilotActionLink[] = [];
-    if (pendingOrdersCount > 0 || userText.includes("অর্ডার") || userText.toLowerCase().includes("order")) {
-      actionLinks.push({ label: `পেন্ডিং অর্ডার (${pendingOrdersCount})`, href: "/orders" });
-    }
-    if (pendingBookingsCount > 0 || userText.includes("বুকিং") || userText.toLowerCase().includes("booking")) {
-      actionLinks.push({ label: `বুকিং রিকোয়েস্ট (${pendingBookingsCount})`, href: "/bookings" });
-    }
-    if (outOfStockVariants.length > 0 || lowStockVariants.length > 0 || userText.includes("স্টক") || userText.toLowerCase().includes("stock")) {
-      actionLinks.push({ label: "ইনভেন্টরি ও স্টক", href: "/products" });
-    }
-    if (actionLinks.length === 0) {
-      actionLinks.push({ label: "অর্ডার ম্যানেজমেন্ট", href: "/orders" });
-      actionLinks.push({ label: "AI সেটিংস", href: "/settings/ai" });
-    }
-
-    return {
-      reply: aiReply.trim(),
-      suggestedQuestions: [
-        "আজকের সেলস ও অর্ডার সামারি দিন",
-        "পেন্ডিং বুকিং ও লিড চেক করুন",
-        "লো-স্টক প্রোডাক্ট কোনগুলো?",
-        "হোয়াটসঅ্যাপে অফার মেসেজ ড্রাফট করুন",
-      ],
-      actionLinks,
-      quotaRemaining: isCustom ? 999999 : remaining,
-      isCustomKey: isCustom,
-    };
+  const aiReply = await callGemini({
+    apiKey,
+    model,
+    prompt,
+    systemInstruction: SYSTEM_PROMPT_ADMIN_COPILOT,
+    temperature: 0.5,
+    maxOutputTokens: 600,
+    fetchImpl: input.fetchImpl,
   });
+
+  await recordAiGeneration(tenantId, isCustom);
+
+  // Formulate intelligent action links based on context
+  const actionLinks: AdminCopilotActionLink[] = [];
+  if (pendingOrdersCount > 0 || userText.includes("অর্ডার") || userText.toLowerCase().includes("order")) {
+    actionLinks.push({ label: `পেন্ডিং অর্ডার (${pendingOrdersCount})`, href: "/orders" });
+  }
+  if (pendingBookingsCount > 0 || userText.includes("বুকিং") || userText.toLowerCase().includes("booking")) {
+    actionLinks.push({ label: `বুকিং রিকোয়েস্ট (${pendingBookingsCount})`, href: "/bookings" });
+  }
+  if (outOfStockVariants.length > 0 || lowStockVariants.length > 0 || userText.includes("স্টক") || userText.toLowerCase().includes("stock")) {
+    actionLinks.push({ label: "ইনভেন্টরি ও স্টক", href: "/products" });
+  }
+  if (actionLinks.length === 0) {
+    actionLinks.push({ label: "অর্ডার ম্যানেজমেন্ট", href: "/orders" });
+    actionLinks.push({ label: "AI সেটিংস", href: "/settings/ai" });
+  }
+
+  return {
+    reply: aiReply.trim(),
+    suggestedQuestions: [
+      "আজকের সেলস ও অর্ডার সামারি দিন",
+      "পেন্ডিং বুকিং ও লিড চেক করুন",
+      "লো-স্টক প্রোডাক্ট কোনগুলো?",
+      "হোয়াটসঅ্যাপে অফার মেসেজ ড্রাফট করুন",
+    ],
+    actionLinks,
+    quotaRemaining: isCustom ? 999999 : remaining,
+    isCustomKey: isCustom,
+  };
 }

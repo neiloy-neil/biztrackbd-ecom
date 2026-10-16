@@ -2,11 +2,10 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import {
-  formatTableOrderMessage,
-  type PublicMenuCategory,
-  type PublicMenuItem,
-  type StoreInfo,
+import type {
+  PublicMenuCategory,
+  PublicMenuItem,
+  StoreInfo,
 } from "@biztrackbd/core";
 import type { Lang } from "@/lib/i18n-core";
 
@@ -23,6 +22,37 @@ function cleanWaPhone(phone: string): string {
   if (digits.startsWith("880")) return digits;
   if (digits.startsWith("0")) return `880${digits.slice(1)}`;
   return digits;
+}
+
+function formatTableOrderMessage(options: {
+  storeName?: string;
+  table?: string | null;
+  items: Array<{ name: string; quantity: number; price: number }>;
+  total: number;
+  note?: string;
+}): string {
+  const lines: string[] = [];
+  if (options.table) {
+    lines.push(`🍽️ *Table Order — Table ${options.table}*`);
+  } else {
+    lines.push(`🛍️ *Takeaway / Dining Order*`);
+  }
+  if (options.storeName) {
+    lines.push(`📍 *Restaurant:* ${options.storeName}`);
+  }
+  lines.push("");
+  lines.push("*Ordered Items:*");
+  for (const item of options.items) {
+    lines.push(`• ${item.quantity}x ${item.name} — ৳${(item.price * item.quantity).toLocaleString("en-BD")}`);
+  }
+  lines.push("");
+  lines.push(`*Total Bill:* ৳${options.total.toLocaleString("en-BD")}`);
+  if (options.note?.trim()) {
+    lines.push(`📝 *Note:* ${options.note.trim()}`);
+  }
+  lines.push("");
+  lines.push(`_Sent via BizTrack Digital Menu at ${new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}_`);
+  return lines.join("\n");
 }
 
 export function MenuDiningClient({

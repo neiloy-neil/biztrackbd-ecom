@@ -53,7 +53,7 @@ export async function handleStorefrontChat(
     };
   }
 
-  return withTenant(tenantId, async (tx) => {
+  const contextData = await withTenant(tenantId, async (tx) => {
     // 1. Fetch store settings, tenant vertical, and full business grounding data
     const [settings, tenant, topProducts, menuCategories, contentItems, downloads] = await Promise.all([
       tx.storeSettings.findFirst(),
@@ -104,8 +104,16 @@ export async function handleStorefrontChat(
 
     if (!chatbotEnabled) {
       return {
-        reply: `আমাদের চ্যাট অ্যাসিস্ট্যান্ট বর্তমানে অফলাইনে রয়েছে। যেকোনো প্রয়োজনে সরাসরি আমাদের সাথে যোগাযোগ করুন: ${supportPhone || "আমাদের কন্টাক্ট পেইজে"}।`,
+        chatbotEnabled: false,
+        disabledReply: `আমাদের চ্যাট অ্যাসিস্ট্যান্ট বর্তমানে অফলাইনে রয়েছে। যেকোনো প্রয়োজনে সরাসরি আমাদের সাথে যোগাযোগ করুন: ${supportPhone || "আমাদের কন্টাক্ট পেইজে"}।`,
         whatsappUrl,
+        supportPhone,
+        storeContext: "",
+        suggestedQuestions: [] as string[],
+        orderTrackingInfo: null,
+        topProductsList: [] as Array<{ title: string; price: number; slug: string }>,
+        settingsWelcome: null as string | null,
+        vertical: "RETAIL",
       };
     }
 
@@ -267,16 +275,52 @@ ${matchingOrderText}
       ];
     }
 
-    // 4. Resolve API key and call Gemini
-    try {
-      const { apiKey, isCustom, model } = await resolveGeminiApiKey(tenantId);
+    return {
+      chatbotEnabled: true,
+      disabledReply: "",
+      whatsappUrl,
+      supportPhone,
+      storeContext,
+      suggestedQuestions,
+      orderTrackingInfo,
+      topProductsList: topProducts.slice(0, 3).map((p) => ({
+        title: p.title,
+        price: Number(p.variants[0]?.price ?? 0),
+        slug: p.slug,
+      })),
+      settingsWelcome: settings?.aiChatbotWelcome || null,
+      vertical,
+    };
+  });
 
-      const conversationHistory = (input.history || [])
-        .slice(-6)
-        .map((h) => `${h.role === "user" ? "Customer" : "Assistant"}: ${h.text}`)
-        .join("\n");
+  if (!contextData.chatbotEnabled) {
+    return {
+      reply: contextData.disabledReply,
+      whatsappUrl: contextData.whatsappUrl,
+    };
+  }
 
-      const prompt = `
+  const {
+    whatsappUrl,
+    supportPhone,
+    storeContext,
+    suggestedQuestions,
+    orderTrackingInfo,
+    topProductsList,
+    settingsWelcome,
+    vertical,
+  } = contextData;
+
+  // 4. Resolve API key and call Gemini OUTSIDE transaction
+  try {
+    const { apiKey, isCustom, model } = await resolveGeminiApiKey(tenantId);
+
+    const conversationHistory = (input.history || [])
+      .slice(-6)
+      .map((h) => `${h.role === "user" ? "Customer" : "Assistant"}: ${h.text}`)
+      .join("\n");
+
+    const prompt = `
 BUSINESS INFORMATION CONTEXT:
 ${storeContext}
 
@@ -289,49 +333,44 @@ CUSTOMER MESSAGE:
 Reply naturally, warmly, and concisely in Bengali (চলিত বাংলা) or English matching the customer. If they asked about an order or booking and matching details exist in context, provide clear reassurance and next steps.
 `;
 
-      const aiReply = await callGemini({
-        apiKey,
-        model,
-        prompt,
-        systemInstruction: SYSTEM_PROMPT_STOREFRONT_CHATBOT,
-        temperature: 0.6,
-        maxOutputTokens: 350,
-        fetchImpl: input.fetchImpl,
-      });
+    const aiReply = await callGemini({
+      apiKey,
+      model,
+      prompt,
+      systemInstruction: SYSTEM_PROMPT_STOREFRONT_CHATBOT,
+      temperature: 0.6,
+      maxOutputTokens: 350,
+      fetchImpl: input.fetchImpl,
+    });
 
-      await recordAiGeneration(tenantId, isCustom);
+    await recordAiGeneration(tenantId, isCustom);
 
-      return {
-        reply: aiReply.trim(),
-        suggestedQuestions,
-        orderTracking: orderTrackingInfo,
-        suggestedProducts: topProducts.slice(0, 3).map((p) => ({
-          title: p.title,
-          price: Number(p.variants[0]?.price ?? 0),
-          slug: p.slug,
-        })),
-        whatsappUrl,
-      };
-    } catch (err) {
-      console.warn("[storefront chatbot] Gemini call failed, returning resilient fallback", err);
+    return {
+      reply: aiReply.trim(),
+      suggestedQuestions,
+      orderTracking: orderTrackingInfo,
+      suggestedProducts: topProductsList,
+      whatsappUrl,
+    };
+  } catch (err) {
+    console.warn("[storefront chatbot] Gemini call failed, returning resilient fallback", err);
 
-      let fallbackText = `ধন্যবাদ আপনার বার্তার জন্য! যেকোনো জরুরি প্রয়োজনে সরাসরি আমাদের সাথে যোগাযোগ করুন: ${supportPhone || "আমাদের কন্টাক্ট পেইজে"}`;
-      if (orderTrackingInfo) {
-        fallbackText = `আপনার অর্ডার #${orderTrackingInfo.orderNumber} এর স্ট্যাটাস: ${orderTrackingInfo.status} (বিল: ৳ ${orderTrackingInfo.total})। বিস্তারিত তথ্যের জন্য আমাদের হোয়াটসঅ্যাপে সরাসরি মেসেজ দিন: ${supportPhone || ""}`;
-      } else if (settings?.aiChatbotWelcome) {
-        fallbackText = settings.aiChatbotWelcome;
-      } else if (vertical === "DOCTOR_CLINIC") {
-        fallbackText = `ধন্যবাদ আপনার বার্তার জন্য! ডাক্তারের চেম্বার ও সিরিয়াল বুকিংয়ের জন্য আমাদের চেম্বার সহকারীর সাথে যোগাযোগ করুন: ${supportPhone || ""}`;
-      } else if (vertical === "RESTAURANT") {
-        fallbackText = `ধন্যবাদ আপনার বার্তার জন্য! আমাদের মেনু ও ডাইনিং বুকিং সংক্রান্ত তথ্যের জন্য সরাসরি যোগাযোগ করুন: ${supportPhone || ""}`;
-      }
-
-      return {
-        reply: fallbackText,
-        whatsappUrl,
-        orderTracking: orderTrackingInfo,
-        suggestedQuestions,
-      };
+    let fallbackText = `ধন্যবাদ আপনার বার্তার জন্য! যেকোনো জরুরি প্রয়োজনে সরাসরি আমাদের সাথে যোগাযোগ করুন: ${supportPhone || "আমাদের কন্টাক্ট পেইজে"}`;
+    if (orderTrackingInfo) {
+      fallbackText = `আপনার অর্ডার #${orderTrackingInfo.orderNumber} এর স্ট্যাটাস: ${orderTrackingInfo.status} (বিল: ৳ ${orderTrackingInfo.total})। বিস্তারিত তথ্যের জন্য আমাদের হোয়াটসঅ্যাপে সরাসরি মেসেজ দিন: ${supportPhone || ""}`;
+    } else if (settingsWelcome) {
+      fallbackText = settingsWelcome;
+    } else if (vertical === "DOCTOR_CLINIC") {
+      fallbackText = `ধন্যবাদ আপনার বার্তার জন্য! ডাক্তারের চেম্বার ও সিরিয়াল বুকিংয়ের জন্য আমাদের চেম্বার সহকারীর সাথে যোগাযোগ করুন: ${supportPhone || ""}`;
+    } else if (vertical === "RESTAURANT") {
+      fallbackText = `ধন্যবাদ আপনার বার্তার জন্য! আমাদের মেনু ও ডাইনিং বুকিং সংক্রান্ত তথ্যের জন্য সরাসরি যোগাযোগ করুন: ${supportPhone || ""}`;
     }
-  });
+
+    return {
+      reply: fallbackText,
+      whatsappUrl,
+      orderTracking: orderTrackingInfo,
+      suggestedQuestions,
+    };
+  }
 }
