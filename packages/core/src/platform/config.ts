@@ -258,7 +258,14 @@ export async function testPlatformGeminiApiKey(
   const preferredModel = (rawModel === "gemini-2.0-flash" || rawModel === "gemini-1.5-flash" || rawModel === "gemini-1.5-pro")
     ? "gemini-2.5-flash"
     : rawModel;
-  const candidateModels = Array.from(new Set([preferredModel, "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-latest"]));
+  const candidateModels = Array.from(new Set([
+    preferredModel,
+    "gemini-2.5-flash",
+    "gemini-3.1-flash-lite",
+    "gemini-2.5-flash-lite",
+    "gemini-3.5-flash-lite",
+    "gemini-flash-latest",
+  ]));
 
   let lastError = "Connection failed";
   let lastLatency = 0;
@@ -289,13 +296,41 @@ export async function testPlatformGeminiApiKey(
 
       const isUnavailable =
         res.status === 404 ||
+        res.status === 429 ||
         lastError.toLowerCase().includes("not found") ||
         lastError.toLowerCase().includes("no longer available") ||
         lastError.toLowerCase().includes("not supported") ||
-        lastError.toLowerCase().includes("high demand");
+        lastError.toLowerCase().includes("high demand") ||
+        lastError.toLowerCase().includes("resource has been exhausted") ||
+        lastError.toLowerCase().includes("quota") ||
+        lastError.toLowerCase().includes("rate limit");
 
-      if (isUnavailable && targetModel !== candidateModels[candidateModels.length - 1]) {
-        continue;
+      if (isUnavailable) {
+        // Also test OpenAI-compatible endpoint before moving to next candidate
+        try {
+          const oaiRes = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${encodeURIComponent(resolvedKey)}`,
+            },
+            body: JSON.stringify({
+              model: targetModel,
+              messages: [{ role: "user", content: "Ping test. Reply with OK." }],
+              max_tokens: 10,
+            }),
+            signal: AbortSignal.timeout(10000),
+          });
+          if (oaiRes.ok) {
+            return { ok: true, latencyMs: Date.now() - start, model: `${targetModel} (OpenAI compatible)` };
+          }
+        } catch {
+          // continue to next model candidate
+        }
+
+        if (targetModel !== candidateModels[candidateModels.length - 1]) {
+          continue;
+        }
       }
 
       return { ok: false, latencyMs: lastLatency, model: targetModel, error: lastError };

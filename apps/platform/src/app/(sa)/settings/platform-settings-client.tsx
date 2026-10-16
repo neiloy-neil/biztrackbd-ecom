@@ -549,6 +549,8 @@ export function PlatformSettingsClient({
                 style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
               >
                 <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended)</option>
+                <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite (500 Req/Day Free)</option>
+                <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite (500 Req/Day Free)</option>
                 <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite (Fastest)</option>
                 <option value="gemini-flash-latest">Gemini Flash Latest</option>
                 <option value="gemini-3.8-flash">Gemini 3.8 Flash (Next-Gen Preview)</option>

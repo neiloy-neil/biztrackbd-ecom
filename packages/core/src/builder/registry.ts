@@ -1326,7 +1326,7 @@ const HEX = /^#[0-9a-fA-F]{6}$/;
 
 /** `https://` or a path on the store. Never `javascript:`, `data:` or anything else. */
 export function safeUrl(v: string): boolean {
-  if (v === "") return true;
+  if (v === "" || v === "#" || v.startsWith("#")) return true;
   if (/^\/(?!\/)[^\s]*$/.test(v)) return true;
   try {
     return new URL(v).protocol === "https:";
@@ -1366,6 +1366,7 @@ function normField(f: Field, raw: unknown, where: string): unknown {
     }
     case "url": {
       const v = typeof raw === "string" ? raw.trim() : "";
+      if (v === "" || v === "#" || v.startsWith("#")) return v;
       if (v.length > (f.max ?? 300)) return bad(`${f.label} is too long`);
       if (!safeUrl(v)) return bad(`${f.label} must start with https:// or /`);
       return v;

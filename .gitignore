@@ -60,3 +60,4 @@ checkup/logs/
 # Office temporary lock files
 ~$*
 *.tmp
+.seo-cache/

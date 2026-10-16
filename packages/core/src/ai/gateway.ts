@@ -245,7 +245,14 @@ export async function testGeminiApiKey(
   const preferredModel = (rawModel === "gemini-2.0-flash" || rawModel === "gemini-1.5-flash" || rawModel === "gemini-1.5-pro")
     ? "gemini-2.5-flash"
     : rawModel;
-  const candidateModels = Array.from(new Set([preferredModel, "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-latest"]));
+  const candidateModels = Array.from(new Set([
+    preferredModel,
+    "gemini-2.5-flash",
+    "gemini-3.1-flash-lite",
+    "gemini-2.5-flash-lite",
+    "gemini-3.5-flash-lite",
+    "gemini-flash-latest",
+  ]));
 
   let lastError = "Network error contacting Google Gemini API";
 
@@ -271,12 +278,17 @@ export async function testGeminiApiKey(
 
       const isUnavailable =
         res.status === 404 ||
+        res.status === 429 ||
         lastError.toLowerCase().includes("not found") ||
         lastError.toLowerCase().includes("no longer available") ||
         lastError.toLowerCase().includes("not supported") ||
-        lastError.toLowerCase().includes("high demand");
+        lastError.toLowerCase().includes("high demand") ||
+        lastError.toLowerCase().includes("resource has been exhausted") ||
+        lastError.toLowerCase().includes("quota") ||
+        lastError.toLowerCase().includes("rate limit");
 
       if (isUnavailable) {
+        console.warn(`[gemini-test] model ${m} unavailable (${lastError}), trying fallback candidate...`);
         continue;
       }
 
@@ -284,6 +296,27 @@ export async function testGeminiApiKey(
     } catch (err) {
       lastError = err instanceof Error ? err.message : "Network error contacting Google Gemini API";
     }
+  }
+
+  // If native generateContent failed across candidates, test Google's OpenAI-compatible endpoint
+  try {
+    const oaiRes = await fetcher("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey.trim()}`,
+      },
+      body: JSON.stringify({
+        model: "gemini-2.5-flash",
+        messages: [{ role: "user", content: "ping" }],
+        max_tokens: 5,
+      }),
+    });
+    if (oaiRes.ok) {
+      return { valid: true };
+    }
+  } catch {
+    // continue
   }
 
   return { valid: false, error: lastError };
@@ -314,11 +347,13 @@ export async function callGemini(params: CallGeminiParams): Promise<string> {
     ? "gemini-2.5-flash"
     : rawModel;
 
-  // Build ordered, deduplicated candidate models list
+  // Build ordered, deduplicated candidate models list with high-quota flash-lite fallbacks
   const candidateModels = Array.from(new Set([
     preferredModel,
     "gemini-2.5-flash",
+    "gemini-3.1-flash-lite",
     "gemini-2.5-flash-lite",
+    "gemini-3.5-flash-lite",
     "gemini-flash-latest",
   ]));
 
@@ -372,13 +407,17 @@ export async function callGemini(params: CallGeminiParams): Promise<string> {
       if (!res.ok) {
         const errJson = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
         const msg = errJson?.error?.message || `Gemini API request failed with status ${res.status}`;
-        // If 404/not found or unsupported model or deprecated/high demand, try next candidate model
+        // If 404, 429 quota exhaustion, or unsupported model, try next candidate model
         const isFallbackCandidate =
           res.status === 404 ||
+          res.status === 429 ||
           msg.toLowerCase().includes("not found") ||
           msg.toLowerCase().includes("no longer available") ||
           msg.toLowerCase().includes("not supported") ||
-          msg.toLowerCase().includes("high demand");
+          msg.toLowerCase().includes("high demand") ||
+          msg.toLowerCase().includes("resource has been exhausted") ||
+          msg.toLowerCase().includes("quota") ||
+          msg.toLowerCase().includes("rate limit");
 
         if (isFallbackCandidate) {
           console.warn(`[gemini] model ${modelName} unavailable (${msg}), trying fallback candidate...`);
@@ -400,8 +439,41 @@ export async function callGemini(params: CallGeminiParams): Promise<string> {
       return text;
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
-      // If error is network or non-404, we don't necessarily abort unless it's the last candidate
+      // If error is network or non-404, continue to next candidate
     }
+  }
+
+  // If all native candidate models were exhausted, attempt Google's OpenAI-compatible endpoint as final fallback
+  try {
+    const oaiMessages: Array<{ role: string; content: string }> = [];
+    if (params.systemInstruction) {
+      oaiMessages.push({ role: "system", content: params.systemInstruction });
+    }
+    oaiMessages.push({ role: "user", content: params.prompt });
+
+    const oaiRes = await fetcher("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${params.apiKey.trim()}`,
+      },
+      body: JSON.stringify({
+        model: "gemini-2.5-flash",
+        messages: oaiMessages,
+        temperature: params.temperature ?? 0.7,
+        max_tokens: params.maxOutputTokens ?? 2048,
+      }),
+    });
+
+    if (oaiRes.ok) {
+      const oaiData = (await oaiRes.json()) as { choices?: Array<{ message?: { content?: string } }> };
+      const oaiText = oaiData?.choices?.[0]?.message?.content;
+      if (oaiText) {
+        return oaiText;
+      }
+    }
+  } catch {
+    // continue
   }
 
   throw lastError ?? new Error("Failed to generate content from any available Gemini model");
