@@ -10,6 +10,7 @@ import {
   generateMenuQrAction,
 } from "./actions";
 import type { PublicMenuCategory, PublicMenuItem } from "@biztrackbd/core";
+import { TableQrStudio } from "./table-qr-studio";
 
 const DIETARY_OPTIONS = [
   { id: "halal", label: "Halal / হালাল" },
@@ -24,10 +25,15 @@ const DIETARY_OPTIONS = [
 export function MenuManager({
   initialCategories,
   storeOrigin,
+  storeName,
+  logoUrl,
 }: {
   initialCategories: PublicMenuCategory[];
   storeOrigin: string;
+  storeName?: string;
+  logoUrl?: string | null;
 }) {
+  const [activeMainTab, setActiveMainTab] = useState<"dishes" | "qr-studio">("dishes");
   const [categories, setCategories] = useState<PublicMenuCategory[]>(initialCategories);
   const [activeCategoryId, setActiveCategoryId] = useState<string>("all");
   const [isPending, startTransition] = useTransition();
@@ -144,10 +150,14 @@ export function MenuManager({
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => openQrModal("")}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition"
+            onClick={() => setActiveMainTab("qr-studio")}
+            className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition ${
+              activeMainTab === "qr-studio"
+                ? "bg-emerald-50 text-emerald-800 border border-emerald-300"
+                : "text-slate-700 bg-white border border-slate-300 hover:bg-slate-50"
+            }`}
           >
-            <span>📱</span> Table QR Codes
+            <span>📱</span> Table QR Studio
           </button>
           <button
             type="button"
@@ -174,7 +184,47 @@ export function MenuManager({
         </div>
       </div>
 
-      {/* Category Tabs */}
+      {/* Primary Module Navigation Tabs */}
+      <div className="flex items-center gap-4 border-b border-slate-200">
+        <button
+          type="button"
+          onClick={() => setActiveMainTab("dishes")}
+          className={`flex items-center gap-2 pb-3 px-1 text-sm font-bold transition border-b-2 -mb-px cursor-pointer ${
+            activeMainTab === "dishes"
+              ? "border-emerald-600 text-emerald-700"
+              : "border-transparent text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          <span>🍽️</span> Menu Categories & Dishes
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+            {totalDishes}
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveMainTab("qr-studio")}
+          className={`flex items-center gap-2 pb-3 px-1 text-sm font-bold transition border-b-2 -mb-px cursor-pointer ${
+            activeMainTab === "qr-studio"
+              ? "border-emerald-600 text-emerald-700"
+              : "border-transparent text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          <span>📱</span> Table QR Studio
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+            Print & Stands
+          </span>
+        </button>
+      </div>
+
+      {activeMainTab === "qr-studio" ? (
+        <TableQrStudio
+          storeOrigin={storeOrigin}
+          storeName={storeName}
+          logoUrl={logoUrl}
+        />
+      ) : (
+        <>
+          {/* Category Tabs */}
       {categories.length > 0 ? (
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           <button
@@ -364,6 +414,8 @@ export function MenuManager({
           </div>
         ))}
       </div>
+        </>
+      )}
 
       {/* Category Modal */}
       {showCategoryModal && (

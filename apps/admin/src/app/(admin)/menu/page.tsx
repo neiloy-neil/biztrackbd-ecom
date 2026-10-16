@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getAdminMenu, getTenantCapabilities } from "@biztrackbd/core";
+import { getAdminMenu, getStoreInfo, getTenantCapabilities } from "@biztrackbd/core";
 import { getSession } from "@/lib/session";
 import { storefrontOrigin } from "@/lib/store-url";
 import { MenuManager } from "./menu-manager";
@@ -15,8 +15,18 @@ export default async function AdminMenuPage() {
     redirect("/design");
   }
 
-  const categories = await getAdminMenu(session.tenantId);
+  const [categories, storeInfo] = await Promise.all([
+    getAdminMenu(session.tenantId),
+    getStoreInfo(session.tenantId),
+  ]);
   const storeOrigin = storefrontOrigin(session.tenantSubdomain);
 
-  return <MenuManager initialCategories={categories} storeOrigin={storeOrigin} />;
+  return (
+    <MenuManager
+      initialCategories={categories}
+      storeOrigin={storeOrigin}
+      storeName={storeInfo.storeName}
+      logoUrl={storeInfo.logoUrl}
+    />
+  );
 }

@@ -98,3 +98,28 @@ graph TD
 - **Branch:** `main` (clean, up to date with `origin/main`).
 - **Latest Commit:** `e9db2f1` (`fix(marketing): resolve RSC error #441 on homepage, add DB fallbacks, and add brand favicon`).
 - **All Active Documents:** Verified and aligned.
+
+---
+
+## 5. Completed Feature: Digital Table Menu & QR Ordering Experience
+
+### 5.1 Architecture & Components
+- **Core QR & Order Engine (`packages/core/src/site/qr.ts`):**
+  - `generateBatchTableQrs(options)`: Generates high-res PNG and vector SVG QR codes for sequential table ranges (1–100) and custom labels (`VIP-1`, `Roof-A`).
+  - `parseCustomTableLabels(input)`: Parses and sanitizes comma/newline separated table names.
+  - `formatTableOrderMessage(options)`: Generates structured, bilingual WhatsApp tickets with dish quantities, pricing breakdown, total ৳ bill, and special kitchen notes.
+- **Storefront Dedicated Mobile Dining Route (`apps/storefront/src/app/(store)/menu/`):**
+  - Dedicated `/menu` route honoring `?table=N` query parameter with auto-fallback to takeaway mode.
+  - Dynamic category switching, dietary pills (`Halal`, `Chef's Special`, `Spicy`, `Vegetarian`), and instant dish search.
+  - Interactive Table Tray with slide-up drawer, special notes, and 1-tap WhatsApp order dispatch.
+  - 1-tap `Call Waiter / বিল দিন` quick assistance button.
+- **Admin Table QR Studio (`apps/admin/src/app/(admin)/menu/`):**
+  - Tabbed switcher in Menu Manager: `[🍽️ Menu Categories & Dishes]` and `[📱 Table QR Studio]`.
+  - Dual preset formats: **A6 Acrylic Stand Card** (2 per A4 sheet) and **Compact Square Sticker** (6 per A4 sheet).
+  - Live preview with restaurant logo, table badge, bilingual call-to-action, and optional guest WiFi credentials.
+  - `@media print` optimized CSS with dashed cutting guides.
+  - Batch SVG/PNG export and 1-click browser printing.
+- **Automated Verification:**
+  - 100% test pass in `packages/core/tests/site-menu-qr.test.ts` (13 tests), `security.test.ts` (10 tests), and `biztrack-business.test.ts` (17 tests).
+  - Clean TypeScript typecheck across `@biztrackbd/core`, `@biztrackbd/admin`, and `@biztrackbd/storefront`.
+

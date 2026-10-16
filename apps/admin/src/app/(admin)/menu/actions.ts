@@ -10,6 +10,7 @@ import {
   buildMenuUrl,
   generateMenuQrSvg,
   generateMenuQrDataUrl,
+  generateBatchTableQrs,
   type UpsertCategoryInput,
   type UpsertMenuItemInput,
 } from "@biztrackbd/core";
@@ -61,4 +62,23 @@ export async function generateMenuQrAction(tableNumber?: string) {
   ]);
 
   return { ok: true, targetUrl, svg, dataUrl };
+}
+
+export async function generateBatchTableQrsAction(options: {
+  mode: "range" | "custom";
+  rangeStart?: number;
+  rangeEnd?: number;
+  customTables?: string[];
+}) {
+  const session = await getSession();
+  const origin = storefrontOrigin(session.tenantSubdomain);
+  const items = await generateBatchTableQrs({
+    baseOrigin: origin,
+    mode: options.mode,
+    rangeStart: options.rangeStart,
+    rangeEnd: options.rangeEnd,
+    customTables: options.customTables,
+  });
+
+  return { ok: true, origin, items };
 }
