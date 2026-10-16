@@ -29,7 +29,7 @@ const ROWS: { label: string; of: (p: PlanView) => string }[] = [
 ];
 
 export default async function Pricing() {
-  const plans = await listPublicPlans();
+  const plans = await listPublicPlans().catch(() => []);
   const best = plans.find((p) => p.tier === "PRO")?.tier;
 
   return (

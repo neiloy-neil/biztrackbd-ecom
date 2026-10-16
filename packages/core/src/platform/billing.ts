@@ -37,10 +37,48 @@ export function toPlanView(p: { tier: string; name: string; priceMonthlyBdt: Pri
   };
 }
 
-/** The plans on the pricing page and the upgrade screen. Prices and limits come from the Plan table, never from code. */
+const FALLBACK_PUBLIC_PLANS: PlanView[] = [
+  {
+    tier: "STARTER",
+    name: "Starter",
+    priceMonthly: 699,
+    priceYearly: 6990,
+    yearlyMonthsFree: 2,
+    trialDays: 14,
+    limits: { products: 300, ordersPerMonth: 500, staff: 2, storageGb: 5, smsCredits: 200, landingPages: 3 },
+    features: { customDomain: false, courierBooking: "manual", fraud: "basic", sectionBuilder: "settings", modules: 0, paymentGateway: false, capi: true },
+  },
+  {
+    tier: "PRO",
+    name: "Pro",
+    priceMonthly: 1499,
+    priceYearly: 14990,
+    yearlyMonthsFree: 2,
+    trialDays: 14,
+    limits: { products: 2000, ordersPerMonth: 3000, staff: 5, storageGb: 20, smsCredits: 1000, landingPages: 20 },
+    features: { customDomain: true, courierBooking: "auto", fraud: "full", sectionBuilder: "home", modules: 3, paymentGateway: false, capi: true },
+  },
+  {
+    tier: "BUSINESS",
+    name: "Business",
+    priceMonthly: 3499,
+    priceYearly: 34990,
+    yearlyMonthsFree: 2,
+    trialDays: 14,
+    limits: { products: null, ordersPerMonth: null, staff: 15, storageGb: 100, smsCredits: 3000, landingPages: null },
+    features: { customDomain: true, courierBooking: "auto", fraud: "full", sectionBuilder: "all", modules: "all", paymentGateway: true, capi: true },
+  },
+];
+
+/** The plans on the pricing page and the upgrade screen. Prices and limits come from the Plan table, falling back to defaults if DB is unreachable. */
 export async function listPublicPlans(): Promise<PlanView[]> {
-  const rows = await getBasePrisma().plan.findMany({ where: { isPublic: true, tier: { not: "ENTERPRISE" } }, orderBy: { sortOrder: "asc" } });
-  return rows.map(toPlanView);
+  try {
+    const rows = await getBasePrisma().plan.findMany({ where: { isPublic: true, tier: { not: "ENTERPRISE" } }, orderBy: { sortOrder: "asc" } });
+    if (rows && rows.length > 0) return rows.map(toPlanView);
+  } catch {
+    // fallback to preset plans if database is not yet ready or configured
+  }
+  return FALLBACK_PUBLIC_PLANS;
 }
 
 export interface ProofView {

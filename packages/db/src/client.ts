@@ -41,7 +41,7 @@ const globalForPlatform = globalThis as unknown as { __biztrackPlatform?: Prisma
  */
 export function getPlatformPrisma(): PrismaClient {
   if (!globalForPlatform.__biztrackPlatform) {
-    const url = process.env.PLATFORM_DATABASE_URL;
+    const url = process.env.PLATFORM_DATABASE_URL || process.env.DIRECT_URL || process.env.DATABASE_URL;
     if (!url) throw new Error("PLATFORM_DATABASE_URL is not set");
     globalForPlatform.__biztrackPlatform = createBaseClient(url, 3);
   }

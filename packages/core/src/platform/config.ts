@@ -1149,21 +1149,6 @@ export interface PlatformSeoConfigView {
 }
 
 export async function getPlatformSeoConfig(deps?: Deps): Promise<PlatformSeoConfigView> {
-  const db = dbOf(deps);
-  const rows = await db.platformConfig.findMany({
-    where: {
-      key: {
-        in: [
-          "platform_seo_title",
-          "platform_seo_description",
-          "platform_seo_keywords",
-          "platform_seo_og_image",
-          "google_site_verification",
-        ],
-      },
-    },
-  });
-  const map = new Map(rows.map((r: { key: string; value: string; updatedAt: Date; updatedBy: string | null }) => [r.key, r]));
   const marketingUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "https://biztrack.bd";
 
   const defaultTitle = "BizTrackBD: Online Store Software for Bangladesh";
@@ -1172,17 +1157,47 @@ export async function getPlatformSeoConfig(deps?: Deps): Promise<PlatformSeoConf
   const defaultKeywords =
     "online store bangladesh, ecommerce website builder bangladesh, bkash payment gateway, nagad checkout, steadfast courier integration, pathao courier delivery, cash on delivery return protection, shopify alternative bangladesh, অনলাইন শপ তৈরি";
 
-  return {
-    title: map.get("platform_seo_title")?.value || defaultTitle,
-    description: map.get("platform_seo_description")?.value || defaultDesc,
-    keywords: map.get("platform_seo_keywords")?.value || defaultKeywords,
-    ogImageUrl: map.get("platform_seo_og_image")?.value || `${marketingUrl}/opengraph-image`,
-    sitemapUrl: `${marketingUrl}/sitemap.xml`,
-    robotsUrl: `${marketingUrl}/robots.txt`,
-    siteVerificationCode: cleanGoogleSiteVerification(map.get("google_site_verification")?.value || process.env.GOOGLE_SITE_VERIFICATION || null),
-    updatedAt: map.get("platform_seo_title")?.updatedAt ?? null,
-    updatedBy: map.get("platform_seo_title")?.updatedBy ?? null,
-  };
+  try {
+    const db = dbOf(deps);
+    const rows = await db.platformConfig.findMany({
+      where: {
+        key: {
+          in: [
+            "platform_seo_title",
+            "platform_seo_description",
+            "platform_seo_keywords",
+            "platform_seo_og_image",
+            "google_site_verification",
+          ],
+        },
+      },
+    });
+    const map = new Map(rows.map((r: { key: string; value: string; updatedAt: Date; updatedBy: string | null }) => [r.key, r]));
+
+    return {
+      title: map.get("platform_seo_title")?.value || defaultTitle,
+      description: map.get("platform_seo_description")?.value || defaultDesc,
+      keywords: map.get("platform_seo_keywords")?.value || defaultKeywords,
+      ogImageUrl: map.get("platform_seo_og_image")?.value || `${marketingUrl}/opengraph-image`,
+      sitemapUrl: `${marketingUrl}/sitemap.xml`,
+      robotsUrl: `${marketingUrl}/robots.txt`,
+      siteVerificationCode: cleanGoogleSiteVerification(map.get("google_site_verification")?.value || process.env.GOOGLE_SITE_VERIFICATION || null),
+      updatedAt: map.get("platform_seo_title")?.updatedAt ?? null,
+      updatedBy: map.get("platform_seo_title")?.updatedBy ?? null,
+    };
+  } catch {
+    return {
+      title: defaultTitle,
+      description: defaultDesc,
+      keywords: defaultKeywords,
+      ogImageUrl: `${marketingUrl}/opengraph-image`,
+      sitemapUrl: `${marketingUrl}/sitemap.xml`,
+      robotsUrl: `${marketingUrl}/robots.txt`,
+      siteVerificationCode: cleanGoogleSiteVerification(process.env.GOOGLE_SITE_VERIFICATION || null),
+      updatedAt: null,
+      updatedBy: null,
+    };
+  }
 }
 
 export async function savePlatformSeoConfig(

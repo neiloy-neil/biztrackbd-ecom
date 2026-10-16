@@ -14,10 +14,22 @@ const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002"
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const seoConfig = await getPlatformSeoConfig();
+  const seoConfig = await getPlatformSeoConfig().catch(() => ({
+    title: "BizTrackBD: Online Store Software for Bangladesh",
+    description:
+      "Launch your online store in a day. Sell with bKash, Nagad, and Cash on Delivery. Book Pathao and Steadfast pickups straight from each order with 0% sales commission.",
+    keywords:
+      "online store bangladesh, ecommerce website builder bangladesh, bkash payment gateway, nagad checkout, steadfast courier integration, pathao courier delivery, cash on delivery return protection, shopify alternative bangladesh, অনলাইন শপ তৈরি",
+    ogImageUrl: `${siteUrl}/opengraph-image`,
+    sitemapUrl: `${siteUrl}/sitemap.xml`,
+    robotsUrl: `${siteUrl}/robots.txt`,
+    siteVerificationCode: process.env.GOOGLE_SITE_VERIFICATION || null,
+    updatedAt: null,
+    updatedBy: null,
+  }));
   const tokenSet = new Set<string>();
 
-  const siteCode = seoConfig.siteVerificationCode || (await getPlatformSiteVerificationCode());
+  const siteCode = seoConfig.siteVerificationCode || (await getPlatformSiteVerificationCode().catch(() => null));
   if (siteCode) {
     tokenSet.add(siteCode);
     const withoutExt = siteCode.replace(/\.html$/i, "");
@@ -32,7 +44,7 @@ export async function generateMetadata(): Promise<Metadata> {
   tokenSet.add("0668054f248577b1");
 
   const tokens = Array.from(tokenSet).filter(Boolean);
-  const keywordsList = seoConfig.keywords.split(",").map((k) => k.trim()).filter(Boolean);
+  const keywordsList = (seoConfig.keywords || "").split(",").map((k) => k.trim()).filter(Boolean);
 
   return {
     metadataBase: new URL(siteUrl),
@@ -42,6 +54,14 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description: seoConfig.description,
     keywords: keywordsList,
+    icons: {
+      icon: [
+        { url: "/icon.svg", type: "image/svg+xml" },
+        { url: "/favicon.ico", sizes: "32x32" },
+      ],
+      shortcut: "/favicon.ico",
+      apple: "/icon.svg",
+    },
     alternates: {
       canonical: siteUrl,
     },
@@ -127,7 +147,7 @@ const globalJsonLd = {
 import { PlatformTracker } from "@/components/platform-tracker";
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const googleVerification = await getPlatformSiteVerificationCode();
+  const googleVerification = await getPlatformSiteVerificationCode().catch(() => null);
   return (
     <html lang="en" data-scroll-behavior="smooth" className={`${jakarta.variable} ${hind.variable}`}>
       <head>
