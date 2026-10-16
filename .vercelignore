@@ -1,0 +1,36 @@
+# Vercel deployment ignore file: excludes documentation, screenshots, and reference assets
+# from being uploaded to Vercel build containers or counted toward function storage.
+
+# Documentation & reference specs
+docs/
+deliverables/
+checkup/
+design/
+Landing Page/
+
+# Local media, test uploads and auth sessions
+.uploads/
+.baileys_auth/
+
+# Non-production binary documents & inspection dumps
+*.docx
+*.xlsx
+*.ndjson
+*.csv
+*.pdf
+portfolio-platform-planner.html
+
+# Test outputs, reports, and playwright artifacts
+test-results/
+playwright-report/
+apps/*/test-results/
+apps/*/playwright-report/
+apps/*/e2e/
+
+# Developer tooling & offline test runners
+tools/
+scripts/
+
+# Markdown documentation (except package READMEs if needed)
+*.md
+!packages/*/README.md

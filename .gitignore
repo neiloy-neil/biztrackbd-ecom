@@ -27,10 +27,11 @@ packages/core/.drill-work
 packages/core/.drill-store
 .baileys_auth/
 
-# The project checkup: ids and a test authenticator secret (the screenshots and REPORT.md are meant to be read)
+# The project checkup: test runs, actual/compare screenshots and auth secrets
 checkup/state.json
 checkup/run1-as-postgres/
-
+checkup/screens/actual/
+checkup/screens/compare/
 checkup/screens/actual/*enroll-secret*
 .claude/settings.local.json
 
@@ -40,6 +41,12 @@ deploy-env/
 
 # Test message outboxes (written by the end-to-end runs)
 *.jsonl
+
+# Inspection data dumps and scratch deliverables
+*.inspect.ndjson
+deliverables/**/src/
+deliverables/**/report/
+deliverables/**/summary/
 
 # Regenerable UX capture images and measurements (node tools/ux-capture.mjs)
 checkup/ux/
@@ -52,3 +59,4 @@ checkup/logs/
 
 # Office temporary lock files
 ~$*
+*.tmp
