@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
 import type { Lang } from "@/lib/i18n-core";
 
 export interface MenuItemData {
@@ -145,13 +144,14 @@ export function RestaurantMenuSection({
   showDietary?: boolean;
   site?: { phone?: string | null; whatsapp?: string | null; address?: string | null };
 }) {
-  const searchParams = useSearchParams();
-  const tableParam = searchParams.get("table");
   const [table, setTable] = useState<string | null>(null);
 
   useEffect(() => {
-    if (tableParam) setTable(tableParam);
-  }, [tableParam]);
+    if (typeof window !== "undefined") {
+      const p = new URLSearchParams(window.location.search).get("table");
+      if (p) setTable(p);
+    }
+  }, []);
 
   const activeCategories = categories.length > 0 ? categories : DEFAULT_SAMPLE_CATEGORIES;
   const [selectedCatId, setSelectedCatId] = useState(activeCategories[0]?.id ?? "");
