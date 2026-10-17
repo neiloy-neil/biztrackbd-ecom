@@ -9,6 +9,8 @@ import {
   UpsertDownloadSchema,
   downloadsCsv,
 } from "../src/site/downloads";
+import { loadPageData } from "../src/builder/data";
+import type { PageJson } from "../src/builder/registry";
 import type { SiteContentItem, SiteDownload } from "@biztrackbd/db";
 
 describe("BizTrack Business Content Items & Digital Downloads Suite", () => {
@@ -248,4 +250,71 @@ describe("BizTrack Business Content Items & Digital Downloads Suite", () => {
       expect(csv).toContain("\"Gated (Lead Required)\"");
     });
   });
+
+  describe("Gated Downloads & loadPageData Builder Integration", () => {
+    it("transforms requiresLead=true into isPublic=false (Lead Magnet mode)", () => {
+      const parsed = UpsertDownloadSchema.parse({
+        label: "Clinical Whitepaper",
+        fileName: "whitepaper.pdf",
+        fileUrl: "https://example.com/wp.pdf",
+        requiresLead: true,
+      });
+
+      expect(parsed.isPublic).toBe(false);
+    });
+
+    it("transforms requiresLead=false into isPublic=true (Direct 1-Click)", () => {
+      const parsed = UpsertDownloadSchema.parse({
+        label: "Restaurant Menu PDF",
+        fileName: "menu.pdf",
+        fileUrl: "https://example.com/menu.pdf",
+        requiresLead: false,
+      });
+
+      expect(parsed.isPublic).toBe(true);
+    });
+
+    it("populates downloads field in loadPageData when download-card section is present", async () => {
+      const mockPage: PageJson = {
+        version: 1,
+        sections: [
+          {
+            id: "sec_download",
+            type: "download-card",
+            settings: {
+              title: "Download CV",
+              fileUrl: "https://example.com/cv.pdf",
+            },
+          },
+        ],
+      };
+
+      const pageData = await loadPageData("tenant_mock", mockPage);
+
+      expect(pageData).toBeDefined();
+      expect(pageData.downloads).toBeDefined();
+      expect(Array.isArray(pageData.downloads)).toBe(true);
+    });
+
+    it("leaves downloads undefined when no download-card section is present", async () => {
+      const mockPage: PageJson = {
+        version: 1,
+        sections: [
+          {
+            id: "sec_hero",
+            type: "hero",
+            settings: {
+              title: "Welcome to our store",
+            },
+          },
+        ],
+      };
+
+      const pageData = await loadPageData("tenant_mock", mockPage);
+
+      expect(pageData).toBeDefined();
+      expect(pageData.downloads).toBeUndefined();
+    });
+  });
 });
+

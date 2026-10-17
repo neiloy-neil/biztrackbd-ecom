@@ -71,13 +71,24 @@ export async function POST(
     const download = await getDownloadById(store.id, id);
     const body = await request.json().catch(() => ({}));
 
-    // 1. Capture public lead with bot shield
-    await createPublicLead(store.id, {
+    // 1. Capture public lead with bot shield and attribution
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      request.headers.get("x-real-ip") ||
+      null;
+    const userAgent = request.headers.get("user-agent") || null;
+
+    const leadResult = await createPublicLead(store.id, {
       name: body.name || "Download Visitor",
       phone: body.phone,
       email: body.email,
       hp: body.hp,
       elapsedMs: body.elapsedMs,
+      sourcePage: body.sourcePage || `/downloads/${id}`,
+      locale: body.locale === "bn" ? "bn" : "en",
+      consentGiven: body.consentGiven !== false,
+      ip,
+      userAgent,
       type: "CONTACT",
       message: `Downloaded lead magnet: ${download.label} (${download.fileName})`,
       metadata: {
@@ -90,11 +101,12 @@ export async function POST(
     // 2. Increment download stats
     await recordDownloadIncrement(store.id, id);
 
-    // 3. Return secure file URL
+    // 3. Return secure file URL and optional WhatsApp follow-up link
     return NextResponse.json({
       success: true,
       downloadUrl: download.fileUrl,
       fileName: download.fileName,
+      whatsAppFollowUpUrl: leadResult.whatsAppFollowUpUrl,
     });
   } catch (err: any) {
     return NextResponse.json(

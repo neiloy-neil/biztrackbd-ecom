@@ -1032,17 +1032,23 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
       );
     }
     case "download-card": {
-      const firstDownload = data.contentItems?.DOWNLOAD?.[0];
-      const downloadData = (firstDownload?.data && typeof firstDownload.data === "object" ? firstDownload.data : {}) as Record<string, unknown>;
+      const selectedDownloadId = str(s.downloadId) || undefined;
+      const downloads = data.downloads ?? [];
+      const legacyFirst = data.contentItems?.DOWNLOAD?.[0];
+      const legacyData = (legacyFirst?.data && typeof legacyFirst.data === "object" ? legacyFirst.data : {}) as Record<string, unknown>;
+
       return (
         <div data-section={id}>
           <DownloadCardSection
-            title={str(s.title) || firstDownload?.title || undefined}
-            titleBn={str(s.titleBn) || firstDownload?.titleBn || undefined}
-            description={str(s.description) || firstDownload?.summary || undefined}
-            descriptionBn={str(s.descriptionBn) || firstDownload?.summaryBn || undefined}
-            fileUrl={str(s.fileUrl) || firstDownload?.mediaUrl || undefined}
-            fileLabel={str(s.fileLabel) || (typeof downloadData.fileSize === "string" ? downloadData.fileSize : undefined)}
+            downloadId={selectedDownloadId}
+            layout={s.layout === "grid" ? "grid" : "single"}
+            downloads={downloads}
+            title={str(s.title) || legacyFirst?.title || undefined}
+            titleBn={str(s.titleBn) || legacyFirst?.titleBn || undefined}
+            description={str(s.description) || legacyFirst?.summary || undefined}
+            descriptionBn={str(s.descriptionBn) || legacyFirst?.summaryBn || undefined}
+            fileUrl={str(s.fileUrl) || legacyFirst?.mediaUrl || undefined}
+            fileLabel={str(s.fileLabel) || (typeof legacyData.fileSize === "string" ? legacyData.fileSize : undefined)}
             buttonText={str(s.buttonText)}
             buttonTextBn={str(s.buttonTextBn)}
             lang={lang}

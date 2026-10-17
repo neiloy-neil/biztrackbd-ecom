@@ -2,19 +2,21 @@ import { listCategories, listProducts, type CategoryCard, type ProductCard } fro
 import { productKey, type PageJson } from "./registry";
 import { listContentItems, type SiteContentItem } from "../site/content-items";
 import { getPublicMenu, type PublicMenuCategory } from "../site/menu";
+import { getPublicDownloads, type PublicDownloadView } from "../site/downloads";
 
 /**
  * The live data a page's sections need. Prices and stock come from the database, never from the layout.
  * Products are keyed by what a section asks for ("new", "sale", "featured", "cat:<slug>"), so the same data can feed a page
  * that is edited live in the browser without another trip to the server.
  *
- * For BizTrack Business verticals, also carries active structured content items and public restaurant menus.
+ * For BizTrack Business verticals, also carries active structured content items, public restaurant menus, and digital downloads.
  */
 export interface PageData {
   products: Record<string, ProductCard[]>;
   categories: CategoryCard[];
   contentItems?: Record<string, SiteContentItem[]>;
   menu?: PublicMenuCategory[];
+  downloads?: PublicDownloadView[];
 }
 
 export const MAX_GRID = 12;
@@ -31,7 +33,6 @@ const VERTICAL_SECTIONS = new Set([
   "team-grid",
   "portfolio-grid",
   "clinic-chambers",
-  "download-card",
 ]);
 
 /** For a published page: only what its sections use. With `everything`, every kind of grid and vertical feed (the editor preview). */
@@ -40,6 +41,7 @@ export async function loadPageData(tenantId: string, page: PageJson, opts: { eve
   let wantsCategories = !!opts.everything;
   let wantsContentItems = !!opts.everything;
   let wantsMenu = !!opts.everything;
+  let wantsDownloads = !!opts.everything;
 
   for (const s of page.sections) {
     if (s.disabled) continue;
@@ -47,6 +49,7 @@ export async function loadPageData(tenantId: string, page: PageJson, opts: { eve
     if (s.type === "category-grid") wantsCategories = true;
     if (VERTICAL_SECTIONS.has(s.type)) wantsContentItems = true;
     if (s.type === "restaurant-menu") wantsMenu = true;
+    if (s.type === "download-card") wantsDownloads = true;
   }
   const categories = wantsCategories ? await listCategories(tenantId) : [];
   if (opts.everything) {
@@ -54,10 +57,11 @@ export async function loadPageData(tenantId: string, page: PageJson, opts: { eve
     for (const c of categories) keys.add(`cat:${c.slug}`);
   }
 
-  const [productEntries, rawItems, menu] = await Promise.all([
+  const [productEntries, rawItems, menu, downloads] = await Promise.all([
     Promise.all([...keys].map(async (k) => [k, await fetchKey(tenantId, k)] as const)),
     wantsContentItems ? listContentItems(tenantId, { isPublished: true }).catch(() => []) : Promise.resolve([]),
     wantsMenu ? getPublicMenu(tenantId).catch(() => []) : Promise.resolve([]),
+    wantsDownloads ? getPublicDownloads(tenantId).catch(() => []) : Promise.resolve(undefined),
   ]);
 
   const contentItemsByKind: Record<string, SiteContentItem[]> = {};
@@ -73,5 +77,6 @@ export async function loadPageData(tenantId: string, page: PageJson, opts: { eve
     categories,
     contentItems: contentItemsByKind,
     menu,
+    downloads,
   };
 }
