@@ -96,11 +96,20 @@ A live visual inspection and interactive browser walkthrough was executed across
    - Confirmed strict end-customer PII masking under "Inquiries & Leads" (`01712******`, `ta***@example.com`) backed by consent audit notice.
    - Inspected the "Mode Transition" tab, verifying the pre-flight dry-run engine computes capabilities gained/disabled, route table modifications, and zero data loss guarantee.
 
+4. **Live Mode Transition & Dual-Engine Verification (`PORTFOLIO` -> `HYBRID`):**
+   - In Platform Super-Admin (`http://localhost:3003/tenants/5b85d2b8-06d1-426b-a662-e35c8242f7c7?tab=transition`), executed atomic mode transition to `HYBRID (Portfolio + Full Commerce)` with explicit merchant consent and operational rationale.
+   - Verified tenant mode badge updated immediately to `HYBRID`.
+   - Confirmed 100% data preservation: historical consultation lead `#LD-t8rgyb` (Dr. Tanvir Ahmed) and immutable `SiteLeadActivity` timeline entries remain completely intact.
+   - Navigated `http://localhost:3000/demo/modernclinic` and verified dual-engine unlocking: consultation appointment booking and full products/cart/checkout catalog routes co-exist seamlessly.
+
 ### 5.2 Visual Proof Artifacts
 
 - **Detailed Live QA Artifact:** [biztrack_business_live_qa_walkthrough.md](file:///C:/Users/USER/.gemini/antigravity-ide/brain/6746e714-03f1-481b-9915-594b2c9518b2/biztrack_business_live_qa_walkthrough.md)
 - **Storefront Consultation Recording:** `biztrack_business_e2e_walkthrough_1792262786808.webp`
 - **Merchant Triage & Platform Governance Recording:** `biztrack_business_admin_platform_walkthrough_1792263454614.webp`
+- **Live Mode Transition & Dual-Engine Recording:** `verify_hybrid_mode_1792264902644.webp`
+- **Transition Execution Screenshot:** `tenant_transitioned_success_1792265282756.png`
+- **Storefront Hybrid Unlocked Screenshot:** `storefront_hybrid_mode_2_1792265404496.png`
 
 ---
 
