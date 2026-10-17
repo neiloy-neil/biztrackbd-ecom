@@ -20,6 +20,7 @@ export async function generateMetadata({
     "apex-corporate",
     "local-service-pro",
     "portfolio-focus",
+    "public-profile",
   ].includes(requestedTemplate);
   const isBusiness = rawMode === "business" || rawMode === "portfolio" || isBusinessTemplate;
   return {
@@ -66,6 +67,9 @@ export default async function Start({
   } else if (wantedTemplate === "portfolio-focus") {
     resolvedMode = "PORTFOLIO";
     resolvedVertical = "PERSONAL_PORTFOLIO";
+  } else if (wantedTemplate === "public-profile") {
+    resolvedMode = "PORTFOLIO";
+    resolvedVertical = "PUBLIC_FIGURE";
   }
 
   const rawMode = typeof sp.mode === "string" ? sp.mode.toUpperCase() : "";
@@ -89,6 +93,7 @@ export default async function Start({
   else if (initialVertical === "BUSINESS_COMPANY") defaultTheme = "apex-corporate";
   else if (initialVertical === "SERVICE_PROVIDER") defaultTheme = "local-service-pro";
   else if (initialVertical === "PERSONAL_PORTFOLIO") defaultTheme = "portfolio-focus";
+  else if (initialVertical === "PUBLIC_FIGURE") defaultTheme = "public-profile";
 
   const initialTheme = offered.find((t) => t.id === (kept?.template || wantedTemplate || defaultTheme) && t.live)?.id ?? defaultTheme ?? offered[0]?.id ?? "kapor";
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";

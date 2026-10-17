@@ -129,7 +129,7 @@ export const VERTICAL_OPTIONS: BusinessVerticalOption[] = [
     bn: "পাবলিক ফিগার ও কনটেন্ট ক্রিয়েটর",
     icon: "⭐",
     hint: "Press links, biography, event schedule & speaking booking",
-    recommendedTheme: "axionwear",
+    recommendedTheme: "public-profile",
   },
 ];
 
@@ -336,7 +336,7 @@ export function Wizard({
   const defaultTheme: Theme = { id: "kapor", name: "Kapor", blurb: "Modern fashion & apparel theme", live: true };
   const chosenTheme: Theme = themes.find((t) => t.id === v.theme) ?? themes[0] ?? defaultTheme;
   const defaultPlan: Plan = isPortfolio
-    ? { tier: "PRO", name: "Business", priceMonthly: 799, blurb: "Business website features with a 14-day free trial" }
+    ? { tier: "PRO", name: "Business", priceMonthly: 399, blurb: "Business website features with a 14-day free trial" }
     : { tier: "PRO", name: "Pro", priceMonthly: 1499, blurb: "Commerce features with a 14-day free trial" };
   const chosenPlan: Plan = plans.find((p) => p.tier === v.plan) ?? plans[0] ?? defaultPlan;
   const displayHost = rootDomain.replace(/:\d+$/, "");
