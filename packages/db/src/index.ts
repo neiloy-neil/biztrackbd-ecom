@@ -47,10 +47,13 @@ export type {
   SiteLeadStatus,
   BookingRequestStatus,
   SiteContentKind,
+  LeadActivityType,
   SiteLead,
+  SiteLeadActivity,
   BookingRequest,
   MenuCategory,
   MenuItem,
   SiteContentItem,
   SiteDownload,
 } from "@prisma/client";
+

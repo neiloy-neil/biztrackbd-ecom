@@ -297,6 +297,19 @@ export async function updateBookingRequestStatus(
         where: { id: booking.leadId },
         data: { status: leadStatus },
       });
+
+      await tx.siteLeadActivity.create({
+        data: {
+          tenantId,
+          leadId: booking.leadId,
+          actorId: actor.userId,
+          actorName: actor.name || actor.email,
+          activityType: "STATUS_CHANGED",
+          note: `Booking request marked as ${status}. Lead moved to ${leadStatus}.`,
+          beforeStatus: booking.lead?.status ?? "NEW",
+          afterStatus: leadStatus,
+        },
+      });
     }
 
     await audit(tx, tenantId, actor, "booking.status_updated", {

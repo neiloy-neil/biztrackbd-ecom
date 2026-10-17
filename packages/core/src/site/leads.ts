@@ -1,4 +1,4 @@
-import { withTenant, type PrismaClient, type SiteLeadStatus, type SiteLeadType } from "@biztrackbd/db";
+import { withTenant, type PrismaClient, type SiteLeadStatus, type SiteLeadType, type LeadActivityType } from "@biztrackbd/db";
 import { NotFoundError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
 import { audit } from "../audit/service";
@@ -230,7 +230,13 @@ export async function listSiteLeads(tenantId: string, actor: StaffActor, filters
         orderBy: { createdAt: "desc" },
         take: filters?.take ?? 50,
         skip: filters?.skip ?? 0,
-        include: { bookingRequest: true },
+        include: {
+          bookingRequest: true,
+          activities: {
+            orderBy: { createdAt: "desc" },
+            take: 5,
+          },
+        },
       }),
       tx.siteLead.count({ where }),
       tx.siteLead.count({ where: { tenantId, status: "NEW" } }),
@@ -240,7 +246,7 @@ export async function listSiteLeads(tenantId: string, actor: StaffActor, filters
   });
 }
 
-/** Updates a lead status (e.g. NEW -> CONTACTED -> QUALIFIED -> CLOSED) */
+/** Updates a lead status (e.g. NEW -> CONTACTED -> QUALIFIED -> CLOSED) and writes an immutable activity row */
 export async function updateSiteLeadStatus(
   tenantId: string,
   actor: StaffActor,
@@ -254,13 +260,30 @@ export async function updateSiteLeadStatus(
     const lead = await tx.siteLead.findFirst({ where: { id: leadId, tenantId } });
     if (!lead) throw new NotFoundError("Lead");
 
+    const cleanNote = privateNotes !== undefined ? sanitize(privateNotes, 1000) : undefined;
+
     const updated = await tx.siteLead.update({
       where: { id: leadId },
       data: {
         status,
-        ...(privateNotes !== undefined ? { privateNotes: sanitize(privateNotes, 1000) } : {}),
+        ...(cleanNote !== undefined ? { privateNotes: cleanNote } : {}),
       },
     });
+
+    if (lead.status !== status || cleanNote) {
+      await tx.siteLeadActivity.create({
+        data: {
+          tenantId,
+          leadId,
+          actorId: actor.userId,
+          actorName: actor.name || actor.email,
+          activityType: "STATUS_CHANGED",
+          note: cleanNote || `Status updated from ${lead.status} to ${status}`,
+          beforeStatus: lead.status,
+          afterStatus: status,
+        },
+      });
+    }
 
     await audit(tx, tenantId, actor, "lead.status_updated", {
       leadId,
@@ -271,3 +294,101 @@ export async function updateSiteLeadStatus(
     return updated;
   });
 }
+
+/** Assigns a lead to a staff member with an immutable activity log */
+export async function assignSiteLead(
+  tenantId: string,
+  actor: StaffActor,
+  leadId: string,
+  assignedToUserId: string | null,
+  assignedToUserName?: string | null
+) {
+  assertCan(actor, "leads", "edit");
+
+  return withTenant(tenantId, async (tx) => {
+    const lead = await tx.siteLead.findFirst({ where: { id: leadId, tenantId } });
+    if (!lead) throw new NotFoundError("Lead");
+
+    const updated = await tx.siteLead.update({
+      where: { id: leadId },
+      data: { assignedToUserId },
+    });
+
+    await tx.siteLeadActivity.create({
+      data: {
+        tenantId,
+        leadId,
+        actorId: actor.userId,
+        actorName: actor.name || actor.email,
+        activityType: "ASSIGNED",
+        note: assignedToUserId ? `Assigned to ${assignedToUserName || assignedToUserId}` : "Unassigned lead",
+        metadata: { assignedToUserId, assignedToUserName },
+      },
+    });
+
+    await audit(tx, tenantId, actor, "lead.assigned", {
+      leadId,
+      assignedToUserId,
+    });
+
+    return updated;
+  });
+}
+
+/** Appends an internal note or communication attempt to a lead's activity timeline */
+export async function addSiteLeadActivityNote(
+  tenantId: string,
+  actor: StaffActor,
+  leadId: string,
+  noteText: string,
+  activityType: LeadActivityType = "NOTE_ADDED"
+) {
+  assertCan(actor, "leads", "edit");
+  const cleanNote = sanitize(noteText, 2000);
+  if (!cleanNote) throw new ValidationError("Note cannot be empty", { field: "note" });
+
+  return withTenant(tenantId, async (tx) => {
+    const lead = await tx.siteLead.findFirst({ where: { id: leadId, tenantId } });
+    if (!lead) throw new NotFoundError("Lead");
+
+    const activity = await tx.siteLeadActivity.create({
+      data: {
+        tenantId,
+        leadId,
+        actorId: actor.userId,
+        actorName: actor.name || actor.email,
+        activityType,
+        note: cleanNote,
+      },
+    });
+
+    await tx.siteLead.update({
+      where: { id: leadId },
+      data: { privateNotes: cleanNote },
+    });
+
+    await audit(tx, tenantId, actor, "lead.note_added", {
+      leadId,
+      activityId: activity.id,
+    });
+
+    return activity;
+  });
+}
+
+/** Lists the complete chronological activity timeline for a lead */
+export async function listSiteLeadActivities(
+  tenantId: string,
+  actor: StaffActor,
+  leadId: string
+) {
+  assertCan(actor, "leads", "view");
+
+  return withTenant(tenantId, async (tx) => {
+    return tx.siteLeadActivity.findMany({
+      where: { tenantId, leadId },
+      orderBy: { createdAt: "asc" },
+    });
+  });
+}
+

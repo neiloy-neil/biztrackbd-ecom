@@ -2694,33 +2694,64 @@ enum SiteLeadStatus {
 }
 
 model SiteLead {
-  id             String         @id @default(cuid())
-  tenantId       String
-  type           SiteLeadType   @default(CONTACT)
-  status         SiteLeadStatus @default(NEW)
-  name           String
-  phone          String?
-  email          String?
-  message        String?
-  metadata       Json?          // Structured request metadata
-  sourcePage     String?
-  utmSource      String?
-  utmMedium      String?
-  utmCampaign    String?
-  referrer       String?
-  locale         String         @default("en")
-  consentGivenAt DateTime?
-  privateNotes   String?
+  id               String             @id @default(cuid())
+  tenantId         String
+  type             SiteLeadType       @default(CONTACT)
+  status           SiteLeadStatus     @default(NEW)
+  name             String
+  phone            String?
+  email            String?
+  message          String?
+  metadata         Json?              // Structured request metadata
+  sourcePage       String?
+  utmSource        String?
+  utmMedium        String?
+  utmCampaign      String?
+  referrer         String?
+  locale           String             @default("en")
+  consentGivenAt   DateTime?
+  privateNotes     String?
+  assignedToUserId String?            // Staff actor assigned to this lead
 
-  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  bookingRequest BookingRequest?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  tenant           Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  bookingRequest   BookingRequest?
+  activities       SiteLeadActivity[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 
   @@index([tenantId, status])
   @@index([tenantId, type])
   @@index([tenantId, createdAt])
+  @@index([tenantId, assignedToUserId])
 }
+
+enum LeadActivityType {
+  STATUS_CHANGED
+  ASSIGNED
+  NOTE_ADDED
+  WHATSAPP_CLICKED
+  CALL_LOGGED
+  EMAIL_DISPATCHED
+}
+
+model SiteLeadActivity {
+  id           String           @id @default(cuid())
+  tenantId     String
+  leadId       String
+  actorId      String           // Staff user ID or "VISITOR" or "SYSTEM"
+  actorName    String
+  activityType LeadActivityType
+  note         String?          @db.Text
+  beforeStatus SiteLeadStatus?
+  afterStatus  SiteLeadStatus?
+  metadata     Json?            // e.g. { durationSecs: 180, templateUsed: "booking_confirmation" }
+  createdAt    DateTime         @default(now())
+
+  lead         SiteLead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, leadId, createdAt])
+}
+
 
 enum BookingRequestStatus {
   REQUESTED
