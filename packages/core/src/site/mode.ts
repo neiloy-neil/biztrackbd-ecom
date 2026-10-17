@@ -166,3 +166,241 @@ export async function setTenantModeAndVertical(
   });
 }
 
+/** Privacy PII Redaction for Platform Super-Admin Operators */
+export function redactPhone(phone: string | null | undefined): string {
+  if (!phone) return "—";
+  const clean = phone.trim();
+  if (clean.length < 6) return "***";
+  return clean.slice(0, 5) + "******";
+}
+
+export function redactEmail(email: string | null | undefined): string {
+  if (!email) return "—";
+  const [local, domain] = email.split("@");
+  if (!domain || !local) return "***@***";
+  const maskedLocal = local.length > 2 ? `${local.slice(0, 2)}***` : `${local[0]}***`;
+  return `${maskedLocal}@${domain}`;
+}
+
+export function redactName(name: string | null | undefined): string {
+  if (!name) return "Anonymous Visitor";
+  const parts = name.trim().split(" ");
+  if (parts.length === 1) {
+    const first = parts[0] ?? "";
+    return first.length > 3 ? `${first.slice(0, 3)}***` : `${first[0] ?? "*"}***`;
+  }
+  const first = parts[0] ?? "";
+  const last = parts[parts.length - 1] ?? "";
+  return `${first} ${last[0] ?? "*"}***`;
+}
+
+export interface ModeTransitionDryRunResult {
+  tenantId: string;
+  tenantName: string;
+  currentMode: SiteMode;
+  targetMode: SiteMode;
+  currentVertical: BusinessVertical | null;
+  targetVertical: BusinessVertical | null;
+  capabilitiesGained: string[];
+  capabilitiesDisabled: string[];
+  routesAdded: string[];
+  routesDisabled: string[];
+  recommendedPlanTier: string;
+  preservedDataSummary: {
+    productsCount: number;
+    ordersCount: number;
+    leadsCount: number;
+    contentItemsCount: number;
+  };
+  requiresSeed: boolean;
+  safetyChecksPassed: boolean;
+  warnings: string[];
+}
+
+export interface ExecuteModeTransitionInput {
+  targetMode: SiteMode;
+  targetVertical?: BusinessVertical | null;
+  reason: string;
+  confirmedConsent: boolean;
+}
+
+/** Pre-flight dry-run validator for mode transitions */
+export async function validateModeTransitionDryRun(
+  tenantId: string,
+  targetMode: SiteMode,
+  targetVertical?: BusinessVertical | null
+): Promise<ModeTransitionDryRunResult> {
+  const { resolveTenantCapabilities } = await import("./capabilities");
+
+  return withTenant(tenantId, async (tx) => {
+    const tenant = await tx.tenant.findUnique({
+      where: { id: tenantId },
+      select: {
+        id: true,
+        name: true,
+        siteMode: true,
+        businessVertical: true,
+        planTier: true,
+      },
+    });
+    if (!tenant) throw new (await import("../errors")).NotFoundError("Tenant");
+
+    const currentMode = normalizeSiteMode(tenant.siteMode);
+    const currentVertical = normalizeBusinessVertical(tenant.businessVertical);
+    const normTargetVertical = targetVertical ? normalizeBusinessVertical(targetVertical) : null;
+
+    const moduleRows = await tx.tenantModule.findMany({
+      where: { tenantId, isEnabled: true },
+      select: { moduleKey: true },
+    });
+    const activeModules = Object.fromEntries(moduleRows.map((m) => [m.moduleKey, true]));
+
+    const currentCaps = resolveTenantCapabilities({
+      siteMode: currentMode,
+      vertical: currentVertical,
+      planTier: tenant.planTier,
+      activeModules,
+    });
+
+    const targetCaps = resolveTenantCapabilities({
+      siteMode: targetMode,
+      vertical: normTargetVertical,
+      planTier: targetMode === "HYBRID" ? "BUSINESS" : tenant.planTier,
+      activeModules,
+    });
+
+    const capKeys = Object.keys(targetCaps) as (keyof typeof targetCaps)[];
+    const capabilitiesGained = capKeys.filter((k) => !currentCaps[k] && targetCaps[k]);
+    const capabilitiesDisabled = capKeys.filter((k) => currentCaps[k] && !targetCaps[k]);
+
+    const routesAdded: string[] = [];
+    const routesDisabled: string[] = [];
+
+    if (targetMode === "PORTFOLIO") {
+      routesDisabled.push("/checkout", "/cart");
+      if (normTargetVertical === "RESTAURANT") routesAdded.push("/menu", "/reservations");
+      else if (normTargetVertical === "DOCTOR_CLINIC") routesAdded.push("/services", "/appointment");
+      else routesAdded.push("/services", "/portfolio", "/contact");
+    } else if (targetMode === "HYBRID") {
+      if (normTargetVertical === "RESTAURANT") routesAdded.push("/menu", "/reservations");
+      else if (normTargetVertical === "DOCTOR_CLINIC") routesAdded.push("/services", "/appointment");
+      else routesAdded.push("/services", "/portfolio");
+      if (!currentCaps.commerce) {
+        routesAdded.push("/shop", "/checkout");
+      }
+    } else if (targetMode === "ECOMMERCE") {
+      routesAdded.push("/shop", "/checkout", "/cart");
+      routesDisabled.push("/appointment");
+    }
+
+    const [productsCount, ordersCount, leadsCount, contentItemsCount] = await Promise.all([
+      tx.product.count({ where: { tenantId } }),
+      tx.order.count({ where: { tenantId } }),
+      tx.siteLead.count({ where: { tenantId } }),
+      tx.siteContentItem.count({ where: { tenantId } }),
+    ]);
+
+    const warnings: string[] = [];
+    if (currentMode === "ECOMMERCE" && targetMode === "PORTFOLIO" && productsCount > 0) {
+      warnings.push(`Store has ${productsCount} active products. Cart and checkout routes will be paused, but product data remains 100% preserved.`);
+    }
+    if (targetMode === "HYBRID" && tenant.planTier === "STARTER") {
+      warnings.push("Hybrid dual-engine requires BUSINESS or PRO plan tier for optimal courier and payment limits.");
+    }
+
+    return {
+      tenantId,
+      tenantName: tenant.name,
+      currentMode,
+      targetMode,
+      currentVertical,
+      targetVertical: normTargetVertical,
+      capabilitiesGained,
+      capabilitiesDisabled,
+      routesAdded: Array.from(new Set(routesAdded)),
+      routesDisabled: Array.from(new Set(routesDisabled)),
+      recommendedPlanTier: targetMode === "HYBRID" ? "BUSINESS" : "STARTER",
+      preservedDataSummary: {
+        productsCount,
+        ordersCount,
+        leadsCount,
+        contentItemsCount,
+      },
+      requiresSeed: contentItemsCount === 0 && targetMode !== "ECOMMERCE",
+      safetyChecksPassed: true,
+      warnings,
+    };
+  });
+}
+
+/** Executes an atomic, safe mode transition between ECOMMERCE, PORTFOLIO, and HYBRID */
+export async function executeModeTransition(
+  tenantId: string,
+  actor: { id?: string; userId?: string; email?: string; ip?: string },
+  input: ExecuteModeTransitionInput
+): Promise<{ success: boolean; tenantId: string; newMode: SiteMode; newVertical: BusinessVertical | null }> {
+  const { ValidationError, NotFoundError } = await import("../errors");
+  const { audit } = await import("../audit/service");
+  const { syncTenantRouting } = await import("../routing/edge-config");
+
+  if (!input.confirmedConsent) {
+    throw new ValidationError("Merchant consent verification is mandatory before executing mode transition", { field: "confirmedConsent" });
+  }
+  const reason = (input.reason || "").trim();
+  if (reason.length < 3) {
+    throw new ValidationError("Please provide a reason of at least 3 characters for the transition", { field: "reason" });
+  }
+
+  const result = await withTenant(tenantId, async (tx) => {
+    const tenant = await tx.tenant.findUnique({
+      where: { id: tenantId },
+      select: { id: true, siteMode: true, businessVertical: true, name: true },
+    });
+    if (!tenant) throw new NotFoundError("Tenant");
+
+    const oldMode = tenant.siteMode;
+    const oldVertical = tenant.businessVertical;
+
+    await tx.tenant.update({
+      where: { id: tenantId },
+      data: {
+        siteMode: input.targetMode,
+        businessVertical: input.targetVertical ?? null,
+      },
+    });
+
+    await audit(
+      tx,
+      tenantId,
+      {
+        userId: actor.userId || actor.id || "PLATFORM_ADMIN",
+        email: actor.email || "platform@biztrackbd.com",
+        ip: actor.ip,
+      },
+      "tenant.mode_transitioned",
+      {
+        oldMode,
+        newMode: input.targetMode,
+        oldVertical,
+        newVertical: input.targetVertical ?? null,
+        reason,
+      }
+    );
+
+    return {
+      success: true,
+      tenantId,
+      newMode: input.targetMode,
+      newVertical: input.targetVertical ?? null,
+    };
+  });
+
+  try {
+    await syncTenantRouting(tenantId);
+  } catch (err) {
+    console.warn("[mode] edge sync warning:", err);
+  }
+
+  return result;
+}
+

@@ -29,6 +29,13 @@ export default async function Overview() {
     Suspended: { bg: "#FCEBEB", color: "#DC2626" },
   };
 
+  const SEVERITY_STYLES: Record<string, { bg: string; color: string; border: string }> = {
+    CRIT: { bg: "#FEE2E2", color: "#B91C1C", border: "#FECACA" },
+    HIGH: { bg: "#FFEDD5", color: "#C2410C", border: "#FED7AA" },
+    WARN: { bg: "#FEF3C7", color: "#92400E", border: "#FDE68A" },
+    INFO: { bg: "#E0F2FE", color: "#0369A1", border: "#BAE6FD" },
+  };
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
       {/* Search Header Bar */}
@@ -73,18 +80,179 @@ export default async function Overview() {
         </div>
       </div>
 
-      {/* 4 Top KPI Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }} data-testid="sa-stats">
+      {/* Multi-Mode Platform Cohort Telemetry */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: 16 }} data-testid="sa-cohorts">
+        {/* BizTrack Business */}
         <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "18px 20px" }}>
-          <div style={{ fontSize: 13, color: "#4B4B73", fontWeight: 500 }}>Monthly recurring revenue</div>
-          <div style={{ fontSize: 28, fontWeight: 700, marginTop: 6, fontVariantNumeric: "tabular-nums" }} data-testid="mrr">
-            {taka(o.mrr)}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 13, color: "#4B4B73", fontWeight: 600 }}>BizTrack Business</span>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4, background: "#EDE9FE", color: "#6D28D9" }}>
+              PORTFOLIO
+            </span>
+          </div>
+          <div style={{ fontSize: 26, fontWeight: 800, marginTop: 6, color: "#1A1A4E", fontVariantNumeric: "tabular-nums" }}>
+            {o.cohorts.portfolioSites} Sites
           </div>
           <div style={{ fontSize: 12.5, marginTop: 6, color: "#15803D", fontWeight: 700 }}>
-            {taka(o.arr)} <span style={{ color: "#4B4B73", fontWeight: 500 }}>a year at this rate</span>
+            {o.cohorts.portfolioLeads7d} leads <span style={{ color: "#4B4B73", fontWeight: 500 }}>in last 7 days</span>
           </div>
         </div>
 
+        {/* BizTrack Ecommerce */}
+        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "18px 20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 13, color: "#4B4B73", fontWeight: 600 }}>BizTrack Ecommerce</span>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4, background: "#F1F5F9", color: "#334155" }}>
+              ECOMMERCE
+            </span>
+          </div>
+          <div style={{ fontSize: 26, fontWeight: 800, marginTop: 6, color: "#1A1A4E", fontVariantNumeric: "tabular-nums" }}>
+            {o.cohorts.ecommerceStores} Stores
+          </div>
+          <div style={{ fontSize: 12.5, marginTop: 6, color: "#15803D", fontWeight: 700 }}>
+            {o.payingStores} paying <span style={{ color: "#4B4B73", fontWeight: 500 }}>({o.activeTrials} trials)</span>
+          </div>
+        </div>
+
+        {/* Hybrid Dual Stores */}
+        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "18px 20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 13, color: "#4B4B73", fontWeight: 600 }}>Hybrid Dual Stores</span>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4, background: "#FEF9C3", color: "#854D0E" }}>
+              HYBRID
+            </span>
+          </div>
+          <div style={{ fontSize: 26, fontWeight: 800, marginTop: 6, color: "#1A1A4E", fontVariantNumeric: "tabular-nums" }}>
+            {o.cohorts.hybridTenants} Tenants
+          </div>
+          <div style={{ fontSize: 12.5, marginTop: 6, color: "#6D28D9", fontWeight: 700 }}>
+            Dual engine <span style={{ color: "#4B4B73", fontWeight: 500 }}>retail + services</span>
+          </div>
+        </div>
+
+        {/* Platform MRR & ARR */}
+        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "18px 20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 13, color: "#4B4B73", fontWeight: 600 }}>Platform Revenue</span>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4, background: "#E8F6EE", color: "#15803D" }}>
+              MRR
+            </span>
+          </div>
+          <div style={{ fontSize: 26, fontWeight: 800, marginTop: 6, color: "#1A1A4E", fontVariantNumeric: "tabular-nums" }} data-testid="mrr">
+            {taka(o.mrr)}
+          </div>
+          <div style={{ fontSize: 12.5, marginTop: 6, color: "#15803D", fontWeight: 700 }}>
+            {taka(o.arr)} <span style={{ color: "#4B4B73", fontWeight: 500 }}>annual run-rate</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Needs Attention Incident Queue */}
+      {o.needsAttentionQueue.length > 0 && (
+        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "18px 20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 16 }}>🚨</span>
+              <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#1A1A4E" }}>
+                Needs Attention Incident Queue
+              </h2>
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  padding: "2px 8px",
+                  borderRadius: 9999,
+                  background: "#FEE2E2",
+                  color: "#B91C1C",
+                }}
+              >
+                {o.needsAttentionQueue.length} Active Alerts
+              </span>
+            </div>
+            <span style={{ fontSize: 12.5, color: "#6B6B8D" }}>Ranked by severity</span>
+          </div>
+
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid #E7E7F0", color: "#6B6B8D", textAlign: "left" }}>
+                  <th style={{ padding: "8px 12px", fontWeight: 600 }}>Severity</th>
+                  <th style={{ padding: "8px 12px", fontWeight: 600 }}>Tenant</th>
+                  <th style={{ padding: "8px 12px", fontWeight: 600 }}>Issue Detected</th>
+                  <th style={{ padding: "8px 12px", fontWeight: 600 }}>Impacted Service</th>
+                  <th style={{ padding: "8px 12px", fontWeight: 600, textAlign: "right" }}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {o.needsAttentionQueue.map((item, idx) => {
+                  const sev = SEVERITY_STYLES[item.severity] ?? { bg: "#E0F2FE", color: "#0369A1", border: "#BAE6FD" };
+                  return (
+                    <tr key={idx} style={{ borderBottom: "1px solid #F1F1F6" }}>
+                      <td style={{ padding: "10px 12px" }}>
+                        <span
+                          style={{
+                            display: "inline-block",
+                            padding: "2px 8px",
+                            borderRadius: 6,
+                            fontSize: 11,
+                            fontWeight: 800,
+                            background: sev.bg,
+                            color: sev.color,
+                            border: `1px solid ${sev.border}`,
+                          }}
+                        >
+                          [{item.severity}]
+                        </span>
+                      </td>
+                      <td style={{ padding: "10px 12px" }}>
+                        <div style={{ fontWeight: 700, color: "#1A1A4E" }}>{item.tenantName}</div>
+                        <div style={{ fontSize: 11.5, color: "#6B6B8D", display: "flex", alignItems: "center", gap: 6 }}>
+                          <span>{item.subdomain}.biztrackbd.com</span>
+                          <span
+                            style={{
+                              fontSize: 10,
+                              fontWeight: 700,
+                              padding: "1px 5px",
+                              borderRadius: 4,
+                              background: item.siteMode === "PORTFOLIO" ? "#EDE9FE" : item.siteMode === "HYBRID" ? "#FEF9C3" : "#F1F5F9",
+                              color: item.siteMode === "PORTFOLIO" ? "#6D28D9" : item.siteMode === "HYBRID" ? "#854D0E" : "#475569",
+                            }}
+                          >
+                            {item.siteMode}
+                          </span>
+                        </div>
+                      </td>
+                      <td style={{ padding: "10px 12px", color: "#2B2B4E" }}>{item.issue}</td>
+                      <td style={{ padding: "10px 12px", color: "#6B6B8D" }}>{item.impactedService}</td>
+                      <td style={{ padding: "10px 12px", textAlign: "right" }}>
+                        <Link
+                          href={item.actionUrl}
+                          style={{
+                            display: "inline-block",
+                            padding: "5px 12px",
+                            borderRadius: 6,
+                            background: "#1A1A4E",
+                            color: "#ffffff",
+                            fontSize: 12,
+                            fontWeight: 600,
+                            textDecoration: "none",
+                          }}
+                          prefetch={false}
+                        >
+                          {item.actionLabel} →
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* 4 Top KPI Cards */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }} data-testid="sa-stats">
         <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "18px 20px" }}>
           <div style={{ fontSize: 13, color: "#4B4B73", fontWeight: 500 }}>Paying stores</div>
           <div style={{ fontSize: 28, fontWeight: 700, marginTop: 6, fontVariantNumeric: "tabular-nums" }} data-testid="paying">
@@ -112,6 +280,16 @@ export default async function Overview() {
           </div>
           <div style={{ fontSize: 12.5, marginTop: 6, color: "#15803D", fontWeight: 700 }}>
             {o.trialToPaidPercent !== null ? `${o.trialToPaidPercent}%` : "None yet"} <span style={{ color: "#4B4B73", fontWeight: 500 }}>trials become paid</span>
+          </div>
+        </div>
+
+        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "18px 20px" }}>
+          <div style={{ fontSize: 13, color: "#4B4B73", fontWeight: 500 }}>Failing Domains & Quarantined</div>
+          <div style={{ fontSize: 28, fontWeight: 700, marginTop: 6, fontVariantNumeric: "tabular-nums", color: o.failingDomains > 0 || o.quarantined > 0 ? "#DC2626" : "#15803D" }}>
+            {o.failingDomains + o.quarantined}
+          </div>
+          <div style={{ fontSize: 12.5, marginTop: 6, color: "#4B4B73" }}>
+            {o.failingDomains} domains unverified • {o.quarantined} quarantined
           </div>
         </div>
       </div>

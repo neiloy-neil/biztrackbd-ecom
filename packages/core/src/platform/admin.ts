@@ -7,6 +7,7 @@ import { money } from "../orders/pricing";
 import { syncTenantRouting } from "../routing/edge-config";
 import { accessState, addPeriod, statusFor, type Access } from "./lifecycle";
 import { toPlanView, type PlanView } from "./billing";
+import { redactName, redactPhone } from "../site/mode";
 
 /**
  * The super admin's operations (docs/07 section 25). Every function takes the acting platform user first, checks what their
@@ -81,6 +82,24 @@ export interface PlatformOverview {
   quarantined: number;
   signups: { date: string; count: number }[];
   byPlan: { tier: string; stores: number }[];
+  cohorts: {
+    portfolioSites: number;
+    ecommerceStores: number;
+    hybridTenants: number;
+    portfolioLeads7d: number;
+    portfolioBookings7d: number;
+  };
+  needsAttentionQueue: {
+    severity: "CRIT" | "HIGH" | "WARN" | "INFO";
+    tenantId: string;
+    tenantName: string;
+    subdomain: string;
+    siteMode: string;
+    issue: string;
+    impactedService: string;
+    actionUrl: string;
+    actionLabel: string;
+  }[];
   newestSignups: {
     id: string;
     name: string;
@@ -103,9 +122,11 @@ const THEME_NAMES: Record<string, string> = {
 export async function getOverview(actor: PlatformActor, deps?: Deps): Promise<PlatformOverview> {
   assertPlatformCan(actor, "tenants", "view");
   const db = dbOf(deps), now = nowOf(deps);
-  const [subs, tenants, pending, quarantined, paidEver, openTicketsCount, failingDomainsCount, recentTenants] = await Promise.all([
+  const since7d = new Date(now.getTime() - 7 * 86_400_000);
+
+  const [subs, tenants, pending, quarantined, paidEver, openTicketsCount, failingDomainsCount, recentTenants, portfolioLeads7d, portfolioBookings7d, failingDomainsList] = await Promise.all([
     db.subscription.findMany({ select: { tenantId: true, amount: true, interval: true, status: true, planTier: true, currentPeriodEnd: true } }),
-    db.tenant.findMany({ where: { isDemo: false }, select: { id: true, status: true, trialEndsAt: true, createdAt: true, suspendedReason: true, planTier: true } }),
+    db.tenant.findMany({ where: { isDemo: false }, select: { id: true, name: true, subdomain: true, status: true, trialEndsAt: true, createdAt: true, suspendedReason: true, planTier: true, siteMode: true, businessVertical: true, quarantined: true } }),
     db.paymentProof.aggregate({ where: { status: "PENDING" }, _count: { _all: true }, _sum: { amount: true } }),
     db.tenant.count({ where: { quarantined: true, suspendedReason: null, isDemo: false } }),
     db.paymentProof.groupBy({ by: ["tenantId"], where: { status: "APPROVED" } }),
@@ -127,10 +148,19 @@ export async function getOverview(actor: PlatformActor, deps?: Deps): Promise<Pl
         subscription: { select: { amount: true, currentPeriodEnd: true } },
       },
     }),
+    db.siteLead.count({ where: { createdAt: { gte: since7d } } }).catch(() => 0),
+    db.bookingRequest.count({ where: { createdAt: { gte: since7d } } }).catch(() => 0),
+    db.domain.findMany({
+      where: { verified: false },
+      take: 4,
+      select: { domain: true, tenantId: true, tenant: { select: { name: true, subdomain: true, siteMode: true } } },
+    }).catch(() => []),
   ]);
   const subOf = new Map(subs.map((s) => [s.tenantId, s]));
   let mrr = 0, paying = 0, trials = 0, trialsEndingSoon = 0, pastDue = 0, locked = 0, lapsed = 0, trialsOver = 0;
+  let portfolioSites = 0, ecommerceStores = 0, hybridTenants = 0;
   const byPlan = new Map<string, number>();
+
   for (const t of tenants) {
     const s = subOf.get(t.id) ?? null;
     const a = accessOf(t, s, now);
@@ -147,7 +177,63 @@ export async function getOverview(actor: PlatformActor, deps?: Deps): Promise<Pl
     if (a.state === "READ_ONLY" || a.state === "LOCKED") locked++;
     if (a.state !== "TRIAL") trialsOver++;
     if (s && Number(s.amount) > 0 && a.state !== "ACTIVE" && now.getTime() - s.currentPeriodEnd.getTime() < 30 * 86_400_000) lapsed++;
+
+    const mode = t.siteMode || "ECOMMERCE";
+    if (mode === "PORTFOLIO") portfolioSites++;
+    else if (mode === "HYBRID") hybridTenants++;
+    else ecommerceStores++;
   }
+
+  const needsAttentionQueue: PlatformOverview["needsAttentionQueue"] = [];
+
+  for (const fd of failingDomainsList) {
+    needsAttentionQueue.push({
+      severity: "CRIT",
+      tenantId: fd.tenantId,
+      tenantName: fd.tenant.name,
+      subdomain: fd.tenant.subdomain,
+      siteMode: fd.tenant.siteMode || "ECOMMERCE",
+      issue: `Custom domain ${fd.domain} verification pending (SSL at risk)`,
+      impactedService: "Storefront / Edge Routing",
+      actionUrl: `/tenants/${fd.tenantId}?tab=domains`,
+      actionLabel: "Fix Domain",
+    });
+  }
+
+  const quarantinedTenants = tenants.filter((t) => t.quarantined && !t.suspendedReason);
+  for (const qt of quarantinedTenants.slice(0, 3)) {
+    needsAttentionQueue.push({
+      severity: "HIGH",
+      tenantId: qt.id,
+      tenantName: qt.name,
+      subdomain: qt.subdomain,
+      siteMode: qt.siteMode || "ECOMMERCE",
+      issue: "Tenant quarantined under brand safety review",
+      impactedService: "Public Website",
+      actionUrl: `/tenants/${qt.id}`,
+      actionLabel: "Review Hold",
+    });
+  }
+
+  const expiringTrials = tenants.filter((t) => {
+    const s = subOf.get(t.id) ?? null;
+    const a = accessOf(t, s, now);
+    return a.state === "TRIAL" && a.daysLeft !== null && a.daysLeft <= 3;
+  });
+  for (const et of expiringTrials.slice(0, 3)) {
+    needsAttentionQueue.push({
+      severity: "WARN",
+      tenantId: et.id,
+      tenantName: et.name,
+      subdomain: et.subdomain,
+      siteMode: et.siteMode || "ECOMMERCE",
+      issue: "Trial expires in <= 3 days",
+      impactedService: "Merchant Access",
+      actionUrl: `/tenants/${et.id}`,
+      actionLabel: "Extend Trial",
+    });
+  }
+
   const today = dhakaDate(now);
   const counts = new Map<string, number>();
   for (const t of tenants) counts.set(dhakaDate(t.createdAt), (counts.get(dhakaDate(t.createdAt)) ?? 0) + 1);
@@ -178,6 +264,14 @@ export async function getOverview(actor: PlatformActor, deps?: Deps): Promise<Pl
     openTickets: openTicketsCount,
     quarantined, signups,
     byPlan: [...byPlan.entries()].map(([tier, stores]) => ({ tier, stores })),
+    cohorts: {
+      portfolioSites,
+      ecommerceStores,
+      hybridTenants,
+      portfolioLeads7d,
+      portfolioBookings7d,
+    },
+    needsAttentionQueue,
     newestSignups,
   };
 }
@@ -200,6 +294,8 @@ export interface TenantRow {
   isDemo: boolean;
   createdAt: Date;
   status?: string;
+  siteMode?: string;
+  businessVertical?: string | null;
 }
 
 export type TenantFilter = "all" | "trial" | "paying" | "overdue" | "locked" | "flagged" | "suspended" | "cancelled";
@@ -269,6 +365,8 @@ export async function listTenants(actor: PlatformActor, opts: { q?: string; filt
       isDemo: t.isDemo,
       createdAt: t.createdAt,
       status: t.status,
+      siteMode: t.siteMode,
+      businessVertical: t.businessVertical,
     };
   });
 
@@ -303,6 +401,20 @@ export interface TenantDetail extends TenantRow {
   trialEndsAt: Date;
   suspendedReason: string | null;
   quarantineReason: string | null;
+  siteMode: string;
+  businessVertical: string | null;
+  leadsCount: number;
+  leads30Days: number;
+  bookingsConfirmed: number;
+  recentLeads: {
+    id: string;
+    type: string;
+    status: string;
+    name: string;
+    phone: string;
+    sourcePage: string | null;
+    createdAt: Date;
+  }[];
   subscription: { tier: string; interval: string; amount: number; status: string; periodStart: Date; periodEnd: Date } | null;
   usage: {
     products: number;
@@ -346,7 +458,7 @@ export async function getTenantDetail(actor: PlatformActor, tenantId: string, de
   if (!t) throw new NotFoundError("Store");
   const since = new Date(now.getTime() - 30 * 86_400_000);
   const month = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-  const [staff, gmv, ordersTotal, orders30Days, customers, smsUsage, usageRow, domains, modules, proofs, notes, tickets, audit, plan] = await Promise.all([
+  const [staff, gmv, ordersTotal, orders30Days, customers, smsUsage, usageRow, domains, modules, proofs, notes, tickets, audit, plan, leadsCount, leads30Days, bookingsConfirmed, recentLeads] = await Promise.all([
     db.tenantUser.count({ where: { tenantId, isActive: true } }),
     db.order.aggregate({ where: { tenantId, status: "DELIVERED", deliveredAt: { gte: since } }, _sum: { totalAmount: true } }),
     db.order.count({ where: { tenantId } }),
@@ -361,6 +473,23 @@ export async function getTenantDetail(actor: PlatformActor, tenantId: string, de
     db.supportTicket.findMany({ where: { tenantId }, orderBy: { createdAt: "desc" }, take: 10 }),
     db.platformAuditLog.findMany({ where: { tenantId }, orderBy: { createdAt: "desc" }, take: 20 }),
     db.plan.findUnique({ where: { tier: t.planTier } }),
+    db.siteLead.count({ where: { tenantId } }).catch(() => 0),
+    db.siteLead.count({ where: { tenantId, createdAt: { gte: since } } }).catch(() => 0),
+    db.bookingRequest.count({ where: { tenantId, status: "CONFIRMED" } }).catch(() => 0),
+    db.siteLead.findMany({
+      where: { tenantId },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      select: {
+        id: true,
+        type: true,
+        status: true,
+        name: true,
+        phone: true,
+        sourcePage: true,
+        createdAt: true,
+      },
+    }).catch(() => []),
   ]);
 
   const limits = (plan?.limits ?? {}) as Record<string, number | null>;
@@ -368,6 +497,20 @@ export async function getTenantDetail(actor: PlatformActor, tenantId: string, de
   return {
     id: t.id, name: t.name, subdomain: t.subdomain, ownerName: t.ownerName, ownerEmail: t.ownerEmail, ownerPhone: t.ownerPhone, tier: t.planTier, access: accessOf(t, t.subscription, now),
     quarantined: t.quarantined, isDemo: t.isDemo, createdAt: t.createdAt, status: t.status, trialEndsAt: t.trialEndsAt, suspendedReason: t.suspendedReason, quarantineReason: t.quarantineReason,
+    siteMode: t.siteMode || "ECOMMERCE",
+    businessVertical: t.businessVertical,
+    leadsCount,
+    leads30Days,
+    bookingsConfirmed,
+    recentLeads: recentLeads.map((l) => ({
+      id: l.id,
+      type: l.type,
+      status: l.status,
+      name: redactName(l.name),
+      phone: redactPhone(l.phone),
+      sourcePage: l.sourcePage,
+      createdAt: l.createdAt,
+    })),
     subscription: t.subscription ? { tier: t.subscription.planTier, interval: t.subscription.interval, amount: Number(t.subscription.amount), status: t.subscription.status, periodStart: t.subscription.currentPeriodStart, periodEnd: t.subscription.currentPeriodEnd } : null,
     usage: {
       products: t.productCount,

@@ -12,6 +12,7 @@ import {
   reviewQuarantine,
   suspendTenant,
   addTenantQuotaAdjustment,
+  executeModeTransition,
 } from "@biztrackbd/core";
 import { getPlatformPrisma } from "@biztrackbd/db";
 import { requireAction } from "@/lib/session";
@@ -101,4 +102,25 @@ export async function overrideTenantModuleAction(id: string, moduleKey: string, 
 
   revalidatePath(`/tenants/${id}`);
   redirect(`/tenants/${id}?tab=modules&done=module_updated`);
+}
+
+export async function modeTransitionExecuteAction(id: string, form: FormData): Promise<void> {
+  const targetMode = String(form.get("targetMode") ?? "PORTFOLIO") as any;
+  const targetVertical = (form.get("targetVertical") ? String(form.get("targetVertical")) : null) as any;
+  const reason = String(form.get("reason") ?? "").trim();
+  const confirmedConsent = form.get("confirmedConsent") === "on" || form.get("confirmedConsent") === "true";
+
+  await run(
+    id,
+    "adjust",
+    (a) =>
+      executeModeTransition(id, a, {
+        targetMode,
+        targetVertical,
+        reason,
+        confirmedConsent,
+      }),
+    "mode_transitioned",
+    "transition"
+  );
 }

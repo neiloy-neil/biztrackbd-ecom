@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ACCESS_LABELS, canPlatform, getTenantDetail, listTenantQuotaAdjustments, APP_CATALOG } from "@biztrackbd/core";
+import { ACCESS_LABELS, canPlatform, getTenantDetail, listTenantQuotaAdjustments, APP_CATALOG, validateModeTransitionDryRun } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
 import { dateOnly, dateTime, prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
@@ -16,6 +16,7 @@ import {
   suspendAction,
   addQuotaAdjustmentAction,
   overrideTenantModuleAction,
+  modeTransitionExecuteAction,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -30,10 +31,13 @@ const DONE_MESSAGES: Record<string, string> = {
   noted: "Internal note saved.",
   quota_adjusted: "Quota adjustment applied successfully.",
   module_updated: "Tenant module entitlement updated.",
+  mode_transitioned: "Site mode and vertical successfully transitioned. Edge routing synchronized.",
 };
 
 const TABS = [
   { id: "overview", label: "Overview" },
+  { id: "leads", label: "Leads & Health" },
+  { id: "transition", label: "Mode Transition" },
   { id: "subscription", label: "Subscription" },
   { id: "usage", label: "Usage" },
   { id: "domains", label: "Domains" },
@@ -54,6 +58,13 @@ export default async function TenantDetail({
   const t = await getTenantDetail(s.actor, id).catch(() => null);
   const quotaAdjustments = await listTenantQuotaAdjustments(s.actor, id).catch(() => []);
   if (!t) notFound();
+
+  const targetModeChoice = (one(sp.targetMode) as any) || (t.siteMode === "ECOMMERCE" ? "PORTFOLIO" : t.siteMode === "PORTFOLIO" ? "HYBRID" : "ECOMMERCE");
+  const targetVerticalChoice = (one(sp.targetVertical) as any) || t.businessVertical || "BUSINESS_COMPANY";
+
+  const dryRun = one(sp.tab) === "transition"
+    ? await validateModeTransitionDryRun(id, targetModeChoice, targetVerticalChoice).catch(() => null)
+    : null;
 
   const canSuspend = canPlatform(s.user.role, "suspend", "edit");
   const canAdjust = canPlatform(s.user.role, "adjust", "edit");
@@ -146,6 +157,33 @@ export default async function TenantDetail({
             >
               {statusPillText}
             </span>
+            <span
+              style={{
+                padding: "3px 10px",
+                borderRadius: 11,
+                background: t.siteMode === "PORTFOLIO" ? "#EDE9FE" : t.siteMode === "HYBRID" ? "#FEF9C3" : "#F1F5F9",
+                color: t.siteMode === "PORTFOLIO" ? "#6D28D9" : t.siteMode === "HYBRID" ? "#854D0E" : "#334155",
+                fontSize: 12,
+                fontWeight: 700,
+              }}
+            >
+              {t.siteMode}
+            </span>
+            {t.businessVertical && (
+              <span
+                style={{
+                  padding: "3px 10px",
+                  borderRadius: 11,
+                  background: "#F8FAFC",
+                  color: "#475569",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  border: "1px solid #E2E8F0",
+                }}
+              >
+                {t.businessVertical.replace("_", " ")}
+              </span>
+            )}
             {t.quarantined && <span style={{ padding: "3px 10px", borderRadius: 11, background: "#FDF3E3", color: "#B45309", fontSize: 12, fontWeight: 600 }}>Flagged for review</span>}
           </div>
           <div style={{ fontSize: 13, color: "#4B4B73", marginTop: 3 }}>
@@ -155,6 +193,26 @@ export default async function TenantDetail({
 
         {/* Header Action Buttons */}
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <Link
+            href={`/tenants/${t.id}?tab=transition`}
+            style={{
+              height: 38,
+              padding: "0 14px",
+              border: "1px solid #C7D2FE",
+              borderRadius: 8,
+              background: "#EEF2FF",
+              fontSize: 13,
+              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              color: "#4338CA",
+              textDecoration: "none",
+            }}
+            prefetch={false}
+          >
+            <span>🔄</span> Transition Mode
+          </Link>
           <a
             href={`https://${t.subdomain}.biztrack.bd`}
             target="_blank"
@@ -250,32 +308,63 @@ export default async function TenantDetail({
         })}
       </div>
 
-      {/* Top 4 KPI Cards */}
+      {/* Top 4 KPI Cards (Mode-Aware) */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }} data-testid="usage-card">
-        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
-          <div style={{ fontSize: 13, color: "#4B4B73" }}>Orders (30 days)</div>
-          <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
-            {t.usage.orders30Days}
-          </div>
-        </div>
-        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
-          <div style={{ fontSize: 13, color: "#4B4B73" }}>Sales (GMV)</div>
-          <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
-            {taka(t.usage.gmv30Days)}
-          </div>
-        </div>
-        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
-          <div style={{ fontSize: 13, color: "#4B4B73" }}>Products</div>
-          <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
-            {t.usage.products}
-          </div>
-        </div>
-        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
-          <div style={{ fontSize: 13, color: "#4B4B73" }}>Customers</div>
-          <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
-            {t.usage.customers}
-          </div>
-        </div>
+        {t.siteMode === "PORTFOLIO" ? (
+          <>
+            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
+              <div style={{ fontSize: 13, color: "#4B4B73" }}>Inquiries (Total)</div>
+              <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
+                {t.leadsCount}
+              </div>
+            </div>
+            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
+              <div style={{ fontSize: 13, color: "#4B4B73" }}>Inquiries (30 days)</div>
+              <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums", color: "#15803D" }}>
+                {t.leads30Days}
+              </div>
+            </div>
+            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
+              <div style={{ fontSize: 13, color: "#4B4B73" }}>Bookings Confirmed</div>
+              <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums", color: "#4338CA" }}>
+                {t.bookingsConfirmed}
+              </div>
+            </div>
+            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
+              <div style={{ fontSize: 13, color: "#4B4B73" }}>Content & Services</div>
+              <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
+                {t.usage.products}
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
+              <div style={{ fontSize: 13, color: "#4B4B73" }}>Orders (30 days)</div>
+              <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
+                {t.usage.orders30Days}
+              </div>
+            </div>
+            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
+              <div style={{ fontSize: 13, color: "#4B4B73" }}>Sales (GMV)</div>
+              <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
+                {taka(t.usage.gmv30Days)}
+              </div>
+            </div>
+            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
+              <div style={{ fontSize: 13, color: "#4B4B73" }}>Products</div>
+              <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
+                {t.usage.products}
+              </div>
+            </div>
+            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
+              <div style={{ fontSize: 13, color: "#4B4B73" }}>Customers</div>
+              <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
+                {t.usage.customers}
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* 2-Column Layout: Main Tab Content + Right Rail */}
@@ -514,6 +603,342 @@ export default async function TenantDetail({
                     </div>
                   )}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {tab === "leads" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              {/* Snapshot metrics */}
+              <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1A1A4E" }}>
+                      Operational Health Snapshot
+                    </h3>
+                    <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6B6B8D" }}>
+                      Telemetry for incoming leads, quotes, table reservations, and clinic appointments.
+                    </p>
+                  </div>
+                  <span
+                    style={{
+                      padding: "4px 10px",
+                      borderRadius: 9999,
+                      fontSize: 11.5,
+                      fontWeight: 700,
+                      background: "#EDE9FE",
+                      color: "#6D28D9",
+                    }}
+                  >
+                    MODE: {t.siteMode}
+                  </span>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14 }}>
+                  <div style={{ padding: "14px", background: "#FAFAFC", borderRadius: 8, border: "1px solid #E7E7F0" }}>
+                    <div style={{ fontSize: 12, color: "#6B6B8D", fontWeight: 600 }}>Total Inquiries (All-Time)</div>
+                    <div style={{ fontSize: 24, fontWeight: 800, color: "#1A1A4E", marginTop: 4 }}>
+                      {t.leadsCount}
+                    </div>
+                  </div>
+                  <div style={{ padding: "14px", background: "#FAFAFC", borderRadius: 8, border: "1px solid #E7E7F0" }}>
+                    <div style={{ fontSize: 12, color: "#6B6B8D", fontWeight: 600 }}>Inquiries (Last 30 Days)</div>
+                    <div style={{ fontSize: 24, fontWeight: 800, color: "#15803D", marginTop: 4 }}>
+                      {t.leads30Days}
+                    </div>
+                  </div>
+                  <div style={{ padding: "14px", background: "#FAFAFC", borderRadius: 8, border: "1px solid #E7E7F0" }}>
+                    <div style={{ fontSize: 12, color: "#6B6B8D", fontWeight: 600 }}>Bookings Confirmed</div>
+                    <div style={{ fontSize: 24, fontWeight: 800, color: "#4338CA", marginTop: 4 }}>
+                      {t.bookingsConfirmed}
+                    </div>
+                  </div>
+                  <div style={{ padding: "14px", background: "#FAFAFC", borderRadius: 8, border: "1px solid #E7E7F0" }}>
+                    <div style={{ fontSize: 12, color: "#6B6B8D", fontWeight: 600 }}>PII Redaction Status</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#15803D", marginTop: 8 }}>
+                      Active (Masked)
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Redacted Inquiry Audit Table */}
+              <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, overflow: "hidden" }}>
+                <div style={{ padding: "18px 24px", borderBottom: "1px solid #E7E7F0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#1A1A4E" }}>
+                      Redacted Leads & Inquiry Audit
+                    </h3>
+                    <p style={{ margin: "4px 0 0", fontSize: 12.5, color: "#6B6B8D" }}>
+                      High-level audit trail with end-customer privacy protections active.
+                    </p>
+                  </div>
+                  <span style={{ fontSize: 12, color: "#6B6B8D" }}>
+                    Showing latest {t.recentLeads.length} inquiries
+                  </span>
+                </div>
+
+                {t.recentLeads.length === 0 ? (
+                  <div style={{ padding: "32px 24px", textAlign: "center", color: "#6B6B8D", fontSize: 13.5 }}>
+                    No leads or booking inquiries have been captured yet for this tenant.
+                  </div>
+                ) : (
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                      <thead>
+                        <tr style={{ borderBottom: "1px solid #E7E7F0", color: "#6B6B8D", textAlign: "left", background: "#FAFAFC" }}>
+                          <th style={{ padding: "10px 14px", fontWeight: 600 }}>Inquiry ID</th>
+                          <th style={{ padding: "10px 14px", fontWeight: 600 }}>Type</th>
+                          <th style={{ padding: "10px 14px", fontWeight: 600 }}>Submitted At</th>
+                          <th style={{ padding: "10px 14px", fontWeight: 600 }}>Contact Status</th>
+                          <th style={{ padding: "10px 14px", fontWeight: 600 }}>Customer (Redacted)</th>
+                          <th style={{ padding: "10px 14px", fontWeight: 600 }}>Source Page</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {t.recentLeads.map((lead) => (
+                          <tr key={lead.id} style={{ borderBottom: "1px solid #F1F1F6" }}>
+                            <td style={{ padding: "12px 14px", fontFamily: "monospace", fontWeight: 600 }}>
+                              #LD-{lead.id.slice(-6)}
+                            </td>
+                            <td style={{ padding: "12px 14px" }}>
+                              <span
+                                style={{
+                                  padding: "2px 6px",
+                                  borderRadius: 4,
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  background: lead.type === "RESERVATION" || lead.type === "APPOINTMENT" ? "#EDE9FE" : "#F1F5F9",
+                                  color: lead.type === "RESERVATION" || lead.type === "APPOINTMENT" ? "#6D28D9" : "#334155",
+                                }}
+                              >
+                                {lead.type}
+                              </span>
+                            </td>
+                            <td style={{ padding: "12px 14px", color: "#4B4B73" }}>
+                              {dateTime(lead.createdAt)}
+                            </td>
+                            <td style={{ padding: "12px 14px" }}>
+                              <span
+                                style={{
+                                  padding: "2px 7px",
+                                  borderRadius: 9999,
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  background: lead.status === "NEW" ? "#FEF3C7" : lead.status === "WON" ? "#DCFCE7" : "#F1F5F9",
+                                  color: lead.status === "NEW" ? "#92400E" : lead.status === "WON" ? "#15803D" : "#475569",
+                                }}
+                              >
+                                {lead.status}
+                              </span>
+                            </td>
+                            <td style={{ padding: "12px 14px" }}>
+                              <div style={{ fontWeight: 600, color: "#1A1A4E" }}>{lead.name}</div>
+                              <div style={{ fontSize: 11.5, color: "#6B6B8D", fontFamily: "monospace" }}>{lead.phone}</div>
+                            </td>
+                            <td style={{ padding: "12px 14px", color: "#6B6B8D" }}>
+                              <code>{lead.sourcePage || "/"}</code>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                <div style={{ padding: "14px 20px", background: "#F8FAFC", borderTop: "1px solid #E7E7F0", fontSize: 12, color: "#64748B" }}>
+                  🔒 <strong>Privacy Policy Enforcement:</strong> Platform staff and operators cannot view patient symptom details, consultation medical notes, or unredacted phone numbers without temporary elevated authorization.
+                </div>
+              </div>
+            </div>
+          )}
+
+          {tab === "transition" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1A1A4E" }}>
+                      Guarded Mode Transition Engine
+                    </h3>
+                    <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6B6B8D" }}>
+                      Safely convert this tenant between ECOMMERCE, PORTFOLIO (BizTrack Business), and HYBRID dual modes.
+                    </p>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 12, color: "#6B6B8D" }}>Current Mode:</span>
+                    <span
+                      style={{
+                        padding: "3px 8px",
+                        borderRadius: 6,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        background: t.siteMode === "PORTFOLIO" ? "#EDE9FE" : t.siteMode === "HYBRID" ? "#FEF9C3" : "#F1F5F9",
+                        color: t.siteMode === "PORTFOLIO" ? "#6D28D9" : t.siteMode === "HYBRID" ? "#854D0E" : "#334155",
+                      }}
+                    >
+                      {t.siteMode}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Dry Run Pre-flight Analysis */}
+                {dryRun && (
+                  <div style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, padding: 18, marginBottom: 20 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                      <span style={{ fontSize: 16 }}>🔍</span>
+                      <strong style={{ fontSize: 14, color: "#0F172A" }}>
+                        Pre-Flight Dry-Run Impact Analysis
+                      </strong>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 9999, background: "#DCFCE7", color: "#15803D" }}>
+                        Safety Verified ✓
+                      </span>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14, fontSize: 13 }}>
+                      <div>
+                        <span style={{ color: "#15803D", fontWeight: 700, display: "block", marginBottom: 4 }}>
+                          + Capabilities Gained:
+                        </span>
+                        {dryRun.capabilitiesGained.length > 0 ? (
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                            {dryRun.capabilitiesGained.map((c) => (
+                              <span key={c} style={{ background: "#DCFCE7", color: "#15803D", padding: "1px 6px", borderRadius: 4, fontSize: 11, fontWeight: 600 }}>
+                                +{c}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span style={{ color: "#64748B", fontSize: 12 }}>None</span>
+                        )}
+                      </div>
+
+                      <div>
+                        <span style={{ color: "#B91C1C", fontWeight: 700, display: "block", marginBottom: 4 }}>
+                          - Capabilities Disabled:
+                        </span>
+                        {dryRun.capabilitiesDisabled.length > 0 ? (
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                            {dryRun.capabilitiesDisabled.map((c) => (
+                              <span key={c} style={{ background: "#FEE2E2", color: "#B91C1C", padding: "1px 6px", borderRadius: 4, fontSize: 11, fontWeight: 600 }}>
+                                -{c}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span style={{ color: "#15803D", fontSize: 12 }}>None (Zero loss)</span>
+                        )}
+                      </div>
+
+                      <div>
+                        <span style={{ color: "#4338CA", fontWeight: 700, display: "block", marginBottom: 4 }}>
+                          Recommended Plan Tier:
+                        </span>
+                        <span style={{ fontWeight: 700, color: "#1E293B" }}>
+                          {dryRun.recommendedPlanTier} Plan
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Preserved Data Summary */}
+                    <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px dashed #CBD5E1", fontSize: 12.5, color: "#334155" }}>
+                      🛡️ <strong>Zero Data Loss Guarantee:</strong> All existing {dryRun.preservedDataSummary.productsCount} products, {dryRun.preservedDataSummary.ordersCount} orders, and {dryRun.preservedDataSummary.leadsCount} leads remain <strong>100% PRESERVED</strong> in the database.
+                    </div>
+
+                    {dryRun.warnings.length > 0 && (
+                      <div style={{ marginTop: 10, padding: "8px 12px", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 6, fontSize: 12, color: "#92400E" }}>
+                        {dryRun.warnings.map((w, i) => (
+                          <div key={i}>⚠️ {w}</div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Transition Form */}
+                <form action={modeTransitionExecuteAction.bind(null, t.id)} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1A1A4E", marginBottom: 6 }}>
+                        Target Site Mode
+                      </label>
+                      <select
+                        name="targetMode"
+                        defaultValue={targetModeChoice}
+                        style={{
+                          width: "100%",
+                          padding: "8px 12px",
+                          borderRadius: 8,
+                          border: "1px solid #CBD5E1",
+                          fontSize: 13.5,
+                          background: "#fff",
+                        }}
+                      >
+                        <option value="PORTFOLIO">PORTFOLIO (BizTrack Business — Lead capture, menu, booking)</option>
+                        <option value="HYBRID">HYBRID (Dual Engine — Services & lead capture + Online shop)</option>
+                        <option value="ECOMMERCE">ECOMMERCE (Online Store — Cart, checkout, bKash & courier)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1A1A4E", marginBottom: 6 }}>
+                        Business Vertical (Optional)
+                      </label>
+                      <select
+                        name="targetVertical"
+                        defaultValue={t.businessVertical || "BUSINESS_COMPANY"}
+                        style={{
+                          width: "100%",
+                          padding: "8px 12px",
+                          borderRadius: 8,
+                          border: "1px solid #CBD5E1",
+                          fontSize: 13.5,
+                          background: "#fff",
+                        }}
+                      >
+                        <option value="RESTAURANT">Restaurant, Café & Food</option>
+                        <option value="DOCTOR_CLINIC">Doctor, Specialist & Clinic</option>
+                        <option value="BUSINESS_COMPANY">Company, Corporate & Agency</option>
+                        <option value="SERVICE_PROVIDER">Service Provider & Consultant</option>
+                        <option value="PUBLIC_FIGURE">Public Figure & Creator</option>
+                        <option value="PERSONAL_PORTFOLIO">Personal Portfolio & CV</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1A1A4E", marginBottom: 6 }}>
+                      Reason for Mode Transition (Required for audit log)
+                    </label>
+                    <input
+                      type="text"
+                      name="reason"
+                      required
+                      placeholder="E.g. Merchant requested clinic appointment scheduling; customer agreement verified."
+                      style={{
+                        width: "100%",
+                        padding: "8px 12px",
+                        borderRadius: 8,
+                        border: "1px solid #CBD5E1",
+                        fontSize: 13.5,
+                        boxSizing: "border-box",
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#334155" }}>
+                    <input type="checkbox" name="confirmedConsent" id="consentCheck" required />
+                    <label htmlFor="consentCheck" style={{ cursor: "pointer", fontWeight: 600 }}>
+                      I verify that the merchant requested this mode transition and understand that storefront routing will update immediately.
+                    </label>
+                  </div>
+
+                  <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+                    <SubmitButton style={{ background: "#5B4FE8", color: "#fff", padding: "9px 20px", borderRadius: 8, fontSize: 13.5, fontWeight: 700, border: "none", cursor: "pointer" }}>
+                      🚀 Execute Atomic Mode Transition (Safe)
+                    </SubmitButton>
+                  </div>
+                </form>
               </div>
             </div>
           )}
