@@ -5,6 +5,7 @@ import { useState } from "react";
 import { PlanCards, type PlanCardData } from "@/components/plan-cards";
 import { PlanRecommender } from "@/components/plan-recommender";
 import { demoAdminUrl } from "@/lib/demo-admin";
+import { handleTabListKeyDown } from "@/lib/a11y";
 
 export interface ComparisonRow {
   label: string;
@@ -12,6 +13,9 @@ export interface ComparisonRow {
   pro: string;
   business: string;
 }
+
+export type PricingTab = "store" | "portfolio";
+const PRICING_TABS: readonly PricingTab[] = ["store", "portfolio"];
 
 interface PricingViewProps {
   storePlans: PlanCardData[];
@@ -32,7 +36,7 @@ export function PricingView({
 }: PricingViewProps) {
   const searchParams = useSearchParams();
   const requestedMode = searchParams.get("mode")?.toLowerCase();
-  const [tab, setTab] = useState<"store" | "portfolio">(
+  const [tab, setTab] = useState<PricingTab>(
     requestedMode === "portfolio" || requestedMode === "website" ? "portfolio" : "store"
   );
   const [highlightedTier, setHighlightedTier] = useState<string | null>(null);
@@ -57,6 +61,7 @@ export function PricingView({
         <div
           role="tablist"
           aria-label="Choose plan category"
+          onKeyDown={(e) => handleTabListKeyDown(e, PRICING_TABS, tab, setTab)}
           style={{
             display: "inline-flex",
             maxWidth: "100%",
@@ -70,9 +75,12 @@ export function PricingView({
           }}
         >
           <button
+            id="pricing-tab-store"
             type="button"
             role="tab"
             aria-selected={isStore}
+            aria-controls="pricing-panel-store"
+            tabIndex={isStore ? 0 : -1}
             onClick={() => setTab("store")}
             data-testid="tab-store-plans"
             style={{
@@ -91,13 +99,16 @@ export function PricingView({
               transition: "all 0.2s ease",
             }}
           >
-            <span>🛍️</span> Online Store Plans
+            <span aria-hidden="true">🛍️</span> Online Store Plans
           </button>
 
           <button
+            id="pricing-tab-portfolio"
             type="button"
             role="tab"
             aria-selected={!isStore}
+            aria-controls="pricing-panel-portfolio"
+            tabIndex={!isStore ? 0 : -1}
             onClick={() => setTab("portfolio")}
             data-testid="tab-portfolio-plans"
             style={{
@@ -116,7 +127,7 @@ export function PricingView({
               transition: "all 0.2s ease",
             }}
           >
-            <span>💼</span> Business &amp; Portfolio
+            <span aria-hidden="true">💼</span> Business &amp; Portfolio
             <span
               style={{
                 fontSize: 10,
@@ -132,6 +143,15 @@ export function PricingView({
           </button>
         </div>
       </div>
+
+      {/* Pricing Tab Panel */}
+      <div
+        role="tabpanel"
+        id={isStore ? "pricing-panel-store" : "pricing-panel-portfolio"}
+        aria-labelledby={isStore ? "pricing-tab-store" : "pricing-tab-portfolio"}
+        tabIndex={0}
+        style={{ outline: "none" }}
+      >
 
       {/* Dynamic Sub-heading Description */}
       <div style={{ textAlign: "center", margin: "16px auto 32px", maxWidth: 680 }}>
@@ -190,6 +210,7 @@ export function PricingView({
             </tbody>
           </table>
         </div>
+      </div>
       </div>
     </>
   );

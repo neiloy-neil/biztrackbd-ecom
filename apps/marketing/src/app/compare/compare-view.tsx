@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import { TcoCalculator } from "@/components/tco-calculator";
+import { handleTabListKeyDown } from "@/lib/a11y";
 
 export type CompareTab = "storefronts" | "business";
+const COMPARE_TABS: readonly CompareTab[] = ["storefronts", "business"];
 
 export interface ComparisonCard {
   slug: string;
@@ -63,6 +65,7 @@ export function CompareView({
         <div
           role="tablist"
           aria-label="Comparison category"
+          onKeyDown={(e) => handleTabListKeyDown(e, COMPARE_TABS, activeTab, setActiveTab)}
           style={{
             display: "inline-flex",
             maxWidth: "100%",
@@ -77,9 +80,12 @@ export function CompareView({
           }}
         >
           <button
+            id="compare-tab-storefronts"
             type="button"
             role="tab"
             aria-selected={isStore}
+            aria-controls="compare-panel-storefronts"
+            tabIndex={isStore ? 0 : -1}
             onClick={() => setActiveTab("storefronts")}
             style={{
               padding: "9px clamp(14px, 3.5vw, 24px)",
@@ -97,7 +103,7 @@ export function CompareView({
               transition: "all 0.15s ease",
             }}
           >
-            <span>🛍️</span> Online Storefronts
+            <span aria-hidden="true">🛍️</span> Online Storefronts
             <span
               style={{
                 fontSize: "12px",
@@ -112,9 +118,12 @@ export function CompareView({
           </button>
 
           <button
+            id="compare-tab-business"
             type="button"
             role="tab"
             aria-selected={!isStore}
+            aria-controls="compare-panel-business"
+            tabIndex={!isStore ? 0 : -1}
             onClick={() => setActiveTab("business")}
             style={{
               padding: "9px clamp(14px, 3.5vw, 24px)",
@@ -132,7 +141,7 @@ export function CompareView({
               transition: "all 0.15s ease",
             }}
           >
-            <span>💼</span> Business &amp; Service Websites
+            <span aria-hidden="true">💼</span> Business &amp; Service Websites
             <span
               style={{
                 fontSize: "12px",
@@ -149,15 +158,23 @@ export function CompareView({
         </div>
       </div>
 
-      {/* Comparison Cards Grid */}
+      {/* Comparison Tab Panel */}
       <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: 24,
-          marginTop: 20,
-        }}
+        role="tabpanel"
+        id={isStore ? "compare-panel-storefronts" : "compare-panel-business"}
+        aria-labelledby={isStore ? "compare-tab-storefronts" : "compare-tab-business"}
+        tabIndex={0}
+        style={{ outline: "none" }}
       >
+        {/* Comparison Cards Grid */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gap: 24,
+            marginTop: 20,
+          }}
+        >
         {currentCards.map((c) => (
           <div
             key={c.slug}
@@ -428,6 +445,7 @@ export function CompareView({
           </div>
         </div>
       )}
+      </div>
     </>
   );
 }

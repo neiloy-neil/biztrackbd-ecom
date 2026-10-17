@@ -9,7 +9,7 @@ This backlog translates the 17 October 2026 alignment audit into testable work. 
 | WEB-001 | P0 | Replace desktop-only header with accessible mobile navigation | **Resolved & Verified** | Verified via browser subagent (`mobile_nav_audit_1792191063492.webp`). Touch, keyboard, Escape, focus trap, and focus restoration pass. |
 | WEB-002 | P0 | Repair responsive CTA, segmented-control, form, and layout overflow | **Resolved & Verified** | Live crawl across 320/360/375/390/414 px: `scrollWidth = 375px <= clientWidth = 375px` (0 horizontal overflow). |
 | WEB-003 | P1 | Add skip link and consistent main landmark | **Resolved & Verified** | First keyboard action exposes `.skip-link` and focuses `<main id="main">`. |
-| WEB-004 | P1 | Complete dropdown, tab, and modal semantics | In Progress | Template preview and tabs accessible; additional screen-reader matrix ongoing. |
+| WEB-004 | P1 | Complete dropdown, tab, and modal semantics | **Resolved & Verified** | W3C APG automatic roving tabindex tabs (`handleTabListKeyDown`) on all 5 segmented tab components (`dual-hero`, `authentic-ui-proof`, `architecture-explorer`, `compare-view`, `pricing-view`); accessible modal focus trap, scroll lock, Escape dismiss, and trigger restoration (`useModalFocusTrap`) on template preview dialog; accessible header dropdown semantics (`aria-haspopup`, Arrow/Escape/Enter navigation, focus return). Verified via Next.js 45-route build and typecheck. |
 | WEB-005 | P2 | Redesign pricing comparison for mobile | **Resolved & Verified** | Horizontal swipe cue and smooth touch scroll container added to pricing comparison table. |
 
 ## Epic 2 — Demo and proof reliability

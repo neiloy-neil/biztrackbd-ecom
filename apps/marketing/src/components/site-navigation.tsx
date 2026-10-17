@@ -95,6 +95,68 @@ export function SiteNavigation() {
     }
   };
 
+  const productTriggerRef = useRef<HTMLButtonElement>(null);
+  const solutionsTriggerRef = useRef<HTMLButtonElement>(null);
+  const productPanelRef = useRef<HTMLDivElement>(null);
+  const solutionsPanelRef = useRef<HTMLDivElement>(null);
+
+  const handleTriggerKeyDown = (
+    e: React.KeyboardEvent<HTMLButtonElement>,
+    name: DropdownName,
+    panelRef: React.RefObject<HTMLDivElement | null>
+  ) => {
+    if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setOpenDropdown(name);
+      setTimeout(() => {
+        const firstLink = panelRef.current?.querySelector<HTMLAnchorElement>("a.dropdown-item");
+        firstLink?.focus();
+      }, 50);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      setOpenDropdown(null);
+    }
+  };
+
+  const handlePanelKeyDown = (
+    e: React.KeyboardEvent<HTMLDivElement>,
+    triggerRef: React.RefObject<HTMLButtonElement | null>
+  ) => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      setOpenDropdown(null);
+      triggerRef.current?.focus();
+      return;
+    }
+
+    const items = Array.from(
+      e.currentTarget.querySelectorAll<HTMLAnchorElement>("a.dropdown-item")
+    );
+    if (!items.length) return;
+
+    const currentIndex = items.indexOf(document.activeElement as HTMLAnchorElement);
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+      items[nextIndex]?.focus();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (currentIndex <= 0) {
+        setOpenDropdown(null);
+        triggerRef.current?.focus();
+      } else {
+        items[currentIndex - 1]?.focus();
+      }
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      items[0]?.focus();
+    } else if (e.key === "End") {
+      e.preventDefault();
+      items[items.length - 1]?.focus();
+    }
+  };
+
   return (
     <>
       <button
@@ -126,22 +188,32 @@ export function SiteNavigation() {
           onMouseLeave={handleMouseLeave}
         >
           <button
+            ref={productTriggerRef}
             type="button"
             className="nav-dropdown-trigger"
+            aria-haspopup="true"
             aria-expanded={openDropdown === "product"}
             aria-controls="product-navigation"
             onClick={() => toggleDropdown("product")}
+            onKeyDown={(e) => handleTriggerKeyDown(e, "product", productPanelRef)}
           >
             <span>Product</span>
             <span className="nav-chevron" aria-hidden="true">⌄</span>
           </button>
-          <div id="product-navigation" className="nav-dropdown-panel">
+          <div
+            ref={productPanelRef}
+            id="product-navigation"
+            className="nav-dropdown-panel"
+            role="region"
+            aria-label="Product navigation links"
+            onKeyDown={(e) => handlePanelKeyDown(e, productTriggerRef)}
+          >
             <Link href="/product" className="dropdown-item" onClick={closeAll}>
-              <div className="dropdown-item-icon">🏛️</div>
+              <div className="dropdown-item-icon" aria-hidden="true">🏛️</div>
               <div className="dropdown-item-body">
                 <div className="dropdown-item-title">
                   <span>Platform Architecture</span>
-                  <span className="status-stamp stamp-review">Core</span>
+                  <span className="status-stamp stamp-review" aria-hidden="true">Core</span>
                 </div>
                 <div className="dropdown-item-desc">
                   One engine, three deployment modes: Commerce, Business, and unified Hybrid.
@@ -149,11 +221,11 @@ export function SiteNavigation() {
               </div>
             </Link>
             <Link href="/features" className="dropdown-item" onClick={closeAll}>
-              <div className="dropdown-item-icon">🛍️</div>
+              <div className="dropdown-item-icon" aria-hidden="true">🛍️</div>
               <div className="dropdown-item-body">
                 <div className="dropdown-item-title">
                   <span>Commerce Platform</span>
-                  <span className="status-stamp stamp-paid">Sell</span>
+                  <span className="status-stamp stamp-paid" aria-hidden="true">Sell</span>
                 </div>
                 <div className="dropdown-item-desc">
                   Online stores, direct bKash/Nagad checks, COD risk signals, and courier booking.
@@ -161,11 +233,11 @@ export function SiteNavigation() {
               </div>
             </Link>
             <Link href="/business" className="dropdown-item" onClick={closeAll}>
-              <div className="dropdown-item-icon">💼</div>
+              <div className="dropdown-item-icon" aria-hidden="true">💼</div>
               <div className="dropdown-item-body">
                 <div className="dropdown-item-title">
                   <span>Business Websites</span>
-                  <span className="status-stamp stamp-lead">Inquire</span>
+                  <span className="status-stamp stamp-lead" aria-hidden="true">Inquire</span>
                 </div>
                 <div className="dropdown-item-desc">
                   Company presence, local services, portfolios, menus, and an organized inquiry inbox.
@@ -173,11 +245,11 @@ export function SiteNavigation() {
               </div>
             </Link>
             <Link href="/business#hybrid" className="dropdown-item" onClick={closeAll}>
-              <div className="dropdown-item-icon">⚡</div>
+              <div className="dropdown-item-icon" aria-hidden="true">⚡</div>
               <div className="dropdown-item-body">
                 <div className="dropdown-item-title">
                   <span>Hybrid Websites</span>
-                  <span className="status-stamp stamp-review">Both</span>
+                  <span className="status-stamp stamp-review" aria-hidden="true">Both</span>
                 </div>
                 <div className="dropdown-item-desc">
                   Generate client inquiries and sell products from one brand website.
@@ -194,53 +266,63 @@ export function SiteNavigation() {
           onMouseLeave={handleMouseLeave}
         >
           <button
+            ref={solutionsTriggerRef}
             type="button"
             className="nav-dropdown-trigger"
+            aria-haspopup="true"
             aria-expanded={openDropdown === "solutions"}
             aria-controls="solutions-navigation"
             onClick={() => toggleDropdown("solutions")}
+            onKeyDown={(e) => handleTriggerKeyDown(e, "solutions", solutionsPanelRef)}
           >
             <span>Solutions</span>
             <span className="nav-chevron" aria-hidden="true">⌄</span>
           </button>
-          <div id="solutions-navigation" className="nav-dropdown-panel">
+          <div
+            ref={solutionsPanelRef}
+            id="solutions-navigation"
+            className="nav-dropdown-panel"
+            role="region"
+            aria-label="Solutions navigation links"
+            onKeyDown={(e) => handlePanelKeyDown(e, solutionsTriggerRef)}
+          >
             <Link href="/features" className="dropdown-item" onClick={closeAll}>
-              <div className="dropdown-item-icon">💬</div>
+              <div className="dropdown-item-icon" aria-hidden="true">💬</div>
               <div className="dropdown-item-body">
                 <div className="dropdown-item-title">Facebook &amp; Social Sellers</div>
                 <div className="dropdown-item-desc">Bring chat orders into one automated operating desk.</div>
               </div>
             </Link>
             <Link href="/business/company-website" className="dropdown-item" onClick={closeAll}>
-              <div className="dropdown-item-icon">🏢</div>
+              <div className="dropdown-item-icon" aria-hidden="true">🏢</div>
               <div className="dropdown-item-body">
                 <div className="dropdown-item-title">Corporate &amp; B2B Firms</div>
                 <div className="dropdown-item-desc">Verified corporate trust, team bios, and practice areas.</div>
               </div>
             </Link>
             <Link href="/business/service-websites" className="dropdown-item" onClick={closeAll}>
-              <div className="dropdown-item-icon">💼</div>
+              <div className="dropdown-item-icon" aria-hidden="true">💼</div>
               <div className="dropdown-item-body">
                 <div className="dropdown-item-title">Professional Service Firms</div>
                 <div className="dropdown-item-desc">Present services and capture quote or consultation requests.</div>
               </div>
             </Link>
             <Link href="/business/doctor-websites" className="dropdown-item" onClick={closeAll}>
-              <div className="dropdown-item-icon">🩺</div>
+              <div className="dropdown-item-icon" aria-hidden="true">🩺</div>
               <div className="dropdown-item-body">
                 <div className="dropdown-item-title">Clinics &amp; Medical Chambers</div>
                 <div className="dropdown-item-desc">BMDC facts, chamber schedules, and appointment requests.</div>
               </div>
             </Link>
             <Link href="/business/restaurant-websites" className="dropdown-item" onClick={closeAll}>
-              <div className="dropdown-item-icon">🍽️</div>
+              <div className="dropdown-item-icon" aria-hidden="true">🍽️</div>
               <div className="dropdown-item-body">
                 <div className="dropdown-item-title">Restaurants &amp; Cafés</div>
                 <div className="dropdown-item-desc">Publish QR dining menus, branch locations, and reservations.</div>
               </div>
             </Link>
             <Link href="/business/public-profile-websites" className="dropdown-item" onClick={closeAll}>
-              <div className="dropdown-item-icon">👤</div>
+              <div className="dropdown-item-icon" aria-hidden="true">👤</div>
               <div className="dropdown-item-body">
                 <div className="dropdown-item-title">Public Figures &amp; Leaders</div>
                 <div className="dropdown-item-desc">Publish op-eds, press kits, and capture speaking requests.</div>

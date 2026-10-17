@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import { demoAdminUrl } from "@/lib/demo-admin";
+import { handleTabListKeyDown } from "@/lib/a11y";
 
 export type ArchitectureMode = "commerce" | "business" | "hybrid";
+const ARCH_MODES: readonly ArchitectureMode[] = ["commerce", "business", "hybrid"];
 
 export function ArchitectureExplorer() {
   const [activeMode, setActiveMode] = useState<ArchitectureMode>("commerce");
@@ -24,6 +26,7 @@ export function ArchitectureExplorer() {
         <div
           role="tablist"
           aria-label="Platform Architecture Mode"
+          onKeyDown={(e) => handleTabListKeyDown(e, ARCH_MODES, activeMode, setActiveMode)}
           style={{
             display: "inline-flex",
             maxWidth: "100%",
@@ -38,9 +41,12 @@ export function ArchitectureExplorer() {
           }}
         >
           <button
+            id="arch-tab-commerce"
             type="button"
             role="tab"
             aria-selected={activeMode === "commerce"}
+            aria-controls="arch-panel-commerce"
+            tabIndex={activeMode === "commerce" ? 0 : -1}
             onClick={() => setActiveMode("commerce")}
             style={{
               padding: "9px clamp(14px, 3.5vw, 24px)",
@@ -58,13 +64,16 @@ export function ArchitectureExplorer() {
               transition: "all 0.15s ease",
             }}
           >
-            <span>🛍️</span> Commerce Engine
+            <span aria-hidden="true">🛍️</span> Commerce Engine
           </button>
 
           <button
+            id="arch-tab-business"
             type="button"
             role="tab"
             aria-selected={activeMode === "business"}
+            aria-controls="arch-panel-business"
+            tabIndex={activeMode === "business" ? 0 : -1}
             onClick={() => setActiveMode("business")}
             style={{
               padding: "9px clamp(14px, 3.5vw, 24px)",
@@ -82,13 +91,16 @@ export function ArchitectureExplorer() {
               transition: "all 0.15s ease",
             }}
           >
-            <span>🩺</span> Business Engine
+            <span aria-hidden="true">🩺</span> Business Engine
           </button>
 
           <button
+            id="arch-tab-hybrid"
             type="button"
             role="tab"
             aria-selected={activeMode === "hybrid"}
+            aria-controls="arch-panel-hybrid"
+            tabIndex={activeMode === "hybrid" ? 0 : -1}
             onClick={() => setActiveMode("hybrid")}
             style={{
               padding: "9px clamp(14px, 3.5vw, 24px)",
@@ -106,13 +118,20 @@ export function ArchitectureExplorer() {
               transition: "all 0.15s ease",
             }}
           >
-            <span>⚡</span> Unified Hybrid
+            <span aria-hidden="true">⚡</span> Unified Hybrid
           </button>
         </div>
       </div>
 
       {/* Simulated Live Architecture Console */}
-      <div className="comparison-preview-stage">
+      <div
+        role="tabpanel"
+        id={`arch-panel-${activeMode}`}
+        aria-labelledby={`arch-tab-${activeMode}`}
+        tabIndex={0}
+        className="comparison-preview-stage"
+        style={{ outline: "none" }}
+      >
         <div className="comparison-window-header">
           <div className="window-dots">
             <span className="dot-red" />

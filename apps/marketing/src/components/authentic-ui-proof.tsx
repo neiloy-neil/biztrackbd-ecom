@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { handleTabListKeyDown } from "@/lib/a11y";
 
 type ProofDeskTab = "leads" | "clinic" | "restaurant" | "services" | "tracking";
+const PROOF_TABS: readonly ProofDeskTab[] = ["leads", "clinic", "restaurant", "services", "tracking"];
 
 interface ProofDesk {
   id: ProofDeskTab;
@@ -116,7 +118,8 @@ export function AuthenticUiProof() {
         {/* Tab Buttons */}
         <div
           role="tablist"
-          aria-label="Operational desks"
+          aria-label="Operational merchant proof desks"
+          onKeyDown={(e) => handleTabListKeyDown(e, PROOF_TABS, activeTab, setActiveTab)}
           style={{
             display: "flex",
             gap: 8,
@@ -138,9 +141,12 @@ export function AuthenticUiProof() {
             return (
               <button
                 key={key}
+                id={`proof-tab-${key}`}
                 type="button"
                 role="tab"
                 aria-selected={isSelected}
+                aria-controls={`proof-panel-${key}`}
+                tabIndex={isSelected ? 0 : -1}
                 onClick={() => setActiveTab(key)}
                 className={`btn btn-sm ${isSelected ? "btn-primary" : "btn-secondary"}`}
                 style={{
@@ -161,7 +167,18 @@ export function AuthenticUiProof() {
       </div>
 
       {/* Main Content Area: Left Ledger Preview + Right Architectural Breakdown */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", borderBottom: "1px solid var(--line)" }}>
+      <div
+        role="tabpanel"
+        id={`proof-panel-${activeTab}`}
+        aria-labelledby={`proof-tab-${activeTab}`}
+        tabIndex={0}
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+          borderBottom: "1px solid var(--line)",
+          outline: "none",
+        }}
+      >
         {/* Left: Operational Ledger Table */}
         <div style={{ padding: "20px 24px", overflowX: "auto", borderRight: "1px solid var(--line)", background: "#FFFFFF" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>

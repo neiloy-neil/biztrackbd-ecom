@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import { demoUrl } from "@/components/template-card";
+import { handleTabListKeyDown, useModalFocusTrap } from "@/lib/a11y";
 
 const THEME_HOSTS: Record<string, string> = {
   kapor: "kapor",
@@ -20,6 +21,7 @@ const THEME_HOSTS: Record<string, string> = {
 };
 
 export type GalleryMode = "ecommerce" | "business";
+const GALLERY_MODES: readonly GalleryMode[] = ["ecommerce", "business"];
 
 export type EcommerceCategoryFilter = "all" | "fashion" | "electronics" | "kids" | "streetwear" | "beauty";
 export type BusinessCategoryFilter = "all" | "restaurant" | "doctor" | "corporate" | "services" | "portfolio" | "public-figure";
@@ -230,18 +232,18 @@ export function TemplateGallery({
   const [activeMode, setActiveMode] = useState<GalleryMode>(initialMode);
   const [activeCategory, setActiveCategory] = useState<string>("all");
 
-  // Modal Previewer State
+  // Modal Previewer State & Focus Management
   const [previewTemplate, setPreviewTemplate] = useState<GalleryTheme | null>(null);
   const [viewportMode, setViewportMode] = useState<"desktop" | "tablet" | "mobile">("desktop");
+  const modalRef = useRef<HTMLDivElement>(null);
+  const triggerButtonRef = useRef<HTMLElement | null>(null);
 
-  // Close modal on escape key
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setPreviewTemplate(null);
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  useModalFocusTrap(
+    !!previewTemplate,
+    modalRef,
+    () => setPreviewTemplate(null),
+    triggerButtonRef
+  );
 
   const ecomAll = [...ECOMMERCE_TEMPLATES.filter((t) => !hidden.includes(t.id)), ...extra];
   const currentTemplates = activeMode === "ecommerce" ? ecomAll : BUSINESS_TEMPLATES_DATA;
@@ -286,6 +288,9 @@ export function TemplateGallery({
         }}
       >
         <div
+          role="tablist"
+          aria-label="Template platform mode"
+          onKeyDown={(e) => handleTabListKeyDown(e, GALLERY_MODES, activeMode, handleModeSwitch)}
           style={{
             display: "inline-flex",
             maxWidth: "100%",
@@ -300,7 +305,12 @@ export function TemplateGallery({
           }}
         >
           <button
+            id="gallery-tab-ecommerce"
             type="button"
+            role="tab"
+            aria-selected={activeMode === "ecommerce"}
+            aria-controls="gallery-panel-templates"
+            tabIndex={activeMode === "ecommerce" ? 0 : -1}
             onClick={() => handleModeSwitch("ecommerce")}
             style={{
               padding: "8px clamp(12px, 3vw, 22px)",
@@ -318,7 +328,7 @@ export function TemplateGallery({
               transition: "all 0.15s ease",
             }}
           >
-            <span>🛍️</span> Online Storefronts
+            <span aria-hidden="true">🛍️</span> Online Storefronts
             <span
               style={{
                 fontSize: "12px",
@@ -333,7 +343,12 @@ export function TemplateGallery({
           </button>
 
           <button
+            id="gallery-tab-business"
             type="button"
+            role="tab"
+            aria-selected={activeMode === "business"}
+            aria-controls="gallery-panel-templates"
+            tabIndex={activeMode === "business" ? 0 : -1}
             onClick={() => handleModeSwitch("business")}
             style={{
               padding: "8px clamp(12px, 3vw, 22px)",
@@ -351,7 +366,7 @@ export function TemplateGallery({
               transition: "all 0.15s ease",
             }}
           >
-            <span>🏢</span> Business &amp; Services
+            <span aria-hidden="true">🏢</span> Business &amp; Services
             <span
               style={{
                 fontSize: "11px",
@@ -450,12 +465,19 @@ export function TemplateGallery({
         </div>
       </div>
 
-      {/* Templates Grid */}
+      {/* Templates Grid Container */}
       <div
-        className="grid g3"
-        style={{ gap: "32px 24px" }}
-        data-testid="templates"
+        role="tabpanel"
+        id="gallery-panel-templates"
+        aria-labelledby={activeMode === "ecommerce" ? "gallery-tab-ecommerce" : "gallery-tab-business"}
+        tabIndex={0}
+        style={{ outline: "none" }}
       >
+        <div
+          className="grid g3"
+          style={{ gap: "32px 24px" }}
+          data-testid="templates"
+        >
         {filtered.map((t) => {
           const host = THEME_HOSTS[t.id] ?? t.id;
           const demoStoreUrl = demoUrl(host);
@@ -666,7 +688,8 @@ export function TemplateGallery({
               >
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={(e) => {
+                    triggerButtonRef.current = e.currentTarget;
                     setPreviewTemplate(t);
                     setViewportMode("desktop");
                   }}
@@ -674,7 +697,7 @@ export function TemplateGallery({
                   style={{ flex: 1, minHeight: 40, borderRadius: 20, cursor: "pointer" }}
                   data-testid={`demo-${t.id}`}
                 >
-                  <span>👁️</span> Preview
+                  <span aria-hidden="true">👁️</span> Preview
                 </button>
                 <Link
                   href={startUrl}
@@ -688,13 +711,17 @@ export function TemplateGallery({
             </div>
           );
         })}
+        </div>
       </div>
 
       {/* Interactive Responsive Viewport Modal Previewer */}
       {previewTemplate && (
         <div
+          ref={modalRef}
           role="dialog"
           aria-modal="true"
+          aria-labelledby="template-preview-dialog-title"
+          tabIndex={-1}
           style={{
             position: "fixed",
             inset: 0,
@@ -703,6 +730,7 @@ export function TemplateGallery({
             backdropFilter: "blur(4px)",
             display: "flex",
             flexDirection: "column",
+            outline: "none",
           }}
         >
           {/* Top Modal Navigation Bar */}
@@ -720,7 +748,7 @@ export function TemplateGallery({
           >
             {/* Left: Template Identity */}
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ fontWeight: 800, fontSize: 16 }}>
+              <span id="template-preview-dialog-title" style={{ fontWeight: 800, fontSize: 16 }}>
                 {previewTemplate.name}
               </span>
               <span
@@ -739,6 +767,8 @@ export function TemplateGallery({
 
             {/* Center: Responsive Viewport Switcher */}
             <div
+              role="group"
+              aria-label="Responsive preview viewport"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -750,6 +780,7 @@ export function TemplateGallery({
             >
               <button
                 type="button"
+                aria-pressed={viewportMode === "desktop"}
                 onClick={() => setViewportMode("desktop")}
                 style={{
                   background: viewportMode === "desktop" ? "#334155" : "transparent",
@@ -765,10 +796,11 @@ export function TemplateGallery({
                   gap: 6,
                 }}
               >
-                <span>🖥️</span> Desktop
+                <span aria-hidden="true">🖥️</span> Desktop
               </button>
               <button
                 type="button"
+                aria-pressed={viewportMode === "tablet"}
                 onClick={() => setViewportMode("tablet")}
                 style={{
                   background: viewportMode === "tablet" ? "#334155" : "transparent",
@@ -784,10 +816,11 @@ export function TemplateGallery({
                   gap: 6,
                 }}
               >
-                <span>📱</span> Tablet (768px)
+                <span aria-hidden="true">📱</span> Tablet (768px)
               </button>
               <button
                 type="button"
+                aria-pressed={viewportMode === "mobile"}
                 onClick={() => setViewportMode("mobile")}
                 style={{
                   background: viewportMode === "mobile" ? "#334155" : "transparent",
@@ -803,7 +836,7 @@ export function TemplateGallery({
                   gap: 6,
                 }}
               >
-                <span>📱</span> Mobile (375px)
+                <span aria-hidden="true">📱</span> Mobile (375px)
               </button>
             </div>
 
@@ -853,7 +886,7 @@ export function TemplateGallery({
                   padding: "2px 6px",
                   lineHeight: 1,
                 }}
-                aria-label="Close preview"
+                aria-label={`Close ${previewTemplate.name} preview`}
               >
                 ✕
               </button>

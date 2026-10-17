@@ -3,8 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { demoAdminUrl } from "@/lib/demo-admin";
+import { handleTabListKeyDown } from "@/lib/a11y";
 
 export type HeroMode = "commerce" | "business";
+const HERO_MODES: readonly HeroMode[] = ["commerce", "business"];
 
 interface DualHeroProps {
   initialMode?: HeroMode;
@@ -32,31 +34,51 @@ export function DualHero({
       <div className="wrap">
         {/* Goal Switcher Selector */}
         <div style={{ marginBottom: 20 }}>
-          <div className="goal-switcher-wrap" role="tablist" aria-label="Select your business goal">
+          <div
+            className="goal-switcher-wrap"
+            role="tablist"
+            aria-label="Select your business goal"
+            onKeyDown={(e) => handleTabListKeyDown(e, HERO_MODES, mode, setMode)}
+          >
             <button
+              id="goal-tab-commerce"
               type="button"
               role="tab"
               aria-selected={mode === "commerce"}
+              aria-controls="hero-panel-commerce"
+              tabIndex={mode === "commerce" ? 0 : -1}
               onClick={() => setMode("commerce")}
               className={`goal-btn ${mode === "commerce" ? "active-commerce" : ""}`}
               data-testid="goal-commerce-btn"
             >
-              <span>🛍️</span>
+              <span aria-hidden="true">🛍️</span>
               <span>Sell Products (Commerce)</span>
             </button>
             <button
+              id="goal-tab-business"
               type="button"
               role="tab"
               aria-selected={mode === "business"}
+              aria-controls="hero-panel-business"
+              tabIndex={mode === "business" ? 0 : -1}
               onClick={() => setMode("business")}
               className={`goal-btn ${mode === "business" ? "active-business" : ""}`}
               data-testid="goal-business-btn"
             >
-              <span>💼</span>
+              <span aria-hidden="true">💼</span>
               <span>Win Enquiries &amp; Clients (Business)</span>
             </button>
           </div>
         </div>
+
+        {/* Dynamic Panel Container */}
+        <div
+          role="tabpanel"
+          id={mode === "commerce" ? "hero-panel-commerce" : "hero-panel-business"}
+          aria-labelledby={mode === "commerce" ? "goal-tab-commerce" : "goal-tab-business"}
+          tabIndex={0}
+          style={{ outline: "none" }}
+        >
 
         {/* Dynamic Eyebrow */}
         <span
@@ -627,6 +649,7 @@ export function DualHero({
             </div>
           </div>
         </div>
+      </div>
       </div>
     </section>
   );
