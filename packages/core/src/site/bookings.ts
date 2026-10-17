@@ -3,6 +3,7 @@ import { NotFoundError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
 import { audit } from "../audit/service";
 import { trackServerBooking } from "../growth/tracking";
+import { enqueueNotificationJob } from "../messaging/queue";
 import { normalizeBdPhone } from "../phone";
 import {
   checkPublicSubmissionRateLimit,
@@ -203,30 +204,37 @@ export async function createPublicBooking(tenantId: string, input: CreateBooking
     setCachedIdempotentResult(tenantId, input.idempotencyKey, result);
   }
 
-  // Dispatch Meta CAPI server-side event if consent given
+  // Dispatch Meta CAPI server-side event via durable outbox if consent given
   if (input.consentGiven !== false) {
-    trackServerBooking(
+    enqueueNotificationJob({
       tenantId,
-      {
-        id: result.bookingId,
-        eventId: input.eventId || undefined,
-        name: name!,
-        phone: phone!,
-        email: input.email,
-        serviceName: input.serviceName,
-        requestedDate: input.requestedDate,
-        partySize: input.partySize,
-        url: input.sourcePage,
-      },
-      {
-        ip: input.ip,
-        userAgent: input.userAgent,
-        fbp: input.fbp,
-        fbc: input.fbc,
-      },
-      { consentGiven: input.consentGiven }
-    ).catch((err) => {
-      console.warn("[bookings] CAPI booking dispatch warning:", err instanceof Error ? err.message : err);
+      recipient: "META_CAPI",
+      channel: "META_CAPI",
+      event: "Schedule",
+      body: JSON.stringify({
+        booking: {
+          id: result.bookingId,
+          eventId: input.eventId || undefined,
+          name: name!,
+          phone: phone!,
+          email: input.email,
+          serviceName: input.serviceName,
+          requestedDate: input.requestedDate,
+          partySize: input.partySize,
+          url: input.sourcePage,
+        },
+        user: {
+          ip: input.ip,
+          userAgent: input.userAgent,
+          fbp: input.fbp,
+          fbc: input.fbc,
+        },
+        options: { consentGiven: input.consentGiven },
+      }),
+      metadata: { bookingId: result.bookingId, eventId: input.eventId },
+      immediateDispatch: true,
+    }).catch((err) => {
+      console.warn("[bookings] Outbox CAPI enqueue warning:", err instanceof Error ? err.message : err);
     });
   }
 

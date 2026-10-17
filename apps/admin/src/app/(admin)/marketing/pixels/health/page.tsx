@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getTrackingOverview } from "@biztrackbd/core";
+import { getTrackingOverview, getOutboxStats } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
 import { dateTime } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
-import { testEventAction } from "../actions";
+import { testEventAction, sweepOutboxAction } from "../actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Tracking Health & Diagnostics — BizTrackBD" };
@@ -30,10 +30,15 @@ export default async function TrackingHealth({
 }) {
   const sp = await searchParams;
   const s = await requireAccess("marketing");
-  const o = await getTrackingOverview(s.tenantId, s.actor);
+  const [o, outbox] = await Promise.all([
+    getTrackingOverview(s.tenantId, s.actor),
+    getOutboxStats(s.tenantId),
+  ]);
   const c = o.config;
   const err = one(sp.err);
   const done = one(sp.done);
+  const processed = one(sp.processed);
+  const succeeded = one(sp.succeeded);
 
   const totalBrowser = o.stats.reduce((n, e) => n + e.browser, 0);
   const totalServer = o.stats.reduce((n, e) => n + e.server, 0);
@@ -72,6 +77,8 @@ export default async function TrackingHealth({
         <div className="notice good" role="status" style={{ marginBottom: 16 }}>
           {done === "test_sent"
             ? "Test event dispatched! Check Meta Events Manager under Test Events tab."
+            : done === "swept"
+            ? `Outbox sweep complete: processed ${processed ?? 0} jobs (${succeeded ?? 0} succeeded).`
             : "Action completed successfully."}
         </div>
       )}
@@ -146,6 +153,46 @@ export default async function TrackingHealth({
             Dispatch Test Ping to Meta
           </SubmitButton>
         </form>
+      </section>
+
+      {/* Asynchronous Event Outbox & Durable Webhook Queue */}
+      <section className="card" style={{ padding: 20, marginBottom: 24, background: "#FFFFFF", border: "1.5px solid #E2E8F0" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 12 }}>
+          <div>
+            <h3 style={{ fontSize: 15, fontWeight: 700, margin: "0 0 4px" }}>📬 Asynchronous Event Outbox &amp; Webhook Queue</h3>
+            <p style={{ fontSize: 13, color: "var(--ink-2)", margin: 0, maxWidth: 640 }}>
+              Durable background queue for SMS, Meta Conversions API (CAPI), and outbound webhooks. Automatically retries transient failures with exponential backoff (+1m, +5m, +15m).
+            </p>
+          </div>
+          <form action={sweepOutboxAction}>
+            <SubmitButton className="btn btn-secondary btn-sm" pending="Sweeping Queue…">
+              🔄 Sweep Due Jobs Now
+            </SubmitButton>
+          </form>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginTop: 14 }}>
+          <div style={{ background: "#F1F5F9", padding: "12px 14px", borderRadius: 8 }}>
+            <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ink-3)" }}>Delivered (Sent)</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: "#15803D", marginTop: 2 }}>{outbox.sent}</div>
+          </div>
+          <div style={{ background: "#F1F5F9", padding: "12px 14px", borderRadius: 8 }}>
+            <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ink-3)" }}>Pending (Retrying)</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: outbox.pending > 0 ? "#D97706" : "var(--ink)", marginTop: 2 }}>{outbox.pending}</div>
+          </div>
+          <div style={{ background: "#F1F5F9", padding: "12px 14px", borderRadius: 8 }}>
+            <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ink-3)" }}>Failed</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: outbox.failed > 0 ? "#DC2626" : "var(--ink)", marginTop: 2 }}>{outbox.failed}</div>
+          </div>
+          <div style={{ background: "#F1F5F9", padding: "12px 14px", borderRadius: 8 }}>
+            <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ink-3)" }}>Exhausted (Dead-Letter)</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: outbox.exhausted > 0 ? "#DC2626" : "var(--ink)", marginTop: 2 }}>{outbox.exhausted}</div>
+          </div>
+          <div style={{ background: "#F1F5F9", padding: "12px 14px", borderRadius: 8 }}>
+            <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ink-3)" }}>Total Managed Jobs</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: "var(--brand)", marginTop: 2 }}>{outbox.total}</div>
+          </div>
+        </div>
       </section>
 
       {/* 7-Day Live Event Breakdown Table */}

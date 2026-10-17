@@ -3,6 +3,7 @@ import { NotFoundError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
 import { audit } from "../audit/service";
 import { trackServerLead } from "../growth/tracking";
+import { enqueueNotificationJob } from "../messaging/queue";
 import { normalizeBdPhone } from "../phone";
 import {
   checkPublicSubmissionRateLimit,
@@ -178,28 +179,35 @@ export async function createPublicLead(tenantId: string, input: CreateLeadInput)
     setCachedIdempotentResult(tenantId, input.idempotencyKey, result);
   }
 
-  // Dispatch Meta CAPI server-side event if consent given
+  // Dispatch Meta CAPI server-side event via durable outbox if consent given
   if (input.consentGiven !== false) {
-    trackServerLead(
+    enqueueNotificationJob({
       tenantId,
-      {
-        id: result.id,
-        eventId: input.eventId || undefined,
-        name: name || undefined,
-        phone,
-        email,
-        type,
-        sourcePage: input.sourcePage,
-      },
-      {
-        ip: input.ip,
-        userAgent: input.userAgent,
-        fbp: input.fbp,
-        fbc: input.fbc,
-      },
-      { consentGiven: input.consentGiven }
-    ).catch((err) => {
-      console.warn("[leads] CAPI lead dispatch warning:", err instanceof Error ? err.message : err);
+      recipient: "META_CAPI",
+      channel: "META_CAPI",
+      event: "Lead",
+      body: JSON.stringify({
+        lead: {
+          id: result.id,
+          eventId: input.eventId || undefined,
+          name: name || undefined,
+          phone,
+          email,
+          type,
+          sourcePage: input.sourcePage,
+        },
+        user: {
+          ip: input.ip,
+          userAgent: input.userAgent,
+          fbp: input.fbp,
+          fbc: input.fbc,
+        },
+        options: { consentGiven: input.consentGiven },
+      }),
+      metadata: { leadId: result.id, eventId: input.eventId },
+      immediateDispatch: true,
+    }).catch((err) => {
+      console.warn("[leads] Outbox CAPI enqueue warning:", err instanceof Error ? err.message : err);
     });
   }
 

@@ -459,3 +459,4 @@ export * from "./platform/tracking";
 // Messaging & Notifications Queue (NOTIFY-001)
 export * from "./messaging/queue";
 export * from "./messaging/templates";
+export * from "./messaging/webhook";

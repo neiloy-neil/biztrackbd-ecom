@@ -20,6 +20,7 @@ import { getCategoryStarterPreset, type StarterCatalogPreset } from "../demo/cat
 import { getBusinessTemplateByVertical } from "../site/templates/manifests";
 import { seedBusinessDemoStore } from "../demo/business-seed";
 import { trackPlatformRegistrationCapi } from "./tracking";
+import { enqueueNotificationJob } from "../messaging/queue";
 
 const EXTERNAL_AUTH = "EXTERNAL_AUTH";
 const MAX_STORES_PER_EMAIL = 3;
@@ -303,25 +304,33 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
     await publishEvent("store/created", { tenantId: id, subdomain: sub.label, plan: input.plan });
     await notifyOwner(id, "WELCOME", { trialEndsDate: result.trialEndsAt }, { dedupeKey: id });
 
-    // Dispatch Meta CAPI server-side CompleteRegistration event
+    // Dispatch Meta CAPI server-side CompleteRegistration event via durable outbox
     if (input.consentGiven !== false) {
-      trackPlatformRegistrationCapi({
-        tenantId: id,
-        eventId: input.eventId || undefined,
-        ownerName: input.ownerName,
-        phone,
-        email: input.email,
-        storeName: input.storeName,
-        plan: input.plan,
-        consentGiven: input.consentGiven,
-        user: {
-          ip: input.ip,
-          userAgent: input.userAgent,
-          fbp: input.fbp,
-          fbc: input.fbc,
-        },
+      enqueueNotificationJob({
+        tenantId: "platform",
+        recipient: "META_CAPI",
+        channel: "META_CAPI",
+        event: "CompleteRegistration",
+        body: JSON.stringify({
+          tenantId: id,
+          eventId: input.eventId || undefined,
+          ownerName: input.ownerName,
+          phone,
+          email: input.email,
+          storeName: input.storeName,
+          plan: input.plan,
+          consentGiven: input.consentGiven,
+          user: {
+            ip: input.ip,
+            userAgent: input.userAgent,
+            fbp: input.fbp,
+            fbc: input.fbc,
+          },
+        }),
+        metadata: { newTenantId: id, eventId: input.eventId },
+        immediateDispatch: true,
       }).catch((err) => {
-        console.warn("[signup] Platform CAPI dispatch warning:", err instanceof Error ? err.message : err);
+        console.warn("[signup] Platform Outbox CAPI dispatch warning:", err instanceof Error ? err.message : err);
       });
     }
 

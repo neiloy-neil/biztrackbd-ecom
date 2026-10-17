@@ -1,14 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getPlatformTrackingDiagnostics } from "@biztrackbd/core";
+import { getPlatformTrackingDiagnostics, getOutboxStats } from "@biztrackbd/core";
 import { requireAccess } from "@/lib/session";
+import { SubmitButton } from "@/components/ui";
+import { sweepPlatformOutboxAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Platform Tracking & CAPI Diagnostics — BizTrackBD" };
 
-export default async function PlatformTrackingDiagnosticsPage() {
+export default async function PlatformTrackingDiagnosticsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   await requireAccess("settings");
-  const diag = await getPlatformTrackingDiagnostics();
+  const sp = await searchParams;
+  const done = typeof sp.done === "string" ? sp.done : undefined;
+  const processed = typeof sp.processed === "string" ? sp.processed : undefined;
+  const succeeded = typeof sp.succeeded === "string" ? sp.succeeded : undefined;
+
+  const [diag, outbox] = await Promise.all([
+    getPlatformTrackingDiagnostics(),
+    getOutboxStats(),
+  ]);
 
   return (
     <div className="stack" style={{ gap: 24 }}>
@@ -25,6 +39,12 @@ export default async function PlatformTrackingDiagnosticsPage() {
           </Link>
         </div>
       </div>
+
+      {done === "swept" && (
+        <div className="notice good" role="status">
+          Outbox sweep completed: processed {processed ?? 0} jobs ({succeeded ?? 0} succeeded).
+        </div>
+      )}
 
       {/* KPI Status Grid */}
       <div
@@ -89,6 +109,46 @@ export default async function PlatformTrackingDiagnosticsPage() {
           <li><b>Deduplication (event_id):</b> Client generates a unique UUID on form submit, server dispatches CAPI on 200, and browser fires Meta Pixel with the identical event ID.</li>
           <li><b>Zero PII Leakage:</b> Plaintext customer names, emails, and phone numbers are stripped from client events and strictly hashed via SHA-256 on the server.</li>
         </ul>
+      </section>
+
+      {/* Asynchronous Event Outbox & Webhook Queue */}
+      <section className="card" style={{ padding: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 12 }}>
+          <div>
+            <h3 style={{ fontSize: 15, fontWeight: 700, margin: "0 0 4px" }}>📬 Platform Event Outbox &amp; Webhook Delivery Health</h3>
+            <p style={{ fontSize: 13, color: "var(--ink-2)", margin: 0 }}>
+              Cluster-wide status for background SMS, Meta CAPI dispatches, and third-party webhooks.
+            </p>
+          </div>
+          <form action={sweepPlatformOutboxAction}>
+            <SubmitButton className="btn btn-secondary btn-sm" pending="Sweeping Queue…">
+              🔄 Sweep Due Jobs Now
+            </SubmitButton>
+          </form>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginTop: 14 }}>
+          <div style={{ background: "#F1F5F9", padding: "12px 14px", borderRadius: 8 }}>
+            <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ink-3)" }}>Delivered (Sent)</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: "#15803D", marginTop: 2 }}>{outbox.sent}</div>
+          </div>
+          <div style={{ background: "#F1F5F9", padding: "12px 14px", borderRadius: 8 }}>
+            <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ink-3)" }}>Pending (Retrying)</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: outbox.pending > 0 ? "#D97706" : "var(--ink)", marginTop: 2 }}>{outbox.pending}</div>
+          </div>
+          <div style={{ background: "#F1F5F9", padding: "12px 14px", borderRadius: 8 }}>
+            <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ink-3)" }}>Failed</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: outbox.failed > 0 ? "#DC2626" : "var(--ink)", marginTop: 2 }}>{outbox.failed}</div>
+          </div>
+          <div style={{ background: "#F1F5F9", padding: "12px 14px", borderRadius: 8 }}>
+            <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ink-3)" }}>Exhausted (Dead-Letter)</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: outbox.exhausted > 0 ? "#DC2626" : "var(--ink)", marginTop: 2 }}>{outbox.exhausted}</div>
+          </div>
+          <div style={{ background: "#F1F5F9", padding: "12px 14px", borderRadius: 8 }}>
+            <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ink-3)" }}>Total Cluster Jobs</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: "var(--brand)", marginTop: 2 }}>{outbox.total}</div>
+          </div>
+        </div>
       </section>
 
       {/* Recent Inquiries Ledger */}
