@@ -53,7 +53,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   // If Portfolio mode or Hybrid in Website tab, load lead and vertical metrics
   let portfolioData: any = null;
   if (modeMeta.siteMode === "PORTFOLIO" || modeMeta.siteMode === "HYBRID") {
-    const [leadsRes, bookingCount, pendingBookingsCount, downloadCount, contentItemCount] = await withTenant(
+    const [leadsRes, bookingCount, pendingBookingsCount, downloadCount, contentItemCount, domainInfo, storeSettings] = await withTenant(
       s.tenantId,
       async (tx) => {
         return Promise.all([
@@ -62,6 +62,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           tx.bookingRequest.count({ where: { tenantId: s.tenantId, status: "REQUESTED" } }),
           tx.siteDownload.count({ where: { tenantId: s.tenantId } }),
           tx.siteContentItem.count({ where: { tenantId: s.tenantId } }),
+          tx.domain.findFirst({ where: { isPrimary: true }, select: { domain: true, verified: true } }),
+          tx.storeSettings.findFirst({ select: { whatsappNumber: true, contactPhone: true, storeName: true } }),
         ]);
       }
     );
@@ -74,6 +76,10 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
       pendingBookings: pendingBookingsCount,
       totalDownloads: downloadCount,
       totalContentItems: contentItemCount,
+      domainName: domainInfo?.domain || null,
+      isDomainVerified: domainInfo?.verified || false,
+      whatsappNumber: storeSettings?.whatsappNumber || storeSettings?.contactPhone || null,
+      storeName: storeSettings?.storeName || s.user.name,
     };
   }
 
@@ -109,6 +115,10 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           pendingBookings={portfolioData.pendingBookings}
           totalDownloads={portfolioData.totalDownloads}
           totalContentItems={portfolioData.totalContentItems}
+          domainName={portfolioData.domainName}
+          isDomainVerified={portfolioData.isDomainVerified}
+          whatsappNumber={portfolioData.whatsappNumber}
+          storeName={portfolioData.storeName}
           storeOrigin={storeOrigin}
           userName={s.user.name}
         />
@@ -186,6 +196,10 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           pendingBookings={portfolioData.pendingBookings}
           totalDownloads={portfolioData.totalDownloads}
           totalContentItems={portfolioData.totalContentItems}
+          domainName={portfolioData.domainName}
+          isDomainVerified={portfolioData.isDomainVerified}
+          whatsappNumber={portfolioData.whatsappNumber}
+          storeName={portfolioData.storeName}
           storeOrigin={storeOrigin}
           userName={s.user.name}
         />
