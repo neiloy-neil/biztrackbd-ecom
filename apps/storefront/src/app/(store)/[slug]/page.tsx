@@ -1,6 +1,17 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { customKey, customPageIdBySlug, getPreview, getPublicCustomPage, getPublishedPage, getStoreInfo, getTenantModeAndVertical, loadPageData, verifyPreviewToken } from "@biztrackbd/core";
+import {
+  customKey,
+  customPageIdBySlug,
+  getPreview,
+  getPublicCustomPage,
+  getPublishedPage,
+  getStoreInfo,
+  getTenantModeAndVertical,
+  loadPageData,
+  verifyPreviewToken,
+  getBusinessTemplateByVertical,
+} from "@biztrackbd/core";
 import { PreviewBridge } from "@/components/preview-bridge";
 import { Sections } from "@/components/sections";
 import { getLang, makeT } from "@/lib/i18n";
@@ -30,7 +41,23 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
   const custom = await getPublicCustomPage(store.id, slug);
   if (custom) return { title: custom.seoTitle || custom.title, description: custom.seoDescription ?? undefined, alternates: { canonical: `/${slug}` } };
   const page = await getPublishedPage(store.id, slug);
-  return page ? { title: page.title, alternates: { canonical: `/${slug}` } } : { title: "Not found", robots: { index: false } };
+  if (page) return { title: page.title, alternates: { canonical: `/${slug}` } };
+
+  // Fallback to vertical template manifest custom page if in PORTFOLIO or HYBRID mode
+  const { siteMode, vertical } = await getTenantModeAndVertical(store.id);
+  if (siteMode === "PORTFOLIO" || (siteMode === "HYBRID" && vertical)) {
+    const template = getBusinessTemplateByVertical(vertical);
+    const manifestPage = template?.customPages.find((p) => p.slug === slug);
+    if (manifestPage) {
+      return {
+        title: manifestPage.title,
+        description: manifestPage.description,
+        alternates: { canonical: `/${slug}` },
+      };
+    }
+  }
+
+  return { title: "Not found", robots: { index: false } };
 }
 
 /**
@@ -80,11 +107,43 @@ export default async function CleanRootStorePage({ params, searchParams }: { par
   }
 
   const page = await getPublishedPage(store.id, slug);
-  if (!page) notFound();
-  return (
-    <article className="wrap" style={{ padding: "28px var(--gutter) 56px" }} data-testid="store-page">
-      <h1 className="page-title" style={{ paddingTop: 0 }}>{page.title}</h1>
-      <div className="prose" dangerouslySetInnerHTML={{ __html: page.contentHtml }} />
-    </article>
-  );
+  if (page) {
+    return (
+      <article className="wrap" style={{ padding: "28px var(--gutter) 56px" }} data-testid="store-page">
+        <h1 className="page-title" style={{ paddingTop: 0 }}>{page.title}</h1>
+        <div className="prose" dangerouslySetInnerHTML={{ __html: page.contentHtml }} />
+      </article>
+    );
+  }
+
+  // Fallback to business template custom page (e.g. services, appointment, reservations)
+  const modeMeta = await getTenantModeAndVertical(store.id);
+  if (modeMeta.siteMode === "PORTFOLIO" || (modeMeta.siteMode === "HYBRID" && modeMeta.vertical)) {
+    const template = getBusinessTemplateByVertical(modeMeta.vertical);
+    const manifestPage = template?.customPages.find((p) => p.slug === slug);
+    if (manifestPage) {
+      const [info, lang] = await Promise.all([
+        getStoreInfo(store.id),
+        getLang(store.locale),
+      ]);
+      const t = makeT(lang);
+      const data = await loadPageData(store.id, manifestPage.layout);
+      const site = {
+        phone: info.contactPhone,
+        whatsapp: info.whatsappNumber,
+        address: info.addressLine,
+        logoUrl: info.logoUrl,
+        storeName: info.storeName,
+        siteMode: modeMeta.siteMode,
+        businessVertical: modeMeta.vertical ?? undefined,
+      };
+      return (
+        <article data-testid="store-page-sections" style={{ paddingBottom: 40 }}>
+          <Sections page={manifestPage.layout} data={data} lang={lang} t={t} site={site} />
+        </article>
+      );
+    }
+  }
+
+  notFound();
 }

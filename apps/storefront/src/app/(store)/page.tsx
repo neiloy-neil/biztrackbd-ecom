@@ -39,8 +39,8 @@ export default async function Home() {
   const live = await getLive(store.id, "home");
   if (live) return <Sections page={live.page} data={await loadPageData(store.id, live.page)} lang={lang} t={t} site={site} />;
 
-  // Portfolio tenants without custom published layout render their curated vertical template manifest
-  if (siteMode === "PORTFOLIO") {
+  // Portfolio or Hybrid tenants with vertical without custom published layout render their curated vertical template manifest
+  if (siteMode === "PORTFOLIO" || (siteMode === "HYBRID" && vertical)) {
     const template = getBusinessTemplateByVertical(vertical);
     const fallbackHome = template?.pages.home;
     if (fallbackHome) {
