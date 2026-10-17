@@ -5,6 +5,7 @@ import { SettingsShell } from "./settings-shell";
 // One navigation for every settings page. What a person sees in it follows what they may open.
 const ITEMS: { href: string; label: string; area: Area }[] = [
   { href: "/settings/store", label: "Store details", area: "design" },
+  { href: "/settings/mode", label: "Operating Mode", area: "design" },
   { href: "/settings/payments", label: "Payments", area: "billing" },
   { href: "/settings/shipping", label: "Shipping", area: "orders" },
   { href: "/settings/domains", label: "Domains", area: "billing" },
