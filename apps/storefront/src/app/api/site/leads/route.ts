@@ -5,6 +5,8 @@ import { getStore } from "@/lib/tenant";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  const requestId = "req_lead_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+
   try {
     const store = await getStore();
     const body = await req.json().catch(() => ({}));
@@ -13,6 +15,7 @@ export async function POST(req: NextRequest) {
     const userAgent = req.headers.get("user-agent") || undefined;
     const fbp = body.fbp || req.cookies.get("_fbp")?.value || undefined;
     const fbc = body.fbc || req.cookies.get("_fbc")?.value || undefined;
+    const idempotencyKey = req.headers.get("idempotency-key") || body.idempotencyKey || undefined;
 
     const result = await createPublicLead(store.id, {
       name: body.name,
@@ -28,6 +31,7 @@ export async function POST(req: NextRequest) {
       locale: body.locale,
       metadata: body.metadata,
       eventId: body.eventId || undefined,
+      idempotencyKey,
       ip,
       userAgent,
       fbp,
@@ -38,11 +42,23 @@ export async function POST(req: NextRequest) {
       elapsedMs: body.elapsedMs,
     });
 
-    return NextResponse.json({ ok: true, data: result });
+    return NextResponse.json({ ok: true, data: result, requestId });
   } catch (err: any) {
+    const status = err.statusCode || (err.code === "RATE_LIMITED" ? 429 : 400);
+    const retryAfter = err.data?.retryAfterSeconds || 3600;
+
     return NextResponse.json(
-      { ok: false, error: err.message || "Failed to submit inquiry." },
-      { status: err.statusCode || 400 }
+      {
+        ok: false,
+        error: err.message || "Failed to submit inquiry.",
+        code: err.code || (status === 429 ? "RATE_LIMITED" : "BAD_REQUEST"),
+        field: err.data?.field,
+        requestId,
+      },
+      {
+        status,
+        headers: status === 429 ? { "Retry-After": String(retryAfter) } : undefined,
+      }
     );
   }
 }

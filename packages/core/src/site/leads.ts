@@ -3,6 +3,14 @@ import { NotFoundError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
 import { audit } from "../audit/service";
 import { trackServerLead } from "../growth/tracking";
+import { normalizeBdPhone } from "../phone";
+import {
+  checkPublicSubmissionRateLimit,
+  recordPublicSubmission,
+  getCachedIdempotentResult,
+  setCachedIdempotentResult,
+  validateLeadMetadata,
+} from "./abuse-protection";
 
 export interface CreateLeadInput {
   name: string;
@@ -19,6 +27,8 @@ export interface CreateLeadInput {
   metadata?: Record<string, unknown> | null;
   /** Unique client-generated eventId for Meta Pixel / CAPI deduplication */
   eventId?: string | null;
+  /** Unique submission idempotency key to prevent double clicks */
+  idempotencyKey?: string | null;
   /** Client IP, user agent, and cookies for Meta CAPI attribution */
   ip?: string | null;
   userAgent?: string | null;
@@ -49,6 +59,12 @@ const sanitize = (val: string | null | undefined, max: number): string | null =>
 
 /** Validates and captures a public lead from storefront contact/inquiry forms */
 export async function createPublicLead(tenantId: string, input: CreateLeadInput): Promise<LeadResult> {
+  // 0. Idempotency Check — Return cached result if already processed in last 60s
+  if (input.idempotencyKey) {
+    const cached = getCachedIdempotentResult<LeadResult>(tenantId, input.idempotencyKey);
+    if (cached) return cached;
+  }
+
   // 1. Invisible Bot Shield — Honeypot & Minimum Completion Duration
   if (input.hp && input.hp.trim().length > 0) {
     // Silently drop bot submissions without throwing loud error
@@ -69,13 +85,28 @@ export async function createPublicLead(tenantId: string, input: CreateLeadInput)
     };
   }
 
-  // 2. Validate input fields
+  // 2. Sliding Window Rate Limiting (5/hr per IP, 3/hr per phone)
+  checkPublicSubmissionRateLimit({
+    tenantId,
+    ip: input.ip,
+    phone: input.phone,
+  });
+
+  // 3. Validate & sanitize input fields
   const name = sanitize(input.name, 80);
   if (!name || name.length < 2) {
     throw new ValidationError("Please provide a name of at least 2 characters", { field: "name" });
   }
 
-  const phone = sanitize(input.phone, 30);
+  let phone: string | null = null;
+  if (input.phone) {
+    try {
+      phone = normalizeBdPhone(input.phone);
+    } catch {
+      throw new ValidationError("Please enter a valid 11-digit Bangladeshi mobile number", { field: "phone" });
+    }
+  }
+
   const email = sanitize(input.email, 120);
 
   if (!phone && !email) {
@@ -88,6 +119,7 @@ export async function createPublicLead(tenantId: string, input: CreateLeadInput)
 
   const message = sanitize(input.message, 1500);
   const type: SiteLeadType = input.type ?? "CONTACT";
+  const validatedMeta = validateLeadMetadata(input.metadata);
 
   const result = await withTenant(tenantId, async (tx) => {
     const lead = await tx.siteLead.create({
@@ -106,7 +138,7 @@ export async function createPublicLead(tenantId: string, input: CreateLeadInput)
         referrer: sanitize(input.referrer, 300),
         locale: input.locale === "bn" ? "bn" : "en",
         metadata: {
-          ...(input.metadata ? (input.metadata as object) : {}),
+          ...(validatedMeta || {}),
           ...(input.consentTextVersion ? { consentTextVersion: input.consentTextVersion } : {}),
         },
         consentGivenAt: input.consentGiven === true ? new Date() : null,
@@ -134,6 +166,17 @@ export async function createPublicLead(tenantId: string, input: CreateLeadInput)
       whatsAppFollowUpUrl,
     };
   });
+
+  // 4. Record successful submission for rate limiting & cache idempotency
+  recordPublicSubmission({
+    tenantId,
+    ip: input.ip,
+    phone,
+  });
+
+  if (input.idempotencyKey) {
+    setCachedIdempotentResult(tenantId, input.idempotencyKey, result);
+  }
 
   // Dispatch Meta CAPI server-side event if consent given
   if (input.consentGiven !== false) {

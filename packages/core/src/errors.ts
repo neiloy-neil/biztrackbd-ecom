@@ -126,3 +126,10 @@ export class AiQuotaExhaustedError extends DomainError {
     super("AI_QUOTA_EXHAUSTED", message, 429);
   }
 }
+
+export class PublicSubmissionRateLimitError extends DomainError {
+  constructor(readonly retryAfterSeconds = 3600, message = "Too many submission attempts. Please try again later.") {
+    super("RATE_LIMITED", message, 429, { retryAfterSeconds });
+  }
+}
+

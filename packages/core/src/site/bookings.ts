@@ -3,6 +3,14 @@ import { NotFoundError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
 import { audit } from "../audit/service";
 import { trackServerBooking } from "../growth/tracking";
+import { normalizeBdPhone } from "../phone";
+import {
+  checkPublicSubmissionRateLimit,
+  recordPublicSubmission,
+  getCachedIdempotentResult,
+  setCachedIdempotentResult,
+  validateLeadMetadata,
+} from "./abuse-protection";
 
 export interface CreateBookingInput {
   name: string;
@@ -19,6 +27,8 @@ export interface CreateBookingInput {
   locale?: string;
   /** Unique client-generated eventId for Meta Pixel / CAPI deduplication */
   eventId?: string | null;
+  /** Unique submission idempotency key to prevent double clicks */
+  idempotencyKey?: string | null;
   /** Client IP, user agent, and cookies for Meta CAPI attribution */
   ip?: string | null;
   userAgent?: string | null;
@@ -46,6 +56,12 @@ const sanitize = (val: string | null | undefined, max: number): string | null =>
 };
 
 export async function createPublicBooking(tenantId: string, input: CreateBookingInput): Promise<SiteBookingResult> {
+  // 0. Idempotency Check — Return cached result if already processed in last 60s
+  if (input.idempotencyKey) {
+    const cached = getCachedIdempotentResult<SiteBookingResult>(tenantId, input.idempotencyKey);
+    if (cached) return cached;
+  }
+
   // 1. Bot Shield
   if (input.hp && input.hp.trim().length > 0) {
     return {
@@ -65,15 +81,24 @@ export async function createPublicBooking(tenantId: string, input: CreateBooking
     };
   }
 
-  // 2. Validate essentials
+  // 2. Sliding Window Rate Limiting (5/hr per IP, 3/hr per phone)
+  checkPublicSubmissionRateLimit({
+    tenantId,
+    ip: input.ip,
+    phone: input.phone,
+  });
+
+  // 3. Validate essentials & normalize phone
   const name = sanitize(input.name, 80);
   if (!name || name.length < 2) {
     throw new ValidationError("Please provide a name of at least 2 characters", { field: "name" });
   }
 
-  const phone = sanitize(input.phone, 30);
-  if (!phone || phone.length < 6) {
-    throw new ValidationError("Please provide a valid phone number for booking confirmation", { field: "phone" });
+  let phone: string;
+  try {
+    phone = normalizeBdPhone(input.phone);
+  } catch {
+    throw new ValidationError("Please provide a valid 11-digit Bangladeshi mobile number for booking confirmation", { field: "phone" });
   }
 
   const email = sanitize(input.email, 120);
@@ -91,6 +116,16 @@ export async function createPublicBooking(tenantId: string, input: CreateBooking
 
   const leadType: SiteLeadType = input.type === "RESERVATION" ? "RESERVATION" : "APPOINTMENT";
 
+  const rawMetadata = {
+    serviceName,
+    providerName,
+    requestedDate: input.requestedDate,
+    requestedTime,
+    partySize,
+    ...(input.consentTextVersion ? { consentTextVersion: input.consentTextVersion } : {}),
+  };
+  const validatedMeta = validateLeadMetadata(rawMetadata);
+
   const result = await withTenant(tenantId, async (tx) => {
     // 1. Create SiteLead row
     const lead = await tx.siteLead.create({
@@ -105,14 +140,7 @@ export async function createPublicBooking(tenantId: string, input: CreateBooking
         sourcePage: sanitize(input.sourcePage, 200),
         locale: input.locale === "bn" ? "bn" : "en",
         consentGivenAt: input.consentGiven === true ? new Date() : null,
-        metadata: {
-          serviceName,
-          providerName,
-          requestedDate: input.requestedDate,
-          requestedTime,
-          partySize,
-          ...(input.consentTextVersion ? { consentTextVersion: input.consentTextVersion } : {}),
-        },
+        metadata: validatedMeta || rawMetadata,
       },
     });
 
@@ -163,6 +191,17 @@ export async function createPublicBooking(tenantId: string, input: CreateBooking
       whatsAppFollowUpUrl,
     };
   });
+
+  // 4. Record successful submission for rate limiting & cache idempotency
+  recordPublicSubmission({
+    tenantId,
+    ip: input.ip,
+    phone,
+  });
+
+  if (input.idempotencyKey) {
+    setCachedIdempotentResult(tenantId, input.idempotencyKey, result);
+  }
 
   // Dispatch Meta CAPI server-side event if consent given
   if (input.consentGiven !== false) {
