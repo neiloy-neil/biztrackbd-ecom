@@ -30,6 +30,7 @@ import { createPublicLead } from "../src/site/leads";
 import { createPublicBooking } from "../src/site/bookings";
 import { SECTIONS, STORE_SECTION_CATEGORIES } from "../src/builder/registry";
 import { CUSTOM_PAGE_TEMPLATES } from "../src/builder/custom-pages";
+import { can, PERMISSIONS, AREAS } from "../src/permissions";
 import type { SiteContentItem, SiteDownload } from "@biztrackbd/db";
 
 describe("BizTrack Business Architecture & Quality Gates (Phase 5)", () => {
@@ -284,17 +285,17 @@ describe("BizTrack Business Architecture & Quality Gates (Phase 5)", () => {
 
       const [starter, pro, business] = plans;
       expect(starter?.tier).toBe("STARTER");
-      expect(starter?.priceMonthly).toBe(990);
+      expect(starter?.priceMonthly).toBe(399);
       expect(starter?.features.customDomain).toBe(true);
       expect(starter?.features.mode).toBe("PORTFOLIO");
 
       expect(pro?.tier).toBe("PRO");
-      expect(pro?.priceMonthly).toBe(1990);
+      expect(pro?.priceMonthly).toBe(799);
       expect(pro?.features.bookingRequests).toBe(true);
       expect(pro?.features.downloadsLimit).toBe("unlimited");
 
       expect(business?.tier).toBe("BUSINESS");
-      expect(business?.priceMonthly).toBe(3990);
+      expect(business?.priceMonthly).toBe(1499);
       expect(business?.features.hybridStore).toBe(true);
       expect(business?.features.teamProfiles).toBe(true);
     });
@@ -380,4 +381,72 @@ describe("BizTrack Business Architecture & Quality Gates (Phase 5)", () => {
       expect(menuTpl?.build().sections.some((s) => s.type === "restaurant-menu")).toBe(true);
     });
   });
+
+  describe("6. Dedicated Business Permissions (AUTH-001)", () => {
+    it("includes leads and bookings in system AREAS", () => {
+      expect(AREAS).toContain("leads");
+      expect(AREAS).toContain("bookings");
+    });
+
+    it("verifies STORE_OWNER has full edit permissions across all areas including leads and bookings", () => {
+      expect(can("STORE_OWNER", "leads", "view")).toBe(true);
+      expect(can("STORE_OWNER", "leads", "edit")).toBe(true);
+      expect(can("STORE_OWNER", "bookings", "view")).toBe(true);
+      expect(can("STORE_OWNER", "bookings", "edit")).toBe(true);
+    });
+
+    it("verifies STORE_MANAGER has full edit permissions for leads and bookings", () => {
+      expect(can("STORE_MANAGER", "leads", "view")).toBe(true);
+      expect(can("STORE_MANAGER", "leads", "edit")).toBe(true);
+      expect(can("STORE_MANAGER", "bookings", "view")).toBe(true);
+      expect(can("STORE_MANAGER", "bookings", "edit")).toBe(true);
+    });
+
+    it("verifies TELEMARKETER (support) can triage and edit leads and bookings", () => {
+      expect(can("TELEMARKETER", "leads", "view")).toBe(true);
+      expect(can("TELEMARKETER", "leads", "edit")).toBe(true);
+      expect(can("TELEMARKETER", "bookings", "view")).toBe(true);
+      expect(can("TELEMARKETER", "bookings", "edit")).toBe(true);
+    });
+
+    it("verifies ORDER_PACKER is strictly forbidden from accessing leads and bookings", () => {
+      expect(can("ORDER_PACKER", "leads", "view")).toBe(false);
+      expect(can("ORDER_PACKER", "leads", "edit")).toBe(false);
+      expect(can("ORDER_PACKER", "bookings", "view")).toBe(false);
+      expect(can("ORDER_PACKER", "bookings", "edit")).toBe(false);
+    });
+
+    it("verifies CONTENT_EDITOR is strictly forbidden from accessing private leads and bookings", () => {
+      expect(can("CONTENT_EDITOR", "leads", "view")).toBe(false);
+      expect(can("CONTENT_EDITOR", "leads", "edit")).toBe(false);
+      expect(can("CONTENT_EDITOR", "bookings", "view")).toBe(false);
+      expect(can("CONTENT_EDITOR", "bookings", "edit")).toBe(false);
+    });
+  });
+
+  describe("7. Plan Continuity & Public Pricing (PLAN-001, PLAN-003)", () => {
+    it("ensures public Business plans return exact agreed tiers: ৳399, ৳799, ৳1,499", () => {
+      const plans = FALLBACK_PORTFOLIO_PLANS;
+      expect(plans).toHaveLength(3);
+
+      const starter = plans.find((p) => p.tier === "STARTER");
+      expect(starter).toBeDefined();
+      expect(starter?.priceMonthly).toBe(399);
+      expect(starter?.priceYearly).toBe(3990);
+      expect(starter?.features.mode).toBe("PORTFOLIO");
+      expect(starter?.features.leadCapture).toBe(true);
+
+      const pro = plans.find((p) => p.tier === "PRO");
+      expect(pro).toBeDefined();
+      expect(pro?.priceMonthly).toBe(799);
+      expect(pro?.priceYearly).toBe(7990);
+      expect(pro?.features.bookingRequests).toBe(true);
+
+      const business = plans.find((p) => p.tier === "BUSINESS");
+      expect(business).toBeDefined();
+      expect(business?.priceMonthly).toBe(1499);
+      expect(business?.priceYearly).toBe(14990);
+    });
+  });
 });
+

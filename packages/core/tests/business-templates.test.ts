@@ -11,15 +11,16 @@ import {
 } from "../src/builder/registry";
 
 describe("BizTrack Business Templates & Section Filtering", () => {
-  it("defines the first 5 launch templates with custom pages and chrome", () => {
-    expect(BUSINESS_TEMPLATES).toHaveLength(5);
+  it("defines the 6 launch templates with custom pages and chrome", () => {
+    expect(BUSINESS_TEMPLATES).toHaveLength(6);
     const ids = BUSINESS_TEMPLATES.map((t) => t.id);
     expect(ids).toEqual([
       "dhaka-bistro",
       "modern-clinic",
-      "corporate-trust",
+      "apex-corporate",
       "local-service-pro",
       "portfolio-focus",
+      "public-profile",
     ]);
 
     for (const tpl of BUSINESS_TEMPLATES) {
@@ -32,7 +33,7 @@ describe("BizTrack Business Templates & Section Filtering", () => {
     }
   });
 
-  it("retrieves a template by id", () => {
+  it("retrieves a template by id or alias", () => {
     const bistro = getBusinessTemplate("dhaka-bistro");
     expect(bistro).toBeDefined();
     expect(bistro?.vertical).toBe("RESTAURANT");
@@ -42,6 +43,20 @@ describe("BizTrack Business Templates & Section Filtering", () => {
     expect(clinic).toBeDefined();
     expect(clinic?.vertical).toBe("DOCTOR_CLINIC");
     expect(clinic?.customPages.some((p) => p.slug === "chambers")).toBe(true);
+
+    // Canonical apex-corporate and its alias corporate-trust
+    const corpCanonical = getBusinessTemplate("apex-corporate");
+    expect(corpCanonical).toBeDefined();
+    expect(corpCanonical?.vertical).toBe("BUSINESS_COMPANY");
+
+    const corpAlias = getBusinessTemplate("corporate-trust");
+    expect(corpAlias).toBeDefined();
+    expect(corpAlias?.id).toBe("apex-corporate");
+
+    // 6th template: public-profile
+    const publicProfile = getBusinessTemplate("public-profile");
+    expect(publicProfile).toBeDefined();
+    expect(publicProfile?.vertical).toBe("PUBLIC_FIGURE");
   });
 
   it("filters commerce sections when mode is PORTFOLIO or commerce capability is false", () => {

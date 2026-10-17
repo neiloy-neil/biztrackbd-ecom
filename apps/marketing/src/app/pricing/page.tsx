@@ -3,12 +3,31 @@ import { listPublicPlans, listPublicPortfolioPlans, type PlanView } from "@biztr
 import { PricingView, type ComparisonRow } from "./pricing-view";
 import { planBullets, portfolioPlanBullets } from "@/lib/plans";
 
+const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
+
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Pricing Plans: Transparent Taka Pricing with 0% Commission",
   description:
     "Honest monthly plans in Bangladeshi Taka. 14 days free trial, no credit card required, 0% commission on your sales. Pay via bKash or Nagad.",
+  alternates: {
+    canonical: `${siteUrl}/pricing`,
+  },
+  openGraph: {
+    type: "website",
+    url: `${siteUrl}/pricing`,
+    siteName: "BizTrackBD",
+    title: "Transparent Pricing Plans: 0% Commission in Bangladeshi Taka",
+    description: "Flat BDT monthly plans for Commerce and Business. 14-day free trial, pay via bKash or Nagad.",
+    images: [{ url: `${siteUrl}/opengraph-image`, width: 1200, height: 630, alt: "BizTrackBD Pricing" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Transparent Pricing Plans: 0% Commission in Bangladeshi Taka",
+    description: "No dollar card needed. 0% sales commission, flat monthly pricing in Taka.",
+    images: [`${siteUrl}/opengraph-image`],
+  },
 };
 
 const lim = (v: number | null) => (v == null ? "Unlimited" : v.toLocaleString("en-IN"));
@@ -84,7 +103,7 @@ export default async function Pricing() {
     monthsFree: p.yearlyMonthsFree,
     bullets: portfolioPlanBullets(p),
     forText: PORTFOLIO_FOR[p.tier],
-    linkHref: `/start?mode=portfolio&plan=${p.tier}`,
+    linkHref: `/start?mode=business&plan=${p.tier}`,
   }));
 
   return (
@@ -128,6 +147,15 @@ export default async function Pricing() {
         <p className="muted" style={{ marginTop: 24, fontSize: 14, lineHeight: 1.6 }}>
           * Order limits are soft: if you experience a sales surge in a busy Eid or wedding season, customer checkouts are never blocked. We will simply invite you to upgrade before your next cycle. Product limits are firm. You can upgrade, downgrade, or pause anytime.
         </p>
+
+        <div style={{ textAlign: "center", marginTop: 24 }}>
+          <p style={{ fontSize: 14.5, color: "var(--ink-2)" }}>
+            Looking exclusively for service business, clinic appointment, or restaurant menu website pricing?{" "}
+            <a href="/business/pricing" className="link" style={{ fontWeight: 600 }}>
+              View dedicated Business Website Pricing &amp; FAQs →
+            </a>
+          </p>
+        </div>
       </div>
     </section>
   );

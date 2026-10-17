@@ -14,6 +14,7 @@ interface LeadItem {
   message: string | null;
   sourcePage: string | null;
   createdAt: Date | string;
+  privateNotes?: string | null;
   bookingRequest?: {
     id: string;
     serviceName: string | null;
@@ -42,6 +43,8 @@ export function LeadsManager({ initialLeads }: { initialLeads: LeadItem[] }) {
   const [leads, setLeads] = useState<LeadItem[]>(initialLeads);
   const [filterTab, setFilterTab] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [editingNoteLeadId, setEditingNoteLeadId] = useState<string | null>(null);
+  const [noteDraft, setNoteDraft] = useState<string>("");
   const [isPending, startTransition] = useTransition();
 
   const filtered = leads.filter((item) => {
@@ -76,6 +79,16 @@ export function LeadsManager({ initialLeads }: { initialLeads: LeadItem[] }) {
           : "REQUESTED";
         await updateBookingStatusAction(bookingId, bStatus);
       }
+    });
+  };
+
+  const handleSaveNotes = (leadId: string, currentStatus: SiteLeadStatus) => {
+    startTransition(async () => {
+      setLeads((prev) =>
+        prev.map((l) => (l.id === leadId ? { ...l, privateNotes: noteDraft } : l))
+      );
+      await updateLeadStatusAction(leadId, currentStatus, noteDraft);
+      setEditingNoteLeadId(null);
     });
   };
 
@@ -307,6 +320,95 @@ export function LeadsManager({ initialLeads }: { initialLeads: LeadItem[] }) {
                     {item.message}
                   </div>
                 )}
+
+                {/* Staff Private Follow-up Notes */}
+                <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "10px 14px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                    <span style={{ fontWeight: 700, fontSize: "0.78rem", color: "#92400E", display: "flex", alignItems: "center", gap: 6 }}>
+                      📝 Internal Follow-up Notes:
+                    </span>
+                    {editingNoteLeadId !== item.id && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingNoteLeadId(item.id);
+                          setNoteDraft(item.privateNotes || "");
+                        }}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "#B45309",
+                          fontSize: "0.78rem",
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          textDecoration: "underline",
+                        }}
+                      >
+                        {item.privateNotes ? "Edit note" : "+ Add note"}
+                      </button>
+                    )}
+                  </div>
+                  {editingNoteLeadId === item.id ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      <textarea
+                        value={noteDraft}
+                        onChange={(e) => setNoteDraft(e.target.value)}
+                        placeholder="Add private staff notes (e.g. called customer, quoted ৳12,000, awaiting decision)..."
+                        rows={3}
+                        style={{
+                          width: "100%",
+                          padding: "8px 10px",
+                          borderRadius: 6,
+                          border: "1px solid #FCD34D",
+                          fontSize: "0.85rem",
+                          resize: "vertical",
+                          fontFamily: "inherit",
+                        }}
+                      />
+                      <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                        <button
+                          type="button"
+                          onClick={() => setEditingNoteLeadId(null)}
+                          style={{
+                            padding: "4px 10px",
+                            borderRadius: 6,
+                            border: "1px solid #CBD5E1",
+                            background: "#FFFFFF",
+                            fontSize: "0.78rem",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isPending}
+                          onClick={() => handleSaveNotes(item.id, item.status)}
+                          style={{
+                            padding: "4px 12px",
+                            borderRadius: 6,
+                            border: "none",
+                            background: "#D97706",
+                            color: "#FFFFFF",
+                            fontSize: "0.78rem",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                          }}
+                        >
+                          {isPending ? "Saving…" : "Save Note"}
+                        </button>
+                      </div>
+                    </div>
+                  ) : item.privateNotes ? (
+                    <div style={{ fontSize: "0.88rem", color: "#78350F", whiteSpace: "pre-wrap" }}>
+                      {item.privateNotes}
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: "0.8rem", color: "#B45309", fontStyle: "italic" }}>
+                      No follow-up notes yet. Click &quot;+ Add note&quot; to log phone call details or assignment status.
+                    </div>
+                  )}
+                </div>
 
                 {/* Footer contact actions */}
                 <div

@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { PlanCards, type PlanCardData } from "@/components/plan-cards";
+import { PlanRecommender } from "@/components/plan-recommender";
 import { demoAdminUrl } from "@/lib/demo-admin";
 
 export interface ComparisonRow {
@@ -34,21 +35,33 @@ export function PricingView({
   const [tab, setTab] = useState<"store" | "portfolio">(
     requestedMode === "portfolio" || requestedMode === "website" ? "portfolio" : "store"
   );
+  const [highlightedTier, setHighlightedTier] = useState<string | null>(null);
 
   const isStore = tab === "store";
   const currentPlans = isStore ? storePlans : portfolioPlans;
-  const currentBest = isStore ? bestStore : bestPortfolio;
+  const currentBest = highlightedTier ?? (isStore ? bestStore : bestPortfolio);
   const currentRows = isStore ? storeRows : portfolioRows;
 
   return (
     <>
+      {/* 2-Question Plan Recommender */}
+      <div style={{ marginTop: 24 }}>
+        <PlanRecommender
+          onSelectFamily={(family) => setTab(family)}
+          onHighlightPlan={(tier) => setHighlightedTier(tier)}
+        />
+      </div>
+
       {/* Segmented Mode Switcher */}
-      <div style={{ textAlign: "center", marginTop: 28, marginBottom: 8 }}>
+      <div id="plan-cards-section" style={{ textAlign: "center", marginTop: 28, marginBottom: 8, maxWidth: "100%", padding: "0 8px", boxSizing: "border-box" }}>
         <div
           role="tablist"
           aria-label="Choose plan category"
           style={{
             display: "inline-flex",
+            maxWidth: "100%",
+            flexWrap: "wrap",
+            justifyContent: "center",
             padding: 5,
             borderRadius: 28,
             background: "#F1F1F7",
@@ -65,14 +78,14 @@ export function PricingView({
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: 8,
-              padding: "10px 24px",
+              gap: 6,
+              padding: "8px clamp(12px, 3vw, 22px)",
               borderRadius: 22,
               border: isStore ? "1px solid #E2E1F6" : "1px solid transparent",
               background: isStore ? "#FFFFFF" : "transparent",
               color: isStore ? "var(--brand, #5B4FE8)" : "var(--ink-2, #64647A)",
               fontWeight: 700,
-              fontSize: 15,
+              fontSize: "clamp(13px, 2.5vw, 15px)",
               cursor: "pointer",
               boxShadow: isStore ? "0 2px 8px rgba(91,79,232,0.12)" : "none",
               transition: "all 0.2s ease",
@@ -90,24 +103,24 @@ export function PricingView({
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: 8,
-              padding: "10px 24px",
+              gap: 6,
+              padding: "8px clamp(12px, 3vw, 22px)",
               borderRadius: 22,
               border: !isStore ? "1px solid #E2E1F6" : "1px solid transparent",
               background: !isStore ? "#FFFFFF" : "transparent",
               color: !isStore ? "var(--brand, #5B4FE8)" : "var(--ink-2, #64647A)",
               fontWeight: 700,
-              fontSize: 15,
+              fontSize: "clamp(13px, 2.5vw, 15px)",
               cursor: "pointer",
               boxShadow: !isStore ? "0 2px 8px rgba(91,79,232,0.12)" : "none",
               transition: "all 0.2s ease",
             }}
           >
-            <span>💼</span> Business Website & Portfolio
+            <span>💼</span> Business &amp; Portfolio
             <span
               style={{
-                fontSize: 11,
-                padding: "2px 7px",
+                fontSize: 10,
+                padding: "2px 6px",
                 borderRadius: 99,
                 background: "#E9E7FD",
                 color: "#5B4FE8",
@@ -144,9 +157,12 @@ export function PricingView({
 
       {/* Comparison Table */}
       <div style={{ marginTop: 64 }}>
-        <h2 style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.6px", marginBottom: 20 }}>
+        <h2 style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.6px", marginBottom: 12 }}>
           Compare {isStore ? "online store" : "business website"} features
         </h2>
+        <div className="mobile-scroll-cue" style={{ display: "none", fontSize: 12.5, color: "var(--ink-3)", marginBottom: 8, fontStyle: "italic" }}>
+          &larr; Swipe horizontally to inspect all plan tiers &rarr;
+        </div>
         <div className="table-wrap" data-testid="compare" tabIndex={0} role="region" aria-label="Plan comparison">
           <table className="compare">
             <thead>

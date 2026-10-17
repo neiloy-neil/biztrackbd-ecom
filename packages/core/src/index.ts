@@ -118,7 +118,7 @@ export { signupStore, checkSubdomain, SignupInput, THEMES, SUBDOMAIN_MESSAGES, t
 export { createAutoLoginToken, verifyAutoLoginToken, createAutoLoginSessionCookie, verifyAutoLoginSessionCookie, AUTO_LOGIN_COOKIE, type AutoLoginPayload } from "./auth/auto-login";
 export { CATEGORY_CATALOG_PRESETS, getCategoryStarterPreset, type StarterCatalogPreset, type StarterProductPreset } from "./demo/catalog-presets";
 export {
-  listPublicPlans, listPublicPortfolioPlans, FALLBACK_PORTFOLIO_PLANS, getBillingOverview, getStoreAccess, submitPaymentProof, cancelPendingProof, paymentTargets, toPlanView, ProofInput,
+  listPublicPlans, listPublicPortfolioPlans, listPublicPlansForSiteMode, FALLBACK_PORTFOLIO_PLANS, getBillingOverview, getStoreAccess, submitPaymentProof, cancelPendingProof, paymentTargets, toPlanView, ProofInput,
   type PlanView, type BillingOverview, type ProofView, type PayTo,
 } from "./platform/billing";
 export {

@@ -99,53 +99,36 @@ export async function checkCourierFraudAction(phoneInput: string): Promise<Fraud
     };
   }
 
-  // Increment usage count and persist in cookie and memory
-  count += 1;
-  ipDailyChecks.set(trackerKey, { count, dateStr: today });
-  reqCookies.set("bt_fraud_usage", `${today}:${count}`, {
-    maxAge: 24 * 60 * 60,
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-  });
-
-  // Set cookie for browser session tracking if not set
-  if (!reqCookies.get("bt_fraud_client_id")?.value) {
-    reqCookies.set("bt_fraud_client_id", `client_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, {
-      maxAge: 30 * 24 * 60 * 60,
-      path: "/",
-      httpOnly: true,
-      sameSite: "lax",
-    });
-  }
-
   try {
     const fraudData = await fetchUnifiedCourierFraud(phone);
 
     if (!fraudData) {
-      // If external API has temporary network downtime, return a structured fallback response
+      // Upstream courier service unavailable - do NOT decrement quota and do NOT fabricate safe score
       return {
-        success: true,
+        success: false,
         remainingChecks: Math.max(0, MAX_FREE_DAILY_CHECKS - count),
-        data: {
-          phone,
-          score: 85,
-          status: "Safe",
-          source: "network_fallback",
-          total_parcel: 0,
-          success_parcel: 0,
-          cancel_parcel: 0,
-          unresolved_reports: 0,
-          community_reports: [],
-          response: {
-            steadfast: { status: false, message: "No parcel record", data: { total: 0, success: 0, cancel: 0, deliveredPercentage: 0, returnPercentage: 0 } },
-            pathao: { status: false, message: "No parcel record", data: { total: 0, success: 0, cancel: 0, deliveredPercentage: 0, returnPercentage: 0 } },
-            redx: { status: false, message: "No parcel record", data: { total: 0, success: 0, cancel: 0, deliveredPercentage: 0, returnPercentage: 0 } },
-            carrybee: { status: false, message: "No parcel record", data: { total: 0, success: 0, cancel: 0, deliveredPercentage: 0, returnPercentage: 0 } },
-            paperfly: { status: false, message: "No parcel record", data: { total: 0, success: 0, cancel: 0, deliveredPercentage: 0, returnPercentage: 0 } },
-          },
-        },
+        error: "কুরিয়ার ডাটাবেজ সাময়িকভাবে অনুপলব্ধ। কোনো ঝুঁকি মূল্যায়ন করা সম্ভব হয়নি। আপনার ফ্রি কোটা কাটা হয়নি। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।",
       };
+    }
+
+    // Increment usage count only upon successful data retrieval
+    count += 1;
+    ipDailyChecks.set(trackerKey, { count, dateStr: today });
+    reqCookies.set("bt_fraud_usage", `${today}:${count}`, {
+      maxAge: 24 * 60 * 60,
+      path: "/",
+      httpOnly: true,
+      sameSite: "lax",
+    });
+
+    // Set cookie for browser session tracking if not set
+    if (!reqCookies.get("bt_fraud_client_id")?.value) {
+      reqCookies.set("bt_fraud_client_id", `client_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, {
+        maxAge: 30 * 24 * 60 * 60,
+        path: "/",
+        httpOnly: true,
+        sameSite: "lax",
+      });
     }
 
     return {
@@ -158,7 +141,7 @@ export async function checkCourierFraudAction(phoneInput: string): Promise<Fraud
     return {
       success: false,
       remainingChecks: Math.max(0, MAX_FREE_DAILY_CHECKS - count),
-      error: "কুরিয়ার সার্ভারে সংযোগ করতে সমস্যা হয়েছে। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।",
+      error: "কুরিয়ার সার্ভারে সংযোগ করতে সমস্যা হয়েছে। আপনার ফ্রি কোটা কাটা হয়নি। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।",
     };
   }
 }

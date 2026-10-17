@@ -1,6 +1,28 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Privacy", description: "What BizTrackBD collects, why, who sees it, and how to have it removed." };
+const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description: "What BizTrackBD collects, why, who sees it, and how to have it removed.",
+  alternates: {
+    canonical: `${siteUrl}/privacy`,
+  },
+  openGraph: {
+    type: "website",
+    url: `${siteUrl}/privacy`,
+    siteName: "BizTrackBD",
+    title: "Privacy Policy",
+    description: "What BizTrackBD collects, merchant data ownership, and customer privacy protections.",
+    images: [{ url: `${siteUrl}/opengraph-image`, width: 1200, height: 630, alt: "BizTrackBD Privacy" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Privacy Policy",
+    description: "Our clear privacy principles and zero customer data selling charter.",
+    images: [`${siteUrl}/opengraph-image`],
+  },
+};
 
 const UPDATED = "12 October 2026";
 

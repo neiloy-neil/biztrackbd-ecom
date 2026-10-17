@@ -2,15 +2,35 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { demoAdminUrl } from "@/lib/demo-admin";
 
+const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
+
 export const metadata: Metadata = {
   title: "Features: Built for the realities of Bangladesh eCommerce",
   description: "Combat COD returns, automate Pathao and Steadfast pickups, accept bKash and Nagad with zero commission, and run your shop from your phone.",
+  alternates: {
+    canonical: `${siteUrl}/features`,
+  },
+  openGraph: {
+    type: "website",
+    url: `${siteUrl}/features`,
+    siteName: "BizTrackBD",
+    title: "Features: Built for Bangladesh eCommerce",
+    description: "Combat COD returns, automate Pathao and Steadfast pickups, accept bKash and Nagad with zero commission.",
+    images: [{ url: `${siteUrl}/opengraph-image`, width: 1200, height: 630, alt: "BizTrackBD features" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Features: Built for Bangladesh eCommerce",
+    description: "Automate pickups, accept bKash/Nagad, and protect profits against fake returns.",
+    images: [`${siteUrl}/opengraph-image`],
+  },
 };
 
 const PILLARS = [
   {
     badge: "Protection",
     title: "Cash on Delivery Return Protection",
+    link: "/features/cod-fraud-protection",
     problem: "1 in 4 COD parcels in Bangladesh gets rejected by customers who changed their mind or gave a fake number. Every returned parcel costs the seller ৳ 120–৳ 160 in delivery charges, wiping out daily profits.",
     solution: "BizTrackBD checks customer phone numbers against delivery logs across Pathao and Steadfast networks before you pack. Orders from serial parcel rejectors are flagged so you can require a partial bKash delivery advance (e.g. ৳ 150) before shipping.",
     points: [
@@ -19,11 +39,12 @@ const PILLARS = [
       "Option to enforce mandatory partial bKash advance delivery fee on risky orders",
       "Incomplete order phone capture: follow up via 1-tap WhatsApp call list",
     ],
-    proof: "Saves typical sellers ৳ 12,000+ every month in avoided return courier bills.",
+    proof: "Saves typical sellers thousands every month in avoided return courier bills.",
   },
   {
     badge: "Logistics",
     title: "1-Click Courier Pickup & Shipping Labels",
+    link: "/features/courier-automation",
     problem: "Manually copying customer names, phone numbers, and addresses from Facebook chat or spreadsheets into Steadfast and Pathao portals at midnight is slow, tiring, and leads to courier delivery mistakes.",
     solution: "Enter your courier API credentials once. Click 'Book Pickup' directly from the order page. BizTrackBD creates the consignment, retrieves the tracking code, and generates standard thermal shipping labels and packing slips.",
     points: [
@@ -37,6 +58,7 @@ const PILLARS = [
   {
     badge: "Payments",
     title: "Direct bKash & Nagad Payments (0% Commission)",
+    link: "/features/bkash-nagad-cod",
     problem: "Foreign tools force you to pay 2% on every sale and hold your funds for days. Other platforms require complicated merchant bank agreements and charge steep setup fees.",
     solution: "Customers pay directly to your personal or merchant bKash or Nagad wallet. They enter their TrxID at checkout, and you verify it with 1 tap on your admin desk. BizTrackBD never touches your money and charges zero commission.",
     points: [
@@ -48,8 +70,23 @@ const PILLARS = [
     proof: "Customer money goes directly into your mobile wallet, with zero payout holding delays.",
   },
   {
+    badge: "Accounting",
+    title: "Profit & COD Reconciliation",
+    link: "/features/profit-cod-reconciliation",
+    problem: "Most sellers calculate revenue from gross sales without accounting for courier fees, refused parcel return penalties, and ad spend, leading to cashflow surprises.",
+    solution: "BizTrackBD itemizes gross order value, product wholesale costs, delivery charges, packaging expenses, and ad costs in one automated waterfall ledger to reveal your True Net Profit.",
+    points: [
+      "Itemized net profit waterfall per order and across monthly cohorts",
+      "Courier settlement statement auditing to catch unpaid delivered parcels",
+      "True net margin tracking in Taka without manual spreadsheet formulas",
+      "1-click CSV and Excel export for partnership accounting and tax filing",
+    ],
+    proof: "Know your true business profit down to the last Taka.",
+  },
+  {
     badge: "Marketing",
     title: "Server-Side Meta Conversions API (CAPI)",
+    link: "/features/meta-pixel-capi",
     problem: "Since Apple's iOS 14 update and ad-blockers, standard browser-based Facebook Pixels miss up to 30% of purchases in Bangladesh, throwing off Meta's ad algorithms and raising your cost per customer.",
     solution: "BizTrackBD includes server-side Meta Conversions API (CAPI) built-in. Every completed order is sent directly from our server to Meta with 100% purchase delivery match, training Facebook's algorithm on your exact purchase values in Taka.",
     points: [
@@ -58,7 +95,7 @@ const PILLARS = [
       "High-converting single-product landing pages tailored for Facebook ads",
       "Track real return on ad spend (ROAS) in Taka to scale winning campaigns",
     ],
-    proof: "Lowers Facebook ad cost per acquisition by up to 25% with accurate purchase signaling.",
+    proof: "Accurate purchase signaling trains Meta to find higher-spending buyers.",
   },
   {
     badge: "Operations",
@@ -72,19 +109,6 @@ const PILLARS = [
       "Quick WhatsApp customer sharing for order links, receipts, and invoices",
     ],
     proof: "Zero computer needed. Run your entire business from your pocket.",
-  },
-  {
-    badge: "Speed & SEO",
-    title: "Sub-Second Storefront Speed on Mobile 4G",
-    problem: "Clunky WordPress or Shopify stores with multiple plugins take 4–7 seconds to load on mobile networks in Bangladesh. Half your paid ad visitors leave before the product image even loads.",
-    solution: "Our storefronts are built with Next.js Turbopack with zero bloatware scripts. Pages render in under 0.8 seconds on Grameenphone, Robi, and Banglalink mobile 4G connections.",
-    points: [
-      "Sub-second load times optimized for Bangladeshi mobile networks",
-      "Bilingual typography in Bangla and English with Google Fonts (Hind Siliguri)",
-      "Tailored themes for Fashion (Kapor), Gadgets (GadgetStudio), and Streetwear (Berber)",
-      "Custom domain support (yourbrand.com) with automatic zero-config SSL",
-    ],
-    proof: "Tested to load in under 0.8 seconds across mobile connections in Bangladesh.",
   },
 ];
 
@@ -132,6 +156,13 @@ export default function FeaturesPage() {
                 <div className="feat-highlight">
                   <span>💡 {p.proof}</span>
                 </div>
+                {p.link && (
+                  <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid var(--line)" }}>
+                    <Link href={p.link} className="btn btn-secondary btn-sm" style={{ width: "100%", justifyContent: "center" }} prefetch={false}>
+                      Read Deep-Dive Guide &amp; Interactive Simulator &rarr;
+                    </Link>
+                  </div>
+                )}
               </div>
             ))}
           </div>

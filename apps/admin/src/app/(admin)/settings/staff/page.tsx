@@ -10,8 +10,16 @@ import { InviteForm } from "./invite-form";
 export const dynamic = "force-dynamic";
 
 const AREA_LABEL: Record<(typeof AREAS)[number], string> = {
-  orders: "Orders and fulfilment", products: "Products and inventory", customers: "Customers and messages", marketing: "Discounts and marketing",
-  reports: "Reports and profit", design: "Theme and store design", billing: "Payments, domains, billing, keys", team: "Team and audit log",
+  orders: "Orders and fulfilment",
+  products: "Products and inventory",
+  customers: "Customers and messages",
+  leads: "Inquiries and leads",
+  bookings: "Bookings and appointments",
+  marketing: "Discounts and marketing",
+  reports: "Reports and profit",
+  design: "Theme and store design",
+  billing: "Payments, domains, billing, keys",
+  team: "Team and audit log",
 };
 
 export default async function Staff() {

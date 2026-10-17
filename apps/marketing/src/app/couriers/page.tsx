@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { demoAdminUrl } from "@/lib/demo-admin";
 
+const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
+
 export const metadata: Metadata = {
   title: "Courier Automation: Steadfast, Pathao & RedX Integration Guide",
   description:
@@ -14,6 +16,23 @@ export const metadata: Metadata = {
     "thermal shipping label bangladesh",
     "ecommerce courier booking bangladesh",
   ],
+  alternates: {
+    canonical: `${siteUrl}/couriers`,
+  },
+  openGraph: {
+    type: "website",
+    url: `${siteUrl}/couriers`,
+    siteName: "BizTrackBD",
+    title: "Courier Automation: Steadfast, Pathao & RedX Integration",
+    description: "Compare courier rates, automate 1-click booking, print barcode labels, and protect against COD returns.",
+    images: [{ url: `${siteUrl}/opengraph-image`, width: 1200, height: 630, alt: "Courier Automation Guide" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Courier Automation: Steadfast, Pathao & RedX Integration",
+    description: "Multi-courier dispatch and rate comparison for Bangladesh online merchants.",
+    images: [`${siteUrl}/opengraph-image`],
+  },
 };
 
 const COURIER_COMPARISON = [

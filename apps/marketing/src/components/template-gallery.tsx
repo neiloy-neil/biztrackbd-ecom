@@ -22,7 +22,7 @@ const THEME_HOSTS: Record<string, string> = {
 export type GalleryMode = "ecommerce" | "business";
 
 export type EcommerceCategoryFilter = "all" | "fashion" | "electronics" | "kids" | "streetwear" | "beauty";
-export type BusinessCategoryFilter = "all" | "restaurant" | "doctor" | "corporate" | "services" | "portfolio";
+export type BusinessCategoryFilter = "all" | "restaurant" | "doctor" | "corporate" | "services" | "portfolio" | "public-figure";
 
 export interface GalleryTheme {
   id: string;
@@ -179,6 +179,20 @@ export const BUSINESS_TEMPLATES_DATA: GalleryTheme[] = [
     colors: { accent: "#4F46E5", background: "#FAFAFA", text: "#18181B" },
     previewFeatures: ["Fintech & SaaS Case Studies", "Design System Highlights", "Resume Download", "Direct Contact"],
   },
+  {
+    id: "public-profile",
+    name: "Public Profile & Leader",
+    sub: "Distinguished personal branding for authors, speakers, researchers, and public figures with op-ed publications, press kit, and invitation forms.",
+    category: "public-figure",
+    categoryLabel: "Public Figure",
+    tag1: "Media & Press Kit",
+    tag2: "Op-Eds & Speaking",
+    module: "Leadership & Media",
+    mode: "business",
+    vertical: "PUBLIC_FIGURE",
+    colors: { accent: "#4338CA", background: "#FAFAFA", text: "#1E1B4B" },
+    previewFeatures: ["Media Kit & Press Kit", "Op-Ed Column Showcase", "Official Biography", "Keynote Invitation Form"],
+  },
 ];
 
 const ECOM_CATEGORIES: { id: EcommerceCategoryFilter; label: string }[] = [
@@ -197,6 +211,7 @@ const BIZ_CATEGORIES: { id: BusinessCategoryFilter; label: string }[] = [
   { id: "corporate", label: "Corporate & B2B" },
   { id: "services", label: "Home & Tech Services" },
   { id: "portfolio", label: "Portfolios & Freelancers" },
+  { id: "public-figure", label: "Public Profile & Leaders" },
 ];
 
 export interface PublishedGalleryTheme extends GalleryTheme {
@@ -252,7 +267,7 @@ export function TemplateGallery({
 
   const getStartUrl = (t: GalleryTheme) => {
     if (t.mode === "business" && t.vertical) {
-      return `/start?template=${t.id}&mode=portfolio&vertical=${t.vertical.toLowerCase()}`;
+      return `/start?template=${t.id}&mode=business&vertical=${t.vertical.toLowerCase()}`;
     }
     return `/start?theme=${t.id}&mode=ecommerce`;
   };
@@ -265,34 +280,41 @@ export function TemplateGallery({
           display: "flex",
           justifyContent: "center",
           margin: "24px 0 16px",
+          maxWidth: "100%",
+          padding: "0 8px",
+          boxSizing: "border-box",
         }}
       >
         <div
           style={{
             display: "inline-flex",
+            maxWidth: "100%",
             background: "#F1F1F8",
             padding: "5px",
             borderRadius: "32px",
             border: "1px solid var(--line, #E2E2EC)",
             boxShadow: "inset 0 1px 3px rgba(0,0,0,0.04)",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: "4px",
           }}
         >
           <button
             type="button"
             onClick={() => handleModeSwitch("ecommerce")}
             style={{
-              padding: "10px 24px",
+              padding: "8px clamp(12px, 3vw, 22px)",
               borderRadius: "28px",
               background: activeMode === "ecommerce" ? "#FFFFFF" : "transparent",
               color: activeMode === "ecommerce" ? "var(--ink, #101828)" : "#667085",
               fontWeight: 700,
-              fontSize: "15px",
+              fontSize: "clamp(13px, 2.5vw, 15px)",
               border: "none",
               cursor: "pointer",
               boxShadow: activeMode === "ecommerce" ? "0 2px 8px rgba(0,0,0,0.08)" : "none",
               display: "flex",
               alignItems: "center",
-              gap: "8px",
+              gap: "6px",
               transition: "all 0.15s ease",
             }}
           >
@@ -314,22 +336,22 @@ export function TemplateGallery({
             type="button"
             onClick={() => handleModeSwitch("business")}
             style={{
-              padding: "10px 24px",
+              padding: "8px clamp(12px, 3vw, 22px)",
               borderRadius: "28px",
               background: activeMode === "business" ? "#FFFFFF" : "transparent",
               color: activeMode === "business" ? "var(--ink, #101828)" : "#667085",
               fontWeight: 700,
-              fontSize: "15px",
+              fontSize: "clamp(13px, 2.5vw, 15px)",
               border: "none",
               cursor: "pointer",
               boxShadow: activeMode === "business" ? "0 2px 8px rgba(0,0,0,0.08)" : "none",
               display: "flex",
               alignItems: "center",
-              gap: "8px",
+              gap: "6px",
               transition: "all 0.15s ease",
             }}
           >
-            <span>🏢</span> Business &amp; Service Websites
+            <span>🏢</span> Business &amp; Services
             <span
               style={{
                 fontSize: "11px",
@@ -340,7 +362,7 @@ export function TemplateGallery({
                 color: "#166534",
               }}
             >
-              New • 5 Verticals
+              5 Verticals
             </span>
           </button>
         </div>

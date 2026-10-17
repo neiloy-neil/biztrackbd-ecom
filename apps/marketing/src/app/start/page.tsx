@@ -1,15 +1,35 @@
 import type { Metadata } from "next";
-import { THEMES, listPublicPlans, listPublishedTemplates, readKeptStore, verificationRequired } from "@biztrackbd/core";
-import { planBullets } from "@/lib/plans";
+import { THEMES, listPublicPlans, listPublicPortfolioPlans, listPublishedTemplates, readKeptStore, verificationRequired } from "@biztrackbd/core";
+import { planBullets, portfolioPlanBullets } from "@/lib/plans";
 import { Wizard } from "./wizard";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Open Your Online Store: 14-Day Free Trial",
-  description: "Start a free 14-day trial for your Bangladeshi online store. Sell with bKash, Nagad, and Cash on Delivery. No credit card required.",
-  robots: { index: false },
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  const sp = await searchParams;
+  const rawMode = typeof sp.mode === "string" ? sp.mode.toLowerCase() : "";
+  const requestedTemplate = (typeof sp.template === "string" ? sp.template : typeof sp.theme === "string" ? sp.theme : "").toLowerCase();
+  const isBusinessTemplate = [
+    "dhaka-bistro",
+    "modern-clinic",
+    "corporate-trust",
+    "apex-corporate",
+    "local-service-pro",
+    "portfolio-focus",
+  ].includes(requestedTemplate);
+  const isBusiness = rawMode === "business" || rawMode === "portfolio" || isBusinessTemplate;
+  return {
+    title: isBusiness ? "Start Your Business Website: 14-Day Free Trial" : "Open Your Online Store: 14-Day Free Trial",
+    description: isBusiness
+      ? "Start a BizTrackBD Business website trial with your chosen industry, template, custom-domain path, and enquiry tools. No credit card required."
+      : "Start a free 14-day trial for your Bangladeshi online store. Sell with bKash, Nagad, and Cash on Delivery. No credit card required.",
+    robots: { index: false },
+  };
+}
 
 export default async function Start({
   searchParams,
@@ -17,13 +37,8 @@ export default async function Start({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const sp = await searchParams;
-  const plans = await listPublicPlans();
   const wantedPlan = typeof sp.plan === "string" ? sp.plan : "";
   const wantedTheme = typeof sp.theme === "string" ? sp.theme : "";
-  const initialPlan =
-    plans.find((p) => p.tier === wantedPlan)?.tier ??
-    plans.find((p) => p.tier === "PRO")?.tier ??
-    plans[0]!.tier;
 
   // Coming from a demo: its store comes with the visitor, in the template they were trying.
   const from = typeof sp.from === "string" ? sp.from.slice(0, 120) : "";
@@ -31,7 +46,8 @@ export default async function Start({
   // The templates on offer are the published list (the originals plus any staff have published). If it cannot be read, the originals still work.
   const templates = await listPublishedTemplates().catch(() => []);
   const offered = templates.length > 0 ? templates.map((t) => ({ id: t.id, name: t.name, blurb: t.blurb, live: true, look: t.baseLook })) : THEMES.map((t) => ({ id: t.id, name: t.name, blurb: t.blurb, live: t.live, look: t.id }));
-  const wantedTemplate = typeof sp.template === "string" ? sp.template.toLowerCase() : "";
+  const requestedTemplate = (typeof sp.template === "string" ? sp.template : wantedTheme).toLowerCase();
+  const wantedTemplate = requestedTemplate === "corporate-trust" ? "apex-corporate" : requestedTemplate;
   let resolvedMode: "ECOMMERCE" | "PORTFOLIO" | "HYBRID" | null = null;
   let resolvedVertical: string | undefined = undefined;
 
@@ -54,7 +70,13 @@ export default async function Start({
 
   const rawMode = typeof sp.mode === "string" ? sp.mode.toUpperCase() : "";
   const initialMode: "ECOMMERCE" | "PORTFOLIO" | "HYBRID" =
-    resolvedMode ?? (rawMode === "PORTFOLIO" || rawMode === "HYBRID" ? rawMode : "ECOMMERCE");
+    resolvedMode ?? (rawMode === "BUSINESS" ? "PORTFOLIO" : rawMode === "PORTFOLIO" || rawMode === "HYBRID" ? rawMode : "ECOMMERCE");
+  const [commercePlans, businessPlans] = await Promise.all([listPublicPlans(), listPublicPortfolioPlans()]);
+  const plans = initialMode === "PORTFOLIO" ? businessPlans : commercePlans;
+  const initialPlan =
+    plans.find((p) => p.tier === wantedPlan)?.tier ??
+    plans.find((p) => p.tier === "PRO")?.tier ??
+    plans[0]!.tier;
   const rawVertical = typeof sp.vertical === "string" ? sp.vertical.toUpperCase() : "";
   const validVerticals = ["RESTAURANT", "DOCTOR_CLINIC", "PUBLIC_FIGURE", "BUSINESS_COMPANY", "SERVICE_PROVIDER", "PERSONAL_PORTFOLIO"];
   const initialVertical =
@@ -68,7 +90,7 @@ export default async function Start({
   else if (initialVertical === "SERVICE_PROVIDER") defaultTheme = "local-service-pro";
   else if (initialVertical === "PERSONAL_PORTFOLIO") defaultTheme = "portfolio-focus";
 
-  const initialTheme = offered.find((t) => t.id === (kept?.template || wantedTheme || defaultTheme) && t.live)?.id ?? defaultTheme ?? offered[0]?.id ?? "kapor";
+  const initialTheme = offered.find((t) => t.id === (kept?.template || wantedTemplate || defaultTheme) && t.live)?.id ?? defaultTheme ?? offered[0]?.id ?? "kapor";
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
 
   return (
@@ -82,11 +104,17 @@ export default async function Start({
       initialMode={initialMode}
       initialVertical={initialVertical}
       themes={offered}
-      plans={plans.map((p) => ({
+      commercePlans={commercePlans.map((p) => ({
         tier: p.tier,
         name: p.name,
         priceMonthly: p.priceMonthly,
         blurb: planBullets(p).slice(0, 3).join(", "),
+      }))}
+      businessPlans={businessPlans.map((p) => ({
+        tier: p.tier,
+        name: p.name,
+        priceMonthly: p.priceMonthly,
+        blurb: portfolioPlanBullets(p).slice(0, 3).join(", "),
       }))}
     />
   );

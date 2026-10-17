@@ -16,6 +16,9 @@ export interface CreateBookingInput {
   type?: "APPOINTMENT" | "RESERVATION";
   sourcePage?: string | null;
   locale?: string;
+  /** Explicit affirmative consent given by the visitor */
+  consentGiven?: boolean | null;
+  consentTextVersion?: string | null;
   /** Invisible bot shield */
   hp?: string | null;
   elapsedMs?: number | null;
@@ -93,13 +96,14 @@ export async function createPublicBooking(tenantId: string, input: CreateBooking
         message,
         sourcePage: sanitize(input.sourcePage, 200),
         locale: input.locale === "bn" ? "bn" : "en",
-        consentGivenAt: new Date(),
+        consentGivenAt: input.consentGiven === true ? new Date() : null,
         metadata: {
           serviceName,
           providerName,
           requestedDate: input.requestedDate,
           requestedTime,
           partySize,
+          ...(input.consentTextVersion ? { consentTextVersion: input.consentTextVersion } : {}),
         },
       },
     });
@@ -160,7 +164,7 @@ export interface ListBookingsFilters {
 }
 
 export async function listBookingRequests(tenantId: string, actor: StaffActor, filters?: ListBookingsFilters) {
-  assertCan(actor, "customers", "view");
+  assertCan(actor, "bookings", "view");
 
   return withTenant(tenantId, async (tx) => {
     const where = {
@@ -191,7 +195,7 @@ export async function updateBookingRequestStatus(
   status: BookingRequestStatus,
   privateNotes?: string | null,
 ) {
-  assertCan(actor, "customers", "edit");
+  assertCan(actor, "bookings", "edit");
 
   return withTenant(tenantId, async (tx) => {
     const booking = await tx.bookingRequest.findFirst({ where: { id: bookingId, tenantId }, include: { lead: true } });

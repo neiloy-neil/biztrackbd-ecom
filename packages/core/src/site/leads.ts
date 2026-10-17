@@ -16,6 +16,9 @@ export interface CreateLeadInput {
   referrer?: string | null;
   locale?: string;
   metadata?: Record<string, unknown> | null;
+  /** Explicit affirmative consent given by the visitor */
+  consentGiven?: boolean | null;
+  consentTextVersion?: string | null;
   /** Invisible honeypot field — bots fill this, humans do not */
   hp?: string | null;
   /** Milliseconds since the form mounted — bots submit in <1500ms */
@@ -94,8 +97,11 @@ export async function createPublicLead(tenantId: string, input: CreateLeadInput)
         utmCampaign: sanitize(input.utmCampaign, 100),
         referrer: sanitize(input.referrer, 300),
         locale: input.locale === "bn" ? "bn" : "en",
-        metadata: input.metadata ? (input.metadata as object) : undefined,
-        consentGivenAt: new Date(),
+        metadata: {
+          ...(input.metadata ? (input.metadata as object) : {}),
+          ...(input.consentTextVersion ? { consentTextVersion: input.consentTextVersion } : {}),
+        },
+        consentGivenAt: input.consentGiven === true ? new Date() : null,
       },
     });
 
@@ -131,7 +137,7 @@ export interface ListLeadsFilters {
 
 /** Lists leads for merchant admin */
 export async function listSiteLeads(tenantId: string, actor: StaffActor, filters?: ListLeadsFilters) {
-  assertCan(actor, "customers", "view");
+  assertCan(actor, "leads", "view");
 
   return withTenant(tenantId, async (tx) => {
     const where = {
@@ -164,7 +170,7 @@ export async function updateSiteLeadStatus(
   status: SiteLeadStatus,
   privateNotes?: string | null,
 ) {
-  assertCan(actor, "customers", "edit");
+  assertCan(actor, "leads", "edit");
 
   return withTenant(tenantId, async (tx) => {
     const lead = await tx.siteLead.findFirst({ where: { id: leadId, tenantId } });

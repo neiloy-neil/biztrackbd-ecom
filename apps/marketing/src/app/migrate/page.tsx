@@ -2,9 +2,28 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MigrateAnalyzer } from "./migrate-analyzer";
 
+const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
+
 export const metadata: Metadata = {
-  title: "Migrate from Shopify or WooCommerce to BizTrackBD | Zero Downtime Switch",
+  title: "Migrate from Shopify or WooCommerce: Zero Downtime Switch",
   description: "Switch your Bangladeshi ecommerce store from Shopify or WooCommerce to BizTrackBD with zero downtime. Keep your domain, product photos, and variants. Save over ৳ 90,000/year with native bKash and Pathao integration.",
+  alternates: {
+    canonical: `${siteUrl}/migrate`,
+  },
+  openGraph: {
+    type: "website",
+    url: `${siteUrl}/migrate`,
+    siteName: "BizTrackBD",
+    title: "Migrate from Shopify or WooCommerce: Zero Downtime Switch",
+    description: "Switch your store with zero downtime. Keep your domain, photos, and variants while avoiding USD card billing.",
+    images: [{ url: `${siteUrl}/opengraph-image`, width: 1200, height: 630, alt: "Migrate to BizTrackBD" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Migrate from Shopify or WooCommerce: Zero Downtime Switch",
+    description: "Keep your catalog and domain intact with native Bangladesh courier and payment integrations.",
+    images: [`${siteUrl}/opengraph-image`],
+  },
 };
 
 const STEPS = [
@@ -94,6 +113,22 @@ export default function MigratePage() {
           <p className="muted" style={{ fontSize: "clamp(16px, 2vw, 18px)", lineHeight: 1.6, maxWidth: 680, margin: "0 auto 28px" }}>
             Keep your domain, your customer links, and all your product photos. Eliminate dollar credit card friction, 2% sales commissions, and manual courier copy-pasting.
           </p>
+          <div style={{ display: "flex", justifyContent: "center", gap: 14, flexWrap: "wrap", marginTop: 8 }}>
+            <Link
+              href="/migrate/shopify"
+              className="btn btn-primary btn-sm"
+              style={{ fontWeight: 700 }}
+            >
+              Shopify Migration Playbook →
+            </Link>
+            <Link
+              href="/migrate/woocommerce"
+              className="btn btn-secondary btn-sm"
+              style={{ fontWeight: 700 }}
+            >
+              WooCommerce Migration Playbook →
+            </Link>
+          </div>
         </div>
       </section>
 

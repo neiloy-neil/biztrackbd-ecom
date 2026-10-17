@@ -73,32 +73,32 @@ const FALLBACK_PUBLIC_PLANS: PlanView[] = [
 export const FALLBACK_PORTFOLIO_PLANS: PlanView[] = [
   {
     tier: "STARTER",
-    name: "Portfolio Starter",
-    priceMonthly: 990,
-    priceYearly: 9900,
+    name: "Business Starter",
+    priceMonthly: 399,
+    priceYearly: 3990,
     yearlyMonthsFree: 2,
     trialDays: 14,
-    limits: { products: 10, ordersPerMonth: 50, staff: 2, storageGb: 5, smsCredits: 200, landingPages: 5 },
+    limits: { products: 0, ordersPerMonth: 0, staff: 1, storageGb: 5, smsCredits: 0, landingPages: 5 },
     features: { customDomain: true, leadCapture: true, downloadsLimit: 5, contentItemsLimit: 15, bookingRequests: false, whatsappAlerts: true, teamProfiles: false, hybridStore: false, mode: "PORTFOLIO" },
   },
   {
     tier: "PRO",
-    name: "Portfolio Pro",
-    priceMonthly: 1990,
-    priceYearly: 19900,
+    name: "Business",
+    priceMonthly: 799,
+    priceYearly: 7990,
     yearlyMonthsFree: 2,
     trialDays: 14,
-    limits: { products: 50, ordersPerMonth: 200, staff: 5, storageGb: 20, smsCredits: 1000, landingPages: 25 },
+    limits: { products: 0, ordersPerMonth: 0, staff: 3, storageGb: 20, smsCredits: 0, landingPages: 20 },
     features: { customDomain: true, leadCapture: true, downloadsLimit: "unlimited", contentItemsLimit: "unlimited", bookingRequests: true, whatsappAlerts: true, teamProfiles: true, hybridStore: false, mode: "PORTFOLIO" },
   },
   {
     tier: "BUSINESS",
-    name: "Portfolio Business",
-    priceMonthly: 3990,
-    priceYearly: 39900,
+    name: "Business Plus",
+    priceMonthly: 1499,
+    priceYearly: 14990,
     yearlyMonthsFree: 2,
     trialDays: 14,
-    limits: { products: 200, ordersPerMonth: 1000, staff: 15, storageGb: 100, smsCredits: 3000, landingPages: null },
+    limits: { products: 200, ordersPerMonth: 1000, staff: 8, storageGb: 100, smsCredits: 0, landingPages: 50 },
     features: { customDomain: true, leadCapture: true, downloadsLimit: "unlimited", contentItemsLimit: "unlimited", bookingRequests: true, whatsappAlerts: true, teamProfiles: true, hybridStore: true, mode: "PORTFOLIO" },
   },
 ];
@@ -116,6 +116,10 @@ export async function listPublicPlans(): Promise<PlanView[]> {
 
 export async function listPublicPortfolioPlans(): Promise<PlanView[]> {
   return FALLBACK_PORTFOLIO_PLANS;
+}
+
+export async function listPublicPlansForSiteMode(siteMode: string | null | undefined): Promise<PlanView[]> {
+  return siteMode === "PORTFOLIO" ? listPublicPortfolioPlans() : listPublicPlans();
 }
 
 export interface ProofView {
@@ -181,10 +185,10 @@ export async function getStoreAccess(tenantId: string, now: Date = new Date(), c
 
 export async function getBillingOverview(tenantId: string, actor: StaffActor, now: Date = new Date()): Promise<BillingOverview> {
   assertCan(actor, "billing", "view");
-  const plans = await listPublicPlans();
   return withTenant(tenantId, async (tx) => {
-    const t = await tx.tenant.findFirst({ select: { name: true, planTier: true, status: true, trialEndsAt: true, suspendedReason: true } });
+    const t = await tx.tenant.findFirst({ select: { name: true, planTier: true, siteMode: true, status: true, trialEndsAt: true, suspendedReason: true } });
     if (!t) throw new NotFoundError("Store");
+    const plans = await listPublicPlansForSiteMode(t.siteMode);
     const sub = await tx.subscription.findFirst();
     const proofs = await tx.paymentProof.findMany({ orderBy: { createdAt: "desc" }, take: 30 });
     const views = proofs.map(toProof);
@@ -227,9 +231,12 @@ export async function submitPaymentProof(tenantId: string, actor: StaffActor, ra
   } catch {
     throw new ValidationError("Enter the mobile number you sent the money from, like 01712345678", { field: "senderNumber" });
   }
-  const plan = await getBasePrisma().plan.findUnique({ where: { tier: input.plan } });
-  if (!plan || !plan.isPublic) throw new ValidationError("Choose a plan");
-  const amount = Number(input.interval === "YEARLY" ? plan.priceYearlyBdt : plan.priceMonthlyBdt);
+  const tenant = await getBasePrisma().tenant.findUnique({ where: { id: tenantId }, select: { siteMode: true } });
+  if (!tenant) throw new NotFoundError("Store");
+  const plans = await listPublicPlansForSiteMode(tenant.siteMode);
+  const plan = plans.find((candidate) => candidate.tier === input.plan);
+  if (!plan) throw new ValidationError("Choose a plan");
+  const amount = input.interval === "YEARLY" ? plan.priceYearly : plan.priceMonthly;
 
   try {
     return await withTenant(tenantId, async (tx) => {

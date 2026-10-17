@@ -1,6 +1,28 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Terms", description: "The rules for using BizTrackBD: plans, payment, your store and your customers." };
+const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
+
+export const metadata: Metadata = {
+  title: "Terms of Use",
+  description: "The rules for using BizTrackBD: plans, payment, your store and your customers.",
+  alternates: {
+    canonical: `${siteUrl}/terms`,
+  },
+  openGraph: {
+    type: "website",
+    url: `${siteUrl}/terms`,
+    siteName: "BizTrackBD",
+    title: "Terms of Use",
+    description: "Terms and conditions for merchants using the BizTrackBD platform.",
+    images: [{ url: `${siteUrl}/opengraph-image`, width: 1200, height: 630, alt: "BizTrackBD Terms" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Terms of Use",
+    description: "Clear and straightforward terms for store and business owners.",
+    images: [`${siteUrl}/opengraph-image`],
+  },
+};
 
 const UPDATED = "12 October 2026";
 

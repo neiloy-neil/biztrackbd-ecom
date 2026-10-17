@@ -3,12 +3,31 @@ import { listPublishedTemplates, THEMES } from "@biztrackbd/core";
 import { TemplateGallery, type PublishedGalleryTheme } from "@/components/template-gallery";
 import { demoAdminUrl } from "@/lib/demo-admin";
 
+const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
+
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: "eCommerce Store Templates: Ready-to-Use Bangladeshi Storefronts",
+  title: "eCommerce Store & Business Website Templates",
   description:
-    "Explore responsive storefront templates for Bangladeshi businesses. Complete with bKash checkout, size guides, spec tables, and mobile-optimized carts.",
+    "Explore responsive templates for Bangladeshi businesses. Complete with bKash checkout, size guides, spec tables, and mobile-optimized carts.",
+  alternates: {
+    canonical: `${siteUrl}/templates`,
+  },
+  openGraph: {
+    type: "website",
+    url: `${siteUrl}/templates`,
+    siteName: "BizTrackBD",
+    title: "Store & Business Website Templates for Bangladesh",
+    description: "Browse high-converting mobile templates for fashion, gadgets, clinics, dining, and professional services.",
+    images: [{ url: `${siteUrl}/opengraph-image`, width: 1200, height: 630, alt: "BizTrackBD Templates" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Store & Business Website Templates for Bangladesh",
+    description: "Ready-to-use Bangladeshi storefront and business templates.",
+    images: [`${siteUrl}/opengraph-image`],
+  },
 };
 
 const LABELS: Record<string, string> = { fashion: "Fashion", electronics: "Electronics", kids: "Kids", streetwear: "Streetwear", beauty: "Beauty", other: "More" };

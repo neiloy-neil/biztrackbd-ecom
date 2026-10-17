@@ -1,24 +1,111 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { THEMES, listPublicPlans } from "@biztrackbd/core";
-import { HeroMock } from "@/components/hero-mock";
+import { DualHero } from "@/components/dual-hero";
+import { OperationalScenarios } from "@/components/operational-scenarios";
 import { PlanCards } from "@/components/plan-cards";
 import { TemplateCard } from "@/components/template-card";
 import { demoAdminUrl } from "@/lib/demo-admin";
 import { planBullets, taka } from "@/lib/plans";
 
+const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
+
+export const metadata: Metadata = {
+  title: "Online Store & Business Website Platform for Bangladesh",
+  description:
+    "Launch your online store or business website in a day. Sell with bKash, Nagad, and Cash on Delivery. Book Pathao and Steadfast pickups straight from each order with 0% sales commission.",
+  alternates: {
+    canonical: siteUrl,
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_BD",
+    alternateLocale: ["bn_BD"],
+    url: siteUrl,
+    siteName: "BizTrackBD",
+    title: "BizTrackBD: Online Store & Business Website Platform for Bangladesh",
+    description:
+      "Launch your online store or business website in a day. Sell with bKash, Nagad, and Cash on Delivery. Book Pathao and Steadfast pickups straight from each order with 0% sales commission.",
+    images: [
+      {
+        url: `${siteUrl}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "BizTrackBD Platform",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BizTrackBD: Online Store & Business Website Platform for Bangladesh",
+    description:
+      "Launch your online store or business website in a day. Sell with bKash, Nagad, and Cash on Delivery with 0% commission.",
+    images: [`${siteUrl}/opengraph-image`],
+  },
+};
+
 export const dynamic = "force-dynamic";
 
 const FAQ: [string, string][] = [
-  ["Do I need an international credit card to use BizTrackBD?", "No. You never need a dollar card. You pay for your subscription in Bangladeshi Taka using personal or merchant bKash or Nagad."],
-  ["Does BizTrackBD take a cut or commission from my sales?", "Never. We charge 0% commission. You keep 100% of every sale. Your customers pay you directly via bKash, Nagad, or Cash on Delivery."],
-  ["Does BizTrackBD hold my customer's money in an escrow account?", "No. Your money never touches our bank account. Customer payments go straight to your personal or merchant bKash/Nagad number."],
-  ["How does the Cash on Delivery (COD) return check work?", "When a customer places an order, BizTrackBD checks their phone number against courier delivery logs across Pathao and Steadfast. If they have a history of rejecting parcels, the order is flagged so you can request an advance delivery fee or confirm by phone before shipping."],
-  ["Which couriers can I connect?", "Steadfast, Pathao, and RedX. You connect your own courier merchant accounts using your API keys. We encrypt your keys and you can book pickups and print shipping labels in 1 click."],
-  ["Can I run my store completely from my smartphone?", "Yes. Our merchant admin is built mobile-first. You can take photos on your phone, set prices, confirm orders, and book couriers without ever opening a computer."],
-  ["What happens to my data if I cancel or pause my plan?", "Your data is always yours. You can download all your products, customer phone numbers, and order histories as CSV spreadsheets at any time in 1 click."],
+  [
+    "Do I need an international credit card to use BizTrackBD?",
+    "No. You never need a dollar card. You pay for your monthly or yearly plan in Bangladeshi Taka using personal or merchant bKash, Nagad, or local bank transfer.",
+  ],
+  [
+    "Does BizTrackBD take a cut or sales commission from my revenue?",
+    "Never. We charge 0% commission. You keep 100% of every sale. Your customers pay you directly via bKash, Nagad, or Cash on Delivery.",
+  ],
+  [
+    "Does BizTrackBD hold my customer's money in an escrow account?",
+    "No. Your money never touches our bank account. Customer payments go straight to your personal or merchant bKash/Nagad wallet or courier settlement account.",
+  ],
+  [
+    "How does the Cash on Delivery (COD) return fraud protection work?",
+    "When a customer places an order, BizTrackBD checks their phone number against delivery performance records across Pathao and Steadfast. If they have a history of rejecting parcels, the order is flagged so you can request an advance delivery fee or confirm by phone before shipping.",
+  ],
+  [
+    "Can I build a business, clinic, or portfolio website without an online store?",
+    "Yes. BizTrackBD Business is designed specifically for non-ecommerce businesses—such as medical practices, restaurants, consulting firms, service providers, and creators. You get custom domains, bilingual Bangla & English content, WhatsApp direct inquiries, and an organized lead inbox.",
+  ],
+  [
+    "Which couriers can I automate?",
+    "Steadfast, Pathao, and RedX. You connect your own courier merchant accounts using your API keys. We encrypt your keys using AES-256 and you can book pickups and print shipping labels in 1 click.",
+  ],
+  [
+    "Can I run my store or business completely from my smartphone?",
+    "Yes. Our merchant and business admin is built mobile-first. You can upload photos on your phone, set prices, confirm orders, assign leads, and book couriers without ever opening a computer.",
+  ],
+  [
+    "What happens to my data if I cancel or pause my plan?",
+    "Your data is always yours. You can download all your products, customer contacts, leads, and order histories as CSV spreadsheets at any time in 1 click.",
+  ],
 ];
 
 const SHOWCASE = ["kapor", "gadgetstudio", "berber"];
+
+const BUSINESS_SHOWCASE = [
+  {
+    id: "dhaka-bistro",
+    name: "Dhaka Bistro",
+    blurb: "Atmospheric restaurant & dining website with digital QR menu, reservation requests, and location map.",
+    audience: "Restaurants, cafes, bistros & cloud kitchens",
+    live: true,
+  },
+  {
+    id: "modern-clinic",
+    name: "Modern Clinic",
+    blurb: "Doctor profile & medical clinic with verified BMDC credentials, chamber schedules, and appointment requests.",
+    audience: "Specialist doctors, clinics & diagnostic centers",
+    live: true,
+  },
+  {
+    id: "corporate-trust",
+    name: "Corporate Trust",
+    blurb: "Authoritative corporate presence for consultancies, agencies, enterprises, and holding ventures.",
+    audience: "Corporate firms, consultancies & B2B agencies",
+    live: true,
+  },
+];
 
 const faqJsonLd = {
   "@context": "https://schema.org",
@@ -45,353 +132,250 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
-      {/* Handcrafted Hero Section */}
-      <section className="hero hero-center">
+
+      {/* Dual Umbrella Hero with Goal Switcher and Progressive Interactive Rail */}
+      <DualHero
+        fromPriceCommerce={from ? taka(from) : "৳ 699"}
+        fromPriceBusiness="৳ 399"
+      />
+
+      {/* The Messy Before vs BizTrackBD Operating Desk */}
+      <section className="block soft" style={{ borderBottom: "1px solid var(--line)" }}>
         <div className="wrap">
-          <span className="eyebrow">Honest eCommerce Software for Bangladesh</span>
-          <h1>Launch your online store in a day. Sell with bKash, Nagad and Cash on Delivery.</h1>
-          <p className="lead">
-            Run your shop from your phone. Take orders directly into your bKash or Nagad wallet. Book Steadfast and Pathao pickups straight from each order. Zero sales commission, no dollar cards, and plans starting at {from ? taka(from) : "৳ 699"} a month.
-          </p>
-          <div className="cta">
-            <Link href="/start" className="btn btn-primary btn-lg" prefetch={false} data-testid="hero-cta">Start 14-day free trial</Link>
-            <a href={demoAdminUrl()} className="btn btn-secondary btn-lg" data-testid="hero-demo-admin">Try the admin desk (no signup)</a>
+          <div style={{ textAlign: "center", maxWidth: 780, margin: "0 auto 36px" }}>
+            <span
+              className="eyebrow"
+              style={{
+                color: "var(--ink-2)",
+                background: "#ECEEF2",
+                borderColor: "var(--line)",
+                borderWidth: 1,
+                borderStyle: "solid",
+                padding: "4px 14px",
+                borderRadius: 20,
+                fontSize: 12.5,
+                fontWeight: 700,
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
+                display: "inline-block",
+                marginBottom: 12,
+              }}
+            >
+              One Operating Desk
+            </span>
+            <h2 style={{ fontSize: "clamp(28px, 4.5vw, 44px)", letterSpacing: "-1.2px", color: "var(--ink-ledger)", lineHeight: 1.15 }}>
+              Your business should not live in five browser tabs
+            </h2>
+            <p style={{ margin: "14px auto 0", fontSize: 17, color: "var(--ink-2)", lineHeight: 1.6 }}>
+              When orders, customer inquiries, payment checks, and courier bookings are scattered across different apps, mistakes happen and profits disappear.
+            </p>
           </div>
-          <p className="fine">
-            14 days free · No card needed · Bangla and English · 0% commission on sales
-          </p>
-        </div>
-        <div className="wrap" style={{ marginTop: 40 }}>
-          <HeroMock />
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24 }}>
+            {/* The Before Card */}
+            <div
+              className="card ledger-border"
+              style={{
+                padding: "28px 24px",
+                background: "#FFFDFD",
+                border: "1.5px solid #FECACA",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                <span className="status-stamp stamp-risk">THE SCATTERED BEFORE</span>
+                <span style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>5 Tabs &amp; Manual Friction</span>
+              </div>
+              <h3 style={{ margin: 0, fontSize: 20, color: "#991B1B" }}>
+                Messy manual copying &amp; lost revenue
+              </h3>
+              <ul style={{ margin: "16px 0 0", paddingLeft: 20, color: "var(--ink-2)", fontSize: 14, lineHeight: 1.8 }}>
+                <li><strong>Tab 1: Facebook Messenger:</strong> Addresses copied by hand; customer typos go unnoticed.</li>
+                <li><strong>Tab 2: Personal bKash SMS:</strong> Staring at SMS alerts trying to match TrxIDs against customer names.</li>
+                <li><strong>Tab 3: Courier Portals:</strong> Re-typing customer details into Steadfast or Pathao one by one.</li>
+                <li><strong>Tab 4: Spreadsheet:</strong> Out-of-sync stock; overselling items that are already out of stock.</li>
+                <li><strong>Tab 5: Fake COD Returns:</strong> Shipping blind to repeat-refusal buyers, paying ৳130+ return fees.</li>
+              </ul>
+            </div>
+
+            {/* The BizTrackBD Desk Card */}
+            <div
+              className="card ledger-border"
+              style={{
+                padding: "28px 24px",
+                background: "#FFFFFF",
+                border: "1.5px solid #DDD9FC",
+                boxShadow: "0 8px 24px rgba(91, 79, 232, 0.08)",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                <span className="status-stamp stamp-paid">THE BIZTRACKBD DESK</span>
+                <span style={{ fontSize: 12, color: "var(--brand)", fontWeight: 700 }}>One Unified Workflow</span>
+              </div>
+              <h3 style={{ margin: 0, fontSize: 20, color: "var(--brand)" }}>
+                Every order, courier, and taka under control
+              </h3>
+              <ul style={{ margin: "16px 0 0", paddingLeft: 20, color: "var(--ink)", fontSize: 14, lineHeight: 1.8 }}>
+                <li><strong>One Order Desk:</strong> Storefront orders and phone orders converge in one clean status queue.</li>
+                <li><strong>Automated TrxID Verification:</strong> Customers enter bKash/Nagad TrxID; verified straight to your wallet.</li>
+                <li><strong>COD Return Risk Shield:</strong> Checks 6-month courier delivery history before you pack.</li>
+                <li><strong>1-Click Courier Dispatch:</strong> Steadfast &amp; Pathao booking with barcode thermal labels.</li>
+                <li><strong>True Net Profit:</strong> Automated ledger calculates courier fees, product costs, and true net earnings.</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="block">
-        <div className="wrap">
-          <span className="eyebrow">How it works</span>
-          <h2>From setup to first order in three practical steps</h2>
-          <ol className="steps3">
-            <li>
-              <span>01</span>
-              <h3>Pick a template</h3>
-              <p>Ready-to-use stores for clothing, gadgets, kids wear, beauty, and tailoring. Switch designs any time without losing your products or orders.</p>
-            </li>
-            <li>
-              <span>02</span>
-              <h3>Add your products and bKash</h3>
-              <p>Take photos on your phone, set prices in Taka, and enter your bKash or Nagad number. You can also start with sample products to explore.</p>
-            </li>
-            <li>
-              <span>03</span>
-              <h3>Share your link and take orders</h3>
-              <p>Your store goes live immediately at yourname.biztrack.bd. Connect your own custom domain (yourbrand.com) whenever you are ready.</p>
-            </li>
-          </ol>
-        </div>
-      </section>
+      {/* Verifiable Operational Scenarios (Compliance with Claims Proof Policy) */}
+      <OperationalScenarios />
 
-      {/* Built for Bangladesh Operational Reality */}
-      <section className="block soft">
+      {/* Templates Showcase (Commerce & Business) */}
+      <section className="block" style={{ borderTop: "1px solid var(--line)" }}>
         <div className="wrap">
-          <div className="bd-panel">
+          <div className="row-between" style={{ alignItems: "flex-end", gap: 16, flexWrap: "wrap", marginBottom: 28 }}>
             <div>
-              <span className="eyebrow">Built for Bangladesh</span>
-              <h2>Built around how Bangladeshi commerce actually operates</h2>
-              <p className="sub">
-                Not a foreign Western tool with a Taka sign slapped on. Every screen is designed around bKash payments, Cash on Delivery risks, and local courier hubs.
+              <span className="eyebrow">Real Working Websites</span>
+              <h2 style={{ fontSize: "clamp(26px, 4vw, 38px)", letterSpacing: "-1px", color: "var(--ink-ledger)" }}>
+                Start with a template built for your specific business
+              </h2>
+              <p style={{ margin: "8px 0 0", color: "var(--ink-2)", fontSize: 15.5 }}>
+                Switch designs at any time without losing your products, orders, pages, or customer records.
               </p>
-              <div style={{ marginTop: 24 }}>
-                <Link href="/features" className="btn btn-primary" prefetch={false}>
-                  Explore all 6 operational features →
-                </Link>
-              </div>
             </div>
-            <dl className="bd-list">
-              <div>
-                <dt>bKash & Nagad checkout</dt>
-                <dd>Customers enter their TrxID. You confirm it in one tap. Money goes directly to your wallet, not our bank.</dd>
-              </div>
-              <div>
-                <dt>COD return fraud protection</dt>
-                <dd>Checks customer delivery success rates across Pathao and Steadfast before you pack, saving return courier fees.</dd>
-              </div>
-              <div>
-                <dt>Pathao, Steadfast, RedX</dt>
-                <dd>Connect your courier API keys once. Click book pickup and print thermal shipping labels right from the order.</dd>
-              </div>
-              <div>
-                <dt>Division, District, Upazila</dt>
-                <dd>Cascading address dropdowns matching Bangladesh geography, so customers don&apos;t misspell addresses and parcels don&apos;t get lost.</dd>
-              </div>
-              <div>
-                <dt>Automated Bangla SMS</dt>
-                <dd>Send automatic order confirmations, dispatch alerts, and live tracking links in clear Bangla.</dd>
-              </div>
-              <div>
-                <dt>Built for your phone</dt>
-                <dd>Run your full store from your phone while shopping for fabrics in Gausia or stock in Elephant Road.</dd>
-              </div>
-            </dl>
+            <Link href="/templates" className="btn btn-secondary btn-sm" prefetch={false}>
+              Browse Full Template Library &rarr;
+            </Link>
           </div>
-        </div>
-      </section>
 
-      {/* Templates Showcase */}
-      <section className="block">
-        <div className="wrap">
-          <div className="row-between" style={{ alignItems: "flex-end", gap: 16, flexWrap: "wrap" }}>
-            <div>
-              <span className="eyebrow">Storefronts</span>
-              <h2>Real templates you can open and try right now</h2>
-            </div>
-            <Link href="/templates" className="link" prefetch={false}>Browse all templates →</Link>
+          {/* Section Subheading: Online Stores */}
+          <div style={{ marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
+            <span className="status-stamp stamp-paid">COMMERCE STOREFRONTS</span>
+            <span style={{ fontSize: 13, color: "var(--ink-3)" }}>Optimized for bKash, Nagad, and mobile checkout</span>
           </div>
-          <div className="grid g3" style={{ marginTop: 28 }} data-testid="home-templates">
+          <div className="grid g3" style={{ marginBottom: 36 }} data-testid="home-templates">
             {showcase.map((t) => (
               <TemplateCard key={t.id} t={{ ...t, audience: undefined }} compact />
+            ))}
+          </div>
+
+          {/* Section Subheading: Business & Services */}
+          <div style={{ marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
+            <span className="status-stamp stamp-lead">BUSINESS &amp; SERVICE WEBSITES</span>
+            <span style={{ fontSize: 13, color: "var(--ink-3)" }}>Optimized for inquiries, WhatsApp chats, and client bookings</span>
+          </div>
+          <div className="grid g3">
+            {BUSINESS_SHOWCASE.map((t) => (
+              <div
+                key={t.id}
+                className="card ledger-border"
+                style={{
+                  padding: "24px 22px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                  background: "#FFFFFF",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "var(--ink-ledger)" }}>{t.name}</h3>
+                  <span className="pill live" style={{ fontSize: 11 }}>Ready</span>
+                </div>
+                <div style={{ fontSize: 12.5, color: "var(--business)", fontWeight: 600 }}>{t.audience}</div>
+                <p style={{ fontSize: 13.5, color: "var(--ink-2)", lineHeight: 1.5, margin: 0 }}>{t.blurb}</p>
+                <div style={{ marginTop: "auto", paddingTop: 14, borderTop: "1px solid var(--line)", display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <a
+                    href={demoAdminUrl(t.id)}
+                    className="btn btn-secondary btn-sm"
+                    data-testid={`biz-demo-${t.id}`}
+                  >
+                    Try demo desk ↗
+                  </a>
+                  <Link
+                    href={`/start?mode=business&theme=${t.id}`}
+                    className="btn btn-primary btn-sm"
+                    style={{ background: "var(--business)" }}
+                    prefetch={false}
+                  >
+                    Use template
+                  </Link>
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Real Merchant Case Studies */}
-      <section className="block soft">
+      {/* Fair Alternatives Comparison Block */}
+      <section className="block soft" style={{ borderTop: "1px solid var(--line)", borderBottom: "1px solid var(--line)" }}>
         <div className="wrap">
-          <div style={{ textAlign: "center", maxWidth: 760, margin: "0 auto 40px" }}>
-            <span className="eyebrow">Real Merchant Stories</span>
-            <h2>How stores in Dhaka, Chittagong &amp; Sylhet run on BizTrackBD</h2>
-            <p className="sub">
-              Real Bangladeshi sellers who moved away from chaotic Facebook Messenger orders, manual paper ledgers, and costly foreign eCommerce tools.
+          <div style={{ textAlign: "center", maxWidth: 760, margin: "0 auto 36px" }}>
+            <span className="eyebrow">Fair Platform Comparison</span>
+            <h2 style={{ fontSize: "clamp(26px, 4vw, 38px)", letterSpacing: "-1px", color: "var(--ink-ledger)" }}>
+              Choose the right software for the market you operate in
+            </h2>
+            <p style={{ margin: "12px auto 0", fontSize: 16, color: "var(--ink-2)" }}>
+              We respect international platforms and local logistics providers. Here is an honest summary of who each tool is best suited for.
             </p>
           </div>
 
-          <div className="grid g3" style={{ gap: 24 }}>
-            {/* Story 1: Dhaka */}
-            <div
-              className="card"
-              style={{
-                padding: "28px 24px",
-                background: "#FFFFFF",
-                borderRadius: 16,
-                border: "1px solid var(--line)",
-                display: "flex",
-                flexDirection: "column",
-                gap: 14,
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div>
-                  <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: "var(--ink)" }}>
-                    Narayanganj Silk &amp; Handloom
-                  </h3>
-                  <div style={{ fontSize: 13, color: "var(--ink-3)", marginTop: 2 }}>
-                    📍 Elephant Road &amp; Gausia, Dhaka · Clothing
-                  </div>
-                </div>
-                <span className="pill live" style={{ fontSize: 11 }}>Steadfast COD</span>
-              </div>
-
-              <blockquote
-                style={{
-                  margin: "8px 0 0",
-                  fontSize: 14.5,
-                  color: "var(--ink)",
-                  lineHeight: 1.6,
-                  fontStyle: "italic",
-                }}
-              >
-                &ldquo;Before BizTrackBD, we spent 3 hours every evening copying customer addresses from Messenger into our courier app. We lost over ৳ 15,000 every month on fake orders. The COD fraud shield cut our parcel returns by 80%.&rdquo;
-              </blockquote>
-
-              <div
-                style={{
-                  marginTop: "auto",
-                  paddingTop: 14,
-                  borderTop: "1px solid var(--line)",
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 12,
-                  fontSize: 12.5,
-                }}
-              >
-                <div>
-                  <span style={{ color: "var(--ink-3)", display: "block" }}>Monthly shipments</span>
-                  <strong style={{ fontSize: 15, color: "var(--ink)" }}>650+ orders</strong>
-                </div>
-                <div>
-                  <span style={{ color: "var(--ink-3)", display: "block" }}>Courier return rate</span>
-                  <strong style={{ fontSize: 15, color: "#15803D" }}>Dropped to 3.2%</strong>
-                </div>
-              </div>
-            </div>
-
-            {/* Story 2: Chittagong */}
-            <div
-              className="card"
-              style={{
-                padding: "28px 24px",
-                background: "#FFFFFF",
-                borderRadius: 16,
-                border: "1.5px solid var(--brand)",
-                boxShadow: "0 8px 24px rgba(91, 79, 232, 0.08)",
-                display: "flex",
-                flexDirection: "column",
-                gap: 14,
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div>
-                  <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: "var(--ink)" }}>
-                    PortCity Tech Accessories
-                  </h3>
-                  <div style={{ fontSize: 13, color: "var(--ink-3)", marginTop: 2 }}>
-                    📍 GEC Circle, Chittagong · Electronics
-                  </div>
-                </div>
-                <span className="pill" style={{ fontSize: 11 }}>Shopify Switcher</span>
-              </div>
-
-              <blockquote
-                style={{
-                  margin: "8px 0 0",
-                  fontSize: 14.5,
-                  color: "var(--ink)",
-                  lineHeight: 1.6,
-                  fontStyle: "italic",
-                }}
-              >
-                &ldquo;We paid Shopify $39 every month plus currency conversion fees, but our customers wanted to pay with bKash and COD. Switching to BizTrackBD saved us over ৳ 85,000 a year and our store loads in under a second on 4G.&rdquo;
-              </blockquote>
-
-              <div
-                style={{
-                  marginTop: "auto",
-                  paddingTop: 14,
-                  borderTop: "1px solid var(--line)",
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 12,
-                  fontSize: 12.5,
-                }}
-              >
-                <div>
-                  <span style={{ color: "var(--ink-3)", display: "block" }}>Annual savings</span>
-                  <strong style={{ fontSize: 15, color: "var(--brand)" }}>৳ 87,000/yr</strong>
-                </div>
-                <div>
-                  <span style={{ color: "var(--ink-3)", display: "block" }}>Courier dispatch</span>
-                  <strong style={{ fontSize: 15, color: "var(--ink)" }}>1-click Pathao API</strong>
-                </div>
-              </div>
-            </div>
-
-            {/* Story 3: Sylhet */}
-            <div
-              className="card"
-              style={{
-                padding: "28px 24px",
-                background: "#FFFFFF",
-                borderRadius: 16,
-                border: "1px solid var(--line)",
-                display: "flex",
-                flexDirection: "column",
-                gap: 14,
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div>
-                  <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: "var(--ink)" }}>
-                    Surma Valley Organics
-                  </h3>
-                  <div style={{ fontSize: 13, color: "var(--ink-3)", marginTop: 2 }}>
-                    📍 Zindabazar, Sylhet · Artisanal Tea
-                  </div>
-                </div>
-                <span className="pill live" style={{ fontSize: 11 }}>bKash Verified</span>
-              </div>
-
-              <blockquote
-                style={{
-                  margin: "8px 0 0",
-                  fontSize: 14.5,
-                  color: "var(--ink)",
-                  lineHeight: 1.6,
-                  fontStyle: "italic",
-                }}
-              >
-                &ldquo;Customers order from Sylhet, Dhaka, and Rajshahi. When they enter their bKash TrxID, we verify it in 1 tap from our phone. The automatic Bangla SMS with live Pathao tracking makes our brand look 10x more professional.&rdquo;
-              </blockquote>
-
-              <div
-                style={{
-                  marginTop: "auto",
-                  paddingTop: 14,
-                  borderTop: "1px solid var(--line)",
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 12,
-                  fontSize: 12.5,
-                }}
-              >
-                <div>
-                  <span style={{ color: "var(--ink-3)", display: "block" }}>Payment wallet</span>
-                  <strong style={{ fontSize: 15, color: "#E2136E" }}>100% Direct bKash</strong>
-                </div>
-                <div>
-                  <span style={{ color: "var(--ink-3)", display: "block" }}>Customer SMS</span>
-                  <strong style={{ fontSize: 15, color: "var(--ink)" }}>Automated Bangla</strong>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* BizTrackBD vs Shopify Teaser */}
-      <section className="block">
-        <div className="wrap">
-          <div className="demo-band" style={{ background: "#FFFFFF", border: "1px solid var(--line)" }}>
-            <div>
-              <span className="eyebrow">Platform Comparison</span>
-              <h2>Why spend $39/month on Shopify when you sell in Bangladesh?</h2>
-              <p>
-                Shopify requires a passport-endorsed dollar credit card, takes up to 2% of your sales, and has no native Pathao, Steadfast, or bKash TrxID integration. BizTrackBD gives you a complete local store engine for ৳ 699/month, saving you over ৳ 80,000 every year.
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 18 }}>
+            <div className="card ledger-border" style={{ padding: "22px 20px", background: "#FFFFFF" }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "var(--ink-3)", textTransform: "uppercase" }}>Global Benchmark</div>
+              <h3 style={{ margin: "4px 0 8px", fontSize: 18, color: "var(--ink-ledger)" }}>Shopify</h3>
+              <p style={{ fontSize: 13.5, color: "var(--ink-2)", lineHeight: 1.5 }}>
+                <strong>Best for:</strong> Global brands selling internationally in USD/EUR with extensive plugin budgets.
               </p>
+              <div style={{ fontSize: 12.5, color: "var(--ink-3)", marginTop: 10, borderTop: "1px solid var(--line)", paddingTop: 10 }}>
+                Requires passport-endorsed credit card. No native Steadfast or bKash TrxID verification.
+              </div>
             </div>
-            <Link href="/compare" className="btn btn-secondary btn-lg" prefetch={false}>
-              Read the Shopify comparison →
-            </Link>
-          </div>
-        </div>
-      </section>
 
-      {/* Try Admin Demo Banner */}
-      <section className="block">
-        <div className="wrap">
-          <div className="demo-band" data-testid="demo-admin-band">
-            <div>
-              <span className="eyebrow">Try it before signing up</span>
-              <h2>Test the merchant admin with sample products and orders</h2>
-              <p>
-                Open a private store with sample products and orders. Check a real bKash payment, pack an order, book a courier pickup, and see your sales. It is yours to test for three hours. No email or password needed.
+            <div className="card ledger-border" style={{ padding: "22px 20px", background: "#FFFFFF" }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "var(--ink-3)", textTransform: "uppercase" }}>Open Source</div>
+              <h3 style={{ margin: "4px 0 8px", fontSize: 18, color: "var(--ink-ledger)" }}>WooCommerce</h3>
+              <p style={{ fontSize: 13.5, color: "var(--ink-2)", lineHeight: 1.5 }}>
+                <strong>Best for:</strong> Developers with in-house server management and WordPress maintenance capacity.
               </p>
+              <div style={{ fontSize: 12.5, color: "var(--ink-3)", marginTop: 10, borderTop: "1px solid var(--line)", paddingTop: 10 }}>
+                High maintenance overhead; plugin conflicts frequently break checkout during flash sales.
+              </div>
             </div>
-            <a href={demoAdminUrl()} className="btn btn-primary btn-lg" data-testid="demo-admin-cta">
-              Open instant demo
-            </a>
+
+            <div className="card ledger-border" style={{ padding: "22px 20px", background: "#FFFFFF" }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "var(--ink-3)", textTransform: "uppercase" }}>Logistics Ecosystem</div>
+              <h3 style={{ margin: "4px 0 8px", fontSize: 18, color: "var(--ink-ledger)" }}>Pathao Commerce</h3>
+              <p style={{ fontSize: 13.5, color: "var(--ink-2)", lineHeight: 1.5 }}>
+                <strong>Best for:</strong> Sellers operating exclusively within the Pathao logistics network.
+              </p>
+              <div style={{ fontSize: 12.5, color: "var(--ink-3)", marginTop: 10, borderTop: "1px solid var(--line)", paddingTop: 10 }}>
+                Tied to single delivery provider. Less flexibility for multi-courier arbitrage or custom domains.
+              </div>
+            </div>
+
+            <div className="card ledger-border" style={{ padding: "22px 20px", background: "#F4F3FF", border: "1.5px solid var(--brand)" }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "var(--brand)", textTransform: "uppercase" }}>Locally Native Desk</div>
+              <h3 style={{ margin: "4px 0 8px", fontSize: 18, color: "var(--brand)" }}>BizTrackBD</h3>
+              <p style={{ fontSize: 13.5, color: "var(--ink)", lineHeight: 1.5 }}>
+                <strong>Best for:</strong> Bangladeshi sellers &amp; businesses wanting courier neutrality, COD return protection, and 0% commission.
+              </p>
+              <div style={{ fontSize: 12.5, color: "var(--ink-2)", marginTop: 10, borderTop: "1px solid var(--tint-border)", paddingTop: 10 }}>
+                Transparent Taka plans, Steadfast &amp; Pathao integration, phone-first admin, and bilingual websites.
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Pricing Section */}
+      {/* Pricing Preview Section */}
       {plans.length > 0 && (
-        <section className="block soft">
+        <section className="block" style={{ borderBottom: "1px solid var(--line)" }}>
           <div className="wrap" style={{ textAlign: "center" }}>
-            <span className="eyebrow">Honest Pricing</span>
-            <h2 style={{ margin: "0 auto" }}>Simple plans. Zero sales commission.</h2>
-            <p className="sub" style={{ margin: "12px auto 0" }}>
-              Pay monthly or yearly via bKash or Nagad. Cancel any time. We never take a cut of your revenue.
+            <span className="eyebrow">Honest Pricing in Taka</span>
+            <h2 style={{ margin: "0 auto", fontSize: "clamp(28px, 4vw, 42px)", letterSpacing: "-1.2px", color: "var(--ink-ledger)" }}>
+              Simple monthly plans. 0% sales commission.
+            </h2>
+            <p className="sub" style={{ margin: "12px auto 0", fontSize: 16.5, color: "var(--ink-2)" }}>
+              Pay monthly or yearly via bKash or Nagad. 14 days free trial, no credit card needed.
             </p>
             <div style={{ textAlign: "left", marginTop: 32 }}>
               <PlanCards
@@ -407,41 +391,45 @@ export default async function Home() {
                 compactBullets={4}
               />
             </div>
-            <p style={{ marginTop: 24 }}>
-              <Link href="/pricing" className="link" prefetch={false}>Compare all plan features and limits →</Link>
+            <p style={{ marginTop: 28 }}>
+              <Link href="/pricing" className="btn btn-secondary btn-sm" prefetch={false}>
+                Open Plan Recommender &amp; Feature Comparison &rarr;
+              </Link>
             </p>
           </div>
         </section>
       )}
 
-      {/* Trust & Guarantees Bar */}
-      <section className="block">
+      {/* Trust & Operational Guarantees */}
+      <section className="block soft" style={{ borderBottom: "1px solid var(--line)" }}>
         <div className="wrap">
           <div className="trust-grid">
             <div className="trust-item">
-              <b>🔒 We never touch your money</b>
-              <p>Customers pay directly to your bKash, Nagad, or by Cash on Delivery. 0% commission on your sales.</p>
+              <b>🔒 Direct wallet settlement</b>
+              <p>Customers pay directly into your bKash, Nagad, or bank. BizTrackBD never holds your money in escrow.</p>
             </div>
             <div className="trust-item">
-              <b>🔑 Encrypted courier keys</b>
-              <p>Your Steadfast and Pathao API keys are encrypted with AES-256 and never shared with anyone.</p>
+              <b>🔑 AES-256 encrypted courier keys</b>
+              <p>Your Steadfast and Pathao API keys are encrypted at rest and never shared with third parties.</p>
             </div>
             <div className="trust-item">
-              <b>📦 1-click CSV data export</b>
-              <p>Your products, customers, and order history belong to you. Download everything in 1 click at any time.</p>
+              <b>📦 1-click CSV data ownership</b>
+              <p>Your products, customers, and order history belong to you. Download everything as CSV at any time.</p>
             </div>
             <div className="trust-item">
-              <b>💬 Direct WhatsApp support in Dhaka</b>
-              <p>Real support from people who know Bangladesh eCommerce. No generic chatbots that waste your time.</p>
+              <b>💬 Dhaka-based support</b>
+              <p>Direct WhatsApp and phone assistance from specialists who understand local commerce logistics.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="block soft">
+      <section className="block">
         <div className="wrap">
-          <h2 style={{ textAlign: "center", margin: "0 auto" }}>Frequently asked questions</h2>
+          <h2 style={{ textAlign: "center", margin: "0 auto 32px", fontSize: "clamp(26px, 4vw, 38px)", letterSpacing: "-1px" }}>
+            Frequently asked questions
+          </h2>
           <dl className="faq-list">
             {FAQ.map(([q, a]) => (
               <div key={q}>
@@ -454,13 +442,26 @@ export default async function Home() {
       </section>
 
       {/* Closing CTA Band */}
-      <section className="cta-band">
+      <section className="cta-band" style={{ background: "var(--ink-ledger)" }}>
         <div className="wrap">
-          <h2>Start selling the way Bangladesh actually shops</h2>
-          <p>14 days free · No credit card required · Set up in 10 minutes</p>
-          <Link href="/start" className="btn btn-lg btn-primary" prefetch={false}>
-            Start your free 14-day trial
-          </Link>
+          <h2 style={{ color: "#FFFFFF", fontSize: "clamp(28px, 4.5vw, 42px)", letterSpacing: "-1.2px" }}>
+            Put your next order or client inquiry through BizTrackBD
+          </h2>
+          <p style={{ color: "#94A3B8", fontSize: 17, marginTop: 10 }}>
+            14 days free &middot; No credit card required &middot; Set up in 10 minutes
+          </p>
+          <div style={{ marginTop: 24, display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+            <Link href="/start" className="btn btn-lg btn-primary" prefetch={false}>
+              Start your free 14-day trial
+            </Link>
+            <a
+              href={demoAdminUrl()}
+              className="btn btn-lg btn-secondary"
+              style={{ background: "rgba(255,255,255,0.1)", color: "#FFFFFF", borderColor: "rgba(255,255,255,0.2)" }}
+            >
+              Open Live Demo Desk ↗
+            </a>
+          </div>
         </div>
       </section>
     </>

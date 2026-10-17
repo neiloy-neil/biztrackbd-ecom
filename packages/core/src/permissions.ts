@@ -6,7 +6,18 @@ import { ForbiddenError } from "./errors";
  *   billing = payments, domains, billing, and the integration keys (owner only, so a manager never sees secrets)
  *   team    = staff accounts, invites and the audit log
  */
-export const AREAS = ["orders", "products", "customers", "marketing", "reports", "design", "billing", "team"] as const;
+export const AREAS = [
+  "orders",
+  "products",
+  "customers",
+  "leads",
+  "bookings",
+  "marketing",
+  "reports",
+  "design",
+  "billing",
+  "team",
+] as const;
 export type Area = (typeof AREAS)[number];
 
 export type Level = "none" | "view" | "edit";
@@ -19,11 +30,11 @@ const N = "none", V = "view", E = "edit";
  * CONTENT_EDITOR is not on the canvas yet: catalog and store design only.
  */
 export const PERMISSIONS: Record<StaffRole, Record<Area, Level>> = {
-  STORE_OWNER:    { orders: E, products: E, customers: E, marketing: E, reports: E, design: E, billing: E, team: E },
-  STORE_MANAGER:  { orders: E, products: E, customers: E, marketing: E, reports: V, design: E, billing: N, team: N },
-  ORDER_PACKER:   { orders: E, products: E, customers: V, marketing: N, reports: N, design: N, billing: N, team: N },
-  TELEMARKETER:   { orders: V, products: V, customers: E, marketing: N, reports: N, design: N, billing: N, team: N },
-  CONTENT_EDITOR: { orders: N, products: E, customers: N, marketing: N, reports: N, design: E, billing: N, team: N },
+  STORE_OWNER:    { orders: E, products: E, customers: E, leads: E, bookings: E, marketing: E, reports: E, design: E, billing: E, team: E },
+  STORE_MANAGER:  { orders: E, products: E, customers: E, leads: E, bookings: E, marketing: E, reports: V, design: E, billing: N, team: N },
+  ORDER_PACKER:   { orders: E, products: E, customers: V, leads: N, bookings: N, marketing: N, reports: N, design: N, billing: N, team: N },
+  TELEMARKETER:   { orders: V, products: V, customers: E, leads: E, bookings: E, marketing: N, reports: N, design: N, billing: N, team: N },
+  CONTENT_EDITOR: { orders: N, products: E, customers: N, leads: N, bookings: N, marketing: N, reports: N, design: E, billing: N, team: N },
 };
 
 export const ROLE_LABELS: Record<StaffRole, string> = {

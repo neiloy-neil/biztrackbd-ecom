@@ -1,11 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { trackPlatformEvent } from "@/components/platform-tracker";
 
 export function ContactForm() {
+  const [mountedAt] = useState(() => Date.now());
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [consent, setConsent] = useState(false);
+  const [hp, setHp] = useState("");
   const [v, setV] = useState({
     name: "",
     phone: "",
@@ -18,13 +22,22 @@ export function ContactForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!consent) {
+      setError("Please check the consent box to proceed.");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(v),
+        body: JSON.stringify({
+          ...v,
+          hp,
+          elapsedMs: Date.now() - mountedAt,
+          consentGiven: consent,
+        }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
@@ -32,9 +45,6 @@ export function ContactForm() {
       }
       trackPlatformEvent("Lead", {
         topic: v.topic,
-        name: v.name,
-        email: v.email,
-        phone: v.phone,
       });
       setSubmitted(true);
     } catch (err: unknown) {
@@ -171,7 +181,7 @@ export function ContactForm() {
         </label>
       </div>
 
-      <label className="field" style={{ marginBottom: 20 }}>
+      <label className="field" style={{ marginBottom: 16 }}>
         <span className="label">How can we help? *</span>
         <textarea
           className="input"
@@ -183,6 +193,50 @@ export function ContactForm() {
           onChange={(e) => setV({ ...v, message: e.target.value })}
           data-testid="c-message"
         />
+      </label>
+
+      {/* Invisible Honeypot Field */}
+      <div style={{ display: "none" }} aria-hidden="true">
+        <label htmlFor="b_company_fax">Leave this field blank</label>
+        <input
+          id="b_company_fax"
+          type="text"
+          name="b_company_fax"
+          tabIndex={-1}
+          autoComplete="off"
+          value={hp}
+          onChange={(e) => setHp(e.target.value)}
+        />
+      </div>
+
+      {/* Explicit Consent Control */}
+      <label
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 10,
+          fontSize: 13,
+          color: "var(--ink-2)",
+          cursor: "pointer",
+          marginBottom: 20,
+          lineHeight: 1.5,
+        }}
+      >
+        <input
+          type="checkbox"
+          required
+          checked={consent}
+          onChange={(e) => setConsent(e.target.checked)}
+          style={{ marginTop: 2, accentColor: "var(--brand, #5B4FE8)", cursor: "pointer" }}
+          data-testid="c-consent"
+        />
+        <span>
+          I agree to BizTrackBD contacting me via WhatsApp, phone, or email regarding this inquiry, and acknowledge the{" "}
+          <Link href="/privacy" target="_blank" style={{ color: "var(--brand, #5B4FE8)", textDecoration: "underline" }}>
+            Privacy Policy
+          </Link>
+          .
+        </span>
       </label>
 
       {error && (

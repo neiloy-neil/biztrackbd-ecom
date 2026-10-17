@@ -14,6 +14,7 @@ export interface CustomPageManifest {
 
 export interface BusinessTemplateManifest {
   id: string;
+  aliases?: string[];
   name: string;
   blurb: string;
   audience: string;
@@ -593,10 +594,11 @@ export const BUSINESS_TEMPLATES: BusinessTemplateManifest[] = [
     },
   },
 
-  // 3. Business / Company — Corporate Trust
+  // 3. Business / Company — Apex Corporate Advisory
   {
-    id: "corporate-trust",
-    name: "Corporate Trust",
+    id: "apex-corporate",
+    aliases: ["corporate-trust"],
+    name: "Apex Corporate Advisory",
     blurb: "Authoritative, modern corporate presence for enterprises, consultancies, agencies, and institutions.",
     audience: "Corporate firms, holding companies, B2B agencies, consultancies, and ventures",
     baseLook: "kapor",
@@ -1294,10 +1296,185 @@ export const BUSINESS_TEMPLATES: BusinessTemplateManifest[] = [
       },
     },
   },
+
+  // 6. Public Figure & Thought Leader — Public Profile
+  {
+    id: "public-profile",
+    aliases: ["public-figure", "creator-profile"],
+    name: "Public Profile & Leader",
+    blurb: "Distinguished personal profile for authors, public figures, speakers, consultants, and leaders with media kit, op-eds, and speaking booking requests.",
+    audience: "Authors, journalists, public figures, consultants, researchers, thought leaders, and executives",
+    baseLook: "kapor",
+    category: "other",
+    tags: ["public-figure", "speaker", "leader", "author", "consultant", "media"],
+    siteMode: "PORTFOLIO",
+    vertical: "PUBLIC_FIGURE",
+    settings: {
+      accent: "#4338CA",
+      background: "#FAFAFA",
+      text: "#1E1B4B",
+      radius: "soft",
+      font: "editorial",
+      button: "filled",
+      buttonShape: "rounded",
+      buttonSize: "medium",
+      cardRatio: "portrait",
+      cardHover: "lift",
+      spacing: "airy",
+      width: "wide",
+    },
+    pages: {
+      home: {
+        version: 1,
+        sections: [
+          {
+            id: "pf_hero_1",
+            type: "hero",
+            settings: {
+              heading: "Ideas, Insights & Public Engagement",
+              headingBn: "চিন্তা, বিশ্লেষণ ও সামাজিক নেতৃত্ব",
+              subhead: "Author, Keynote Speaker, and Policy Analyst shaping economic reform and digital strategy in Bangladesh.",
+              subheadBn: "লেখক, বক্তা ও অর্থনৈতিক বিশ্লেষক হিসেবে বাংলাদেশের উন্নয়ন রূপরেখায় সক্রিয় অবদান।",
+              ctaText: "Speaking Inquiries",
+              ctaTextBn: "বক্তব্য ও আমন্ত্রণ",
+              ctaLink: "/contact",
+              secondCtaText: "Media Kit & Bio",
+              secondCtaTextBn: "মিডিয়া কিট ও পরিচিতি",
+              secondCtaLink: "/media",
+            },
+          },
+          {
+            id: "pf_articles_1",
+            type: "portfolio-grid",
+            settings: {
+              title: "Featured Op-Eds & Publications",
+              titleBn: "নির্বাচিত লেখা ও প্রবন্ধ",
+              subtitle: "Read recent columns published across leading national dailies and international journals.",
+              subtitleBn: "জাতীয় ও আন্তর্জাতিক পত্রিকায় প্রকাশিত সাম্প্রতিক কলামসমূহ।",
+              columns: "2",
+            },
+          },
+          {
+            id: "pf_contact_1",
+            type: "contact-form",
+            settings: {
+              heading: "Media & Speaking Inquiries",
+              headingBn: "বক্তব্য ও সাক্ষাৎকার সংক্রান্ত যোগাযোগ",
+              subhead: "For keynote speaking, panel participation, media interviews, or advisory roles.",
+              subheadBn: "কী-নোট বক্তব্য, প্যানেল আলোচনা বা মিডিয়া সাক্ষাৎকারের জন্য বার্তা পাঠান।",
+              buttonText: "Submit Invitation",
+              buttonTextBn: "বার্তা পাঠান",
+            },
+          },
+        ],
+      },
+    },
+    customPages: [
+      {
+        slug: "media",
+        title: "Media Kit & Biography",
+        titleBn: "মিডিয়া কিট ও জীবনবৃত্তান্ত",
+        description: "Official biography, high-resolution portrait photographs, and press kit guidelines.",
+        descriptionBn: "অফিসিয়াল জীবনবৃত্তান্ত ও মিডিয়া প্রেস কিট।",
+        layout: {
+          version: 1,
+          sections: [
+            {
+              id: "media_bio_1",
+              type: "rich-text",
+              settings: {
+                title: "Official Biography",
+                titleBn: "অফিসিয়াল পরিচিতি",
+                body: "Regular contributor to national economic forums and international research publications. Available for keynotes, advisory, and academic lectures.",
+                bodyBn: "জাতীয় অর্থনীতি ও আধুনিক প্রযুক্তি বিষয়ক নিয়মিত কলামিস্ট ও বক্তা।",
+              },
+            },
+          ],
+        },
+      },
+      {
+        slug: "contact",
+        title: "Speaking & Advisory Inquiries",
+        titleBn: "আমন্ত্রণ ও যোগাযোগ",
+        description: "Submit invitations for conferences, keynotes, media commentary, and institutional consulting.",
+        descriptionBn: "কনফারেন্স ও সেমিনারে আমন্ত্রণের জন্য যোগাযোগ।",
+        layout: {
+          version: 1,
+          sections: [
+            {
+              id: "contact_section_1",
+              type: "contact-form",
+              settings: {
+                heading: "Send an Official Invitation",
+                headingBn: "অফিসিয়াল আমন্ত্রণ বার্তা পাঠান",
+                subhead: "Please provide event dates, format (virtual or in-person), and topic focus.",
+                subheadBn: "অনুষ্ঠানের তারিখ ও বিষয়ের বিবরণ উল্লেখ করুন।",
+                buttonText: "Submit Official Request",
+                buttonTextBn: "রিকোয়েস্ট পাঠান",
+              },
+            },
+          ],
+        },
+      },
+    ],
+    chrome: {
+      version: 1,
+      header: {
+        logo: "left",
+        sticky: true,
+        search: "none",
+        showLanguage: true,
+        showAccount: false,
+        announcement: {
+          mode: "custom",
+          text: "🎙️ Open for Speaking Engagements & Advisory Roles for 2026/27",
+          textBn: "🎙️ ২০২৬/২৭ এর জন্য কিনোট ও উপদেষ্টা হিসেবে আমন্ত্রণের আবেদন খোলা",
+          link: "/contact",
+          bgColor: "#4338CA",
+          textColor: "#FFFFFF",
+        },
+      },
+      menu: {
+        auto: false,
+        items: [
+          { id: "pf_m1", type: "link", label: "Home", labelBn: "হোম", ref: "", url: "/" },
+          { id: "pf_m2", type: "link", label: "Media Kit", labelBn: "মিডিয়া কিট", ref: "media", url: "/media" },
+          { id: "pf_m3", type: "link", label: "Speaking", labelBn: "আমন্ত্রণ", ref: "contact", url: "/contact" },
+        ],
+      },
+      footer: {
+        columns: [
+          {
+            id: "pff_1",
+            type: "text",
+            title: "Public Engagements",
+            titleBn: "পাবলিক ফোরাম",
+            body: "Engaging in dialogue, research, and public leadership.",
+            bodyBn: "সমাজ ও জাতীয় রূপরেখায় সক্রিয় অংশগ্রহণ।",
+            links: [],
+          },
+          {
+            id: "pff_2",
+            type: "contact",
+            title: "Executive Secretariat",
+            titleBn: "অফিস ও যোগাযোগ",
+            body: "Email: secretariat@leader.org.bd\nDhaka, Bangladesh",
+            bodyBn: "ইমেইলঃ secretariat@leader.org.bd",
+            links: [],
+          },
+        ],
+        copyright: "All rights reserved. Built with BizTrack Business.",
+        copyrightBn: "সর্বস্বত্ব সংরক্ষিত। বিসট্র্যাক বিজনেস-এ নির্মিত।",
+      },
+    },
+  },
 ];
 
 export function getBusinessTemplate(id: string): BusinessTemplateManifest | undefined {
-  return BUSINESS_TEMPLATES.find((t) => t.id === id);
+  const clean = id.toLowerCase().trim();
+  return BUSINESS_TEMPLATES.find(
+    (t) => t.id === clean || t.aliases?.includes(clean)
+  );
 }
 
 export function getBusinessTemplateByVertical(
@@ -1309,3 +1486,4 @@ export function getBusinessTemplateByVertical(
     BUSINESS_TEMPLATES[0]
   );
 }
+

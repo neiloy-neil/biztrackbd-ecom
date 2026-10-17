@@ -62,9 +62,6 @@ export async function generateMetadata(): Promise<Metadata> {
       shortcut: "/favicon.ico",
       apple: "/icon.svg",
     },
-    alternates: {
-      canonical: siteUrl,
-    },
     openGraph: {
       type: "website",
       locale: "en_BD",
@@ -145,6 +142,7 @@ const globalJsonLd = {
 };
 
 import { PlatformTracker } from "@/components/platform-tracker";
+import { SiteNavigation } from "@/components/site-navigation";
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const googleVerification = await getPlatformSiteVerificationCode().catch(() => null);
@@ -160,6 +158,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body>
+        <a className="skip-link" href="#main">Skip to main content</a>
         <PlatformTracker />
         <header className="site-head">
           <div className="wrap row-between">
@@ -170,14 +169,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </svg>
               <span>BizTrack<span style={{ color: "#5B4FE8" }}>BD</span></span>
             </Link>
-            <nav aria-label="Main" className="site-nav">
-              <Link href="/features" prefetch={false}>Features</Link>
-              <Link href="/templates" prefetch={false}>Templates</Link>
-              <Link href="/compare" prefetch={false}>Why Us</Link>
-              <Link href="/migrate" prefetch={false}>Migrate</Link>
-              <Link href="/pricing" prefetch={false}>Pricing</Link>
-              <Link href="/start" className="btn btn-primary btn-sm" prefetch={false}>Start free</Link>
-            </nav>
+
+            <SiteNavigation />
           </div>
         </header>
         <main id="main">{children}</main>
@@ -195,7 +188,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   </div>
                 </div>
                 <p>
-                  Online store software built for Bangladeshi businesses. Sell with bKash, Nagad, and Cash on Delivery with zero commission. Direct Pathao and Steadfast pickup automation.
+                  The Commerce and Business Operating Platform for Bangladesh. Sell products, verify payments, protect against fake COD returns, and capture high-value customer inquiries with 0% sales commission.
                 </p>
                 <div className="foot-sister-badge">
                   A product &amp; sister concern of <strong>The Digital Dude</strong>
@@ -203,33 +196,39 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
 
               <div className="foot-col">
-                <h4>Product</h4>
+                <h4>Platform</h4>
                 <nav aria-label="Product Links">
-                  <Link href="/templates" prefetch={false}>Templates</Link>
-                  <Link href="/features" prefetch={false}>Features</Link>
-                  <Link href="/compare" prefetch={false}>Why Us (vs Shopify)</Link>
+                  <Link href="/product" prefetch={false}>Platform Architecture</Link>
+                  <Link href="/features" prefetch={false}>Commerce Overview</Link>
+                  <Link href="/business" prefetch={false}>Business &amp; Services</Link>
+                  <Link href="/templates" prefetch={false}>Storefront Templates</Link>
+                  <Link href="/business/templates" prefetch={false}>Business Templates</Link>
+                  <Link href="/compare" prefetch={false}>Compare Platforms</Link>
                   <Link href="/migrate" prefetch={false}>Migrate from Shopify</Link>
-                  <Link href="/pricing" prefetch={false}>Pricing</Link>
+                  <Link href="/pricing" prefetch={false}>Transparent Pricing</Link>
                 </nav>
               </div>
 
               <div className="foot-col">
                 <h4>Logistics &amp; Pay</h4>
                 <nav aria-label="Integrations Links">
-                  <Link href="/tools/courier-fraud-checker" prefetch={false}>Free Fraud Checker API</Link>
+                  <Link href="/tools/courier-fraud-checker" prefetch={false}>Free Courier Fraud Checker</Link>
                   <Link href="/couriers#steadfast" prefetch={false}>Steadfast Automation</Link>
                   <Link href="/couriers#pathao" prefetch={false}>Pathao Delivery</Link>
                   <Link href="/couriers#redx" prefetch={false}>RedX Integration</Link>
-                  <Link href="/couriers" prefetch={false}>COD Return Shield</Link>
+                  <Link href="/couriers" prefetch={false}>COD Return Risk Shield</Link>
                 </nav>
               </div>
 
               <div className="foot-col">
-                <h4>Company</h4>
+                <h4>Company &amp; Trust</h4>
                 <nav aria-label="Company Links">
                   <a href="https://digitaldude.co.uk" target="_blank" rel="noopener noreferrer">
                     The Digital Dude ↗
                   </a>
+                  <Link href="/security" prefetch={false}>Security Architecture</Link>
+                  <Link href="/data-ownership" prefetch={false}>Zero Lock-In Charter</Link>
+                  <Link href="/demo" prefetch={false}>Live Sandbox Demos</Link>
                   <Link href="/contact" prefetch={false}>Contact Support</Link>
                   <Link href="/privacy" prefetch={false}>Privacy Policy</Link>
                   <Link href="/terms" prefetch={false}>Terms of Service</Link>
@@ -245,7 +244,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 </a>
                 .
               </div>
-              <div>Dhaka, Bangladesh · London, UK</div>
+              <div>Dhaka, Bangladesh · London, UK · Honest Taka Pricing</div>
             </div>
           </div>
         </footer>

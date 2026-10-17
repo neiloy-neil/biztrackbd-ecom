@@ -132,7 +132,8 @@ export const VERTICAL_OPTIONS: BusinessVerticalOption[] = [
   },
 ];
 
-const STEPS = ["Store & Category", "Store Address", "Account & Launch"] as const;
+const COMMERCE_STEPS = ["Store & Category", "Store Address", "Account & Launch"] as const;
+const BUSINESS_STEPS = ["Business & Industry", "Website Address", "Account & Launch"] as const;
 
 const FIELD_STEP: Record<string, number> = {
   storeName: 0,
@@ -157,7 +158,8 @@ const slug = (s: string) =>
     .slice(0, 30);
 
 export function Wizard({
-  plans,
+  commercePlans,
+  businessPlans,
   themes,
   rootDomain,
   initialPlan,
@@ -170,7 +172,8 @@ export function Wizard({
   verify?: boolean;
   keepCode?: string;
   keptProductsCount?: number;
-  plans: Plan[];
+  commercePlans: Plan[];
+  businessPlans: Plan[];
   themes: Theme[];
   rootDomain: string;
   initialPlan: string;
@@ -321,9 +324,13 @@ export function Wizard({
   const chosenVertical = VERTICAL_OPTIONS.find((c) => c.id === v.businessVertical) ?? VERTICAL_OPTIONS[0]!;
   const isPortfolio = v.siteMode === "PORTFOLIO";
   const isHybrid = v.siteMode === "HYBRID";
+  const steps = isPortfolio ? BUSINESS_STEPS : COMMERCE_STEPS;
+  const plans = isPortfolio ? businessPlans : commercePlans;
   const defaultTheme: Theme = { id: "kapor", name: "Kapor", blurb: "Modern fashion & apparel theme", live: true };
   const chosenTheme: Theme = themes.find((t) => t.id === v.theme) ?? themes[0] ?? defaultTheme;
-  const defaultPlan: Plan = { tier: "PRO", name: "Pro Plan", priceMonthly: 1499, blurb: "Full features with 14-day free trial" };
+  const defaultPlan: Plan = isPortfolio
+    ? { tier: "PRO", name: "Business", priceMonthly: 799, blurb: "Business website features with a 14-day free trial" }
+    : { tier: "PRO", name: "Pro", priceMonthly: 1499, blurb: "Commerce features with a 14-day free trial" };
   const chosenPlan: Plan = plans.find((p) => p.tier === v.plan) ?? plans[0] ?? defaultPlan;
   const displayHost = rootDomain.replace(/:\d+$/, "");
 
@@ -377,12 +384,12 @@ export function Wizard({
             className="progress"
             role="progressbar"
             aria-valuemin={1}
-            aria-valuemax={STEPS.length}
+            aria-valuemax={steps.length}
             aria-valuenow={step + 1}
-            aria-label={`Step ${step + 1} of ${STEPS.length}: ${STEPS[step]}`}
+            aria-label={`Step ${step + 1} of ${steps.length}: ${steps[step]}`}
             style={{ marginBottom: 24 }}
           >
-            {STEPS.map((s, i) => (
+            {steps.map((s, i) => (
               <div key={s} style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
                 <i className={i <= step ? "on" : ""} style={{ height: 6 }} />
                 <span
@@ -813,11 +820,11 @@ export function Wizard({
           {step === 1 && (
             <div data-testid="step-address">
               <h2 style={{ fontSize: 19, marginBottom: 14, color: "var(--ink)", fontWeight: 700 }}>
-                2. Choose your store web address
+                2. Choose your {isPortfolio ? "website" : "store"} web address
               </h2>
               <div className="field">
                 <label className="label" htmlFor="sub">
-                  Store Subdomain URL *
+                  {isPortfolio ? "Website" : "Store"} subdomain URL *
                 </label>
                 <div className="addr">
                   <input
@@ -930,9 +937,9 @@ export function Wizard({
                     lineHeight: 1.5,
                   }}
                 >
-                  💡 <b>Custom Domains Included:</b> You can connect your own custom domain (e.g.{" "}
+                  💡 <b>Custom domain:</b> You can connect your own domain (e.g.{" "}
                   <code style={{ background: "#fff", padding: "1px 5px", borderRadius: 4 }}>www.{v.subdomain || "yourbrand"}.com</code>
-                  ) with free automated SSL certificate at any time inside Store Admin.
+                  ) with an automated SSL certificate from your BizTrackBD dashboard.
                 </div>
               </div>
             </div>
@@ -942,7 +949,7 @@ export function Wizard({
           {step === 2 && (
             <div data-testid="step-account">
               <h2 style={{ fontSize: 19, marginBottom: 14, color: "var(--ink)", fontWeight: 700 }}>
-                3. Store owner credentials & password
+                3. {isPortfolio ? "Website" : "Store"} owner credentials &amp; password
               </h2>
 
               <label className="field">
@@ -983,7 +990,7 @@ export function Wizard({
                   onChange={(e) => set("email", e.target.value)}
                   data-testid="f-email"
                 />
-                <span className="hint">Your main Store Admin login email.</span>
+                <span className="hint">Your main BizTrackBD dashboard login email.</span>
               </label>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -1054,10 +1061,14 @@ export function Wizard({
                 />
                 <div>
                   <b style={{ color: "var(--ink)", fontSize: 14 }}>
-                    Pre-populate {chosenCat.name} sample catalog ({chosenCat.icon})
+                    {isPortfolio
+                      ? `Pre-populate sample ${chosenVertical.name} content (${chosenVertical.icon})`
+                      : `Pre-populate ${chosenCat.name} sample catalog (${chosenCat.icon})`}
                   </b>
                   <div className="muted" style={{ fontSize: 13, marginTop: 2, lineHeight: 1.4 }}>
-                    Includes 3 sample products with Bangladeshi pricing, size/weight variants, and Dhaka / Outside Dhaka delivery rates. You can test orders immediately and edit or delete them anytime.
+                    {isPortfolio
+                      ? "Includes clearly labelled sample services, profile content, and enquiry examples for your selected industry. You can edit or remove them before publishing."
+                      : "Includes 3 sample products with Bangladeshi pricing, variants, and delivery rates. You can test orders and edit or remove them anytime."}
                   </div>
                 </div>
               </label>
@@ -1078,10 +1089,12 @@ export function Wizard({
                 <span style={{ fontSize: 22 }}>🎁</span>
                 <div style={{ flex: 1, fontSize: 13.5, color: "#065F46" }}>
                   <b style={{ display: "block", fontSize: 14, marginBottom: 2 }}>
-                    Pro Plan Free Trial Activated (14 Days · ৳0 Today)
+                    {chosenPlan.name} Trial Selected (14 Days · ৳0 Today)
                   </b>
                   <span>
-                    Includes POS billing, Barcode generator, Steadfast/Pathao courier booking, and bKash/Nagad checkout. No credit card required.
+                    {isPortfolio
+                      ? "Includes your website builder, custom-domain path, structured content, and enquiry inbox. No credit card required."
+                      : "Includes POS billing, barcode tools, courier booking, and bKash/Nagad checkout. No credit card required."}
                   </span>
                 </div>
               </div>
@@ -1125,7 +1138,7 @@ export function Wizard({
                 disabled={pending}
                 data-testid="next"
               >
-                Continue to {STEPS[step + 1]} →
+                Continue to {steps[step + 1]} →
               </button>
             ) : (
               <button
@@ -1155,7 +1168,7 @@ export function Wizard({
       </div>
 
       {/* Right Column: Dynamic Live Preview & Timeline Sidebar */}
-      <aside className="split-side" aria-label="Store Preview & Guarantee">
+      <aside className="split-side" aria-label={isPortfolio ? "Website preview and setup summary" : "Store preview and setup summary"}>
         <div className="side-card">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
             <span className="eyebrow" style={{ margin: 0, fontSize: 11.5 }}>
@@ -1264,25 +1277,29 @@ export function Wizard({
               <div>
                 <b style={{ fontSize: 13.5, color: "var(--ink)" }}>1-Click Auto Login</b>
                 <p className="muted" style={{ fontSize: 12.5, marginTop: 2, lineHeight: 1.4 }}>
-                  No password re-prompts or verification blockers. You will be logged straight into your Store Admin dashboard.
+                  You will be signed in to your BizTrackBD dashboard after account verification and setup complete.
                 </p>
               </div>
             </div>
             <div className="timeline-item">
               <div className="timeline-dot">2</div>
               <div>
-                <b style={{ fontSize: 13.5, color: "var(--ink)" }}>Starter Catalog Ready</b>
+                <b style={{ fontSize: 13.5, color: "var(--ink)" }}>{isPortfolio ? "Starter Website Content" : "Starter Catalog Ready"}</b>
                 <p className="muted" style={{ fontSize: 12.5, marginTop: 2, lineHeight: 1.4 }}>
-                  Your {chosenCat.name} starter items, variants, and Dhaka delivery fees are pre-loaded to test orders right away.
+                  {isPortfolio
+                    ? `Sample ${chosenVertical.name} sections and content are pre-loaded for you to review before publishing.`
+                    : `Your ${chosenCat.name} starter items, variants, and delivery fees are pre-loaded to test orders.`}
                 </p>
               </div>
             </div>
             <div className="timeline-item">
               <div className="timeline-dot">3</div>
               <div>
-                <b style={{ fontSize: 13.5, color: "var(--ink)" }}>bKash & Courier Integration</b>
+                <b style={{ fontSize: 13.5, color: "var(--ink)" }}>{isPortfolio ? "Enquiry & Contact Setup" : "bKash & Courier Integration"}</b>
                 <p className="muted" style={{ fontSize: 12.5, marginTop: 2, lineHeight: 1.4 }}>
-                  Connect your Steadfast/Pathao API and bKash merchant number with a single click.
+                  {isPortfolio
+                    ? "Add your WhatsApp number, contact details, service information, and enquiry preferences from one setup area."
+                    : "Connect your supported courier account and payment details from the integrations area."}
                 </p>
               </div>
             </div>
@@ -1301,9 +1318,19 @@ export function Wizard({
               fontWeight: 600,
             }}
           >
-            <div>🔒 100% money goes directly to you (0% commission)</div>
-            <div>🚚 Steadfast, Pathao & RedX 1-click booking</div>
-            <div>🇧🇩 Dhaka support hotline & Bengali SMS updates</div>
+            {isPortfolio ? (
+              <>
+                <div>🌐 Custom-domain connection path with managed SSL</div>
+                <div>📥 Enquiry inbox with private status and notes</div>
+                <div>🇧🇩 Bangla and English website content support</div>
+              </>
+            ) : (
+              <>
+                <div>🔒 Customer payments go directly to you (0% commission)</div>
+                <div>🚚 Supported courier booking from the order desk</div>
+                <div>🇧🇩 Bangladesh-focused commerce setup</div>
+              </>
+            )}
           </div>
         </div>
       </aside>

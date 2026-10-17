@@ -2,13 +2,30 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ContactForm } from "./contact-form";
 
+const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
+
 export const metadata: Metadata = {
   title: "Contact & Support: Direct WhatsApp & Dhaka Office Assistance",
   description:
     "Get direct human support for your online store. Talk with our Dhaka team on WhatsApp, get help with Steadfast/Pathao API setup, bKash checkout, or Shopify migration.",
+  alternates: {
+    canonical: `${siteUrl}/contact`,
+  },
+  openGraph: {
+    type: "website",
+    url: `${siteUrl}/contact`,
+    siteName: "BizTrackBD",
+    title: "Contact & Support: Direct WhatsApp & Dhaka Office Assistance",
+    description: "Get direct human assistance for courier setup, bKash payments, or migrations.",
+    images: [{ url: `${siteUrl}/opengraph-image`, width: 1200, height: 630, alt: "BizTrackBD Contact" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Contact & Support: Direct WhatsApp & Dhaka Office Assistance",
+    description: "Connect with our local team in Dhaka for setup and platform support.",
+    images: [`${siteUrl}/opengraph-image`],
+  },
 };
-
-const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
 const whatsappNumber = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP ?? "+880 1711 000000";
 const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@biztrack.bd";
 
