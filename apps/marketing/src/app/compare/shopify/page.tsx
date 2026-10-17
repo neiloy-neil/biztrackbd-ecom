@@ -34,12 +34,22 @@ const SHOPIFY_FAQS = [
     a: "Yes. You can export your catalog CSV directly from your Shopify admin and import it into BizTrackBD in a few minutes. Product titles, descriptions, SKU, variants, inventory counts, and images map automatically.",
   },
   {
+    q: "Can I use Shopify for a doctor clinic, restaurant, or professional service firm?",
+    a: "Shopify is built exclusively around the shopping cart and physical product checkout. Attempting to use Shopify for a doctor clinic, law firm, or restaurant requires awkward workarounds, disabling buy buttons via custom liquid code, and paying $39+/month for retail e-commerce features you don't need. BizTrackBD offers dedicated Portfolio and Hybrid modes: you can start with pure appointment bookings and dining menus, and seamlessly unlock ecommerce delivery whenever you expand with 100% data preservation.",
+  },
+  {
     q: "When is Shopify legitimately better than BizTrackBD?",
     a: "Shopify is the superior platform if you are targeting international customers in North America or Europe, selling in USD, GBP, or EUR, accepting international credit cards via Stripe, or running global dropshipping operations with Oberlo/DSers.",
   },
 ];
 
 const COMPARISON_ROWS = [
+  {
+    feature: "Operating Architecture (Multi-Mode)",
+    shopify: "Rigid retail cart only; cannot run a clean clinic schedule or restaurant menu",
+    biztrack: "3 distinct modes: Portfolio (leads & bookings), Hybrid (dual engine), or Commerce (pure retail)",
+    verdict: "BizTrackBD adapts to service, dining, and retail models with zero data loss",
+  },
   {
     feature: "Monthly Base Price",
     shopify: "$39 USD / month (≈ ৳ 5,600 with card tax)",

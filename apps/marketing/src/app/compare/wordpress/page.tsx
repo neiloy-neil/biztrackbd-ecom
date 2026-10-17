@@ -47,12 +47,22 @@ const WP_FAQS = [
     a: "WordPress is legitimately better if you employ an in-house full-stack web developer who wants complete root SSH access to the server, requires custom PHP functions, or needs to integrate with legacy local databases or custom enterprise systems requiring proprietary database schemas.",
   },
   {
+    q: "How does BizTrackBD prevent the database bloat and plugin conflicts common to WooCommerce + WordPress?",
+    a: "On WordPress, combining service appointments with physical store checkout requires running WooCommerce, a booking plugin, a form builder, and a payment gateway bridge simultaneously—bloating the wp_options table and causing fatal PHP memory crashes during updates. BizTrackBD provides a unified multi-mode edge runtime where service booking forms and shopping cart routes run natively in optimized TypeScript with 100% isolated PostgreSQL storage and guaranteed zero data loss.",
+  },
+  {
     q: "Can I manage leads and customer inquiries easily on WordPress?",
     a: "On WordPress, form submissions typically land in your personal email inbox (which often ends up in spam) or requires a separate CRM plugin like FluentCRM or HubSpot. BizTrackBD includes a centralized, mobile-friendly Lead and Booking Inbox out of the box, with 1-tap WhatsApp customer contact, staff assignment, and private follow-up notes.",
   },
 ];
 
 const COMPARISON_ROWS = [
+  {
+    feature: "Hybrid Service + Product Architecture",
+    wp: "Requires heavy WooCommerce + Elementor + booking plugins; prone to fatal PHP conflicts and slow mobile speed",
+    biztrack: "Native Dual-Engine: consultation booking desk and full ecommerce catalog run together with sub-100ms speed",
+    verdict: "Zero plugin conflicts, zero database bloat, and guaranteed zero data loss",
+  },
   {
     feature: "Infrastructure & Server Maintenance",
     wp: "Self-managed cloud VPS; manual PHP, MySQL & SSL updates",

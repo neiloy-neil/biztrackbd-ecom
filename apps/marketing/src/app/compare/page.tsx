@@ -162,6 +162,16 @@ const STOREFRONT_MATRIX: MatrixRow[] = [
     comp3Name: "Pathao Commerce",
   },
   {
+    dimension: "Multi-Mode Architecture & Transition",
+    biztrack: "3 modes (Commerce, Portfolio, Hybrid) with atomic zero-loss transitions",
+    comp1: "Rigid retail cart only; cannot run clean clinic/restaurant menus",
+    comp2: "Requires heavy plugins; database bloat and theme collision risk",
+    comp3: "Locked to basic retail; no service or booking capabilities",
+    comp1Name: "Shopify",
+    comp2Name: "WooCommerce",
+    comp3Name: "Pathao Commerce",
+  },
+  {
     dimension: "Where This Platform Wins",
     biztrack: "All-in-one Bangladesh domestic operations",
     comp1: "Global international sales in USD/EUR",
@@ -174,6 +184,16 @@ const STOREFRONT_MATRIX: MatrixRow[] = [
 ];
 
 const BUSINESS_MATRIX: MatrixRow[] = [
+  {
+    dimension: "Evolution to Full e-Commerce (Dual Engine)",
+    biztrack: "1-Click atomic transition to Hybrid; 100% historical leads preserved",
+    comp1: "Forces upgrade to expensive USD plans ($36+/mo); no local couriers",
+    comp2: "Requires installing WooCommerce + plugins; high risk of fatal PHP crashes",
+    comp3: "Locked to North American payment gateways; no bKash or local delivery",
+    comp1Name: "Wix",
+    comp2Name: "WordPress",
+    comp3Name: "Squarespace",
+  },
   {
     dimension: "Monthly Base Price Currency",
     biztrack: "Flat BDT (৳ 399 - ৳ 1,499)",

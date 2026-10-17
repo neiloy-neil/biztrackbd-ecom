@@ -47,12 +47,22 @@ const WIX_FAQS = [
     a: "Wix is genuinely superior if you are an international agency or designer needing an unconstrained, free-form drag-and-drop canvas where elements can be nudged to exact pixel coordinates. It also has a massive global App Market with hundreds of specialized niche integrations, and excellent global multilingual tools for European and East Asian languages.",
   },
   {
+    q: "What happens if my business starts with a portfolio and later wants to sell merchandise or physical products?",
+    a: "On Wix, adding ecommerce requires upgrading to an expensive international plan in USD ($29–$36/mo), rebuilding store components, and dealing with unsupported local couriers and lack of bKash/Nagad checkout. On BizTrackBD, your store can transition atomically to Hybrid mode: your existing lead capture forms, patient bookings, and customer history remain 100% intact, while instantly unlocking bKash/Nagad checkout and 1-click Steadfast/Pathao courier booking.",
+  },
+  {
     q: "How does Bangla typography render on Wix versus BizTrackBD?",
     a: "Wix often struggles with complex South Asian scripts like Bengali, causing conjunct ligature breakage (যুক্তবর্ণ ত্রুটি) and font fallback flash on mobile devices. BizTrackBD natively embeds Google Fonts Hind Siliguri and Plus Jakarta Sans with optimized subsetting, ensuring crisp, authentic Bangla text rendering across all Android and iOS smartphones.",
   },
 ];
 
 const COMPARISON_ROWS = [
+  {
+    feature: "Evolution from Portfolio to Full Commerce",
+    wix: "Forces upgrade to expensive USD ecommerce plans ($36+/mo); no local couriers or bKash",
+    biztrack: "Atomic 1-click transition to Hybrid mode; bKash & Steadfast dispatch with 100% data preserved",
+    verdict: "Grow from a portfolio to a national retail brand without rebuilding your website",
+  },
   {
     feature: "Monthly Subscription Currency",
     wix: "USD ($17 – $36/month + 15% bank surcharge)",
