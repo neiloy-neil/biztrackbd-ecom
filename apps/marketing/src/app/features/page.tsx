@@ -126,7 +126,7 @@ export default function FeaturesPage() {
             <Link href="/start" className="btn btn-primary btn-lg" prefetch={false}>Start 14-day free trial</Link>
             <a href={demoAdminUrl()} className="btn btn-secondary btn-lg">Try live admin demo</a>
           </div>
-          <p className="fine">No card required · Set up in 10 minutes · Plans from ৳ 699 a month</p>
+          <p className="fine">No card required · Set up in 10 minutes · Plans from ৳ 399 a month</p>
         </div>
       </section>
 
@@ -134,27 +134,58 @@ export default function FeaturesPage() {
         <div className="wrap">
           <div className="features-grid">
             {PILLARS.map((p, idx) => (
-              <div key={p.title} className="card feature-card">
-                <div className="row-between">
-                  <span className="pill">{p.badge}</span>
-                  <span className="feat-num">0{idx + 1}</span>
+              <div
+                key={p.title}
+                className="card feature-card"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  background: "#FFFFFF",
+                  border: "1px solid var(--line, #E2E2EC)",
+                  borderRadius: 16,
+                  padding: 24,
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+                }}
+              >
+                <div className="row-between" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span className="pill" style={{ fontWeight: 700, fontSize: 11, textTransform: "uppercase" }}>{p.badge}</span>
+                    <span className="status-stamp stamp-review" style={{ fontSize: 10 }}>PRODUCTION</span>
+                  </div>
+                  <span className="feat-num" style={{ fontFamily: "monospace", fontWeight: 700, color: "var(--ink-2, #64748B)" }}>PILLAR 0{idx + 1}</span>
                 </div>
-                <h3>{p.title}</h3>
-                <div className="feat-problem">
-                  <strong>The Daily Problem:</strong>
-                  <p>{p.problem}</p>
+                <h3 style={{ fontSize: 20, fontWeight: 800, margin: "0 0 14px", color: "var(--ink, #101828)" }}>{p.title}</h3>
+                <div className="feat-problem" style={{ marginBottom: 12, background: "#FEF2F2", padding: "12px 14px", borderRadius: 8, borderLeft: "3px solid #EF4444" }}>
+                  <strong style={{ display: "block", color: "#991B1B", fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>The Daily Problem</strong>
+                  <p style={{ margin: 0, fontSize: 13.5, color: "#7F1D1D", lineHeight: 1.5 }}>{p.problem}</p>
                 </div>
-                <div className="feat-solution">
-                  <strong>How BizTrackBD Solves It:</strong>
-                  <p>{p.solution}</p>
+                <div className="feat-solution" style={{ marginBottom: 16, background: "#F0FDF4", padding: "12px 14px", borderRadius: 8, borderLeft: "3px solid #22C55E" }}>
+                  <strong style={{ display: "block", color: "#166534", fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>The Operational Solution</strong>
+                  <p style={{ margin: 0, fontSize: 13.5, color: "#14532D", lineHeight: 1.5 }}>{p.solution}</p>
                 </div>
-                <ul className="feat-points">
+                <ul className="feat-points" style={{ listStyle: "none", padding: 0, margin: "0 0 16px", display: "flex", flexDirection: "column", gap: 8 }}>
                   {p.points.map((pt) => (
-                    <li key={pt}>{pt}</li>
+                    <li key={pt} style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 13.5, color: "var(--ink-2, #334155)", lineHeight: 1.45 }}>
+                      <span style={{ color: "var(--brand, #5B4FE8)", fontWeight: 700, fontFamily: "monospace" }}>[✓]</span>
+                      <span>{pt}</span>
+                    </li>
                   ))}
                 </ul>
-                <div className="feat-highlight">
-                  <span>💡 {p.proof}</span>
+                <div
+                  className="feat-highlight"
+                  style={{
+                    marginTop: "auto",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    background: "var(--soft, #F8FAFC)",
+                    padding: "10px 14px",
+                    borderRadius: 8,
+                    border: "1px solid var(--line, #E2E2EC)",
+                  }}
+                >
+                  <span className="status-stamp stamp-paid" style={{ fontSize: 10 }}>VERIFIED PROOF</span>
+                  <span style={{ fontSize: 12.5, fontWeight: 600, color: "var(--ink, #101828)" }}>{p.proof}</span>
                 </div>
                 {p.link && (
                   <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid var(--line)" }}>

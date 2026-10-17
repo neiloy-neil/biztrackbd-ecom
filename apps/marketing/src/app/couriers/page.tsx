@@ -216,25 +216,37 @@ export default function CouriersPage() {
 
             <dl className="bd-list">
               <div>
-                <dt>🛡 Cross-Courier Delivery Scoring</dt>
+                <dt style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span className="status-stamp stamp-paid" style={{ fontSize: 10 }}>API LIVE</span>
+                  <span>Cross-Courier Delivery Scoring</span>
+                </dt>
                 <dd>
                   BizTrackBD verifies the recipient phone number against courier delivery logs. You immediately see whether a shopper accepts 98% of parcels or has a track record of serial rejections.
                 </dd>
               </div>
               <div>
-                <dt>⚠️ Advance Courier Fee Alerts</dt>
+                <dt style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span className="status-stamp stamp-review" style={{ fontSize: 10 }}>FEE ALERT</span>
+                  <span>Automated Advance Courier Fee Alerts</span>
+                </dt>
                 <dd>
                   When a risky order arrives, our admin desk displays an amber warning recommending you collect a ৳ 120 advance courier fee via bKash before packing the box.
                 </dd>
               </div>
               <div>
-                <dt>🗺 District &amp; Thana Cascade Validation</dt>
+                <dt style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span className="status-stamp stamp-paid" style={{ fontSize: 10 }}>GEO CADASTRE</span>
+                  <span>District &amp; Thana Cascade Validation</span>
+                </dt>
                 <dd>
                   Customers select their Division, District, and Upazila from verified dropdowns matching courier hub databases, eliminating misspelled delivery addresses.
                 </dd>
               </div>
               <div>
-                <dt>📱 Automated Dispatch Alerts</dt>
+                <dt style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span className="status-stamp stamp-paid" style={{ fontSize: 10 }}>SMS QUEUE</span>
+                  <span>Automated Dispatch Alerts</span>
+                </dt>
                 <dd>
                   Customers receive automatic SMS reminders when their parcel is handed over to the courier rider, significantly increasing final collection rates.
                 </dd>
@@ -248,7 +260,7 @@ export default function CouriersPage() {
       <section className="block soft" id="setup">
         <div className="wrap">
           <div style={{ textAlign: "center", maxWidth: 760, margin: "0 auto 40px" }}>
-            <span className="eyebrow">Step-by-Step Walkthroughs</span>
+            <span className="eyebrow">Direct Courier Protocols</span>
             <h2>Connecting your courier merchant API keys</h2>
             <p className="sub">
               Takes less than 3 minutes. Your API keys are encrypted with AES-256 and only used to request parcel pickups on your behalf.
@@ -267,9 +279,11 @@ export default function CouriersPage() {
                 border: "1px solid var(--line)",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                <span style={{ fontSize: 24 }}>📦</span>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
                 <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Steadfast Courier</h3>
+                <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: "#F1F5F9", color: "#334155" }}>
+                  STEADFAST_V1
+                </span>
               </div>
               <p style={{ fontSize: 14, color: "var(--ink-2)", lineHeight: 1.55 }}>
                 Popular for fast outside-Dhaka deliveries and daily bKash remittances.
@@ -297,9 +311,11 @@ export default function CouriersPage() {
                 boxShadow: "0 8px 24px rgba(91, 79, 232, 0.1)",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                <span style={{ fontSize: 24 }}>🚀</span>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
                 <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Pathao Courier</h3>
+                <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: "#EEF2FF", color: "#4F46E5" }}>
+                  PATHAO_OAUTH2
+                </span>
               </div>
               <p style={{ fontSize: 14, color: "var(--ink-2)", lineHeight: 1.55 }}>
                 Preferred for high-speed inside-Dhaka deliveries and nationwide coverage.
@@ -326,9 +342,11 @@ export default function CouriersPage() {
                 border: "1px solid var(--line)",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                <span style={{ fontSize: 24 }}>🚚</span>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
                 <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>RedX Delivery</h3>
+                <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: "#F1F5F9", color: "#334155" }}>
+                  REDX_BEARER
+                </span>
               </div>
               <p style={{ fontSize: 14, color: "var(--ink-2)", lineHeight: 1.55 }}>
                 Ideal for high-volume enterprise stores and nationwide parcel fulfillment.

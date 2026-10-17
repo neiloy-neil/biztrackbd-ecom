@@ -221,7 +221,12 @@ export default function DataOwnershipPage() {
             </p>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-xs">
+          <div
+            tabIndex={0}
+            role="region"
+            aria-label="Merchant data export capabilities matrix"
+            className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-xs"
+          >
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--surface-subtle)]">
@@ -234,7 +239,12 @@ export default function DataOwnershipPage() {
               <tbody className="divide-y divide-[var(--border)] font-sans">
                 {EXPORT_CAPABILITIES.map((row, idx) => (
                   <tr key={idx} className="hover:bg-[var(--surface-subtle)] transition">
-                    <td className="p-4 font-bold text-[var(--foreground)]">{row.asset}</td>
+                    <td className="p-4 font-bold text-[var(--foreground)]">
+                      <div className="flex items-center gap-2">
+                        <span className="status-stamp stamp-paid" style={{ fontSize: 9 }}>SOVEREIGN</span>
+                        <span>{row.asset}</span>
+                      </div>
+                    </td>
                     <td className="p-4 font-mono font-bold text-[var(--primary)]">{row.formats}</td>
                     <td className="p-4 text-[var(--muted)] leading-relaxed">{row.includes}</td>
                     <td className="p-4 text-[11px] font-mono text-emerald-700 dark:text-emerald-400">

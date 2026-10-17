@@ -77,7 +77,7 @@ This backlog translates the 17 October 2026 alignment audit into testable work. 
 | COPY-002 | P0 | Correct hashing/privacy/CAPI language | **Resolved & Verified** | SHA-256 copy corrected to cryptographic hashing (not encryption); removed bypass claims in favor of dual-layer server resilience. |
 | COPY-003 | P1 | Create product and terminology glossary | **Resolved & Verified** | Published authoritative reference `docs/57-product-and-terminology-glossary.md` defining Product Families, Plan tiers, and standardizing on "Inquiries", aligned across site navigation, badges, and schemas. |
 | COPY-004 | P1 | Make comparisons balanced | **Resolved & Verified** | Disclosed commercial interest, articulated authentic competitor strengths (Shopify international USD, WooCommerce open-source PHP, Wix free-form visual layout), dual-engine segmented hub (Storefronts vs Business), unified ৳399–৳1,499 pricing across TCO calculator, direct `/migrate` guide cross-links, and new `/compare/wix` & `/compare/wordpress` deep-dives. Verified via `compare_hub_mobile_audit_1792194931158.webp`. |
-| BRAND-001 | P2 | Reduce generic landing-page repetition | In Progress | Operational ledger layout and refined typography. |
+| BRAND-001 | P2 | Reduce generic landing-page repetition | **Resolved & Verified** | Upgraded commercial hubs (`/features`, `/couriers`, `/data-ownership`) replacing repetitive generic emoji cards with authentic operational proof ledger blocks, technical protocol tags (`STEADFAST_V1`, `PATHAO_OAUTH2`, `REDX_BEARER`), unified ৳399 pricing copy, and accessible export matrices with RFC format verification badges. Verified via Next.js 45-route production build. |
 
 ## Release gates
 
