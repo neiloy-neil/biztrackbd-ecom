@@ -85,7 +85,7 @@ export default function Image() {
             ✓ bKash & Nagad TrxID Desk
           </span>
           <span style={{ marginLeft: "auto", fontSize: "20px", fontWeight: 800, color: "#4338CA" }}>
-            From ৳ 699/month
+            From ৳ 399/month
           </span>
         </div>
       </div>

@@ -135,7 +135,7 @@ export default async function Home() {
 
       {/* Dual Umbrella Hero with Goal Switcher and Progressive Interactive Rail */}
       <DualHero
-        fromPriceCommerce={from ? taka(from) : "৳ 699"}
+        fromPriceCommerce={from ? taka(from) : "৳ 399"}
         fromPriceBusiness="৳ 399"
       />
 

@@ -16,7 +16,7 @@ interface DualHeroProps {
 
 export function DualHero({
   initialMode = "commerce",
-  fromPriceCommerce = "৳ 699",
+  fromPriceCommerce = "৳ 399",
   fromPriceBusiness = "৳ 399",
 }: DualHeroProps) {
   const [mode, setMode] = useState<HeroMode>(initialMode);

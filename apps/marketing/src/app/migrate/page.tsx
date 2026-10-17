@@ -256,7 +256,7 @@ export default function MigratePage() {
               <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 10, fontSize: 14, color: "rgba(255,255,255,0.85)" }}>
                 <li style={{ display: "flex", gap: 8 }}>
                   <span style={{ color: "#4ADE80" }}>✓</span>
-                  <span><b>$39 USD/mo Shopify base fee</b> &rarr; Replaced by ৳ 699/mo flat BDT</span>
+                  <span><b>$39 USD/mo Shopify base fee</b> &rarr; Replaced by ৳ 399/mo flat BDT</span>
                 </li>
                 <li style={{ display: "flex", gap: 8 }}>
                   <span style={{ color: "#4ADE80" }}>✓</span>

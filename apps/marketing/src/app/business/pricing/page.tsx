@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ModeArchitectureMatrix } from "@/components/mode-architecture-matrix";
 
 const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
 
@@ -144,7 +145,7 @@ export default function BusinessPricingPage() {
           >
             <span>Need an eCommerce store with Pathao/Steadfast dispatch?</span>
             <Link href="/pricing" style={{ color: "var(--brand)", fontWeight: 700, textDecoration: "underline" }}>
-              View eCommerce Plans (৳699/mo) →
+              View eCommerce Plans (from ৳399/mo) →
             </Link>
           </div>
         </div>
@@ -363,6 +364,18 @@ export default function BusinessPricingPage() {
               </thead>
               <tbody>
                 <tr style={{ borderBottom: "1px solid var(--line)" }}>
+                  <td style={{ padding: "14px 20px", fontWeight: 700, color: "var(--ink-ledger)" }}>Operating Architecture</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center" }}>PORTFOLIO (Lead Engine)</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FFFDF8", fontWeight: 700, color: "var(--business)" }}>PORTFOLIO or HYBRID (Dual)</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", fontWeight: 700 }}>PORTFOLIO or HYBRID (Dual)</td>
+                </tr>
+                <tr style={{ borderBottom: "1px solid var(--line)" }}>
+                  <td style={{ padding: "14px 20px", fontWeight: 700, color: "var(--ink-ledger)" }}>Zero Data Loss Guarantee</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", color: "#027A48", fontWeight: 700 }}>100% Leads Retained</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FFFDF8", color: "#027A48", fontWeight: 700 }}>100% Leads Retained</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", color: "#027A48", fontWeight: 700 }}>100% Leads Retained</td>
+                </tr>
+                <tr style={{ borderBottom: "1px solid var(--line)" }}>
                   <td style={{ padding: "14px 20px", fontWeight: 600 }}>Custom Domain Support</td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>✓ Included</td>
                   <td style={{ padding: "14px 16px", textAlign: "center", background: "#FFFDF8" }}>✓ Included</td>
@@ -379,6 +392,12 @@ export default function BusinessPricingPage() {
                   <td style={{ padding: "14px 16px", textAlign: "center", color: "var(--ink-3)" }}>—</td>
                   <td style={{ padding: "14px 16px", textAlign: "center", background: "#FFFDF8", color: "var(--business)", fontWeight: 700 }}>✓ Included</td>
                   <td style={{ padding: "14px 16px", textAlign: "center", fontWeight: 700 }}>✓ Included</td>
+                </tr>
+                <tr style={{ borderBottom: "1px solid var(--line)" }}>
+                  <td style={{ padding: "14px 20px", fontWeight: 600 }}>Dual Engine Merchandise Sales</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center" }}>Up to 10 products</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FFFDF8", fontWeight: 600, color: "var(--business)" }}>Full Dual Engine (50 items)</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", fontWeight: 600 }}>Full Dual Engine (200 items)</td>
                 </tr>
                 <tr style={{ borderBottom: "1px solid var(--line)" }}>
                   <td style={{ padding: "14px 20px", fontWeight: 600 }}>Custom Pages Limit</td>
@@ -413,6 +432,9 @@ export default function BusinessPricingPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Multi-Mode Architecture & Zero-Data-Loss Transition Matrix */}
+          <ModeArchitectureMatrix />
         </div>
       </section>
 

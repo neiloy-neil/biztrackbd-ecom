@@ -6,6 +6,7 @@ import { PlanCards, type PlanCardData } from "@/components/plan-cards";
 import { PlanRecommender } from "@/components/plan-recommender";
 import { demoAdminUrl } from "@/lib/demo-admin";
 import { handleTabListKeyDown } from "@/lib/a11y";
+import { ModeArchitectureMatrix } from "@/components/mode-architecture-matrix";
 
 export interface ComparisonRow {
   label: string;
@@ -212,6 +213,9 @@ export function PricingView({
         </div>
       </div>
       </div>
+
+      {/* Multi-Mode Architecture & Zero-Data-Loss Transition Matrix */}
+      <ModeArchitectureMatrix />
     </>
   );
 }

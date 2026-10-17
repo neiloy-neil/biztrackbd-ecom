@@ -1293,7 +1293,7 @@ export function Wizard({
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
               <span style={{ color: "var(--ink-3)", fontWeight: 600 }}>Plan:</span>
               <span style={{ color: "var(--ink)", fontWeight: 600 }}>
-                {chosenPlan?.name} (Free Trial, {taka(chosenPlan?.priceMonthly || 699)}/mo after)
+                {chosenPlan?.name} (Free Trial, {taka(chosenPlan?.priceMonthly || 399)}/mo after)
               </span>
             </div>
           </div>

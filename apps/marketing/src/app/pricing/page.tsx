@@ -34,11 +34,13 @@ const lim = (v: number | null) => (v == null ? "Unlimited" : v.toLocaleString("e
 
 /** Features comparison for Online Store plans */
 const STORE_ROWS_DEF: { label: string; of: (p: PlanView) => string }[] = [
+  { label: "Operating Architecture", of: () => "COMMERCE (Full Retail e-Commerce)" },
+  { label: "Mode Transition Guarantee", of: () => "Atomic toggle to HYBRID (100% data preserved)" },
   { label: "Products", of: (p) => lim(p.limits.products) },
   { label: "Orders a month", of: (p) => lim(p.limits.ordersPerMonth) },
   { label: "Staff accounts", of: (p) => lim(p.limits.staff) },
   { label: "Sales commission", of: () => "0%" },
-  { label: "Courier booking from the order", of: (p) => (p.features.courierBooking === "auto" ? "1-click automated" : "By hand") },
+  { label: "Courier booking from the order", of: (p) => (p.features.courierBooking === "auto" ? "1-click automated (Pathao, Steadfast, RedX)" : "By hand") },
   { label: "COD return fraud protection", of: (p) => (p.features.fraud === "full" ? "Full cross-store score" : "Basic check") },
   { label: "Your own custom domain", of: (p) => (p.features.customDomain ? "Included (free SSL)" : "Subdomain only") },
   { label: "SMS credits a month", of: (p) => (p.limits.smsCredits ? `${p.limits.smsCredits.toLocaleString("en-IN")} free` : "Pay as you go") },
@@ -47,6 +49,8 @@ const STORE_ROWS_DEF: { label: string; of: (p: PlanView) => string }[] = [
 
 /** Features comparison for Business Website & Portfolio plans */
 const PORTFOLIO_ROWS: ComparisonRow[] = [
+  { label: "Operating Architecture", starter: "PORTFOLIO (Lead & Booking Engine)", pro: "PORTFOLIO or HYBRID (Dual Engine)", business: "PORTFOLIO or HYBRID (Enterprise Dual)" },
+  { label: "Mode Transition Guarantee", starter: "100% Leads Retained (Zero Data Loss)", pro: "100% Leads Retained (Zero Data Loss)", business: "100% Leads Retained (Zero Data Loss)" },
   { label: "Your own custom domain", starter: "Included (free SSL)", pro: "Included (free SSL)", business: "Included (free SSL)" },
   { label: "Services & portfolio showcase", starter: "Up to 15 items", pro: "Unlimited", business: "Unlimited" },
   { label: "Digital downloads & lead magnets", starter: "Up to 5 files", pro: "Unlimited", business: "Unlimited" },
@@ -55,7 +59,7 @@ const PORTFOLIO_ROWS: ComparisonRow[] = [
   { label: "Digital menu & QR code (food)", starter: "Included", pro: "Included", business: "Included" },
   { label: "Team & doctor profiles", starter: "2 staff accounts", pro: "5 staff accounts", business: "15 staff accounts" },
   { label: "Document & photo storage", starter: "5 GB", pro: "20 GB", business: "100 GB" },
-  { label: "Hybrid store (sell merchandise)", starter: "Up to 10 products", pro: "Up to 50 products", business: "Up to 200 products" },
+  { label: "Hybrid store (sell merchandise)", starter: "Up to 10 products", pro: "Full Dual Engine (up to 50 products)", business: "Full Dual Engine (up to 200 products)" },
   { label: "Sales commission", starter: "0%", pro: "0%", business: "0%" },
 ];
 

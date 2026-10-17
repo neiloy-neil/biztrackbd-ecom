@@ -21,15 +21,15 @@ export function PlanRecommender({ onSelectFamily, onHighlightPlan }: PlanRecomme
     recFamily = "store";
     if (scale === "starter") {
       recTier = "STARTER";
-      recPrice = "৳ 699 / mo";
+      recPrice = "৳ 399 / mo";
       recReason = "Ideal for launching your first store with up to 50 monthly orders and bKash/Nagad checkout.";
     } else if (scale === "growth") {
       recTier = "PRO";
-      recPrice = "৳ 1,499 / mo";
+      recPrice = "৳ 799 / mo";
       recReason = "Best for active D2C brands needing automated Steadfast/Pathao courier booking and full COD fraud protection.";
     } else {
       recTier = "BUSINESS";
-      recPrice = "৳ 2,999 / mo";
+      recPrice = "৳ 1,499 / mo";
       recReason = "Built for high-volume operations with multiple staff accounts, unlimited products, and priority support.";
     }
   } else {
