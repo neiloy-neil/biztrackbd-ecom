@@ -63,8 +63,7 @@ This backlog translates the 17 October 2026 alignment audit into testable work. 
 | --- | --- | --- | --- | --- |
 | API-001 | P0 | Harden contact/lead/booking ingestion | **Resolved & Verified** | Content-Type check (415), 16KB body limit (413), IP rate limit (429), bot shield (`hp` + `elapsedMs`), and consent validation (400) verified via `test_api_contact.js`. |
 | RISK-001 | P0 | Remove fabricated fraud-checker success fallback | **Resolved & Verified** | Fallback 85/Safe removed; upstream failures return error without decrementing user quota. |
-| RISK-002 | P0 | Remove or implement advertised checker REST API | **Resolved & Verified** | Advertised unbuilt REST API and X-API-KEY promises replaced with real-time multi-courier screening badge. |
-| RISK-003 | P1 | Replace process-local/client-controlled checker quota | Planned | Distributed Redis/edge rate limiting. |
+| RISK-003 | P1 | Replace process-local/client-controlled checker quota | **Resolved & Verified** | Durable PostgreSQL `PublicToolUsage` table with atomic upserts, HMAC-SHA256 device cookie signature verification (`bt_dev_sig_v1`), 25-check IP safety ceiling (anonymized salted hash to protect CGNAT users), 10 req/min burst throttling, and automatic in-memory fallback. Verified in `public-quota.test.ts`. |
 | AUTH-001 | P0 | Add dedicated Business permissions | **Resolved & Verified** | Dedicated `leads` and `bookings` areas added to `PERMISSIONS`; positive and negative role assertions pass in `biztrack-business.test.ts`. |
 | LEAD-001 | P1 | Deliver promised lead workspace | **Resolved & Verified** | Admin lead manager updated with inline staff follow-up note taking, WhatsApp contact links, and real-time status management. |
 | BOOK-001 | P1 | Deliver booking workflow | **Resolved & Verified** | Booking details, service, chamber, party size, and status synchronizer implemented. |

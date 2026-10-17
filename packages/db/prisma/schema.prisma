@@ -2848,4 +2848,21 @@ model SiteDownload {
   @@index([tenantId, isPublic, sortOrder])
 }
 
+// ==========================================
+// 41. PUBLIC TOOLS & ANTI-ABUSE RATE LIMITS (RISK-003)
+// ==========================================
+
+model PublicToolUsage {
+  id         String   @id @default(cuid())
+  tool       String
+  bucket     String
+  count      Int      @default(0)
+  lastUsedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([tool, bucket])
+  @@index([tool, bucket])
+}
+
 

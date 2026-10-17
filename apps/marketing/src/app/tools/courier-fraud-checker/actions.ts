@@ -5,6 +5,13 @@ import {
   fetchUnifiedCourierFraud,
   normalizeBdPhone,
   type ExternalCourierFraudData,
+  verifyDeviceToken,
+  resolveClientIp,
+  hashClientIp,
+  checkPublicToolQuota,
+  incrementPublicToolQuota,
+  MAX_DEVICE_DAILY_CHECKS,
+  PUBLIC_TOOL_COURIER_FRAUD,
 } from "@biztrackbd/core";
 
 export interface FraudCheckResult {
@@ -15,87 +22,98 @@ export interface FraudCheckResult {
   error?: string;
 }
 
-const MAX_FREE_DAILY_CHECKS = 5;
+const DEVICE_COOKIE_NAME = "bt_dev_sig_v1";
 
-// In-memory rate limiting map keyed by IP and date
-const ipDailyChecks = new Map<string, { count: number; dateStr: string }>();
+async function getOrAssignDeviceIdentity(): Promise<{ deviceId: string; signedToken: string; isNew: boolean }> {
+  const reqCookies = await cookies();
+  const rawToken = reqCookies.get(DEVICE_COOKIE_NAME)?.value;
+  const verified = verifyDeviceToken(rawToken);
 
-function getDhakaDateStr(): string {
-  // Returns YYYY-MM-DD in UTC+6
-  const now = new Date(Date.now() + 6 * 3600_000);
-  return now.toISOString().slice(0, 10);
+  if (!verified.valid) {
+    reqCookies.set(DEVICE_COOKIE_NAME, verified.signedToken, {
+      maxAge: 365 * 24 * 60 * 60,
+      path: "/",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
+    return { deviceId: verified.deviceId, signedToken: verified.signedToken, isNew: true };
+  }
+
+  return { deviceId: verified.deviceId, signedToken: verified.signedToken, isNew: false };
 }
 
 export async function getRemainingDailyChecks(): Promise<number> {
-  const reqCookies = await cookies();
-  const today = getDhakaDateStr();
-  const val = reqCookies.get("bt_fraud_usage")?.value;
-  if (!val) return MAX_FREE_DAILY_CHECKS;
   try {
-    const [d, c] = val.split(":");
-    if (d === today) {
-      const count = parseInt(c || "0", 10);
-      return Math.max(0, MAX_FREE_DAILY_CHECKS - (isNaN(count) ? 0 : count));
-    }
-  } catch {
-    // ignore
+    const reqHeaders = await headers();
+    const { deviceId } = await getOrAssignDeviceIdentity();
+    const clientIp = resolveClientIp(reqHeaders);
+    const ipHash = hashClientIp(clientIp);
+
+    const quota = await checkPublicToolQuota({
+      deviceId,
+      ipHash,
+      tool: PUBLIC_TOOL_COURIER_FRAUD,
+    });
+
+    return quota.remainingChecks;
+  } catch (err) {
+    console.error("[getRemainingDailyChecks] error", err);
+    return MAX_DEVICE_DAILY_CHECKS;
   }
-  return MAX_FREE_DAILY_CHECKS;
 }
 
 export async function checkCourierFraudAction(phoneInput: string): Promise<FraudCheckResult> {
   const reqHeaders = await headers();
   const reqCookies = await cookies();
 
-  const ip =
-    reqHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    reqHeaders.get("x-real-ip") ||
-    "local-ip";
-
-  const clientCookieId = reqCookies.get("bt_fraud_client_id")?.value || ip;
-  const today = getDhakaDateStr();
-  const trackerKey = `${clientCookieId}_${today}`;
-
-  // Read persisted usage from cookie first, fallback to in-memory tracker
-  let count = 0;
-  const val = reqCookies.get("bt_fraud_usage")?.value;
-  if (val) {
-    const [d, c] = val.split(":");
-    if (d === today) {
-      count = parseInt(c || "0", 10);
-      if (isNaN(count)) count = 0;
-    }
-  }
-  const mem = ipDailyChecks.get(trackerKey);
-  if (mem && mem.dateStr === today && mem.count > count) {
-    count = mem.count;
-  }
-
-  if (count >= MAX_FREE_DAILY_CHECKS) {
-    return {
-      success: false,
-      rateLimited: true,
-      remainingChecks: 0,
-      error:
-        "আজকের জন্য আপনার ৫টি ফ্রি সার্চ কোটা পূর্ণ হয়েছে। আপনার স্টোরে আনলিমিটেড রিয়েল-টাইম ফ্রড গার্ড সক্রিয় করতে ফ্রি একাউন্ট তৈরি করুন।",
-    };
-  }
-
   let phone: string;
   try {
     phone = normalizeBdPhone(phoneInput);
     if (!/^01[3-9]\d{8}$/.test(phone)) {
+      const remaining = await getRemainingDailyChecks();
       return {
         success: false,
-        remainingChecks: Math.max(0, MAX_FREE_DAILY_CHECKS - count),
+        remainingChecks: remaining,
         error: "অনুগ্রহ করে একটি সঠিক ১১ ডিজিটের বাংলাদেশি মোবাইল নম্বর দিন (যেমন: 01712345678)।",
       };
     }
   } catch {
+    const remaining = await getRemainingDailyChecks();
     return {
       success: false,
-      remainingChecks: Math.max(0, MAX_FREE_DAILY_CHECKS - count),
+      remainingChecks: remaining,
       error: "সঠিক মোবাইল নম্বর পাওয়া যায়নি। নম্বরটি ভালো করে চেক করুন।",
+    };
+  }
+
+  const { deviceId, signedToken } = await getOrAssignDeviceIdentity();
+  const clientIp = resolveClientIp(reqHeaders);
+  const ipHash = hashClientIp(clientIp);
+
+  // Check quota across device, IP ceiling, and burst limits
+  const quotaCheck = await checkPublicToolQuota({
+    deviceId,
+    ipHash,
+    tool: PUBLIC_TOOL_COURIER_FRAUD,
+  });
+
+  if (!quotaCheck.allowed) {
+    let errorMessage =
+      "আজকের জন্য আপনার ৫টি ফ্রি সার্চ কোটা পূর্ণ হয়েছে। আপনার স্টোরে আনলিমিটেড রিয়েল-টাইম ফ্রড গার্ড সক্রিয় করতে ফ্রি একাউন্ট তৈরি করুন।";
+
+    if (quotaCheck.reason === "BURST_EXCEEDED") {
+      errorMessage = "খুব দ্রুত অনুসন্ধান করা হয়েছে। অনুগ্রহ করে এক মিনিট অপেক্ষা করে আবার চেষ্টা করুন।";
+    } else if (quotaCheck.reason === "IP_CEILING_EXCEEDED") {
+      errorMessage =
+        "আপনার নেটওয়ার্ক থেকে দৈনিক সর্বোচ্চ ফ্রি ফ্রড চেক কোটা পূর্ণ হয়েছে। আনলিমিটেড সিকিউরিটি পেতে বিজট্র্যাকবিডিতে রেজিস্ট্রেশন করুন।";
+    }
+
+    return {
+      success: false,
+      rateLimited: true,
+      remainingChecks: 0,
+      error: errorMessage,
     };
   }
 
@@ -103,44 +121,41 @@ export async function checkCourierFraudAction(phoneInput: string): Promise<Fraud
     const fraudData = await fetchUnifiedCourierFraud(phone);
 
     if (!fraudData) {
-      // Upstream courier service unavailable - do NOT decrement quota and do NOT fabricate safe score
+      // Upstream courier service unavailable - do NOT decrement quota and do NOT fabricate safe score (RISK-001)
       return {
         success: false,
-        remainingChecks: Math.max(0, MAX_FREE_DAILY_CHECKS - count),
-        error: "কুরিয়ার ডাটাবেজ সাময়িকভাবে অনুপলব্ধ। কোনো ঝুঁকি মূল্যায়ন করা সম্ভব হয়নি। আপনার ফ্রি কোটা কাটা হয়নি। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।",
+        remainingChecks: quotaCheck.remainingChecks,
+        error:
+          "কুরিয়ার ডাটাবেজ সাময়িকভাবে অনুপলব্ধ। কোনো ঝুঁকি মূল্যায়ন করা সম্ভব হয়নি। আপনার ফ্রি কোটা কাটা হয়নি। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।",
       };
     }
 
-    // Increment usage count only upon successful data retrieval
-    count += 1;
-    ipDailyChecks.set(trackerKey, { count, dateStr: today });
-    reqCookies.set("bt_fraud_usage", `${today}:${count}`, {
-      maxAge: 24 * 60 * 60,
-      path: "/",
-      httpOnly: true,
-      sameSite: "lax",
+    // Atomically increment quota only upon successful upstream response
+    const incResult = await incrementPublicToolQuota({
+      deviceId,
+      ipHash,
+      tool: PUBLIC_TOOL_COURIER_FRAUD,
     });
 
-    // Set cookie for browser session tracking if not set
-    if (!reqCookies.get("bt_fraud_client_id")?.value) {
-      reqCookies.set("bt_fraud_client_id", `client_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, {
-        maxAge: 30 * 24 * 60 * 60,
-        path: "/",
-        httpOnly: true,
-        sameSite: "lax",
-      });
-    }
+    // Ensure device token cookie is refreshed
+    reqCookies.set(DEVICE_COOKIE_NAME, signedToken, {
+      maxAge: 365 * 24 * 60 * 60,
+      path: "/",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
 
     return {
       success: true,
       data: fraudData,
-      remainingChecks: Math.max(0, MAX_FREE_DAILY_CHECKS - count),
+      remainingChecks: incResult.remainingChecks,
     };
   } catch (err) {
     console.error("[fraud-checker action] error", err);
     return {
       success: false,
-      remainingChecks: Math.max(0, MAX_FREE_DAILY_CHECKS - count),
+      remainingChecks: quotaCheck.remainingChecks,
       error: "কুরিয়ার সার্ভারে সংযোগ করতে সমস্যা হয়েছে। আপনার ফ্রি কোটা কাটা হয়নি। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।",
     };
   }

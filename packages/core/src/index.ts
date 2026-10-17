@@ -90,6 +90,12 @@ export {
   type ExternalCourierFraudData, type CourierNetworkStats,
 } from "./fraud/courier-api";
 export {
+  signDeviceToken, verifyDeviceToken, resolveClientIp, hashClientIp, getDhakaDayBucket,
+  checkPublicToolQuota, incrementPublicToolQuota, clearPublicQuotaMemoryCache,
+  MAX_DEVICE_DAILY_CHECKS, MAX_IP_DAILY_CHECKS, MAX_BURST_CHECKS_PER_MIN, PUBLIC_TOOL_COURIER_FRAUD,
+  type QuotaCheckResult, type QuotaIncrementResult,
+} from "./fraud/quota";
+export {
   getOrderTrackingTimeline, buildCourierTrackingUrl,
   type OrderTrackingTimeline, type MilestoneStage, type TrackingCheckpoint,
 } from "./orders/tracking";
