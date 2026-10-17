@@ -67,7 +67,7 @@ This backlog translates the 17 October 2026 alignment audit into testable work. 
 | AUTH-001 | P0 | Add dedicated Business permissions | **Resolved & Verified** | Dedicated `leads` and `bookings` areas added to `PERMISSIONS`; positive and negative role assertions pass in `biztrack-business.test.ts`. |
 | LEAD-001 | P1 | Deliver promised lead workspace | **Resolved & Verified** | Admin lead manager updated with inline staff follow-up note taking, WhatsApp contact links, and real-time status management. |
 | BOOK-001 | P1 | Deliver booking workflow | **Resolved & Verified** | Booking details, service, chamber, party size, and status synchronizer implemented. |
-| NOTIFY-001 | P1 | Build reliable notification jobs before SMS claims | Planned | Queue-backed SMS provider integration. |
+| NOTIFY-001 | P1 | Build reliable notification jobs before SMS claims | **Resolved & Verified** | Durable PostgreSQL `NotificationJob` outbox with RLS (`20261106000052_notification_job`), immediate fast-path dispatch, 3-attempt exponential backoff retry scheduling (1m, 5m, 15m), fail-fast permanent refusal classification, concurrency-safe worker sweep (`processPendingNotificationJobs`), and resilient in-memory fallback. Verified via 9/9 passing tests in `notifications-queue.test.ts`. |
 
 ## Epic 7 — Claims, content, and brand coherence
 

@@ -10,8 +10,10 @@ import {
   DEFAULT_MESSAGES, EVENT_BY_NAME, MESSAGE_EVENTS, MESSAGE_LOCALES, renderMessage, smsParts, validateMessage,
   type MessageEvent, type MessageLocale, type MessageVar,
 } from "./shared";
+import { enqueueNotificationJob } from "./queue";
 
 export * from "./shared";
+export * from "./queue";
 
 export interface MessageTemplateView {
   event: MessageEvent;
@@ -139,14 +141,38 @@ export async function notifyOrder(tenantId: string, orderId: string, event: Excl
       return (await consumeSmsCredit(tx, tenantId)) ? ("ok" as const) : ("no_credits" as const);
     });
     if (gate !== "ok") return gate;
-    try {
-      await currentSmsSender().send(tenantId, order.customerPhone, text);
-    } catch (e) {
-      console.error("[messages] sms failed", e instanceof Error ? e.name : "unknown");
-      return "failed";
+    const enq = await enqueueNotificationJob({
+      tenantId,
+      recipient: order.customerPhone,
+      body: text,
+      channel: "SMS",
+      event,
+      metadata: { orderId: order.id, orderNumber: order.orderNumber },
+    });
+
+    if (enq.status === "SENT") {
+      await withTenant(tenantId, (tx) =>
+        recordOrderEvent(tx, tenantId, orderId, {
+          type: "SMS",
+          message: `Told the customer by SMS: ${MESSAGE_EVENTS.find((x) => x.event === event)!.label.toLowerCase()}`,
+          actor: { name: "System" },
+          data: { event, parts: smsParts(text).parts, jobId: enq.jobId },
+        })
+      );
+      return "sent";
+    } else if (enq.status === "PENDING") {
+      await withTenant(tenantId, (tx) =>
+        recordOrderEvent(tx, tenantId, orderId, {
+          type: "SMS",
+          message: `SMS queued for retry: ${MESSAGE_EVENTS.find((x) => x.event === event)!.label.toLowerCase()} (${enq.error ?? "provider timeout"})`,
+          actor: { name: "System" },
+          data: { event, parts: smsParts(text).parts, jobId: enq.jobId, queued: true },
+        })
+      );
+      return "sent";
     }
-    await withTenant(tenantId, (tx) => recordOrderEvent(tx, tenantId, orderId, { type: "SMS", message: `Told the customer by SMS: ${MESSAGE_EVENTS.find((x) => x.event === event)!.label.toLowerCase()}`, actor: { name: "System" }, data: { event, parts: smsParts(text).parts } }));
-    return "sent";
+
+    return "failed";
   } catch (e) {
     if (e instanceof NotFoundError) return "off";
     console.error("[messages] notify failed", e instanceof Error ? e.name : "unknown");

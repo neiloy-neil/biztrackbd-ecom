@@ -183,6 +183,7 @@ model Tenant {
   menuItems             MenuItem[]
   siteContentItems      SiteContentItem[]
   siteDownloads         SiteDownload[]
+  notificationJobs      NotificationJob[]
 
   @@index([subdomain])
   @@index([customDomain])
@@ -2863,6 +2864,34 @@ model PublicToolUsage {
 
   @@unique([tool, bucket])
   @@index([tool, bucket])
+}
+
+// ==========================================
+// 42. ASYNCHRONOUS NOTIFICATION OUTBOX & RETRY QUEUE (NOTIFY-001)
+// ==========================================
+
+model NotificationJob {
+  id          String    @id @default(cuid())
+  tenantId    String
+  channel     String    @default("SMS") // "SMS" | "WHATSAPP" | "EMAIL"
+  event       String    // "ORDER_RECEIVED" | "PAYMENT_CONFIRMED" | "ORDER_SHIPPED" | "DELIVERED" | "ORDER_CANCELLED" | "ABANDONED_RECOVERY" | "BUSINESS_INQUIRY"
+  recipient   String
+  body        String    @db.Text
+  status      String    @default("PENDING") // "PENDING" | "SENT" | "FAILED" | "EXHAUSTED"
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(3)
+  nextRetryAt DateTime? @default(now())
+  lastError   String?   @db.Text
+  sentAt      DateTime?
+  metadata    Json      @default("{}")
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, status, nextRetryAt])
+  @@index([status, nextRetryAt])
+  @@index([tenantId, createdAt])
 }
 
 
