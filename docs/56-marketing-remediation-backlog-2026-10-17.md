@@ -41,8 +41,8 @@ This backlog translates the 17 October 2026 alignment audit into testable work. 
 | SEO-003 | P0 | Remove duplicate brand suffixes and normalize metadata | **Resolved & Verified** | Clean single brand suffix (`%s \| BizTrackBD`) verified across all audited routes. |
 | SEO-004 | P1 | Add Business internal-link cluster | **Resolved & Verified** | Added breadcrumbs, reciprocal sibling business directory, and hub links across all 6 vertical pages. |
 | SEO-005 | P1 | Build `/product`, `/business/templates`, `/business/pricing`, public-profile route | **Resolved & Verified** | Built all 4 first-class routes with self-canonicals, dedicated OG cards, responsive mobile layout (0 overflow), registered in `sitemap.ts` and `site-navigation.tsx`. |
-| SEO-006 | P1 | Split global schema into factual site and route graphs | In Progress | Route-specific SoftwareApplication schemas emit matching plan prices. |
-| SEO-007 | P1 | Use real sitemap modification dates | Planned | Update `lastmod` to content commit timestamps. |
+| SEO-006 | P1 | Split global schema into factual site and route graphs | **Resolved & Verified** | Root layout emits only global Organization and WebSite graph. Commercial routes (`/product`, `/pricing`) emit `SoftwareApplication` with exact ৳399/৳799/৳1,499 tiers; vertical routes emit specialized `MedicalWebPage`, `FoodEstablishment`, `HomeAndConstructionBusiness`, `Corporation`, and `ProfilePage` graphs. |
+| SEO-007 | P1 | Use real sitemap modification dates | **Resolved & Verified** | Automated prebuild script `tools/generate-sitemap-dates.mjs` inspects `git log -1 --format=%cI` for all 45 routes and writes `sitemap-dates.json`, providing 100% authentic ISO commit timestamps in `sitemap.xml`. |
 | SEO-008 | P1 | Restore static/revalidated delivery where possible | **Resolved & Verified** | Production build completes with prerendered static routes and cache headers. |
 
 ## Epic 5 — Consent, analytics, Pixel, and CAPI
@@ -76,7 +76,7 @@ This backlog translates the 17 October 2026 alignment audit into testable work. 
 | --- | --- | --- | --- | --- |
 | COPY-001 | P0 | Remove/qualify unsupported quantitative and guarantee claims | **Resolved & Verified** | Grounded 0.6s load claim, removed guaranteed response time badge, and clarified doctor WhatsApp confirmation receipts. |
 | COPY-002 | P0 | Correct hashing/privacy/CAPI language | **Resolved & Verified** | SHA-256 copy corrected to cryptographic hashing (not encryption); removed bypass claims in favor of dual-layer server resilience. |
-| COPY-003 | P1 | Create product and terminology glossary | Planned | Glossary documentation. |
+| COPY-003 | P1 | Create product and terminology glossary | **Resolved & Verified** | Published authoritative reference `docs/57-product-and-terminology-glossary.md` defining Product Families, Plan tiers, and standardizing on "Inquiries", aligned across site navigation, badges, and schemas. |
 | COPY-004 | P1 | Make comparisons balanced | **Resolved & Verified** | Disclosed commercial interest, articulated authentic competitor strengths (Shopify international USD, WooCommerce open-source PHP, Wix free-form visual layout), dual-engine segmented hub (Storefronts vs Business), unified ৳399–৳1,499 pricing across TCO calculator, direct `/migrate` guide cross-links, and new `/compare/wix` & `/compare/wordpress` deep-dives. Verified via `compare_hub_mobile_audit_1792194931158.webp`. |
 | BRAND-001 | P2 | Reduce generic landing-page repetition | In Progress | Operational ledger layout and refined typography. |
 

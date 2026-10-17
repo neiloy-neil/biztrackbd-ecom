@@ -151,15 +151,36 @@ const FAQ: [string, string][] = [
 
 const schemaJsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "BizTrackBD Doctor & Clinic Website Blueprint",
-  applicationCategory: "BusinessApplication",
-  operatingSystem: "Web, iOS, Android",
-  offers: {
-    "@type": "Offer",
-    price: "799",
-    priceCurrency: "BDT",
-  },
+  "@graph": [
+    {
+      "@type": "MedicalWebPage",
+      "@id": `${siteUrl}/business/doctor-websites#webpage`,
+      url: `${siteUrl}/business/doctor-websites`,
+      name: "Doctor & Medical Clinic Website Builder for Bangladesh",
+      description: "Build a professional website for your medical practice, clinic, or specialist doctor chamber with verified BMDC credentials.",
+      about: {
+        "@type": "MedicalBusiness",
+        name: "Doctor & Medical Chamber Blueprint",
+        areaServed: {
+          "@type": "Country",
+          name: "Bangladesh",
+        },
+      },
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${siteUrl}/business/doctor-websites#software`,
+      name: "BizTrackBD Doctor & Clinic Website Blueprint",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web, iOS, Android",
+      offers: {
+        "@type": "Offer",
+        price: "799",
+        priceCurrency: "BDT",
+        priceValidUntil: "2027-12-31",
+      },
+    },
+  ],
 };
 
 export default function DoctorWebsitesPage() {

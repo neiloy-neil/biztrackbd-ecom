@@ -156,9 +156,66 @@ const CAPABILITIES: CapabilityRow[] = [
   },
 ];
 
+const productJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "@id": `${siteUrl}/product#software`,
+  name: "BizTrackBD Operating Platform",
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "All (Web, Android, iOS PWA)",
+  url: `${siteUrl}/product`,
+  offers: {
+    "@type": "AggregateOffer",
+    priceCurrency: "BDT",
+    lowPrice: "399",
+    highPrice: "1499",
+    offerCount: "3",
+    offers: [
+      {
+        "@type": "Offer",
+        name: "Starter Plan",
+        price: "399",
+        priceCurrency: "BDT",
+        priceValidUntil: "2027-12-31",
+        description: "For personal portfolios, local service firms, and boutique emerging brands.",
+      },
+      {
+        "@type": "Offer",
+        name: "Growth Plan",
+        price: "799",
+        priceCurrency: "BDT",
+        priceValidUntil: "2027-12-31",
+        description: "For active eCommerce stores and clinics dispatching daily orders.",
+      },
+      {
+        "@type": "Offer",
+        name: "Scale Plan",
+        price: "1499",
+        priceCurrency: "BDT",
+        priceValidUntil: "2027-12-31",
+        description: "For high-volume retail operations with multi-staff permission desks.",
+      },
+    ],
+  },
+  featureList: [
+    "bKash and Nagad direct payment verification",
+    "Pathao and Steadfast automated courier dispatch",
+    "Cash on Delivery return fraud prevention",
+    "Bangla SMS notifications",
+    "0% sales commission",
+    "Sub-second mobile storefront speed",
+    "Doctor chamber schedules and consultation requests",
+    "Unified Hybrid eCommerce + Business presence",
+  ],
+};
+
 export default function ProductArchitecturePage() {
   return (
     <div style={{ background: "#FAFAFC", minHeight: "100vh" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
       {/* Hero Header with Gradient Mesh */}
       <section
         className="gradient-mesh-hero"

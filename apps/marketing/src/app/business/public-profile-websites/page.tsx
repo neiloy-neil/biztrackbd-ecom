@@ -168,15 +168,32 @@ const FAQ: [string, string][] = [
 
 const schemaJsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "BizTrackBD Public Profile & Thought Leader Website Platform",
-  applicationCategory: "BusinessApplication",
-  operatingSystem: "Web, iOS, Android",
-  offers: {
-    "@type": "Offer",
-    price: "399",
-    priceCurrency: "BDT",
-  },
+  "@graph": [
+    {
+      "@type": "ProfilePage",
+      "@id": `${siteUrl}/business/public-profile-websites#webpage`,
+      url: `${siteUrl}/business/public-profile-websites`,
+      name: "Public Figure & Thought Leader Website Platform for Bangladesh",
+      description: "Authoritative digital home for authors, speakers, researchers, and public figures with op-eds and speaking invitation forms.",
+      about: {
+        "@type": "Person",
+        name: "Public Leader & Author Blueprint",
+      },
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${siteUrl}/business/public-profile-websites#software`,
+      name: "BizTrackBD Public Profile & Thought Leader Website Platform",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web, iOS, Android",
+      offers: {
+        "@type": "Offer",
+        price: "399",
+        priceCurrency: "BDT",
+        priceValidUntil: "2027-12-31",
+      },
+    },
+  ],
 };
 
 export default function PublicProfileWebsitesPage() {

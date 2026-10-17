@@ -151,15 +151,36 @@ const FAQ: [string, string][] = [
 
 const schemaJsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "BizTrackBD Corporate Website Blueprint",
-  applicationCategory: "BusinessApplication",
-  operatingSystem: "Web, iOS, Android",
-  offers: {
-    "@type": "Offer",
-    price: "799",
-    priceCurrency: "BDT",
-  },
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": `${siteUrl}/business/company-website#webpage`,
+      url: `${siteUrl}/business/company-website`,
+      name: "Corporate & Consulting Website Builder for Bangladesh",
+      description: "Authoritative corporate presence, practice areas, leadership team bios, and corporate RFP inquiry capture.",
+      about: {
+        "@type": "Corporation",
+        name: "Corporate & B2B Advisory Blueprint",
+        areaServed: {
+          "@type": "Country",
+          name: "Bangladesh",
+        },
+      },
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${siteUrl}/business/company-website#software`,
+      name: "BizTrackBD Corporate Website Blueprint",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web, iOS, Android",
+      offers: {
+        "@type": "Offer",
+        price: "799",
+        priceCurrency: "BDT",
+        priceValidUntil: "2027-12-31",
+      },
+    },
+  ],
 };
 
 export default function CompanyWebsitePage() {

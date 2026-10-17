@@ -151,15 +151,37 @@ const FAQ: [string, string][] = [
 
 const schemaJsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "BizTrackBD Restaurant & Dining Website Blueprint",
-  applicationCategory: "BusinessApplication",
-  operatingSystem: "Web, iOS, Android",
-  offers: {
-    "@type": "Offer",
-    price: "799",
-    priceCurrency: "BDT",
-  },
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": `${siteUrl}/business/restaurant-websites#webpage`,
+      url: `${siteUrl}/business/restaurant-websites`,
+      name: "Restaurant & Dining Website Builder for Bangladesh",
+      description: "Digital QR menus, contactless table ordering, and table reservation management for Bangladeshi restaurants.",
+      about: {
+        "@type": "FoodEstablishment",
+        name: "Restaurant & Dining Blueprint",
+        servesCuisine: ["Bengali", "Continental", "Asian Fusion"],
+        areaServed: {
+          "@type": "Country",
+          name: "Bangladesh",
+        },
+      },
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${siteUrl}/business/restaurant-websites#software`,
+      name: "BizTrackBD Restaurant & Dining Website Blueprint",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web, iOS, Android",
+      offers: {
+        "@type": "Offer",
+        price: "799",
+        priceCurrency: "BDT",
+        priceValidUntil: "2027-12-31",
+      },
+    },
+  ],
 };
 
 export default function RestaurantWebsitesPage() {

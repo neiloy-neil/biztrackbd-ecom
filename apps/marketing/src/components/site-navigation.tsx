@@ -165,10 +165,10 @@ export function SiteNavigation() {
               <div className="dropdown-item-body">
                 <div className="dropdown-item-title">
                   <span>Business Websites</span>
-                  <span className="status-stamp stamp-lead">Enquire</span>
+                  <span className="status-stamp stamp-lead">Inquire</span>
                 </div>
                 <div className="dropdown-item-desc">
-                  Company presence, local services, portfolios, menus, and an organised enquiry inbox.
+                  Company presence, local services, portfolios, menus, and an organized inquiry inbox.
                 </div>
               </div>
             </Link>
@@ -180,7 +180,7 @@ export function SiteNavigation() {
                   <span className="status-stamp stamp-review">Both</span>
                 </div>
                 <div className="dropdown-item-desc">
-                  Generate client enquiries and sell products from one brand website.
+                  Generate client inquiries and sell products from one brand website.
                 </div>
               </div>
             </Link>

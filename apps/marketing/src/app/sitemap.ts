@@ -1,227 +1,230 @@
 import type { MetadataRoute } from "next";
+import sitemapDates from "@/lib/sitemap-dates.json";
 
 const origin = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
+const dates = sitemapDates as Record<string, string>;
+const FALLBACK_DATE = new Date("2026-10-17T00:00:00.000Z");
 
-// Milestone-based release timestamps for authentic search engine indexing
-const RELEASE_OCT_17 = new Date("2026-10-17T00:00:00.000Z"); // Newly revised comparison suite, TCO calculator, Business verticals, demo chooser
-const RELEASE_OCT_10 = new Date("2026-10-10T00:00:00.000Z"); // Feature deep dives, migration guides, fraud checker tool
-const RELEASE_OCT_01 = new Date("2026-10-01T00:00:00.000Z"); // Core templates, security, privacy, terms
+function getModifiedDate(path: string): Date {
+  const iso = dates[path];
+  return iso ? new Date(iso) : FALLBACK_DATE;
+}
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
       url: `${origin}/`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/"),
       changeFrequency: "daily",
       priority: 1.0,
     },
     {
       url: `${origin}/business`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/business"),
       changeFrequency: "daily",
       priority: 0.95,
     },
     {
       url: `${origin}/demo`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/demo"),
       changeFrequency: "weekly",
       priority: 0.95,
     },
     {
       url: `${origin}/features/cod-fraud-protection`,
-      lastModified: RELEASE_OCT_10,
+      lastModified: getModifiedDate("/features/cod-fraud-protection"),
       changeFrequency: "daily",
       priority: 0.95,
     },
     {
       url: `${origin}/features/courier-automation`,
-      lastModified: RELEASE_OCT_10,
+      lastModified: getModifiedDate("/features/courier-automation"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${origin}/features/bkash-nagad-cod`,
-      lastModified: RELEASE_OCT_10,
+      lastModified: getModifiedDate("/features/bkash-nagad-cod"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${origin}/features/profit-cod-reconciliation`,
-      lastModified: RELEASE_OCT_10,
+      lastModified: getModifiedDate("/features/profit-cod-reconciliation"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${origin}/features/meta-pixel-capi`,
-      lastModified: RELEASE_OCT_10,
+      lastModified: getModifiedDate("/features/meta-pixel-capi"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${origin}/business/company-website`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/business/company-website"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${origin}/business/service-websites`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/business/service-websites"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${origin}/business/doctor-websites`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/business/doctor-websites"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${origin}/business/restaurant-websites`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/business/restaurant-websites"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${origin}/business/portfolio-websites`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/business/portfolio-websites"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${origin}/business/public-profile-websites`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/business/public-profile-websites"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${origin}/business/templates`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/business/templates"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${origin}/business/pricing`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/business/pricing"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${origin}/product`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/product"),
       changeFrequency: "weekly",
       priority: 0.95,
     },
     {
       url: `${origin}/tools/courier-fraud-checker`,
-      lastModified: RELEASE_OCT_10,
+      lastModified: getModifiedDate("/tools/courier-fraud-checker"),
       changeFrequency: "daily",
       priority: 0.95,
     },
     {
       url: `${origin}/features`,
-      lastModified: RELEASE_OCT_10,
+      lastModified: getModifiedDate("/features"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${origin}/compare`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/compare"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${origin}/compare/shopify`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/compare/shopify"),
       changeFrequency: "weekly",
       priority: 0.85,
     },
     {
       url: `${origin}/compare/woocommerce`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/compare/woocommerce"),
       changeFrequency: "weekly",
       priority: 0.85,
     },
     {
       url: `${origin}/compare/pathao-commerce`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/compare/pathao-commerce"),
       changeFrequency: "weekly",
       priority: 0.85,
     },
     {
       url: `${origin}/compare/wix`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/compare/wix"),
       changeFrequency: "weekly",
       priority: 0.85,
     },
     {
       url: `${origin}/compare/wordpress`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/compare/wordpress"),
       changeFrequency: "weekly",
       priority: 0.85,
     },
     {
       url: `${origin}/security`,
-      lastModified: RELEASE_OCT_01,
+      lastModified: getModifiedDate("/security"),
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${origin}/data-ownership`,
-      lastModified: RELEASE_OCT_01,
+      lastModified: getModifiedDate("/data-ownership"),
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${origin}/migrate`,
-      lastModified: RELEASE_OCT_10,
+      lastModified: getModifiedDate("/migrate"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${origin}/migrate/shopify`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/migrate/shopify"),
       changeFrequency: "weekly",
       priority: 0.85,
     },
     {
       url: `${origin}/migrate/woocommerce`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/migrate/woocommerce"),
       changeFrequency: "weekly",
       priority: 0.85,
     },
     {
       url: `${origin}/templates`,
-      lastModified: RELEASE_OCT_01,
+      lastModified: getModifiedDate("/templates"),
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
       url: `${origin}/pricing`,
-      lastModified: RELEASE_OCT_17,
+      lastModified: getModifiedDate("/pricing"),
       changeFrequency: "weekly",
       priority: 0.85,
     },
     {
       url: `${origin}/couriers`,
-      lastModified: RELEASE_OCT_01,
+      lastModified: getModifiedDate("/couriers"),
       changeFrequency: "weekly",
       priority: 0.85,
     },
     {
       url: `${origin}/contact`,
-      lastModified: RELEASE_OCT_01,
+      lastModified: getModifiedDate("/contact"),
       changeFrequency: "monthly",
       priority: 0.6,
     },
     {
       url: `${origin}/privacy`,
-      lastModified: RELEASE_OCT_01,
+      lastModified: getModifiedDate("/privacy"),
       changeFrequency: "monthly",
       priority: 0.5,
     },
     {
       url: `${origin}/terms`,
-      lastModified: RELEASE_OCT_01,
+      lastModified: getModifiedDate("/terms"),
       changeFrequency: "monthly",
       priority: 0.5,
     },

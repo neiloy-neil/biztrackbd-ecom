@@ -151,15 +151,32 @@ const FAQ: [string, string][] = [
 
 const schemaJsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "BizTrackBD Personal & Creator Portfolio Blueprint",
-  applicationCategory: "BusinessApplication",
-  operatingSystem: "Web, iOS, Android",
-  offers: {
-    "@type": "Offer",
-    price: "399",
-    priceCurrency: "BDT",
-  },
+  "@graph": [
+    {
+      "@type": "ProfilePage",
+      "@id": `${siteUrl}/business/portfolio-websites#webpage`,
+      url: `${siteUrl}/business/portfolio-websites`,
+      name: "Portfolio & Creator Website Builder for Bangladesh",
+      description: "Structured case studies, CV downloads, and freelance consultation briefs for creators and consultants.",
+      about: {
+        "@type": "Person",
+        name: "Creator & Consultant Blueprint",
+      },
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${siteUrl}/business/portfolio-websites#software`,
+      name: "BizTrackBD Personal & Creator Portfolio Blueprint",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web, iOS, Android",
+      offers: {
+        "@type": "Offer",
+        price: "399",
+        priceCurrency: "BDT",
+        priceValidUntil: "2027-12-31",
+      },
+    },
+  ],
 };
 
 export default function PortfolioWebsitesPage() {

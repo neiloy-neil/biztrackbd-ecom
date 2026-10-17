@@ -151,15 +151,36 @@ const FAQ: [string, string][] = [
 
 const schemaJsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "BizTrackBD Local Service Business Blueprint",
-  applicationCategory: "BusinessApplication",
-  operatingSystem: "Web, iOS, Android",
-  offers: {
-    "@type": "Offer",
-    price: "799",
-    priceCurrency: "BDT",
-  },
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": `${siteUrl}/business/service-websites#webpage`,
+      url: `${siteUrl}/business/service-websites`,
+      name: "Local Service Business Website Builder for Bangladesh",
+      description: "Transparent pricing tiers, neighborhood coverage maps, and direct WhatsApp quote requests for service businesses.",
+      about: {
+        "@type": "HomeAndConstructionBusiness",
+        name: "Local Service Provider Blueprint",
+        areaServed: {
+          "@type": "Country",
+          name: "Bangladesh",
+        },
+      },
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${siteUrl}/business/service-websites#software`,
+      name: "BizTrackBD Local Service Business Blueprint",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web, iOS, Android",
+      offers: {
+        "@type": "Offer",
+        price: "799",
+        priceCurrency: "BDT",
+        priceValidUntil: "2027-12-31",
+      },
+    },
+  ],
 };
 
 export default function ServiceWebsitesPage() {
