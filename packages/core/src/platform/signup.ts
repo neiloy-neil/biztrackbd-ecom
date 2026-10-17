@@ -290,9 +290,12 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
     if (kept) {
       keptPage = await copyKeptPage(kept.demoTenantId, id, { userId: result.ownerId, email: result.ownerEmail, name: result.ownerName, role: "STORE_OWNER" }, keptPictures);
       await finishKeep(kept.demoTenantId);
-    } else if (input.demoData && input.siteMode === "PORTFOLIO") {
+    } else if (input.demoData && (input.siteMode === "PORTFOLIO" || (input.siteMode === "HYBRID" && Boolean(input.businessVertical)))) {
       try {
-        await seedBusinessDemoStore(id, input.theme || input.businessVertical || "dhaka-bistro");
+        await seedBusinessDemoStore(id, input.theme || input.businessVertical || "dhaka-bistro", {
+          modeOverride: input.siteMode,
+          preserveStoreInfo: true,
+        });
       } catch (e) {
         console.error("seedBusinessDemoStore during signup failed", e);
       }

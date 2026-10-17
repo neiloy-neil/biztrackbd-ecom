@@ -4,12 +4,17 @@ import {
   findBusinessDemoTemplate,
   type BusinessDemoTemplate,
 } from "./business-templates";
-import { setTenantModeAndVertical } from "../site/mode";
+import { setTenantModeAndVertical, type SiteMode } from "../site/mode";
 import { upsertMenuCategory, upsertMenuItem } from "../site/menu";
 import { upsertContentItem } from "../site/content-items";
 import { upsertDownload } from "../site/downloads";
 import { getBusinessTemplateByVertical, BUSINESS_TEMPLATES } from "../site/templates/manifests";
 import { installTemplateForNewStore, type TemplateInfo } from "../platform/templates";
+
+export interface SeedBusinessStoreOptions {
+  modeOverride?: SiteMode;
+  preserveStoreInfo?: boolean;
+}
 
 /**
  * Seeds authentic business domain records (Menu categories/dishes, Content Items,
@@ -17,7 +22,8 @@ import { installTemplateForNewStore, type TemplateInfo } from "../platform/templ
  */
 export async function seedBusinessDemoStore(
   tenantId: string,
-  templateIdOrHost: string
+  templateIdOrHost: string,
+  options?: SeedBusinessStoreOptions
 ): Promise<{ ok: boolean; template: BusinessDemoTemplate }> {
   const template = findBusinessDemoTemplate(templateIdOrHost);
   if (!template) {
@@ -25,10 +31,15 @@ export async function seedBusinessDemoStore(
   }
 
   // 1. Set tenant siteMode and businessVertical
-  await setTenantModeAndVertical(tenantId, "PORTFOLIO", template.vertical);
+  const targetMode = options?.modeOverride || "PORTFOLIO";
+  await setTenantModeAndVertical(tenantId, targetMode, template.vertical);
 
   // 2. Update storeSettings & themeInstall
   await withTenant(tenantId, async (tx) => {
+    const existing = options?.preserveStoreInfo
+      ? await tx.storeSettings.findUnique({ where: { tenantId } })
+      : null;
+
     await tx.storeSettings.upsert({
       where: { tenantId },
       create: {
@@ -41,15 +52,20 @@ export async function seedBusinessDemoStore(
         addressLine: template.address,
         description: template.description,
       },
-      update: {
-        storeName: template.name,
-        storeNameBn: template.nameBn,
-        tagline: template.tagline,
-        contactPhone: template.phone,
-        whatsappNumber: template.whatsapp,
-        addressLine: template.address,
-        description: template.description,
-      },
+      update: options?.preserveStoreInfo && existing
+        ? {
+            tagline: existing.tagline || template.tagline,
+            description: existing.description || template.description,
+          }
+        : {
+            storeName: template.name,
+            storeNameBn: template.nameBn,
+            tagline: template.tagline,
+            contactPhone: template.phone,
+            whatsappNumber: template.whatsapp,
+            addressLine: template.address,
+            description: template.description,
+          },
     });
 
     const manifest = getBusinessTemplateByVertical(template.vertical);
