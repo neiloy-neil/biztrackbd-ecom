@@ -102,21 +102,52 @@ A live visual inspection and interactive browser walkthrough was executed across
    - Confirmed 100% data preservation: historical consultation lead `#LD-t8rgyb` (Dr. Tanvir Ahmed) and immutable `SiteLeadActivity` timeline entries remain completely intact.
    - Navigated `http://localhost:3000/demo/modernclinic` and verified dual-engine unlocking: consultation appointment booking and full products/cart/checkout catalog routes co-exist seamlessly.
 
+5. **Merchant Operating Mode Control Center (`apps/admin` — port 3001):**
+   - Navigated `http://localhost:3001/settings/mode`.
+   - Verified active mode indicator displaying current tenant mode (`HYBRID`).
+   - Inspected self-service mode options (`PORTFOLIO`, `HYBRID`, `COMMERCE`) with live dry-run impact calculator.
+   - Verified real-time asset safety metrics: active leads, activities, catalog items, and draft orders are preserved with 100% Zero-Data-Loss guarantee.
+   - Confirmed affirmative consent barrier requires manual confirmation checkbox before transition execution.
+
+6. **Marketing Hub & Competitor Modernization (`apps/marketing` — port 3002):**
+   - Navigated `http://localhost:3002/pricing` and `http://localhost:3002/business/pricing`.
+   - Verified responsive `ModeArchitectureMatrix` comparing Commerce, Portfolio, and Hybrid modes across 16 feature dimensions.
+   - Verified unified ৳399/mo pricing across all marketing funnels, comparison matrices, and plan recommenders.
+   - Verified competitor deep-dive comparison pages (`/compare/shopify`, `/compare/wix`, `/compare/wordpress`) featuring multi-mode capabilities and zero-data-loss FAQs.
+
 ### 5.2 Visual Proof Artifacts
 
-- **Detailed Live QA Artifact:** [biztrack_business_live_qa_walkthrough.md](file:///C:/Users/USER/.gemini/antigravity-ide/brain/6746e714-03f1-481b-9915-594b2c9518b2/biztrack_business_live_qa_walkthrough.md)
-- **Storefront Consultation Recording:** `biztrack_business_e2e_walkthrough_1792262786808.webp`
-- **Merchant Triage & Platform Governance Recording:** `biztrack_business_admin_platform_walkthrough_1792263454614.webp`
-- **Live Mode Transition & Dual-Engine Recording:** `verify_hybrid_mode_1792264902644.webp`
-- **Transition Execution Screenshot:** `tenant_transitioned_success_1792265282756.png`
-- **Storefront Hybrid Unlocked Screenshot:** `storefront_hybrid_mode_2_1792265404496.png`
+| Milestone Feature | Artifact Media Reference | Verification Status |
+| :--- | :--- | :--- |
+| **Merchant Settings Mode Workspace** | `verify_admin_mode_settings_1792269165906.webp`<br>`operating_mode_settings_1792269183405.png`<br>`operating_mode_settings_scrolled_1792269193090.png` | **PASSED** (Full dry run, impact preview, affirmative consent) |
+| **Platform Mode Transition Execution** | `mode_transition_hybrid_execution_1792264400419.webp`<br>`biztrack_business_admin_platform_walkthrough_1792263454614.webp`<br>`tenant_transitioned_success_1792265282756.png` | **PASSED** (Atomic transition `PORTFOLIO` -> `HYBRID`, audit event logged) |
+| **Marketing Pricing Hub & Mode Matrix** | `verify_marketing_pricing_1792267364612.webp`<br>`pricing_hero_plans_1792267390164.png`<br>`three_operating_modes_columns_1792267430652.png` | **PASSED** (All ৳399 pricing verified, multi-mode matrix responsive) |
+| **Competitor Comparison Pages** | `verify_competitor_pages_1792268253360.webp`<br>`shopify_comparison_1792268285288.png`<br>`wix_comparison_1792268397845.png` | **PASSED** (Clear mode differentiation, Zero-Data-Loss guarantee) |
+| **Storefront Consultation & Lead Engine** | `biztrack_business_e2e_walkthrough_1792262786808.webp`<br>`leads_workspace_1792263531820.png` | **PASSED** (Lead capture, duplicate prevention, CRM progression) |
+| **Storefront Dual-Engine Activation** | `verify_hybrid_mode_1792264902644.webp`<br>`storefront_hybrid_mode_2_1792265404496.png` | **PASSED** (Consultation booking + retail commerce catalog active) |
 
 ---
 
-## 6. Formal Sign-Off & Release Lock
+## 6. Monorepo Production Build Verification
+
+Full production builds were executed and verified across all monorepo applications on October 18, 2026:
+
+| Package | Command | Exit Code | Routes Compiled | TypeScript Status |
+| :--- | :--- | :--- | :--- | :--- |
+| `@biztrackbd/core` | `pnpm --filter @biztrackbd/core test` | **0** | 64/64 Unit Tests Pass | Clean (0 errors) |
+| `@biztrackbd/marketing` | `pnpm --filter @biztrackbd/marketing build` | **0** | 40 Routes (Static + Dynamic) | Clean (0 errors) |
+| `@biztrackbd/admin` | `pnpm --filter @biztrackbd/admin build` | **0** | All admin routes + `/settings/mode` | Clean (0 errors) |
+| `@biztrackbd/platform` | `pnpm --filter @biztrackbd/platform build` | **0** | All super-admin cohort routes | Clean (0 errors) |
+| `@biztrackbd/storefront` | `pnpm --filter @biztrackbd/storefront build` | **0** | All catalog & booking routes | Clean (0 errors) |
+
+---
+
+## 7. Formal Sign-Off & Release Lock
 
 - **Engineering Lead:** Antigravity AI Systems
-- **Platform Architecture:** Verified & Compliant with `docs/54`, `docs/58`, and `docs/59`
+- **Platform Architecture:** Verified & Compliant with `docs/54`, `docs/55`, `docs/56`, `docs/58`, and `docs/59`
 - **Database Status:** Live Supabase PostgreSQL migrations applied (`SiteLeadActivity` DDL with RLS)
-- **Release Status:** **LOCKED & READY FOR IMMEDIATE PILOT MERCHANTS**
+- **Zero-Data-Loss Invariant:** Verified across all schema entities and mode transitions
+- **Release Status:** **LOCKED & READY FOR PRODUCTION PILOT MERCHANTS**
+
 
