@@ -137,6 +137,15 @@ export async function POST(req: Request) {
       );
     }
 
+    const userAgent = req.headers.get("user-agent") || null;
+    const eventId = typeof json.eventId === "string" ? json.eventId.trim().slice(0, 100) : null;
+    const fbp = typeof json.fbp === "string" ? json.fbp.trim().slice(0, 100) : null;
+    const fbc = typeof json.fbc === "string" ? json.fbc.trim().slice(0, 150) : null;
+    const utmSource = typeof json.utmSource === "string" ? json.utmSource.trim().slice(0, 100) : null;
+    const utmMedium = typeof json.utmMedium === "string" ? json.utmMedium.trim().slice(0, 100) : null;
+    const utmCampaign = typeof json.utmCampaign === "string" ? json.utmCampaign.trim().slice(0, 100) : null;
+    const referrer = typeof json.referrer === "string" ? json.referrer.trim().slice(0, 300) : null;
+
     // 8. Core Submission Ingestion
     const result = await submitPlatformInquiry({
       name,
@@ -145,9 +154,18 @@ export async function POST(req: Request) {
       topic,
       message,
       ipAddress,
+      userAgent,
+      eventId,
+      fbp,
+      fbc,
+      utmSource,
+      utmMedium,
+      utmCampaign,
+      referrer,
+      consentGiven: json.consentGiven === true,
     });
 
-    return NextResponse.json({ ok: true, id: result.id });
+    return NextResponse.json({ ok: true, id: result.id, eventId });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Failed to submit message";
     return NextResponse.json({ ok: false, error: message }, { status: 400 });

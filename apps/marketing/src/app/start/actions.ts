@@ -51,6 +51,16 @@ export async function signupAction(_prev: SignupState, form: FormData): Promise<
   if (!storeName || storeName.length < 2) return { error: "Enter your store name", field: "storeName" };
   if (!subdomain || subdomain.length < 3) return { error: "Choose a valid web address", field: "subdomain" };
 
+  // Tracking and Attribution parameters
+  const eventId = String(form.get("eventId") ?? "").trim() || undefined;
+  const fbp = String(form.get("fbp") ?? "").trim() || undefined;
+  const fbc = String(form.get("fbc") ?? "").trim() || undefined;
+  const utmSource = String(form.get("utmSource") ?? "").trim() || undefined;
+  const utmMedium = String(form.get("utmMedium") ?? "").trim() || undefined;
+  const utmCampaign = String(form.get("utmCampaign") ?? "").trim() || undefined;
+  const referrer = String(form.get("referrer") ?? "").trim() || undefined;
+  const userAgent = (await headers()).get("user-agent") ?? undefined;
+
   // A demo the visitor chose to keep: its secret code arrives as a hidden field. The core checks it; a wrong or used code just means sample products.
   const keepCode = String(form.get("from") ?? "").slice(0, 120);
   const copier = keepPictureCopier();
@@ -70,6 +80,16 @@ export async function signupAction(_prev: SignupState, form: FormData): Promise<
       demoData,
       siteMode,
       businessVertical,
+      eventId,
+      ip,
+      userAgent,
+      fbp,
+      fbc,
+      utmSource,
+      utmMedium,
+      utmCampaign,
+      referrer,
+      consentGiven: true,
     }, { pictures: samplePictures() ?? undefined, ...(keepCode && copier ? { keep: { code: keepCode, copyImage: copier } } : {}) });
   } catch (e) {
     if (e instanceof DomainError) return { error: e.message, field: typeof e.details?.field === "string" ? e.details.field : undefined };
@@ -93,6 +113,7 @@ export async function signupAction(_prev: SignupState, form: FormData): Promise<
     email: signed.ownerEmail,
     ends: signed.trialEndsAt.toISOString(),
     plan: signed.plan,
+    ...(eventId ? { ev: eventId } : {}),
     ...(signed.autoLoginToken ? { token: signed.autoLoginToken } : {}),
     ...(signed.quarantined ? { review: "1" } : {}),
     ...(signed.kept ? { kept: String(signed.kept) } : {}),

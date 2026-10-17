@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
+import { initClientAttribution } from "../lib/client-attribution";
 
 declare global {
   interface Window {
@@ -49,10 +50,11 @@ export function getPlatformConsent(): "granted" | "denied" | "unset" {
   return "unset";
 }
 
-/** Fires a conversion event on the BizTrackBD marketing website with consent and PII protection */
+/** Fires a conversion event on the BizTrackBD marketing website with consent, PII protection, and eventID deduplication */
 export function trackPlatformEvent(
   name: "PageView" | "Lead" | "ViewContent" | "CompleteRegistration" | string,
-  data: Record<string, unknown> = {}
+  data: Record<string, unknown> = {},
+  options?: { eventId?: string }
 ): void {
   if (typeof window === "undefined") return;
 
@@ -61,10 +63,14 @@ export function trackPlatformEvent(
 
   const safeData = sanitizeEventPayload(data);
 
-  // Meta Pixel
+  // Meta Pixel with deduplication eventID
   if (window.fbq) {
     try {
-      window.fbq("track", name, safeData);
+      if (options?.eventId) {
+        window.fbq("track", name, safeData, { eventID: options.eventId });
+      } else {
+        window.fbq("track", name, safeData);
+      }
     } catch {
       /* ignore */
     }
@@ -73,7 +79,10 @@ export function trackPlatformEvent(
   // Google Analytics 4
   if (window.gtag) {
     try {
-      window.gtag("event", name.toLowerCase(), safeData);
+      window.gtag("event", name.toLowerCase(), {
+        ...safeData,
+        ...(options?.eventId ? { event_id: options.eventId } : {}),
+      });
     } catch {
       /* ignore */
     }
@@ -85,6 +94,7 @@ export function trackPlatformEvent(
       window.dataLayer.push({
         event: name,
         ...safeData,
+        ...(options?.eventId ? { eventId: options.eventId } : {}),
       });
     } catch {
       /* ignore */
@@ -99,6 +109,9 @@ export function PlatformTracker() {
   const [bannerVisible, setBannerVisible] = useState(false);
 
   useEffect(() => {
+    // Initialize first-touch and last-touch attribution on mount
+    initClientAttribution();
+
     const current = getPlatformConsent();
     setConsent(current);
     if (current === "unset") {

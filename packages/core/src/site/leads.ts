@@ -2,6 +2,7 @@ import { withTenant, type PrismaClient, type SiteLeadStatus, type SiteLeadType }
 import { NotFoundError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
 import { audit } from "../audit/service";
+import { trackServerLead } from "../growth/tracking";
 
 export interface CreateLeadInput {
   name: string;
@@ -16,6 +17,13 @@ export interface CreateLeadInput {
   referrer?: string | null;
   locale?: string;
   metadata?: Record<string, unknown> | null;
+  /** Unique client-generated eventId for Meta Pixel / CAPI deduplication */
+  eventId?: string | null;
+  /** Client IP, user agent, and cookies for Meta CAPI attribution */
+  ip?: string | null;
+  userAgent?: string | null;
+  fbp?: string | null;
+  fbc?: string | null;
   /** Explicit affirmative consent given by the visitor */
   consentGiven?: boolean | null;
   consentTextVersion?: string | null;
@@ -81,7 +89,7 @@ export async function createPublicLead(tenantId: string, input: CreateLeadInput)
   const message = sanitize(input.message, 1500);
   const type: SiteLeadType = input.type ?? "CONTACT";
 
-  return withTenant(tenantId, async (tx) => {
+  const result = await withTenant(tenantId, async (tx) => {
     const lead = await tx.siteLead.create({
       data: {
         tenantId,
@@ -126,6 +134,33 @@ export async function createPublicLead(tenantId: string, input: CreateLeadInput)
       whatsAppFollowUpUrl,
     };
   });
+
+  // Dispatch Meta CAPI server-side event if consent given
+  if (input.consentGiven !== false) {
+    trackServerLead(
+      tenantId,
+      {
+        id: result.id,
+        eventId: input.eventId || undefined,
+        name: name || undefined,
+        phone,
+        email,
+        type,
+        sourcePage: input.sourcePage,
+      },
+      {
+        ip: input.ip,
+        userAgent: input.userAgent,
+        fbp: input.fbp,
+        fbc: input.fbc,
+      },
+      { consentGiven: input.consentGiven }
+    ).catch((err) => {
+      console.warn("[leads] CAPI lead dispatch warning:", err instanceof Error ? err.message : err);
+    });
+  }
+
+  return result;
 }
 
 export interface ListLeadsFilters {

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { checkAddressAction, signupAction, type SignupState } from "./actions";
+import { generateTrackingEventId, getAttributionForPayload } from "@/lib/client-attribution";
 
 interface Plan {
   tier: string;
@@ -183,6 +184,12 @@ export function Wizard({
 }) {
   const [state, action, pending] = useActionState<SignupState, FormData>(signupAction, {});
   const [step, setStep] = useState(0);
+  const [eventId] = useState(() => generateTrackingEventId("reg"));
+  const [attr, setAttr] = useState(() => getAttributionForPayload());
+
+  useEffect(() => {
+    setAttr(getAttributionForPayload());
+  }, []);
   const [v, setV] = useState({
     storeName: "",
     siteMode: (initialMode || "ECOMMERCE") as "ECOMMERCE" | "PORTFOLIO" | "HYBRID",
@@ -345,6 +352,31 @@ export function Wizard({
         )}
 
         <form action={action} className="wizard" data-testid="wizard" noValidate>
+          {/* Synchronized state for multi-step server action submission */}
+          <input type="hidden" name="storeName" value={v.storeName} />
+          <input type="hidden" name="siteMode" value={v.siteMode} />
+          <input type="hidden" name="businessVertical" value={v.businessVertical || ""} />
+          <input type="hidden" name="category" value={v.category} />
+          <input type="hidden" name="tagline" value={v.tagline} />
+          <input type="hidden" name="subdomain" value={v.subdomain} />
+          <input type="hidden" name="ownerName" value={v.ownerName} />
+          <input type="hidden" name="email" value={v.email} />
+          <input type="hidden" name="phone" value={v.phone} />
+          <input type="hidden" name="password" value={v.password} />
+          <input type="hidden" name="plan" value={v.plan} />
+          <input type="hidden" name="theme" value={v.theme} />
+          <input type="hidden" name="demoData" value={v.demoData ? "on" : "off"} />
+          {keepCode && <input type="hidden" name="from" value={keepCode} />}
+
+          {/* Attribution & Meta CAPI Deduplication fields */}
+          <input type="hidden" name="eventId" value={eventId} />
+          <input type="hidden" name="utmSource" value={attr.utmSource || ""} />
+          <input type="hidden" name="utmMedium" value={attr.utmMedium || ""} />
+          <input type="hidden" name="utmCampaign" value={attr.utmCampaign || ""} />
+          <input type="hidden" name="referrer" value={attr.referrer || ""} />
+          <input type="hidden" name="fbp" value={attr.fbp || ""} />
+          <input type="hidden" name="fbc" value={attr.fbc || ""} />
+
           <div style={{ marginBottom: 20 }}>
             <span
               className="eyebrow"

@@ -53,9 +53,9 @@ This backlog translates the 17 October 2026 alignment audit into testable work. 
 | PRIV-002 | P0 | Implement versioned consent state | **Resolved & Verified** | `bt_cookie_consent_v1` default-denied consent gate implemented with interactive banner and revisable state. |
 | PRIV-003 | P0 | Correct lead/booking consent records | **Resolved & Verified** | `consentGivenAt` written only when affirmative consent is granted; `consentTextVersion` captured in metadata. |
 | DATA-001 | P0 | Define product-neutral event vocabulary | **Resolved & Verified** | Standardized payload structure with prohibited parameter sanitizer. |
-| DATA-002 | P1 | Implement lead/booking server events only after policy approval | Planned | Lead server event pipeline. |
-| DATA-003 | P1 | Preserve first/latest attribution through signup | Planned | Attribution continuity through onboarding. |
-| DATA-004 | P1 | Build tracking-health view | Planned | Tracking diagnostics dashboard. |
+| DATA-002 | P1 | Implement lead/booking server events only after policy approval | **Resolved & Verified** | Lead, Booking, Inquiry, and Signup server-side events via Meta CAPI with SHA-256 phone/email hashing, PII sanitization, client deduplication (`eventId`), and affirmative consent gating. Verified in `capi-server-events.test.ts`. |
+| DATA-003 | P1 | Preserve first/latest attribution through signup | **Resolved & Verified** | Dual First-touch (`bt_attr_first`) and Last-touch (`bt_attr_last`) attribution persistence (30-day 1st-party cookies) capturing UTMs, referrer, landing page, and `fbc`/`fbp`. Preserved across `/start` wizard onboarding and `/contact`. Verified in `attribution.test.ts`. |
+| DATA-004 | P1 | Build tracking-health view | **Resolved & Verified** | Built Merchant Admin Tracking Health dashboard (`/marketing/pixels/health`) with live test ping dispatch to Meta, 7-day multi-layer event breakdown, and Platform Super Admin diagnostics (`/diagnostics/tracking`). |
 
 ## Epic 6 — Public forms, permissions, and Business operations
 
@@ -104,6 +104,7 @@ This backlog translates the 17 October 2026 alignment audit into testable work. 
 - **PRIV-003:** Complete with affirmative consent logging and bot shielding.
 - **LEAD-001 & BOOK-001:** Lead and booking manager with inline private follow-up notes and WhatsApp dispatch operational.
 - **SEO-004 & SEO-005:** All 6 vertical deep-dives (`/business/public-profile-websites` etc.) and hub expansion routes (`/product`, `/business/templates`, `/business/pricing`) fully implemented, cross-linked, and verified in sitemap.
+- **DATA-002, DATA-003, DATA-004:** Complete & verified. Meta CAPI server-side event pipeline (`Lead`, `Schedule`, `CompleteRegistration`), dual first-touch and last-touch attribution (`bt_attr_first`, `bt_attr_last`) cookie persistence, event deduplication (`eventId`), SHA-256 PII hashing, Merchant Tracking Health (`/marketing/pixels/health`), and Platform Diagnostics (`/diagnostics/tracking`) verified in automated test suite (`attribution.test.ts`, `capi-server-events.test.ts`).
 
 ### Production performance gate
 

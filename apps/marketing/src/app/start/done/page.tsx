@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { SignupDoneTracker } from "./signup-done-tracker";
 
 export const metadata: Metadata = { title: "Your store is open", robots: { index: false } };
 
@@ -22,9 +23,13 @@ export default async function Done({ searchParams }: { searchParams: Promise<Rec
   const ends = one(sp.ends) ? new Date(one(sp.ends)!) : null;
   const endsText = ends && !Number.isNaN(ends.getTime()) ? new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Dhaka" }).format(ends) : null;
   const review = one(sp.review) === "1";
+  const ev = one(sp.ev);
+  const plan = one(sp.plan);
+  const name = one(sp.name);
 
   return (
     <div className="wrap">
+      <SignupDoneTracker eventId={ev} plan={plan} storeName={name} />
       <div className="wizard done-box" data-testid="done" style={{ textAlign: "center" }}>
         <div style={{ fontSize: 48, marginBottom: 8 }} aria-hidden="true">🎉</div>
         <h1 style={{ fontSize: 28, fontWeight: 800 }}>Your Store is Live!</h1>

@@ -1,6 +1,7 @@
 import { getPlatformPrisma } from "@biztrackbd/db";
 import { assertPlatformCan, type PlatformActor } from "./admin";
 import { ValidationError } from "../errors";
+import { trackPlatformInquiryCapi } from "./tracking";
 
 export type InquiryStatus = "NEW" | "CONTACTED" | "CONVERTED" | "ARCHIVED";
 
@@ -11,6 +12,16 @@ export interface InquiryInput {
   topic: string;
   message: string;
   ipAddress?: string | null;
+  userAgent?: string | null;
+  eventId?: string | null;
+  fbp?: string | null;
+  fbc?: string | null;
+  utmSource?: string | null;
+  utmMedium?: string | null;
+  utmCampaign?: string | null;
+  referrer?: string | null;
+  consentGiven?: boolean | null;
+  consentTextVersion?: string | null;
 }
 
 export interface InquiryView {
@@ -50,6 +61,13 @@ export async function submitPlatformInquiry(input: InquiryInput): Promise<Inquir
 
   const topic = input.topic?.trim() || "setup";
 
+  const attrParts: string[] = [];
+  if (input.utmSource) attrParts.push(`source: ${input.utmSource}`);
+  if (input.utmMedium) attrParts.push(`medium: ${input.utmMedium}`);
+  if (input.utmCampaign) attrParts.push(`campaign: ${input.utmCampaign}`);
+  if (input.referrer) attrParts.push(`ref: ${input.referrer}`);
+  const attributionNote = attrParts.length > 0 ? `[Attribution: ${attrParts.join(", ")}]` : null;
+
   const db = getPlatformPrisma();
   const created = await db.platformInquiry.create({
     data: {
@@ -59,9 +77,31 @@ export async function submitPlatformInquiry(input: InquiryInput): Promise<Inquir
       topic,
       message,
       status: "NEW",
+      notes: attributionNote,
       ipAddress: input.ipAddress ?? null,
     },
   });
+
+  // Dispatch Meta CAPI for platform inquiry if consent given
+  if (input.consentGiven !== false) {
+    trackPlatformInquiryCapi({
+      inquiryId: created.id,
+      eventId: input.eventId || undefined,
+      name,
+      phone,
+      email,
+      topic,
+      consentGiven: input.consentGiven,
+      user: {
+        ip: input.ipAddress,
+        userAgent: input.userAgent,
+        fbp: input.fbp,
+        fbc: input.fbc,
+      },
+    }).catch((err) => {
+      console.warn("[inquiry] Platform CAPI dispatch warning:", err instanceof Error ? err.message : err);
+    });
+  }
 
   return {
     id: created.id,

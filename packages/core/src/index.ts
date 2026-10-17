@@ -146,10 +146,11 @@ export {
   type AbandonedRow, type AbandonedTab, type AbandonedMetrics, type CallOutcome, type RecoverySummary, type CartSnapshotLine,
 } from "./growth/abandoned";
 export {
-  getPixelId, getStorefrontTracking, getTrackingConfig, savePixelId, saveTrackingConfig, trackBrowserEvent, sendServerPurchase, sendServerCancellation, recordBrowserPurchase, getTrackingOverview, sendTestEvent, setPixelFetchForTests, purchaseEventId, EVENT_NAMES,
+  getPixelId, getStorefrontTracking, getTrackingConfig, savePixelId, saveTrackingConfig, trackBrowserEvent, sendServerPurchase, sendServerCancellation, recordBrowserPurchase, getTrackingOverview, sendTestEvent, setPixelFetchForTests, getPixelFetch, purchaseEventId, EVENT_NAMES,
+  trackServerLead, trackServerBooking, normalizeMetaPhone, hashPhone, hashEmail, capiBody,
   buildMetaOAuthUrl, exchangeMetaOAuthCode, fetchMetaPixels, sendGa4ServerEvent,
   getSeoSuiteConfig, saveSeoSuiteConfig, type SeoSuiteConfig,
-  type TrackingConfig, type StorefrontTracking, type TrackingOverview, type EventStat, type UserContext, type EventName, type SendResult, type MetaAdAccountPixel,
+  type TrackingConfig, type StorefrontTracking, type TrackingOverview, type EventStat, type UserContext, type EventName, type SendResult, type MetaAdAccountPixel, type ServerEvent,
 } from "./growth/tracking";
 export {
   getReviewSummary, listPublicReviews, reviewableItems, submitReview, listReviews, reviewTabCounts, setReviewPublished, replyToReview, setReviewsAutoPublish, reviewsAutoPublish, displayName, cleanText,
@@ -443,3 +444,7 @@ export * from "./site/downloads";
 export * from "./site/templates/manifests";
 export * from "./demo/business-templates";
 export * from "./demo/business-seed";
+
+// Marketing Attribution & Multi-Touch Tracking
+export * from "./growth/attribution";
+export * from "./platform/tracking";

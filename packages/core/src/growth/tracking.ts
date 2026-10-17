@@ -5,17 +5,29 @@ import { audit } from "../audit/service";
 import { NotFoundError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
 import { loadCredentials } from "../vault/integrations";
+import { normalizeBdPhone } from "../phone";
 
 /**
- * Marketing pixels and server-side events (docs/07 section 17, docs/10).
+ * Marketing pixels and server-side events (docs/07 section 17, docs/10, docs/56).
  *
  * Meta counts an event once when the browser Pixel and the server (Conversions API) report it with the same event id.
- * Every event here has a stable id: a Purchase is always `purchase_<orderId>`, so the browser on the thank-you page and the
- * server at the moment of ordering agree without talking to each other. A server copy survives ad blockers; the browser copy
- * carries the visitor's own cookies. We keep one row per (event id, origin) so the owner can see both arrived.
+ * Every event here has a stable id: a Purchase is always `purchase_<orderId>`, a Lead is `lead_<id>`, so the browser
+ * and the server agree without talking to each other. A server copy survives ad blockers; the browser copy carries
+ * the visitor's own cookies. We keep one row per (event id, origin) so the owner can see both arrived.
  */
 
-export const EVENT_NAMES = ["PageView", "ViewContent", "AddToCart", "InitiateCheckout", "AddPaymentInfo", "Purchase"] as const;
+export const EVENT_NAMES = [
+  "PageView",
+  "ViewContent",
+  "AddToCart",
+  "InitiateCheckout",
+  "AddPaymentInfo",
+  "Purchase",
+  "Lead",
+  "Schedule",
+  "CompleteRegistration",
+  "Contact",
+] as const;
 export type EventName = (typeof EVENT_NAMES)[number];
 
 /** Development and end-to-end tests may point this at a local fake. Ignored in production, so a stray variable cannot redirect real events. */
@@ -29,10 +41,27 @@ export function setPixelFetchForTests(f: typeof fetch | undefined): void {
   fetchImpl = f ?? ((...a) => fetch(...a));
 }
 
-const sha = (s: string) => createHash("sha256").update(s).digest("hex");
-/** Meta wants phone numbers as digits with the country code, lower-case and hashed. */
-const hashPhone = (local: string) => sha(`88${local}`);
-const hashEmail = (e: string) => sha(e.trim().toLowerCase());
+export function getPixelFetch(): typeof fetch {
+  return fetchImpl;
+}
+
+export const sha = (s: string) => createHash("sha256").update(s).digest("hex");
+
+/** Meta wants phone numbers as digits with country code (8801XXXXXXXXX for BD), lower-case and hashed. */
+export function normalizeMetaPhone(phone: string): string {
+  try {
+    const canon = normalizeBdPhone(phone);
+    return `88${canon}`;
+  } catch {
+    const digits = phone.replace(/\D/g, "");
+    if (digits.startsWith("880")) return digits;
+    if (digits.startsWith("0")) return `88${digits}`;
+    return `880${digits}`;
+  }
+}
+
+export const hashPhone = (phone: string) => sha(normalizeMetaPhone(phone));
+export const hashEmail = (e: string) => sha(e.trim().toLowerCase());
 
 export const purchaseEventId = (orderId: string) => `purchase_${orderId}`;
 
@@ -381,18 +410,21 @@ export interface UserContext {
   fbc?: string | null;
 }
 
-interface ServerEvent {
+export interface ServerEvent {
   name: EventName;
   eventId: string;
   time: Date;
   url?: string | null;
   user: UserContext;
   value?: number;
+  currency?: string;
   contentIds?: string[];
+  contentType?: string;
   numItems?: number;
+  customData?: Record<string, unknown>;
 }
 
-function capiBody(e: ServerEvent, testCode?: string) {
+export function capiBody(e: ServerEvent, testCode?: string) {
   const u = e.user;
   const user_data: Record<string, unknown> = {};
   if (u.phoneLocal) user_data.ph = [hashPhone(u.phoneLocal)];
@@ -402,9 +434,11 @@ function capiBody(e: ServerEvent, testCode?: string) {
   if (u.userAgent) user_data.client_user_agent = u.userAgent.slice(0, 400);
   if (u.fbp && COOKIE.test(u.fbp)) user_data.fbp = u.fbp;
   if (u.fbc && COOKIE.test(u.fbc)) user_data.fbc = u.fbc;
-  const custom_data: Record<string, unknown> = {};
-  if (e.value !== undefined) { custom_data.value = e.value; custom_data.currency = "BDT"; }
-  if (e.contentIds?.length) { custom_data.content_ids = e.contentIds.slice(0, 50); custom_data.content_type = "product"; }
+  const custom_data: Record<string, unknown> = {
+    ...(e.customData || {}),
+  };
+  if (e.value !== undefined) { custom_data.value = e.value; custom_data.currency = e.currency || "BDT"; }
+  if (e.contentIds?.length) { custom_data.content_ids = e.contentIds.slice(0, 50); custom_data.content_type = e.contentType || "product"; }
   if (e.numItems !== undefined) custom_data.num_items = e.numItems;
   return {
     data: [{ event_name: e.name, event_time: Math.floor(e.time.getTime() / 1000), event_id: e.eventId, action_source: "website", ...(e.url ? { event_source_url: e.url } : {}), user_data, custom_data }],
@@ -474,6 +508,118 @@ export async function trackBrowserEvent(tenantId: string, raw: unknown, user: Us
     await remember(tenantId, { name: e.name, eventId: e.eventId, origin: "SERVER", status: r.ok ? "SENT" : "FAILED", detail: r.ok ? undefined : r.detail, httpStatus: r.httpStatus, payload: { contentIds: e.contentIds ?? [] } });
   }
   return { recorded: true };
+}
+
+/**
+ * Dispatches a server-side Lead event to Meta Conversions API (CAPI) for inquiries and consultation leads.
+ * Dual-gated on affirmative consent: suppressed if consentGiven === false.
+ */
+export async function trackServerLead(
+  tenantId: string,
+  lead: {
+    id: string;
+    eventId?: string;
+    name?: string;
+    phone?: string | null;
+    email?: string | null;
+    type?: string;
+    url?: string | null;
+    sourcePage?: string | null;
+  },
+  user: UserContext = {},
+  options?: { testCode?: string; consentGiven?: boolean | null }
+): Promise<SendResult> {
+  const pixelId = await getPixelId(tenantId);
+  if (!pixelId) return { ok: false, httpStatus: null, detail: "No Meta Pixel configured" };
+
+  if (options?.consentGiven === false) {
+    return { ok: false, httpStatus: null, detail: "Consent not given" };
+  }
+
+  const eventId = lead.eventId || `lead_${lead.id}`;
+  const phoneLocal = lead.phone || user.phoneLocal;
+  const email = lead.email || user.email;
+
+  const event: ServerEvent = {
+    name: "Lead",
+    eventId,
+    time: new Date(),
+    url: lead.url || lead.sourcePage,
+    user: { ...user, phoneLocal, email },
+    customData: {
+      lead_type: lead.type || "CONTACT",
+    },
+  };
+
+  const r = await sendCapi(tenantId, pixelId, event, options?.testCode);
+  await remember(tenantId, {
+    name: "Lead",
+    eventId,
+    origin: "SERVER",
+    status: r.ok ? "SENT" : "FAILED",
+    detail: r.ok ? undefined : r.detail,
+    httpStatus: r.httpStatus,
+    payload: { leadId: lead.id, type: lead.type },
+  });
+  return r;
+}
+
+/**
+ * Dispatches a server-side Schedule event to Meta Conversions API (CAPI) for appointments, table reservations, and clinic visits.
+ * Dual-gated on affirmative consent: suppressed if consentGiven === false.
+ */
+export async function trackServerBooking(
+  tenantId: string,
+  booking: {
+    id: string;
+    eventId?: string;
+    name: string;
+    phone: string;
+    email?: string | null;
+    serviceName?: string | null;
+    requestedDate?: string | null;
+    partySize?: number | null;
+    url?: string | null;
+  },
+  user: UserContext = {},
+  options?: { testCode?: string; consentGiven?: boolean | null }
+): Promise<SendResult> {
+  const pixelId = await getPixelId(tenantId);
+  if (!pixelId) return { ok: false, httpStatus: null, detail: "No Meta Pixel configured" };
+
+  if (options?.consentGiven === false) {
+    return { ok: false, httpStatus: null, detail: "Consent not given" };
+  }
+
+  const eventId = booking.eventId || `bk_${booking.id}`;
+  const event: ServerEvent = {
+    name: "Schedule",
+    eventId,
+    time: new Date(),
+    url: booking.url,
+    user: {
+      ...user,
+      phoneLocal: booking.phone || user.phoneLocal,
+      email: booking.email || user.email,
+    },
+    customData: {
+      booking_id: booking.id,
+      service_name: booking.serviceName || undefined,
+      party_size: booking.partySize || undefined,
+    },
+  };
+
+  const r = await sendCapi(tenantId, pixelId, event, options?.testCode);
+  await remember(tenantId, {
+    name: "Schedule",
+    eventId,
+    origin: "SERVER",
+    status: r.ok ? "SENT" : "FAILED",
+    detail: r.ok ? undefined : r.detail,
+    httpStatus: r.httpStatus,
+    payload: { bookingId: booking.id, serviceName: booking.serviceName },
+  });
+  return r;
 }
 
 async function purchaseFacts(tenantId: string, orderId: string) {

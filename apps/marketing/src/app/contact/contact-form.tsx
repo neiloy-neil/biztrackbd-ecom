@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { trackPlatformEvent } from "@/components/platform-tracker";
+import { generateTrackingEventId, getAttributionForPayload } from "@/lib/client-attribution";
 
 export function ContactForm() {
   const [mountedAt] = useState(() => Date.now());
@@ -28,12 +29,18 @@ export function ContactForm() {
     }
     setLoading(true);
     setError(null);
+
+    const eventId = generateTrackingEventId("inq");
+    const attr = getAttributionForPayload();
+
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...v,
+          ...attr,
+          eventId,
           hp,
           elapsedMs: Date.now() - mountedAt,
           consentGiven: consent,
@@ -43,9 +50,13 @@ export function ContactForm() {
       if (!res.ok || !data.ok) {
         throw new Error(data.error || "Failed to send message");
       }
-      trackPlatformEvent("Lead", {
-        topic: v.topic,
-      });
+      trackPlatformEvent(
+        "Lead",
+        {
+          topic: v.topic,
+        },
+        { eventId }
+      );
       setSubmitted(true);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to send message. Please message us on WhatsApp.");

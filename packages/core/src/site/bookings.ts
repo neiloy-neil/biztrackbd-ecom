@@ -2,6 +2,7 @@ import { withTenant, type BookingRequestStatus, type SiteLeadType } from "@biztr
 import { NotFoundError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
 import { audit } from "../audit/service";
+import { trackServerBooking } from "../growth/tracking";
 
 export interface CreateBookingInput {
   name: string;
@@ -16,6 +17,13 @@ export interface CreateBookingInput {
   type?: "APPOINTMENT" | "RESERVATION";
   sourcePage?: string | null;
   locale?: string;
+  /** Unique client-generated eventId for Meta Pixel / CAPI deduplication */
+  eventId?: string | null;
+  /** Client IP, user agent, and cookies for Meta CAPI attribution */
+  ip?: string | null;
+  userAgent?: string | null;
+  fbp?: string | null;
+  fbc?: string | null;
   /** Explicit affirmative consent given by the visitor */
   consentGiven?: boolean | null;
   consentTextVersion?: string | null;
@@ -83,7 +91,7 @@ export async function createPublicBooking(tenantId: string, input: CreateBooking
 
   const leadType: SiteLeadType = input.type === "RESERVATION" ? "RESERVATION" : "APPOINTMENT";
 
-  return withTenant(tenantId, async (tx) => {
+  const result = await withTenant(tenantId, async (tx) => {
     // 1. Create SiteLead row
     const lead = await tx.siteLead.create({
       data: {
@@ -155,6 +163,35 @@ export async function createPublicBooking(tenantId: string, input: CreateBooking
       whatsAppFollowUpUrl,
     };
   });
+
+  // Dispatch Meta CAPI server-side event if consent given
+  if (input.consentGiven !== false) {
+    trackServerBooking(
+      tenantId,
+      {
+        id: result.bookingId,
+        eventId: input.eventId || undefined,
+        name: name!,
+        phone: phone!,
+        email: input.email,
+        serviceName: input.serviceName,
+        requestedDate: input.requestedDate,
+        partySize: input.partySize,
+        url: input.sourcePage,
+      },
+      {
+        ip: input.ip,
+        userAgent: input.userAgent,
+        fbp: input.fbp,
+        fbc: input.fbc,
+      },
+      { consentGiven: input.consentGiven }
+    ).catch((err) => {
+      console.warn("[bookings] CAPI booking dispatch warning:", err instanceof Error ? err.message : err);
+    });
+  }
+
+  return result;
 }
 
 export interface ListBookingsFilters {

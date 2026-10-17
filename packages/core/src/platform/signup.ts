@@ -19,6 +19,7 @@ import { getCategoryStarterPreset, type StarterCatalogPreset } from "../demo/cat
 
 import { getBusinessTemplateByVertical } from "../site/templates/manifests";
 import { seedBusinessDemoStore } from "../demo/business-seed";
+import { trackPlatformRegistrationCapi } from "./tracking";
 
 const EXTERNAL_AUTH = "EXTERNAL_AUTH";
 const MAX_STORES_PER_EMAIL = 3;
@@ -54,6 +55,16 @@ export const SignupInput = z.object({
     "SERVICE_PROVIDER",
     "PERSONAL_PORTFOLIO",
   ]).optional().nullable(),
+  eventId: z.string().max(100).optional().nullable(),
+  ip: z.string().max(100).optional().nullable(),
+  userAgent: z.string().max(400).optional().nullable(),
+  fbp: z.string().max(100).optional().nullable(),
+  fbc: z.string().max(150).optional().nullable(),
+  utmSource: z.string().max(100).optional().nullable(),
+  utmMedium: z.string().max(100).optional().nullable(),
+  utmCampaign: z.string().max(100).optional().nullable(),
+  referrer: z.string().max(400).optional().nullable(),
+  consentGiven: z.boolean().optional().nullable(),
 });
 export type SignupInput = z.input<typeof SignupInput>;
 
@@ -288,6 +299,29 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
     }
     await publishEvent("store/created", { tenantId: id, subdomain: sub.label, plan: input.plan });
     await notifyOwner(id, "WELCOME", { trialEndsDate: result.trialEndsAt }, { dedupeKey: id });
+
+    // Dispatch Meta CAPI server-side CompleteRegistration event
+    if (input.consentGiven !== false) {
+      trackPlatformRegistrationCapi({
+        tenantId: id,
+        eventId: input.eventId || undefined,
+        ownerName: input.ownerName,
+        phone,
+        email: input.email,
+        storeName: input.storeName,
+        plan: input.plan,
+        consentGiven: input.consentGiven,
+        user: {
+          ip: input.ip,
+          userAgent: input.userAgent,
+          fbp: input.fbp,
+          fbc: input.fbc,
+        },
+      }).catch((err) => {
+        console.warn("[signup] Platform CAPI dispatch warning:", err instanceof Error ? err.message : err);
+      });
+    }
+
     const { ownerId: _o, ...out } = result;
     return { ...out, keptPage };
   } catch (e) {

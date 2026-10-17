@@ -9,6 +9,11 @@ export async function POST(req: NextRequest) {
     const store = await getStore();
     const body = await req.json().catch(() => ({}));
 
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "127.0.0.1";
+    const userAgent = req.headers.get("user-agent") || undefined;
+    const fbp = body.fbp || req.cookies.get("_fbp")?.value || undefined;
+    const fbc = body.fbc || req.cookies.get("_fbc")?.value || undefined;
+
     const result = await createPublicBooking(store.id, {
       name: body.name,
       phone: body.phone,
@@ -22,6 +27,13 @@ export async function POST(req: NextRequest) {
       type: body.type,
       sourcePage: body.sourcePage,
       locale: body.locale,
+      eventId: body.eventId || undefined,
+      ip,
+      userAgent,
+      fbp,
+      fbc,
+      consentGiven: body.consentGiven !== false,
+      consentTextVersion: body.consentTextVersion,
       hp: body.hp,
       elapsedMs: body.elapsedMs,
     });

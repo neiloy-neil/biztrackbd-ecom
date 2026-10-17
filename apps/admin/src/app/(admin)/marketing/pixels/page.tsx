@@ -18,6 +18,10 @@ const LABEL: Record<string, string> = {
   InitiateCheckout: "Started checkout",
   AddPaymentInfo: "Payment details",
   Purchase: "Purchases",
+  Lead: "Inquiries & Leads",
+  Schedule: "Bookings & Consultations",
+  CompleteRegistration: "Registrations",
+  Contact: "Contact messages",
 };
 
 export default async function Pixels({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
