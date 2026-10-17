@@ -208,6 +208,23 @@ export async function resetBusinessDemoStore(
       },
     });
 
+    await tx.tenantUser.upsert({
+      where: { tenantId_email: { tenantId: id, email } },
+      create: {
+        tenantId: id,
+        email,
+        name: `Demo ${t.name}`,
+        phone: PHONE,
+        role: "STORE_OWNER",
+        passwordHash: "EXTERNAL_AUTH",
+        isActive: true,
+      },
+      update: {
+        role: "STORE_OWNER",
+        isActive: true,
+      },
+    });
+
     const templateInfo: TemplateInfo = {
       id: manifest.id,
       name: manifest.name,
