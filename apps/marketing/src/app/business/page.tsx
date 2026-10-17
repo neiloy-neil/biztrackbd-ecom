@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { demoAdminUrl } from "@/lib/demo-admin";
+import { AuthenticUiProof } from "@/components/authentic-ui-proof";
 
 const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
 
@@ -337,6 +338,23 @@ export default function BusinessPage() {
               Browse All 6 Verified Business Templates &amp; Interactive Previews →
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Authentic UI Proof (DEMO-004) */}
+      <section className="block" style={{ borderBottom: "1px solid var(--line)" }}>
+        <div className="wrap">
+          <div style={{ textAlign: "center", maxWidth: 760, margin: "0 auto 36px" }}>
+            <span className="eyebrow" style={{ color: "var(--business)" }}>Verified Product Evidence</span>
+            <h2 style={{ fontSize: "clamp(28px, 4.5vw, 40px)", letterSpacing: "-1.2px", color: "var(--ink-ledger)" }}>
+              Inspect the real merchant operations desk
+            </h2>
+            <p style={{ margin: "14px auto 0", fontSize: 16, color: "var(--ink-2)", lineHeight: 1.6 }}>
+              No generic mockups or fabricated promises. Explore the live merchant admin workspaces powering inquiries, appointments, dining tables, and resilient Meta CAPI tracking.
+            </p>
+          </div>
+
+          <AuthenticUiProof />
         </div>
       </section>
 

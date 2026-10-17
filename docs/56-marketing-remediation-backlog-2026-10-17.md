@@ -17,9 +17,9 @@ This backlog translates the 17 October 2026 alignment audit into testable work. 
 | ID | Priority | Work | Status | Acceptance test / Verification |
 | --- | --- | --- | --- | --- |
 | DEMO-001 | P0 | Implement `/demo` chooser or redirect to a real demo | **Resolved & Verified** | `/demo` chooser page created with live template cards, tags, and working previews. Returns HTTP 200. |
-| DEMO-002 | P0 | Add end-to-end demo environment smoke test | Planned | Release CI check for demo storefront and admin apps. |
-| DEMO-003 | P1 | Add capability state labels | In Progress | Proof items labelled Live, Pilot, Sample, or Planned. |
-| DEMO-004 | P2 | Replace generic cards with authentic UI proof | Planned | Replaces simulator cards with authentic admin UI screenshots. |
+| DEMO-002 | P0 | Add end-to-end demo environment smoke test | **Resolved & Verified** | Automated Playwright test suite `apps/admin/e2e/demo-environment-smoke.spec.ts` covers `/demo` 12-template chooser, customer site previews, `/business` hub, consent-gated contact API, and Merchant Admin `/leads`, `/bookings`, `/marketing/pixels/health` desks. |
+| DEMO-003 | P1 | Add capability state labels | **Resolved & Verified** | Added explicit `Live Storefront`, `Sample Data`, and `Pilot` capability labels across `TemplateCard`, demo chooser (`/demo`), and operational proof components. |
+| DEMO-004 | P2 | Replace generic cards with authentic UI proof | **Resolved & Verified** | Built `AuthenticUiProof` component with 5 interactive operational desks (Inbound Leads & CRM, Doctor Chambers & Queue, Dining QR & Tables, Service Technician Dispatch, Meta CAPI Tracking Health) embedded on `/business` and `/demo`. |
 
 ## Epic 3 — Product, plan, template, and signup contract
 
@@ -105,6 +105,7 @@ This backlog translates the 17 October 2026 alignment audit into testable work. 
 - **LEAD-001 & BOOK-001:** Lead and booking manager with inline private follow-up notes and WhatsApp dispatch operational.
 - **SEO-004 & SEO-005:** All 6 vertical deep-dives (`/business/public-profile-websites` etc.) and hub expansion routes (`/product`, `/business/templates`, `/business/pricing`) fully implemented, cross-linked, and verified in sitemap.
 - **DATA-002, DATA-003, DATA-004:** Complete & verified. Meta CAPI server-side event pipeline (`Lead`, `Schedule`, `CompleteRegistration`), dual first-touch and last-touch attribution (`bt_attr_first`, `bt_attr_last`) cookie persistence, event deduplication (`eventId`), SHA-256 PII hashing, Merchant Tracking Health (`/marketing/pixels/health`), and Platform Diagnostics (`/diagnostics/tracking`) verified in automated test suite (`attribution.test.ts`, `capi-server-events.test.ts`).
+- **DEMO-002, DEMO-003, DEMO-004:** Complete & verified. End-to-end smoke test spec (`demo-environment-smoke.spec.ts`), capability state badges (`Live Storefront`, `Sample Data`), all 12 templates active on `/demo`, and `AuthenticUiProof` operational evidence desk embedded on `/business` and `/demo`.
 
 ### Production performance gate
 

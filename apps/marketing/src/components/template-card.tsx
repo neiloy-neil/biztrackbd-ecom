@@ -20,7 +20,14 @@ export function demoUrl(host: string): string {
   return `${root.includes("localhost") ? "http" : "https"}://${host}.${root}`;
 }
 
-export interface TemplateInfo { id: string; name: string; blurb: string; audience?: string; live: boolean }
+export interface TemplateInfo {
+  id: string;
+  name: string;
+  blurb: string;
+  audience?: string;
+  live: boolean;
+  proofState?: "LIVE" | "PILOT" | "SAMPLE" | "PLANNED";
+}
 
 /** A template with a real preview of its demo store (desktop, and a phone overlapping the corner), and links to open the demo or start with it. */
 export function TemplateCard({ t, compact }: { t: TemplateInfo; compact?: boolean }) {
@@ -31,7 +38,17 @@ export function TemplateCard({ t, compact }: { t: TemplateInfo; compact?: boolea
         <Image src={`/templates/${t.id}.webp`} alt={`${t.name} template, home page on a computer`} width={960} height={600} sizes="(min-width: 760px) 33vw, 100vw" className="tpl-desktop" />
         <Image src={`/templates/${t.id}-phone.webp`} alt={`${t.name} template on a phone`} width={390} height={844} sizes="90px" className="tpl-phone" />
       </div>
-      <div className="row-between" style={{ marginTop: 16 }}><h3>{t.name}</h3>{!compact && <span className={`pill${t.live ? " live" : ""}`}>{t.live ? "Ready" : "Coming soon"}</span>}</div>
+      <div className="row-between" style={{ marginTop: 16 }}>
+        <h3>{t.name}</h3>
+        {!compact && (
+          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+            <span className={`pill${t.live ? " live" : ""}`}>
+              {t.proofState === "PILOT" ? "Pilot" : t.live ? "Live Storefront" : "Planned"}
+            </span>
+            {t.live && <span className="pill" style={{ fontSize: 11 }}>Sample Data</span>}
+          </div>
+        )}
+      </div>
       <p>{compact && t.audience ? t.audience : t.blurb}</p>
       {t.live && (
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
