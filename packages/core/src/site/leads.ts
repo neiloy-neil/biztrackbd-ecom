@@ -392,3 +392,21 @@ export async function listSiteLeadActivities(
   });
 }
 
+/** Lists active staff members who can be assigned to leads */
+export async function listAssignableStaff(tenantId: string, actor: StaffActor) {
+  assertCan(actor, "leads", "view");
+
+  return withTenant(tenantId, async (tx) => {
+    return tx.tenantUser.findMany({
+      where: { tenantId, isActive: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      },
+      orderBy: { name: "asc" },
+    });
+  });
+}
+

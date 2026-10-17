@@ -214,8 +214,8 @@ describe("Lead Assignment & Activity Timeline Engine (Phase 1)", () => {
         "lead_test_01"
       );
       expect(list).toHaveLength(2);
-      expect(list[0].activityType).toBe("STATUS_CHANGED");
-      expect(list[1].activityType).toBe("ASSIGNED");
+      expect(list[0]?.activityType).toBe("STATUS_CHANGED");
+      expect(list[1]?.activityType).toBe("ASSIGNED");
     });
 
     it("blocks content editor from viewing lead activities", async () => {
