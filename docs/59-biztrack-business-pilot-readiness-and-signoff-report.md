@@ -76,8 +76,38 @@ The pilot cohort spans 6 business verticals across Dhaka:
 
 ---
 
-## 5. Formal Sign-Off
+## 5. Live Multi-App Browser QA & Visual Proof
+
+A live visual inspection and interactive browser walkthrough was executed across all three applications on October 18, 2026, validating the visitor-to-platform operational lifecycle:
+
+### 5.1 Verified Browser User Journeys
+
+1. **Visitor Storefront Consultation Flow (`apps/storefront` — port 3000):**
+   - Navigated `http://localhost:3000/demo/modernclinic`.
+   - Verified responsive display of verified BMDC credentials, chamber schedules across Dhaka, and clinical specialties.
+   - Submitted an appointment consultation inquiry with affirmative consent logging.
+2. **Merchant Business Command Center & Split-Pane Triage (`apps/admin` — port 3001):**
+   - Navigated `http://localhost:3001/` and verified the 4-step setup checklist (80% completion) and live unattended queue.
+   - Navigated `/leads` split-pane operational workspace.
+   - Selected lead `#LD-t8rgyb` (Dr. Tanvir Ahmed), updated qualification state to `CONTACTED`, verified 1-tap WhatsApp action launcher (`wa.me/...`), and inspected timeline activity logs.
+3. **Platform Super-Admin Multi-Mode Governance (`apps/platform` — port 3003):**
+   - Navigated `http://localhost:3003/` and verified cohort telemetry (`portfolioSites`, `portfolioLeads7d`) and Needs-Attention incident triage queue.
+   - Navigated `/tenants/5b85d2b8-06d1-426b-a662-e35c8242f7c7` (Modern Clinic).
+   - Confirmed strict end-customer PII masking under "Inquiries & Leads" (`01712******`, `ta***@example.com`) backed by consent audit notice.
+   - Inspected the "Mode Transition" tab, verifying the pre-flight dry-run engine computes capabilities gained/disabled, route table modifications, and zero data loss guarantee.
+
+### 5.2 Visual Proof Artifacts
+
+- **Detailed Live QA Artifact:** [biztrack_business_live_qa_walkthrough.md](file:///C:/Users/USER/.gemini/antigravity-ide/brain/6746e714-03f1-481b-9915-594b2c9518b2/biztrack_business_live_qa_walkthrough.md)
+- **Storefront Consultation Recording:** `biztrack_business_e2e_walkthrough_1792262786808.webp`
+- **Merchant Triage & Platform Governance Recording:** `biztrack_business_admin_platform_walkthrough_1792263454614.webp`
+
+---
+
+## 6. Formal Sign-Off & Release Lock
 
 - **Engineering Lead:** Antigravity AI Systems
-- **Platform Architecture:** Verified & Compliant with `docs/54` and `docs/58`
-- **Release Status:** Ready for immediate 5-10 pilot merchant onboarding.
+- **Platform Architecture:** Verified & Compliant with `docs/54`, `docs/58`, and `docs/59`
+- **Database Status:** Live Supabase PostgreSQL migrations applied (`SiteLeadActivity` DDL with RLS)
+- **Release Status:** **LOCKED & READY FOR IMMEDIATE PILOT MERCHANTS**
+
