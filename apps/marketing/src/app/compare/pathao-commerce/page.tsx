@@ -499,6 +499,51 @@ export default function ComparePathaoCommercePage() {
           </div>
         </div>
       </section>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                  {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Home",
+                    "item": "https://biztrackbd.com",
+                  },
+                  {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Compare",
+                    "item": "https://biztrackbd.com/compare",
+                  },
+                  {
+                    "@type": "ListItem",
+                    "position": 3,
+                    "name": "Pathao Commerce vs BizTrackBD",
+                    "item": "https://biztrackbd.com/compare/pathao-commerce",
+                  },
+                ],
+              },
+              {
+                "@type": "FAQPage",
+                "mainEntity": PATHAO_FAQS.map((faq) => ({
+                  "@type": "Question",
+                  "name": faq.q,
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": faq.a,
+                  },
+                })),
+              },
+            ],
+          }),
+        }}
+      />
     </div>
   );
 }

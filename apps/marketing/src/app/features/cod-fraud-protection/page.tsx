@@ -63,21 +63,41 @@ const COD_FAQ: [string, string][] = [
 
 const schemaJsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "BizTrackBD COD Return Fraud Protection",
-  applicationCategory: "BusinessApplication",
-  operatingSystem: "Web, iOS, Android",
-  offers: {
-    "@type": "Offer",
-    price: "699",
-    priceCurrency: "BDT",
-  },
-  featureList: [
-    "Cross-courier delivery success rate check across Pathao & Steadfast",
-    "Automated risk scoring badges (Safe, Review, High Risk)",
-    "Advance courier fee request SMS integration",
-    "1-click dispatch for verified customers",
-    "0% sales commission",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://biztrackbd.com" },
+        { "@type": "ListItem", "position": 2, "name": "Features", "item": "https://biztrackbd.com/features" },
+        { "@type": "ListItem", "position": 3, "name": "COD Return Fraud Protection", "item": "https://biztrackbd.com/features/cod-fraud-protection" },
+      ],
+    },
+    {
+      "@type": "SoftwareApplication",
+      name: "BizTrackBD COD Return Fraud Protection",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web, iOS, Android",
+      offers: {
+        "@type": "Offer",
+        price: "799",
+        priceCurrency: "BDT",
+      },
+      featureList: [
+        "Cross-courier delivery success rate check across Pathao & Steadfast",
+        "Automated risk scoring badges (Safe, Review, High Risk)",
+        "Advance courier fee request SMS integration",
+        "1-click dispatch for verified customers",
+        "0% sales commission",
+      ],
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": COD_FAQ.map(([q, a]) => ({
+        "@type": "Question",
+        "name": q,
+        "acceptedAnswer": { "@type": "Answer", "text": a },
+      })),
+    },
   ],
 };
 
@@ -209,6 +229,104 @@ export default function CodFraudProtectionPage() {
           </div>
 
           <CodCalculatorSimulator />
+
+          {/* Authentic Admin Risk Desk Proof */}
+          <div className="admin-mockup-stage">
+            <div className="admin-mockup-topbar">
+              <div className="admin-mockup-dots">
+                <span className="admin-mockup-dot admin-mockup-dot-red" />
+                <span className="admin-mockup-dot admin-mockup-dot-yellow" />
+                <span className="admin-mockup-dot admin-mockup-dot-green" />
+              </div>
+              <div className="admin-mockup-url">admin.biztrackbd.com/orders/fraud-screening</div>
+              <div className="admin-mockup-live">
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10B981", display: "inline-block" }} />
+                POOLED COURIER NETWORK AUDIT
+              </div>
+            </div>
+
+            <div className="admin-mockup-inner">
+              <div className="admin-desk-toolbar">
+                <div className="admin-desk-pill-tabs">
+                  <span className="admin-desk-tab is-active">Active Screening Desk</span>
+                  <span className="admin-desk-tab">Auto-Cleared (41)</span>
+                  <span className="admin-desk-tab" style={{ color: "#FCA5A5" }}>High Risk Held (4)</span>
+                </div>
+                <div className="admin-desk-actions">
+                  <span style={{ fontSize: 11.5, color: "#94A3B8" }}>
+                    Avoided Return Losses this Month: <strong style={{ color: "#34D399" }}>৳ 42,600</strong>
+                  </span>
+                </div>
+              </div>
+
+              <div className="admin-desk-table-wrap">
+                <table className="admin-desk-table">
+                  <thead>
+                    <tr>
+                      <th>Buyer Phone &amp; District</th>
+                      <th>Order Value</th>
+                      <th>Pooled Delivery Record</th>
+                      <th>Risk Assessment</th>
+                      <th>Operational Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <div style={{ fontWeight: 600 }}>01711-***420</div>
+                        <div style={{ fontSize: 11, color: "#94A3B8" }}>Dhanmondi, Dhaka</div>
+                      </td>
+                      <td style={{ fontWeight: 700, color: "#F8FAFC" }}>৳ 3,250 COD</td>
+                      <td>
+                        <span style={{ fontWeight: 700, color: "#34D399" }}>24 Delivered · 0 Returns</span>
+                        <div style={{ fontSize: 10, color: "#94A3B8" }}>Steadfast &amp; Pathao verified</div>
+                      </td>
+                      <td>
+                        <span className="admin-badge-safe">100% Success · Safe</span>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: 11, color: "#34D399", fontWeight: 600 }}>Auto-Cleared for 1-Click Ship</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div style={{ fontWeight: 600 }}>01912-***892</div>
+                        <div style={{ fontSize: 11, color: "#94A3B8" }}>Agrabad, Chattogram</div>
+                      </td>
+                      <td style={{ fontWeight: 700, color: "#F8FAFC" }}>৳ 1,800 COD</td>
+                      <td>
+                        <span style={{ fontWeight: 700, color: "#FCD34D" }}>14 Delivered · 1 Return</span>
+                        <div style={{ fontSize: 10, color: "#94A3B8" }}>93% Delivery Ratio</div>
+                      </td>
+                      <td>
+                        <span className="admin-badge-warn">Low Risk · Standard</span>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: 11, color: "#60A5FA", fontWeight: 600 }}>Approve Dispatch ↗</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div style={{ fontWeight: 600 }}>01823-***119</div>
+                        <div style={{ fontSize: 11, color: "#94A3B8" }}>Uttara Sector 11, Dhaka</div>
+                      </td>
+                      <td style={{ fontWeight: 700, color: "#F8FAFC" }}>৳ 4,100 COD</td>
+                      <td>
+                        <span style={{ fontWeight: 700, color: "#FCA5A5" }}>1 Delivered · 5 Returns</span>
+                        <div style={{ fontSize: 10, color: "#FCA5A5" }}>16% Success (Serial Rejector)</div>
+                      </td>
+                      <td>
+                        <span className="admin-badge-danger">High Return Risk</span>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: 11, color: "#F87171", fontWeight: 700 }}>Hold &middot; Send ৳130 Courier Advance SMS ↗</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

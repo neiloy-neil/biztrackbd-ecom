@@ -156,6 +156,46 @@ export default async function Pricing() {
             </a>
           </p>
         </div>
+
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "BreadcrumbList",
+                  "itemListElement": [
+                    {
+                      "@type": "ListItem",
+                      "position": 1,
+                      "name": "Home",
+                      "item": "https://biztrackbd.com",
+                    },
+                    {
+                      "@type": "ListItem",
+                      "position": 2,
+                      "name": "Pricing",
+                      "item": "https://biztrackbd.com/pricing",
+                    },
+                  ],
+                },
+                {
+                  "@type": "Product",
+                  "name": "BizTrackBD Platform Subscription",
+                  "description": "Transparent eCommerce store software and business website subscription in Bangladeshi Taka with 0% sales commission.",
+                  "offers": {
+                    "@type": "AggregateOffer",
+                    "priceCurrency": "BDT",
+                    "lowPrice": "399",
+                    "highPrice": "1499",
+                    "offerCount": "3",
+                  },
+                },
+              ],
+            }),
+          }}
+        />
       </div>
     </section>
   );

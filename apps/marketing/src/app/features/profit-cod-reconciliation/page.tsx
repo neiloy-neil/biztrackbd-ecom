@@ -58,15 +58,35 @@ const PROFIT_FAQ: [string, string][] = [
 
 const schemaJsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "BizTrackBD Profit & COD Reconciliation Engine",
-  applicationCategory: "BusinessApplication",
-  operatingSystem: "Web, iOS, Android",
-  offers: {
-    "@type": "Offer",
-    price: "699",
-    priceCurrency: "BDT",
-  },
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://biztrackbd.com" },
+        { "@type": "ListItem", "position": 2, "name": "Features", "item": "https://biztrackbd.com/features" },
+        { "@type": "ListItem", "position": 3, "name": "Profit & COD Reconciliation", "item": "https://biztrackbd.com/features/profit-cod-reconciliation" },
+      ],
+    },
+    {
+      "@type": "SoftwareApplication",
+      name: "BizTrackBD Profit & COD Reconciliation Engine",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web, iOS, Android",
+      offers: {
+        "@type": "Offer",
+        price: "799",
+        priceCurrency: "BDT",
+      },
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": PROFIT_FAQ.map(([q, a]) => ({
+        "@type": "Question",
+        "name": q,
+        "acceptedAnswer": { "@type": "Answer", "text": a },
+      })),
+    },
+  ],
 };
 
 export default function ProfitCodReconciliationPage() {
@@ -148,6 +168,102 @@ export default function ProfitCodReconciliationPage() {
           </div>
 
           <WaterfallProfitLedger />
+
+          {/* Authentic Admin Reconciliation Desk Proof */}
+          <div className="admin-mockup-stage">
+            <div className="admin-mockup-topbar">
+              <div className="admin-mockup-dots">
+                <span className="admin-mockup-dot admin-mockup-dot-red" />
+                <span className="admin-mockup-dot admin-mockup-dot-yellow" />
+                <span className="admin-mockup-dot admin-mockup-dot-green" />
+              </div>
+              <div className="admin-mockup-url">admin.biztrackbd.com/finances/courier-reconciliation</div>
+              <div className="admin-mockup-live">
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10B981", display: "inline-block" }} />
+                AUTOMATED SETTLEMENT DESK
+              </div>
+            </div>
+
+            <div className="admin-mockup-inner">
+              <div className="admin-desk-toolbar">
+                <div className="admin-desk-pill-tabs">
+                  <span className="admin-desk-tab is-active">Batch #ST-2026-10-16 (Steadfast)</span>
+                  <span className="admin-desk-tab">Disbursed: ৳ 84,200</span>
+                  <span className="admin-desk-tab" style={{ color: "#34D399" }}>Matched: 100%</span>
+                </div>
+                <div className="admin-desk-actions">
+                  <button type="button" className="admin-action-btn-primary">
+                    <span>📑</span> Export Financial Voucher CSV
+                  </button>
+                </div>
+              </div>
+
+              <div className="admin-desk-table-wrap">
+                <table className="admin-desk-table">
+                  <thead>
+                    <tr>
+                      <th>Consignment / Order</th>
+                      <th>Gross COD</th>
+                      <th>Courier Delivery Fee</th>
+                      <th>Wholesale COGS</th>
+                      <th>True Net Margin</th>
+                      <th>Settlement Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <div style={{ fontWeight: 600, color: "#60A5FA" }}>ST-902180</div>
+                        <div style={{ fontSize: 11, color: "#94A3B8" }}>Order #BD-1088 · Dhaka City</div>
+                      </td>
+                      <td style={{ fontWeight: 700, color: "#F8FAFC" }}>৳ 2,400</td>
+                      <td style={{ color: "#F87171" }}>- ৳ 60</td>
+                      <td style={{ color: "#F87171" }}>- ৳ 1,150</td>
+                      <td>
+                        <span style={{ fontWeight: 800, color: "#34D399" }}>+ ৳ 1,190</span>
+                        <div style={{ fontSize: 10, color: "#34D399" }}>49.6% Net Profit</div>
+                      </td>
+                      <td>
+                        <span className="admin-badge-safe">Deposited to Bank</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div style={{ fontWeight: 600, color: "#60A5FA" }}>ST-902181</div>
+                        <div style={{ fontSize: 11, color: "#94A3B8" }}>Order #BD-1089 · Rajshahi Sadar</div>
+                      </td>
+                      <td style={{ fontWeight: 700, color: "#F8FAFC" }}>৳ 3,650</td>
+                      <td style={{ color: "#F87171" }}>- ৳ 110</td>
+                      <td style={{ color: "#F87171" }}>- ৳ 1,800</td>
+                      <td>
+                        <span style={{ fontWeight: 800, color: "#34D399" }}>+ ৳ 1,740</span>
+                        <div style={{ fontSize: 10, color: "#34D399" }}>47.7% Net Profit</div>
+                      </td>
+                      <td>
+                        <span className="admin-badge-safe">Deposited to Bank</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div style={{ fontWeight: 600, color: "#60A5FA" }}>ST-902182</div>
+                        <div style={{ fontSize: 11, color: "#94A3B8" }}>Order #BD-1090 · Bogura (Returned)</div>
+                      </td>
+                      <td style={{ fontWeight: 700, color: "#94A3B8" }}>৳ 0 (Returned)</td>
+                      <td style={{ color: "#F87171", fontWeight: 700 }}>- ৳ 110 (Loss)</td>
+                      <td style={{ color: "#94A3B8" }}>৳ 0 (Stock Back)</td>
+                      <td>
+                        <span style={{ fontWeight: 800, color: "#F87171" }}>- ৳ 110</span>
+                        <div style={{ fontSize: 10, color: "#F87171" }}>Return Courier Penalty</div>
+                      </td>
+                      <td>
+                        <span className="admin-badge-danger">Reconciled Loss</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

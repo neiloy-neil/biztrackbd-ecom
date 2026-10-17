@@ -475,6 +475,51 @@ export default function CompareWordPressPage() {
           </div>
         </div>
       </section>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                  {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Home",
+                    "item": "https://biztrackbd.com",
+                  },
+                  {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Compare",
+                    "item": "https://biztrackbd.com/compare",
+                  },
+                  {
+                    "@type": "ListItem",
+                    "position": 3,
+                    "name": "WordPress vs BizTrackBD",
+                    "item": "https://biztrackbd.com/compare/wordpress",
+                  },
+                ],
+              },
+              {
+                "@type": "FAQPage",
+                "mainEntity": WP_FAQS.map((faq) => ({
+                  "@type": "Question",
+                  "name": faq.q,
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": faq.a,
+                  },
+                })),
+              },
+            ],
+          }),
+        }}
+      />
     </div>
   );
 }

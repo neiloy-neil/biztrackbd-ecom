@@ -58,15 +58,35 @@ const COURIER_FAQ: [string, string][] = [
 
 const schemaJsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "BizTrackBD Courier Automation Desk",
-  applicationCategory: "BusinessApplication",
-  operatingSystem: "Web, iOS, Android",
-  offers: {
-    "@type": "Offer",
-    price: "699",
-    priceCurrency: "BDT",
-  },
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://biztrackbd.com" },
+        { "@type": "ListItem", "position": 2, "name": "Features", "item": "https://biztrackbd.com/features" },
+        { "@type": "ListItem", "position": 3, "name": "Courier Automation", "item": "https://biztrackbd.com/features/courier-automation" },
+      ],
+    },
+    {
+      "@type": "SoftwareApplication",
+      name: "BizTrackBD Courier Automation Desk",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web, iOS, Android",
+      offers: {
+        "@type": "Offer",
+        price: "799",
+        priceCurrency: "BDT",
+      },
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": COURIER_FAQ.map(([q, a]) => ({
+        "@type": "Question",
+        "name": q,
+        "acceptedAnswer": { "@type": "Answer", "text": a },
+      })),
+    },
+  ],
 };
 
 export default function CourierAutomationPage() {
@@ -148,6 +168,112 @@ export default function CourierAutomationPage() {
           </div>
 
           <CourierDispatchSimulator />
+
+          {/* Authentic Admin Workspace Proof */}
+          <div className="admin-mockup-stage">
+            <div className="admin-mockup-topbar">
+              <div className="admin-mockup-dots">
+                <span className="admin-mockup-dot admin-mockup-dot-red" />
+                <span className="admin-mockup-dot admin-mockup-dot-yellow" />
+                <span className="admin-mockup-dot admin-mockup-dot-green" />
+              </div>
+              <div className="admin-mockup-url">admin.biztrackbd.com/orders/courier-dispatch</div>
+              <div className="admin-mockup-live">
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10B981", display: "inline-block" }} />
+                LIVE WORKSPACE DESK
+              </div>
+            </div>
+
+            <div className="admin-mockup-inner">
+              <div className="admin-desk-toolbar">
+                <div className="admin-desk-pill-tabs">
+                  <span className="admin-desk-tab is-active">All Dispatches (48)</span>
+                  <span className="admin-desk-tab">Ready for Pickup (12)</span>
+                  <span className="admin-desk-tab">In Transit (29)</span>
+                  <span className="admin-desk-tab">Delivered (7)</span>
+                </div>
+                <div className="admin-desk-actions">
+                  <button type="button" className="admin-action-btn-primary">
+                    <span>⚡</span> 1-Click Bulk Dispatch
+                  </button>
+                  <button type="button" className="admin-action-btn-ghost">
+                    <span>🖨️</span> Print 4×6 Thermal Labels
+                  </button>
+                </div>
+              </div>
+
+              <div className="admin-desk-table-wrap">
+                <table className="admin-desk-table">
+                  <thead>
+                    <tr>
+                      <th>Order ID</th>
+                      <th>Recipient &amp; Destination</th>
+                      <th>Carrier &amp; Rate</th>
+                      <th>Consignment ID</th>
+                      <th>Delivery Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ fontWeight: 700, color: "#60A5FA" }}>#BD-1092</td>
+                      <td>
+                        <div style={{ fontWeight: 600 }}>Fahim Chowdhury</div>
+                        <div style={{ fontSize: 11, color: "#94A3B8" }}>Mirpur-10, Dhaka · 01711-***420</div>
+                      </td>
+                      <td>
+                        <span style={{ fontWeight: 700, color: "#34D399" }}>Steadfast ৳60</span>
+                        <div style={{ fontSize: 10, color: "#94A3B8" }}>COD: ৳2,450</div>
+                      </td>
+                      <td style={{ fontFamily: "var(--font-mono, monospace)", color: "#CBD5E1" }}>ST-902184</td>
+                      <td>
+                        <span className="admin-badge-safe">Ready for Pickup</span>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: 11, color: "#60A5FA", fontWeight: 600 }}>Print Thermal Label ↗</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 700, color: "#60A5FA" }}>#BD-1093</td>
+                      <td>
+                        <div style={{ fontWeight: 600 }}>Nusrat Jahan</div>
+                        <div style={{ fontSize: 11, color: "#94A3B8" }}>Chawkbazar, Chattogram · 01823-***551</div>
+                      </td>
+                      <td>
+                        <span style={{ fontWeight: 700, color: "#34D399" }}>Steadfast ৳110</span>
+                        <div style={{ fontSize: 10, color: "#94A3B8" }}>COD: ৳3,800</div>
+                      </td>
+                      <td style={{ fontFamily: "var(--font-mono, monospace)", color: "#CBD5E1" }}>ST-902185</td>
+                      <td>
+                        <span className="admin-badge-safe">Label Printed</span>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: 11, color: "#60A5FA", fontWeight: 600 }}>Track Courier ↗</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 700, color: "#60A5FA" }}>#BD-1094</td>
+                      <td>
+                        <div style={{ fontWeight: 600 }}>Tanvir Ahmed</div>
+                        <div style={{ fontSize: 11, color: "#94A3B8" }}>Sylhet Sadar · 01912-***892</div>
+                      </td>
+                      <td>
+                        <span style={{ fontWeight: 700, color: "#F59E0B" }}>Pathao 24h ৳120</span>
+                        <div style={{ fontSize: 10, color: "#94A3B8" }}>COD: ৳1,650</div>
+                      </td>
+                      <td style={{ fontFamily: "var(--font-mono, monospace)", color: "#CBD5E1" }}>PTH-491028</td>
+                      <td>
+                        <span className="admin-badge-warn">In Transit</span>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: 11, color: "#60A5FA", fontWeight: 600 }}>Send SMS Update ↗</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

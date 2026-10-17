@@ -527,6 +527,51 @@ export default function CompareWooCommercePage() {
           </div>
         </div>
       </section>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                  {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Home",
+                    "item": "https://biztrackbd.com",
+                  },
+                  {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Compare",
+                    "item": "https://biztrackbd.com/compare",
+                  },
+                  {
+                    "@type": "ListItem",
+                    "position": 3,
+                    "name": "WooCommerce vs BizTrackBD",
+                    "item": "https://biztrackbd.com/compare/woocommerce",
+                  },
+                ],
+              },
+              {
+                "@type": "FAQPage",
+                "mainEntity": WOO_FAQS.map((faq) => ({
+                  "@type": "Question",
+                  "name": faq.q,
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": faq.a,
+                  },
+                })),
+              },
+            ],
+          }),
+        }}
+      />
     </div>
   );
 }
