@@ -108,6 +108,22 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
   const [credId, setCredId] = useState("");
   const [credVerifyUrl, setCredVerifyUrl] = useState("");
 
+  // PUBLICATION
+  const [pubPublisher, setPubPublisher] = useState("");
+  const [pubPublishedAt, setPubPublishedAt] = useState("");
+  const [pubAuthors, setPubAuthors] = useState<string[]>([]);
+  const [authorInput, setAuthorInput] = useState("");
+  const [pubDoiUrl, setPubDoiUrl] = useState("");
+  const [pubPdfUrl, setPubPdfUrl] = useState("");
+
+  // EVENT
+  const [eventStartDate, setEventStartDate] = useState("");
+  const [eventEndDate, setEventEndDate] = useState("");
+  const [eventLocation, setEventLocation] = useState("");
+  const [eventLocationBn, setEventLocationBn] = useState("");
+  const [eventIsVirtual, setEventIsVirtual] = useState(false);
+  const [eventRegistrationUrl, setEventRegistrationUrl] = useState("");
+
   // Open modal for Create
   const handleOpenCreate = () => {
     setEditingItem(null);
@@ -146,6 +162,20 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
     setCredYear("");
     setCredId("");
     setCredVerifyUrl("");
+
+    setPubPublisher("");
+    setPubPublishedAt("");
+    setPubAuthors([]);
+    setAuthorInput("");
+    setPubDoiUrl("");
+    setPubPdfUrl("");
+
+    setEventStartDate("");
+    setEventEndDate("");
+    setEventLocation("");
+    setEventLocationBn("");
+    setEventIsVirtual(false);
+    setEventRegistrationUrl("");
 
     setIsModalOpen(true);
   };
@@ -191,6 +221,19 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
       setCredYear(data.issuedYear ? String(data.issuedYear) : "");
       setCredId(data.credentialId || "");
       setCredVerifyUrl(data.verificationUrl || "");
+    } else if (item.kind === "PUBLICATION") {
+      setPubPublisher(data.publisher || "");
+      setPubPublishedAt(data.publishedAt || "");
+      setPubAuthors(Array.isArray(data.authors) ? data.authors : []);
+      setPubDoiUrl(data.doiUrl || "");
+      setPubPdfUrl(data.pdfUrl || "");
+    } else if (item.kind === "EVENT") {
+      setEventStartDate(data.startDate || "");
+      setEventEndDate(data.endDate || "");
+      setEventLocation(data.location || "");
+      setEventLocationBn(data.locationBn || "");
+      setEventIsVirtual(Boolean(data.isVirtual));
+      setEventRegistrationUrl(data.registrationUrl || "");
     }
 
     setIsModalOpen(true);
@@ -257,6 +300,23 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
         issuedYear: credYear ? Number(credYear) || credYear : null,
         credentialId: credId || null,
         verificationUrl: credVerifyUrl || null,
+      };
+    } else if (formKind === "PUBLICATION") {
+      dynamicData = {
+        publisher: pubPublisher.trim() || null,
+        publishedAt: pubPublishedAt.trim() || null,
+        authors: pubAuthors,
+        doiUrl: pubDoiUrl.trim() || null,
+        pdfUrl: pubPdfUrl.trim() || null,
+      };
+    } else if (formKind === "EVENT") {
+      dynamicData = {
+        startDate: eventStartDate.trim() || null,
+        endDate: eventEndDate.trim() || null,
+        location: eventLocation.trim() || null,
+        locationBn: eventLocationBn.trim() || null,
+        isVirtual: eventIsVirtual,
+        registrationUrl: eventRegistrationUrl.trim() || null,
       };
     }
 
@@ -528,6 +588,21 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
                             {it.kind === "TEAM" && data.role && (
                               <span style={{ marginLeft: 8, color: "#2563eb" }}>
                                 {data.role}
+                              </span>
+                            )}
+                            {it.kind === "CREDENTIAL" && (data.issuer || data.credentialId) && (
+                              <span style={{ marginLeft: 8, color: "#d97706", fontWeight: 500 }}>
+                                {data.issuer}{data.issuedYear ? ` (${data.issuedYear})` : ""}{data.credentialId ? ` · ID: ${data.credentialId}` : ""}
+                              </span>
+                            )}
+                            {it.kind === "PUBLICATION" && (data.publisher || data.publishedAt) && (
+                              <span style={{ marginLeft: 8, color: "#7c3aed", fontWeight: 500 }}>
+                                {data.publisher}{data.publishedAt ? ` · ${data.publishedAt}` : ""}
+                              </span>
+                            )}
+                            {it.kind === "EVENT" && (data.startDate || data.location || data.isVirtual) && (
+                              <span style={{ marginLeft: 8, color: "#059669", fontWeight: 500 }}>
+                                {data.startDate ? `📅 ${data.startDate}` : ""}{data.isVirtual ? " (Virtual)" : data.location ? ` · 📍 ${data.location}` : ""}
                               </span>
                             )}
                           </div>
@@ -1193,6 +1268,196 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
                         className="input input-sm"
                         value={credVerifyUrl}
                         onChange={(e) => setCredVerifyUrl(e.target.value)}
+                        placeholder="https://..."
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {formKind === "PUBLICATION" && (
+                <div style={{ padding: 14, background: "#f8fafc", borderRadius: 8, marginBottom: 14, border: "1px solid #e2e8f0" }}>
+                  <div style={{ fontWeight: 600, fontSize: "0.9rem", marginBottom: 10, color: "#1e293b" }}>
+                    Publication & Research Details
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 10, marginBottom: 10 }}>
+                    <div>
+                      <label style={{ fontSize: "0.8rem", fontWeight: 500, display: "block" }}>Journal / Publisher</label>
+                      <input
+                        type="text"
+                        className="input input-sm"
+                        value={pubPublisher}
+                        onChange={(e) => setPubPublisher(e.target.value)}
+                        placeholder="e.g. The Lancet or Dhaka Tribune"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: "0.8rem", fontWeight: 500, display: "block" }}>Publication Date</label>
+                      <input
+                        type="text"
+                        className="input input-sm"
+                        value={pubPublishedAt}
+                        onChange={(e) => setPubPublishedAt(e.target.value)}
+                        placeholder="e.g. Oct 2026"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Authors tags */}
+                  <div style={{ marginBottom: 10 }}>
+                    <label style={{ fontSize: "0.8rem", fontWeight: 500, display: "block", marginBottom: 4 }}>
+                      Co-Authors
+                    </label>
+                    <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
+                      <input
+                        type="text"
+                        className="input input-sm"
+                        value={authorInput}
+                        onChange={(e) => setAuthorInput(e.target.value)}
+                        placeholder="e.g. Dr. Tanvir Ahmed and click Add"
+                        style={{ flex: 1 }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            if (authorInput.trim()) {
+                              setPubAuthors([...pubAuthors, authorInput.trim()]);
+                              setAuthorInput("");
+                            }
+                          }
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => {
+                          if (authorInput.trim()) {
+                            setPubAuthors([...pubAuthors, authorInput.trim()]);
+                            setAuthorInput("");
+                          }
+                        }}
+                      >
+                        + Add
+                      </button>
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      {pubAuthors.map((a, i) => (
+                        <span key={i} className="badge" style={{ background: "#e2e8f0", padding: "2px 8px", borderRadius: 12, fontSize: "0.75rem" }}>
+                          {a}{" "}
+                          <button
+                            type="button"
+                            style={{ background: "none", border: "none", cursor: "pointer", marginLeft: 4, color: "#64748b" }}
+                            onClick={() => setPubAuthors(pubAuthors.filter((_, idx) => idx !== i))}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    <div>
+                      <label style={{ fontSize: "0.8rem", fontWeight: 500, display: "block" }}>DOI / Article Link</label>
+                      <input
+                        type="url"
+                        className="input input-sm"
+                        value={pubDoiUrl}
+                        onChange={(e) => setPubDoiUrl(e.target.value)}
+                        placeholder="https://doi.org/..."
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: "0.8rem", fontWeight: 500, display: "block" }}>PDF Download Link</label>
+                      <input
+                        type="url"
+                        className="input input-sm"
+                        value={pubPdfUrl}
+                        onChange={(e) => setPubPdfUrl(e.target.value)}
+                        placeholder="https://storage.../paper.pdf"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {formKind === "EVENT" && (
+                <div style={{ padding: 14, background: "#f8fafc", borderRadius: 8, marginBottom: 14, border: "1px solid #e2e8f0" }}>
+                  <div style={{ fontWeight: 600, fontSize: "0.9rem", marginBottom: 10, color: "#1e293b" }}>
+                    Event & Appearance Details
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                    <div>
+                      <label style={{ fontSize: "0.8rem", fontWeight: 500, display: "block" }}>Start Date / Time</label>
+                      <input
+                        type="text"
+                        className="input input-sm"
+                        value={eventStartDate}
+                        onChange={(e) => setEventStartDate(e.target.value)}
+                        placeholder="e.g. 24 Nov 2026, 10:00 AM"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: "0.8rem", fontWeight: 500, display: "block" }}>End Date / Time</label>
+                      <input
+                        type="text"
+                        className="input input-sm"
+                        value={eventEndDate}
+                        onChange={(e) => setEventEndDate(e.target.value)}
+                        placeholder="e.g. 24 Nov 2026, 05:00 PM"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                    <div>
+                      <label style={{ fontSize: "0.8rem", fontWeight: 500, display: "block" }}>Location / Venue (EN)</label>
+                      <input
+                        type="text"
+                        className="input input-sm"
+                        value={eventLocation}
+                        onChange={(e) => setEventLocation(e.target.value)}
+                        placeholder="e.g. BICC Dhaka or Zoom"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: "0.8rem", fontWeight: 500, display: "block" }}>Venue (বাংলা)</label>
+                      <input
+                        type="text"
+                        className="input input-sm"
+                        value={eventLocationBn}
+                        onChange={(e) => setEventLocationBn(e.target.value)}
+                        placeholder="যেমনঃ বঙ্গবন্ধু আন্তর্জাতিক সম্মেলন কেন্দ্র"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 10, alignItems: "center" }}>
+                    <div>
+                      <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.85rem", cursor: "pointer", marginTop: 14 }}>
+                        <input
+                          type="checkbox"
+                          checked={eventIsVirtual}
+                          onChange={(e) => setEventIsVirtual(e.target.checked)}
+                        />
+                        <span>Virtual / Online Event</span>
+                      </label>
+                    </div>
+                    <div>
+                      <label style={{ fontSize: "0.8rem", fontWeight: 500, display: "block" }}>Registration URL / Link</label>
+                      <input
+                        type="url"
+                        className="input input-sm"
+                        value={eventRegistrationUrl}
+                        onChange={(e) => setEventRegistrationUrl(e.target.value)}
                         placeholder="https://..."
                         style={{ width: "100%" }}
                       />

@@ -17,6 +17,9 @@ function revalidateAllContentPaths() {
   revalidatePath("/services");
   revalidatePath("/portfolio");
   revalidatePath("/team");
+  revalidatePath("/credentials");
+  revalidatePath("/publications");
+  revalidatePath("/events");
   revalidatePath("/content");
 }
 
