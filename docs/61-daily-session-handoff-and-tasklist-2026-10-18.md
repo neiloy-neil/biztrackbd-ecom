@@ -104,6 +104,9 @@ All browser walkthrough recordings and full-resolution PNG artifacts are saved i
 | `add_dish_modal_1792317573703.png` | Add Dish modal with glassmorphic backdrop and structured form grid | Verified ✓ |
 | `table_qr_studio_tab_1792317650104.png` | Table QR Studio with table stands and print layout | Verified ✓ |
 | `menu_design_verification_1792317510905.webp` | Live browser verification video of Restaurant Menu redesign | Verified ✓ |
+| `builder_overview_1792319157516.png` | Site Design workspace loaded with Dhaka Bistro restaurant layout & atmospheric preview | Verified ✓ |
+| `website_portfolio_templates_tab_1792319208345.png` | Template switcher showing Dhaka Bistro Active with Website & Portfolio category tabs | Verified ✓ |
+| `ecommerce_templates_tab_1792319192847.png` | E-Commerce templates tab in Template Switcher | Verified ✓ |
 
 ---
 
