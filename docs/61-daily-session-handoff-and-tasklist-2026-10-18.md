@@ -100,6 +100,10 @@ All browser walkthrough recordings and full-resolution PNG artifacts are saved i
 | `billing_page_1792313389723.png` | Admin Billing workspace displaying mode badge, mode switcher cross-link, and synchronized plan cards | Verified ✓ |
 | `settings_mode_page_1792313416433.png` | Operating Mode workspace reached via direct link from Billing page | Verified ✓ |
 | `verify_billing_plans_mode_1792313368348.webp` | Full video recording of Admin Billing and Operating Mode cross-navigation | Verified ✓ |
+| `menu_categories_and_dishes_1792317546649.png` | Redesigned Restaurant Menu with category filters, dietary badges, and prices | Verified ✓ |
+| `add_dish_modal_1792317573703.png` | Add Dish modal with glassmorphic backdrop and structured form grid | Verified ✓ |
+| `table_qr_studio_tab_1792317650104.png` | Table QR Studio with table stands and print layout | Verified ✓ |
+| `menu_design_verification_1792317510905.webp` | Live browser verification video of Restaurant Menu redesign | Verified ✓ |
 
 ---
 
