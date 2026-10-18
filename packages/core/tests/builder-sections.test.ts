@@ -193,4 +193,73 @@ describe("Visual Theme Builder Studio - New Conversion Sections", () => {
       }
     });
   });
+
+  describe("Phase 2 Dynamic Modern Widgets", () => {
+    const PHASE2_TYPES = ["bento-grid", "content-tabs", "video-lightbox"];
+
+    it("registers all Phase 2 modern dynamic sections in SECTIONS", () => {
+      const types = SECTIONS.map((s) => s.type);
+      for (const t of PHASE2_TYPES) {
+        expect(types).toContain(t);
+      }
+    });
+
+    it("normalizes bento-grid settings and items list properly", () => {
+      const def = sectionDef("bento-grid")!;
+      expect(def).toBeDefined();
+      const s = normalizeSettings(def, {});
+      expect(s.layout).toBe("bento-3");
+      expect(Array.isArray(s.items)).toBe(true);
+      const items = s.items as Array<Record<string, unknown>>;
+      expect(items.length).toBeGreaterThan(0);
+      expect(items[0]?.cardStyle).toBe("accent");
+      expect(items[0]?.span).toBe("2");
+    });
+
+    it("normalizes content-tabs settings and items list properly", () => {
+      const def = sectionDef("content-tabs")!;
+      expect(def).toBeDefined();
+      const s = normalizeSettings(def, {});
+      expect(s.tabStyle).toBe("pills");
+      expect(Array.isArray(s.items)).toBe(true);
+      const items = s.items as Array<Record<string, unknown>>;
+      expect(items.length).toBeGreaterThanOrEqual(3);
+      expect(items[0]?.label).toBe("Quality Craft");
+    });
+
+    it("normalizes video-lightbox settings and aspect ratio properly", () => {
+      const def = sectionDef("video-lightbox")!;
+      expect(def).toBeDefined();
+      const s = normalizeSettings(def, {});
+      expect(s.aspectRatio).toBe("16-9");
+      expect(s.videoUrl).toContain("youtube.com");
+      expect(s.playLabel).toBe("Watch Story (2 mins)");
+    });
+
+    it("validates a page containing Phase 2 modern widgets", () => {
+      const page: PageJson = {
+        version: 1,
+        sections: [
+          newSection("hero"),
+          newSection("bento-grid"),
+          newSection("content-tabs"),
+          newSection("video-lightbox"),
+        ],
+      };
+
+      expect(() => validatePage("home", page)).not.toThrow();
+      
+      const customPage: PageJson = {
+        version: 1,
+        sections: [
+          newSection("banner"),
+          newSection("bento-grid"),
+          newSection("content-tabs"),
+          newSection("video-lightbox"),
+        ],
+      };
+      expect(() => validatePage("custom", customPage)).not.toThrow();
+    });
+  });
 });
+

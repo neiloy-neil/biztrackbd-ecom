@@ -32,6 +32,9 @@ const DRAWINGS: Record<string, ReactNode> = {
   portfolio: <><rect x={6} y={8} width={18} height={20} rx={2} {...solid} />{line(31, 14, 8)}{line(36, 10, 8)}<rect x={27} y={8} width={18} height={20} rx={2} {...solid} />{line(31, 14, 29)}{line(36, 10, 29)}<rect x={48} y={8} width={18} height={20} rx={2} {...solid} />{line(31, 14, 50)}{line(36, 10, 50)}</>,
   download: <><rect x={12} y={8} width={48} height={32} rx={4} {...box} /><rect x={16} y={13} width={14} height={10} rx={2} fill="currentColor" opacity={0.8} />{line(15, 24, 34)}{line(21, 18, 34)}<rect x={16} y={28} width={40} height={7} rx={3} fill="currentColor" opacity={0.6} /></>,
   contactForm: <><rect x={10} y={6} width={52} height={36} rx={4} {...box} /><rect x={14} y={10} width={24} height={4} rx={1.5} {...solid} /><rect x={14} y={17} width={44} height={6} rx={2} {...solid} /><rect x={14} y={25} width={44} height={8} rx={2} {...solid} /><rect x={14} y={35} width={20} height={5} rx={2} fill="currentColor" opacity={0.8} /></>,
+  bento: <><rect x={6} y={8} width={38} height={18} rx={3} {...solid} /><rect x={48} y={8} width={18} height={18} rx={3} {...box} /><rect x={6} y={30} width={18} height={12} rx={2} {...box} /><rect x={28} y={30} width={38} height={12} rx={2} {...solid} /></>,
+  tabs: <><rect x={6} y={8} width={18} height={6} rx={3} fill="currentColor" opacity={0.7} /><rect x={27} y={8} width={18} height={6} rx={3} {...box} /><rect x={48} y={8} width={18} height={6} rx={3} {...box} /><rect x={6} y={18} width={60} height={24} rx={3} {...box} />{line(23, 26, 10)}{line(29, 22, 10)}<rect x={42} y={22} width={20} height={16} rx={2} {...solid} /></>,
+  lightbox: <><rect x={6} y={8} width={60} height={32} rx={4} {...box} /><rect x={8} y={10} width={56} height={28} rx={3} {...solid} /><circle cx={36} cy={24} r={8} fill="currentColor" opacity={0.6} /><path d="M34 20l6 4-6 4z" fill="currentColor" opacity={0.9} /></>,
 };
 
 const KIND: Record<string, keyof typeof DRAWINGS> = {
@@ -50,6 +53,9 @@ const KIND: Record<string, keyof typeof DRAWINGS> = {
   "portfolio-grid": "portfolio",
   "download-card": "download",
   "contact-form": "contactForm",
+  "bento-grid": "bento",
+  "content-tabs": "tabs",
+  "video-lightbox": "lightbox",
 };
 
 export function SectionThumb({ type }: { type: string }) {
@@ -65,8 +71,8 @@ export { STORE_SECTION_CATEGORIES, type StoreSectionCategory } from "@biztrackbd
 
 /** How the cards are grouped on a landing page; other pages show one list. */
 export const LANDING_GROUPS: { title: string; types: string[] }[] = [
-  { title: "Top of the page", types: ["lp-header", "lp-hero", "lp-marquee", "lp-video"] },
-  { title: "Describe the product", types: ["lp-benefits", "lp-split", "lp-compare", "lp-steps", "lp-text", "lp-gallery"] },
+  { title: "Top of the page", types: ["lp-header", "lp-hero", "lp-marquee", "lp-video", "video-lightbox"] },
+  { title: "Describe the product", types: ["lp-benefits", "lp-split", "lp-compare", "lp-steps", "lp-text", "lp-gallery", "bento-grid", "content-tabs"] },
   { title: "Build trust", types: ["lp-reviews", "lp-screens", "trust-strip", "lp-countdown", "lp-stock"] },
   { title: "Close the sale", types: ["lp-offer-bar", "lp-order-form", "lp-faq", "lp-sticky-cta"] },
 ];

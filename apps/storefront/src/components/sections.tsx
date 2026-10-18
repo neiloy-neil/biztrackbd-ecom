@@ -22,6 +22,9 @@ import { TeamGridSection, type TeamMember } from "./verticals/team-grid";
 import { PortfolioGridSection, type ProjectItem } from "./verticals/portfolio-grid";
 import { DownloadCardSection } from "./verticals/download-card";
 import { ContactFormSection } from "./verticals/contact-form";
+import { BentoGridSection, type BentoItem } from "./widgets/bento-grid";
+import { ContentTabsSection, type ContentTabItem } from "./widgets/content-tabs";
+import { VideoLightboxSection } from "./widgets/video-lightbox";
 
 /**
  * Draws a page built in the editor. It has no server-only code, so the live store (server) and the editor's preview
@@ -1072,6 +1075,100 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
           />
         </div>
       );
+    case "bento-grid": {
+      const rawItems = Array.isArray(s.items) ? (s.items as Record<string, unknown>[]) : [];
+      const items: BentoItem[] = rawItems.map((it) => ({
+        badge: str(it.badge) || undefined,
+        badgeBn: str(it.badgeBn) || undefined,
+        title: str(it.title) || undefined,
+        titleBn: str(it.titleBn) || undefined,
+        text: str(it.text) || undefined,
+        textBn: str(it.textBn) || undefined,
+        metric: str(it.metric) || undefined,
+        metricLabel: str(it.metricLabel) || undefined,
+        metricLabelBn: str(it.metricLabelBn) || undefined,
+        image: str(it.image) || undefined,
+        icon: str(it.icon) || undefined,
+        ctaText: str(it.ctaText) || undefined,
+        ctaTextBn: str(it.ctaTextBn) || undefined,
+        ctaLink: str(it.ctaLink) || undefined,
+        cardStyle: (it.cardStyle as BentoItem["cardStyle"]) || "surface",
+        span: (it.span as BentoItem["span"]) || "1",
+      }));
+
+      return (
+        <div data-section={id}>
+          <BentoGridSection
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            subtitle={str(s.subtitle)}
+            subtitleBn={str(s.subtitleBn)}
+            layout={str(s.layout) || "bento-3"}
+            items={items}
+            lang={lang}
+            ed={ed}
+            editing={editing}
+          />
+        </div>
+      );
+    }
+    case "content-tabs": {
+      const rawItems = Array.isArray(s.items) ? (s.items as Record<string, unknown>[]) : [];
+      const items: ContentTabItem[] = rawItems.map((it) => ({
+        id: str(it.id) || undefined,
+        label: str(it.label) || undefined,
+        labelBn: str(it.labelBn) || undefined,
+        icon: str(it.icon) || undefined,
+        badge: str(it.badge) || undefined,
+        badgeBn: str(it.badgeBn) || undefined,
+        title: str(it.title) || undefined,
+        titleBn: str(it.titleBn) || undefined,
+        text: str(it.text) || undefined,
+        textBn: str(it.textBn) || undefined,
+        image: str(it.image) || undefined,
+        ctaText: str(it.ctaText) || undefined,
+        ctaTextBn: str(it.ctaTextBn) || undefined,
+        ctaLink: str(it.ctaLink) || undefined,
+      }));
+
+      return (
+        <div data-section={id}>
+          <ContentTabsSection
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            subtitle={str(s.subtitle)}
+            subtitleBn={str(s.subtitleBn)}
+            tabStyle={(s.tabStyle as "pills" | "underline" | "boxed") || "pills"}
+            items={items}
+            lang={lang}
+            ed={ed}
+            editing={editing}
+          />
+        </div>
+      );
+    }
+    case "video-lightbox": {
+      return (
+        <div data-section={id}>
+          <VideoLightboxSection
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            subtitle={str(s.subtitle)}
+            subtitleBn={str(s.subtitleBn)}
+            badge={str(s.badge)}
+            badgeBn={str(s.badgeBn)}
+            videoUrl={str(s.videoUrl)}
+            coverImage={str(s.coverImage)}
+            aspectRatio={(s.aspectRatio as "16-9" | "4-3" | "21-9") || "16-9"}
+            playLabel={str(s.playLabel)}
+            playLabelBn={str(s.playLabelBn)}
+            lang={lang}
+            ed={ed}
+            editing={editing}
+          />
+        </div>
+      );
+    }
     default:
       // The product, collection and cart blocks (docs/39) need the page's own data.
       return <>{renderPageBlock(section.type, id, s, ctx, lang, t, editing)}</>;
