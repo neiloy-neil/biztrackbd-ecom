@@ -20,15 +20,29 @@ export function SectionMotion({ editing }: { editing?: boolean }) {
       return;
     }
 
+    const revealAll = () => {
+      document.querySelectorAll(".bt-anim:not(.bt-revealed)").forEach((el) => el.classList.add("bt-revealed"));
+    };
+
     if (editing) {
       // In builder editor, reveal by default so canvas is never blank
-      document.querySelectorAll(".bt-anim").forEach((el) => el.classList.add("bt-revealed"));
+      revealAll();
+
+      // Mutation observer guarantees newly added sections are immediately visible
+      const mo = new MutationObserver(() => {
+        revealAll();
+      });
+      if (document.body) {
+        mo.observe(document.body, { childList: true, subtree: true });
+      }
 
       const onMessage = (e: MessageEvent) => {
         if (!e.data || typeof e.data !== "object") return;
         const m = e.data as { type?: string; id?: string };
 
-        if (m.type === "bt-preview:replay-anim" && m.id) {
+        if (m.type === "bt-preview:update") {
+          requestAnimationFrame(revealAll);
+        } else if (m.type === "bt-preview:replay-anim" && m.id) {
           const el = document.querySelector(`[data-section-wrap="${m.id}"]`);
           if (el) {
             el.classList.remove("bt-revealed");
@@ -51,12 +65,15 @@ export function SectionMotion({ editing }: { editing?: boolean }) {
       };
 
       window.addEventListener("message", onMessage);
-      return () => window.removeEventListener("message", onMessage);
+      return () => {
+        mo.disconnect();
+        window.removeEventListener("message", onMessage);
+      };
     }
 
     // Live storefront: observe scroll entrance
     if (!("IntersectionObserver" in window)) {
-      document.querySelectorAll(".bt-anim").forEach((el) => el.classList.add("bt-revealed"));
+      revealAll();
       return;
     }
 
@@ -75,8 +92,17 @@ export function SectionMotion({ editing }: { editing?: boolean }) {
     const animEls = document.querySelectorAll(".bt-anim:not(.bt-revealed)");
     animEls.forEach((el) => observer.observe(el));
 
+    // Observe newly added nodes on live storefront as well
+    const mo = new MutationObserver(() => {
+      document.querySelectorAll(".bt-anim:not(.bt-revealed)").forEach((el) => observer.observe(el));
+    });
+    if (document.body) {
+      mo.observe(document.body, { childList: true, subtree: true });
+    }
+
     return () => {
       observer.disconnect();
+      mo.disconnect();
     };
   }, [editing]);
 

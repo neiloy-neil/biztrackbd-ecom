@@ -1291,6 +1291,8 @@ export function SectionStyleWrapper({
 
   const classes: string[] = ["bt-section-wrap"];
   const inlineStyles: React.CSSProperties = {};
+  const isCard = style?.cardMode && !isFloating && !isAnnouncement;
+  const cardStyles: React.CSSProperties = {};
 
   if (style?.hideOn === "mobile") classes.push("bt-hide-mobile");
   if (style?.hideOn === "desktop") classes.push("bt-hide-desktop");
@@ -1311,6 +1313,9 @@ export function SectionStyleWrapper({
     const anim = style?.animation && style.animation !== "none" ? style.animation : undefined;
     if (anim) {
       classes.push("bt-anim", `bt-anim-${anim}`);
+      if (editing) {
+        classes.push("bt-revealed");
+      }
       classes.push(`bt-dur-${style?.animDuration || "normal"}`);
       if (typeof style?.animDelay === "number" && style.animDelay > 0) {
         classes.push(`bt-delay-${style.animDelay}`);
@@ -1323,17 +1328,32 @@ export function SectionStyleWrapper({
 
     if (style?.bgType === "color" && style.bgColor) {
       classes.push("bt-has-custom-bg");
-      inlineStyles.backgroundColor = style.bgColor;
+      if (isCard) {
+        cardStyles.backgroundColor = style.bgColor;
+      } else {
+        inlineStyles.backgroundColor = style.bgColor;
+      }
     } else if (style?.bgType === "gradient" && style.bgGradient) {
       classes.push("bt-has-custom-bg");
       const presetCss = SECTION_GRADIENT_PRESETS[style.bgGradient]?.css;
-      inlineStyles.backgroundImage = presetCss || style.bgGradient;
+      if (isCard) {
+        cardStyles.backgroundImage = presetCss || style.bgGradient;
+      } else {
+        inlineStyles.backgroundImage = presetCss || style.bgGradient;
+      }
     } else if (style?.bgType === "image" && style.bgImage) {
       classes.push("bt-has-custom-bg");
-      inlineStyles.backgroundImage = `url(${style.bgImage})`;
-      inlineStyles.backgroundPosition = "center";
-      inlineStyles.backgroundRepeat = "no-repeat";
-      inlineStyles.backgroundSize = "cover";
+      if (isCard) {
+        cardStyles.backgroundImage = `url(${style.bgImage})`;
+        cardStyles.backgroundPosition = "center";
+        cardStyles.backgroundRepeat = "no-repeat";
+        cardStyles.backgroundSize = "cover";
+      } else {
+        inlineStyles.backgroundImage = `url(${style.bgImage})`;
+        inlineStyles.backgroundPosition = "center";
+        inlineStyles.backgroundRepeat = "no-repeat";
+        inlineStyles.backgroundSize = "cover";
+      }
     }
   }
 
@@ -1344,8 +1364,8 @@ export function SectionStyleWrapper({
     typeof style.bgOverlay === "number" &&
     style.bgOverlay > 0;
 
-  const content = style?.cardMode && !isFloating && !isAnnouncement ? (
-    <div className="bt-section-card-inner">{children}</div>
+  const content = isCard ? (
+    <div className="bt-section-card-inner" style={Object.keys(cardStyles).length > 0 ? cardStyles : undefined}>{children}</div>
   ) : (
     children
   );

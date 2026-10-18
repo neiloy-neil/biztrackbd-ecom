@@ -127,10 +127,12 @@ body[data-store-theme="berber"] .footer b, body[data-store-theme="berber"] .foot
 }
 
 /* When a custom background is set, child default backgrounds (like .hero or .wrap) yield */
-.bt-section-wrap.bt-has-custom-bg .hero {
+.bt-section-wrap.bt-has-custom-bg .hero,
+.bt-section-wrap.bt-card-mode .hero {
   background: transparent !important;
 }
-.bt-section-wrap.bt-has-custom-bg .wrap {
+.bt-section-wrap.bt-has-custom-bg .wrap,
+.bt-section-wrap.bt-card-mode .wrap {
   background-color: transparent !important;
 }
 
@@ -294,6 +296,14 @@ body[data-store-theme="berber"] .footer b, body[data-store-theme="berber"] .foot
 .bt-anim-slide-left:not(.bt-revealed) { transform: translateX(40px); }
 .bt-anim-slide-right:not(.bt-revealed) { transform: translateX(-40px); }
 .bt-anim-zoom-in:not(.bt-revealed) { transform: scale(0.92); }
+
+/* In SiteBuilder editor preview canvas, never allow sections to remain invisible */
+[data-testid="preview-root"] .bt-anim:not(.bt-revealed),
+[data-preview-sections] .bt-anim:not(.bt-revealed),
+body:has(#bt-preview-select) .bt-anim:not(.bt-revealed) {
+  opacity: 1 !important;
+  transform: none !important;
+}
 
 /* Revealed trigger */
 .bt-anim-fade.bt-revealed {
