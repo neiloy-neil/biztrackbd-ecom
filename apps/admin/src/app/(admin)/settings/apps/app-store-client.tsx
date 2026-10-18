@@ -1802,6 +1802,7 @@ export function AppStoreClient({
                         const res = await savePaymentGatewayAction("SSLCOMMERZ", "LIVE", {
                           storeId: String(fd.get("storeId") ?? ""),
                           storePassword: String(fd.get("storePassword") ?? ""),
+                          isSandbox: fd.get("isSandbox") === "on" ? "true" : "false",
                         });
                         setFormMsg(res);
                       });
@@ -1814,8 +1815,7 @@ export function AppStoreClient({
                       <input
                         type="text"
                         name="storeId"
-                        defaultValue={row?.config?.storeId ?? ""}
-                        placeholder="Your Store ID"
+                        placeholder={row?.secretsSet?.storeId ? "•••••••••••• (Leave blank to keep saved)" : "Your Store ID"}
                         className="input"
                         style={{ width: "100%" }}
                       />
@@ -1832,9 +1832,104 @@ export function AppStoreClient({
                       />
                     </div>
 
+                    <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13.5 }}>
+                      <input
+                        type="checkbox"
+                        name="isSandbox"
+                        defaultChecked={row?.config?.isSandbox === "true"}
+                      />
+                      <span>Sandbox / Test Mode (Uses sandbox.sslcommerz.com)</span>
+                    </label>
+
                     <div style={{ marginTop: 8 }}>
                       <button type="submit" className="btn btn-primary" disabled={isPending} style={{ width: "100%" }}>
                         {isPending ? "Saving…" : "Save SSLCOMMERZ Keys"}
+                      </button>
+                    </div>
+                  </form>
+                );
+              })()}
+
+              {/* 12b. DIRECT BKASH (TOKENIZED CHECKOUT) */}
+              {activeModal === "bkash_direct_pay" && (() => {
+                const row = getIntegration("BKASH_DIRECT", "LIVE");
+
+                return (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const fd = new FormData(e.currentTarget);
+                      startTransition(async () => {
+                        const res = await savePaymentGatewayAction("BKASH_DIRECT", "LIVE", {
+                          appKey: String(fd.get("appKey") ?? ""),
+                          appSecret: String(fd.get("appSecret") ?? ""),
+                          username: String(fd.get("username") ?? ""),
+                          password: String(fd.get("password") ?? ""),
+                          isSandbox: fd.get("isSandbox") === "on" ? "true" : "false",
+                        });
+                        setFormMsg(res);
+                      });
+                    }}
+                    className="stack"
+                    style={{ gap: 14 }}
+                  >
+                    <div>
+                      <label className="label">bKash App Key</label>
+                      <input
+                        type="text"
+                        name="appKey"
+                        placeholder={row?.secretsSet?.appKey ? "•••••••••••• (Leave blank to keep saved)" : "App Key from bKash Developer Portal"}
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="label">bKash App Secret</label>
+                      <input
+                        type="password"
+                        name="appSecret"
+                        placeholder={row?.secretsSet?.appSecret ? "•••••••••••• (Leave blank to keep saved)" : "App Secret"}
+                        className="input"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                      <div>
+                        <label className="label">Merchant Username</label>
+                        <input
+                          type="text"
+                          name="username"
+                          placeholder={row?.secretsSet?.username ? "••••••••••••" : "API Username"}
+                          className="input"
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                      <div>
+                        <label className="label">Merchant Password</label>
+                        <input
+                          type="password"
+                          name="password"
+                          placeholder={row?.secretsSet?.password ? "••••••••••••" : "API Password"}
+                          className="input"
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                    </div>
+
+                    <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13.5 }}>
+                      <input
+                        type="checkbox"
+                        name="isSandbox"
+                        defaultChecked={row?.config?.isSandbox === "true"}
+                      />
+                      <span>Sandbox / Test Mode (Uses tokenized.sandbox.bka.sh)</span>
+                    </label>
+
+                    <div style={{ marginTop: 8 }}>
+                      <button type="submit" className="btn btn-primary" disabled={isPending} style={{ width: "100%" }}>
+                        {isPending ? "Saving…" : "Save bKash Merchant API Keys"}
                       </button>
                     </div>
                   </form>
@@ -2356,6 +2451,7 @@ export function AppStoreClient({
                 "fraud_shield",
                 "sms_alerts",
                 "sslcommerz_pay",
+                "bkash_direct_pay",
                 "uddoktapay_pay",
                 "whatsapp_commerce",
                 "product_bundles",

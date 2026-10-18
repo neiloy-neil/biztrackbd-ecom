@@ -322,6 +322,18 @@ export async function listAppStoreCatalog(tenantId: string, actor: StaffActor): 
             blockedReason: null,
           };
         }
+        if (item.key === "bkash_direct_pay") {
+          const hasKeys = activeIntegrations.has("BKASH_DIRECT");
+          if (hasKeys) totalActive++;
+          return {
+            ...item,
+            status: hasKeys ? "ACTIVE" : "NEEDS_SETUP",
+            statusLabel: hasKeys ? "Connected" : "Setup Required",
+            enabled: true,
+            configured: hasKeys,
+            blockedReason: null,
+          };
+        }
         if (item.key === "uddoktapay_pay") {
           const hasKeys = activeIntegrations.has("UDDOKTAPAY");
           if (hasKeys) totalActive++;

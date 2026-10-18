@@ -238,7 +238,7 @@ export async function saveSmsGatewayAction(input: {
 }
 
 export async function savePaymentGatewayAction(
-  provider: "SSLCOMMERZ" | "UDDOKTAPAY",
+  provider: "SSLCOMMERZ" | "UDDOKTAPAY" | "BKASH_DIRECT",
   mode: "TEST" | "LIVE",
   values: Record<string, string>,
 ): Promise<ActionResult> {

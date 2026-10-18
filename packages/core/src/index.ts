@@ -170,6 +170,16 @@ export {
   DEFAULT_UDDOKTAPAY_BASE_URL, DEFAULT_UDDOKTAPAY_API_KEY, setUddoktaPayFetchForTests,
   type UddoktaPayChargeRequest, type UddoktaPayChargeResponse, type UddoktaPayVerifyResponse,
 } from "./payments/uddoktapay";
+export {
+  createSslCommerzSession, verifySslCommerzPayment, processSslCommerzOrderSuccess, getStoreSslCommerzConfig,
+  DEFAULT_SSLCOMMERZ_SANDBOX_URL, DEFAULT_SSLCOMMERZ_LIVE_URL, setSslCommerzFetchForTests,
+  type SslCommerzConfig, type SslCommerzSessionInput, type SslCommerzSessionResponse, type SslCommerzValidationResponse,
+} from "./payments/sslcommerz";
+export {
+  createBkashPayment, executeBkashPayment, queryBkashPayment, processBkashOrderSuccess, getStoreBkashConfig, grantBkashToken,
+  DEFAULT_BKASH_SANDBOX_URL, DEFAULT_BKASH_LIVE_URL, setBkashFetchForTests,
+  type BkashConfig, type BkashCreatePaymentInput, type BkashCreatePaymentResponse, type BkashExecuteResponse,
+} from "./payments/bkash";
 
 // Phase 7: store design builder, landing pages, domain connection
 export * from "./builder/registry";

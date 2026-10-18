@@ -18,7 +18,7 @@ export const QuoteInput = z.object({
   /** Only used to check "one per customer" coupon limits. */
   phone: z.string().max(20).optional(),
   /** Cash on delivery can carry a fee, so the total depends on it. */
-  paymentMethod: z.enum(["COD", "MANUAL_BKASH", "MANUAL_NAGAD", "MANUAL_ROCKET", "GATEWAY_UDDOKTAPAY", "BANK_TRANSFER"]).optional(),
+  paymentMethod: z.enum(["COD", "MANUAL_BKASH", "MANUAL_NAGAD", "MANUAL_ROCKET", "GATEWAY_UDDOKTAPAY", "GATEWAY_SSLCOMMERZ", "GATEWAY_BKASH", "BANK_TRANSFER"]).optional(),
   /** Loyalty points the signed-in customer wants to spend. */
   redeemPoints: z.number().int().min(0).max(1_000_000).optional(),
   referralCode: z.string().trim().max(40).optional(),

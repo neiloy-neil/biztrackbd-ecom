@@ -8,6 +8,7 @@ const PROVIDER_TO_APP: Record<string, string> = {
   GA4: "google_analytics",
   SMS_BYO: "sms_alerts",
   SSLCOMMERZ: "sslcommerz_pay",
+  BKASH_DIRECT: "bkash_direct_pay",
   UDDOKTAPAY: "uddoktapay_pay",
 };
 

@@ -15,6 +15,7 @@ import { PurchaseTracker } from "@/components/tracker";
 import { OrderTrackingTimelineComponent } from "@/components/order-tracking-timeline";
 import { ReturnStatusTrackerComponent } from "@/components/return-status-tracker";
 import { CustomerReturnFormComponent } from "@/components/customer-return-form";
+import { PaymentRecoveryCard } from "@/components/payment-recovery-card";
 import { getLang, makeT, money, num, toBnDigits } from "@/lib/i18n";
 import { getCustomerSession } from "@/lib/session";
 import { getStore } from "@/lib/tenant";
@@ -32,8 +33,14 @@ function dateRange(from: Date, minDays: number, maxDays: number, lang: "en" | "b
   return a.getMonth() === b.getMonth() ? `${dayOnly.format(a)} ${lang === "bn" ? "থেকে" : "to"} ${fmt.format(b)}` : `${fmt.format(a)} ${lang === "bn" ? "থেকে" : "to"} ${fmt.format(b)}`;
 }
 
-export default async function OrderPlaced({ params, searchParams }: { params: Promise<{ orderId: string }>; searchParams: Promise<{ k?: string }> }) {
-  const [{ orderId }, { k }] = await Promise.all([params, searchParams]);
+export default async function OrderPlaced({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ orderId: string }>;
+  searchParams: Promise<{ k?: string; paymentStatus?: string; cancelled?: string; paid?: string }>;
+}) {
+  const [{ orderId }, { k, paymentStatus, cancelled, paid }] = await Promise.all([params, searchParams]);
   const store = await getStore();
   const lang = await getLang(store.locale);
   const t = makeT(lang);
@@ -92,13 +99,35 @@ export default async function OrderPlaced({ params, searchParams }: { params: Pr
         {/* Live Courier Tracking Timeline */}
         <OrderTrackingTimelineComponent timeline={timeline} lang={lang} />
 
-        {isMfs && order.paymentStatus === "PENDING_VERIFICATION" ? (
+        {order.paymentStatus === "PAID" ? (
+          <div className="card" style={{ borderColor: "#16a34a", background: "#f0fdf4" }}>
+            <h2 style={{ marginBottom: 4, color: "#15803d", fontSize: 16 }}>
+              {lang === "bn" ? "পেমেন্ট সফলভাবে সম্পন্ন হয়েছে" : "Payment Received Successfully"}
+            </h2>
+            <p className="muted" style={{ fontSize: 14 }}>
+              {order.mfsTrxId
+                ? `${lang === "bn" ? "ট্রানজেকশন আইডি" : "TrxID"}: ${order.mfsTrxId} · ${money(Number(order.totalAmount), lang)}`
+                : money(Number(order.totalAmount), lang)}
+            </p>
+          </div>
+        ) : isMfs && order.paymentStatus === "PENDING_VERIFICATION" ? (
           <div className="card" style={{ borderColor: "var(--bkash)", background: "#FFF9FC" }}>
             <h2 style={{ marginBottom: 6 }}>{mfsName}: {t("checkingPayment")}</h2>
             <p className="muted" style={{ fontSize: 14 }}>{t("checkingPaymentS", { trx: order.mfsTrxId ?? "", amount: money(Number(order.totalAmount), lang) })}</p>
           </div>
+        ) : order.paymentMethod !== "COD" && order.paymentStatus === "UNPAID" ? (
+          <PaymentRecoveryCard
+            orderId={order.id}
+            token={k}
+            lang={lang}
+            isCancelledOrFailed={Boolean(cancelled || (paymentStatus && paymentStatus !== "success"))}
+            totalAmount={Number(order.totalAmount)}
+          />
         ) : (
-          <div className="card"><p style={{ fontWeight: 600 }}>{t("codSuccess", { amount: money(Number(order.totalAmount), lang) })}</p><p className="muted" style={{ marginTop: 4, fontSize: 14 }}>{t("callToConfirm")}</p></div>
+          <div className="card">
+            <p style={{ fontWeight: 600 }}>{t("codSuccess", { amount: money(Number(order.totalAmount), lang) })}</p>
+            <p className="muted" style={{ marginTop: 4, fontSize: 14 }}>{t("callToConfirm")}</p>
+          </div>
         )}
 
         <div className="card">

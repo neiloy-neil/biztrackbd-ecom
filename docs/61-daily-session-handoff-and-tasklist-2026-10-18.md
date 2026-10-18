@@ -102,6 +102,16 @@ During today's interactive `/grill-me` alignment session, we architected, engine
 |     • Schema Safety & Limit Handling: Graceful disabled state with limit badges when max reached   |
 |     • Verified with 34/34 unit tests in `builder-sections.test.ts`, 12/12 typecheck, and live QA   |
 +----------------------------------------------------------------------------------------------------+
+| 12. AUTOMATED PAYMENT GATEWAYS SUITE (SSLCOMMERZ & DIRECT BKASH TOKENIZED CHECKOUT)               |
+|     • Multi-Gateway Coexistence: COD, Manual MFS, UddoktaPay, SSLCommerz, and Direct bKash        |
+|     • Database Migration 53: Added `GATEWAY_BKASH` to Postgres `PaymentMethodType` enum            |
+|     • Secure Vault: Write-only AES-256-GCM encryption for credentials & live sandbox toggles       |
+|     • Core Engines: Session creation, token grant caching, IPN webhooks, signature verification    |
+|     • Dual Callback/IPN Ingestion: Storefront `/api/payments/sslcommerz` and `/bkash` endpoints   |
+|     • Non-Destructive Failure & Recovery: Instant 1-Click "Switch to COD" fallback on order status |
+|     • Admin App Store: Modal configuration for SSLCommerz & Direct bKash in `/settings/apps`       |
+|     • Verification: 11/11 passing tests across payment suites, 0 typecheck errors, live browser QA |
++----------------------------------------------------------------------------------------------------+
 ```
 
 ---
@@ -126,6 +136,7 @@ During today's interactive `/grill-me` alignment session, we architected, engine
 16. `commit c1c7136`: `feat(builder): add swipeable review carousel, plan comparison matrix, and promotion popup widgets`
 17. `commit ff0bba5`: `feat(builder): add scroll-reveal animations, custom anchor IDs, and section nicknames & reordering`
 18. `commit 70f1fbd`: `feat(builder): add 1-click section presets & design pattern library with dual-tab drawer and visual mini-previews`
+19. `commit [pending]`: `feat(payments): implement SSLCommerz and Direct bKash automated payment gateways`
 
 ---
 

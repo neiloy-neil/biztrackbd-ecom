@@ -21,9 +21,11 @@ export interface PayInfo {
   nagadKind: string;
   paymentNote: string | null;
   uddoktapayEnabled?: boolean;
+  sslcommerzEnabled?: boolean;
+  bkashDirectEnabled?: boolean;
 }
 
-type Method = "COD" | "MANUAL_BKASH" | "MANUAL_NAGAD" | "GATEWAY_UDDOKTAPAY" | "BANK_TRANSFER";
+type Method = "COD" | "MANUAL_BKASH" | "MANUAL_NAGAD" | "GATEWAY_UDDOKTAPAY" | "GATEWAY_SSLCOMMERZ" | "GATEWAY_BKASH" | "BANK_TRANSFER";
 type Errors = Partial<Record<"phone" | "name" | "email" | "division" | "district" | "upazila" | "address" | "mfsSender" | "trxId" | "coupon" | "referral", string>>;
 
 // ---- Phone: the customer types the 10 digits after +880. Pasting 01712345678 or +8801712345678 also works.
@@ -575,6 +577,26 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
             <input type="radio" name="pay" checked={method === "COD"} onChange={() => setMethod("COD")} data-testid="pay-cod" />
             <div className="grow"><div className="t">{s.cod}</div><div className="s">{s.codS}</div></div>
           </label>
+          {pay.bkashDirectEnabled && (
+            <label className={`option${method === "GATEWAY_BKASH" ? " selected" : ""}`} style={{ borderColor: method === "GATEWAY_BKASH" ? "var(--bkash, #D12053)" : undefined }}>
+              <input type="radio" name="pay" checked={method === "GATEWAY_BKASH"} onChange={() => setMethod("GATEWAY_BKASH")} data-testid="pay-bkash-direct" />
+              <div className="grow">
+                <div className="t">{lang === "bn" ? "বিকাশ ডিরেক্ট (তাৎক্ষণিক পেমেন্ট)" : "bKash Direct (Instant Checkout)"}</div>
+                <div className="s">{lang === "bn" ? "বিকাশ অ্যাপ অথবা ওটিপি/পিন দিয়ে অটোমেটিক পেমেন্ট" : "Direct & secure automated checkout via bKash"}</div>
+              </div>
+              <span className="mfs-tag" style={{ background: "var(--bkash, #D12053)", color: "#fff", fontWeight: 700 }} aria-hidden="true">bKash</span>
+            </label>
+          )}
+          {pay.sslcommerzEnabled && (
+            <label className={`option${method === "GATEWAY_SSLCOMMERZ" ? " selected" : ""}`} style={{ borderColor: method === "GATEWAY_SSLCOMMERZ" ? "#1b3882" : undefined }}>
+              <input type="radio" name="pay" checked={method === "GATEWAY_SSLCOMMERZ"} onChange={() => setMethod("GATEWAY_SSLCOMMERZ")} data-testid="pay-sslcommerz" />
+              <div className="grow">
+                <div className="t">{lang === "bn" ? "কার্ড ও মোবাইল ব্যাংকিং (SSLCommerz)" : "Cards & Mobile Banking (SSLCommerz)"}</div>
+                <div className="s">{lang === "bn" ? "ভিসা, মাস্টারকার্ড, বিকাশ, নগদ, রকেট ও ইন্টারনেট ব্যাংকিং" : "Visa, Mastercard, bKash, Nagad, Rocket & Net Banking"}</div>
+              </div>
+              <span className="mfs-tag" style={{ background: "linear-gradient(135deg, #1b3882, #0077b6)", color: "#fff", fontWeight: 700 }} aria-hidden="true">SSLCOMMERZ</span>
+            </label>
+          )}
           {pay.uddoktapayEnabled && (
             <label className={`option${method === "GATEWAY_UDDOKTAPAY" ? " selected" : ""}`} style={{ borderColor: method === "GATEWAY_UDDOKTAPAY" ? "var(--primary, #0f766e)" : undefined }}>
               <input type="radio" name="pay" checked={method === "GATEWAY_UDDOKTAPAY"} onChange={() => setMethod("GATEWAY_UDDOKTAPAY")} data-testid="pay-uddoktapay" />
