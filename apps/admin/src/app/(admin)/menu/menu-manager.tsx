@@ -11,6 +11,7 @@ import {
 } from "./actions";
 import type { PublicMenuCategory, PublicMenuItem } from "@biztrackbd/core";
 import { TableQrStudio } from "./table-qr-studio";
+import "./menu.css";
 
 const DIETARY_OPTIONS = [
   { id: "halal", label: "Halal / হালাল" },
@@ -138,24 +139,22 @@ export function MenuManager({
   const totalDishes = categories.reduce((sum, c) => sum + c.items.length, 0);
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="menu-workspace">
       {/* Header bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Restaurant Menu</h1>
-          <p className="text-sm text-slate-600 mt-1">
-            Organize menu categories, dish availability, and generate contactless table QR codes.
+      <div className="menu-header-bar">
+        <div className="menu-title-group">
+          <h1>
+            <span>🍽️</span> Restaurant Menu & Dishes
+          </h1>
+          <p>
+            Organize dish categories, price points, dietary flags, daily availability, and contactless QR dining tables.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="menu-header-actions">
           <button
             type="button"
             onClick={() => setActiveMainTab("qr-studio")}
-            className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition ${
-              activeMainTab === "qr-studio"
-                ? "bg-emerald-50 text-emerald-800 border border-emerald-300"
-                : "text-slate-700 bg-white border border-slate-300 hover:bg-slate-50"
-            }`}
+            className="menu-btn-secondary"
           >
             <span>📱</span> Table QR Studio
           </button>
@@ -165,9 +164,9 @@ export function MenuManager({
               setEditingCategory(null);
               setShowCategoryModal(true);
             }}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition"
+            className="menu-btn-secondary"
           >
-            + Add Category
+            <span>+</span> Add Category
           </button>
           <button
             type="button"
@@ -177,40 +176,30 @@ export function MenuManager({
               setDishCategoryId(categories[0]?.id ?? "");
               setShowDishModal(true);
             }}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition disabled:opacity-50"
+            className="menu-btn-primary"
           >
-            + Add Dish
+            <span>+</span> Add Dish
           </button>
         </div>
       </div>
 
       {/* Primary Module Navigation Tabs */}
-      <div className="flex items-center gap-4 border-b border-slate-200">
+      <div className="menu-module-tabs">
         <button
           type="button"
           onClick={() => setActiveMainTab("dishes")}
-          className={`flex items-center gap-2 pb-3 px-1 text-sm font-bold transition border-b-2 -mb-px cursor-pointer ${
-            activeMainTab === "dishes"
-              ? "border-emerald-600 text-emerald-700"
-              : "border-transparent text-slate-500 hover:text-slate-800"
-          }`}
+          className={`menu-tab-btn ${activeMainTab === "dishes" ? "active" : ""}`}
         >
           <span>🍽️</span> Menu Categories & Dishes
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-            {totalDishes}
-          </span>
+          <span className="menu-counter-chip">{totalDishes}</span>
         </button>
         <button
           type="button"
           onClick={() => setActiveMainTab("qr-studio")}
-          className={`flex items-center gap-2 pb-3 px-1 text-sm font-bold transition border-b-2 -mb-px cursor-pointer ${
-            activeMainTab === "qr-studio"
-              ? "border-emerald-600 text-emerald-700"
-              : "border-transparent text-slate-500 hover:text-slate-800"
-          }`}
+          className={`menu-tab-btn ${activeMainTab === "qr-studio" ? "active" : ""}`}
         >
           <span>📱</span> Table QR Studio
-          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+          <span className="menu-counter-chip" style={{ background: "rgba(5, 150, 105, 0.12)", color: "#059669" }}>
             Print & Stands
           </span>
         </button>
@@ -225,205 +214,201 @@ export function MenuManager({
       ) : (
         <>
           {/* Category Tabs */}
-      {categories.length > 0 ? (
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-          <button
-            type="button"
-            onClick={() => setActiveCategoryId("all")}
-            className={`px-3.5 py-1.5 text-sm font-medium rounded-full transition whitespace-nowrap ${
-              activeCategoryId === "all"
-                ? "bg-slate-900 text-white"
-                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-            }`}
-          >
-            All Categories ({totalDishes})
-          </button>
-          {categories.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => setActiveCategoryId(c.id)}
-              className={`px-3.5 py-1.5 text-sm font-medium rounded-full transition whitespace-nowrap ${
-                activeCategoryId === c.id
-                  ? "bg-slate-900 text-white"
-                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-              }`}
-            >
-              {c.name} {c.nameBn ? `(${c.nameBn})` : ""} ({c.items.length})
-            </button>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-          <p className="text-slate-600 font-medium">No menu categories yet.</p>
-          <p className="text-slate-500 text-sm mt-1">
-            Create your first category (e.g. Starters, Main Dishes, Drinks) to start listing dishes.
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              setEditingCategory(null);
-              setShowCategoryModal(true);
-            }}
-            className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition"
-          >
-            + Create First Category
-          </button>
-        </div>
-      )}
-
-      {/* Category & Dishes List */}
-      <div className="space-y-8">
-        {filteredCategories.map((cat) => (
-          <div key={cat.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold text-slate-900 text-base">
-                  {cat.name} {cat.nameBn && <span className="text-slate-500 font-normal">({cat.nameBn})</span>}
-                </h3>
-                {cat.description && <p className="text-xs text-slate-500 mt-0.5">{cat.description}</p>}
-              </div>
-              <div className="flex items-center gap-2">
+          {categories.length > 0 ? (
+            <div className="category-filter-scroll">
+              <button
+                type="button"
+                onClick={() => setActiveCategoryId("all")}
+                className={`category-pill-btn ${activeCategoryId === "all" ? "active" : ""}`}
+              >
+                All Categories ({totalDishes})
+              </button>
+              {categories.map((c) => (
                 <button
+                  key={c.id}
                   type="button"
-                  onClick={() => {
-                    setEditingDish(null);
-                    setDishCategoryId(cat.id);
-                    setShowDishModal(true);
-                  }}
-                  className="text-xs font-medium text-emerald-600 hover:text-emerald-700 px-2.5 py-1 rounded bg-emerald-50 hover:bg-emerald-100 transition"
+                  onClick={() => setActiveCategoryId(c.id)}
+                  className={`category-pill-btn ${activeCategoryId === c.id ? "active" : ""}`}
                 >
-                  + Add Dish
+                  {c.name} {c.nameBn ? `(${c.nameBn})` : ""} ({c.items.length})
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingCategory(cat);
-                    setShowCategoryModal(true);
-                  }}
-                  className="text-xs font-medium text-slate-600 hover:text-slate-900 px-2.5 py-1 rounded hover:bg-slate-200 transition"
-                >
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDeleteCategory(cat)}
-                  className="text-xs font-medium text-rose-600 hover:text-rose-700 px-2.5 py-1 rounded hover:bg-rose-50 transition"
-                >
-                  Delete
-                </button>
-              </div>
+              ))}
             </div>
+          ) : (
+            <div className="menu-empty-state">
+              <p className="main">No menu categories yet.</p>
+              <p className="sub">
+                Create your first category (e.g. Starters, Main Dishes, Drinks) to start listing dishes.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingCategory(null);
+                  setShowCategoryModal(true);
+                }}
+                className="menu-btn-primary"
+              >
+                + Create First Category
+              </button>
+            </div>
+          )}
 
-            {cat.items.length === 0 ? (
-              <div className="p-6 text-center text-slate-500 text-sm">
-                No dishes in this category yet. Click &quot;+ Add Dish&quot; to add one.
-              </div>
-            ) : (
-              <div className="divide-y divide-slate-100">
-                {cat.items.map((dish) => (
-                  <div
-                    key={dish.id}
-                    className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition ${
-                      dish.isAvailable ? "hover:bg-slate-50/50" : "bg-slate-50/80 opacity-70"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3.5">
-                      {dish.imageUrl ? (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img
-                          src={dish.imageUrl}
-                          alt={dish.name}
-                          className="w-14 h-14 rounded-lg object-cover border border-slate-200 shrink-0"
-                        />
-                      ) : (
-                        <div className="w-14 h-14 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-xl shrink-0">
-                          🍽️
-                        </div>
-                      )}
-                      <div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-semibold text-slate-900 text-sm">{dish.name}</span>
-                          {dish.nameBn && <span className="text-slate-500 text-xs">({dish.nameBn})</span>}
-                          {dish.dietaryLabels.map((lbl) => (
-                            <span
-                              key={lbl}
-                              className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200/60"
-                            >
-                              {lbl.replace("_", " ")}
-                            </span>
-                          ))}
-                        </div>
-                        {dish.description && (
-                          <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{dish.description}</p>
-                        )}
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="font-bold text-slate-900 text-sm">৳{dish.price}</span>
-                          {dish.compareAtPrice && (
-                            <span className="text-xs text-slate-400 line-through">
-                              ৳{dish.compareAtPrice}
-                            </span>
+          {/* Category & Dishes List */}
+          <div className="menu-categories-stack">
+            {filteredCategories.map((cat) => (
+              <div key={cat.id} className="menu-category-card">
+                <div className="category-card-header">
+                  <div className="category-heading-text">
+                    <h3>
+                      {cat.name} {cat.nameBn && <span className="bn-title">({cat.nameBn})</span>}
+                      <span className="menu-counter-chip">{cat.items.length} items</span>
+                    </h3>
+                    {cat.description && <p>{cat.description}</p>}
+                  </div>
+                  <div className="category-actions">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingDish(null);
+                        setDishCategoryId(cat.id);
+                        setShowDishModal(true);
+                      }}
+                      className="cat-action-btn cat-add-dish"
+                    >
+                      + Add Dish
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingCategory(cat);
+                        setShowCategoryModal(true);
+                      }}
+                      className="cat-action-btn cat-edit"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteCategory(cat)}
+                      className="cat-action-btn cat-delete"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+
+                {cat.items.length === 0 ? (
+                  <div style={{ padding: "32px 20px", textAlign: "center", color: "var(--ink-3, #64748b)", fontSize: "0.88rem" }}>
+                    No dishes in this category yet. Click &quot;+ Add Dish&quot; to add one.
+                  </div>
+                ) : (
+                  <div className="dish-items-list">
+                    {cat.items.map((dish) => (
+                      <div
+                        key={dish.id}
+                        className={`dish-item-row ${dish.isAvailable ? "" : "sold-out"}`}
+                      >
+                        <div className="dish-main-info">
+                          {dish.imageUrl ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              src={dish.imageUrl}
+                              alt={dish.name}
+                              className="dish-thumbnail"
+                            />
+                          ) : (
+                            <div className="dish-thumbnail">
+                              🍽️
+                            </div>
                           )}
+                          <div className="dish-text-block">
+                            <div className="dish-title-row">
+                              <span className="dish-name-en">{dish.name}</span>
+                              {dish.nameBn && <span className="dish-name-bn">({dish.nameBn})</span>}
+                              {dish.dietaryLabels.map((lbl) => (
+                                <span
+                                  key={lbl}
+                                  className={`dietary-badge-tag badge-${lbl}`}
+                                >
+                                  {lbl === "halal" ? "Halal" : lbl === "chef_special" ? "Chef's Special" : lbl.replace("_", " ")}
+                                </span>
+                              ))}
+                            </div>
+                            {dish.description && (
+                              <p className="dish-description">{dish.description}</p>
+                            )}
+                            <div className="dish-price-row">
+                              <span className="dish-current-price">৳{dish.price}</span>
+                              {dish.compareAtPrice && (
+                                <span className="dish-compare-price">
+                                  ৳{dish.compareAtPrice}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="dish-controls">
+                          {/* Availability Switch */}
+                          <button
+                            type="button"
+                            onClick={() => handleToggleAvailability(dish)}
+                            className={`availability-toggle-btn ${
+                              dish.isAvailable ? "is-available" : "is-sold-out"
+                            }`}
+                            title="Click to toggle Available vs Sold Out"
+                          >
+                            <span
+                              className={`status-dot ${
+                                dish.isAvailable ? "green" : "red"
+                              }`}
+                            />
+                            {dish.isAvailable ? "Available" : "Sold Out / শেষ"}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingDish(dish);
+                              setDishCategoryId(dish.categoryId);
+                              setShowDishModal(true);
+                            }}
+                            className="dish-edit-btn"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteDish(dish)}
+                            className="dish-delete-btn"
+                          >
+                            Delete
+                          </button>
                         </div>
                       </div>
-                    </div>
-
-                    <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-                      {/* Availability Switch */}
-                      <button
-                        type="button"
-                        onClick={() => handleToggleAvailability(dish)}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition ${
-                          dish.isAvailable
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
-                            : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"
-                        }`}
-                        title="Click to toggle Available vs Sold Out"
-                      >
-                        <span
-                          className={`w-2 h-2 rounded-full ${
-                            dish.isAvailable ? "bg-emerald-500" : "bg-rose-500"
-                          }`}
-                        />
-                        {dish.isAvailable ? "Available" : "Sold Out / শেষ"}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingDish(dish);
-                          setDishCategoryId(dish.categoryId);
-                          setShowDishModal(true);
-                        }}
-                        className="text-xs font-medium text-slate-600 hover:text-slate-900 px-2 py-1 rounded hover:bg-slate-100 transition"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteDish(dish)}
-                        className="text-xs font-medium text-rose-600 hover:text-rose-700 px-2 py-1 rounded hover:bg-rose-50 transition"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            )}
+            ))}
           </div>
-        ))}
-      </div>
         </>
       )}
 
       {/* Category Modal */}
       {showCategoryModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-md w-full p-6 space-y-4">
-            <h3 className="font-bold text-lg text-slate-900">
-              {editingCategory ? "Edit Category" : "New Category"}
-            </h3>
+        <div className="menu-modal-backdrop">
+          <div className="menu-modal-window" style={{ maxWidth: 460 }}>
+            <div className="menu-modal-header">
+              <h3>{editingCategory ? "Edit Category" : "New Category"}</h3>
+              <button
+                type="button"
+                onClick={() => setShowCategoryModal(false)}
+                className="menu-modal-close"
+              >
+                ✕
+              </button>
+            </div>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -467,55 +452,48 @@ export function MenuManager({
                   }
                 });
               }}
-              className="space-y-4"
+              className="menu-modal-form"
             >
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">
-                  Category Name (English) *
-                </label>
+              <div className="modal-field">
+                <label>Category Name (English) *</label>
                 <input
                   name="name"
                   defaultValue={editingCategory?.name ?? ""}
                   placeholder="e.g. Starters / Appetizers"
                   required
-                  className="w-full text-sm px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">
-                  বাংলা নাম (ঐচ্ছিক)
-                </label>
+              <div className="modal-field">
+                <label>বাংলা নাম (ঐচ্ছিক)</label>
                 <input
                   name="nameBn"
                   defaultValue={editingCategory?.nameBn ?? ""}
                   placeholder="যেমন: স্টার্টার ও স্যুপ"
-                  className="w-full text-sm px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">
-                  Description / বর্ণনা
-                </label>
+              <div className="modal-field">
+                <label>Description / বর্ণনা</label>
                 <textarea
                   name="description"
                   defaultValue={editingCategory?.description ?? ""}
                   rows={2}
                   placeholder="Short note about these dishes"
-                  className="w-full text-sm px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="modal-actions-footer">
                 <button
                   type="button"
                   onClick={() => setShowCategoryModal(false)}
-                  className="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 rounded-lg"
+                  className="menu-btn-secondary"
+                  style={{ padding: "8px 14px", fontSize: "0.85rem" }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition disabled:opacity-50"
+                  className="menu-btn-primary"
+                  style={{ padding: "8px 18px", fontSize: "0.85rem" }}
                 >
                   {isPending ? "Saving..." : "Save Category"}
                 </button>
@@ -527,11 +505,18 @@ export function MenuManager({
 
       {/* Dish Modal */}
       {showDishModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="font-bold text-lg text-slate-900">
-              {editingDish ? "Edit Dish" : "Add New Dish"}
-            </h3>
+        <div className="menu-modal-backdrop">
+          <div className="menu-modal-window">
+            <div className="menu-modal-header">
+              <h3>{editingDish ? "Edit Dish" : "Add New Dish"}</h3>
+              <button
+                type="button"
+                onClick={() => setShowDishModal(false)}
+                className="menu-modal-close"
+              >
+                ✕
+              </button>
+            </div>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -571,7 +556,6 @@ export function MenuManager({
                     // Update in-memory categories state
                     setCategories((prev) =>
                       prev.map((c) => {
-                        // Remove from old category if category changed
                         const cleanItems = c.items.filter((i) => i.id !== editingDish?.id);
                         if (c.id === categoryId) {
                           const updatedItem: PublicMenuItem = {
@@ -596,15 +580,14 @@ export function MenuManager({
                   }
                 });
               }}
-              className="space-y-4"
+              className="menu-modal-form"
             >
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Category *</label>
+              <div className="modal-field">
+                <label>Category *</label>
                 <select
                   name="categoryId"
                   defaultValue={dishCategoryId}
                   required
-                  className="w-full text-sm px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 >
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -614,35 +597,29 @@ export function MenuManager({
                 </select>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">
-                    Dish Name (English) *
-                  </label>
+              <div className="form-group-grid">
+                <div className="modal-field">
+                  <label>Dish Name (English) *</label>
                   <input
                     name="name"
                     defaultValue={editingDish?.name ?? ""}
                     placeholder="e.g. Beef Bhuna Khichuri"
                     required
-                    className="w-full text-sm px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">
-                    বাংলা নাম (ঐচ্ছিক)
-                  </label>
+                <div className="modal-field">
+                  <label>বাংলা নাম (ঐচ্ছিক)</label>
                   <input
                     name="nameBn"
                     defaultValue={editingDish?.nameBn ?? ""}
                     placeholder="যেমন: বিফ ভুনা খিচুড়ি"
-                    className="w-full text-sm px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Price (৳) *</label>
+              <div className="form-group-grid">
+                <div className="modal-field">
+                  <label>Price (৳) *</label>
                   <input
                     name="price"
                     type="number"
@@ -650,63 +627,52 @@ export function MenuManager({
                     defaultValue={editingDish?.price ?? ""}
                     placeholder="350"
                     required
-                    className="w-full text-sm px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">
-                    Regular / Compare Price (৳)
-                  </label>
+                <div className="modal-field">
+                  <label>Regular / Compare Price (৳)</label>
                   <input
                     name="compareAtPrice"
                     type="number"
                     step="0.01"
                     defaultValue={editingDish?.compareAtPrice ?? ""}
                     placeholder="400"
-                    className="w-full text-sm px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Image URL</label>
+              <div className="modal-field">
+                <label>Image URL</label>
                 <input
                   name="imageUrl"
                   type="url"
                   defaultValue={editingDish?.imageUrl ?? ""}
                   placeholder="https://... or upload from media"
-                  className="w-full text-sm px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">
-                  Description / Ingredients
-                </label>
+              <div className="modal-field">
+                <label>Description / Ingredients</label>
                 <textarea
                   name="description"
                   defaultValue={editingDish?.description ?? ""}
                   rows={2}
                   placeholder="Chinigura rice, tender shank beef, mustard oil, aromatic spices"
-                  className="w-full text-sm px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-2">
-                  Dietary Badges & Labels
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div className="modal-field">
+                <label style={{ marginBottom: 4 }}>Dietary Badges & Labels</label>
+                <div className="dietary-checkbox-grid">
                   {DIETARY_OPTIONS.map((opt) => (
                     <label
                       key={opt.id}
-                      className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer"
+                      className="dietary-checkbox-label"
                     >
                       <input
                         type="checkbox"
                         name={`diet_${opt.id}`}
                         defaultChecked={editingDish?.dietaryLabels?.includes(opt.id)}
-                        className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                       />
                       <span>{opt.label}</span>
                     </label>
@@ -714,18 +680,20 @@ export function MenuManager({
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
+              <div className="modal-actions-footer">
                 <button
                   type="button"
                   onClick={() => setShowDishModal(false)}
-                  className="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 rounded-lg"
+                  className="menu-btn-secondary"
+                  style={{ padding: "8px 14px", fontSize: "0.85rem" }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition disabled:opacity-50"
+                  className="menu-btn-primary"
+                  style={{ padding: "8px 18px", fontSize: "0.85rem" }}
                 >
                   {isPending ? "Saving..." : "Save Dish"}
                 </button>
@@ -737,95 +705,107 @@ export function MenuManager({
 
       {/* QR Code Modal */}
       {showQrModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-md w-full p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-lg text-slate-900">Table QR Code Generator</h3>
+        <div className="menu-modal-backdrop">
+          <div className="menu-modal-window" style={{ maxWidth: 440 }}>
+            <div className="menu-modal-header">
+              <h3>Table QR Code Generator</h3>
               <button
                 type="button"
                 onClick={() => setShowQrModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-lg"
+                className="menu-modal-close"
               >
                 ✕
               </button>
             </div>
-            <p className="text-xs text-slate-600">
-              Generate QR codes for table stands or print menus. When customers scan, they see the menu
-              and can order directly via WhatsApp or call.
-            </p>
+            <div className="menu-modal-form">
+              <p style={{ fontSize: "0.85rem", color: "var(--ink-3, #64748b)", margin: 0 }}>
+                Generate QR codes for table stands or print menus. When customers scan, they see the menu
+                and can order directly via WhatsApp or call.
+              </p>
 
-            <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1">
-                Table Number (Optional)
-              </label>
-              <input
-                type="text"
-                value={tableNumber}
-                onChange={(e) => handleTableNumberChange(e.target.value)}
-                placeholder="e.g. 5 or Booth A (leave blank for universal QR)"
-                className="w-full text-sm px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-
-            {/* QR Preview */}
-            <div className="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-xl border border-slate-200">
-              {qrPreviewUrl ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={qrPreviewUrl}
-                  alt="Menu QR Code"
-                  className="w-48 h-48 rounded-lg shadow-sm bg-white p-2"
+              <div className="modal-field">
+                <label>Table Number (Optional)</label>
+                <input
+                  type="text"
+                  value={tableNumber}
+                  onChange={(e) => handleTableNumberChange(e.target.value)}
+                  placeholder="e.g. 5 or Booth A (leave blank for universal QR)"
                 />
-              ) : (
-                <div className="w-48 h-48 flex items-center justify-center text-sm text-slate-400">
-                  Generating QR...
-                </div>
-              )}
-              <div className="mt-2 text-center">
-                <span className="text-xs font-semibold text-slate-900">
-                  {tableNumber.trim() ? `Table ${tableNumber.trim()}` : "Universal Restaurant Menu"}
-                </span>
-                <p className="text-[11px] text-slate-500 truncate max-w-xs">{qrTargetUrl}</p>
               </div>
-            </div>
 
-            {/* Actions */}
-            <div className="grid grid-cols-2 gap-2 pt-2">
-              <a
-                href={qrPreviewUrl ?? "#"}
-                download={`menu-qr${tableNumber ? `-table-${tableNumber}` : ""}.png`}
-                className="inline-flex items-center justify-center px-3 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition"
-              >
-                ⬇️ Download PNG
-              </a>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!qrSvg) return;
-                  const blob = new Blob([qrSvg], { type: "image/svg+xml" });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = `menu-qr${tableNumber ? `-table-${tableNumber}` : ""}.svg`;
-                  a.click();
-                  URL.revokeObjectURL(url);
+              {/* QR Preview */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 16,
+                  background: "#f8fafc",
+                  borderRadius: 12,
+                  border: "1px solid #e2e8f0",
                 }}
-                className="inline-flex items-center justify-center px-3 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition"
               >
-                🖨️ Download Vector SVG
-              </button>
-            </div>
-            <div className="text-center pt-1">
-              <button
-                type="button"
-                onClick={() => {
-                  navigator.clipboard.writeText(qrTargetUrl);
-                  alert("Copied menu link to clipboard!");
-                }}
-                className="text-xs text-emerald-600 hover:text-emerald-700 font-medium"
-              >
-                📋 Copy Link
-              </button>
+                {qrPreviewUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={qrPreviewUrl}
+                    alt="Menu QR Code"
+                    style={{ width: 180, height: 180, borderRadius: 8, background: "#fff", padding: 8, border: "1px solid #e2e8f0" }}
+                  />
+                ) : (
+                  <div style={{ width: 180, height: 180, display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: "0.85rem" }}>
+                    Generating QR...
+                  </div>
+                )}
+                <div style={{ marginTop: 8, textAlign: "center" }}>
+                  <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--ink, #0f172a)" }}>
+                    {tableNumber.trim() ? `Table ${tableNumber.trim()}` : "Universal Restaurant Menu"}
+                  </span>
+                  <p style={{ fontSize: "0.75rem", color: "#64748b", margin: "2px 0 0", wordBreak: "break-all" }}>{qrTargetUrl}</p>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, paddingTop: 6 }}>
+                <a
+                  href={qrPreviewUrl ?? "#"}
+                  download={`menu-qr${tableNumber ? `-table-${tableNumber}` : ""}.png`}
+                  className="menu-btn-secondary"
+                  style={{ padding: "8px 12px", fontSize: "0.8rem", textAlign: "center" }}
+                >
+                  ⬇️ Download PNG
+                </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!qrSvg) return;
+                    const blob = new Blob([qrSvg], { type: "image/svg+xml" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `menu-qr${tableNumber ? `-table-${tableNumber}` : ""}.svg`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="menu-btn-secondary"
+                  style={{ padding: "8px 12px", fontSize: "0.8rem", textAlign: "center" }}
+                >
+                  🖨️ Download SVG
+                </button>
+              </div>
+              <div style={{ textAlign: "center", paddingTop: 4 }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(qrTargetUrl);
+                    alert("Copied menu link to clipboard!");
+                  }}
+                  style={{ background: "none", border: "none", color: "#059669", fontSize: "0.82rem", fontWeight: 600, cursor: "pointer" }}
+                >
+                  📋 Copy Menu Link
+                </button>
+              </div>
             </div>
           </div>
         </div>

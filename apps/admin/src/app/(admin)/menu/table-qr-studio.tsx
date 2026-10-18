@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useTransition } from "react";
 import type { TableQrItem } from "@biztrackbd/core";
 import { generateBatchTableQrsAction } from "./actions";
+import "./menu.css";
 
 interface TableQrStudioProps {
   storeOrigin: string;
