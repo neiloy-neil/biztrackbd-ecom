@@ -53,6 +53,14 @@ During today's interactive `/grill-me` alignment session, we architected, engine
 |     • Live admin demo session provisioning (createBusinessDemoSession) in PORTFOLIO mode           |
 |     • Auto-seeded authentic menus, table reservations, doctor appointments, and corporate leads    |
 +----------------------------------------------------------------------------------------------------+
+|  7. SITEBUILDER EVOLUTION: PHASE 1 — SECTION STYLE WRAPPER & CANVAS SEPARATORS                     |
+|     • Typed SectionStyle schema (bgType, bgColor, bgGradient, bgImage, bgOverlay, paddingY, etc.)  |
+|     • Curated gradient presets (Midnight Sky, Warm Sunset, Deep Emerald, Royal Indigo, etc.)       |
+|     • Storefront SectionStyleWrapper: background tones, overlays, card container, text contrast   |
+|     • Responsive visibility controls: Hide on Mobile (.bt-hide-mobile) / Hide on Desktop           |
+|     • Admin Inspector Section Appearance & Spacing cards with live update & undo/redo history     |
+|     • Polished in-canvas '+ Add section' gap separator with hover glow & interactive pill button   |
++----------------------------------------------------------------------------------------------------+
 ```
 
 ---
@@ -69,7 +77,9 @@ During today's interactive `/grill-me` alignment session, we architected, engine
 8. `commit ff5f26c`: `feat(outbox): implement Asynchronous Event Outbox and Durable Webhook Worker with HMAC signing and UI sweep triggers`
 9. `commit f977b4d`: `feat(onboarding): enhance tailored vertical onboarding with dynamic template switching, public-profile resolution, and sample content opt-out`
 10. `commit 4730928`: `feat(admin): build Merchant Webhook Management UI with signing secret rotation, live ping dispatcher, and delivery audit logs`
-11. `commit (pending)`: `feat(demo): implement authentic business template previews and live admin demo provisioning with seeded leads & dining menus`
+11. `commit 3095704`: `fix(demo): handle zero-product portfolio stores in sample order generation and seed business demo themes`
+12. `commit 2e14266`: `fix(design): align store design with active business templates and vertical-aware theme switcher`
+13. `commit 8defbd5`: `feat(builder): add universal section style wrapper, appearance inspector, and canvas separators`
 
 ---
 
@@ -79,6 +89,8 @@ All browser walkthrough recordings and full-resolution PNG artifacts are saved i
 
 | Artifact Name | Description | Status |
 | :--- | :--- | :--- |
+| `builder_gap_hover_1792321084940.png` | Live SiteBuilder showing Deep Emerald gradient, floating glass card mode, light text contrast, and interactive + Add section gap separator | Verified ✓ |
+| `test_section_style_builder_1792320979236.webp` | Full video walkthrough of Section Appearance inspector, gradient swatches, padding, card container, and canvas separator QA | Verified ✓ |
 | `portfolio_mode_selected_1792316530933.png` | Marketing `/start` wizard displaying authentic Dhaka Bistro dining preview (desktop + mobile) and ৳799 Business Pro plan | Verified ✓ |
 | `modern_clinic_selected_1792316556363.png` | Marketing `/start` wizard displaying Modern Clinic & Chambers with BMDC credentials and visiting hours | Verified ✓ |
 | `apex_corporate_selected_1792316570674.png` | Marketing `/start` wizard displaying Apex Corporate Advisory preview | Verified ✓ |
