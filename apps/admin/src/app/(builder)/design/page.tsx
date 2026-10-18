@@ -156,8 +156,26 @@ export default async function Design({ searchParams }: { searchParams: Promise<{
       siteMode={siteMode}
       businessVertical={businessVertical}
       header={pageKey === "home"
-        ? <>{notice}<ThemePicker active={state.themeId} canEdit={canEdit} /><TemplateSwitcher templates={templates} currentLook={state.themeId} currentTemplate={currentTemplate} canEdit={canEdit} /></>
-        : <>{notice}<div className="notice info" role="note">Colours, fonts and the template are set once for the whole website, on the <Link className="link" href="/design">Home page</Link>.</div></>}
+        ? (
+            <>
+              {notice}
+              {siteMode === "ECOMMERCE" && <ThemePicker active={state.themeId} canEdit={canEdit} />}
+              <TemplateSwitcher
+                templates={templates}
+                currentLook={state.themeId}
+                currentTemplate={currentTemplate}
+                canEdit={canEdit}
+                siteMode={siteMode}
+                businessVertical={businessVertical}
+              />
+            </>
+          )
+        : (
+            <>
+              {notice}
+              <div className="notice info" role="note">Colours, fonts and the template are set once for the whole website, on the <Link className="link" href="/design">Home page</Link>.</div>
+            </>
+          )}
     />
   );
 }

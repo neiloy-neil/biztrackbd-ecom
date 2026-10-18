@@ -90,6 +90,28 @@ export async function seedBusinessDemoStore(
           pagesJson: manifest.pages as unknown as Prisma.InputJsonValue,
         },
       });
+
+      const templateInfo: TemplateInfo = {
+        id: manifest.id,
+        name: manifest.name,
+        blurb: manifest.blurb,
+        audience: manifest.audience,
+        baseLook: manifest.baseLook,
+        category: manifest.category,
+        tags: manifest.tags,
+        moduleLabel: manifest.vertical,
+        version: 1,
+        status: "PUBLISHED",
+        builtIn: true,
+        settings: manifest.settings,
+        pages: manifest.pages,
+        chrome: manifest.chrome,
+        siteMode: manifest.siteMode,
+        vertical: manifest.vertical,
+        customPages: manifest.customPages,
+      };
+
+      await installTemplateForNewStore(tx, tenantId, templateInfo, "system");
     }
   });
 

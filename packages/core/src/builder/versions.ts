@@ -107,7 +107,16 @@ async function storeTheme(tx: TenantTx, themeId: ThemeId, draftFirst: boolean): 
     if (d) return asTheme(d.settings, themeId);
   }
   const p = await latestPublished(tx, themeId, HOME_KEY);
-  return p ? asTheme(p.settings, themeId) : themeDefaults(themeId);
+  if (p) return asTheme(p.settings, themeId);
+  const install = await tx.themeInstall.findFirst({ where: { themeId, isActive: true }, select: { settings: true } });
+  if (install?.settings && typeof install.settings === "object" && Object.keys(install.settings).length > 0) {
+    try {
+      return asTheme(install.settings, themeId);
+    } catch {
+      /* fall back to default */
+    }
+  }
+  return themeDefaults(themeId);
 }
 
 /**
@@ -125,6 +134,18 @@ async function startingPage(tx: TenantTx, kind: PageKind, pageKey: string): Prom
       } catch {
         /* the plain start below */
       }
+    }
+  }
+  const install = await tx.themeInstall.findFirst({
+    where: { isActive: true },
+    select: { pagesJson: true },
+  });
+  const pages = (install?.pagesJson && typeof install.pagesJson === "object" ? install.pagesJson : {}) as Record<string, unknown>;
+  if (pages[kind]) {
+    try {
+      return asPage(kind, pages[kind]);
+    } catch {
+      /* the plain start below */
     }
   }
   return defaultPageFor(kind);

@@ -393,7 +393,7 @@ const newPhone = () => `01${[3, 4, 5, 6, 7, 8, 9][randomInt(7)]}${randomInt(10_0
 /** One sample order: mostly cash on delivery, sometimes a bKash payment with a TrxID waiting to be checked. */
 async function placeSample(tenantId: string, kind: "COD" | "MANUAL_BKASH"): Promise<{ orderId: string }> {
   const items = await pickVariants(tenantId, randomInt(1, 3));
-  if (items.length === 0) throw new Error("no products to order");
+  if (items.length === 0) return { orderId: "" };
   const place = PLACES[randomInt(PLACES.length)]!;
   const placed = await createOrder(tenantId, {
     idempotencyKey: `demo-${randomUUID()}`,
@@ -417,6 +417,7 @@ async function seedStarterOrders(tenantId: string, actor: StaffActor): Promise<v
   ];
   for (const p of plan) {
     const { orderId } = await placeSample(tenantId, p.kind);
+    if (!orderId) continue;
     if (p.fate !== "NEW" && p.fate !== "CHECK") {
       if (p.fate === "CANCELLED") { await transitionOrder(tenantId, orderId, "CANCELLED", system, "Customer changed their mind"); }
       else {
@@ -441,6 +442,14 @@ async function seedStarterOrders(tenantId: string, actor: StaffActor): Promise<v
 export async function maybeDropDemoOrder(tenantId: string, now = new Date()): Promise<boolean> {
   try {
     const claimed = await withTenant(tenantId, async (tx) => {
+      const tenant = await tx.tenant.findUnique({
+        where: { id: tenantId },
+        select: { siteMode: true, productCount: true },
+      });
+      // In portfolio mode (or stores without products), there are no retail ecommerce shipping orders.
+      if (tenant?.siteMode === "PORTFOLIO" || (tenant?.productCount ?? 0) === 0) {
+        return false;
+      }
       const rows = await tx.$queryRaw<{ n: number; unpacked: number }[]>`
         SELECT (SELECT count(*)::int FROM "Order") AS n, (SELECT count(*)::int FROM "Order" WHERE status IN ('PENDING', 'CONFIRMED', 'PROCESSING')) AS unpacked`;
       const r = rows[0]!;
@@ -450,10 +459,11 @@ export async function maybeDropDemoOrder(tenantId: string, now = new Date()): Pr
       return upd > 0;
     });
     if (!claimed) return false;
-    await placeSample(tenantId, randomInt(10) < 3 ? "MANUAL_BKASH" : "COD");
-    return true;
+    const res = await placeSample(tenantId, randomInt(10) < 3 ? "MANUAL_BKASH" : "COD");
+    return Boolean(res.orderId);
   } catch (e) {
-    console.error("[demo] sample order failed", e instanceof Error ? e.name : "unknown");
+    if (e instanceof Error && e.message === "no products to order") return false;
+    console.warn("[demo] sample order skipped:", e instanceof Error ? e.message : e);
     return false;
   }
 }

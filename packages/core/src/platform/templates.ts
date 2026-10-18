@@ -311,7 +311,20 @@ export async function applyTemplateToStore(tenantId: string, actor: StaffActor, 
     const written = await installTemplatePages(tx, tenantId, info.baseLook, { settings: info.settings, pages }, "draft", actor.userId, only);
     // Asked for: the header and footer of the template go into the draft too, in place of whatever draft there is.
     const chrome = takeChrome && info.chrome ? await installTemplateChrome(tx, tenantId, info.chrome, "draft", actor.userId, info.id, info.version) : false;
-    await tx.tenant.update({ where: { id: tenantId }, data: { templateId: info.id, templateVersion: info.version } });
+    if (info.customPages && info.customPages.length > 0) {
+      for (const cp of info.customPages) {
+        await installCustomPage(tx, tenantId, info.baseLook, cp, "draft", actor.userId, info.settings);
+      }
+    }
+    await tx.tenant.update({
+      where: { id: tenantId },
+      data: {
+        templateId: info.id,
+        templateVersion: info.version,
+        ...(info.siteMode ? { siteMode: info.siteMode } : {}),
+        ...(info.vertical ? { businessVertical: info.vertical } : {}),
+      },
+    });
     await audit(tx, tenantId, actor, "design.template_applied", { templateId: info.id, version: info.version, lookChanged, kept: [...keep], chrome });
     return { pages: written, version: info.version, lookChanged, chrome };
   });
