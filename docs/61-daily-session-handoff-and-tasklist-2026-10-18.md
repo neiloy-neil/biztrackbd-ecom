@@ -176,6 +176,17 @@ All browser walkthrough recordings and full-resolution PNG artifacts are saved i
 | `builder_overview_1792319157516.png` | Site Design workspace loaded with Dhaka Bistro restaurant layout & atmospheric preview | Verified ✓ |
 | `website_portfolio_templates_tab_1792319208345.png` | Template switcher showing Dhaka Bistro Active with Website & Portfolio category tabs | Verified ✓ |
 | `ecommerce_templates_tab_1792319192847.png` | E-Commerce templates tab in Template Switcher | Verified ✓ |
+| `scrolled_down_warm_split_2_1792332297086.png` | Live SiteBuilder canvas showing Warm Split Hero visibly rendered with sunset gradient card container | Verified ✓ |
+| `verify_design_visible_1792332113105.webp` | Live browser recording verifying all animated sections immediately render in SiteBuilder canvas | Verified ✓ |
+
+### Additional Bugfix: SiteBuilder Preview Animation Opacity Lock Resolved
+- **Problem:** Sections added with animations (e.g., `Warm Split Hero` with `animation: "fade"`) remained stuck at `opacity: 0` inside the preview canvas because `SectionMotion` only evaluated `.bt-anim` once on initial mount and `themes.css` hid `:not(.bt-revealed)` without a builder canvas override.
+- **Resolution:**
+  1. Overrode `:not(.bt-revealed)` in `themes.css` for `[data-testid="preview-root"]` so builder canvas sections are never hidden from merchants.
+  2. Enhanced `SectionMotion` with `MutationObserver` and `bt-preview:update` listener to continuously reveal animated elements as they mount.
+  3. Pre-injected `bt-revealed` in `SectionStyleWrapper` when `editing === true`.
+  4. Aligned `hero` and `countdown-timer` settings keys in `patterns.ts` with the registered schemas.
+  5. Allowed `.hero` and `.wrap` to yield transparency inside `.bt-card-mode` so floating card custom backgrounds display beautifully.
 
 ---
 
