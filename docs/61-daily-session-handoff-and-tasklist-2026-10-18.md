@@ -81,6 +81,16 @@ During today's interactive `/grill-me` alignment session, we architected, engine
 |     • Added live canvas section thumbnails & wireframe icons in `section-thumbs.tsx`                |
 |     • Verified with 25/25 unit tests in `builder-sections.test.ts` and 0 errors in typecheck        |
 +----------------------------------------------------------------------------------------------------+
+| 10. SITEBUILDER EVOLUTION: PHASE 4 — MOTION, DEVELOPER ANCHORS & SECTION REORDERING POLISH        |
+|     • Scroll-Reveal Animations: Lightweight IntersectionObserver & pure CSS keyframe presets       |
+|       (`fade`, `slide-up`, `slide-down`, `slide-left`, `slide-right`, `zoom-in`), duration & delay|
+|     • Strict Accessibility: Full compliance with `@media (prefers-reduced-motion: reduce)`         |
+|     • Developer Anchor IDs & Custom Classes: HTML id anchor slug (`#reviews`) & sanitized classes  |
+|     • Section Nickname / Label: Custom rename in Navigator & Inspector header with type badge      |
+|     • Reordering UX Polish: Quick position jump dropdown, Alt+Up/Down shortcuts, Ctrl+D duplicate, |
+|       and in-canvas indigo pulse highlight on reorder and live animation replay preview            |
+|     • Verified with 30/30 unit tests in `builder-sections.test.ts`, 12/12 typecheck, and live QA   |
++----------------------------------------------------------------------------------------------------+
 ```
 
 ---
@@ -102,6 +112,8 @@ During today's interactive `/grill-me` alignment session, we architected, engine
 13. `commit 8defbd5`: `feat(builder): add universal section style wrapper, appearance inspector, and canvas separators`
 14. `commit 04da40e`: `docs: update session handoff with SiteBuilder Phase 1 implementation records`
 15. `commit 4575580`: `feat(builder): add dynamic bento grids, interactive content tabs, and video lightbox widgets`
+16. `commit c1c7136`: `feat(builder): add swipeable review carousel, plan comparison matrix, and promotion popup widgets`
+17. `commit ff0bba5`: `feat(builder): add scroll-reveal animations, custom anchor IDs, and section nicknames & reordering`
 
 ---
 
@@ -111,6 +123,7 @@ All browser walkthrough recordings and full-resolution PNG artifacts are saved i
 
 | Artifact Name | Description | Status |
 | :--- | :--- | :--- |
+| `sitebuilder_anim_polish_1792325130602.webp` | Full video walkthrough of section scroll animations, custom nickname, anchor ID, position jump, and replay preview in Theme Builder | Verified ✓ |
 | `test_phase3_widgets_1792323256628.webp` | Full video walkthrough of adding and interacting with Phase 3 widgets in Theme Builder | Verified ✓ |
 | `modal_search_state_1792323598162.png` | SiteBuilder section picker modal showing search filtering for Swipeable Review Carousel | Verified ✓ |
 | `scrolled_sidebar_1792323356970.png` | SiteBuilder left inspector showing added sections and action controls | Verified ✓ |
