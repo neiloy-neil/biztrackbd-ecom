@@ -406,8 +406,8 @@ describe("Visual Theme Builder Studio - New Conversion Sections", () => {
   });
 
   describe("Phase 5 Design Patterns & Preset Library", () => {
-    it("contains 12 curated production-ready patterns", () => {
-      expect(SECTION_PATTERNS.length).toBe(12);
+    it("contains 18 curated production-ready patterns across all verticals", () => {
+      expect(SECTION_PATTERNS.length).toBe(18);
     });
 
     it("every pattern references a registered section definition with valid schema", () => {
@@ -455,7 +455,131 @@ describe("Visual Theme Builder Studio - New Conversion Sections", () => {
       }
     });
   });
+
+  describe("Phase 6 aBlocks-Inspired Modern Widgets Suite", () => {
+    const PHASE6_TYPES = [
+      "image-comparison",
+      "logo-marquee",
+      "process-timeline",
+      "flip-box",
+      "image-hotspots",
+      "filterable-grid",
+    ];
+
+    it("registers all 6 aBlocks-inspired widget types in SECTIONS registry", () => {
+      const registered = new Set(SECTIONS.map((s) => s.type));
+      for (const type of PHASE6_TYPES) {
+        expect(registered.has(type), `Section type '${type}' missing in registry`).toBe(true);
+      }
+    });
+
+    it("normalizes image-comparison with split position and bilingual labels", () => {
+      const def = sectionDef("image-comparison")!;
+      expect(def).toBeDefined();
+      const s = normalizeSettings(def, {});
+      expect(s.orientation).toBe("horizontal");
+      expect(s.initialSplit).toBe("50");
+      expect(s.beforeLabel).toBe("Before");
+      expect(s.beforeLabelBn).toBe("আগে");
+      expect(s.afterLabel).toBe("After");
+      expect(s.afterLabelBn).toBe("পরে");
+    });
+
+    it("normalizes logo-marquee with speed, direction, and partner items", () => {
+      const def = sectionDef("logo-marquee")!;
+      expect(def).toBeDefined();
+      const s = normalizeSettings(def, {});
+      expect(s.speed).toBe("normal");
+      expect(s.direction).toBe("left");
+      expect(s.pauseOnHover).toBe(true);
+      expect(s.maskEdges).toBe(true);
+      const items = s.items as Record<string, unknown>[];
+      expect(items.length).toBeGreaterThanOrEqual(6);
+      const bkash = items.find((it) => it.name === "bKash");
+      expect(bkash).toBeDefined();
+    });
+
+    it("normalizes process-timeline with 4 fulfillment stages and badges", () => {
+      const def = sectionDef("process-timeline")!;
+      expect(def).toBeDefined();
+      const s = normalizeSettings(def, {});
+      expect(s.layout).toBe("vertical");
+      const steps = s.items as Record<string, unknown>[];
+      expect(steps.length).toBe(4);
+      expect(steps[0]?.stepNumber).toBe("01");
+      expect(steps[0]?.title).toBe("Place Order Online");
+      expect(steps[0]?.icon).toBe("cart");
+    });
+
+    it("normalizes flip-box with 3D cards, front preview, and back CTA", () => {
+      const def = sectionDef("flip-box")!;
+      expect(def).toBeDefined();
+      const s = normalizeSettings(def, {});
+      expect(s.columns).toBe("3");
+      const cards = s.items as Record<string, unknown>[];
+      expect(cards.length).toBeGreaterThanOrEqual(3);
+      expect(cards[0]?.frontTitle).toBe("Signature Kebab Platter");
+      expect(cards[0]?.price).toBe("৳ 1,290");
+      expect(cards[0]?.ctaText).toBe("Reserve Platter");
+    });
+
+    it("normalizes image-hotspots with coordinate pins and price highlights", () => {
+      const def = sectionDef("image-hotspots")!;
+      expect(def).toBeDefined();
+      const s = normalizeSettings(def, {});
+      const pins = s.items as Record<string, unknown>[];
+      expect(pins.length).toBeGreaterThanOrEqual(3);
+      expect(pins[0]?.x).toBe("28");
+      expect(pins[0]?.y).toBe("36");
+      expect(pins[0]?.price).toBe("৳ 1,450");
+      expect(pins[0]?.title).toBe("Minimalist Linen Kurti");
+    });
+
+    it("normalizes filterable-grid with instant category cards", () => {
+      const def = sectionDef("filterable-grid")!;
+      expect(def).toBeDefined();
+      const s = normalizeSettings(def, {});
+      expect(s.columns).toBe("3");
+      const items = s.items as Record<string, unknown>[];
+      expect(items.length).toBeGreaterThanOrEqual(6);
+      expect(items[0]?.category).toBe("Kebabs");
+      expect(items[1]?.category).toBe("Biryani");
+      expect(items[1]?.price).toBe("৳ 480");
+    });
+
+    it("validates pages containing all Phase 6 modern widgets without error", () => {
+      const page: PageJson = {
+        version: 1,
+        sections: [
+          newSection("hero"),
+          newSection("image-comparison"),
+          newSection("logo-marquee"),
+          newSection("process-timeline"),
+          newSection("flip-box"),
+          newSection("image-hotspots"),
+          newSection("filterable-grid"),
+        ],
+      };
+
+      expect(() => validatePage("home", page)).not.toThrow();
+
+      const customPage: PageJson = {
+        version: 1,
+        sections: [
+          newSection("banner"),
+          newSection("image-comparison"),
+          newSection("logo-marquee"),
+          newSection("process-timeline"),
+          newSection("flip-box"),
+          newSection("image-hotspots"),
+          newSection("filterable-grid"),
+        ],
+      };
+      expect(() => validatePage("custom", customPage)).not.toThrow();
+    });
+  });
 });
+
 
 
 

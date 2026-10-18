@@ -38,6 +38,12 @@ const DRAWINGS: Record<string, ReactNode> = {
   reviewsSlider: <><rect x={6} y={8} width={60} height={32} rx={4} {...box} /><circle cx={15} cy={17} r={4.5} {...solid} /><text x={24} y={18} fontSize={7} fill="currentColor">★★★★★</text>{line(25, 48, 12)}{line(32, 34, 12)}<circle cx={33} cy={43} r={1.5} fill="currentColor" /><circle cx={38} cy={43} r={1.5} {...solid} /><circle cx={43} cy={43} r={1.5} {...solid} /></>,
   pricingMatrix: <><rect x={6} y={10} width={18} height={28} rx={2} {...box} />{line(15, 12, 9)}<rect x={9} y={21} width={12} height={4} rx={1} {...solid} /><rect x={27} y={6} width={18} height={34} rx={3} stroke="currentColor" strokeWidth={1.8} fill="currentColor" fillOpacity={0.08} /><rect x={31} y={8} width={10} height={3} rx={1} fill="currentColor" />{line(15, 12, 30)}<rect x={30} y={21} width={12} height={5} rx={1.5} fill="currentColor" opacity={0.7} /><rect x={48} y={10} width={18} height={28} rx={2} {...box} />{line(15, 12, 51)}<rect x={51} y={21} width={12} height={4} rx={1} {...solid} /></>,
   promoPopup: <><rect x={12} y={7} width={48} height={34} rx={4} fill="currentColor" opacity={0.12} stroke="currentColor" strokeWidth={1.2} /><rect x={18} y={11} width={20} height={4} rx={1.5} {...solid} />{line(18, 36, 18)}<rect x={18} y={24} width={36} height={6} rx={2} fill="none" stroke="currentColor" strokeDasharray="2,2" strokeWidth={0.9} /><rect x={18} y={32} width={36} height={6} rx={2} fill="currentColor" opacity={0.7} /></>,
+  comparison: <><rect x={6} y={8} width={28} height={32} rx={2} {...solid} /><rect x={38} y={8} width={28} height={32} rx={2} {...box} /><line x1={36} y1={6} x2={36} y2={42} stroke="currentColor" strokeWidth={1.5} /><circle cx={36} cy={24} r={4} fill="currentColor" opacity={0.8} /></>,
+  marquee: <><rect x={6} y={10} width={24} height={12} rx={6} {...box} /><rect x={34} y={10} width={32} height={12} rx={6} {...solid} /><rect x={10} y={26} width={30} height={12} rx={6} {...solid} /><rect x={44} y={26} width={22} height={12} rx={6} {...box} /></>,
+  timeline: <><line x1={20} y1={6} x2={20} y2={42} stroke="currentColor" strokeWidth={1.5} opacity={0.4} strokeDasharray="2,2" /><circle cx={20} cy={14} r={4} fill="currentColor" opacity={0.7} /><circle cx={20} cy={34} r={4} fill="currentColor" opacity={0.7} />{line(12, 36, 28)}{line(18, 24, 28)}{line(32, 36, 28)}{line(38, 24, 28)}</>,
+  flipBox: <><rect x={8} y={8} width={26} height={32} rx={3} {...box} /><rect x={38} y={8} width={26} height={32} rx={3} fill="currentColor" opacity={0.8} /><path d="M22 24c4-4 12-4 16 0" fill="none" stroke="currentColor" strokeWidth={1.4} /><polyline points="35 20 38 24 35 28" fill="none" stroke="currentColor" strokeWidth={1.4} /></>,
+  hotspots: <><rect x={6} y={8} width={60} height={32} rx={4} {...solid} /><circle cx={22} cy={20} r={4} fill="currentColor" opacity={0.9} /><circle cx={22} cy={20} r={7} fill="none" stroke="currentColor" strokeWidth={1} opacity={0.5} /><circle cx={48} cy={28} r={4} fill="currentColor" opacity={0.9} /><circle cx={48} cy={28} r={7} fill="none" stroke="currentColor" strokeWidth={1} opacity={0.5} /></>,
+  filterable: <><rect x={6} y={8} width={16} height={6} rx={3} fill="currentColor" opacity={0.8} /><rect x={26} y={8} width={16} height={6} rx={3} {...box} /><rect x={46} y={8} width={16} height={6} rx={3} {...box} /><rect x={6} y={18} width={18} height={22} rx={2} {...box} /><rect x={27} y={18} width={18} height={22} rx={2} {...solid} /><rect x={48} y={18} width={18} height={22} rx={2} {...box} /></>,
 };
 
 const KIND: Record<string, keyof typeof DRAWINGS> = {
@@ -62,6 +68,12 @@ const KIND: Record<string, keyof typeof DRAWINGS> = {
   "testimonials-slider": "reviewsSlider",
   "pricing-matrix": "pricingMatrix",
   "promo-popup": "promoPopup",
+  "image-comparison": "comparison",
+  "logo-marquee": "marquee",
+  "process-timeline": "timeline",
+  "flip-box": "flipBox",
+  "image-hotspots": "hotspots",
+  "filterable-grid": "filterable",
 };
 
 export function SectionThumb({ type }: { type: string }) {
@@ -77,8 +89,8 @@ export { STORE_SECTION_CATEGORIES, type StoreSectionCategory } from "@biztrackbd
 
 /** How the cards are grouped on a landing page; other pages show one list. */
 export const LANDING_GROUPS: { title: string; types: string[] }[] = [
-  { title: "Top of the page", types: ["lp-header", "lp-hero", "lp-marquee", "lp-video", "video-lightbox"] },
-  { title: "Describe the product", types: ["lp-benefits", "lp-split", "lp-compare", "lp-steps", "lp-text", "lp-gallery", "bento-grid", "content-tabs", "pricing-matrix"] },
-  { title: "Build trust", types: ["lp-reviews", "testimonials-slider", "lp-screens", "trust-strip", "lp-countdown", "lp-stock"] },
+  { title: "Top of the page", types: ["lp-header", "lp-hero", "lp-marquee", "lp-video", "video-lightbox", "logo-marquee"] },
+  { title: "Describe the product", types: ["lp-benefits", "lp-split", "lp-compare", "lp-steps", "lp-text", "lp-gallery", "bento-grid", "content-tabs", "pricing-matrix", "image-comparison", "process-timeline", "image-hotspots", "flip-box", "filterable-grid"] },
+  { title: "Build trust", types: ["lp-reviews", "testimonials-slider", "lp-screens", "trust-strip", "lp-countdown", "lp-stock", "image-comparison", "logo-marquee"] },
   { title: "Close the sale", types: ["lp-offer-bar", "lp-order-form", "lp-faq", "lp-sticky-cta", "promo-popup"] },
 ];

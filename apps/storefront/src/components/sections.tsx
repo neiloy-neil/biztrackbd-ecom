@@ -29,6 +29,12 @@ import { VideoLightboxSection } from "./widgets/video-lightbox";
 import { TestimonialsSliderSection, type TestimonialItem } from "./widgets/testimonials-slider";
 import { PricingMatrixSection, type PricingPlanItem } from "./widgets/pricing-matrix";
 import { PromoPopupSection } from "./widgets/promo-popup";
+import { ImageComparisonSection } from "./widgets/image-comparison";
+import { LogoMarqueeSection, type MarqueeItem } from "./widgets/logo-marquee";
+import { ProcessTimelineSection, type TimelineStepItem } from "./widgets/process-timeline";
+import { FlipBoxSection, type FlipCardItem } from "./widgets/flip-box";
+import { ImageHotspotsSection, type HotspotPin } from "./widgets/image-hotspots";
+import { FilterableGridSection, type FilterableItem } from "./widgets/filterable-grid";
 
 /**
  * Draws a page built in the editor. It has no server-only code, so the live store (server) and the editor's preview
@@ -1263,6 +1269,198 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
             ctaLink={str(s.ctaLink)}
             trigger={(s.trigger as "delay" | "scroll" | "immediate") || "delay"}
             showPhoneCapture={Boolean(s.showPhoneCapture)}
+            lang={lang}
+            ed={ed}
+            editing={editing}
+          />
+        </div>
+      );
+    }
+    case "image-comparison": {
+      return (
+        <div data-section={id}>
+          <ImageComparisonSection
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            subtitle={str(s.subtitle)}
+            subtitleBn={str(s.subtitleBn)}
+            badge={str(s.badge)}
+            badgeBn={str(s.badgeBn)}
+            beforeImage={str(s.beforeImage)}
+            afterImage={str(s.afterImage)}
+            beforeLabel={str(s.beforeLabel)}
+            beforeLabelBn={str(s.beforeLabelBn)}
+            afterLabel={str(s.afterLabel)}
+            afterLabelBn={str(s.afterLabelBn)}
+            orientation={(s.orientation as "horizontal" | "vertical") || "horizontal"}
+            initialSplit={str(s.initialSplit) || "50"}
+            lang={lang}
+            ed={ed}
+            editing={editing}
+          />
+        </div>
+      );
+    }
+    case "logo-marquee": {
+      const rawItems = Array.isArray(s.items) ? (s.items as Record<string, unknown>[]) : [];
+      const items: MarqueeItem[] = rawItems.map((it) => ({
+        name: str(it.name),
+        image: str(it.image) || undefined,
+        label: str(it.label) || undefined,
+        labelBn: str(it.labelBn) || undefined,
+        link: str(it.link) || undefined,
+      }));
+
+      return (
+        <div data-section={id}>
+          <LogoMarqueeSection
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            badge={str(s.badge)}
+            badgeBn={str(s.badgeBn)}
+            speed={(s.speed as "slow" | "normal" | "fast") || "normal"}
+            direction={(s.direction as "left" | "right") || "left"}
+            pauseOnHover={s.pauseOnHover !== false}
+            maskEdges={s.maskEdges !== false}
+            items={items}
+            lang={lang}
+            ed={ed}
+            editing={editing}
+          />
+        </div>
+      );
+    }
+    case "process-timeline": {
+      const rawItems = Array.isArray(s.items) ? (s.items as Record<string, unknown>[]) : [];
+      const items: TimelineStepItem[] = rawItems.map((it) => ({
+        stepNumber: str(it.stepNumber) || undefined,
+        title: str(it.title) || undefined,
+        titleBn: str(it.titleBn) || undefined,
+        description: str(it.description) || undefined,
+        descriptionBn: str(it.descriptionBn) || undefined,
+        badge: str(it.badge) || undefined,
+        badgeBn: str(it.badgeBn) || undefined,
+        icon: str(it.icon) || undefined,
+      }));
+
+      return (
+        <div data-section={id}>
+          <ProcessTimelineSection
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            subtitle={str(s.subtitle)}
+            subtitleBn={str(s.subtitleBn)}
+            badge={str(s.badge)}
+            badgeBn={str(s.badgeBn)}
+            layout={(s.layout as "vertical" | "horizontal") || "vertical"}
+            items={items}
+            lang={lang}
+            ed={ed}
+            editing={editing}
+          />
+        </div>
+      );
+    }
+    case "flip-box": {
+      const rawItems = Array.isArray(s.items) ? (s.items as Record<string, unknown>[]) : [];
+      const items: FlipCardItem[] = rawItems.map((it) => ({
+        frontTitle: str(it.frontTitle) || undefined,
+        frontTitleBn: str(it.frontTitleBn) || undefined,
+        frontSubtitle: str(it.frontSubtitle) || undefined,
+        frontSubtitleBn: str(it.frontSubtitleBn) || undefined,
+        frontBadge: str(it.frontBadge) || undefined,
+        frontBadgeBn: str(it.frontBadgeBn) || undefined,
+        frontImage: str(it.frontImage) || undefined,
+        backTitle: str(it.backTitle) || undefined,
+        backTitleBn: str(it.backTitleBn) || undefined,
+        backText: str(it.backText) || undefined,
+        backTextBn: str(it.backTextBn) || undefined,
+        price: str(it.price) || undefined,
+        ctaText: str(it.ctaText) || undefined,
+        ctaTextBn: str(it.ctaTextBn) || undefined,
+        ctaLink: str(it.ctaLink) || undefined,
+      }));
+
+      return (
+        <div data-section={id}>
+          <FlipBoxSection
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            subtitle={str(s.subtitle)}
+            subtitleBn={str(s.subtitleBn)}
+            badge={str(s.badge)}
+            badgeBn={str(s.badgeBn)}
+            columns={(s.columns as "2" | "3" | "4") || "3"}
+            items={items}
+            lang={lang}
+            ed={ed}
+            editing={editing}
+          />
+        </div>
+      );
+    }
+    case "image-hotspots": {
+      const rawItems = Array.isArray(s.items) ? (s.items as Record<string, unknown>[]) : [];
+      const items: HotspotPin[] = rawItems.map((it) => ({
+        x: str(it.x) || undefined,
+        y: str(it.y) || undefined,
+        title: str(it.title) || undefined,
+        titleBn: str(it.titleBn) || undefined,
+        price: str(it.price) || undefined,
+        description: str(it.description) || undefined,
+        descriptionBn: str(it.descriptionBn) || undefined,
+        linkText: str(it.linkText) || undefined,
+        linkTextBn: str(it.linkTextBn) || undefined,
+        linkUrl: str(it.linkUrl) || undefined,
+      }));
+
+      return (
+        <div data-section={id}>
+          <ImageHotspotsSection
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            subtitle={str(s.subtitle)}
+            subtitleBn={str(s.subtitleBn)}
+            badge={str(s.badge)}
+            badgeBn={str(s.badgeBn)}
+            image={str(s.image) || undefined}
+            items={items}
+            lang={lang}
+            ed={ed}
+            editing={editing}
+          />
+        </div>
+      );
+    }
+    case "filterable-grid": {
+      const rawItems = Array.isArray(s.items) ? (s.items as Record<string, unknown>[]) : [];
+      const items: FilterableItem[] = rawItems.map((it) => ({
+        title: str(it.title) || undefined,
+        titleBn: str(it.titleBn) || undefined,
+        category: str(it.category) || undefined,
+        categoryBn: str(it.categoryBn) || undefined,
+        description: str(it.description) || undefined,
+        descriptionBn: str(it.descriptionBn) || undefined,
+        price: str(it.price) || undefined,
+        badge: str(it.badge) || undefined,
+        badgeBn: str(it.badgeBn) || undefined,
+        image: str(it.image) || undefined,
+        ctaText: str(it.ctaText) || undefined,
+        ctaTextBn: str(it.ctaTextBn) || undefined,
+        ctaLink: str(it.ctaLink) || undefined,
+      }));
+
+      return (
+        <div data-section={id}>
+          <FilterableGridSection
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            subtitle={str(s.subtitle)}
+            subtitleBn={str(s.subtitleBn)}
+            badge={str(s.badge)}
+            badgeBn={str(s.badgeBn)}
+            columns={(s.columns as "2" | "3" | "4") || "3"}
+            items={items}
             lang={lang}
             ed={ed}
             editing={editing}
