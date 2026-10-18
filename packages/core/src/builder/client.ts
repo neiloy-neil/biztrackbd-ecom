@@ -2,3 +2,5 @@
 export * from "./registry";
 export * from "./theme";
 export * from "./chrome";
+export * from "./patterns";
+

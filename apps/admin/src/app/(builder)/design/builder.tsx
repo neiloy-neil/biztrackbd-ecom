@@ -6,13 +6,14 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { Drawer, Segmented, useToast } from "@biztrackbd/ui";
 import {
   DEFAULT_THEME, FONT_LABELS, FONT_PAIRS, STYLE_FIELDS, contrast, editableField, newSection, sectionDef, sectionsFor, setByPath, validateTheme,
-  SECTION_GRADIENT_PRESETS,
+  SECTION_GRADIENT_PRESETS, normalizeSettings, normalizeSectionStyle, SECTION_PATTERNS, PATTERN_CATEGORIES,
   type Field, type ListSpec, type PageJson, type PageKind, type PageSection, type SectionDef, type ThemeSettings, type SiteMode, type BusinessVertical,
   type SectionStyle, type SectionBgType, type SectionPaddingY, type SectionHideOn, type SectionTextColor,
-  type SectionAnimation, type SectionAnimDuration, type SectionAnimDelay,
+  type SectionAnimation, type SectionAnimDuration, type SectionAnimDelay, type SectionPattern,
 } from "@biztrackbd/core/builder-client";
 import { ImagePicker } from "@/components/image-picker";
 import { LANDING_GROUPS, STORE_SECTION_CATEGORIES, SectionThumb } from "./section-thumbs";
+import { PatternCard } from "./pattern-card";
 import { discardDraftAction, publishAction, rollbackAction, saveDraftAction } from "./actions";
 
 export interface VersionItem { version: number; label: string | null; createdAt: string; isLive: boolean }
@@ -619,7 +620,9 @@ export function Builder(props: Props) {
   const [label, setLabel] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
   const [library, setLibrary] = useState(false);
+  const [libraryTab, setLibraryTab] = useState<"components" | "patterns">("components");
   const [libraryCategory, setLibraryCategory] = useState("all");
+  const [patternCategory, setPatternCategory] = useState("all");
   const [librarySearch, setLibrarySearch] = useState("");
   // Where a section chosen from the gallery goes: the gap that was clicked on the page, or the end.
   const [addAt, setAddAt] = useState<number | null>(null);
@@ -831,6 +834,33 @@ export function Builder(props: Props) {
     setLibrary(false);
     setTab(narrow ? "settings" : "layers");
     setTimeout(() => { post({ type: "bt-preview:focus", id: s.id }); }, 200);
+  }
+  function addPattern(pattern: SectionPattern) {
+    const def = sectionDef(pattern.sectionType);
+    if (!def || full(pattern.sectionType)) return;
+    const base = newSection(pattern.sectionType);
+    const s: PageSection = {
+      id: base.id,
+      type: pattern.sectionType,
+      label: pattern.defaultLabel,
+      settings: normalizeSettings(def, pattern.settings),
+      style: normalizeSectionStyle(pattern.style),
+    };
+    const at = addAt;
+    edit((p) => {
+      const next = [...p.sections];
+      next.splice(at === null ? next.length : Math.max(0, Math.min(at, next.length)), 0, s);
+      return { ...p, sections: next };
+    });
+    setSelected(s.id);
+    setAddAt(null);
+    setLibrary(false);
+    setTab(narrow ? "settings" : "layers");
+    toast(`Added "${pattern.title}" pattern`);
+    setTimeout(() => {
+      post({ type: "bt-preview:focus", id: s.id });
+      post({ type: "bt-preview:highlight", id: s.id });
+    }, 200);
   }
   function move(id: string, d: -1 | 1) {
     edit((p) => {
@@ -1236,9 +1266,38 @@ export function Builder(props: Props) {
           setAddAt(null);
           setLibrarySearch("");
           setLibraryCategory("all");
+          setPatternCategory("all");
         }}
         title="Add a section"
       >
+        {/* Top Dual-Tab Switcher */}
+        <div
+          className="bld-tabs"
+          role="tablist"
+          aria-label="Section or Pattern"
+          style={{ marginBottom: 14 }}
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={libraryTab === "components"}
+            onClick={() => setLibraryTab("components")}
+            data-testid="tab-lib-components"
+          >
+            Components ({defs.length})
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={libraryTab === "patterns"}
+            onClick={() => setLibraryTab("patterns")}
+            data-testid="tab-lib-patterns"
+          >
+            ⭐ Design Patterns ({SECTION_PATTERNS.length})
+          </button>
+        </div>
+
+        {/* Universal Search Box */}
         <div className="bld-search-box">
           <span className="bld-search-icon" aria-hidden>
             <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -1250,10 +1309,14 @@ export function Builder(props: Props) {
             type="search"
             className="input"
             style={{ paddingLeft: 34, paddingRight: librarySearch ? 32 : 12 }}
-            placeholder="Search sections (e.g. countdown, FAQ, video)..."
+            placeholder={
+              libraryTab === "components"
+                ? "Search sections (e.g. countdown, FAQ, video)..."
+                : "Search patterns (e.g. Dark Hero, Bento, Reviews, Eid)..."
+            }
             value={librarySearch}
             onChange={(e) => setLibrarySearch(e.target.value)}
-            aria-label="Search sections"
+            aria-label="Search sections or patterns"
           />
           {librarySearch && (
             <button
@@ -1267,105 +1330,189 @@ export function Builder(props: Props) {
           )}
         </div>
 
-        {kind !== "landing" && (() => {
-          let cats = [...STORE_SECTION_CATEGORIES];
-          if (props.siteMode === "PORTFOLIO") {
-            cats = cats.filter((c) => c.id !== "products");
-            const bIdx = cats.findIndex((c) => c.id === "business");
-            if (bIdx > 1) {
-              const [b] = cats.splice(bIdx, 1);
-              cats.splice(1, 0, b!);
-            }
-          }
-          return (
-            <div className="bld-cat-pills" role="tablist" aria-label="Section categories">
-              {cats.map((cat) => (
+        {libraryTab === "patterns" ? (
+          <div>
+            {/* Pattern Category Pills */}
+            <div className="bld-cat-pills" role="tablist" aria-label="Pattern categories">
+              {PATTERN_CATEGORIES.map((cat) => (
                 <button
                   key={cat.id}
                   type="button"
                   role="tab"
-                  aria-selected={libraryCategory === cat.id}
-                  className={`bld-cat-pill${libraryCategory === cat.id ? " on" : ""}`}
-                  onClick={() => setLibraryCategory(cat.id)}
+                  aria-selected={patternCategory === cat.id}
+                  className={`bld-cat-pill${patternCategory === cat.id ? " on" : ""}`}
+                  onClick={() => setPatternCategory(cat.id)}
+                  data-testid={`pat-cat-${cat.id}`}
                 >
                   {cat.icon ? <span>{cat.icon}</span> : null}
                   <span>{cat.title}</span>
                 </button>
               ))}
             </div>
-          );
-        })()}
 
-        {(() => {
-          const card = (d: (typeof defs)[number]) => {
-            const isRecommended = Boolean(props.businessVertical && d.verticals?.includes(props.businessVertical));
-            return (
-              <button key={d.type} type="button" className="bld-card bld-card-pic" disabled={full(d.type)} onClick={() => add(d.type)} data-testid={`lib-${d.type}`}>
-                <SectionThumb type={d.type} />
-                <span className="bld-card-txt">
-                  <span className="row" style={{ gap: 6, alignItems: "center", justifyContent: "space-between" }}>
-                    <b>{d.label}</b>
-                    {isRecommended && <span className="pill ok" style={{ fontSize: 10, padding: "1px 5px", lineHeight: "14px" }}>Recommended</span>}
-                  </span>
-                  <span>{d.description}</span>
-                  {d.max && count(d.type) >= d.max && <em>Already on the page</em>}
-                </span>
-              </button>
-            );
-          };
+            {/* Pattern Cards Grid */}
+            {(() => {
+              const q = librarySearch.trim().toLowerCase();
+              const matchesPatternSearch = (p: SectionPattern) =>
+                !q ||
+                p.title.toLowerCase().includes(q) ||
+                p.titleBn.toLowerCase().includes(q) ||
+                p.description.toLowerCase().includes(q) ||
+                p.descriptionBn.toLowerCase().includes(q) ||
+                (p.badge && p.badge.toLowerCase().includes(q)) ||
+                p.sectionType.toLowerCase().includes(q);
 
-          const q = librarySearch.trim().toLowerCase();
-          const matchesSearch = (d: (typeof defs)[number]) => !q || d.label.toLowerCase().includes(q) || d.description.toLowerCase().includes(q) || d.type.toLowerCase().includes(q);
+              const filteredPatterns = SECTION_PATTERNS.filter((p) => {
+                if (patternCategory !== "all" && p.category !== patternCategory) {
+                  return false;
+                }
+                return matchesPatternSearch(p);
+              });
 
-          if (kind !== "landing") {
-            const activeCategory = STORE_SECTION_CATEGORIES.find((c) => c.id === libraryCategory);
-            const filteredDefs = defs.filter((d) => {
-              if (libraryCategory !== "all" && activeCategory && !activeCategory.types.includes(d.type)) {
-                return false;
+              if (filteredPatterns.length === 0) {
+                return (
+                  <div className="bld-empty" style={{ padding: "28px 12px" }}>
+                    <b>No design patterns found</b>
+                    <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>
+                      Try selecting "All Patterns" or a different search keyword.
+                    </p>
+                  </div>
+                );
               }
-              return matchesSearch(d);
-            });
 
-            if (filteredDefs.length === 0) {
               return (
-                <div className="bld-empty" style={{ padding: "28px 12px" }}>
-                  <b>No sections found</b>
-                  <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>Try a different category or search keyword.</p>
+                <div
+                  className="bld-patterns-grid"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                    gap: 12,
+                    marginTop: 10,
+                  }}
+                >
+                  {filteredPatterns.map((p) => {
+                    const d = sectionDef(p.sectionType);
+                    const isMax = full(p.sectionType);
+                    const currCount = count(p.sectionType);
+                    const maxLimit = d?.max;
+                    return (
+                      <PatternCard
+                        key={p.id}
+                        pattern={p}
+                        def={d}
+                        disabled={isMax}
+                        disabledReason={isMax ? `Limit reached (${currCount}/${maxLimit} on page)` : undefined}
+                        onInsert={addPattern}
+                      />
+                    );
+                  })}
                 </div>
               );
-            }
+            })()}
+          </div>
+        ) : (
+          <div>
+            {kind !== "landing" && (() => {
+              let cats = [...STORE_SECTION_CATEGORIES];
+              if (props.siteMode === "PORTFOLIO") {
+                cats = cats.filter((c) => c.id !== "products");
+                const bIdx = cats.findIndex((c) => c.id === "business");
+                if (bIdx > 1) {
+                  const [b] = cats.splice(bIdx, 1);
+                  cats.splice(1, 0, b!);
+                }
+              }
+              return (
+                <div className="bld-cat-pills" role="tablist" aria-label="Section categories">
+                  {cats.map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={libraryCategory === cat.id}
+                      className={`bld-cat-pill${libraryCategory === cat.id ? " on" : ""}`}
+                      onClick={() => setLibraryCategory(cat.id)}
+                    >
+                      {cat.icon ? <span>{cat.icon}</span> : null}
+                      <span>{cat.title}</span>
+                    </button>
+                  ))}
+                </div>
+              );
+            })()}
 
-            return <div className="bld-lib">{filteredDefs.map(card)}</div>;
-          }
+            {(() => {
+              const card = (d: (typeof defs)[number]) => {
+                const isRecommended = Boolean(props.businessVertical && d.verticals?.includes(props.businessVertical));
+                return (
+                  <button key={d.type} type="button" className="bld-card bld-card-pic" disabled={full(d.type)} onClick={() => add(d.type)} data-testid={`lib-${d.type}`}>
+                    <SectionThumb type={d.type} />
+                    <span className="bld-card-txt">
+                      <span className="row" style={{ gap: 6, alignItems: "center", justifyContent: "space-between" }}>
+                        <b>{d.label}</b>
+                        {isRecommended && <span className="pill ok" style={{ fontSize: 10, padding: "1px 5px", lineHeight: "14px" }}>Recommended</span>}
+                      </span>
+                      <span>{d.description}</span>
+                      {d.max && count(d.type) >= d.max && <em>Already on the page</em>}
+                    </span>
+                  </button>
+                );
+              };
 
-          const activeLandingGroups = LANDING_GROUPS.map((g) => {
-            const groupDefs = g.types
-              .map((t) => defs.find((d) => d.type === t))
-              .filter((d): d is NonNullable<typeof d> => Boolean(d))
-              .filter(matchesSearch);
-            return { title: g.title, defs: groupDefs };
-          }).filter((g) => g.defs.length > 0);
+              const q = librarySearch.trim().toLowerCase();
+              const matchesSearch = (d: (typeof defs)[number]) => !q || d.label.toLowerCase().includes(q) || d.description.toLowerCase().includes(q) || d.type.toLowerCase().includes(q);
 
-          if (activeLandingGroups.length === 0) {
-            return (
-              <div className="bld-empty" style={{ padding: "28px 12px" }}>
-                <b>No sections found</b>
-                <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>Try a different search keyword.</p>
-              </div>
-            );
-          }
+              if (kind !== "landing") {
+                const activeCategory = STORE_SECTION_CATEGORIES.find((c) => c.id === libraryCategory);
+                const filteredDefs = defs.filter((d) => {
+                  if (libraryCategory !== "all" && activeCategory && !activeCategory.types.includes(d.type)) {
+                    return false;
+                  }
+                  return matchesSearch(d);
+                });
 
-          return (
-            <div className="stack" style={{ gap: 14 }}>
-              {activeLandingGroups.map((g) => (
-                <section key={g.title} aria-label={g.title}>
-                  <div className="bld-gh" style={{ marginBottom: 6 }}>{g.title}</div>
-                  <div className="bld-lib">{g.defs.map(card)}</div>
-                </section>
-              ))}
-            </div>
-          );
-        })()}
+                if (filteredDefs.length === 0) {
+                  return (
+                    <div className="bld-empty" style={{ padding: "28px 12px" }}>
+                      <b>No sections found</b>
+                      <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>Try a different category or search keyword.</p>
+                    </div>
+                  );
+                }
+
+                return <div className="bld-lib">{filteredDefs.map(card)}</div>;
+              }
+
+              const activeLandingGroups = LANDING_GROUPS.map((g) => {
+                const groupDefs = g.types
+                  .map((t) => defs.find((d) => d.type === t))
+                  .filter((d): d is NonNullable<typeof d> => Boolean(d))
+                  .filter(matchesSearch);
+                return { title: g.title, defs: groupDefs };
+              }).filter((g) => g.defs.length > 0);
+
+              if (activeLandingGroups.length === 0) {
+                return (
+                  <div className="bld-empty" style={{ padding: "28px 12px" }}>
+                    <b>No sections found</b>
+                    <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>Try a different search keyword.</p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="stack" style={{ gap: 14 }}>
+                  {activeLandingGroups.map((g) => (
+                    <section key={g.title} aria-label={g.title}>
+                      <div className="bld-gh" style={{ marginBottom: 6 }}>{g.title}</div>
+                      <div className="bld-lib">{g.defs.map(card)}</div>
+                    </section>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        )}
       </Drawer>
     </div>
   );

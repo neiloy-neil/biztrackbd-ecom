@@ -9,7 +9,10 @@ import {
   sectionsFor,
   validatePage,
   youtubeId,
+  SECTION_PATTERNS,
+  PATTERN_CATEGORIES,
   type PageJson,
+  type SectionPattern,
 } from "../src";
 
 describe("Visual Theme Builder Studio - New Conversion Sections", () => {
@@ -401,7 +404,59 @@ describe("Visual Theme Builder Studio - New Conversion Sections", () => {
       expect(validated.sections[0]?.style?.customClass).toBe("eid-hero-banner");
     });
   });
+
+  describe("Phase 5 Design Patterns & Preset Library", () => {
+    it("contains 12 curated production-ready patterns", () => {
+      expect(SECTION_PATTERNS.length).toBe(12);
+    });
+
+    it("every pattern references a registered section definition with valid schema", () => {
+      const allTypes = new Set(SECTIONS.map((s) => s.type));
+      for (const p of SECTION_PATTERNS) {
+        expect(allTypes.has(p.sectionType), `Pattern ${p.id} references unknown section type ${p.sectionType}`).toBe(true);
+        const def = sectionDef(p.sectionType)!;
+        expect(def).toBeDefined();
+
+        // Validates settings against schema without throwing
+        expect(() => normalizeSettings(def, p.settings)).not.toThrow();
+
+        // Validates style
+        if (p.style) {
+          const normalizedStyle = normalizeSectionStyle(p.style);
+          expect(normalizedStyle).toBeDefined();
+        }
+      }
+    });
+
+    it("every pattern can be converted into a valid page section and validated", () => {
+      const pageSections = SECTION_PATTERNS.map((p, i) => ({
+        id: `pattern-sec-${i + 1}`,
+        type: p.sectionType,
+        label: p.defaultLabel,
+        settings: normalizeSettings(sectionDef(p.sectionType)!, p.settings),
+        style: normalizeSectionStyle(p.style),
+      }));
+
+      // Validate each section on a custom or home page
+      for (const s of pageSections) {
+        const page: PageJson = {
+          version: 1,
+          sections: [newSection("hero"), s],
+        };
+        expect(() => validatePage("home", page)).not.toThrow();
+      }
+    });
+
+    it("has valid categories defined in PATTERN_CATEGORIES", () => {
+      expect(PATTERN_CATEGORIES.length).toBeGreaterThanOrEqual(6);
+      const catIds = new Set(PATTERN_CATEGORIES.map((c) => c.id));
+      for (const p of SECTION_PATTERNS) {
+        expect(catIds.has(p.category), `Pattern ${p.id} has unregistered category ${p.category}`).toBe(true);
+      }
+    });
+  });
 });
+
 
 
 

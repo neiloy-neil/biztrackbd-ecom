@@ -173,6 +173,7 @@ export {
 
 // Phase 7: store design builder, landing pages, domain connection
 export * from "./builder/registry";
+export * from "./builder/patterns";
 export * from "./builder/theme";
 export * from "./builder/versions";
 export * from "./builder/preview";
