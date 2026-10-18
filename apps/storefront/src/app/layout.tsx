@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Baloo_Da_2, Hind_Siliguri, Noto_Serif_Bengali, Playfair_Display, Plus_Jakarta_Sans, Poppins } from "next/font/google";
+import { Baloo_Da_2, Hind_Siliguri, Noto_Sans_Bengali, Noto_Serif_Bengali, Playfair_Display, Plus_Jakarta_Sans, Poppins } from "next/font/google";
 import { getActiveThemeId } from "@biztrackbd/core";
 import { getLang } from "@/lib/i18n";
 import { findStore } from "@/lib/tenant";
@@ -16,6 +16,7 @@ const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700
 // The rounded, friendly headline font of the landing pages. Not preloaded: a landing page fetches it, other pages never do.
 const baloo = Baloo_Da_2({ subsets: ["bengali", "latin"], weight: ["600", "700", "800"], variable: "--font-baloo", display: "swap", preload: false });
 const notoSerifBn = Noto_Serif_Bengali({ subsets: ["bengali", "latin"], weight: ["500", "600", "700"], variable: "--font-notoserifbn", display: "swap", preload: false });
+const notoSansBn = Noto_Sans_Bengali({ subsets: ["bengali", "latin"], weight: ["400", "500", "600", "700"], variable: "--font-notosansbn", display: "swap", preload: false });
 
 export const metadata: Metadata = { title: "BizTrackBD" };
 export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#FBF8F3" };
@@ -25,7 +26,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const store = await findStore();
   const [lang, themeId] = await Promise.all([getLang(store?.locale ?? "en"), store ? getActiveThemeId(store.id) : Promise.resolve("kapor" as const)]);
   return (
-    <html lang={lang} className={`${jakarta.variable} ${hind.variable} ${playfair.variable} ${poppins.variable} ${notoSerifBn.variable} ${baloo.variable}`}>
+    <html lang={lang} className={`${jakarta.variable} ${hind.variable} ${playfair.variable} ${poppins.variable} ${notoSerifBn.variable} ${baloo.variable} ${notoSansBn.variable}`}>
       <body data-store-theme={themeId}>{children}</body>
     </html>
   );

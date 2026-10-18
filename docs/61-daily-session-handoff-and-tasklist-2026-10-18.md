@@ -138,6 +138,17 @@ During today's interactive `/grill-me` alignment session, we architected, engine
 |       boundary as "Not included (requires Pro or Plus)", strictly reflecting the core state machine |
 |     • Verification: 13/13 passing tests in billing-and-plans.test.ts, 0 TS errors, live browser QA  |
 +----------------------------------------------------------------------------------------------------+
+| 15. SITEBUILDER EVOLUTION: PHASE 6 — GLOBAL THEME STYLING ENGINE & BRAND DESIGN SYSTEM             |
+|     • 10 Curated Brand Color Palettes: 1-click harmonized schemes (Royal Indigo, Emerald Luxe,      |
+|       Warm Terracotta, Crimson Silk, Midnight Lime, Velvet Plum, Nordic Slate, Gold Obsidian, etc.)|
+|     • WCAG AA Contrast Enforcement: Real-time text (≥ 4.5:1) and button (≥ 3.0:1) contrast meters |
+|     • Expanded Typography Pairs: Bundled Google's Noto Sans Bengali (--font-notosansbn) for zero-   |
+|       layout-shift corporate typography alongside Baloo Da 2, Poppins, Playfair, and Hind Siliguri  |
+|     • Segmented Corner Radii: Visual pill controls (0px Sharp, 6px Subtle, 10px Soft, 16px Round,   |
+|       999px Pill) with immediate live preview CSS variable injection                                |
+|     • Card Surfaces & Button Elevation: Hairline border, elevated shadow, and glowing button CTAs   |
+|     • Verification: 6/6 passing tests in theme-styling-engine.test.ts, 0 TS errors, live browser QA |
++----------------------------------------------------------------------------------------------------+
 ```
 
 ---
@@ -165,6 +176,7 @@ During today's interactive `/grill-me` alignment session, we architected, engine
 19. `commit cb66330`: `feat(payments): implement SSLCommerz and Direct bKash automated payment gateways`
 20. `commit d42d3d4`: `feat(builder): implement aBlocks-inspired modern widgets suite and 6 design patterns`
 21. `commit c072ff6`: `fix(billing): resolve sandbox port stripping, align plan features across marketing and admin, and enforce mode-specific gating`
+22. `commit 244155a`: `feat(builder): implement Global Theme Styling Engine with 10 brand palettes, Noto Sans Bengali, corner radii, and surface styling`
 
 
 ---
@@ -175,6 +187,8 @@ All browser walkthrough recordings and full-resolution PNG artifacts are saved i
 
 | Artifact Name | Description | Status |
 | :--- | :--- | :--- |
+| `verify_theme_panel_tab_1792367474544.webp` | Full video walkthrough of Global Theme Styling Engine: 10 brand palettes, Royal Indigo selection, and 16px corner rounding | Verified ✓ |
+| `design_theme_royal_indigo_rounded_1792367563606.png` | Live SiteBuilder inspector showing active Royal Indigo palette, 16px Round corners, Noto Sans Bengali font, and real-time canvas preview | Verified ✓ |
 | `verify_billing_flow_1792364463329.webp` | Full video walkthrough of billing checkout, UddoktaPay button interaction, and port 3001 callback preservation | Verified ✓ |
 | `billing_page_state_1792364504982.png` | Live Admin Billing workspace with UddoktaPay instant pay card and plan selector | Verified ✓ |
 | `billing_error_redirect_1792364572102.png` | Live Admin Billing error redirect verifying port 3001 preservation on callback return | Verified ✓ |

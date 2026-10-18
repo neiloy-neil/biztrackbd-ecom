@@ -7,6 +7,7 @@ import { Drawer, Segmented, useToast } from "@biztrackbd/ui";
 import {
   DEFAULT_THEME, FONT_LABELS, FONT_PAIRS, STYLE_FIELDS, contrast, editableField, newSection, sectionDef, sectionsFor, setByPath, validateTheme,
   SECTION_GRADIENT_PRESETS, normalizeSettings, normalizeSectionStyle, SECTION_PATTERNS, PATTERN_CATEGORIES,
+  THEME_PALETTES, THEME_RADII, RADIUS_PX, type ThemePalette, type ThemeRadius,
   type Field, type ListSpec, type PageJson, type PageKind, type PageSection, type SectionDef, type ThemeSettings, type SiteMode, type BusinessVertical,
   type SectionStyle, type SectionBgType, type SectionPaddingY, type SectionHideOn, type SectionTextColor,
   type SectionAnimation, type SectionAnimDuration, type SectionAnimDelay, type SectionPattern,
@@ -557,45 +558,236 @@ function ThemePanel({ theme, onChange, disabled }: { theme: ThemeSettings; onCha
   const problem = useMemo(() => {
     try { validateTheme(theme); return null; } catch (e) { return e instanceof Error ? e.message : "Check these colours"; }
   }, [theme]);
+
   const set = (patch: Partial<ThemeSettings>) => onChange({ ...theme, ...patch });
+
+  const activePalette = useMemo(() => {
+    if (theme.paletteId) {
+      const found = THEME_PALETTES.find((p) => p.id === theme.paletteId);
+      if (found && found.accent.toUpperCase() === theme.accent.toUpperCase() && found.background.toUpperCase() === theme.background.toUpperCase()) {
+        return found.id;
+      }
+    }
+    return THEME_PALETTES.find((p) => p.accent.toUpperCase() === theme.accent.toUpperCase() && p.background.toUpperCase() === theme.background.toUpperCase())?.id ?? null;
+  }, [theme.paletteId, theme.accent, theme.background]);
+
+  const textContrast = useMemo(() => {
+    try { return contrast(theme.text, theme.background); } catch { return 0; }
+  }, [theme.text, theme.background]);
+
+  const accentContrast = useMemo(() => {
+    try { return contrast(theme.accent, theme.background); } catch { return 0; }
+  }, [theme.accent, theme.background]);
+
+  const applyPalette = (p: ThemePalette) => {
+    set({
+      accent: p.accent,
+      background: p.background,
+      text: p.text,
+      paletteId: p.id,
+      radius: p.recommendedRadius ?? theme.radius,
+      font: p.recommendedFont ?? theme.font,
+    });
+  };
+
   const color = (key: "accent" | "background" | "text", label: string) => (
     <FieldInput f={{ key, label, type: "color" }} value={theme[key]} disabled={disabled} idPrefix="theme" onChange={(v) => set({ [key]: String(v) })} />
   );
+
   return (
-    <div className="stack" style={{ gap: 10 }} data-testid="theme-panel">
-      {color("accent", "Main colour (buttons, links)")}
-      {color("background", "Page background")}
-      {color("text", "Text colour")}
-      <div className="field" style={{ margin: 0 }}>
-        <label className="label" htmlFor="theme-radius">Corners</label>
-        <select id="theme-radius" className="select" value={theme.radius} disabled={disabled} onChange={(e) => set({ radius: e.target.value as ThemeSettings["radius"] })}>
-          <option value="sharp">Sharp</option><option value="soft">Soft</option><option value="round">Round</option>
-        </select>
-      </div>
-      <div className="field" style={{ margin: 0 }}>
-        <label className="label" htmlFor="theme-font">Font</label>
-        <select id="theme-font" className="select" value={theme.font} disabled={disabled} onChange={(e) => set({ font: e.target.value as ThemeSettings["font"] })}>
-          {FONT_PAIRS.map((f) => <option key={f} value={f}>{FONT_LABELS[f]}</option>)}
-        </select>
-        <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>Every font pair shows Bangla clearly.</div>
-      </div>
-      {["Buttons", "Product cards", "Spacing and width"].map((group) => (
-        <div key={group} className="bld-group" data-testid={`style-${group.toLowerCase().replace(/[^a-z]+/g, "-")}`}>
-          <div className="bld-gh">{group}</div>
-          <div className="stack" style={{ gap: 10 }}>
-            {STYLE_FIELDS.filter((f) => f.group === group).map((f) => (
-              <div className="field" style={{ margin: 0 }} key={f.key}>
-                <label className="label" htmlFor={`theme-${f.key}`}>{f.label}</label>
-                <select id={`theme-${f.key}`} className="select" value={String(theme[f.key] ?? "look")} disabled={disabled} onChange={(e) => set({ [f.key]: e.target.value } as Partial<ThemeSettings>)}>
-                  {Object.entries(f.options).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-                </select>
+    <div className="stack" style={{ gap: 14 }} data-testid="theme-panel">
+      {/* 1. Curated Brand Color Palettes */}
+      <div className="bld-group" data-testid="brand-palettes-group">
+        <div className="bld-gh" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span>Curated Brand Palettes</span>
+          <span className="pill" style={{ fontSize: 10, padding: "2px 6px", background: "var(--accent, #5B4FE8)", color: "#FFF" }}>1-Click Apply</span>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, padding: "6px 0" }}>
+          {THEME_PALETTES.map((p) => {
+            const isSelected = activePalette === p.id;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                disabled={disabled}
+                onClick={() => applyPalette(p)}
+                data-testid={`palette-${p.id}`}
+                aria-pressed={isSelected}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  textAlign: "left",
+                  padding: "8px 10px",
+                  borderRadius: 8,
+                  border: isSelected ? "2px solid var(--accent, #5B4FE8)" : "1px solid var(--line)",
+                  background: isSelected ? "color-mix(in srgb, var(--accent, #5B4FE8) 6%, transparent)" : "var(--surface)",
+                  cursor: disabled ? "not-allowed" : "pointer",
+                  position: "relative",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 6, width: "100%", marginBottom: 6 }}>
+                  {/* Swatch Pill */}
+                  <div
+                    style={{
+                      width: 36,
+                      height: 20,
+                      borderRadius: 999,
+                      background: p.background,
+                      border: "1px solid rgba(0,0,0,0.12)",
+                      display: "flex",
+                      alignItems: "center",
+                      padding: "0 3px",
+                      gap: 3,
+                    }}
+                  >
+                    <div style={{ width: 12, height: 12, borderRadius: "50%", background: p.accent }} />
+                    <span style={{ fontSize: 9, fontWeight: 700, color: p.text }}>Aa</span>
+                  </div>
+                  {isSelected && (
+                    <span style={{ marginLeft: "auto", fontSize: 10, color: "var(--accent, #5B4FE8)", fontWeight: 700 }}>✓</span>
+                  )}
+                </div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", lineHeight: 1.2 }}>{p.name}</div>
+                <div style={{ fontSize: 10, color: "var(--ink-muted)", marginTop: 2, lineHeight: 1.2 }}>{p.nameBn}</div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Custom Color Tuning */}
+        <details style={{ marginTop: 8 }}>
+          <summary style={{ cursor: "pointer", fontSize: 12, fontWeight: 600, color: "var(--ink-muted)", userSelect: "none", padding: "4px 0" }}>
+            Custom Hex Colors & Contrast
+          </summary>
+          <div className="stack" style={{ gap: 10, marginTop: 10, padding: 10, background: "var(--surface-sunken, rgba(0,0,0,0.02))", borderRadius: 8 }}>
+            {color("accent", "Main colour (buttons, links)")}
+            {color("background", "Page background")}
+            {color("text", "Text colour")}
+
+            <div style={{ display: "flex", gap: 8, fontSize: 11, flexWrap: "wrap", marginTop: 4 }}>
+              <div style={{ padding: "3px 8px", borderRadius: 6, background: textContrast >= 4.5 ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)", color: textContrast >= 4.5 ? "#065F46" : "#991B1B", fontWeight: 600 }}>
+                Text Contrast: {textContrast.toFixed(1)}:1 {textContrast >= 4.5 ? "(WCAG AA Pass)" : "(Too Low)"}
               </div>
-            ))}
+              <div style={{ padding: "3px 8px", borderRadius: 6, background: accentContrast >= 3.0 ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)", color: accentContrast >= 3.0 ? "#065F46" : "#991B1B", fontWeight: 600 }}>
+                Button Contrast: {accentContrast.toFixed(1)}:1 {accentContrast >= 3.0 ? "(Pass)" : "(Too Low)"}
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      {/* 2. Typography & Bengali Fonts */}
+      <div className="bld-group" data-testid="typography-group">
+        <div className="bld-gh">Typography & Bengali Fonts</div>
+        <div className="field" style={{ margin: 0 }}>
+          <label className="label" htmlFor="theme-font">Font Pairing</label>
+          <select id="theme-font" className="select" value={theme.font} disabled={disabled} onChange={(e) => set({ font: e.target.value as ThemeSettings["font"] })}>
+            {FONT_PAIRS.map((f) => <option key={f} value={f}>{FONT_LABELS[f]}</option>)}
+          </select>
+        </div>
+
+        {/* Live Font Sample Strip */}
+        <div style={{ padding: "10px 12px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 8, marginTop: 8 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)", lineHeight: 1.3 }}>
+            Aa Premium Storefront — চমৎকার ডিজাইন
+          </div>
+          <div style={{ fontSize: 12, color: "var(--ink-muted)", marginTop: 4, lineHeight: 1.4 }}>
+            High-clarity typography optimized for fast rendering on mobile and desktop.
           </div>
         </div>
-      ))}
-      {problem ? <div className="notice bad" role="alert">{problem} The preview keeps the last colours that worked.</div> : <div className="muted" style={{ fontSize: 13 }}>Text contrast {contrast(theme.text, theme.background).toFixed(1)} to 1. At least 4.5 keeps it easy to read.</div>}
-      <button type="button" className="btn btn-secondary btn-sm" disabled={disabled} onClick={() => onChange(DEFAULT_THEME)}>Back to the original look</button>
+      </div>
+
+      {/* 3. Buttons & Corner Radii */}
+      <div className="bld-group" data-testid="buttons-and-shapes-group">
+        <div className="bld-gh">Corners & Button Styling</div>
+
+        {/* Corner Radii Segmented Buttons */}
+        <div className="field" style={{ margin: 0 }}>
+          <label className="label">Corner Rounding ({RADIUS_PX[theme.radius]}px)</label>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 4 }}>
+            {([
+              { key: "none", label: "0px", name: "Sharp" },
+              { key: "subtle", label: "6px", name: "Subtle" },
+              { key: "soft", label: "10px", name: "Soft" },
+              { key: "rounded", label: "16px", name: "Round" },
+              { key: "pill", label: "999px", name: "Pill" },
+            ] as const).map((r) => {
+              const active = theme.radius === r.key;
+              return (
+                <button
+                  key={r.key}
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => set({ radius: r.key as ThemeRadius })}
+                  data-testid={`radius-${r.key}`}
+                  style={{
+                    padding: "6px 2px",
+                    borderRadius: 6,
+                    border: active ? "2px solid var(--accent, #5B4FE8)" : "1px solid var(--line)",
+                    background: active ? "color-mix(in srgb, var(--accent, #5B4FE8) 8%, transparent)" : "var(--surface)",
+                    cursor: disabled ? "not-allowed" : "pointer",
+                    textAlign: "center",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <div style={{ fontSize: 11, fontWeight: 700, color: active ? "var(--accent, #5B4FE8)" : "var(--ink)" }}>{r.name}</div>
+                  <div style={{ fontSize: 9, color: "var(--ink-muted)" }}>{r.label}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Button Style Fields */}
+        <div className="stack" style={{ gap: 10, marginTop: 10 }}>
+          {STYLE_FIELDS.filter((f) => f.group === "Buttons").map((f) => (
+            <div className="field" style={{ margin: 0 }} key={f.key}>
+              <label className="label" htmlFor={`theme-${f.key}`}>{f.label}</label>
+              <select id={`theme-${f.key}`} className="select" value={String(theme[f.key] ?? "look")} disabled={disabled} onChange={(e) => set({ [f.key]: e.target.value } as Partial<ThemeSettings>)}>
+                {Object.entries(f.options).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+              </select>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 4. Product Cards & Surfaces */}
+      <div className="bld-group" data-testid="cards-and-surfaces-group">
+        <div className="bld-gh">Cards & Surfaces</div>
+        <div className="stack" style={{ gap: 10 }}>
+          {STYLE_FIELDS.filter((f) => f.group === "Product cards").map((f) => (
+            <div className="field" style={{ margin: 0 }} key={f.key}>
+              <label className="label" htmlFor={`theme-${f.key}`}>{f.label}</label>
+              <select id={`theme-${f.key}`} className="select" value={String(theme[f.key] ?? "look")} disabled={disabled} onChange={(e) => set({ [f.key]: e.target.value } as Partial<ThemeSettings>)}>
+                {Object.entries(f.options).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+              </select>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 5. Spacing and Width */}
+      <div className="bld-group" data-testid="spacing-and-width-group">
+        <div className="bld-gh">Spacing & Page Width</div>
+        <div className="stack" style={{ gap: 10 }}>
+          {STYLE_FIELDS.filter((f) => f.group === "Spacing and width").map((f) => (
+            <div className="field" style={{ margin: 0 }} key={f.key}>
+              <label className="label" htmlFor={`theme-${f.key}`}>{f.label}</label>
+              <select id={`theme-${f.key}`} className="select" value={String(theme[f.key] ?? "look")} disabled={disabled} onChange={(e) => set({ [f.key]: e.target.value } as Partial<ThemeSettings>)}>
+                {Object.entries(f.options).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+              </select>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {problem && <div className="notice bad" role="alert">{problem} The preview keeps the last colours that worked.</div>}
+
+      <button type="button" className="btn btn-secondary btn-sm" disabled={disabled} onClick={() => onChange(DEFAULT_THEME)}>
+        Reset to Original Template Look
+      </button>
     </div>
   );
 }
@@ -1159,7 +1351,7 @@ export function Builder(props: Props) {
       {kind === "home" ? (
         <>
           {props.header}
-          <section className="bld-group"><div className="bld-gh">Colours and style</div><ThemePanel theme={theme} onChange={editTheme} disabled={!canEdit} /></section>
+          <ThemePanel theme={theme} onChange={editTheme} disabled={!canEdit} />
         </>
       ) : props.header}
     </div>
