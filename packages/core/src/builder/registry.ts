@@ -1974,6 +1974,10 @@ export const SECTION_GRADIENT_PRESETS: Record<string, { label: string; css: stri
   lavender: { label: "Lavender Glow", css: "linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)" },
 };
 
+export type SectionAnimation = "none" | "fade" | "slide-up" | "slide-down" | "slide-left" | "slide-right" | "zoom-in";
+export type SectionAnimDuration = "fast" | "normal" | "slow";
+export type SectionAnimDelay = 0 | 150 | 300 | 450;
+
 export interface SectionStyle {
   bgType?: SectionBgType;
   bgColor?: string;
@@ -1985,11 +1989,17 @@ export interface SectionStyle {
   paddingY?: SectionPaddingY;
   cardMode?: boolean;
   hideOn?: SectionHideOn;
+  animation?: SectionAnimation;
+  animDuration?: SectionAnimDuration;
+  animDelay?: SectionAnimDelay;
+  anchorId?: string;
+  customClass?: string;
 }
 
 export interface PageSection {
   id: string;
   type: string;
+  label?: string;
   disabled?: boolean;
   settings: Record<string, unknown>;
   style?: SectionStyle;
@@ -2054,6 +2064,35 @@ export function normalizeSectionStyle(raw?: unknown): SectionStyle | undefined {
   }
   if (o.hideOn === "mobile" || o.hideOn === "desktop") {
     style.hideOn = o.hideOn;
+  }
+  if (
+    o.animation === "none" ||
+    o.animation === "fade" ||
+    o.animation === "slide-up" ||
+    o.animation === "slide-down" ||
+    o.animation === "slide-left" ||
+    o.animation === "slide-right" ||
+    o.animation === "zoom-in"
+  ) {
+    if (o.animation !== "none") style.animation = o.animation;
+  }
+  if (o.animDuration === "fast" || o.animDuration === "normal" || o.animDuration === "slow") {
+    if (o.animDuration !== "normal") style.animDuration = o.animDuration;
+  }
+  if (o.animDelay === 0 || o.animDelay === 150 || o.animDelay === 300 || o.animDelay === 450) {
+    if (o.animDelay !== 0) style.animDelay = o.animDelay;
+  }
+  if (typeof o.anchorId === "string") {
+    const aid = o.anchorId.trim().toLowerCase().replace(/^#/, "").replace(/[^a-z0-9_-]/g, "");
+    if (/^[a-z0-9_-]{2,32}$/.test(aid)) {
+      style.anchorId = aid;
+    }
+  }
+  if (typeof o.customClass === "string") {
+    const cls = o.customClass.trim().replace(/[^a-zA-Z0-9_\-\s]/g, "").slice(0, 80);
+    if (cls) {
+      style.customClass = cls;
+    }
   }
 
   return Object.keys(style).length > 0 ? style : undefined;
@@ -2148,9 +2187,11 @@ export function validatePage(kind: PageKind, raw: unknown): PageJson {
     counts.set(def.type, n);
     if (def.max && n > def.max) throw new ValidationError(`Only ${def.max} ${def.label.toLowerCase()} ${def.max === 1 ? "section is" : "sections are"} allowed on a page`);
     const style = normalizeSectionStyle(o.style);
+    const label = typeof o.label === "string" && o.label.trim().length > 0 ? plain(o.label.trim(), 60) : undefined;
     return {
       id,
       type: def.type,
+      ...(label ? { label } : {}),
       ...(o.disabled === true ? { disabled: true } : {}),
       settings: normalizeSettings(def, o.settings, `${def.label} (section ${i + 1})`),
       ...(style ? { style } : {}),

@@ -228,6 +228,108 @@ body[data-store-theme="berber"] .footer b, body[data-store-theme="berber"] .foot
   }
 }
 
+/* ---- Motion & Scroll-Reveal Animations ---- */
+.bt-anim {
+  --bt-anim-dur: 0.6s;
+  --bt-anim-delay: 0s;
+}
+.bt-dur-fast { --bt-anim-dur: 0.3s; }
+.bt-dur-normal { --bt-anim-dur: 0.6s; }
+.bt-dur-slow { --bt-anim-dur: 0.9s; }
+
+.bt-delay-0 { --bt-anim-delay: 0s; }
+.bt-delay-150 { --bt-anim-delay: 0.15s; }
+.bt-delay-300 { --bt-anim-delay: 0.3s; }
+.bt-delay-450 { --bt-anim-delay: 0.45s; }
+
+/* In-canvas pulse highlight on reorder / focus */
+@keyframes bt-pulse-highlight {
+  0% { outline: 3px solid rgba(79, 70, 229, 0.9); box-shadow: 0 0 0 6px rgba(79, 70, 229, 0.35); }
+  50% { outline: 3px solid rgba(79, 70, 229, 1); box-shadow: 0 0 0 12px rgba(79, 70, 229, 0.2); }
+  100% { outline: 3px solid transparent; box-shadow: 0 0 0 0 transparent; }
+}
+.bt-section-highlight {
+  animation: bt-pulse-highlight 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  z-index: 99 !important;
+}
+
+/* Base keyframes */
+@keyframes bt-anim-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes bt-anim-slide-up {
+  from { opacity: 0; transform: translateY(36px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes bt-anim-slide-down {
+  from { opacity: 0; transform: translateY(-36px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes bt-anim-slide-left {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes bt-anim-slide-right {
+  from { opacity: 0; transform: translateX(-40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes bt-anim-zoom-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Initially hidden state when animation is enabled, prior to .bt-revealed */
+.bt-anim-fade:not(.bt-revealed),
+.bt-anim-slide-up:not(.bt-revealed),
+.bt-anim-slide-down:not(.bt-revealed),
+.bt-anim-slide-left:not(.bt-revealed),
+.bt-anim-slide-right:not(.bt-revealed),
+.bt-anim-zoom-in:not(.bt-revealed) {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+.bt-anim-slide-up:not(.bt-revealed) { transform: translateY(36px); }
+.bt-anim-slide-down:not(.bt-revealed) { transform: translateY(-36px); }
+.bt-anim-slide-left:not(.bt-revealed) { transform: translateX(40px); }
+.bt-anim-slide-right:not(.bt-revealed) { transform: translateX(-40px); }
+.bt-anim-zoom-in:not(.bt-revealed) { transform: scale(0.92); }
+
+/* Revealed trigger */
+.bt-anim-fade.bt-revealed {
+  animation: bt-anim-fade var(--bt-anim-dur) cubic-bezier(0.16, 1, 0.3, 1) var(--bt-anim-delay) both;
+}
+.bt-anim-slide-up.bt-revealed {
+  animation: bt-anim-slide-up var(--bt-anim-dur) cubic-bezier(0.16, 1, 0.3, 1) var(--bt-anim-delay) both;
+}
+.bt-anim-slide-down.bt-revealed {
+  animation: bt-anim-slide-down var(--bt-anim-dur) cubic-bezier(0.16, 1, 0.3, 1) var(--bt-anim-delay) both;
+}
+.bt-anim-slide-left.bt-revealed {
+  animation: bt-anim-slide-left var(--bt-anim-dur) cubic-bezier(0.16, 1, 0.3, 1) var(--bt-anim-delay) both;
+}
+.bt-anim-slide-right.bt-revealed {
+  animation: bt-anim-slide-right var(--bt-anim-dur) cubic-bezier(0.16, 1, 0.3, 1) var(--bt-anim-delay) both;
+}
+.bt-anim-zoom-in.bt-revealed {
+  animation: bt-anim-zoom-in var(--bt-anim-dur) cubic-bezier(0.16, 1, 0.3, 1) var(--bt-anim-delay) both;
+}
+
+/* Reduced motion strictly enforced */
+@media (prefers-reduced-motion: reduce) {
+  .bt-anim,
+  .bt-anim-fade,
+  .bt-anim-slide-up,
+  .bt-anim-slide-down,
+  .bt-anim-slide-left,
+  .bt-anim-slide-right,
+  .bt-anim-zoom-in {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}
+
 /* ========================================================
    Phase 2 Modern Widgets: Bento Grid, Content Tabs, Video Lightbox
    ======================================================== */

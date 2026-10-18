@@ -9,6 +9,7 @@ import {
   SECTION_GRADIENT_PRESETS,
   type Field, type ListSpec, type PageJson, type PageKind, type PageSection, type SectionDef, type ThemeSettings, type SiteMode, type BusinessVertical,
   type SectionStyle, type SectionBgType, type SectionPaddingY, type SectionHideOn, type SectionTextColor,
+  type SectionAnimation, type SectionAnimDuration, type SectionAnimDelay,
 } from "@biztrackbd/core/builder-client";
 import { ImagePicker } from "@/components/image-picker";
 import { LANDING_GROUPS, STORE_SECTION_CATEGORIES, SectionThumb } from "./section-thumbs";
@@ -182,10 +183,12 @@ function SectionAppearanceForm({
   section,
   disabled,
   onChange,
+  onReplayAnim,
 }: {
   section: PageSection;
   disabled: boolean;
   onChange: (patch: Partial<SectionStyle>) => void;
+  onReplayAnim?: () => void;
 }) {
   const style = section.style ?? {};
   const bgType: SectionBgType = style.bgType ?? "default";
@@ -411,6 +414,140 @@ function SectionAppearanceForm({
           </div>
         </div>
       </details>
+
+      {!isSpecial && (
+        <details className="bld-group" open>
+          <summary className="bld-gh">Motion & Scroll Effects</summary>
+          <div className="stack" style={{ gap: 12, marginTop: 10 }}>
+            <div className="field" style={{ margin: 0, opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}>
+              <label className="label">Entrance Animation</label>
+              <select
+                className="select"
+                value={style.animation ?? "none"}
+                disabled={disabled}
+                onChange={(e) => {
+                  const anim = e.target.value as SectionAnimation;
+                  onChange({ animation: anim });
+                  if (anim !== "none") {
+                    setTimeout(() => onReplayAnim?.(), 50);
+                  }
+                }}
+              >
+                <option value="none">None (Immediate display)</option>
+                <option value="fade">Fade In (Gentle opacity)</option>
+                <option value="slide-up">Slide Up (From bottom)</option>
+                <option value="slide-down">Slide Down (From top)</option>
+                <option value="slide-left">Slide Left (From right edge)</option>
+                <option value="slide-right">Slide Right (From left edge)</option>
+                <option value="zoom-in">Zoom In (Scale from 92%)</option>
+              </select>
+            </div>
+
+            {style.animation && style.animation !== "none" && (
+              <>
+                <div className="field" style={{ margin: 0, opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}>
+                  <label className="label">Animation Speed</label>
+                  <Segmented
+                    label="Animation speed"
+                    value={style.animDuration ?? "normal"}
+                    onChange={(v) => {
+                      onChange({ animDuration: v as SectionAnimDuration });
+                      setTimeout(() => onReplayAnim?.(), 50);
+                    }}
+                    options={[
+                      { value: "fast", label: "Fast (0.3s)" },
+                      { value: "normal", label: "Normal (0.6s)" },
+                      { value: "slow", label: "Slow (0.9s)" },
+                    ]}
+                  />
+                </div>
+
+                <div className="field" style={{ margin: 0, opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}>
+                  <label className="label">Start Delay</label>
+                  <Segmented
+                    label="Animation delay"
+                    value={String(style.animDelay ?? 0)}
+                    onChange={(v) => {
+                      onChange({ animDelay: Number(v) as SectionAnimDelay });
+                      setTimeout(() => onReplayAnim?.(), 50);
+                    }}
+                    options={[
+                      { value: "0", label: "0s" },
+                      { value: "150", label: "150ms" },
+                      { value: "300", label: "300ms" },
+                      { value: "450", label: "450ms" },
+                    ]}
+                  />
+                </div>
+
+                <div className="row" style={{ justifyContent: "flex-end" }}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    disabled={disabled}
+                    onClick={() => onReplayAnim?.()}
+                    style={{ fontSize: 12, gap: 6 }}
+                  >
+                    ▶ Replay Animation Preview
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </details>
+      )}
+
+      <details className="bld-group">
+        <summary className="bld-gh">Advanced & Developer</summary>
+        <div className="stack" style={{ gap: 12, marginTop: 10 }}>
+          <div className="field" style={{ margin: 0 }}>
+            <label className="label" htmlFor={`${section.id}-anchor-id`}>
+              Section HTML Anchor ID
+            </label>
+            <div className="row" style={{ gap: 6, alignItems: "center" }}>
+              <span className="muted" style={{ fontWeight: 600, fontSize: 14 }}>#</span>
+              <input
+                id={`${section.id}-anchor-id`}
+                type="text"
+                className="input"
+                value={style.anchorId ?? ""}
+                disabled={disabled}
+                placeholder="e.g. reviews, menu, contact"
+                maxLength={32}
+                onChange={(e) => {
+                  const cleaned = e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+                  onChange({ anchorId: cleaned });
+                }}
+              />
+            </div>
+            <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+              Allows smooth in-page jumping using button or navbar links like <code>#{style.anchorId || "reviews"}</code>.
+            </div>
+          </div>
+
+          <div className="field" style={{ margin: 0 }}>
+            <label className="label" htmlFor={`${section.id}-custom-class`}>
+              Custom CSS Class Names
+            </label>
+            <input
+              id={`${section.id}-custom-class`}
+              type="text"
+              className="input"
+              value={style.customClass ?? ""}
+              disabled={disabled}
+              placeholder="e.g. hero-glow my-custom-card"
+              maxLength={80}
+              onChange={(e) => {
+                const cleaned = e.target.value.replace(/[^a-zA-Z0-9_\-\s]/g, "");
+                onChange({ customClass: cleaned });
+              }}
+            />
+            <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+              Space-separated CSS classes attached to this section container.
+            </div>
+          </div>
+        </div>
+      </details>
     </div>
   );
 }
@@ -629,15 +766,50 @@ export function Builder(props: Props) {
   }, []);
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== "z") return;
       const t = e.target as HTMLElement | null;
-      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return; // the field keeps its own undo
-      e.preventDefault();
-      if (e.shiftKey) redo(); else undo();
+      const isInput = Boolean(t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable));
+
+      // Undo / Redo: Ctrl+Z / Ctrl+Shift+Z
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+        if (isInput) return; // the field keeps its own undo
+        e.preventDefault();
+        if (e.shiftKey) redo(); else undo();
+        return;
+      }
+
+      // Reorder with Alt+ArrowUp / Alt+ArrowDown
+      if (e.altKey && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+        if (!selected || locked) return;
+        e.preventDefault();
+        move(selected, e.key === "ArrowUp" ? -1 : 1);
+        return;
+      }
+
+      // Duplicate with Ctrl+D / Cmd+D
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "d") {
+        if (!selected || locked || isInput) return;
+        const currentSec = latest.current.page.sections.find((s) => s.id === selected);
+        if (currentSec && !full(currentSec.type)) {
+          e.preventDefault();
+          duplicate(currentSec);
+        }
+        return;
+      }
+
+      // Delete with Delete key when not typing in an input
+      if (e.key === "Delete" && !isInput) {
+        if (!selected || locked) return;
+        const currentSec = latest.current.page.sections.find((s) => s.id === selected);
+        if (currentSec && !isRequired(currentSec.type)) {
+          e.preventDefault();
+          remove(selected);
+        }
+        return;
+      }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [undo, redo]);
+  }, [undo, redo, selected, locked]);
 
   const defs = sectionsFor(kind, { mode: props.siteMode, vertical: props.businessVertical });
   const count = (type: string) => page.sections.filter((s) => s.type === type).length;
@@ -668,15 +840,33 @@ export function Builder(props: Props) {
       [next[i], next[j]] = [next[j]!, next[i]!];
       return { ...p, sections: next };
     });
-    setTimeout(() => { post({ type: "bt-preview:focus", id }); }, 100);
+    setTimeout(() => {
+      post({ type: "bt-preview:focus", id });
+      post({ type: "bt-preview:highlight", id });
+    }, 100);
   }
   function reorder(from: number, to: number) {
     if (from === to) return;
     const movedId = page.sections[from]?.id;
     edit((p) => { const next = [...p.sections]; const [m] = next.splice(from, 1); next.splice(to, 0, m!); return { ...p, sections: next }; });
     if (movedId) {
-      setTimeout(() => { post({ type: "bt-preview:focus", id: movedId }); }, 100);
+      setTimeout(() => {
+        post({ type: "bt-preview:focus", id: movedId });
+        post({ type: "bt-preview:highlight", id: movedId });
+      }, 100);
     }
+  }
+  function moveTo(id: string, targetIndex: number) {
+    const from = page.sections.findIndex((s) => s.id === id);
+    if (from < 0) return;
+    const to = Math.max(0, Math.min(targetIndex, page.sections.length - 1));
+    if (from !== to) reorder(from, to);
+  }
+  function patchLabel(id: string, label?: string) {
+    edit((p) => ({
+      ...p,
+      sections: p.sections.map((s) => (s.id === id ? { ...s, label: label?.trim() ? label.trim().slice(0, 60) : undefined } : s)),
+    }));
   }
   function duplicate(s: PageSection) {
     if (full(s.type)) return;
@@ -836,15 +1026,18 @@ export function Builder(props: Props) {
             >
               {!locked && !narrow && <span className="bld-grip" aria-hidden><IGrip /></span>}
               <button type="button" className="bld-pick" onClick={() => choose(s.id)} aria-pressed={s.id === selected}>
-                <b>{def?.label ?? s.type}</b>
+                <b>{s.label || def?.label || s.type}</b>
+                {s.label && <span className="pill" style={{ fontSize: 10, padding: "1px 5px", background: "var(--line-2)" }}>{def?.label}</span>}
+                {s.style?.anchorId && <span className="pill grey" style={{ fontSize: 10, padding: "1px 5px" }}>#{s.style.anchorId}</span>}
+                {s.style?.animation && s.style.animation !== "none" && <span className="pill blue" style={{ fontSize: 10, padding: "1px 5px" }} title={`Entrance: ${s.style.animation}`}>✦ {s.style.animation}</span>}
                 {s.style?.hideOn === "mobile" && <span className="pill blue" title="Visible on desktop only">Desktop</span>}
                 {s.style?.hideOn === "desktop" && <span className="pill purple" title="Visible on mobile phones only">Mobile</span>}
                 {s.disabled && <span className="pill grey">Hidden</span>}
               </button>
               {!locked && (
                 <span className="bld-acts">
-                  <button type="button" className="bld-ib" disabled={i === 0} onClick={() => move(s.id, -1)} aria-label={`Move ${def?.label} up`}><IUp /></button>
-                  <button type="button" className="bld-ib" disabled={i === page.sections.length - 1} onClick={() => move(s.id, 1)} aria-label={`Move ${def?.label} down`}><IDown /></button>
+                  <button type="button" className="bld-ib" disabled={i === 0} onClick={() => move(s.id, -1)} aria-label={`Move ${s.label || def?.label} up`} title="Move up (Alt+Up)"><IUp /></button>
+                  <button type="button" className="bld-ib" disabled={i === page.sections.length - 1} onClick={() => move(s.id, 1)} aria-label={`Move ${s.label || def?.label} down`} title="Move down (Alt+Down)"><IDown /></button>
                   <button type="button" className="bld-ib" onClick={() => toggle(s.id)} disabled={isRequired(s.type)} title={isRequired(s.type) ? "This page needs this section" : undefined} aria-label={`${s.disabled ? "Show" : "Hide"} ${def?.label}`}><IEye off={s.disabled} /></button>
                 </span>
               )}
@@ -857,20 +1050,75 @@ export function Builder(props: Props) {
     </div>
   );
 
+  const currentIndex = current ? page.sections.findIndex((s) => s.id === current.id) : -1;
+
   const settings = current && currentDef ? (
-    <section aria-label={`Edit ${currentDef.label}`} className="bld-insp">
-      <div className="bld-insp-head">
-        <div><h2>{currentDef.label}</h2><p className="muted">{currentDef.description}</p>{isRequired(current.type) && <p className="muted" style={{ marginTop: 4 }}>You can move it and change its settings, but not hide or remove it.</p>}</div>
+    <section aria-label={`Edit ${current.label || currentDef.label}`} className="bld-insp">
+      <div className="bld-insp-head" style={{ alignItems: "flex-start" }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="row" style={{ alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+            <h2 style={{ margin: 0 }}>{current.label || currentDef.label}</h2>
+            {current.label && <span className="pill grey" style={{ fontSize: 11 }}>{currentDef.label}</span>}
+            {current.style?.anchorId && <span className="pill grey" style={{ fontSize: 11 }}>#{current.style.anchorId}</span>}
+          </div>
+          <div className="row" style={{ gap: 6, alignItems: "center", marginTop: 6, flexWrap: "wrap" }}>
+            <input
+              type="text"
+              className="input"
+              style={{ maxWidth: 180, height: 28, fontSize: 12, padding: "2px 8px" }}
+              placeholder={`Nickname (${currentDef.label})`}
+              value={current.label ?? ""}
+              disabled={locked}
+              onChange={(e) => patchLabel(current.id, e.target.value)}
+              title="Give this section a custom nickname in the navigator list"
+            />
+            {current.label && (
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                style={{ height: 28, padding: "0 6px", fontSize: 11 }}
+                disabled={locked}
+                onClick={() => patchLabel(current.id, undefined)}
+                title="Reset nickname"
+              >
+                Reset
+              </button>
+            )}
+            {!locked && page.sections.length > 1 && (
+              <select
+                className="select"
+                style={{ maxWidth: 125, height: 28, fontSize: 11, padding: "2px 6px" }}
+                value={currentIndex}
+                onChange={(e) => moveTo(current.id, Number(e.target.value))}
+                title="Quick jump to section position"
+                aria-label="Move to position"
+              >
+                {page.sections.map((sec, idx) => (
+                  <option key={sec.id} value={idx}>
+                    Pos {idx + 1}: {sec.label || sectionDef(sec.type)?.label || sec.type}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+          <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>{currentDef.description}</p>
+          {isRequired(current.type) && <p className="muted" style={{ marginTop: 4, fontSize: 12 }}>You can move it and change its settings, but not hide or remove it.</p>}
+        </div>
         {!locked && (
           <span className="row" style={{ gap: 4, flexWrap: "nowrap" }}>
             <button type="button" className="bld-ib" onClick={() => toggle(current.id)} disabled={isRequired(current.type)} aria-label={`${current.disabled ? "Show" : "Hide"} this section`}><IEye off={current.disabled} /></button>
-            <button type="button" className="bld-ib" onClick={() => duplicate(current)} disabled={full(current.type)} aria-label="Duplicate this section"><ICopy /></button>
-            {!isRequired(current.type) && <button type="button" className="bld-ib danger" onClick={() => remove(current.id)} aria-label="Delete this section"><ITrash /></button>}
+            <button type="button" className="bld-ib" onClick={() => duplicate(current)} disabled={full(current.type)} aria-label="Duplicate this section" title="Duplicate (Ctrl+D)"><ICopy /></button>
+            {!isRequired(current.type) && <button type="button" className="bld-ib danger" onClick={() => remove(current.id)} aria-label="Delete this section" title="Delete section (Del)"><ITrash /></button>}
           </span>
         )}
       </div>
       <SectionForm def={currentDef} section={current} disabled={locked} bnOpen={lang === "bn"} imgSignal={imgSignal} onChange={(p) => patch(current.id, p)} />
-      <SectionAppearanceForm section={current} disabled={locked} onChange={(sp) => patchStyle(current.id, sp)} />
+      <SectionAppearanceForm
+        section={current}
+        disabled={locked}
+        onChange={(sp) => patchStyle(current.id, sp)}
+        onReplayAnim={() => post({ type: "bt-preview:replay-anim", id: current.id })}
+      />
     </section>
   ) : (
     <div className="bld-empty"><b>Pick a section</b><p className="muted">Choose one in the list, or click it in the preview, to change its text, pictures and style.</p></div>

@@ -3,6 +3,7 @@ import {
   SECTIONS,
   STORE_SECTION_CATEGORIES,
   newSection,
+  normalizeSectionStyle,
   normalizeSettings,
   sectionDef,
   sectionsFor,
@@ -334,6 +335,73 @@ describe("Visual Theme Builder Studio - New Conversion Sections", () => {
       expect(() => validatePage("custom", customPage)).not.toThrow();
     });
   });
+
+  describe("Phase 4 Motion, Developer Controls & Section Nicknames", () => {
+    it("normalizes animation presets, duration, and delay", () => {
+      const style = normalizeSectionStyle({
+        animation: "slide-up",
+        animDuration: "fast",
+        animDelay: 150,
+      });
+      expect(style).toBeDefined();
+      expect(style?.animation).toBe("slide-up");
+      expect(style?.animDuration).toBe("fast");
+      expect(style?.animDelay).toBe(150);
+    });
+
+    it("drops invalid animation values safely", () => {
+      const style = normalizeSectionStyle({
+        animation: "invalid-bounce",
+        animDuration: "ultra-slow",
+        animDelay: 9999,
+      });
+      expect(style).toBeUndefined();
+    });
+
+    it("cleans and normalizes anchorId slug", () => {
+      const style = normalizeSectionStyle({
+        anchorId: " #Our-Menu_2026! ",
+      });
+      expect(style?.anchorId).toBe("our-menu_2026");
+
+      const invalidStyle = normalizeSectionStyle({
+        anchorId: "x", // too short (min 2)
+      });
+      expect(invalidStyle?.anchorId).toBeUndefined();
+    });
+
+    it("cleans and sanitizes customClass string", () => {
+      const style = normalizeSectionStyle({
+        customClass: "  hero-glow  card-highlight <script>alert(1)</script> ",
+      });
+      expect(style?.customClass).toBe("hero-glow  card-highlight scriptalert1script");
+    });
+
+    it("validates and preserves section label (custom nickname) in validatePage", () => {
+      const page: PageJson = {
+        version: 1,
+        sections: [
+          {
+            ...newSection("hero"),
+            label: "Eid Festival Hero Banner",
+            style: {
+              animation: "zoom-in",
+              animDuration: "normal",
+              anchorId: "featured",
+              customClass: "eid-hero-banner",
+            },
+          },
+        ],
+      };
+
+      const validated = validatePage("home", page);
+      expect(validated.sections[0]?.label).toBe("Eid Festival Hero Banner");
+      expect(validated.sections[0]?.style?.animation).toBe("zoom-in");
+      expect(validated.sections[0]?.style?.anchorId).toBe("featured");
+      expect(validated.sections[0]?.style?.customClass).toBe("eid-hero-banner");
+    });
+  });
 });
+
 
 

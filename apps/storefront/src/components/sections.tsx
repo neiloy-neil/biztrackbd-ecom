@@ -4,6 +4,7 @@ import { parseEndsAt, productKey, youtubeId, SECTION_GRADIENT_PRESETS } from "@b
 import { money, type Lang, type T } from "@/lib/i18n-core";
 import { Countdown } from "./countdown";
 import { LandingMotion } from "./landing-motion";
+import { SectionMotion } from "./section-motion";
 import { mark, markImg } from "./edit-marks";
 import type { PageCtx } from "@/lib/page-ctx";
 import { renderPageBlock } from "./page-blocks";
@@ -1307,6 +1308,19 @@ export function SectionStyleWrapper({
       classes.push("bt-text-dark");
     }
 
+    const anim = style?.animation && style.animation !== "none" ? style.animation : undefined;
+    if (anim) {
+      classes.push("bt-anim", `bt-anim-${anim}`);
+      classes.push(`bt-dur-${style?.animDuration || "normal"}`);
+      if (typeof style?.animDelay === "number" && style.animDelay > 0) {
+        classes.push(`bt-delay-${style.animDelay}`);
+      }
+    }
+
+    if (style?.customClass) {
+      classes.push(style.customClass.trim());
+    }
+
     if (style?.bgType === "color" && style.bgColor) {
       classes.push("bt-has-custom-bg");
       inlineStyles.backgroundColor = style.bgColor;
@@ -1338,6 +1352,7 @@ export function SectionStyleWrapper({
 
   return (
     <div
+      id={style?.anchorId || undefined}
       className={classes.join(" ")}
       style={Object.keys(inlineStyles).length > 0 ? inlineStyles : undefined}
       data-section-wrap={section.id}
@@ -1366,7 +1381,7 @@ export function Sections({ page, data, lang, t, orderForm, ctx, landing, editing
     // Each block rises into place as it comes into view (never in the editor, and never when the visitor asks for less motion).
     return pro && !NO_REVEAL.has(x.type) ? <div key={x.id} className={`lp-rv${editing ? "" : " lp-reveal"}`}>{styled}</div> : styled;
   });
-  if (!pro) return <>{nodes}</>;
+  if (!pro) return <><SectionMotion editing={editing} />{nodes}</>;
   const palette = String(header!.settings.palette ?? "fresh");
-  return <div className="lp-pro" id="top" data-palette={palette}>{!editing && <LandingMotion />}{nodes}</div>;
+  return <div className="lp-pro" id="top" data-palette={palette}><SectionMotion editing={editing} />{!editing && <LandingMotion />}{nodes}</div>;
 }
