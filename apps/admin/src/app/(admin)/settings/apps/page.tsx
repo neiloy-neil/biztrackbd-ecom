@@ -7,7 +7,7 @@ import { DemoLocked } from "@/components/demo-locked";
 import { trialHref } from "@/lib/demo";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
-import { AppStoreClient } from "./app-store-client";
+import { AppStoreClient, type StoreSettingsData } from "./app-store-client";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Apps & Integrations" };
@@ -26,9 +26,44 @@ export default async function Apps({
   const integrations = await listIntegrations(s.tenantId);
 
   const [storeSettings, tenant] = await withTenant(s.tenantId, async (tx) => {
-    const st = await tx.storeSettings.findFirst();
+    const st = await tx.storeSettings.findFirst({
+      select: {
+        whatsappNumber: true,
+        metaPixelId: true,
+        googleAnalyticsId: true,
+        googleTagManagerId: true,
+        tiktokPixelId: true,
+        metaDomainVerification: true,
+        googleSiteVerification: true,
+        googleOAuthClientId: true,
+        googleOAuthClientSecret: true,
+        googleMerchantCenterId: true,
+        seoTitle: true,
+        seoKeywords: true,
+        socialShareImageUrl: true,
+        richSnippetsEnabled: true,
+        description: true,
+        storeName: true,
+        loyaltyEnabled: true,
+        loyaltySpendPerPoint: true,
+        loyaltyPointsPerBlock: true,
+        loyaltyBdtPerBlock: true,
+        loyaltyMaxCartPercent: true,
+        referralEnabled: true,
+        refereeDiscountBdt: true,
+        refereeMinCartBdt: true,
+        referrerRewardPoints: true,
+        vipSilverMin: true,
+        vipGoldMin: true,
+        vipPlatinumMin: true,
+        vipGoldDiscount: true,
+        vipPlatinumDiscount: true,
+        loyaltyExpiryMonths: true,
+        birthdayVoucherBdt: true,
+      },
+    });
     const tn = await tx.tenant.findFirstOrThrow({ select: { subdomain: true, name: true, customDomain: true } });
-    return [st, tn] as const;
+    return [st as StoreSettingsData | null, tn] as const;
   });
 
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";

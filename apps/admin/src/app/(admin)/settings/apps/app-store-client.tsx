@@ -17,7 +17,7 @@ import {
   saveSeoSuiteAction,
 } from "./actions";
 
-interface StoreSettingsData {
+export interface StoreSettingsData {
   whatsappNumber?: string | null;
   metaPixelId?: string | null;
   googleAnalyticsId?: string | null;
