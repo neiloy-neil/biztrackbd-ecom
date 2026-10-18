@@ -261,5 +261,79 @@ describe("Visual Theme Builder Studio - New Conversion Sections", () => {
       expect(() => validatePage("custom", customPage)).not.toThrow();
     });
   });
+
+  describe("Phase 3 Conversions, Reviews & Pricing Matrix Widgets", () => {
+    const PHASE3_TYPES = ["testimonials-slider", "pricing-matrix", "promo-popup"];
+
+    it("registers all Phase 3 sections in SECTIONS", () => {
+      const types = SECTIONS.map((s) => s.type);
+      for (const t of PHASE3_TYPES) {
+        expect(types).toContain(t);
+      }
+    });
+
+    it("normalizes testimonials-slider with star ratings and verified buyer badges", () => {
+      const def = sectionDef("testimonials-slider")!;
+      expect(def).toBeDefined();
+      const s = normalizeSettings(def, {});
+      expect(s.layout).toBe("cards");
+      expect(Array.isArray(s.items)).toBe(true);
+      const items = s.items as Array<Record<string, unknown>>;
+      expect(items.length).toBeGreaterThanOrEqual(3);
+      expect(items[0]?.name).toBe("Sumaiya Akter");
+      expect(items[0]?.rating).toBe(5);
+      expect(items[0]?.verified).toBe(true);
+    });
+
+    it("normalizes pricing-matrix with highlighted plan and feature checklist", () => {
+      const def = sectionDef("pricing-matrix")!;
+      expect(def).toBeDefined();
+      const s = normalizeSettings(def, {});
+      expect(Array.isArray(s.items)).toBe(true);
+      const items = s.items as Array<Record<string, unknown>>;
+      expect(items.length).toBeGreaterThanOrEqual(3);
+      const popular = items.find((i) => i.highlighted);
+      expect(popular).toBeDefined();
+      expect(popular?.name).toBe("Growth Pro");
+      expect(popular?.price).toBe("৳ 1,499");
+      expect(String(popular?.features)).toContain("Unlimited Monthly Orders");
+    });
+
+    it("normalizes promo-popup with code, discount banner, and trigger", () => {
+      const def = sectionDef("promo-popup")!;
+      expect(def).toBeDefined();
+      const s = normalizeSettings(def, {});
+      expect(s.trigger).toBe("delay");
+      expect(s.code).toBe("SAVE200");
+      expect(s.discountText).toBe("৳ 200 FLAT OFF");
+      expect(s.showPhoneCapture).toBe(false);
+    });
+
+    it("validates pages containing all Phase 3 modern conversion widgets", () => {
+      const page: PageJson = {
+        version: 1,
+        sections: [
+          newSection("hero"),
+          newSection("testimonials-slider"),
+          newSection("pricing-matrix"),
+          newSection("promo-popup"),
+        ],
+      };
+
+      expect(() => validatePage("home", page)).not.toThrow();
+
+      const customPage: PageJson = {
+        version: 1,
+        sections: [
+          newSection("banner"),
+          newSection("testimonials-slider"),
+          newSection("pricing-matrix"),
+          newSection("promo-popup"),
+        ],
+      };
+      expect(() => validatePage("custom", customPage)).not.toThrow();
+    });
+  });
 });
+
 

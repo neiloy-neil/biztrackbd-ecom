@@ -25,6 +25,9 @@ import { ContactFormSection } from "./verticals/contact-form";
 import { BentoGridSection, type BentoItem } from "./widgets/bento-grid";
 import { ContentTabsSection, type ContentTabItem } from "./widgets/content-tabs";
 import { VideoLightboxSection } from "./widgets/video-lightbox";
+import { TestimonialsSliderSection, type TestimonialItem } from "./widgets/testimonials-slider";
+import { PricingMatrixSection, type PricingPlanItem } from "./widgets/pricing-matrix";
+import { PromoPopupSection } from "./widgets/promo-popup";
 
 /**
  * Draws a page built in the editor. It has no server-only code, so the live store (server) and the editor's preview
@@ -1162,6 +1165,103 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
             aspectRatio={(s.aspectRatio as "16-9" | "4-3" | "21-9") || "16-9"}
             playLabel={str(s.playLabel)}
             playLabelBn={str(s.playLabelBn)}
+            lang={lang}
+            ed={ed}
+            editing={editing}
+          />
+        </div>
+      );
+    }
+    case "testimonials-slider": {
+      const rawItems = Array.isArray(s.items) ? (s.items as Record<string, unknown>[]) : [];
+      const items: TestimonialItem[] = rawItems.map((it) => ({
+        name: str(it.name),
+        nameBn: str(it.nameBn) || undefined,
+        role: str(it.role) || undefined,
+        roleBn: str(it.roleBn) || undefined,
+        location: str(it.location) || undefined,
+        locationBn: str(it.locationBn) || undefined,
+        rating: typeof it.rating === "number" ? it.rating : Number(it.rating) || 5,
+        text: str(it.text),
+        textBn: str(it.textBn) || undefined,
+        avatar: str(it.avatar) || undefined,
+        verified: it.verified !== false,
+      }));
+
+      return (
+        <div data-section={id}>
+          <TestimonialsSliderSection
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            subtitle={str(s.subtitle)}
+            subtitleBn={str(s.subtitleBn)}
+            badge={str(s.badge)}
+            badgeBn={str(s.badgeBn)}
+            layout={(s.layout as "cards" | "minimal" | "single") || "cards"}
+            items={items}
+            lang={lang}
+            ed={ed}
+            editing={editing}
+          />
+        </div>
+      );
+    }
+    case "pricing-matrix": {
+      const rawItems = Array.isArray(s.items) ? (s.items as Record<string, unknown>[]) : [];
+      const items: PricingPlanItem[] = rawItems.map((it) => ({
+        name: str(it.name),
+        nameBn: str(it.nameBn) || undefined,
+        badge: str(it.badge) || undefined,
+        badgeBn: str(it.badgeBn) || undefined,
+        price: str(it.price) || "৳ 0",
+        period: str(it.period) || undefined,
+        periodBn: str(it.periodBn) || undefined,
+        description: str(it.description) || undefined,
+        descriptionBn: str(it.descriptionBn) || undefined,
+        highlighted: Boolean(it.highlighted),
+        features: str(it.features) || undefined,
+        featuresBn: str(it.featuresBn) || undefined,
+        ctaText: str(it.ctaText) || undefined,
+        ctaTextBn: str(it.ctaTextBn) || undefined,
+        ctaLink: str(it.ctaLink) || undefined,
+      }));
+
+      return (
+        <div data-section={id}>
+          <PricingMatrixSection
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            subtitle={str(s.subtitle)}
+            subtitleBn={str(s.subtitleBn)}
+            badge={str(s.badge)}
+            badgeBn={str(s.badgeBn)}
+            items={items}
+            lang={lang}
+            ed={ed}
+            editing={editing}
+          />
+        </div>
+      );
+    }
+    case "promo-popup": {
+      return (
+        <div data-section={id}>
+          <PromoPopupSection
+            title={str(s.title)}
+            titleBn={str(s.titleBn)}
+            subtitle={str(s.subtitle)}
+            subtitleBn={str(s.subtitleBn)}
+            badge={str(s.badge)}
+            badgeBn={str(s.badgeBn)}
+            code={str(s.code)}
+            discountText={str(s.discountText)}
+            discountTextBn={str(s.discountTextBn)}
+            image={str(s.image)}
+            ctaText={str(s.ctaText)}
+            ctaTextBn={str(s.ctaTextBn)}
+            ctaLink={str(s.ctaLink)}
+            trigger={(s.trigger as "delay" | "scroll" | "immediate") || "delay"}
+            showPhoneCapture={Boolean(s.showPhoneCapture)}
             lang={lang}
             ed={ed}
             editing={editing}

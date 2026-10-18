@@ -35,6 +35,9 @@ const DRAWINGS: Record<string, ReactNode> = {
   bento: <><rect x={6} y={8} width={38} height={18} rx={3} {...solid} /><rect x={48} y={8} width={18} height={18} rx={3} {...box} /><rect x={6} y={30} width={18} height={12} rx={2} {...box} /><rect x={28} y={30} width={38} height={12} rx={2} {...solid} /></>,
   tabs: <><rect x={6} y={8} width={18} height={6} rx={3} fill="currentColor" opacity={0.7} /><rect x={27} y={8} width={18} height={6} rx={3} {...box} /><rect x={48} y={8} width={18} height={6} rx={3} {...box} /><rect x={6} y={18} width={60} height={24} rx={3} {...box} />{line(23, 26, 10)}{line(29, 22, 10)}<rect x={42} y={22} width={20} height={16} rx={2} {...solid} /></>,
   lightbox: <><rect x={6} y={8} width={60} height={32} rx={4} {...box} /><rect x={8} y={10} width={56} height={28} rx={3} {...solid} /><circle cx={36} cy={24} r={8} fill="currentColor" opacity={0.6} /><path d="M34 20l6 4-6 4z" fill="currentColor" opacity={0.9} /></>,
+  reviewsSlider: <><rect x={6} y={8} width={60} height={32} rx={4} {...box} /><circle cx={15} cy={17} r={4.5} {...solid} /><text x={24} y={18} fontSize={7} fill="currentColor">★★★★★</text>{line(25, 48, 12)}{line(32, 34, 12)}<circle cx={33} cy={43} r={1.5} fill="currentColor" /><circle cx={38} cy={43} r={1.5} {...solid} /><circle cx={43} cy={43} r={1.5} {...solid} /></>,
+  pricingMatrix: <><rect x={6} y={10} width={18} height={28} rx={2} {...box} />{line(15, 12, 9)}<rect x={9} y={21} width={12} height={4} rx={1} {...solid} /><rect x={27} y={6} width={18} height={34} rx={3} stroke="currentColor" strokeWidth={1.8} fill="currentColor" fillOpacity={0.08} /><rect x={31} y={8} width={10} height={3} rx={1} fill="currentColor" />{line(15, 12, 30)}<rect x={30} y={21} width={12} height={5} rx={1.5} fill="currentColor" opacity={0.7} /><rect x={48} y={10} width={18} height={28} rx={2} {...box} />{line(15, 12, 51)}<rect x={51} y={21} width={12} height={4} rx={1} {...solid} /></>,
+  promoPopup: <><rect x={12} y={7} width={48} height={34} rx={4} fill="currentColor" opacity={0.12} stroke="currentColor" strokeWidth={1.2} /><rect x={18} y={11} width={20} height={4} rx={1.5} {...solid} />{line(18, 36, 18)}<rect x={18} y={24} width={36} height={6} rx={2} fill="none" stroke="currentColor" strokeDasharray="2,2" strokeWidth={0.9} /><rect x={18} y={32} width={36} height={6} rx={2} fill="currentColor" opacity={0.7} /></>,
 };
 
 const KIND: Record<string, keyof typeof DRAWINGS> = {
@@ -56,6 +59,9 @@ const KIND: Record<string, keyof typeof DRAWINGS> = {
   "bento-grid": "bento",
   "content-tabs": "tabs",
   "video-lightbox": "lightbox",
+  "testimonials-slider": "reviewsSlider",
+  "pricing-matrix": "pricingMatrix",
+  "promo-popup": "promoPopup",
 };
 
 export function SectionThumb({ type }: { type: string }) {
@@ -72,7 +78,7 @@ export { STORE_SECTION_CATEGORIES, type StoreSectionCategory } from "@biztrackbd
 /** How the cards are grouped on a landing page; other pages show one list. */
 export const LANDING_GROUPS: { title: string; types: string[] }[] = [
   { title: "Top of the page", types: ["lp-header", "lp-hero", "lp-marquee", "lp-video", "video-lightbox"] },
-  { title: "Describe the product", types: ["lp-benefits", "lp-split", "lp-compare", "lp-steps", "lp-text", "lp-gallery", "bento-grid", "content-tabs"] },
-  { title: "Build trust", types: ["lp-reviews", "lp-screens", "trust-strip", "lp-countdown", "lp-stock"] },
-  { title: "Close the sale", types: ["lp-offer-bar", "lp-order-form", "lp-faq", "lp-sticky-cta"] },
+  { title: "Describe the product", types: ["lp-benefits", "lp-split", "lp-compare", "lp-steps", "lp-text", "lp-gallery", "bento-grid", "content-tabs", "pricing-matrix"] },
+  { title: "Build trust", types: ["lp-reviews", "testimonials-slider", "lp-screens", "trust-strip", "lp-countdown", "lp-stock"] },
+  { title: "Close the sale", types: ["lp-offer-bar", "lp-order-form", "lp-faq", "lp-sticky-cta", "promo-popup"] },
 ];

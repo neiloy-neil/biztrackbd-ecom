@@ -71,6 +71,16 @@ During today's interactive `/grill-me` alignment session, we architected, engine
 |     • Added live canvas section thumbnails & wireframe icons in `section-thumbs.tsx`                |
 |     • Verified with 20/20 unit tests in `builder-sections.test.ts` and 12/12 `pnpm typecheck` pass  |
 +----------------------------------------------------------------------------------------------------+
+|  9. SITEBUILDER EVOLUTION: PHASE 3 — SOCIAL PROOF, PRICING & CONVERSION POPUPS                      |
+|     • Swipeable Review Carousel (`testimonials-slider`): Touch-friendly slider with gold star      |
+|       ratings, customer avatars/initials, verified buyer badges, reviewer locations, and auto-slide|
+|     • Plan Comparison Matrix (`pricing-matrix`): Multi-tier plan cards, highlighted 'Most Popular' |
+|       ribbon, feature checklists with green checkmarks, price in ৳ Taka, and direct action CTAs    |
+|     • Promotion & Lead Popup (`promo-popup`): Voucher discount banner, one-click coupon code copy  |
+|       with feedback, phone capture form, delay/scroll trigger, and local dismissal memory          |
+|     • Added live canvas section thumbnails & wireframe icons in `section-thumbs.tsx`                |
+|     • Verified with 25/25 unit tests in `builder-sections.test.ts` and 0 errors in typecheck        |
++----------------------------------------------------------------------------------------------------+
 ```
 
 ---
@@ -91,6 +101,7 @@ During today's interactive `/grill-me` alignment session, we architected, engine
 12. `commit 2e14266`: `fix(design): align store design with active business templates and vertical-aware theme switcher`
 13. `commit 8defbd5`: `feat(builder): add universal section style wrapper, appearance inspector, and canvas separators`
 14. `commit 04da40e`: `docs: update session handoff with SiteBuilder Phase 1 implementation records`
+15. `commit 4575580`: `feat(builder): add dynamic bento grids, interactive content tabs, and video lightbox widgets`
 
 ---
 
@@ -100,10 +111,12 @@ All browser walkthrough recordings and full-resolution PNG artifacts are saved i
 
 | Artifact Name | Description | Status |
 | :--- | :--- | :--- |
+| `test_phase3_widgets_1792323256628.webp` | Full video walkthrough of adding and interacting with Phase 3 widgets in Theme Builder | Verified ✓ |
+| `modal_search_state_1792323598162.png` | SiteBuilder section picker modal showing search filtering for Swipeable Review Carousel | Verified ✓ |
+| `scrolled_sidebar_1792323356970.png` | SiteBuilder left inspector showing added sections and action controls | Verified ✓ |
 | `rendered_new_widgets_canvas_1792322389424.png` | Live SiteBuilder canvas showing Bento feature grid, Interactive content tabs, and Video lightbox showcase | Verified ✓ |
 | `test_phase2_widgets_1792322111125.webp` | Full video walkthrough of searching, adding, and interacting with Phase 2 modern widgets in Theme Builder | Verified ✓ |
 | `section_picker_modal_1792322203555.png` | SiteBuilder section picker modal showing Bento, Tabs, and Video Lightbox wireframe thumbnails | Verified ✓ |
-| :--- | :--- | :--- |
 | `builder_gap_hover_1792321084940.png` | Live SiteBuilder showing Deep Emerald gradient, floating glass card mode, light text contrast, and interactive + Add section gap separator | Verified ✓ |
 | `test_section_style_builder_1792320979236.webp` | Full video walkthrough of Section Appearance inspector, gradient swatches, padding, card container, and canvas separator QA | Verified ✓ |
 | `portfolio_mode_selected_1792316530933.png` | Marketing `/start` wizard displaying authentic Dhaka Bistro dining preview (desktop + mobile) and ৳799 Business Pro plan | Verified ✓ |
