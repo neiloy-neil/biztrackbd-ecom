@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { processBkashOrderSuccess, signOrderAccess } from "@biztrackbd/core";
 import { findStore } from "@/lib/tenant";
+import { resolveStorefrontRequestOrigin } from "@/lib/origin";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +10,7 @@ export const dynamic = "force-dynamic";
  * URL: /api/payments/bkash/callback?paymentID=...&status=success&tenantId=...&orderId=...
  */
 export async function GET(req: NextRequest) {
+  const origin = resolveStorefrontRequestOrigin(req, 3000);
   const store = await findStore();
   const searchParams = req.nextUrl.searchParams;
 
@@ -18,11 +20,11 @@ export async function GET(req: NextRequest) {
   const orderId = searchParams.get("orderId");
 
   if (!tenantId) {
-    return NextResponse.redirect(new URL("/checkout?err=store_not_found", req.nextUrl.origin));
+    return NextResponse.redirect(new URL("/checkout?err=store_not_found", origin));
   }
 
   if (!orderId) {
-    return NextResponse.redirect(new URL("/checkout?err=order_not_found", req.nextUrl.origin));
+    return NextResponse.redirect(new URL("/checkout?err=order_not_found", origin));
   }
 
   const token = signOrderAccess(tenantId, orderId);
@@ -32,7 +34,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(
       new URL(
         `/order/${orderId}?k=${encodeURIComponent(token)}&paymentStatus=${status}`,
-        req.nextUrl.origin,
+        origin,
       ),
     );
   }
@@ -41,7 +43,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(
       new URL(
         `/order/${orderId}?k=${encodeURIComponent(token)}&paymentStatus=failed`,
-        req.nextUrl.origin,
+        origin,
       ),
     );
   }
@@ -50,14 +52,14 @@ export async function GET(req: NextRequest) {
     const res = await processBkashOrderSuccess(tenantId, paymentId, orderId);
     if (res.ok) {
       return NextResponse.redirect(
-        new URL(`/order/${orderId}?k=${encodeURIComponent(token)}&paid=1`, req.nextUrl.origin),
+        new URL(`/order/${orderId}?k=${encodeURIComponent(token)}&paid=1`, origin),
       );
     }
 
     return NextResponse.redirect(
       new URL(
         `/order/${orderId}?k=${encodeURIComponent(token)}&paymentStatus=failed`,
-        req.nextUrl.origin,
+        origin,
       ),
     );
   } catch (err) {
@@ -65,7 +67,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(
       new URL(
         `/order/${orderId}?k=${encodeURIComponent(token)}&paymentStatus=failed`,
-        req.nextUrl.origin,
+        origin,
       ),
     );
   }

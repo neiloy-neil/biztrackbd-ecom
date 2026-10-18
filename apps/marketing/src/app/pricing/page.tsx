@@ -59,7 +59,7 @@ const PORTFOLIO_ROWS: ComparisonRow[] = [
   { label: "Digital menu & QR code (food)", starter: "Included", pro: "Included", business: "Included" },
   { label: "Team & doctor profiles", starter: "2 staff accounts", pro: "5 staff accounts", business: "15 staff accounts" },
   { label: "Document & photo storage", starter: "5 GB", pro: "20 GB", business: "100 GB" },
-  { label: "Hybrid store (sell merchandise)", starter: "Up to 10 products", pro: "Full Dual Engine (up to 50 products)", business: "Full Dual Engine (up to 200 products)" },
+  { label: "Hybrid store (sell merchandise)", starter: "Not included (requires Pro or Plus)", pro: "Full Dual Engine (up to 50 products)", business: "Full Dual Engine (up to 200 products)" },
   { label: "Sales commission", starter: "0%", pro: "0%", business: "0%" },
 ];
 

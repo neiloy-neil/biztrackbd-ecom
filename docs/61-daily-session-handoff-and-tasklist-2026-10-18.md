@@ -123,9 +123,20 @@ During today's interactive `/grill-me` alignment session, we architected, engine
 |     • 6 Curated Design Patterns: Added to ⭐ Design Patterns library (expanded from 12 to 18)     |
 |       (Clinic Before/After, Trusted Partners Marquee, Delivery Journey, Chef Specials Flip Box,     |
 |       Shop the Look Hotspots, Filterable Services Grid)                                            |
-|     • Admin Wireframes: Dedicated SVG wireframe thumbnails for all 6 widgets in Section Picker     |
+|       - Admin Wireframes: Dedicated SVG wireframe thumbnails for all 6 widgets in Section Picker     |
 |     • Bilingual Twin Defaults: 100% English + Bengali schema defaults for seamless localization     |
 |     • Quality Assurance: 42/42 passing tests in builder-sections.test.ts, 0 TypeScript errors       |
++----------------------------------------------------------------------------------------------------+
+| 14. BILLING, PLANS, FEATURES & PORT PRESERVATION FULL AUDIT & REMEDIATION                          |
+|     • Port Preservation Engine: Fixed local development port stripping across UddoktaPay, SSLCommerz|
+|       and Direct bKash callbacks (resolveAdminOrigin / resolveStorefrontOrigin preserving 3001/3000)|
+|     • Custom Domains Mode Alignment: Enabled custom domains for all Business Website plans          |
+|       (including Business Starter ৳399) in `domains/service.ts`, eliminating PlanFeatureError       |
+|     • SiteBuilder Tier Gating: Enabled homepage section editing ('home') for Business Starter ৳399  |
+|       and all-pages builder ('all') for Business Pro ৳799 / Business Plus ৳1,499                   |
+|     • Marketing Copy Alignment: Updated Marketing comparison matrix to clarify Starter Hybrid       |
+|       boundary as "Not included (requires Pro or Plus)", strictly reflecting the core state machine |
+|     • Verification: 13/13 passing tests in billing-and-plans.test.ts, 0 TS errors, live browser QA  |
 +----------------------------------------------------------------------------------------------------+
 ```
 
@@ -152,7 +163,8 @@ During today's interactive `/grill-me` alignment session, we architected, engine
 17. `commit ff0bba5`: `feat(builder): add scroll-reveal animations, custom anchor IDs, and section nicknames & reordering`
 18. `commit 70f1fbd`: `feat(builder): add 1-click section presets & design pattern library with dual-tab drawer and visual mini-previews`
 19. `commit cb66330`: `feat(payments): implement SSLCommerz and Direct bKash automated payment gateways`
-20. `commit c7758bd`: `feat(builder): implement aBlocks-inspired modern widgets suite and 6 design patterns`
+20. `commit d42d3d4`: `feat(builder): implement aBlocks-inspired modern widgets suite and 6 design patterns`
+21. `commit c072ff6`: `fix(billing): resolve sandbox port stripping, align plan features across marketing and admin, and enforce mode-specific gating`
 
 
 ---
@@ -163,6 +175,9 @@ All browser walkthrough recordings and full-resolution PNG artifacts are saved i
 
 | Artifact Name | Description | Status |
 | :--- | :--- | :--- |
+| `verify_billing_flow_1792364463329.webp` | Full video walkthrough of billing checkout, UddoktaPay button interaction, and port 3001 callback preservation | Verified ✓ |
+| `billing_page_state_1792364504982.png` | Live Admin Billing workspace with UddoktaPay instant pay card and plan selector | Verified ✓ |
+| `billing_error_redirect_1792364572102.png` | Live Admin Billing error redirect verifying port 3001 preservation on callback return | Verified ✓ |
 | `sitebuilder_patterns_verified_1792330188591.webp` | Full video walkthrough of SiteBuilder Design Patterns library, category filtering, and 1-click Bento pattern insertion | Verified ✓ |
 | `final_bento_preview_1792330265562.png` | Live SiteBuilder canvas showing inserted Tech & Metrics Bento Grid with styled appearance and Performance Bento Grid nickname | Verified ✓ |
 | `filtered_bento_patterns_1792330236448.png` | SiteBuilder Design Patterns tab showing filtered Features & Bento patterns with visual gradient swatches, badges, and insert action | Verified ✓ |

@@ -1,10 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { processSslCommerzOrderSuccess, signOrderAccess } from "@biztrackbd/core";
 import { findStore } from "@/lib/tenant";
+import { resolveStorefrontRequestOrigin } from "@/lib/origin";
 
 export const dynamic = "force-dynamic";
 
 async function handleSslCommerzCallback(req: NextRequest) {
+  const origin = resolveStorefrontRequestOrigin(req, 3000);
   const store = await findStore();
   let valId: string | null = null;
   let tenantId: string | null = null;
@@ -39,7 +41,7 @@ async function handleSslCommerzCallback(req: NextRequest) {
   status = status || req.nextUrl.searchParams.get("status");
 
   if (!tenantId) {
-    return NextResponse.redirect(new URL("/checkout?err=store_not_found", req.nextUrl.origin));
+    return NextResponse.redirect(new URL("/checkout?err=store_not_found", origin));
   }
 
   // If status is failed or cancelled by user
@@ -49,12 +51,12 @@ async function handleSslCommerzCallback(req: NextRequest) {
       return NextResponse.redirect(
         new URL(
           `/order/${orderId}?k=${encodeURIComponent(token)}&paymentStatus=${status.toLowerCase()}`,
-          req.nextUrl.origin,
+          origin,
         ),
       );
     }
     return NextResponse.redirect(
-      new URL(`/checkout?err=Payment+was+${status.toLowerCase()}`, req.nextUrl.origin),
+      new URL(`/checkout?err=Payment+was+${status.toLowerCase()}`, origin),
     );
   }
 
@@ -62,10 +64,10 @@ async function handleSslCommerzCallback(req: NextRequest) {
     if (orderId) {
       const token = signOrderAccess(tenantId, orderId);
       return NextResponse.redirect(
-        new URL(`/order/${orderId}?k=${encodeURIComponent(token)}&paymentStatus=failed`, req.nextUrl.origin),
+        new URL(`/order/${orderId}?k=${encodeURIComponent(token)}&paymentStatus=failed`, origin),
       );
     }
-    return NextResponse.redirect(new URL("/checkout?err=missing_validation_id", req.nextUrl.origin));
+    return NextResponse.redirect(new URL("/checkout?err=missing_validation_id", origin));
   }
 
   try {
@@ -76,7 +78,7 @@ async function handleSslCommerzCallback(req: NextRequest) {
       return NextResponse.redirect(
         new URL(
           `/order/${resolvedOrderId}?k=${encodeURIComponent(token)}&paid=1`,
-          req.nextUrl.origin,
+          origin,
         ),
       );
     }
@@ -86,26 +88,26 @@ async function handleSslCommerzCallback(req: NextRequest) {
       return NextResponse.redirect(
         new URL(
           `/order/${resolvedOrderId}?k=${encodeURIComponent(token)}&paymentStatus=failed`,
-          req.nextUrl.origin,
+          origin,
         ),
       );
     }
 
     return NextResponse.redirect(
-      new URL(`/checkout?err=${encodeURIComponent(`Payment was not validated (${res.status})`)}`, req.nextUrl.origin),
+      new URL(`/checkout?err=${encodeURIComponent(`Payment was not validated (${res.status})`)}`, origin),
     );
   } catch (err) {
     console.error("[sslcommerz-callback] processing failed", err);
     if (orderId) {
       const token = signOrderAccess(tenantId, orderId);
       return NextResponse.redirect(
-        new URL(`/order/${orderId}?k=${encodeURIComponent(token)}&paymentStatus=failed`, req.nextUrl.origin),
+        new URL(`/order/${orderId}?k=${encodeURIComponent(token)}&paymentStatus=failed`, origin),
       );
     }
     return NextResponse.redirect(
       new URL(
         `/checkout?err=${encodeURIComponent("Could not verify SSLCommerz payment. Please contact support.")}`,
-        req.nextUrl.origin,
+        origin,
       ),
     );
   }

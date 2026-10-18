@@ -1,12 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { processUddoktaPaySubscriptionSuccess } from "@biztrackbd/core";
+import { resolveAdminRequestOrigin } from "@/lib/origin";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
+  const origin = resolveAdminRequestOrigin(req, 3001);
   const invoiceId = req.nextUrl.searchParams.get("invoice_id");
   if (!invoiceId) {
-    return NextResponse.redirect(new URL("/billing?err=missing_invoice", req.nextUrl.origin));
+    return NextResponse.redirect(new URL("/billing?err=missing_invoice", origin));
   }
 
   // Verify invoice with UddoktaPay gateway
@@ -14,13 +16,13 @@ export async function GET(req: NextRequest) {
     const verified = await processUddoktaPaySubscriptionSuccess(invoiceId);
     if (verified.ok) {
       return NextResponse.redirect(
-        new URL(`/billing?success=1&plan=${encodeURIComponent(verified.plan)}`, req.nextUrl.origin),
+        new URL(`/billing?success=1&plan=${encodeURIComponent(verified.plan)}`, origin),
       );
     }
-    return NextResponse.redirect(new URL("/billing?err=payment_not_completed", req.nextUrl.origin));
+    return NextResponse.redirect(new URL("/billing?err=payment_not_completed", origin));
   } catch (err) {
     console.error("[billing-uddoktapay-callback] verification failed", err);
-    return NextResponse.redirect(new URL("/billing?err=verification_failed", req.nextUrl.origin));
+    return NextResponse.redirect(new URL("/billing?err=verification_failed", origin));
   }
 }
 

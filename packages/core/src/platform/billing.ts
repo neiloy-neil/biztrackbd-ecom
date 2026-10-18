@@ -79,7 +79,7 @@ export const FALLBACK_PORTFOLIO_PLANS: PlanView[] = [
     yearlyMonthsFree: 2,
     trialDays: 14,
     limits: { products: 0, ordersPerMonth: 0, staff: 1, storageGb: 5, smsCredits: 0, landingPages: 5 },
-    features: { customDomain: true, leadCapture: true, downloadsLimit: 5, contentItemsLimit: 15, bookingRequests: false, whatsappAlerts: true, teamProfiles: false, hybridStore: false, mode: "PORTFOLIO" },
+    features: { customDomain: true, sectionBuilder: "home", leadCapture: true, downloadsLimit: 5, contentItemsLimit: 15, bookingRequests: false, whatsappAlerts: true, teamProfiles: false, hybridStore: false, mode: "PORTFOLIO" },
   },
   {
     tier: "PRO",
@@ -89,7 +89,7 @@ export const FALLBACK_PORTFOLIO_PLANS: PlanView[] = [
     yearlyMonthsFree: 2,
     trialDays: 14,
     limits: { products: 0, ordersPerMonth: 0, staff: 3, storageGb: 20, smsCredits: 0, landingPages: 20 },
-    features: { customDomain: true, leadCapture: true, downloadsLimit: "unlimited", contentItemsLimit: "unlimited", bookingRequests: true, whatsappAlerts: true, teamProfiles: true, hybridStore: true, mode: "PORTFOLIO" },
+    features: { customDomain: true, sectionBuilder: "all", leadCapture: true, downloadsLimit: "unlimited", contentItemsLimit: "unlimited", bookingRequests: true, whatsappAlerts: true, teamProfiles: true, hybridStore: true, mode: "PORTFOLIO" },
   },
   {
     tier: "BUSINESS",
@@ -99,7 +99,7 @@ export const FALLBACK_PORTFOLIO_PLANS: PlanView[] = [
     yearlyMonthsFree: 2,
     trialDays: 14,
     limits: { products: 200, ordersPerMonth: 1000, staff: 8, storageGb: 100, smsCredits: 0, landingPages: 50 },
-    features: { customDomain: true, leadCapture: true, downloadsLimit: "unlimited", contentItemsLimit: "unlimited", bookingRequests: true, whatsappAlerts: true, teamProfiles: true, hybridStore: true, mode: "PORTFOLIO" },
+    features: { customDomain: true, sectionBuilder: "all", leadCapture: true, downloadsLimit: "unlimited", contentItemsLimit: "unlimited", bookingRequests: true, whatsappAlerts: true, teamProfiles: true, hybridStore: true, mode: "PORTFOLIO" },
   },
 ];
 

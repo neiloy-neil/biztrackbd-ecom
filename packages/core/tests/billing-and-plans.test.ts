@@ -6,6 +6,8 @@ import {
   FALLBACK_PORTFOLIO_PLANS,
 } from "../src/platform/billing";
 import { executeModeTransition } from "../src/site/mode";
+import { addDomain } from "../src/domains/service";
+import { getBuilderAccess } from "../src/builder/versions";
 
 const mockTenantRecord = {
   id: "tenant-plan-test",
@@ -18,8 +20,18 @@ const mockTenantRecord = {
 const mockTx = {
   tenant: {
     findUnique: vi.fn(),
+    findFirst: vi.fn().mockResolvedValue({ isDemo: false }),
+    findFirstOrThrow: vi.fn().mockResolvedValue({ planTier: "STARTER", siteMode: "ECOMMERCE", quarantined: false }),
     update: vi.fn(),
   },
+  plan: {
+    findUnique: vi.fn(),
+  },
+  domain: {
+    count: vi.fn().mockResolvedValue(0),
+    create: vi.fn().mockResolvedValue({ id: "dom_1", domain: "custombrand.com" }),
+  },
+  $queryRaw: vi.fn().mockResolvedValue([]),
   auditLog: {
     create: vi.fn().mockResolvedValue({ id: "audit_1" }),
   },
@@ -209,4 +221,95 @@ describe("Billing & Subscription Plans Mode Alignment", () => {
       expect(res.newVertical).toBe("DOCTOR_CLINIC");
     });
   });
+
+  describe("Custom Domains Feature Gating by Mode & Tier", () => {
+    const actor = { role: "STORE_OWNER", id: "usr_1" } as any;
+
+    it("allows custom domain on Business Starter (PORTFOLIO mode on STARTER tier)", async () => {
+      mockTx.tenant.findFirstOrThrow.mockResolvedValue({
+        planTier: "STARTER",
+        siteMode: "PORTFOLIO",
+        quarantined: false,
+      });
+
+      const res = await addDomain("tenant-plan-test", actor, "mybusiness.com");
+      expect(res).toBeDefined();
+      expect(mockTx.domain.create).toHaveBeenCalled();
+    });
+
+    it("rejects custom domain on Commerce Starter (ECOMMERCE mode on STARTER tier)", async () => {
+      mockTx.tenant.findFirstOrThrow.mockResolvedValue({
+        planTier: "STARTER",
+        siteMode: "ECOMMERCE",
+        quarantined: false,
+      });
+      mockTx.plan.findUnique.mockResolvedValue({
+        tier: "STARTER",
+        features: { customDomain: false },
+      });
+
+      await expect(addDomain("tenant-plan-test", actor, "myonlinestore.com")).rejects.toThrow(
+        /Your plan does not include this/i
+      );
+    });
+
+    it("allows custom domain on Commerce Pro (ECOMMERCE mode on PRO tier)", async () => {
+      mockTx.tenant.findFirstOrThrow.mockResolvedValue({
+        planTier: "PRO",
+        siteMode: "ECOMMERCE",
+        quarantined: false,
+      });
+      mockTx.plan.findUnique.mockResolvedValue({
+        tier: "PRO",
+        features: { customDomain: true },
+      });
+
+      const res = await addDomain("tenant-plan-test", actor, "myprostore.com");
+      expect(res).toBeDefined();
+      expect(mockTx.domain.create).toHaveBeenCalled();
+    });
+  });
+
+  describe("SiteBuilder Section Editing Access by Mode & Tier", () => {
+    it("grants homepage section editing to Business Starter (PORTFOLIO mode on STARTER tier)", async () => {
+      mockTx.tenant.findFirstOrThrow.mockResolvedValue({
+        planTier: "STARTER",
+        siteMode: "PORTFOLIO",
+      });
+
+      const access = await getBuilderAccess("tenant-plan-test");
+      expect(access.tier).toBe("home");
+      expect(access.sectionsEditable).toBe(true);
+      expect(access.allPagesEditable).toBe(false);
+    });
+
+    it("grants all pages editing to Business Pro (PORTFOLIO mode on PRO tier)", async () => {
+      mockTx.tenant.findFirstOrThrow.mockResolvedValue({
+        planTier: "PRO",
+        siteMode: "PORTFOLIO",
+      });
+
+      const access = await getBuilderAccess("tenant-plan-test");
+      expect(access.tier).toBe("all");
+      expect(access.sectionsEditable).toBe(true);
+      expect(access.allPagesEditable).toBe(true);
+    });
+
+    it("restricts Commerce Starter (ECOMMERCE on STARTER) to settings only", async () => {
+      mockTx.tenant.findFirstOrThrow.mockResolvedValue({
+        planTier: "STARTER",
+        siteMode: "ECOMMERCE",
+      });
+      mockTx.plan.findUnique.mockResolvedValue({
+        tier: "STARTER",
+        features: { sectionBuilder: "settings" },
+      });
+
+      const access = await getBuilderAccess("tenant-plan-test");
+      expect(access.tier).toBe("settings");
+      expect(access.sectionsEditable).toBe(false);
+      expect(access.allPagesEditable).toBe(false);
+    });
+  });
 });
+

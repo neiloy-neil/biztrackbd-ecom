@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { DomainError, cancelPendingProof, createUddoktaPayCharge, getBillingOverview, submitPaymentProof } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
+import { resolveAdminOrigin } from "@/lib/origin";
 
 export interface ProofState { error?: string }
 
@@ -16,10 +17,7 @@ export async function initiateOnlineBillingAction(plan: string, interval: "MONTH
     if (!chosen) return { error: "Invalid plan selected" };
 
     const amount = interval === "YEARLY" ? chosen.priceYearly : chosen.priceMonthly;
-    const h = await headers();
-    const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3001";
-    const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-    const origin = `${proto}://${host}`;
+    const origin = resolveAdminOrigin(await headers(), 3001);
 
     const charge = await createUddoktaPayCharge({
       fullName: s.actor.name || "Merchant",
