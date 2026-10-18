@@ -103,7 +103,7 @@ const BUSINESS_CARDS: ComparisonCard[] = [
 const STOREFRONT_MATRIX: MatrixRow[] = [
   {
     dimension: "Monthly Base Price Currency",
-    biztrack: "Flat BDT (৳ 399 - ৳ 1,499)",
+    biztrack: "Flat BDT (৳ 699 - ৳ 3,499)",
     comp1: "USD ($39 - $399/mo + 15% tax)",
     comp2: "Hosting & Plugins (৳ 4,000+/mo)",
     comp3: "Free / ৳ 500/mo (Tied to courier)",

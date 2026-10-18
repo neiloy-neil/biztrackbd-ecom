@@ -606,3 +606,39 @@ export async function dispatchOutboundWebhook(
     return { ok: false, httpStatus: null, error: errorMsg };
   }
 }
+
+/**
+ * Retries up to 10 recent failed webhook delivery attempts.
+ */
+export async function retryFailedWebhookDeliveries(
+  tenantId: string,
+  actor: StaffActor
+): Promise<{ retriedCount: number }> {
+  assertCan(actor, "design", "edit");
+  const overview = await getMerchantWebhookOverview(tenantId, actor);
+  if (!overview.subscription || !overview.subscription.isActive) {
+    throw new ValidationError("Cannot retry deliveries on an inactive webhook subscription");
+  }
+
+  const failedLogs = overview.recentLogs.filter((l) => !l.isSuccess).slice(0, 10);
+  let retriedCount = 0;
+  for (const log of failedLogs) {
+    await enqueueNotificationJob({
+      tenantId,
+      recipient: overview.subscription.targetUrl,
+      body: JSON.stringify(log.payload),
+      channel: "WEBHOOK",
+      event: log.eventType,
+      metadata: {
+        secret: overview.subscription.secretToken,
+        subscriptionId: overview.subscription.id,
+        isRetry: true,
+      },
+      immediateDispatch: true,
+    });
+    retriedCount++;
+  }
+
+  return { retriedCount };
+}
+

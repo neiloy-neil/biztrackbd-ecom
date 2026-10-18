@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { DemoLocked } from "@/components/demo-locked";
 import { trialHref } from "@/lib/demo";
 import type { Metadata } from "next";
@@ -41,9 +42,35 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
       {one(sp.err) && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{one(sp.err)}</div>}
 
       <section className="card" data-testid="plan-status">
-        <div className="card-head"><h2>{TIER[b.tier] ?? b.tier} plan</h2><span className={`pill ${a.state === "ACTIVE" || a.state === "TRIAL" ? "ok" : a.state === "GRACE" ? "warn" : "bad"}`} data-testid="access-state">{ACCESS_LABELS[a.state]}</span></div>
+        <div className="card-head">
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <h2>{TIER[b.tier] ?? b.tier} plan</h2>
+            <span
+              style={{
+                fontSize: 12,
+                fontWeight: 700,
+                padding: "3px 8px",
+                borderRadius: 6,
+                backgroundColor: b.siteMode === "PORTFOLIO" ? "rgba(249,115,22,0.12)" : b.siteMode === "HYBRID" ? "rgba(99,102,241,0.12)" : "rgba(16,185,129,0.12)",
+                color: b.siteMode === "PORTFOLIO" ? "#ea580c" : b.siteMode === "HYBRID" ? "#6366f1" : "#059669",
+              }}
+            >
+              {b.siteMode === "PORTFOLIO" ? "🏢 Business & Dining Plan" : b.siteMode === "HYBRID" ? "⚡ Hybrid Dual-Engine Plan" : "🛍️ Online Store Plan"}
+            </span>
+          </div>
+          <span className={`pill ${a.state === "ACTIVE" || a.state === "TRIAL" ? "ok" : a.state === "GRACE" ? "warn" : "bad"}`} data-testid="access-state">{ACCESS_LABELS[a.state]}</span>
+        </div>
         <p style={{ margin: 0 }} data-testid="plan-status-text">{status}</p>
         {b.subscription && b.subscription.amount > 0 && <p className="muted" style={{ margin: "6px 0 0", fontSize: 13.5 }}>Last payment {taka(b.subscription.amount)} for {b.subscription.interval === "YEARLY" ? "a year" : "a month"}.</p>}
+
+        <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid var(--border, #eee)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8, fontSize: 13 }}>
+          <span className="muted">
+            Need to change between Business Website, Online Store, or Hybrid?
+          </span>
+          <Link href="/settings/mode" className="btn btn-secondary btn-sm" prefetch={false}>
+            Configure Operating Mode →
+          </Link>
+        </div>
       </section>
 
       {notes.map((n) => <div key={n} className="notice" style={{ marginTop: 12 }}>{n}</div>)}

@@ -4,6 +4,7 @@ import { assertCan, type StaffActor } from "../permissions";
 import { audit } from "../audit/service";
 import { trackServerLead } from "../growth/tracking";
 import { enqueueNotificationJob } from "../messaging/queue";
+import { emitMerchantWebhookEvent } from "../messaging/webhook";
 import { normalizeBdPhone } from "../phone";
 import {
   checkPublicSubmissionRateLimit,
@@ -210,6 +211,19 @@ export async function createPublicLead(tenantId: string, input: CreateLeadInput)
       console.warn("[leads] Outbox CAPI enqueue warning:", err instanceof Error ? err.message : err);
     });
   }
+
+  // Outbound Merchant Webhook Event: lead.created (non-blocking)
+  emitMerchantWebhookEvent(tenantId, "lead.created", {
+    leadId: result.id,
+    type: result.type,
+    name: name || undefined,
+    phone: phone || undefined,
+    email: email || undefined,
+    message: input.message || undefined,
+    sourceUrl: input.sourcePage || undefined,
+  }).catch((err) => {
+    console.warn("[webhook] lead.created emit warning:", err instanceof Error ? err.message : err);
+  });
 
   return result;
 }

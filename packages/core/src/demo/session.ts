@@ -6,6 +6,8 @@ import { createOrder, transitionOrder } from "../orders/service";
 import type { StaffActor } from "../permissions";
 import { seedCatalog } from "./seed";
 import { demoTemplate, type DemoTemplate } from "./templates";
+import { findBusinessDemoTemplate, type BusinessDemoTemplate } from "./business-templates";
+import { seedBusinessDemoStore } from "./business-seed";
 
 /**
  * The demo admin (docs/41). A visitor gets a private copy of a demo store, with starter orders, that is deleted after a few hours.
@@ -89,11 +91,242 @@ async function readTemplateStore(t: DemoTemplate) {
   return { ...data, live };
 }
 
+async function createBusinessDemoSession(
+  biz: BusinessDemoTemplate,
+  creator: string,
+  now = new Date()
+): Promise<Copy & { cookie: string; template: string }> {
+  const base = getBasePrisma();
+  const [counts] = await base.$queryRaw<{ active: number; recent: number }[]>`SELECT * FROM demo_session_counts(${creator})`;
+  if ((counts?.recent ?? 0) >= DEMO_STARTS_PER_HOUR) throw new DemoLimitError();
+  if ((counts?.active ?? 0) >= DEMO_MAX_ACTIVE) throw new DemoBusyError();
+
+  const id = randomUUID();
+  const subdomain = `d-${shortId()}`;
+  const email = `demo-${subdomain}@demo.${rootDomain().replace(/:\d+$/, "")}`;
+  const expiresAt = new Date(now.getTime() + DEMO_SESSION_HOURS * 3_600_000);
+  await base.$queryRaw`SELECT signup_create_tenant(${id}, ${biz.name}, ${subdomain}, ${biz.baseLook}, 'BUSINESS'::"PlanTier", ${"Demo owner"}, ${email}, ${PHONE}, 14, false, ${null}, 3)`;
+
+  try {
+    await withTenant(id, async (tx) => {
+      await tx.tenant.update({
+        where: { id },
+        data: {
+          isDemo: true,
+          demoKind: "SESSION",
+          demoTemplate: biz.id,
+          demoExpiresAt: expiresAt,
+          demoCreator: creator,
+          demoKeepToken: randomBytes(18).toString("base64url"),
+          status: "ACTIVE",
+          trialEndsAt: FAR_FUTURE,
+          themeId: biz.baseLook,
+          siteMode: "PORTFOLIO",
+          businessVertical: biz.vertical,
+          locale: "en-BD",
+        },
+      });
+
+      await tx.tenantUser.create({
+        data: {
+          tenantId: id,
+          email,
+          name: "Demo owner",
+          phone: PHONE,
+          role: "STORE_OWNER",
+          passwordHash: "EXTERNAL_AUTH",
+        },
+      });
+    });
+
+    // Seed domain records (menu categories/dishes, content items, downloads, and template manifest)
+    await seedBusinessDemoStore(id, biz.id, { modeOverride: "PORTFOLIO" });
+
+    // Seed sample vertical operational inquiries/bookings so the admin Lead Inbox & booking desk have authentic data
+    await withTenant(id, async (tx) => {
+      if (biz.vertical === "RESTAURANT") {
+        const lead1 = await tx.siteLead.create({
+          data: {
+            tenantId: id,
+            type: "RESERVATION",
+            status: "QUALIFIED",
+            name: "Sadia Islam",
+            phone: "01712345678",
+            message: "Celebrating anniversary. Please arrange high-chair for toddler.",
+            sourcePage: "/reservations",
+            locale: "en",
+            metadata: { serviceName: "Dinner Table for 4", requestedDate: new Date(Date.now() + 86400000).toISOString().slice(0, 10), requestedTime: "8:00 PM", partySize: 4 },
+          },
+        });
+        await tx.bookingRequest.create({
+          data: {
+            tenantId: id,
+            leadId: lead1.id,
+            serviceName: "Dinner Table for 4 (Window Side)",
+            requestedDate: new Date(Date.now() + 86400000),
+            requestedTime: "8:00 PM",
+            partySize: 4,
+            status: "CONFIRMED",
+          },
+        });
+
+        const lead2 = await tx.siteLead.create({
+          data: {
+            tenantId: id,
+            type: "RESERVATION",
+            status: "NEW",
+            name: "Tanvir Hasan",
+            phone: "01812345678",
+            message: "Corporate dinner with client guests.",
+            sourcePage: "/reservations",
+            locale: "en",
+            metadata: { serviceName: "Family Dining Room (8 Guests)", requestedDate: new Date(Date.now() + 172800000).toISOString().slice(0, 10), requestedTime: "1:30 PM", partySize: 8 },
+          },
+        });
+        await tx.bookingRequest.create({
+          data: {
+            tenantId: id,
+            leadId: lead2.id,
+            serviceName: "Family Dining Room (8 Guests)",
+            requestedDate: new Date(Date.now() + 172800000),
+            requestedTime: "1:30 PM",
+            partySize: 8,
+            status: "REQUESTED",
+          },
+        });
+
+        await tx.siteLead.create({
+          data: {
+            tenantId: id,
+            type: "CONTACT",
+            status: "NEW",
+            name: "Farzana Yasmin",
+            phone: "01912345678",
+            email: "farzana@gmail.com",
+            message: "Hi, do you provide customized biryani boxes for office milestone events?",
+            sourcePage: "/contact",
+            locale: "en",
+          },
+        });
+      } else if (biz.vertical === "DOCTOR_CLINIC") {
+        const docLead1 = await tx.siteLead.create({
+          data: {
+            tenantId: id,
+            type: "APPOINTMENT",
+            status: "QUALIFIED",
+            name: "Rafiqul Islam",
+            phone: "01711223344",
+            message: "Experiencing fluctuating fasting sugar and high blood pressure for 2 weeks.",
+            sourcePage: "/appointment",
+            locale: "en",
+            metadata: { chamber: "Popular Diagnostic (Dhanmondi)", serviceName: "Internal Medicine Consultation" },
+          },
+        });
+        await tx.bookingRequest.create({
+          data: {
+            tenantId: id,
+            leadId: docLead1.id,
+            serviceName: "Internal Medicine Consultation",
+            providerName: "Prof. Dr. Mohammad Rahman",
+            requestedDate: new Date(Date.now() + 86400000),
+            requestedTime: "6:30 PM",
+            partySize: 1,
+            status: "CONFIRMED",
+          },
+        });
+
+        const docLead2 = await tx.siteLead.create({
+          data: {
+            tenantId: id,
+            type: "APPOINTMENT",
+            status: "NEW",
+            name: "Nusrat Jahan",
+            phone: "01911223344",
+            message: "Routine quarterly HbA1c review and insulin dosage adjustment.",
+            sourcePage: "/appointment",
+            locale: "en",
+            metadata: { chamber: "Ibn Sina (Mirpur)", serviceName: "Diabetes Review & Fasting Sugar" },
+          },
+        });
+        await tx.bookingRequest.create({
+          data: {
+            tenantId: id,
+            leadId: docLead2.id,
+            serviceName: "Diabetes Review & Fasting Sugar",
+            providerName: "Prof. Dr. Mohammad Rahman",
+            requestedDate: new Date(Date.now() + 172800000),
+            requestedTime: "7:00 PM",
+            partySize: 1,
+            status: "REQUESTED",
+          },
+        });
+
+        await tx.siteLead.create({
+          data: {
+            tenantId: id,
+            type: "CONTACT",
+            status: "CONTACTED",
+            name: "Kamal Hossain",
+            phone: "01811223344",
+            email: "kamal.h@yahoo.com",
+            message: "Will the professor be available at Dhanmondi chamber this upcoming Friday?",
+            sourcePage: "/contact",
+            locale: "en",
+          },
+        });
+      } else {
+        await tx.siteLead.createMany({
+          data: [
+            {
+              tenantId: id,
+              type: "QUOTE",
+              status: "QUALIFIED",
+              name: "Farhan Chowdhury",
+              phone: "01719876543",
+              email: "farhan@apexventures.com",
+              message: "Seeking legal and taxation counsel for foreign entity incorporation with BIDA. Company: Apex Ventures Ltd.",
+              sourcePage: "/contact",
+              locale: "en",
+            },
+            {
+              tenantId: id,
+              type: "CONTACT",
+              status: "NEW",
+              name: "Anisur Rahman",
+              phone: "01819876543",
+              email: "anis@greenfield.bd",
+              message: "Requesting proposal for annual statutory audit and corporate compliance. Company: Greenfield Logistics.",
+              sourcePage: "/contact",
+              locale: "en",
+            },
+          ],
+        });
+      }
+    });
+  } catch (e) {
+    await deleteDemoTenant(id).catch(() => undefined);
+    throw e;
+  }
+
+  return {
+    tenantId: id,
+    subdomain,
+    expiresAt,
+    template: biz.id,
+    cookie: createDemoCookie({ tenantId: id, expiresAt: expiresAt.getTime() }),
+  };
+}
+
 /**
  * Makes a visitor's private copy of a demo store and returns the signed cookie that opens its admin. Refuses (before creating anything)
  * when too many demos exist or this visitor has started several in the last hour.
  */
 export async function createDemoSession(templateId: string, creator: string, now = new Date()): Promise<Copy & { cookie: string; template: string }> {
+  const bizTpl = findBusinessDemoTemplate(templateId);
+  if (bizTpl) {
+    return createBusinessDemoSession(bizTpl, creator, now);
+  }
+
   const t = demoTemplate(templateId);
   if (!t) throw new DomainError("DEMO_UNAVAILABLE", "That demo is not available.", 404);
   const base = getBasePrisma();

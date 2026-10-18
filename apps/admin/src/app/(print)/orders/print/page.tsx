@@ -10,10 +10,11 @@ import { PrintButton } from "./print-button";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Print" };
 
-type Doc = "invoice" | "slip" | "label" | "b2b_invoice" | "b2b_challan";
+type Doc = "invoice" | "slip" | "label" | "b2b_invoice" | "b2b_challan" | "kitchen_slip";
 type Size = "a4" | "a5" | "thermal";
 const DOCS: [Doc, string][] = [
   ["invoice", "Invoice"],
+  ["kitchen_slip", "Kitchen Order Ticket (KOT)"],
   ["slip", "Packing slip"],
   ["b2b_invoice", "B2B Tax Invoice"],
   ["b2b_challan", "Delivery Challan"],
@@ -132,6 +133,99 @@ function Slip({ o, st }: { o: OrderDetail; st: StoreSettingsView }) {
       {o.callNote && <div><h2>Call note</h2><div><b>{o.callNote}</b></div></div>}
       {o.notes && <div><h2>Customer note</h2><div>{o.notes}</div></div>}
       {o.tags.length > 0 && <div style={{ marginTop: 6 }}>Labels: {o.tags.join(", ")}</div>}
+    </div>
+  );
+}
+
+function KitchenSlip({ o, st }: { o: OrderDetail; st: StoreSettingsView }) {
+  const tableTag = o.tags.find((t) => t.toLowerCase().startsWith("table "));
+  const tableNumber =
+    tableTag?.replace(/^table\s+/i, "").trim() ||
+    o.address.line.match(/Table\s+([A-Za-z0-9-]+)/i)?.[1] ||
+    "DINE-IN";
+
+  return (
+    <div className="doc">
+      <div className="head">
+        <div>
+          <h1 style={{ fontSize: "1.4em", letterSpacing: "0.5px" }}>KITCHEN ORDER TICKET</h1>
+          <div style={{ fontSize: "0.85em", color: "#555" }}>রান্নাবাড়ির অর্ডার টিকিট (KOT)</div>
+          <div style={{ marginTop: 4 }}><b>Order #{o.orderNumber}</b></div>
+          <div style={{ fontSize: "0.85em", color: "#555" }}>
+            {dateOnly(o.createdAt)} · {new Date(o.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+          </div>
+        </div>
+        <div style={{ textAlign: "right" }} className="biz">
+          <b>{st.storeName}</b>
+          <div style={{ fontSize: "0.85em", color: "#666" }}>KITCHEN EXPEDITE</div>
+        </div>
+      </div>
+
+      <div
+        className="box"
+        style={{
+          background: "#111",
+          color: "#fff",
+          padding: "10px 14px",
+          margin: "10px 0",
+          borderRadius: 6,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <span style={{ fontSize: "0.85em", textTransform: "uppercase", letterSpacing: "1px", opacity: 0.9 }}>
+          Serving Table:
+        </span>
+        <span style={{ fontSize: "1.8em", fontWeight: 900 }}>TABLE {tableNumber}</span>
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.9em", padding: "4px 0 8px", borderBottom: "1px dashed #bbb" }}>
+        <span>Guest: <b>{o.customerName}</b></span>
+        <span>Phone: <b>{prettyPhone(o.customerPhone)}</b></span>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th style={{ width: 28 }}>Cook</th>
+            <th>Dish / Item Description</th>
+            <th className="r" style={{ width: 60 }}>Quantity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {o.items.map((i) => (
+            <tr key={i.id} style={{ borderBottom: "1.5px solid #111" }}>
+              <td style={{ verticalAlign: "middle" }}><span className="sq" style={{ width: 15, height: 15 }} /></td>
+              <td style={{ padding: "8px 4px" }}>
+                <div style={{ fontSize: "1.15em", fontWeight: 800, lineHeight: 1.25 }}>{i.title}</div>
+                {i.variantTitle && i.variantTitle.toLowerCase() !== "default" && (
+                  <div style={{ fontSize: "0.9em", color: "#c2410c", fontWeight: 700, marginTop: 2 }}>
+                    ⚠️ {i.variantTitle}
+                  </div>
+                )}
+                {i.sku && <div style={{ fontSize: "0.8em", color: "#666" }}>{i.sku}</div>}
+              </td>
+              <td className="r" style={{ verticalAlign: "middle" }}>
+                <span style={{ fontSize: "1.45em", fontWeight: 900 }}>{i.quantity}x</span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {o.notes && (
+        <div style={{ border: "2px dashed #111", padding: "8px 12px", margin: "12px 0", borderRadius: 6, background: "#fafafa" }}>
+          <div style={{ fontSize: "0.8em", textTransform: "uppercase", fontWeight: 800 }}>Chef Notes / Special Requests:</div>
+          <div className="big" style={{ fontSize: "1.1em", marginTop: 2 }}>{o.notes}</div>
+        </div>
+      )}
+
+      {o.tags.length > 0 && <div style={{ marginTop: 6, fontSize: "0.85em", color: "#555" }}>Tags: {o.tags.join(", ")}</div>}
+
+      <div style={{ textAlign: "center", fontSize: "0.8em", color: "#666", marginTop: 16, borderTop: "1px solid #ddd", paddingTop: 8 }}>
+        *** End of KOT · Expedited by BizTrack ***
+      </div>
     </div>
   );
 }
@@ -409,6 +503,8 @@ export default async function PrintPage({ searchParams }: { searchParams: Promis
           <div className="sheet" key={o.id} data-testid="print-sheet">
             {doc === "invoice" ? (
               <Invoice o={o} st={st} />
+            ) : doc === "kitchen_slip" ? (
+              <KitchenSlip o={o} st={st} />
             ) : doc === "slip" ? (
               <Slip o={o} st={st} />
             ) : doc === "b2b_invoice" ? (

@@ -4,6 +4,7 @@ import { assertCan, type StaffActor } from "../permissions";
 import { audit } from "../audit/service";
 import { trackServerBooking } from "../growth/tracking";
 import { enqueueNotificationJob } from "../messaging/queue";
+import { emitMerchantWebhookEvent } from "../messaging/webhook";
 import { normalizeBdPhone } from "../phone";
 import {
   checkPublicSubmissionRateLimit,
@@ -237,6 +238,21 @@ export async function createPublicBooking(tenantId: string, input: CreateBooking
       console.warn("[bookings] Outbox CAPI enqueue warning:", err instanceof Error ? err.message : err);
     });
   }
+
+  // Outbound Merchant Webhook Event: booking.created (non-blocking)
+  emitMerchantWebhookEvent(tenantId, "booking.created", {
+    bookingId: result.bookingId,
+    scheduledAt: input.requestedDate ?? new Date().toISOString(),
+    guestName: name!,
+    phone: phone!,
+    email: input.email || undefined,
+    serviceName: input.serviceName || undefined,
+    partySize: input.partySize || 1,
+    notes: input.message || undefined,
+    status: "PENDING",
+  }).catch((err) => {
+    console.warn("[webhook] booking.created emit warning:", err instanceof Error ? err.message : err);
+  });
 
   return result;
 }

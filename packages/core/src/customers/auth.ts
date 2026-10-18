@@ -5,6 +5,7 @@ import { withTenant } from "@biztrackbd/db";
 import { DomainError, ValidationError } from "../errors";
 import { normalizeBdPhone } from "../phone";
 import { smsSenderFromEnv } from "../growth/sms";
+import { emitMerchantWebhookEvent } from "../messaging/webhook";
 
 /**
  * Customer sign-in by one-time code (StrAccount). Customers are identified by their mobile number, which they prove
@@ -145,16 +146,30 @@ export async function verifyOtp(tenantId: string, rawPhone: string, rawCode: str
     const claimed = await tx.customerOtp.updateMany({ where: { id: otp.id, consumedAt: null, attempts: { lt: MAX_ATTEMPTS } }, data: { consumedAt: new Date() } });
     if (claimed.count === 0) return null;
 
+    const existing = await tx.customer.findFirst({ where: { phone }, select: { id: true } });
+    const isNew = !existing;
     const [customer] = await tx.$queryRaw<{ id: string; name: string }[]>`
       INSERT INTO "Customer" ("id", "tenantId", "name", "phone", "updatedAt")
       VALUES (${randomUUID()}, ${tenantId}, '', ${phone}, now())
       ON CONFLICT ("tenantId", "phone") DO UPDATE SET "updatedAt" = now()
       RETURNING "id", "name"`;
     if (!customer) throw new Error("Customer upsert returned nothing");
-    return { customerId: customer.id, phone, name: customer.name };
+    return { customerId: customer.id, phone, name: customer.name, isNew };
   });
   if (!outcome) throw new ValidationError(BAD_CODE);
-  return outcome;
+
+  if (outcome.isNew) {
+    emitMerchantWebhookEvent(tenantId, "customer.registered", {
+      customerId: outcome.customerId,
+      name: outcome.name || undefined,
+      phone: outcome.phone,
+      registeredAt: new Date().toISOString(),
+    }).catch((err) => {
+      console.warn("[webhook] customer.registered emit warning:", err instanceof Error ? err.message : err);
+    });
+  }
+
+  return { customerId: outcome.customerId, phone: outcome.phone, name: outcome.name };
 }
 
 // ---- Session cookie: base64url(payload) "." base64url(HMAC). Stateless, 30 days.

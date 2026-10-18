@@ -129,6 +129,11 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
           )}
           <Link href={`/orders/print?ids=${o.id}&doc=invoice`} target="_blank" className="btn btn-secondary btn-sm" prefetch={false}>Print invoice</Link>
           <Link href={`/orders/print?ids=${o.id}&doc=slip`} target="_blank" className="btn btn-secondary btn-sm" prefetch={false}>Packing slip</Link>
+          {o.channel === "TABLE_ORDER" && (
+            <Link href={`/orders/print?ids=${o.id}&doc=kitchen_slip&size=thermal`} target="_blank" className="btn btn-secondary btn-sm" prefetch={false} data-testid="print-kot-btn">
+              👨‍🍳 Kitchen slip (KOT)
+            </Link>
+          )}
         </div>
       </div>
       <p className="muted" style={{ margin: "-6px 0 14px", fontSize: 13.5 }}>{dateTime(o.createdAt)} · {CHANNEL[o.channel] ?? o.channel}</p>

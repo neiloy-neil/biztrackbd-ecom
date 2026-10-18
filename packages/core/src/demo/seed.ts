@@ -158,4 +158,13 @@ export async function resetDemoStore(templateId: string, deps: DemoDeps): Promis
   return { template: t.id, tenantId: id, subdomain: t.host, products: t.products.length, pictures };
 }
 
-export const DEMO_TEMPLATE_IDS = DEMO_TEMPLATES.map((t) => t.id);
+export const COMMERCE_DEMO_TEMPLATE_IDS = DEMO_TEMPLATES.map((t) => t.id);
+export const BUSINESS_DEMO_TEMPLATE_IDS = [
+  "dhaka-bistro",
+  "modern-clinic",
+  "apex-corporate",
+  "local-service-pro",
+  "portfolio-focus",
+  "public-profile",
+];
+export const DEMO_TEMPLATE_IDS = [...COMMERCE_DEMO_TEMPLATE_IDS, ...BUSINESS_DEMO_TEMPLATE_IDS];

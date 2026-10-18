@@ -25,5 +25,5 @@ export function PaymentPill({ method, status }: { method: string; status: string
 
 export const CHANNEL: Record<string, string> = {
   STOREFRONT: "Online store", LANDING_PAGE: "Landing page", WHATSAPP_BOT: "WhatsApp", MESSENGER_BOT: "Messenger", TELEMARKETING: "Phone",
-  QUICK_MESSENGER: "Messenger", QUICK_WHATSAPP: "WhatsApp", QUICK_PHONE: "Phone call", QUICK_INSTAGRAM: "Instagram",
+  QUICK_MESSENGER: "Messenger", QUICK_WHATSAPP: "WhatsApp", QUICK_PHONE: "Phone call", QUICK_INSTAGRAM: "Instagram", TABLE_ORDER: "Dining Table",
 };

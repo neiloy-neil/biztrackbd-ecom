@@ -354,9 +354,16 @@ export async function executeModeTransition(
   const result = await withTenant(tenantId, async (tx) => {
     const tenant = await tx.tenant.findUnique({
       where: { id: tenantId },
-      select: { id: true, siteMode: true, businessVertical: true, name: true },
+      select: { id: true, siteMode: true, businessVertical: true, name: true, planTier: true },
     });
     if (!tenant) throw new NotFoundError("Tenant");
+
+    if (input.targetMode === "HYBRID" && tenant.planTier === "STARTER") {
+      throw new ValidationError(
+        "Hybrid dual-engine mode requires at least the PRO plan tier (Commerce Pro ৳1,499/mo or Business Pro ৳799/mo). Please upgrade your plan before switching to Hybrid.",
+        { field: "targetMode" }
+      );
+    }
 
     const oldMode = tenant.siteMode;
     const oldVertical = tenant.businessVertical;

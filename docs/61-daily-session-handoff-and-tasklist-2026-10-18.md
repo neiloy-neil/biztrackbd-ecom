@@ -37,6 +37,22 @@ During today's interactive `/grill-me` alignment session, we architected, engine
 |     • Live Test Ping dispatcher with HTTP status feedback & delivery history payload inspector     |
 |     • docs/60: Comprehensive Zapier, Make.com, n8n integration guide with Node/Python/PHP code    |
 +----------------------------------------------------------------------------------------------------+
+|  5. CONSISTENT PRICING & SUBSCRIPTION PLAN ALIGNMENT ACROSS PLATFORM                               |
+|     • Mode-differentiated pricing baseline: Business Website ৳399/mo vs Online Store ৳699/mo       |
+|     • Dual-engine HYBRID mode gated to PRO tier (Business Pro ৳799/mo or Commerce Pro ৳1,499/mo)   |
+|     • Synchronized Marketing Pricing Hub, Wizard (/start), and Competitor Comparison matrices     |
+|     • Enhanced Admin Billing (/billing) with mode badge & direct cross-link to /settings/mode      |
+|     • Added unit test suite (billing-and-plans.test.ts) covering mode plan resolution & gating     |
++----------------------------------------------------------------------------------------------------+
+|  6. BUSINESS & PORTFOLIO DEMO REALISM & LIVE ADMIN DEMO PROVISIONING                               |
+|     • Created 12 dedicated desktop (960x600) & phone (390x844) preview assets for all 6 templates   |
+|     • Fixed /start wizard preview card bug: no longer shows clothing store (Berber) for business   |
+|     • Auto-synced business plan in wizard to Business Pro (৳799/mo, 14-day free trial)             |
+|     • Tailored wizard timeline copy to service/dining setup (QR menu, credentials, appointments)   |
+|     • Live Admin Demo Chooser (/demo) split: Online Stores vs Restaurants, Clinics & Services     |
+|     • Live admin demo session provisioning (createBusinessDemoSession) in PORTFOLIO mode           |
+|     • Auto-seeded authentic menus, table reservations, doctor appointments, and corporate leads    |
++----------------------------------------------------------------------------------------------------+
 ```
 
 ---
@@ -53,6 +69,7 @@ During today's interactive `/grill-me` alignment session, we architected, engine
 8. `commit ff5f26c`: `feat(outbox): implement Asynchronous Event Outbox and Durable Webhook Worker with HMAC signing and UI sweep triggers`
 9. `commit f977b4d`: `feat(onboarding): enhance tailored vertical onboarding with dynamic template switching, public-profile resolution, and sample content opt-out`
 10. `commit 4730928`: `feat(admin): build Merchant Webhook Management UI with signing secret rotation, live ping dispatcher, and delivery audit logs`
+11. `commit (pending)`: `feat(demo): implement authentic business template previews and live admin demo provisioning with seeded leads & dining menus`
 
 ---
 
@@ -62,6 +79,14 @@ All browser walkthrough recordings and full-resolution PNG artifacts are saved i
 
 | Artifact Name | Description | Status |
 | :--- | :--- | :--- |
+| `portfolio_mode_selected_1792316530933.png` | Marketing `/start` wizard displaying authentic Dhaka Bistro dining preview (desktop + mobile) and ৳799 Business Pro plan | Verified ✓ |
+| `modern_clinic_selected_1792316556363.png` | Marketing `/start` wizard displaying Modern Clinic & Chambers with BMDC credentials and visiting hours | Verified ✓ |
+| `apex_corporate_selected_1792316570674.png` | Marketing `/start` wizard displaying Apex Corporate Advisory preview | Verified ✓ |
+| `admin_demo_chooser_1792316603025.png` | Admin Demo Chooser (`/demo`) showing both Online Stores and Restaurants, Clinics & Services | Verified ✓ |
+| `admin_panel_dhaka_bistro_1792316660051.png` | Dhaka Bistro live Admin Command Center in PORTFOLIO mode with restaurant badge & navigation | Verified ✓ |
+| `leads_page_dhaka_bistro_1792316724609.png` | Admin Leads & Inquiries workspace showing seeded table reservations (Sadia Islam, Tanvir Hasan) and WhatsApp actions | Verified ✓ |
+| `menu_page_dhaka_bistro_1792316766260.png` | Admin Restaurant Menu workspace with Kebabs, Biryani, and Beverage categories and dish management | Verified ✓ |
+| `business_demo_preview_verification_1792316489231.webp` | Full video recording of marketing preview realism and live business admin demo provisioning | Verified ✓ |
 | `merchant_webhooks_secret_revealed_live_1792275639815.png` | Webhook Settings UI showing revealed `whsec_...` secret and active event badges | Verified ✓ |
 | `merchant_webhooks_ping_result_live_1792275666582.png` | Test Ping Dispatcher displaying live HTTP delivery status and delivery table | Verified ✓ |
 | `merchant_webhooks_payload_inspected_live_1792275712813.png` | Inspect modal rendering formatted JSON payload of the test ping | Verified ✓ |
@@ -72,6 +97,9 @@ All browser walkthrough recordings and full-resolution PNG artifacts are saved i
 | `verify_vertical_onboarding_1792271747456.webp` | Full video recording of onboarding wizard flow | Verified ✓ |
 | `merchant_outbox_success_done_1792271031571.png` | Merchant Outbox metrics card & manual sweep completion | Verified ✓ |
 | `platform_outbox_swept_1792271219125.png` | Platform Cluster Diagnostics sweep execution | Verified ✓ |
+| `billing_page_1792313389723.png` | Admin Billing workspace displaying mode badge, mode switcher cross-link, and synchronized plan cards | Verified ✓ |
+| `settings_mode_page_1792313416433.png` | Operating Mode workspace reached via direct link from Billing page | Verified ✓ |
+| `verify_billing_plans_mode_1792313368348.webp` | Full video recording of Admin Billing and Operating Mode cross-navigation | Verified ✓ |
 
 ---
 

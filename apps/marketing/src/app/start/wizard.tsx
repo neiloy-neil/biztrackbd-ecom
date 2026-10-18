@@ -262,35 +262,31 @@ export function Wizard({
   function handleCategorySelect(catId: StoreCategory) {
     const cat = CATEGORY_OPTIONS.find((c) => c.id === catId);
     set("category", catId);
-    if (!touchedTheme && cat && v.siteMode === "ECOMMERCE") {
-      const matching = themes.find((t) => t.id === cat.theme && t.live);
-      if (matching) {
-        set("theme", matching.id);
-      }
+    if (cat && v.siteMode === "ECOMMERCE") {
+      set("theme", cat.theme);
     }
   }
 
   function handleVerticalSelect(vertId: BusinessVertical) {
     const vert = VERTICAL_OPTIONS.find((c) => c.id === vertId);
     set("businessVertical", vertId);
-    if (!touchedTheme && vert) {
-      const matching = themes.find((t) => t.id === vert.recommendedTheme && t.live);
-      if (matching) {
-        set("theme", matching.id);
-      }
+    if (vert) {
+      set("theme", vert.recommendedTheme);
     }
   }
 
   function handleModeSelect(mode: "ECOMMERCE" | "PORTFOLIO" | "HYBRID") {
     set("siteMode", mode);
-    if (mode === "PORTFOLIO" && !touchedTheme) {
+    if (mode === "PORTFOLIO") {
       const vert = VERTICAL_OPTIONS.find((o) => o.id === v.businessVertical) ?? VERTICAL_OPTIONS[0]!;
-      const matching = themes.find((t) => t.id === vert.recommendedTheme && t.live);
-      if (matching) set("theme", matching.id);
-    } else if (mode === "ECOMMERCE" && !touchedTheme) {
+      set("theme", vert.recommendedTheme);
+      set("plan", "PRO");
+    } else if (mode === "ECOMMERCE") {
       const cat = CATEGORY_OPTIONS.find((c) => c.id === v.category) ?? CATEGORY_OPTIONS[0]!;
-      const matching = themes.find((t) => t.id === cat.theme && t.live);
-      if (matching) set("theme", matching.id);
+      set("theme", cat.theme);
+      set("plan", "PRO");
+    } else if (mode === "HYBRID") {
+      set("plan", "PRO");
     }
   }
 
@@ -333,10 +329,12 @@ export function Wizard({
   const isHybrid = v.siteMode === "HYBRID";
   const steps = isPortfolio ? BUSINESS_STEPS : COMMERCE_STEPS;
   const plans = isPortfolio ? businessPlans : commercePlans;
-  const defaultTheme: Theme = { id: "kapor", name: "Kapor", blurb: "Modern fashion & apparel theme", live: true };
-  const chosenTheme: Theme = themes.find((t) => t.id === v.theme) ?? themes[0] ?? defaultTheme;
+  const defaultTheme: Theme = isPortfolio
+    ? { id: chosenVertical.recommendedTheme, name: chosenVertical.name, blurb: "Tailored business website template", live: true }
+    : { id: "kapor", name: "Kapor", blurb: "Modern fashion & apparel theme", live: true };
+  const chosenTheme: Theme = themes.find((t) => t.id === v.theme) ?? defaultTheme;
   const defaultPlan: Plan = isPortfolio
-    ? { tier: "PRO", name: "Business", priceMonthly: 399, blurb: "Business website features with a 14-day free trial" }
+    ? { tier: "PRO", name: "Business", priceMonthly: 799, blurb: "Business website features with a 14-day free trial" }
     : { tier: "PRO", name: "Pro", priceMonthly: 1499, blurb: "Commerce features with a 14-day free trial" };
   const chosenPlan: Plan = plans.find((p) => p.tier === v.plan) ?? plans[0] ?? defaultPlan;
   const displayHost = rootDomain.replace(/:\d+$/, "");
@@ -1232,7 +1230,7 @@ export function Wizard({
             }}
           >
             <Image
-              src={`/templates/${chosenTheme?.look ?? v.theme}.webp`}
+              src={`/templates/${isPortfolio ? v.theme : (chosenTheme?.look ?? v.theme)}.webp`}
               alt={`${chosenTheme?.name} preview`}
               fill
               sizes="340px"
@@ -1252,7 +1250,7 @@ export function Wizard({
               }}
             >
               <Image
-                src={`/templates/${chosenTheme?.look ?? v.theme}-phone.webp`}
+                src={`/templates/${isPortfolio ? v.theme : (chosenTheme?.look ?? v.theme)}-phone.webp`}
                 alt={`${chosenTheme?.name} phone preview`}
                 fill
                 sizes="90px"
@@ -1288,12 +1286,12 @@ export function Wizard({
             </div>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
               <span style={{ color: "var(--ink-3)", fontWeight: 600 }}>Template:</span>
-              <span style={{ color: "var(--ink)", fontWeight: 600 }}>{chosenTheme?.name || "Kapor"}</span>
+              <span style={{ color: "var(--ink)", fontWeight: 600 }}>{chosenTheme?.name || (isPortfolio ? chosenVertical.name : "Kapor")}</span>
             </div>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
               <span style={{ color: "var(--ink-3)", fontWeight: 600 }}>Plan:</span>
               <span style={{ color: "var(--ink)", fontWeight: 600 }}>
-                {chosenPlan?.name} (Free Trial, {taka(chosenPlan?.priceMonthly || 399)}/mo after)
+                {chosenPlan?.name || (isPortfolio ? "Business" : "Pro")} (Free Trial, {taka(chosenPlan?.priceMonthly || (isPortfolio ? 799 : 1499))}/mo after)
               </span>
             </div>
           </div>

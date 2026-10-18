@@ -100,7 +100,7 @@ export function PricingView({
               transition: "all 0.2s ease",
             }}
           >
-            <span aria-hidden="true">🛍️</span> Online Store Plans
+            <span aria-hidden="true">🛍️</span> Online Store Plans <span style={{ fontSize: 11, opacity: 0.85, fontWeight: 600 }}>(From ৳699/mo)</span>
           </button>
 
           <button
@@ -128,19 +128,7 @@ export function PricingView({
               transition: "all 0.2s ease",
             }}
           >
-            <span aria-hidden="true">💼</span> Business &amp; Portfolio
-            <span
-              style={{
-                fontSize: 10,
-                padding: "2px 6px",
-                borderRadius: 99,
-                background: "#E9E7FD",
-                color: "#5B4FE8",
-                fontWeight: 800,
-              }}
-            >
-              NEW
-            </span>
+            <span aria-hidden="true">🏢</span> Business &amp; Dining <span style={{ fontSize: 11, opacity: 0.85, fontWeight: 600 }}>(From ৳399/mo)</span>
           </button>
         </div>
       </div>

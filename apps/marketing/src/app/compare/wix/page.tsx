@@ -66,7 +66,7 @@ const COMPARISON_ROWS = [
   {
     feature: "Monthly Subscription Currency",
     wix: "USD ($17 – $36/month + 15% bank surcharge)",
-    biztrack: "Flat BDT (৳ 399 – ৳ 1,499/month)",
+    biztrack: "Business from ৳399/mo · Commerce from ৳699/mo (Flat BDT)",
     verdict: "BizTrackBD saves ৳ 2,000–৳ 4,000 monthly with zero currency risk",
   },
   {

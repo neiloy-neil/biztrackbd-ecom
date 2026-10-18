@@ -53,7 +53,7 @@ const COMPARISON_ROWS = [
   {
     feature: "Monthly Base Price",
     shopify: "$39 USD / month (≈ ৳ 5,600 with card tax)",
-    biztrack: "৳ 399 - ৳ 1,499 / month (Flat in BDT)",
+    biztrack: "Business from ৳399/mo · Commerce from ৳699/mo (Flat BDT)",
     verdict: "BizTrackBD saves ৳ 4,100–৳ 5,200 monthly on base software alone",
   },
   {
@@ -190,7 +190,7 @@ export default function CompareShopifyPage() {
           <div className="metric-pill-row">
             <div className="metric-pill">
               <span>💳</span>
-              <span><strong>Base Price:</strong> Flat ৳399–৳1,499/mo (bKash) vs $39 USD/mo (≈ ৳5,600 with card tax)</span>
+              <span><strong>Base Price:</strong> Business from ৳399/mo · Commerce from ৳699/mo (via bKash) vs $39 USD/mo</span>
             </div>
             <div className="metric-pill">
               <span>✂️</span>
@@ -299,7 +299,7 @@ export default function CompareShopifyPage() {
                   </div>
                   <div className="console-metric-item">
                     <span>Monthly Software Cost</span>
-                    <span className="console-metric-val console-val-success">Flat ৳399 - ৳1,499/mo (bKash)</span>
+                    <span className="console-metric-val console-val-success">Flat ৳699 - ৳3,499/mo (bKash)</span>
                   </div>
                 </div>
               </div>

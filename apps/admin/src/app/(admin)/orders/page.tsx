@@ -115,6 +115,7 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
                 <SubmitButton formAction={bulkCancelAction} className="btn btn-danger btn-sm" pending="Cancelling…" data-testid="bulk-cancel">Cancel selected</SubmitButton>
                 <button className="btn btn-secondary btn-sm" type="submit" formAction="/orders/print" formMethod="get" formTarget="_blank" name="doc" value="slip">Print packing slips</button>
                 <button className="btn btn-secondary btn-sm" type="submit" formAction="/orders/print" formMethod="get" formTarget="_blank" name="doc" value="invoice">Print invoices</button>
+                <button className="btn btn-secondary btn-sm" type="submit" formAction="/orders/print" formMethod="get" formTarget="_blank" name="doc" value="kitchen_slip">Print KOT</button>
               </BulkBar>
             )}
 

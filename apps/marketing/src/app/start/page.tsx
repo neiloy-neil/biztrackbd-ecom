@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { THEMES, listPublicPlans, listPublicPortfolioPlans, listPublishedTemplates, readKeptStore, verificationRequired } from "@biztrackbd/core";
+import { THEMES, BUSINESS_TEMPLATES, listPublicPlans, listPublicPortfolioPlans, listPublishedTemplates, readKeptStore, verificationRequired } from "@biztrackbd/core";
 import { planBullets, portfolioPlanBullets } from "@/lib/plans";
 import { Wizard } from "./wizard";
 
@@ -46,7 +46,19 @@ export default async function Start({
   const kept = from ? await readKeptStore(from).catch(() => null) : null;
   // The templates on offer are the published list (the originals plus any staff have published). If it cannot be read, the originals still work.
   const templates = await listPublishedTemplates().catch(() => []);
-  const offered = templates.length > 0 ? templates.map((t) => ({ id: t.id, name: t.name, blurb: t.blurb, live: true, look: t.baseLook })) : THEMES.map((t) => ({ id: t.id, name: t.name, blurb: t.blurb, live: t.live, look: t.id }));
+  const fallbackTemplates = [
+    ...THEMES.map((t) => ({ id: t.id, name: t.name, blurb: t.blurb, live: t.live, look: t.id })),
+    ...BUSINESS_TEMPLATES.map((bt) => ({ id: bt.id, name: bt.name, blurb: bt.blurb, live: true, look: bt.id })),
+  ];
+  const offered = templates.length > 0
+    ? templates.map((t) => ({
+        id: t.id,
+        name: t.name,
+        blurb: t.blurb,
+        live: true,
+        look: t.siteMode === "PORTFOLIO" ? t.id : t.baseLook,
+      }))
+    : fallbackTemplates;
   const requestedTemplate = (typeof sp.template === "string" ? sp.template : wantedTheme).toLowerCase();
   const wantedTemplate = requestedTemplate === "corporate-trust" ? "apex-corporate" : requestedTemplate;
   let resolvedMode: "ECOMMERCE" | "PORTFOLIO" | "HYBRID" | null = null;

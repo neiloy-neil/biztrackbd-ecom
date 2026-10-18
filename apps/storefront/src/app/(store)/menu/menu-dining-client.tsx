@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import type {
   PublicMenuCategory,
   PublicMenuItem,
   StoreInfo,
+  TableOrderResult,
 } from "@biztrackbd/core";
 import type { Lang } from "@/lib/i18n-core";
 
@@ -72,6 +73,25 @@ export function MenuDiningClient({
   const [tray, setTray] = useState<Record<string, number>>({});
   const [isTrayOpen, setIsTrayOpen] = useState(false);
   const [specialNote, setSpecialNote] = useState("");
+
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [activeTicket, setActiveTicket] = useState<TableOrderResult | null>(null);
+  const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
+
+  useEffect(() => {
+    try {
+      const savedPhone = localStorage.getItem("biztrack_table_phone");
+      const savedName = localStorage.getItem("biztrack_table_name");
+      if (savedPhone) setCustomerPhone(savedPhone);
+      if (savedName) setCustomerName(savedName);
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const waNumber = storeInfo.whatsappNumber || storeInfo.contactPhone;
 
@@ -200,6 +220,79 @@ export function MenuDiningClient({
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
+  const handleOpenKitchenCheckout = () => {
+    setSubmitError(null);
+    setIsTrayOpen(false);
+    setIsCheckoutOpen(true);
+  };
+
+  const handleConfirmTableOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const effectiveTable = (activeTable || tableInput).trim();
+    if (!effectiveTable) {
+      setSubmitError(lang === "bn" ? "টেবিল নম্বর আবশ্যক।" : "Please specify your table number.");
+      return;
+    }
+
+    const digits = customerPhone.replace(/\D/g, "");
+    if (digits.length < 10) {
+      setSubmitError(
+        lang === "bn"
+          ? "সঠিক মোবাইল নম্বর লিখুন (যেমন: 01712345678)।"
+          : "Please enter a valid mobile number (e.g. 01712345678)."
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const itemsPayload = trayEntries.map(({ item, qty }) => ({
+        menuItemId: item.id,
+        quantity: qty,
+        note: specialNote.trim() || undefined,
+      }));
+
+      const res = await fetch("/api/site/table-orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          table: effectiveTable,
+          customerPhone: customerPhone.trim(),
+          customerName: customerName.trim() || undefined,
+          notes: specialNote.trim() || undefined,
+          items: itemsPayload,
+        }),
+      });
+
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        throw new Error(json.error || "Failed to submit table order.");
+      }
+
+      try {
+        localStorage.setItem("biztrack_table_phone", customerPhone.trim());
+        if (customerName.trim()) {
+          localStorage.setItem("biztrack_table_name", customerName.trim());
+        }
+      } catch {
+        // ignore
+      }
+
+      setActiveTable(effectiveTable);
+      setTray({});
+      setSpecialNote("");
+      setIsCheckoutOpen(false);
+      setActiveTicket(json.data);
+      setIsTicketModalOpen(true);
+    } catch (err: any) {
+      setSubmitError(err.message || "Failed to send order to kitchen. Please retry or call waiter.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg, #f8fafc)", paddingBottom: totalCount > 0 ? 120 : 60 }}>
       {/* Top Restaurant Header */}
@@ -273,6 +366,83 @@ export function MenuDiningClient({
 
       {/* Table & Service Bar */}
       <div style={{ maxWidth: 960, margin: "16px auto", padding: "0 16px" }}>
+        {/* Active Dining Ticket Banner */}
+        {activeTicket && !isTicketModalOpen && (
+          <div
+            style={{
+              background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+              color: "#ffffff",
+              borderRadius: 14,
+              padding: "12px 18px",
+              marginBottom: 14,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: 12,
+              boxShadow: "0 4px 12px rgba(15, 23, 42, 0.15)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 10,
+                  background: "rgba(16, 185, 129, 0.2)",
+                  color: "#10b981",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 20,
+                }}
+              >
+                👨‍🍳
+              </div>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <strong style={{ fontSize: "0.95rem" }}>
+                    {lang === "bn" ? `অর্ডার #${activeTicket.orderNumber} রান্নাঘরে তৈরি হচ্ছে` : `Order #${activeTicket.orderNumber} in Kitchen`}
+                  </strong>
+                  <span
+                    style={{
+                      background: "#10b981",
+                      color: "#ffffff",
+                      fontSize: "0.68rem",
+                      fontWeight: 700,
+                      padding: "2px 6px",
+                      borderRadius: 4,
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Preparing
+                  </span>
+                </div>
+                <div style={{ fontSize: "0.78rem", color: "#94a3b8" }}>
+                  Table {activeTicket.table} · ৳{activeTicket.totalAmount.toLocaleString("en-BD")}
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsTicketModalOpen(true)}
+              style={{
+                background: "#38bdf8",
+                color: "#0f172a",
+                border: "none",
+                padding: "8px 14px",
+                borderRadius: 8,
+                fontSize: "0.82rem",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              {lang === "bn" ? "টিকিট দেখুন 🧾" : "View Ticket 🧾"}
+            </button>
+          </div>
+        )}
+
         {activeTable ? (
           <div
             style={{
@@ -1048,43 +1218,70 @@ export function MenuDiningClient({
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {/* Primary: Send Order to Kitchen */}
+              <button
+                type="button"
+                onClick={handleOpenKitchenCheckout}
+                style={{
+                  width: "100%",
+                  background: "var(--btn-bg, #0f172a)",
+                  color: "var(--btn-fg, #ffffff)",
+                  border: "none",
+                  padding: "14px",
+                  borderRadius: 12,
+                  fontWeight: 800,
+                  fontSize: "1rem",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  boxShadow: "0 4px 14px rgba(15, 23, 42, 0.2)",
+                }}
+              >
+                <span style={{ fontSize: "1.2rem" }}>👨‍🍳</span>
+                {activeTable
+                  ? lang === "bn"
+                    ? `টেবিল ${activeTable} এর অর্ডার রান্নাঘরে পাঠান`
+                    : `Send Table ${activeTable} Order to Kitchen`
+                  : lang === "bn"
+                  ? "রান্নাঘরে সরাসরি অর্ডার পাঠান"
+                  : "Send Order Directly to Kitchen"}
+              </button>
+
+              {/* Secondary: Send Order via WhatsApp */}
               {waNumber ? (
                 <button
                   type="button"
                   onClick={handleSendOrderWhatsApp}
                   style={{
                     width: "100%",
-                    background: "#16a34a",
-                    color: "#ffffff",
-                    border: "none",
-                    padding: "14px",
+                    background: "rgba(22, 163, 74, 0.08)",
+                    color: "#15803d",
+                    border: "1px solid rgba(22, 163, 74, 0.25)",
+                    padding: "12px",
                     borderRadius: 12,
-                    fontWeight: 800,
-                    fontSize: "1rem",
+                    fontWeight: 700,
+                    fontSize: "0.92rem",
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     gap: 8,
-                    boxShadow: "0 4px 12px rgba(22, 163, 74, 0.25)",
                   }}
                 >
                   <span>💬</span>
                   {activeTable
                     ? lang === "bn"
-                      ? `টেবিল ${activeTable} এর অর্ডার হোয়াটসঅ্যাপে পাঠান`
-                      : `Send Table ${activeTable} Order via WhatsApp`
+                      ? `বা টেবিল ${activeTable} এর অর্ডার হোয়াটসঅ্যাপে পাঠান`
+                      : `Or Send via WhatsApp`
                     : lang === "bn"
-                    ? "হোয়াটসঅ্যাপে অর্ডার পাঠান"
-                    : "Send Order via WhatsApp"}
+                    ? "বা হোয়াটসঅ্যাপে অর্ডার পাঠান"
+                    : "Or Send via WhatsApp"}
                 </button>
-              ) : (
-                <div style={{ color: "#dc2626", fontSize: "0.85rem", textAlign: "center" }}>
-                  Restaurant WhatsApp number not configured in Settings.
-                </div>
-              )}
+              ) : null}
 
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginTop: 4 }}>
                 <button
                   type="button"
                   onClick={clearTray}
@@ -1119,6 +1316,421 @@ export function MenuDiningClient({
                   {lang === "bn" ? "আরো খাবার যোগ করুন" : "Add More Items"}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Direct Table Checkout Modal */}
+      {isCheckoutOpen && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 0, 0, 0.55)",
+            backdropFilter: "blur(4px)",
+            zIndex: 70,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 16,
+          }}
+          onClick={() => setIsCheckoutOpen(false)}
+        >
+          <div
+            style={{
+              background: "var(--surface, #ffffff)",
+              borderRadius: 20,
+              maxWidth: 480,
+              width: "100%",
+              padding: "24px 22px",
+              boxShadow: "0 20px 40px -10px rgba(0,0,0,0.3)",
+              maxHeight: "90vh",
+              overflowY: "auto",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 24 }}>👨‍🍳</span>
+                  <h2 style={{ fontSize: "1.25rem", fontWeight: 800, margin: 0 }}>
+                    {lang === "bn" ? "রান্নাঘরে অর্ডার নিশ্চিতকরণ" : "Confirm Table Order"}
+                  </h2>
+                </div>
+                <p style={{ margin: "4px 0 0", fontSize: "0.82rem", color: "var(--muted, #64748b)" }}>
+                  {lang === "bn"
+                    ? "অর্ডারটি সরাসরি কিচেন প্রিন্টার ও শেফ স্ক্রিনে চলে যাবে।"
+                    : "Dispatched straight to the kitchen chef station & receipt printer."}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCheckoutOpen(false)}
+                style={{
+                  border: "none",
+                  background: "var(--tint-1, #f1f5f9)",
+                  width: 32,
+                  height: 32,
+                  borderRadius: "50%",
+                  fontSize: 16,
+                  cursor: "pointer",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleConfirmTableOrder} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {/* Table Selection / Confirmation */}
+              <div style={{ background: "rgba(16, 185, 129, 0.08)", border: "1px solid rgba(16, 185, 129, 0.25)", borderRadius: 12, padding: "12px 14px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                  <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "#065f46" }}>
+                    🍽️ {lang === "bn" ? "টেবিল নম্বর" : "Dining Table #"} <span style={{ color: "#dc2626" }}>*</span>
+                  </label>
+                  {activeTable && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTableInput(activeTable);
+                        setActiveTable(null);
+                      }}
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        color: "#047857",
+                        fontSize: "0.78rem",
+                        textDecoration: "underline",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {lang === "bn" ? "পরিবর্তন" : "Change"}
+                    </button>
+                  )}
+                </div>
+                {activeTable ? (
+                  <div style={{ fontSize: "1.35rem", fontWeight: 900, color: "#065f46" }}>
+                    Table {activeTable}
+                  </div>
+                ) : (
+                  <input
+                    type="text"
+                    required
+                    placeholder={lang === "bn" ? "যেমন: 4 বা VIP-1" : "e.g. 4 or VIP-1"}
+                    value={tableInput}
+                    onChange={(e) => setTableInput(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      borderRadius: 8,
+                      border: "1px solid #10b981",
+                      background: "#ffffff",
+                      fontSize: "1rem",
+                      fontWeight: 700,
+                    }}
+                  />
+                )}
+              </div>
+
+              {/* Customer Phone */}
+              <div>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: 4 }}>
+                  📱 {lang === "bn" ? "মোবাইল নম্বর (বিল ও SMS এর জন্য)" : "Mobile Phone Number"} <span style={{ color: "#dc2626" }}>*</span>
+                </label>
+                <input
+                  type="tel"
+                  required
+                  placeholder="017XXXXXXXX"
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    borderRadius: 10,
+                    border: "1px solid var(--border, #cbd5e1)",
+                    fontSize: "0.95rem",
+                    outline: "none",
+                  }}
+                />
+              </div>
+
+              {/* Guest Name */}
+              <div>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: 4 }}>
+                  👤 {lang === "bn" ? "আপনার নাম (অপশনাল)" : "Your Name (Optional)"}
+                </label>
+                <input
+                  type="text"
+                  placeholder={lang === "bn" ? "যেমন: তানভীর" : "e.g. Tanvir"}
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    borderRadius: 10,
+                    border: "1px solid var(--border, #cbd5e1)",
+                    fontSize: "0.95rem",
+                    outline: "none",
+                  }}
+                />
+              </div>
+
+              {/* Kitchen Notes */}
+              <div>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: 4 }}>
+                  📝 {lang === "bn" ? "শেফের জন্য বিশেষ বার্তা (অপশনাল)" : "Special Requests for Kitchen (Optional)"}
+                </label>
+                <input
+                  type="text"
+                  placeholder={lang === "bn" ? "যেমন: ঝাল কম, সালাদ বেশি" : "e.g. Less spicy, extra sauce"}
+                  value={specialNote}
+                  onChange={(e) => setSpecialNote(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    borderRadius: 10,
+                    border: "1px solid var(--border, #cbd5e1)",
+                    fontSize: "0.9rem",
+                    outline: "none",
+                  }}
+                />
+              </div>
+
+              {/* Order Summary Strip */}
+              <div style={{ background: "var(--tint-1, #f8fafc)", border: "1px dashed var(--border, #cbd5e1)", borderRadius: 10, padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ fontSize: "0.82rem", color: "var(--muted, #64748b)" }}>
+                    {totalCount} {lang === "bn" ? "টি খাবার" : "dishes"}
+                  </div>
+                  <div style={{ fontSize: "1.15rem", fontWeight: 800 }}>
+                    ৳{totalPrice.toLocaleString("en-BD")}
+                  </div>
+                </div>
+                <span style={{ fontSize: "0.78rem", background: "rgba(0,0,0,0.06)", padding: "4px 8px", borderRadius: 6, fontWeight: 600 }}>
+                  💵 Pay after Dining
+                </span>
+              </div>
+
+              {submitError && (
+                <div style={{ background: "#fee2e2", border: "1px solid #f87171", color: "#991b1b", padding: "10px 12px", borderRadius: 8, fontSize: "0.85rem", fontWeight: 600 }}>
+                  ⚠️ {submitError}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                style={{
+                  background: "var(--btn-bg, #0f172a)",
+                  color: "var(--btn-fg, #ffffff)",
+                  border: "none",
+                  padding: "14px",
+                  borderRadius: 12,
+                  fontWeight: 800,
+                  fontSize: "1rem",
+                  cursor: isSubmitting ? "not-allowed" : "pointer",
+                  opacity: isSubmitting ? 0.7 : 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  boxShadow: "0 4px 12px rgba(15, 23, 42, 0.2)",
+                }}
+              >
+                {isSubmitting ? (
+                  <span>⏳ {lang === "bn" ? "অর্ডার পাঠানো হচ্ছে..." : "Sending to Kitchen..."}</span>
+                ) : (
+                  <>
+                    <span>👨‍🍳</span>
+                    <span>{lang === "bn" ? "অর্ডার নিশ্চিত করুন" : "Confirm & Send to Kitchen"}</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCheckoutOpen(false);
+                  setIsTrayOpen(true);
+                }}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "var(--muted, #64748b)",
+                  fontSize: "0.85rem",
+                  cursor: "pointer",
+                }}
+              >
+                ← {lang === "bn" ? "ব্যাগে ফিরে যান" : "Back to Tray"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Live Digital Dining Ticket Modal */}
+      {activeTicket && isTicketModalOpen && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 0, 0, 0.65)",
+            backdropFilter: "blur(6px)",
+            zIndex: 80,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 16,
+          }}
+          onClick={() => setIsTicketModalOpen(false)}
+        >
+          <div
+            style={{
+              background: "var(--surface, #ffffff)",
+              borderRadius: 22,
+              maxWidth: 480,
+              width: "100%",
+              padding: "26px 22px",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.35)",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              textAlign: "center",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Animated Cooking / Confirmation Icon */}
+            <div
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: "50%",
+                background: "rgba(16, 185, 129, 0.12)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 36,
+                margin: "0 auto 14px",
+                border: "2px solid rgba(16, 185, 129, 0.3)",
+              }}
+            >
+              👨‍🍳
+            </div>
+
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#ecfdf5", color: "#065f46", padding: "4px 12px", borderRadius: 9999, fontSize: "0.78rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981", display: "inline-block" }} />
+              Kitchen Preparing
+            </div>
+
+            <h2 style={{ fontSize: "1.4rem", fontWeight: 800, margin: "0 0 6px" }}>
+              {lang === "bn" ? "অর্ডার রান্নাঘরে পৌঁছেছে!" : "Order Sent to Kitchen!"}
+            </h2>
+            <p style={{ margin: "0 0 16px", fontSize: "0.86rem", color: "var(--muted, #64748b)" }}>
+              {lang === "bn"
+                ? `আপনার খাবার তৈরি হচ্ছে। রেডি হলে সরাসরি টেবিল ${activeTicket.table}-এ পরিবেশন করা হবে।`
+                : `Our chefs are now preparing your order. Food will be served directly to Table ${activeTicket.table}.`}
+            </p>
+
+            {/* Ticket Details Box */}
+            <div
+              style={{
+                background: "var(--tint-1, #f8fafc)",
+                border: "1px solid var(--border, #e2e8f0)",
+                borderRadius: 14,
+                padding: 16,
+                textAlign: "left",
+                marginBottom: 18,
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px dashed var(--border, #cbd5e1)", paddingBottom: 10, marginBottom: 10 }}>
+                <div>
+                  <div style={{ fontSize: "0.75rem", color: "var(--muted, #64748b)", textTransform: "uppercase" }}>
+                    Order Ticket
+                  </div>
+                  <strong style={{ fontSize: "1.1rem" }}>#{activeTicket.orderNumber}</strong>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <span
+                    style={{
+                      background: "#0f172a",
+                      color: "#ffffff",
+                      padding: "4px 12px",
+                      borderRadius: 8,
+                      fontSize: "0.95rem",
+                      fontWeight: 900,
+                    }}
+                  >
+                    🍽️ TABLE {activeTicket.table}
+                  </span>
+                </div>
+              </div>
+
+              {/* Items summary */}
+              {activeTicket.items && activeTicket.items.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
+                  {activeTicket.items.map((it, idx) => (
+                    <div key={idx} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.88rem" }}>
+                      <div>
+                        <strong>{it.quantity}x</strong> {lang === "bn" && it.nameBn ? it.nameBn : it.name}
+                        {it.note && <div style={{ fontSize: "0.75rem", color: "#c2410c" }}>⚠️ {it.note}</div>}
+                      </div>
+                      <div style={{ fontWeight: 600 }}>৳{it.lineTotal.toLocaleString("en-BD")}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid var(--border, #e2e8f0)", paddingTop: 10 }}>
+                <span style={{ fontWeight: 700, fontSize: "0.95rem" }}>
+                  {lang === "bn" ? "মোট বিল" : "Total Bill"}
+                </span>
+                <span style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--accent, #d97706)" }}>
+                  ৳{activeTicket.totalAmount.toLocaleString("en-BD")}
+                </span>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <button
+                type="button"
+                onClick={() => setIsTicketModalOpen(false)}
+                style={{
+                  width: "100%",
+                  background: "var(--btn-bg, #0f172a)",
+                  color: "var(--btn-fg, #ffffff)",
+                  border: "none",
+                  padding: "12px",
+                  borderRadius: 12,
+                  fontWeight: 800,
+                  fontSize: "0.95rem",
+                  cursor: "pointer",
+                }}
+              >
+                ➕ {lang === "bn" ? "টেবিলের জন্য আরো খাবার যোগ করুন" : `Order More Dishes for Table ${activeTicket.table}`}
+              </button>
+
+              {waNumber && (
+                <button
+                  type="button"
+                  onClick={handleCallWaiterWhatsApp}
+                  style={{
+                    width: "100%",
+                    background: "#ffffff",
+                    color: "#065f46",
+                    border: "1px solid rgba(16, 185, 129, 0.4)",
+                    padding: "10px",
+                    borderRadius: 12,
+                    fontWeight: 700,
+                    fontSize: "0.88rem",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                  }}
+                >
+                  🛎️ {lang === "bn" ? "ওয়েটার ডাকুন বা জল চান" : "Call Waiter / Ask for Service"}
+                </button>
+              )}
             </div>
           </div>
         </div>

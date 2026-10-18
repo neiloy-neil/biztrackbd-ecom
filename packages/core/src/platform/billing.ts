@@ -89,7 +89,7 @@ export const FALLBACK_PORTFOLIO_PLANS: PlanView[] = [
     yearlyMonthsFree: 2,
     trialDays: 14,
     limits: { products: 0, ordersPerMonth: 0, staff: 3, storageGb: 20, smsCredits: 0, landingPages: 20 },
-    features: { customDomain: true, leadCapture: true, downloadsLimit: "unlimited", contentItemsLimit: "unlimited", bookingRequests: true, whatsappAlerts: true, teamProfiles: true, hybridStore: false, mode: "PORTFOLIO" },
+    features: { customDomain: true, leadCapture: true, downloadsLimit: "unlimited", contentItemsLimit: "unlimited", bookingRequests: true, whatsappAlerts: true, teamProfiles: true, hybridStore: true, mode: "PORTFOLIO" },
   },
   {
     tier: "BUSINESS",
@@ -155,6 +155,8 @@ export function paymentTargets(env: NodeJS.ProcessEnv = process.env): PayTo[] {
 export interface BillingOverview {
   storeName: string;
   tier: string;
+  siteMode: string;
+  businessVertical: string | null;
   access: Access;
   subscription: { tier: string; interval: string; amount: number; periodStart: Date; periodEnd: Date } | null;
   plans: PlanView[];
@@ -186,7 +188,7 @@ export async function getStoreAccess(tenantId: string, now: Date = new Date(), c
 export async function getBillingOverview(tenantId: string, actor: StaffActor, now: Date = new Date()): Promise<BillingOverview> {
   assertCan(actor, "billing", "view");
   return withTenant(tenantId, async (tx) => {
-    const t = await tx.tenant.findFirst({ select: { name: true, planTier: true, siteMode: true, status: true, trialEndsAt: true, suspendedReason: true } });
+    const t = await tx.tenant.findFirst({ select: { name: true, planTier: true, siteMode: true, businessVertical: true, status: true, trialEndsAt: true, suspendedReason: true } });
     if (!t) throw new NotFoundError("Store");
     const plans = await listPublicPlansForSiteMode(t.siteMode);
     const sub = await tx.subscription.findFirst();
@@ -194,6 +196,8 @@ export async function getBillingOverview(tenantId: string, actor: StaffActor, no
     const views = proofs.map(toProof);
     return {
       storeName: t.name, tier: t.planTier,
+      siteMode: t.siteMode ?? "ECOMMERCE",
+      businessVertical: t.businessVertical ?? null,
       access: accessState({ status: t.status, trialEndsAt: t.trialEndsAt, suspendedReason: t.suspendedReason, subscription: sub ? { amount: Number(sub.amount), currentPeriodEnd: sub.currentPeriodEnd } : null }, now),
       subscription: sub ? { tier: sub.planTier, interval: sub.interval, amount: Number(sub.amount), periodStart: sub.currentPeriodStart, periodEnd: sub.currentPeriodEnd } : null,
       plans, usage: await readUsage(tx, now), proofs: views, pending: views.find((p) => p.status === "PENDING") ?? null, payTo: paymentTargets(),

@@ -445,12 +445,14 @@ export * from "./site/leads";
 export * from "./site/bookings";
 export * from "./site/menu";
 export * from "./site/qr";
+export * from "./site/table-orders";
 export * from "./site/content-items";
 export * from "./site/downloads";
 export * from "./site/abuse-protection";
 export * from "./site/templates/manifests";
 export * from "./demo/business-templates";
 export * from "./demo/business-seed";
+export * from "./site/provisioning";
 
 // Marketing Attribution & Multi-Touch Tracking
 export * from "./growth/attribution";

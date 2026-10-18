@@ -174,7 +174,7 @@ export default function CompareWooCommercePage() {
             </div>
             <div className="metric-pill">
               <span>💰</span>
-              <span><strong>True Annual Cost:</strong> Flat ৳4,788/yr vs ৳45,000–৳90,000/yr (VPS + licenses + dev retainers)</span>
+              <span><strong>True Annual Cost:</strong> From ৳6,990/yr (৳699/mo) vs ৳45,000–৳90,000/yr (VPS + licenses + dev retainers)</span>
             </div>
           </div>
         </div>
@@ -271,7 +271,7 @@ export default function CompareWooCommercePage() {
                   </div>
                   <div className="console-metric-item">
                     <span>True Annual Cost</span>
-                    <span className="console-metric-val console-val-success">Flat ৳4,788/yr (৳399/mo)</span>
+                    <span className="console-metric-val console-val-success">From ৳6,990/yr (৳699/mo)</span>
                   </div>
                 </div>
               </div>

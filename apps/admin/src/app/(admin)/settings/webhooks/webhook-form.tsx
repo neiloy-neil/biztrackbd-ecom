@@ -8,8 +8,63 @@ import {
   saveWebhookAction,
   rotateWebhookSecretAction,
   sendTestWebhookPingAction,
+  retryFailedWebhookDeliveriesAction,
   type WebhookFormState,
 } from "./actions";
+
+interface AutomationPreset {
+  id: string;
+  name: string;
+  badge: string;
+  badgeColor: string;
+  urlPlaceholder: string;
+  recommendedEvents: string[];
+  helperText: string;
+  guideNote: string;
+}
+
+const AUTOMATION_PRESETS: AutomationPreset[] = [
+  {
+    id: "zapier",
+    name: "Zapier Catch Hook",
+    badge: "Zapier",
+    badgeColor: "#ff4a00",
+    urlPlaceholder: "https://hooks.zapier.com/hooks/catch/1234567/abcdef/",
+    recommendedEvents: ["order.created", "order.delivered", "lead.created", "booking.created", "customer.registered"],
+    helperText: "Trigger Zapier workflows automatically. Connects to Google Sheets, SMS, CRM, Slack, and 5,000+ apps.",
+    guideNote: "Create a 'Webhooks by Zapier' trigger with 'Catch Hook', paste the generated webhook URL below, and send a test ping.",
+  },
+  {
+    id: "make",
+    name: "Make.com (Integromat)",
+    badge: "Make",
+    badgeColor: "#6d28d9",
+    urlPlaceholder: "https://hook.eu1.make.com/abcdef1234567890",
+    recommendedEvents: ["order.created", "order.delivered", "lead.created", "booking.created", "customer.registered"],
+    helperText: "Execute complex multi-branch scenarios in Make.com with automated JSON parsing.",
+    guideNote: "Add a 'Custom Webhook' module in Make, copy the address here, and trigger a Test Ping to auto-map data structures.",
+  },
+  {
+    id: "discord",
+    name: "Discord / Slack Channel",
+    badge: "Chat Alert",
+    badgeColor: "#5865f2",
+    urlPlaceholder: "https://discord.com/api/webhooks/123456789/abcdefgh",
+    recommendedEvents: ["order.created", "order.delivered", "lead.created"],
+    helperText: "Stream sales alerts, parcel deliveries, and lead notifications straight into your team chat channel.",
+    guideNote: "Create an Incoming Webhook in your Discord channel settings or Slack app integrations and paste the webhook URL.",
+  },
+  {
+    id: "custom",
+    name: "Custom Webhook Endpoint",
+    badge: "API",
+    badgeColor: "#64748b",
+    urlPlaceholder: "https://your-domain.com/api/webhooks/biztrack",
+    recommendedEvents: ["order.created", "order.delivered", "lead.created", "booking.created", "customer.registered"],
+    helperText: "Send HMAC-SHA256 signed JSON payloads to your own backend server, Node.js, Python, or PHP service.",
+    guideNote: "Verify signatures using the X-BizTrack-Signature header and your secret token.",
+  },
+];
 
 export function WebhookForm({
   overview,
@@ -41,7 +96,39 @@ export function WebhookForm({
     message: string;
   } | null>(null);
 
+  const [activePreset, setActivePreset] = useState<string | null>(null);
+  const [retryPending, startRetry] = useTransition();
+  const [retryMessage, setRetryMessage] = useState<string | null>(null);
+
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
+
+  function applyPreset(preset: AutomationPreset) {
+    setActivePreset(preset.id);
+    setSelectedEvents(preset.recommendedEvents);
+    if (!url || AUTOMATION_PRESETS.some((p) => url === p.urlPlaceholder)) {
+      setUrl(preset.urlPlaceholder);
+    }
+  }
+
+  function handleRetryFailed() {
+    setRetryMessage(null);
+    startRetry(async () => {
+      const res = await retryFailedWebhookDeliveriesAction();
+      if (res.ok) {
+        setRetryMessage(res.message || "Failed delivery jobs re-queued.");
+      } else {
+        setRetryMessage(res.error || "Failed to retry delivery jobs.");
+      }
+    });
+  }
+
+  // Calculate consecutive failures for DLQ alert
+  let consecutiveFailures = 0;
+  for (const log of overview.recentLogs) {
+    if (!log.isSuccess) consecutiveFailures++;
+    else break;
+  }
+  const selectedPresetMeta = AUTOMATION_PRESETS.find((p) => p.id === activePreset);
 
   useEffect(() => {
     if (sub?.targetUrl) setUrl(sub.targetUrl);
@@ -100,6 +187,31 @@ export function WebhookForm({
           </div>
         )}
 
+        {/* DLQ Failure Threshold Alert */}
+        {consecutiveFailures >= 5 && (
+          <div
+            className="notice notice-danger"
+            style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}
+            data-testid="dlq-consecutive-failure-alert"
+          >
+            <div>
+              <strong>Webhook Delivery Alert:</strong> Your endpoint has failed {consecutiveFailures} consecutive deliveries. Your receiving service may be down, timing out, or returning 5xx server errors.
+            </div>
+            {canEdit && (
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={handleRetryFailed}
+                disabled={retryPending}
+                style={{ whiteSpace: "nowrap" }}
+                data-testid="dlq-retry-btn"
+              >
+                {retryPending ? "Retrying..." : "Retry Failed Deliveries"}
+              </button>
+            )}
+          </div>
+        )}
+
         <section className="card">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <div>
@@ -120,6 +232,75 @@ export function WebhookForm({
               />
               <span style={{ fontWeight: 600 }}>{isActive ? "Active (Receiving Events)" : "Paused"}</span>
             </label>
+          </div>
+
+          {/* Quick Automation Presets Bar */}
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <label style={{ fontWeight: 600, fontSize: 13, margin: 0 }}>
+                Quick Automation Presets
+              </label>
+              <span className="muted" style={{ fontSize: 12 }}>
+                Auto-configures recommended events & schema hints
+              </span>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {AUTOMATION_PRESETS.map((p) => {
+                const isSelected = activePreset === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => applyPreset(p)}
+                    disabled={!canEdit}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      padding: "6px 12px",
+                      borderRadius: 6,
+                      fontSize: 13,
+                      fontWeight: 500,
+                      cursor: canEdit ? "pointer" : "default",
+                      border: isSelected ? "1.5px solid var(--accent, #0066cc)" : "1px solid var(--border, #cbd5e1)",
+                      backgroundColor: isSelected ? "rgba(0, 102, 204, 0.08)" : "var(--card-bg, #ffffff)",
+                      color: isSelected ? "var(--accent, #0066cc)" : "inherit",
+                    }}
+                    data-testid={`preset-btn-${p.id}`}
+                  >
+                    <span
+                      style={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        backgroundColor: p.badgeColor,
+                      }}
+                    />
+                    <span>{p.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {selectedPresetMeta && (
+              <div
+                style={{
+                  marginTop: 10,
+                  padding: "10px 14px",
+                  borderRadius: 6,
+                  backgroundColor: "var(--bg-muted, #f8fafc)",
+                  border: "1px solid var(--border, #e2e8f0)",
+                  fontSize: 12,
+                  lineHeight: 1.45,
+                }}
+                data-testid="preset-helper-card"
+              >
+                <strong style={{ color: selectedPresetMeta.badgeColor }}>{selectedPresetMeta.badge}:</strong>{" "}
+                {selectedPresetMeta.helperText}{" "}
+                <span className="muted" style={{ display: "block", marginTop: 4 }}>
+                  💡 {selectedPresetMeta.guideNote}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="field" style={{ marginBottom: 16 }}>
@@ -318,14 +499,32 @@ export function WebhookForm({
               Audit trail of recent outbound webhook attempts and response codes.
             </p>
           </div>
-          <div style={{ display: "flex", gap: 16, fontSize: 13 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 13 }}>
             <span>Total: <b>{overview.stats.totalDeliveries}</b></span>
             <span style={{ color: "var(--success, #16a34a)" }}>Success: <b>{overview.stats.successfulDeliveries}</b></span>
             {overview.stats.failedDeliveries > 0 && (
               <span style={{ color: "var(--danger, #dc2626)" }}>Failed: <b>{overview.stats.failedDeliveries}</b></span>
             )}
+            {canEdit && overview.stats.failedDeliveries > 0 && (
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={handleRetryFailed}
+                disabled={retryPending}
+                style={{ marginLeft: 8 }}
+                data-testid="retry-failed-deliveries-btn"
+              >
+                {retryPending ? "Retrying..." : "Retry Failed Deliveries"}
+              </button>
+            )}
           </div>
         </div>
+
+        {retryMessage && (
+          <div className="notice notice-info" style={{ marginBottom: 16 }} data-testid="retry-result-banner">
+            {retryMessage}
+          </div>
+        )}
 
         {overview.recentLogs.length === 0 ? (
           <div className="empty" style={{ padding: "24px 0", textAlign: "center", color: "#64748b" }}>

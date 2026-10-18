@@ -13,8 +13,10 @@ import { trialHref } from "@/lib/demo";
 import { CommandPalette, ShellProvider, SideNav, TopActions, type NavGroup, type Page } from "@/components/shell";
 import { AdminCopilotWidget } from "@/components/admin-copilot-widget";
 import { ThemeSwitch } from "./theme-switch";
-import { getSession } from "@/lib/session";
+import { BusinessSwitcher } from "@/components/business-switcher";
+import { getSession, resolveAuth } from "@/lib/session";
 import { authMode } from "@/lib/auth";
+import { getDevBusinesses, getMerchantBusinesses, type BusinessAccountSummary } from "@biztrackbd/core";
 import { LANG_COOKIE, asLang, tr } from "@/lib/i18n";
 import { storefrontOrigin } from "@/lib/store-url";
 import { logoutAction } from "../login/actions";
@@ -154,6 +156,22 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const storeName = settings?.storeName ?? s.tenantSubdomain;
   const check = counts.check;
   const a = s.access;
+
+  // Multi-business switcher discovery
+  const isDev = authMode() === "dev";
+  let businesses: BusinessAccountSummary[] = [];
+  try {
+    if (isDev) {
+      businesses = await getDevBusinesses(s.tenantSubdomain, s.user.email);
+    } else {
+      const auth = await resolveAuth();
+      if (auth.state === "ok") {
+        businesses = await getMerchantBusinesses(auth.user, s.tenantId);
+      }
+    }
+  } catch (err) {
+    console.error("Failed to load merchant businesses for switcher:", err);
+  }
   const banner =
     a.state === "TRIAL" && a.daysLeft !== null && a.daysLeft <= 3 ? { tone: "", text: `Your free trial ends ${a.daysLeft <= 1 ? "within a day" : `in ${a.daysLeft} days`}. Choose a plan to keep selling.` }
     : a.state === "ACTIVE" && a.daysLeft !== null && a.daysLeft <= 3 ? { tone: "", text: `Your plan renews ${a.daysLeft <= 1 ? "within a day" : `in ${a.daysLeft} days`}. Send your payment to stay on plan.` }
@@ -220,14 +238,31 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <PwaRegister />
         <header className="topbar">
           <span className="logo-mark" aria-hidden="true">B</span>
-          <span className="store">{storeName}</span>
+          <div className="store" style={{ minWidth: 0 }}>
+            <BusinessSwitcher
+              businesses={businesses}
+              currentTenantId={s.tenantId}
+              currentSubdomain={s.tenantSubdomain}
+              storeName={storeName}
+              rootDomain={process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000"}
+              lang={lang}
+              compact
+            />
+          </div>
           <TopActions storeHref={storeHref} lang={lang} compact />
           <Link href="/orders/new" className="btn btn-primary btn-sm" prefetch={false}>{tr(lang, "New order")}</Link>
         </header>
 
         <aside className="side">
           <div className="brand"><span className="logo-mark" aria-hidden="true">B</span> BizTrackBD</div>
-          <div className="store-chip"><b>{storeName}</b>{s.tenantSubdomain}</div>
+          <BusinessSwitcher
+            businesses={businesses}
+            currentTenantId={s.tenantId}
+            currentSubdomain={s.tenantSubdomain}
+            storeName={storeName}
+            rootDomain={process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000"}
+            lang={lang}
+          />
           <SideNav groups={groups} />
           {trialPct !== null && can(role, "billing") && (
             <div className="plan-card" data-testid="plan-card">

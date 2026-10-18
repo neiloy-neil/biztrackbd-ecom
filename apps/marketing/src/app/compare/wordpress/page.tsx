@@ -72,7 +72,7 @@ const COMPARISON_ROWS = [
   {
     feature: "True Monthly Cost (TCO)",
     wp: "৳ 4,000 – ৳ 10,000/mo (VPS + Elementor Pro + plugins + dev support)",
-    biztrack: "Flat ৳ 399 – ৳ 1,499/mo (All core modules & hosting included)",
+    biztrack: "Business from ৳399/mo · Commerce from ৳699/mo (All core modules & hosting included)",
     verdict: "Save thousands of Taka annually on recurring software bills",
   },
   {

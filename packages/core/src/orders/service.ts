@@ -21,6 +21,7 @@ import { normalizeBdPhone } from "../phone";
 import { CreateOrderInput } from "./schema";
 import { RESTOCKS_ON, assertTransition } from "./state-machine";
 import { attributeOrderToAffiliate, settleAffiliateOrderCommissions } from "../affiliate/service";
+import { emitMerchantWebhookEvent } from "../messaging/webhook";
 
 const IDEMPOTENCY_TTL_MS = 24 * 3_600_000;
 const TRX_ID = /^[A-Z0-9]{8,12}$/;
@@ -33,6 +34,10 @@ export interface PlacedOrder {
   orderNumber: string;
   totalAmount: number;
   subtotalAmount?: number;
+  deliveryCharge?: number;
+  isNewCustomer?: boolean;
+  customerId?: string;
+  items?: Array<{ sku: string; title: string; quantity: number; unitPrice: number }>;
   replayed: boolean;
 }
 
@@ -73,6 +78,36 @@ export async function createOrder(tenantId: string, rawInput: unknown): Promise<
       await publishEvent("order/created", { tenantId, orderId: placed.orderId, orderNumber: placed.orderNumber, totalAmount: placed.totalAmount });
       for (const percent of usage?.crossed ?? ([] as OrderThreshold[])) {
         await publishEvent("usage/threshold-crossed", { tenantId, metric: "orders", percent, used: usage!.used, limit: usage!.limit! });
+      }
+
+      // Outbound Merchant Webhook Event: order.created (non-blocking)
+      emitMerchantWebhookEvent(tenantId, "order.created", {
+        orderId: placed.orderId,
+        orderNumber: placed.orderNumber,
+        customer: {
+          name: input.customer.name,
+          phone,
+          address: `${input.shipping.address}, ${input.shipping.city || input.shipping.district}`,
+        },
+        subtotal: placed.subtotalAmount ?? placed.totalAmount,
+        deliveryFee: placed.deliveryCharge ?? 0,
+        total: placed.totalAmount,
+        paymentMethod: input.paymentMethod,
+        items: placed.items ?? [],
+      }).catch((err) => {
+        console.warn("[webhook] order.created emit warning:", err instanceof Error ? err.message : err);
+      });
+
+      // Outbound Merchant Webhook Event: customer.registered (if first purchase from this phone number)
+      if (placed.isNewCustomer) {
+        emitMerchantWebhookEvent(tenantId, "customer.registered", {
+          customerId: placed.customerId ?? `cust_${placed.orderId}`,
+          name: input.customer.name,
+          phone,
+          registeredAt: new Date().toISOString(),
+        }).catch((err) => {
+          console.warn("[webhook] customer.registered emit warning:", err instanceof Error ? err.message : err);
+        });
       }
     }
     return placed;
@@ -393,7 +428,22 @@ async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof Cr
     },
   });
 
-  return { orderId: order.id, orderNumber, totalAmount: total, subtotalAmount: subtotal, replayed: false };
+  return {
+    orderId: order.id,
+    orderNumber,
+    totalAmount: total,
+    subtotalAmount: subtotal,
+    deliveryCharge,
+    isNewCustomer: !existingCustomer,
+    customerId: customer.id,
+    items: lines.map((l) => ({
+      sku: l.v.sku ?? "",
+      title: l.v.title,
+      quantity: l.quantity,
+      unitPrice: l.unitPrice,
+    })),
+    replayed: false,
+  };
 }
 
 export interface Actor {
@@ -486,6 +536,22 @@ export async function transitionOrder(tenantId: string, orderId: string, to: Ord
   } catch (err) {
     console.error("[Affiliate] Failed to settle commission:", err);
   }
+
+  // Outbound Merchant Webhook Event: order.delivered (non-blocking)
+  if (to === "DELIVERED") {
+    emitMerchantWebhookEvent(tenantId, "order.delivered", {
+      orderId: updated.id,
+      orderNumber: updated.orderNumber,
+      courier: updated.courierProvider ?? "MANUAL",
+      consignmentId: updated.consignmentId ?? undefined,
+      deliveredAt: updated.deliveredAt?.toISOString() ?? new Date().toISOString(),
+      totalCollected: Number(updated.totalAmount),
+      settlementStatus: updated.settlementStatus ?? "COLLECTED_UNSETTLED",
+    }).catch((err) => {
+      console.warn("[webhook] order.delivered emit warning:", err instanceof Error ? err.message : err);
+    });
+  }
+
   return updated;
 }
 

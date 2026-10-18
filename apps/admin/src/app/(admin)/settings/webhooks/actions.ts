@@ -5,6 +5,7 @@ import {
   saveMerchantWebhookSubscription,
   rotateMerchantWebhookSecret,
   sendTestWebhookPing,
+  retryFailedWebhookDeliveries,
   ValidationError,
   ForbiddenError,
 } from "@biztrackbd/core";
@@ -95,3 +96,28 @@ export async function sendTestWebhookPingAction(): Promise<{
     };
   }
 }
+
+export async function retryFailedWebhookDeliveriesAction(): Promise<{
+  ok: boolean;
+  retriedCount?: number;
+  error?: string;
+  message?: string;
+}> {
+  const s = await requireAction("design", "edit");
+
+  try {
+    const result = await retryFailedWebhookDeliveries(s.tenantId, s.actor);
+    revalidatePath("/settings/webhooks");
+    return {
+      ok: true,
+      retriedCount: result.retriedCount,
+      message: `Successfully re-queued ${result.retriedCount} delivery job${result.retriedCount === 1 ? "" : "s"}.`,
+    };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Failed to retry delivery jobs.",
+    };
+  }
+}
+
