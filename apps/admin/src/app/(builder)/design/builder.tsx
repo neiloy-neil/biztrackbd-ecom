@@ -6,7 +6,9 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { Drawer, Segmented, useToast } from "@biztrackbd/ui";
 import {
   DEFAULT_THEME, FONT_LABELS, FONT_PAIRS, STYLE_FIELDS, contrast, editableField, newSection, sectionDef, sectionsFor, setByPath, validateTheme,
+  SECTION_GRADIENT_PRESETS,
   type Field, type ListSpec, type PageJson, type PageKind, type PageSection, type SectionDef, type ThemeSettings, type SiteMode, type BusinessVertical,
+  type SectionStyle, type SectionBgType, type SectionPaddingY, type SectionHideOn, type SectionTextColor,
 } from "@biztrackbd/core/builder-client";
 import { ImagePicker } from "@/components/image-picker";
 import { LANDING_GROUPS, STORE_SECTION_CATEGORIES, SectionThumb } from "./section-thumbs";
@@ -161,6 +163,254 @@ function SectionForm({ def, section, onChange, disabled, bnOpen, imgSignal }: { 
           <div className="stack" style={{ gap: 10, marginTop: 10 }}>{bn.map(row)}</div>
         </details>
       )}
+    </div>
+  );
+}
+
+const COLOR_SWATCHES = [
+  { label: "White", hex: "#ffffff" },
+  { label: "Off White", hex: "#f8fafc" },
+  { label: "Cream", hex: "#fff8f3" },
+  { label: "Slate Grey", hex: "#f1f5f9" },
+  { label: "Dark Slate", hex: "#0f172a" },
+  { label: "Zinc Carbon", hex: "#18181b" },
+  { label: "Navy", hex: "#0d121e" },
+  { label: "Emerald", hex: "#064e3b" },
+];
+
+function SectionAppearanceForm({
+  section,
+  disabled,
+  onChange,
+}: {
+  section: PageSection;
+  disabled: boolean;
+  onChange: (patch: Partial<SectionStyle>) => void;
+}) {
+  const style = section.style ?? {};
+  const bgType: SectionBgType = style.bgType ?? "default";
+  const paddingY: SectionPaddingY = style.paddingY ?? "normal";
+  const textColor: SectionTextColor = style.textColor ?? "default";
+  const hideOn: SectionHideOn = style.hideOn ?? "none";
+
+  const isSpecial = section.type === "floating-whatsapp" || section.type === "announcement-bar";
+
+  return (
+    <div className="stack" style={{ gap: 14, marginTop: 14 }} data-testid="section-appearance">
+      {!isSpecial && (
+        <details className="bld-group" open>
+          <summary className="bld-gh">Appearance & Background</summary>
+          <div className="stack" style={{ gap: 12, marginTop: 10 }}>
+            <div className="field" style={{ margin: 0, opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}>
+              <label className="label">Background Tone</label>
+              <Segmented
+                label="Background style"
+                value={bgType}
+                onChange={(v) => !disabled && onChange({ bgType: v as SectionBgType })}
+                options={[
+                  { value: "default", label: "Default" },
+                  { value: "color", label: "Color" },
+                  { value: "gradient", label: "Gradient" },
+                  { value: "image", label: "Image" },
+                ]}
+              />
+            </div>
+
+            {bgType === "color" && (
+              <div className="stack" style={{ gap: 8 }}>
+                <div className="field" style={{ margin: 0 }}>
+                  <label className="label" htmlFor={`${section.id}-bg-color`}>Background Color</label>
+                  <div className="row" style={{ gap: 8, alignItems: "center" }}>
+                    <input
+                      id={`${section.id}-bg-color`}
+                      type="color"
+                      className="bld-color-input"
+                      value={style.bgColor ?? "#ffffff"}
+                      disabled={disabled}
+                      onChange={(e) => onChange({ bgColor: e.target.value })}
+                    />
+                    <input
+                      type="text"
+                      className="input"
+                      style={{ width: 110, fontFamily: "monospace" }}
+                      value={style.bgColor ?? "#ffffff"}
+                      disabled={disabled}
+                      onChange={(e) => onChange({ bgColor: e.target.value })}
+                      placeholder="#ffffff"
+                    />
+                  </div>
+                </div>
+
+                <div className="row" style={{ gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                  <span className="muted" style={{ fontSize: 12 }}>Quick colors:</span>
+                  {COLOR_SWATCHES.map((sw) => (
+                    <button
+                      key={sw.hex}
+                      type="button"
+                      title={sw.label}
+                      className="bld-swatch-btn"
+                      style={{
+                        backgroundColor: sw.hex,
+                        outline: style.bgColor?.toLowerCase() === sw.hex ? "2px solid var(--brand)" : "1px solid var(--line-2)",
+                      }}
+                      disabled={disabled}
+                      onClick={() => onChange({ bgColor: sw.hex })}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {bgType === "gradient" && (
+              <div className="field" style={{ margin: 0 }}>
+                <label className="label">Gradient Preset</label>
+                <div className="bld-gradient-grid">
+                  {Object.entries(SECTION_GRADIENT_PRESETS).map(([key, item]) => {
+                    const isSelected = (style.bgGradient ?? "midnight") === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        className={`bld-gradient-chip ${isSelected ? "selected" : ""}`}
+                        disabled={disabled}
+                        onClick={() => onChange({ bgGradient: key })}
+                      >
+                        <span className="bld-gradient-preview" style={{ background: item.css }} />
+                        <span className="bld-gradient-title">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {bgType === "image" && (
+              <div className="stack" style={{ gap: 10 }}>
+                <div className="field" style={{ margin: 0 }}>
+                  <label className="label" htmlFor={`${section.id}-bg-img`}>Background Image URL</label>
+                  <input
+                    id={`${section.id}-bg-img`}
+                    type="url"
+                    className="input"
+                    value={style.bgImage ?? ""}
+                    disabled={disabled}
+                    onChange={(e) => onChange({ bgImage: e.target.value })}
+                    placeholder="https://... or /media/..."
+                  />
+                  <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+                    Use an HTTPS picture or uploaded store media path.
+                  </div>
+                </div>
+
+                <div className="row" style={{ gap: 12, alignItems: "center" }}>
+                  <div className="field" style={{ margin: 0, flex: 1, opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}>
+                    <label className="label">Overlay Tint</label>
+                    <Segmented
+                      label="Overlay tint"
+                      value={style.bgOverlayTint ?? "dark"}
+                      onChange={(v) => !disabled && onChange({ bgOverlayTint: v as "dark" | "light" })}
+                      options={[
+                        { value: "dark", label: "Dark" },
+                        { value: "light", label: "Light" },
+                      ]}
+                    />
+                  </div>
+                  <div className="field" style={{ margin: 0, flex: 1 }}>
+                    <label className="label" htmlFor={`${section.id}-overlay-range`}>
+                      Dim: {style.bgOverlay ?? 40}%
+                    </label>
+                    <input
+                      id={`${section.id}-overlay-range`}
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={style.bgOverlay ?? 40}
+                      disabled={disabled}
+                      onChange={(e) => onChange({ bgOverlay: Number(e.target.value) })}
+                      style={{ width: "100%", accentColor: "var(--brand)" }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="field" style={{ margin: 0, opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}>
+              <label className="label">Text Contrast</label>
+              <Segmented
+                label="Text contrast"
+                value={textColor}
+                onChange={(v) => !disabled && onChange({ textColor: v as SectionTextColor })}
+                options={[
+                  { value: "default", label: "Default" },
+                  { value: "dark", label: "Dark text" },
+                  { value: "light", label: "Light text" },
+                ]}
+              />
+              <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+                Switch to Light text if you choose a dark background color or gradient.
+              </div>
+            </div>
+
+            <label className="row" style={{ gap: 8, alignItems: "center", cursor: "pointer", marginTop: 4 }}>
+              <input
+                type="checkbox"
+                checked={style.cardMode ?? false}
+                disabled={disabled}
+                onChange={(e) => onChange({ cardMode: e.target.checked })}
+                style={{ width: 16, height: 16, accentColor: "var(--brand)" }}
+              />
+              <span style={{ fontSize: 13, fontWeight: 600 }}>Wrap in floating card container</span>
+            </label>
+          </div>
+        </details>
+      )}
+
+      <details className="bld-group" open>
+        <summary className="bld-gh">Spacing & Responsive</summary>
+        <div className="stack" style={{ gap: 12, marginTop: 10 }}>
+          {!isSpecial && (
+            <div className="field" style={{ margin: 0, opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}>
+              <label className="label">Vertical Spacing (Padding)</label>
+              <Segmented
+                label="Vertical spacing"
+                value={paddingY}
+                onChange={(v) => !disabled && onChange({ paddingY: v as SectionPaddingY })}
+                options={[
+                  { value: "none", label: "0px" },
+                  { value: "compact", label: "Compact" },
+                  { value: "normal", label: "Normal" },
+                  { value: "spacious", label: "Spacious" },
+                ]}
+              />
+            </div>
+          )}
+
+          <div className="field" style={{ margin: 0, opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}>
+            <label className="label">Device Visibility</label>
+            <Segmented
+              label="Device visibility"
+              value={hideOn}
+              onChange={(v) => !disabled && onChange({ hideOn: v as SectionHideOn })}
+              options={[
+                { value: "none", label: "All devices" },
+                { value: "mobile", label: "Desktop only" },
+                { value: "desktop", label: "Mobile only" },
+              ]}
+            />
+            {hideOn === "mobile" && (
+              <div className="muted" style={{ fontSize: 12, marginTop: 4, color: "var(--warning)" }}>
+                Hidden on mobile phones (viewport width &le; 768px).
+              </div>
+            )}
+            {hideOn === "desktop" && (
+              <div className="muted" style={{ fontSize: 12, marginTop: 4, color: "var(--warning)" }}>
+                Hidden on desktop / computers (viewport width &gt; 768px).
+              </div>
+            )}
+          </div>
+        </div>
+      </details>
     </div>
   );
 }
@@ -345,6 +595,24 @@ export function Builder(props: Props) {
   const edit = (fn: (p: PageJson) => PageJson) => { remember(); touched.current = true; setPage(fn); };
   const editTheme = (t: ThemeSettings) => { remember(); touched.current = true; setTheme(t); };
   const patch = (id: string, p: Settings) => edit((pg) => ({ ...pg, sections: pg.sections.map((s) => (s.id === id ? { ...s, settings: { ...s.settings, ...p } } : s)) }));
+  const patchStyle = (id: string, stylePatch: Partial<SectionStyle>) => {
+    edit((pg) => ({
+      ...pg,
+      sections: pg.sections.map((s) => {
+        if (s.id !== id) return s;
+        const nextStyle: SectionStyle = { ...(s.style ?? {}), ...stylePatch };
+        if (nextStyle.bgType === "default") delete nextStyle.bgType;
+        if (nextStyle.hideOn === "none") delete nextStyle.hideOn;
+        if (nextStyle.textColor === "default") delete nextStyle.textColor;
+        if (!nextStyle.cardMode) delete nextStyle.cardMode;
+        if (nextStyle.bgImage === "") delete nextStyle.bgImage;
+        return {
+          ...s,
+          style: Object.keys(nextStyle).length > 0 ? nextStyle : undefined,
+        };
+      }),
+    }));
+  };
   const undo = useCallback(() => {
     const h = hist.current, snap = h.past.pop();
     if (!snap) return;
@@ -569,6 +837,8 @@ export function Builder(props: Props) {
               {!locked && !narrow && <span className="bld-grip" aria-hidden><IGrip /></span>}
               <button type="button" className="bld-pick" onClick={() => choose(s.id)} aria-pressed={s.id === selected}>
                 <b>{def?.label ?? s.type}</b>
+                {s.style?.hideOn === "mobile" && <span className="pill blue" title="Visible on desktop only">Desktop</span>}
+                {s.style?.hideOn === "desktop" && <span className="pill purple" title="Visible on mobile phones only">Mobile</span>}
                 {s.disabled && <span className="pill grey">Hidden</span>}
               </button>
               {!locked && (
@@ -600,6 +870,7 @@ export function Builder(props: Props) {
         )}
       </div>
       <SectionForm def={currentDef} section={current} disabled={locked} bnOpen={lang === "bn"} imgSignal={imgSignal} onChange={(p) => patch(current.id, p)} />
+      <SectionAppearanceForm section={current} disabled={locked} onChange={(sp) => patchStyle(current.id, sp)} />
     </section>
   ) : (
     <div className="bld-empty"><b>Pick a section</b><p className="muted">Choose one in the list, or click it in the preview, to change its text, pictures and style.</p></div>

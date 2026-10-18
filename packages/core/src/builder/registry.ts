@@ -1308,11 +1308,41 @@ export const requiredFor = (kind: PageKind): string[] => SECTIONS.filter((s) => 
 
 // ---- The page ------------------------------------------------------------------------------------------------------
 
+export type SectionBgType = "default" | "color" | "gradient" | "image";
+export type SectionPaddingY = "none" | "compact" | "normal" | "spacious";
+export type SectionHideOn = "none" | "mobile" | "desktop";
+export type SectionTextColor = "default" | "dark" | "light";
+
+export const SECTION_GRADIENT_PRESETS: Record<string, { label: string; css: string }> = {
+  midnight: { label: "Midnight Sky", css: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)" },
+  sunset: { label: "Warm Sunset", css: "linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%)" },
+  emerald: { label: "Deep Emerald", css: "linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%)" },
+  royal: { label: "Royal Indigo", css: "linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)" },
+  rose: { label: "Soft Rose", css: "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)" },
+  "clean-dark": { label: "Sleek Carbon", css: "linear-gradient(180deg, #18181b 0%, #09090b 100%)" },
+  "ocean-mist": { label: "Ocean Breeze", css: "linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%)" },
+  lavender: { label: "Lavender Glow", css: "linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)" },
+};
+
+export interface SectionStyle {
+  bgType?: SectionBgType;
+  bgColor?: string;
+  bgGradient?: string;
+  bgImage?: string;
+  bgOverlay?: number;
+  bgOverlayTint?: "dark" | "light";
+  textColor?: SectionTextColor;
+  paddingY?: SectionPaddingY;
+  cardMode?: boolean;
+  hideOn?: SectionHideOn;
+}
+
 export interface PageSection {
   id: string;
   type: string;
   disabled?: boolean;
   settings: Record<string, unknown>;
+  style?: SectionStyle;
 }
 
 export interface PageJson {
@@ -1336,6 +1366,48 @@ export function safeUrl(v: string): boolean {
 }
 /** Pictures are the store's own uploads, or an https address. */
 export const safeImage = (v: string) => v === "" || (/^\/media\/[A-Za-z0-9._/-]+$/.test(v) && !v.includes("..")) || (/^https:\/\//.test(v) && safeUrl(v));
+
+export function normalizeSectionStyle(raw?: unknown): SectionStyle | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const o = raw as Record<string, unknown>;
+  const style: SectionStyle = {};
+
+  if (o.bgType === "color" || o.bgType === "gradient" || o.bgType === "image" || o.bgType === "default") {
+    if (o.bgType !== "default") style.bgType = o.bgType;
+  }
+  if (typeof o.bgColor === "string" && HEX.test(o.bgColor.trim())) {
+    style.bgColor = o.bgColor.trim().toLowerCase();
+  }
+  if (typeof o.bgGradient === "string") {
+    const val = o.bgGradient.trim();
+    if (val in SECTION_GRADIENT_PRESETS || val.startsWith("linear-gradient") || val.startsWith("radial-gradient")) {
+      style.bgGradient = val.slice(0, 300);
+    }
+  }
+  if (typeof o.bgImage === "string" && safeImage(o.bgImage.trim()) && o.bgImage.trim() !== "") {
+    style.bgImage = o.bgImage.trim();
+  }
+  if (typeof o.bgOverlay === "number" && !Number.isNaN(o.bgOverlay)) {
+    style.bgOverlay = Math.max(0, Math.min(100, Math.round(o.bgOverlay)));
+  }
+  if (o.bgOverlayTint === "dark" || o.bgOverlayTint === "light") {
+    style.bgOverlayTint = o.bgOverlayTint;
+  }
+  if (o.textColor === "dark" || o.textColor === "light") {
+    style.textColor = o.textColor;
+  }
+  if (o.paddingY === "none" || o.paddingY === "compact" || o.paddingY === "normal" || o.paddingY === "spacious") {
+    style.paddingY = o.paddingY;
+  }
+  if (typeof o.cardMode === "boolean" && o.cardMode) {
+    style.cardMode = true;
+  }
+  if (o.hideOn === "mobile" || o.hideOn === "desktop") {
+    style.hideOn = o.hideOn;
+  }
+
+  return Object.keys(style).length > 0 ? style : undefined;
+}
 
 // Control characters are removed on purpose: text from the editor must not carry them into the page.
 // eslint-disable-next-line no-control-regex
@@ -1425,7 +1497,14 @@ export function validatePage(kind: PageKind, raw: unknown): PageJson {
     const n = (counts.get(def.type) ?? 0) + 1;
     counts.set(def.type, n);
     if (def.max && n > def.max) throw new ValidationError(`Only ${def.max} ${def.label.toLowerCase()} ${def.max === 1 ? "section is" : "sections are"} allowed on a page`);
-    return { id, type: def.type, ...(o.disabled === true ? { disabled: true } : {}), settings: normalizeSettings(def, o.settings, `${def.label} (section ${i + 1})`) };
+    const style = normalizeSectionStyle(o.style);
+    return {
+      id,
+      type: def.type,
+      ...(o.disabled === true ? { disabled: true } : {}),
+      settings: normalizeSettings(def, o.settings, `${def.label} (section ${i + 1})`),
+      ...(style ? { style } : {}),
+    };
   });
   for (const type of requiredFor(kind)) {
     const label = sectionDef(type)!.label;

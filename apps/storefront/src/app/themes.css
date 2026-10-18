@@ -98,3 +98,133 @@ body[data-store-theme="berber"] .footer b, body[data-store-theme="berber"] .foot
 
 /* Orders paused by the owner */
 .paused-banner { background: var(--ink, #1A1A1A); color: #fff; text-align: center; padding: 10px 16px; font-size: 14px; font-weight: 600; }
+
+/* ---- Universal Section Style Wrapper & Responsive Visibility ---- */
+.bt-section-wrap {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Background overlay */
+.bt-section-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.bt-overlay-dark {
+  background: #000000;
+}
+.bt-overlay-light {
+  background: #ffffff;
+}
+
+/* Content layer above background/overlay */
+.bt-section-wrap > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* When a custom background is set, child default backgrounds (like .hero or .wrap) yield */
+.bt-section-wrap.bt-has-custom-bg .hero {
+  background: transparent !important;
+}
+.bt-section-wrap.bt-has-custom-bg .wrap {
+  background-color: transparent !important;
+}
+
+/* Vertical padding presets */
+.bt-py-none {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+.bt-py-compact {
+  padding-top: clamp(16px, 3vw, 28px) !important;
+  padding-bottom: clamp(16px, 3vw, 28px) !important;
+}
+.bt-py-normal {
+  padding-top: clamp(36px, 5vw, 60px) !important;
+  padding-bottom: clamp(36px, 5vw, 60px) !important;
+}
+.bt-py-spacious {
+  padding-top: clamp(60px, 8vw, 100px) !important;
+  padding-bottom: clamp(60px, 8vw, 100px) !important;
+}
+
+/* Card Container Mode */
+.bt-section-wrap.bt-card-mode {
+  padding-inline: clamp(14px, 4vw, 32px);
+}
+.bt-section-wrap.bt-card-mode > .bt-section-card-inner {
+  max-width: 1240px;
+  margin-inline: auto;
+  border-radius: 20px;
+  border: 1px solid var(--line, rgba(0, 0, 0, 0.08));
+  background: var(--surface, #ffffff);
+  box-shadow: 0 16px 40px -12px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
+}
+
+/* Text contrast overrides */
+.bt-text-light {
+  color: #ffffff !important;
+  --ink: #ffffff;
+  --ink-2: #f1f5f9;
+  --muted: #cbd5e1;
+  --faint: #94a3b8;
+  --line: rgba(255, 255, 255, 0.16);
+  --line-2: rgba(255, 255, 255, 0.28);
+}
+.bt-text-light h1, .bt-text-light h2, .bt-text-light h3, .bt-text-light h4, .bt-text-light b, .bt-text-light strong {
+  color: #ffffff !important;
+}
+.bt-text-light p, .bt-text-light .muted, .bt-text-light span:not(.btn):not(.pill) {
+  color: #e2e8f0;
+}
+.bt-text-light .btn-secondary {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.bt-text-light .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.bt-text-dark {
+  color: #0f172a !important;
+  --ink: #0f172a;
+  --ink-2: #334155;
+  --muted: #64748b;
+  --faint: #94a3b8;
+  --line: rgba(0, 0, 0, 0.1);
+  --line-2: rgba(0, 0, 0, 0.18);
+}
+.bt-text-dark h1, .bt-text-dark h2, .bt-text-dark h3, .bt-text-dark h4, .bt-text-dark b, .bt-text-dark strong {
+  color: #0f172a !important;
+}
+.bt-text-dark p, .bt-text-dark span:not(.btn):not(.pill) {
+  color: #334155;
+}
+
+/* Card Mode with Light Text: Glassmorphism */
+.bt-section-wrap.bt-card-mode.bt-text-light > .bt-section-card-inner {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.45);
+}
+
+/* Device Visibility Utilities */
+@media (max-width: 768px) {
+  .bt-hide-mobile {
+    display: none !important;
+  }
+}
+@media (min-width: 769px) {
+  .bt-hide-desktop {
+    display: none !important;
+  }
+}
+

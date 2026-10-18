@@ -14,6 +14,12 @@ type Send = (msg: Record<string, unknown>) => void;
 type Rect = { id: string; top: number; height: number };
 
 const EDIT_CSS = `
+[data-section-wrap]{position:relative;cursor:pointer}
+[data-section-wrap]:hover{outline:2px dashed rgba(91,79,232,.55);outline-offset:-2px}
+[data-section-wrap].bt-selected{outline:3px solid #5B4FE8;outline-offset:-3px}
+[data-section-wrap].bt-off{opacity:.38}
+[data-section-wrap] [data-section]:hover{outline:none}
+[data-section-wrap] [data-section].bt-selected{outline:none}
 [data-section]{cursor:pointer}
 [data-section]:hover{outline:2px dashed rgba(91,79,232,.55);outline-offset:-2px}
 [data-section].bt-selected{outline:3px solid #5B4FE8;outline-offset:-3px}
@@ -33,10 +39,11 @@ const EDIT_CSS = `
 .bt-bar button:disabled{opacity:.35;cursor:not-allowed}
 .bt-bar .bt-grip{cursor:grab;touch-action:none}
 .bt-bar .bt-del{color:#b42318}
-.bt-gap{position:absolute;left:0;width:100%;height:26px;display:grid;place-items:center;pointer-events:auto;opacity:0}
+.bt-gap{position:absolute;left:0;width:100%;height:32px;display:flex;align-items:center;justify-content:center;pointer-events:auto;opacity:0;transition:opacity .15s ease;z-index:55}
 .bt-gap:hover,.bt-gap:focus-within{opacity:1}
-.bt-gap::before{content:"";position:absolute;left:8%;right:8%;top:12px;height:2px;background:#5B4FE8;border-radius:2px}
-.bt-gap button{all:unset;position:relative;box-sizing:border-box;width:26px;height:26px;border-radius:99px;background:#5B4FE8;color:#fff;display:grid;place-items:center;cursor:pointer;font:700 18px/1 system-ui}
+.bt-gap::before{content:"";position:absolute;left:6%;right:6%;top:50%;height:2px;background:linear-gradient(90deg,transparent,#5B4FE8 20%,#5B4FE8 80%,transparent);transform:translateY(-50%)}
+.bt-gap button{all:unset;position:relative;z-index:2;display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 12px;border-radius:999px;background:#5B4FE8;color:#fff;font:700 12px/1 system-ui;cursor:pointer;box-shadow:0 4px 12px rgba(91,79,232,.35),0 0 0 2px #fff;transition:transform .15s ease,background .15s ease}
+.bt-gap button:hover{transform:scale(1.05);background:#473dc7}
 @media (hover:none){.bt-gap{opacity:.75}}
 .bt-drop{position:absolute;left:4%;width:92%;height:4px;background:#5B4FE8;border-radius:4px;box-shadow:0 0 0 3px rgba(91,79,232,.25);pointer-events:none}
 `;
@@ -53,7 +60,7 @@ export function EditOverlay({ page, selectedId, send, onTyping }: { page: PageJs
     const measure = () => {
       const next: Rect[] = [];
       for (const s of page.sections) {
-        const el = document.querySelector<HTMLElement>(`[data-section="${CSS.escape(s.id)}"]`);
+        const el = document.querySelector<HTMLElement>(`[data-section-wrap="${CSS.escape(s.id)}"]`) || document.querySelector<HTMLElement>(`[data-section="${CSS.escape(s.id)}"]`);
         if (!el) continue;
         el.classList.toggle("bt-off", Boolean(s.disabled));
         const r = el.getBoundingClientRect();
@@ -80,7 +87,7 @@ export function EditOverlay({ page, selectedId, send, onTyping }: { page: PageJs
 
   useEffect(() => {
     const target = (e: Event) => (e.target as Element | null)?.closest?.("[data-edit]") as HTMLElement | null;
-    const idOf = (el: Element | null) => el?.closest("[data-section]")?.getAttribute("data-section") ?? null;
+    const idOf = (el: Element | null) => el?.closest("[data-section-wrap]")?.getAttribute("data-section-wrap") || el?.closest("[data-section]")?.getAttribute("data-section") || null;
     const flush = (el: HTMLElement) => {
       const id = idOf(el);
       const path = el.getAttribute("data-edit");
@@ -185,13 +192,19 @@ export function EditOverlay({ page, selectedId, send, onTyping }: { page: PageJs
       <style id="bt-edit-css">{EDIT_CSS}</style>
       <div className="bt-ovl" style={{ height }} aria-hidden={false}>
         {rects.map((r, i) => (
-          <div key={`gap-${r.id}`} className="bt-gap" style={{ top: r.top - 13 }}>
-            <button type="button" aria-label={`Add a section ${i === 0 ? "at the top" : "here"}`} data-testid={`gap-${i}`} onClick={() => send({ type: "bt-preview:add", index: i })}>+</button>
+          <div key={`gap-${r.id}`} className="bt-gap" style={{ top: r.top - 16 }}>
+            <button type="button" aria-label={`Add a section ${i === 0 ? "at the top" : "here"}`} data-testid={`gap-${i}`} onClick={() => send({ type: "bt-preview:add", index: i })}>
+              <span>+</span>
+              <span>Add section</span>
+            </button>
           </div>
         ))}
         {rects.length > 0 && (
-          <div className="bt-gap" style={{ top: rects[rects.length - 1]!.top + rects[rects.length - 1]!.height - 13 }}>
-            <button type="button" aria-label="Add a section at the end" data-testid="gap-end" onClick={() => send({ type: "bt-preview:add", index: rects.length })}>+</button>
+          <div className="bt-gap" style={{ top: rects[rects.length - 1]!.top + rects[rects.length - 1]!.height - 16 }}>
+            <button type="button" aria-label="Add a section at the end" data-testid="gap-end" onClick={() => send({ type: "bt-preview:add", index: rects.length })}>
+              <span>+</span>
+              <span>Add section</span>
+            </button>
           </div>
         )}
         {rects.filter((r) => r.id === selectedId).map((r) => {

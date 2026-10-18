@@ -124,3 +124,68 @@ details.bld-group[open] > summary.bld-gh::after { transform: rotate(180deg); }
 
 /* ---- The header and footer editor: the store's header and footer on the left, the choices on the right (docs/47 part C) */
 @media (min-width: 900px) { .bld-body.bld-body-chrome { grid-template-columns: minmax(0, 1fr) minmax(320px, 440px); } }
+
+/* ---- Section Appearance Form ---- */
+.bld-color-input {
+  width: 38px;
+  height: 38px;
+  padding: 2px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  cursor: pointer;
+  background: var(--surface);
+}
+.bld-swatch-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  border: 0;
+  cursor: pointer;
+  outline-offset: 2px;
+  transition: transform 0.12s ease;
+}
+.bld-swatch-btn:hover {
+  transform: scale(1.15);
+}
+.bld-gradient-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 6px;
+}
+.bld-gradient-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.bld-gradient-chip:hover {
+  border-color: var(--brand);
+}
+.bld-gradient-chip.selected {
+  border-color: var(--brand);
+  background: var(--tint);
+  box-shadow: 0 0 0 1px var(--brand);
+}
+.bld-gradient-preview {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  flex: none;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+.bld-gradient-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { PageData, PageJson, PageSection } from "@biztrackbd/core";
-import { parseEndsAt, productKey, youtubeId } from "@biztrackbd/core/builder-client";
+import { parseEndsAt, productKey, youtubeId, SECTION_GRADIENT_PRESETS } from "@biztrackbd/core/builder-client";
 import { money, type Lang, type T } from "@/lib/i18n-core";
 import { Countdown } from "./countdown";
 import { LandingMotion } from "./landing-motion";
@@ -1078,6 +1078,85 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
   }
 }
 
+export function SectionStyleWrapper({
+  section,
+  editing,
+  children,
+}: {
+  section: PageSection;
+  editing?: boolean;
+  children: React.ReactNode;
+}) {
+  const style = section.style;
+  const isFloating = section.type === "floating-whatsapp";
+  const isAnnouncement = section.type === "announcement-bar";
+
+  const classes: string[] = ["bt-section-wrap"];
+  const inlineStyles: React.CSSProperties = {};
+
+  if (style?.hideOn === "mobile") classes.push("bt-hide-mobile");
+  if (style?.hideOn === "desktop") classes.push("bt-hide-desktop");
+
+  if (!isFloating && !isAnnouncement) {
+    if (style?.paddingY) {
+      classes.push(`bt-py-${style.paddingY}`);
+    }
+    if (style?.cardMode) {
+      classes.push("bt-card-mode");
+    }
+    if (style?.textColor === "light") {
+      classes.push("bt-text-light");
+    } else if (style?.textColor === "dark") {
+      classes.push("bt-text-dark");
+    }
+
+    if (style?.bgType === "color" && style.bgColor) {
+      classes.push("bt-has-custom-bg");
+      inlineStyles.backgroundColor = style.bgColor;
+    } else if (style?.bgType === "gradient" && style.bgGradient) {
+      classes.push("bt-has-custom-bg");
+      const presetCss = SECTION_GRADIENT_PRESETS[style.bgGradient]?.css;
+      inlineStyles.backgroundImage = presetCss || style.bgGradient;
+    } else if (style?.bgType === "image" && style.bgImage) {
+      classes.push("bt-has-custom-bg");
+      inlineStyles.backgroundImage = `url(${style.bgImage})`;
+      inlineStyles.backgroundPosition = "center";
+      inlineStyles.backgroundRepeat = "no-repeat";
+      inlineStyles.backgroundSize = "cover";
+    }
+  }
+
+  const hasOverlay =
+    !isFloating &&
+    !isAnnouncement &&
+    style?.bgType === "image" &&
+    typeof style.bgOverlay === "number" &&
+    style.bgOverlay > 0;
+
+  const content = style?.cardMode && !isFloating && !isAnnouncement ? (
+    <div className="bt-section-card-inner">{children}</div>
+  ) : (
+    children
+  );
+
+  return (
+    <div
+      className={classes.join(" ")}
+      style={Object.keys(inlineStyles).length > 0 ? inlineStyles : undefined}
+      data-section-wrap={section.id}
+    >
+      {hasOverlay && (
+        <div
+          className={`bt-section-overlay bt-overlay-${style?.bgOverlayTint === "light" ? "light" : "dark"}`}
+          style={{ opacity: (style?.bgOverlay ?? 0) / 100 }}
+          aria-hidden="true"
+        />
+      )}
+      {content}
+    </div>
+  );
+}
+
 export function Sections({ page, data, lang, t, orderForm, ctx, landing, editing, site, extras }: { page: PageJson; data: PageData; lang: Lang; t: T; orderForm?: React.ReactNode; ctx?: PageCtx; landing?: LandingInfo; site?: SiteInfo; extras?: SectionExtras; /** The editor's preview of a landing page: text and pictures are marked so they can be changed on the page. */ editing?: boolean }) {
   // In the editor a hidden section is still drawn, dimmed, so it can be found and shown again; the live page never draws it.
   const shown = page.sections.filter((x) => editing || !x.disabled);
@@ -1086,8 +1165,9 @@ export function Sections({ page, data, lang, t, orderForm, ctx, landing, editing
   const pro = Boolean(header);
   const nodes = shown.map((x) => {
     const node = <Section key={x.id} section={x} data={data} lang={lang} t={t} orderForm={orderForm} ctx={ctx} landing={landing} editing={editing} site={site} pro={pro} extras={extras} />;
+    const styled = <SectionStyleWrapper key={`wrap-${x.id}`} section={x} editing={editing}>{node}</SectionStyleWrapper>;
     // Each block rises into place as it comes into view (never in the editor, and never when the visitor asks for less motion).
-    return pro && !NO_REVEAL.has(x.type) ? <div key={x.id} className={`lp-rv${editing ? "" : " lp-reveal"}`}>{node}</div> : node;
+    return pro && !NO_REVEAL.has(x.type) ? <div key={x.id} className={`lp-rv${editing ? "" : " lp-reveal"}`}>{styled}</div> : styled;
   });
   if (!pro) return <>{nodes}</>;
   const palette = String(header!.settings.palette ?? "fresh");

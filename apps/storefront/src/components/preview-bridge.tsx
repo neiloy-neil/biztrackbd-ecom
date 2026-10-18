@@ -76,7 +76,8 @@ export function PreviewBridge({ kind, initialPage, initialTheme, data, lang: ini
       if (e.source !== window.parent || (adminOrigin && e.origin !== adminOrigin)) return;
       const m = e.data as { type?: string; id?: string } | null;
       if (m?.type !== "bt-preview:focus" || typeof m.id !== "string") return;
-      document.querySelector(`[data-section="${CSS.escape(m.id)}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      const el = document.querySelector(`[data-section-wrap="${CSS.escape(m.id)}"]`) || document.querySelector(`[data-section="${CSS.escape(m.id)}"]`);
+      el?.scrollIntoView({ behavior: "smooth", block: "center" });
     }
     window.addEventListener("message", onFocus);
     return () => window.removeEventListener("message", onFocus);
@@ -86,11 +87,11 @@ export function PreviewBridge({ kind, initialPage, initialTheme, data, lang: ini
   useEffect(() => {
     function onClick(e: MouseEvent) {
       const target = e.target as Element | null;
-      const section = target?.closest("[data-section]");
+      const section = target?.closest("[data-section-wrap]") || target?.closest("[data-section]");
       if (!section) return;
       e.preventDefault();
       e.stopPropagation();
-      const id = section.getAttribute("data-section");
+      const id = section.getAttribute("data-section-wrap") || section.getAttribute("data-section");
       if (id) window.parent.postMessage({ type: "bt-preview:select", id }, adminOrigin || "*");
     }
     document.addEventListener("click", onClick, true);
@@ -104,7 +105,8 @@ export function PreviewBridge({ kind, initialPage, initialTheme, data, lang: ini
       const m = e.data as { type?: string; id?: string } | null;
       if (m?.type !== "bt-preview:focus" || typeof m.id !== "string") return;
       document.querySelectorAll(".bt-selected").forEach((el) => el.classList.remove("bt-selected"));
-      document.querySelector(`[data-section="${CSS.escape(m.id)}"]`)?.classList.add("bt-selected");
+      const el = document.querySelector(`[data-section-wrap="${CSS.escape(m.id)}"]`) || document.querySelector(`[data-section="${CSS.escape(m.id)}"]`);
+      el?.classList.add("bt-selected");
       setSelectedId(m.id);
     }
     window.addEventListener("message", onFocus);
@@ -115,7 +117,7 @@ export function PreviewBridge({ kind, initialPage, initialTheme, data, lang: ini
   const css = themeCss(theme, "body");
   return (
     <div data-testid="preview-root" data-preview-sections={page.sections.length}>
-      <style id="bt-preview-select">{`[data-section]{cursor:pointer}[data-section]:hover{outline:2px dashed rgba(91,79,232,.55);outline-offset:-2px}[data-section].bt-selected{outline:3px solid #5B4FE8;outline-offset:-3px}`}</style>
+      <style id="bt-preview-select">{`[data-section-wrap]{cursor:pointer}[data-section-wrap]:hover{outline:2px dashed rgba(91,79,232,.55);outline-offset:-2px}[data-section-wrap].bt-selected{outline:3px solid #5B4FE8;outline-offset:-3px}[data-section-wrap] [data-section]:hover{outline:none}[data-section-wrap] [data-section].bt-selected{outline:none}[data-section]{cursor:pointer}[data-section]:hover{outline:2px dashed rgba(91,79,232,.55);outline-offset:-2px}[data-section].bt-selected{outline:3px solid #5B4FE8;outline-offset:-3px}`}</style>
       {css && <style id="bt-preview-theme" dangerouslySetInnerHTML={{ __html: css }} />}
       {error && <div role="status" style={{ position: "sticky", top: 0, zIndex: 50, background: "#FEF3E2", color: "#92400E", padding: "8px 16px", fontSize: 13, fontWeight: 600 }}>{error}</div>}
       <Sections page={page} data={data} lang={lang} t={makeT(lang)} orderForm={orderForm} ctx={ctx} landing={landing} editing={editing} site={site} extras={extras} />
