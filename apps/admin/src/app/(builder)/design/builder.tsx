@@ -1847,8 +1847,67 @@ export function Builder(props: Props) {
               data-testid="section-row" data-type={s.type}
               draggable={!locked && !narrow}
               onDragStart={(e) => { setDragFrom(origIdx); e.dataTransfer.effectAllowed = "move"; }}
-              onDragOver={(e) => { if (dragFrom !== null) { e.preventDefault(); setDragOver(origIdx); } }}
-              onDrop={(e) => { e.preventDefault(); if (dragFrom !== null) reorder(dragFrom, origIdx); setDragFrom(null); setDragOver(null); }}
+              onDragOver={(e) => {
+                if (dragFrom !== null) {
+                  e.preventDefault();
+                  setDragOver(origIdx);
+                } else if (
+                  e.dataTransfer.types.includes("application/biztrack-block-type") ||
+                  e.dataTransfer.types.includes("application/biztrack-pattern-id")
+                ) {
+                  e.preventDefault();
+                  setDragOver(origIdx);
+                }
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                const patternId = e.dataTransfer.getData("application/biztrack-pattern-id");
+                const blockType = e.dataTransfer.getData("application/biztrack-block-type");
+
+                if (patternId) {
+                  const pat = SECTION_PATTERNS.find((p) => p.id === patternId);
+                  if (pat && !locked && !full(pat.sectionType)) {
+                    const def = sectionDef(pat.sectionType);
+                    if (def) {
+                      const base = newSection(pat.sectionType);
+                      const s: PageSection = {
+                        id: base.id,
+                        type: pat.sectionType,
+                        label: pat.defaultLabel,
+                        settings: normalizeSettings(def, pat.settings),
+                        style: normalizeSectionStyle(pat.style),
+                      };
+                      edit((p) => {
+                        const next = [...p.sections];
+                        next.splice(origIdx, 0, s);
+                        return { ...p, sections: next };
+                      });
+                      setSelected(s.id);
+                      setRightCollapsed(false);
+                      setTab("settings");
+                      toast(`Added "${pat.title}" at #${origIdx + 1}`);
+                    }
+                  }
+                } else if (blockType) {
+                  const d = sectionDef(blockType);
+                  if (d && !full(blockType) && !locked) {
+                    const s = newSection(blockType);
+                    edit((p) => {
+                      const next = [...p.sections];
+                      next.splice(origIdx, 0, s);
+                      return { ...p, sections: next };
+                    });
+                    setSelected(s.id);
+                    setRightCollapsed(false);
+                    setTab("settings");
+                    toast(`Added ${d.label} at #${origIdx + 1}`);
+                  }
+                } else if (dragFrom !== null) {
+                  reorder(dragFrom, origIdx);
+                }
+                setDragFrom(null);
+                setDragOver(null);
+              }}
               onDragEnd={() => { setDragFrom(null); setDragOver(null); }}
             >
               {!locked && !narrow && <span className="bld-grip" aria-hidden><IGrip /></span>}
@@ -1887,6 +1946,25 @@ export function Builder(props: Props) {
         <button
           type="button"
           className="btn btn-secondary btn-block"
+          onDragOver={(e) => {
+            if (
+              e.dataTransfer.types.includes("application/biztrack-block-type") ||
+              e.dataTransfer.types.includes("application/biztrack-pattern-id")
+            ) {
+              e.preventDefault();
+            }
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            const patternId = e.dataTransfer.getData("application/biztrack-pattern-id");
+            const blockType = e.dataTransfer.getData("application/biztrack-block-type");
+            if (patternId) {
+              const pat = SECTION_PATTERNS.find((p) => p.id === patternId);
+              if (pat) addPattern(pat);
+            } else if (blockType) {
+              add(blockType);
+            }
+          }}
           onClick={() => {
             setLeftTab("library");
             setLeftCollapsed(false);
@@ -2356,10 +2434,15 @@ export function Builder(props: Props) {
                               key={d.type}
                               type="button"
                               className="bld-card"
-                              style={{ padding: "8px 10px", minHeight: "auto" }}
+                              style={{ padding: "8px 10px", minHeight: "auto", cursor: locked || full(d.type) ? "not-allowed" : "grab" }}
                               disabled={locked || full(d.type)}
+                              draggable={!locked && !full(d.type)}
+                              onDragStart={(e) => {
+                                e.dataTransfer.setData("application/biztrack-block-type", d.type);
+                                e.dataTransfer.effectAllowed = "copy";
+                              }}
                               onClick={() => add(d.type)}
-                              title={d.description}
+                              title={`${d.description} • Click to add or drag to Layers`}
                             >
                               <div className="row" style={{ alignItems: "center", gap: 8 }}>
                                 <span className="bld-glyph">{sectionGlyph(d.type)}</span>
@@ -2379,10 +2462,16 @@ export function Builder(props: Props) {
                               key={pat.id}
                               type="button"
                               className="bld-card"
-                              style={{ padding: "8px 10px", minHeight: "auto" }}
+                              style={{ padding: "8px 10px", minHeight: "auto", cursor: locked || full(pat.sectionType) ? "not-allowed" : "grab" }}
                               disabled={locked || full(pat.sectionType)}
+                              draggable={!locked && !full(pat.sectionType)}
+                              onDragStart={(e) => {
+                                e.dataTransfer.setData("application/biztrack-pattern-id", pat.id);
+                                e.dataTransfer.setData("application/biztrack-block-type", pat.sectionType);
+                                e.dataTransfer.effectAllowed = "copy";
+                              }}
                               onClick={() => addPattern(pat)}
-                              title={pat.description}
+                              title={`${pat.description} • Click to add or drag to Layers`}
                             >
                               <div className="row" style={{ alignItems: "center", gap: 8 }}>
                                 <span className="bld-glyph">⭐</span>
