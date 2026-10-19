@@ -3,11 +3,15 @@
 import { revalidatePath } from "next/cache";
 import {
   saveMerchantWebhookSubscription,
+  deleteMerchantWebhookSubscription,
+  toggleMerchantWebhookSubscription,
   rotateMerchantWebhookSecret,
   sendTestWebhookPing,
   retryFailedWebhookDeliveries,
   ValidationError,
   ForbiddenError,
+  type WebhookAdapterType,
+  type WebhookEventKey,
 } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 
@@ -24,6 +28,11 @@ export async function saveWebhookAction(
 ): Promise<WebhookFormState> {
   const s = await requireAction("design", "edit");
 
+  const id = String(formData.get("id") ?? "").trim() || undefined;
+  const name = String(formData.get("name") ?? "").trim() || undefined;
+  const adapter = (String(formData.get("adapter") ?? "").trim() || undefined) as
+    | WebhookAdapterType
+    | undefined;
   const targetUrl = String(formData.get("targetUrl") ?? "").trim();
   const isActive = formData.get("isActive") === "true" || formData.get("isActive") === "on";
   const events = formData.getAll("events").map((e) => String(e));
@@ -31,6 +40,9 @@ export async function saveWebhookAction(
 
   try {
     await saveMerchantWebhookSubscription(s.tenantId, s.actor, {
+      id,
+      name,
+      adapter,
       targetUrl,
       events,
       isActive,
@@ -38,7 +50,7 @@ export async function saveWebhookAction(
     });
 
     revalidatePath("/settings/webhooks");
-    return { ok: true, message: "Webhook configuration saved successfully." };
+    return { ok: true, message: "Webhook endpoint configuration saved successfully." };
   } catch (err) {
     if (err instanceof ValidationError) {
       const field = typeof err.details?.field === "string" ? err.details.field : undefined;
@@ -51,7 +63,46 @@ export async function saveWebhookAction(
   }
 }
 
-export async function rotateWebhookSecretAction(): Promise<{
+export async function deleteWebhookEndpointAction(endpointId: string): Promise<{
+  ok: boolean;
+  error?: string;
+}> {
+  const s = await requireAction("design", "edit");
+
+  try {
+    await deleteMerchantWebhookSubscription(s.tenantId, s.actor, endpointId);
+    revalidatePath("/settings/webhooks");
+    return { ok: true };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Failed to delete webhook endpoint.",
+    };
+  }
+}
+
+export async function toggleWebhookEndpointAction(
+  endpointId: string,
+  isActive: boolean
+): Promise<{
+  ok: boolean;
+  error?: string;
+}> {
+  const s = await requireAction("design", "edit");
+
+  try {
+    await toggleMerchantWebhookSubscription(s.tenantId, s.actor, endpointId, isActive);
+    revalidatePath("/settings/webhooks");
+    return { ok: true };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Failed to update webhook status.",
+    };
+  }
+}
+
+export async function rotateWebhookSecretAction(endpointId?: string): Promise<{
   ok: boolean;
   secretToken?: string;
   error?: string;
@@ -59,7 +110,7 @@ export async function rotateWebhookSecretAction(): Promise<{
   const s = await requireAction("design", "edit");
 
   try {
-    const result = await rotateMerchantWebhookSecret(s.tenantId, s.actor);
+    const result = await rotateMerchantWebhookSecret(s.tenantId, s.actor, endpointId);
     revalidatePath("/settings/webhooks");
     return { ok: true, secretToken: result.secretToken };
   } catch (err) {
@@ -70,7 +121,10 @@ export async function rotateWebhookSecretAction(): Promise<{
   }
 }
 
-export async function sendTestWebhookPingAction(): Promise<{
+export async function sendTestWebhookPingAction(options?: {
+  subscriptionId?: string;
+  event?: WebhookEventKey | "ping";
+}): Promise<{
   ok: boolean;
   httpStatus?: number | null;
   error?: string;
@@ -79,7 +133,11 @@ export async function sendTestWebhookPingAction(): Promise<{
   const s = await requireAction("design", "edit");
 
   try {
-    const result = await sendTestWebhookPing(s.tenantId, s.actor);
+    const result = await sendTestWebhookPing(s.tenantId, s.actor, {
+      subscriptionId: options?.subscriptionId,
+      event: options?.event,
+      adminOrigin: process.env.NEXT_PUBLIC_ADMIN_ORIGIN || "http://localhost:3001",
+    });
     revalidatePath("/settings/webhooks");
     return {
       ok: result.ok,
@@ -97,7 +155,7 @@ export async function sendTestWebhookPingAction(): Promise<{
   }
 }
 
-export async function retryFailedWebhookDeliveriesAction(): Promise<{
+export async function retryFailedWebhookDeliveriesAction(subscriptionId?: string): Promise<{
   ok: boolean;
   retriedCount?: number;
   error?: string;
@@ -106,7 +164,7 @@ export async function retryFailedWebhookDeliveriesAction(): Promise<{
   const s = await requireAction("design", "edit");
 
   try {
-    const result = await retryFailedWebhookDeliveries(s.tenantId, s.actor);
+    const result = await retryFailedWebhookDeliveries(s.tenantId, s.actor, subscriptionId);
     revalidatePath("/settings/webhooks");
     return {
       ok: true,
@@ -120,4 +178,3 @@ export async function retryFailedWebhookDeliveriesAction(): Promise<{
     };
   }
 }
-

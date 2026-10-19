@@ -1,11 +1,22 @@
 "use client";
 
-import { useActionState, useEffect, useState, useTransition } from "react";
-import type { WebhookOverview, WebhookEventKey } from "@biztrackbd/core";
+import { useActionState, useEffect, useMemo, useState, useTransition } from "react";
+import type {
+  WebhookOverview,
+  WebhookSubscriptionView,
+  WebhookEventKey,
+  WebhookAdapterType,
+} from "@biztrackbd/core";
+import {
+  detectWebhookAdapter,
+  getSampleEventData,
+} from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
 import { CopyButton } from "@/components/copy-button";
 import {
   saveWebhookAction,
+  deleteWebhookEndpointAction,
+  toggleWebhookEndpointAction,
   rotateWebhookSecretAction,
   sendTestWebhookPingAction,
   retryFailedWebhookDeliveriesAction,
@@ -17,6 +28,7 @@ interface AutomationPreset {
   name: string;
   badge: string;
   badgeColor: string;
+  adapter: WebhookAdapterType;
   urlPlaceholder: string;
   recommendedEvents: string[];
   helperText: string;
@@ -25,44 +37,70 @@ interface AutomationPreset {
 
 const AUTOMATION_PRESETS: AutomationPreset[] = [
   {
+    id: "discord",
+    name: "Discord Webhook",
+    badge: "Discord",
+    badgeColor: "#5865F2",
+    adapter: "discord",
+    urlPlaceholder: "https://discord.com/api/webhooks/123456789/abcdefgh",
+    recommendedEvents: ["order.created", "order.delivered", "lead.created", "booking.created"],
+    helperText: "Stream rich color-coded status embeds with Bangladesh ৳ pricing and direct admin links into your Discord channel.",
+    guideNote: "Discord: Channel Settings → Integrations → Webhooks → New Webhook → Copy Webhook URL.",
+  },
+  {
+    id: "slack",
+    name: "Slack Channel",
+    badge: "Slack",
+    badgeColor: "#4A154B",
+    adapter: "slack",
+    urlPlaceholder: "https://hooks.slack.com/services/T00/B00/X00",
+    recommendedEvents: ["order.created", "order.delivered", "lead.created", "booking.created"],
+    helperText: "Dispatch Slack Block Kit notifications with 2-column fields, formatted items list, and one-click order lookup.",
+    guideNote: "Slack: App Directory → Incoming WebHooks → Add to Slack → Select Channel → Copy Webhook URL.",
+  },
+  {
+    id: "telegram",
+    name: "Telegram Bot Alert",
+    badge: "Telegram",
+    badgeColor: "#229ED9",
+    adapter: "telegram",
+    urlPlaceholder: "https://api.telegram.org/bot<TOKEN>/sendMessage?chat_id=<CHAT_ID>",
+    recommendedEvents: ["order.created", "order.delivered", "lead.created", "booking.created"],
+    helperText: "Instant push alerts to your Telegram group or private channel with clean Markdown formatting.",
+    guideNote: "Create bot via @BotFather, add bot to group/channel, get your chat_id via @userinfobot and append ?chat_id=<ID>.",
+  },
+  {
     id: "zapier",
-    name: "Zapier Catch Hook",
+    name: "Zapier Pipeline",
     badge: "Zapier",
-    badgeColor: "#ff4a00",
+    badgeColor: "#FF4A00",
+    adapter: "generic",
     urlPlaceholder: "https://hooks.zapier.com/hooks/catch/1234567/abcdef/",
     recommendedEvents: ["order.created", "order.delivered", "lead.created", "booking.created", "customer.registered"],
-    helperText: "Trigger Zapier workflows automatically. Connects to Google Sheets, SMS, CRM, Slack, and 5,000+ apps.",
-    guideNote: "Create a 'Webhooks by Zapier' trigger with 'Catch Hook', paste the generated webhook URL below, and send a test ping.",
+    helperText: "Trigger Zapier workflows automatically. Sync checkouts to Google Sheets, CRM, email campaigns, and 5,000+ apps.",
+    guideNote: "Create a 'Webhooks by Zapier' trigger with 'Catch Hook', paste the generated webhook URL, and send a test ping.",
   },
   {
     id: "make",
     name: "Make.com (Integromat)",
     badge: "Make",
-    badgeColor: "#6d28d9",
+    badgeColor: "#6D28D9",
+    adapter: "generic",
     urlPlaceholder: "https://hook.eu1.make.com/abcdef1234567890",
     recommendedEvents: ["order.created", "order.delivered", "lead.created", "booking.created", "customer.registered"],
-    helperText: "Execute complex multi-branch scenarios in Make.com with automated JSON parsing.",
-    guideNote: "Add a 'Custom Webhook' module in Make, copy the address here, and trigger a Test Ping to auto-map data structures.",
-  },
-  {
-    id: "discord",
-    name: "Discord / Slack Channel",
-    badge: "Chat Alert",
-    badgeColor: "#5865f2",
-    urlPlaceholder: "https://discord.com/api/webhooks/123456789/abcdefgh",
-    recommendedEvents: ["order.created", "order.delivered", "lead.created"],
-    helperText: "Stream sales alerts, parcel deliveries, and lead notifications straight into your team chat channel.",
-    guideNote: "Create an Incoming Webhook in your Discord channel settings or Slack app integrations and paste the webhook URL.",
+    helperText: "Execute complex multi-branch automation scenarios in Make.com with automated JSON parsing.",
+    guideNote: "Add a 'Custom Webhook' module in Make, copy the address here, and trigger a Test Ping to auto-map data.",
   },
   {
     id: "custom",
-    name: "Custom Webhook Endpoint",
+    name: "Custom API Endpoint",
     badge: "API",
-    badgeColor: "#64748b",
+    badgeColor: "#64748B",
+    adapter: "generic",
     urlPlaceholder: "https://your-domain.com/api/webhooks/biztrack",
     recommendedEvents: ["order.created", "order.delivered", "lead.created", "booking.created", "customer.registered"],
-    helperText: "Send HMAC-SHA256 signed JSON payloads to your own backend server, Node.js, Python, or PHP service.",
-    guideNote: "Verify signatures using the X-BizTrack-Signature header and your secret token.",
+    helperText: "Send HMAC-SHA256 signed JSON payloads to your own backend server, Node.js, Python, or Go microservice.",
+    guideNote: "Verify authenticity using the X-BizTrack-Signature header and your webhook signing secret.",
   },
 ];
 
@@ -78,64 +116,105 @@ export function WebhookForm({
     {}
   );
 
-  const sub = overview.subscription;
-  const [url, setUrl] = useState(sub?.targetUrl ?? "");
-  const [isActive, setIsActive] = useState(sub?.isActive ?? true);
-  const [selectedEvents, setSelectedEvents] = useState<string[]>(
-    sub?.events ?? ["order.created", "order.delivered", "lead.created", "booking.created"]
-  );
+  // Endpoint Modal & Edit State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingSub, setEditingSub] = useState<WebhookSubscriptionView | null>(null);
 
-  const [secret, setSecret] = useState(sub?.secretToken ?? "");
-  const [showSecret, setShowSecret] = useState(false);
+  // Modal Form Inputs
+  const [name, setName] = useState("");
+  const [url, setUrl] = useState("");
+  const [adapterOverride, setAdapterOverride] = useState<WebhookAdapterType | "auto">("auto");
+  const [isActive, setIsActive] = useState(true);
+  const [selectedEvents, setSelectedEvents] = useState<string[]>([
+    "order.created",
+    "order.delivered",
+    "lead.created",
+    "booking.created",
+  ]);
+  const [secret, setSecret] = useState("");
+  const [activePreset, setActivePreset] = useState<string | null>(null);
+
+  // Live Message Preview State
+  const [previewEvent, setPreviewEvent] = useState<WebhookEventKey | "ping">("order.created");
+
+  // Global Actions State
   const [rotatePending, startRotate] = useTransition();
   const [rotateNotice, setRotateNotice] = useState<string | null>(null);
+  const [revealedSecrets, setRevealedSecrets] = useState<Record<string, boolean>>({});
 
   const [pingPending, startPing] = useTransition();
   const [pingResult, setPingResult] = useState<{
     ok: boolean;
     message: string;
+    endpointId?: string;
   } | null>(null);
 
-  const [activePreset, setActivePreset] = useState<string | null>(null);
+  const [togglePending, startToggle] = useTransition();
+  const [deletePending, startDelete] = useTransition();
   const [retryPending, startRetry] = useTransition();
   const [retryMessage, setRetryMessage] = useState<string | null>(null);
 
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
 
+  // Calculate DLQ consecutive failures
+  const consecutiveFailures = useMemo(() => {
+    let count = 0;
+    for (const log of overview.recentLogs) {
+      if (!log.isSuccess) count++;
+      else break;
+    }
+    return count;
+  }, [overview.recentLogs]);
+
+  // Detected or overridden adapter
+  const effectiveAdapter: WebhookAdapterType = useMemo(() => {
+    if (adapterOverride !== "auto") return adapterOverride;
+    return detectWebhookAdapter(url);
+  }, [adapterOverride, url]);
+
+  // Open modal for editing or creating
+  function openAddModal(preset?: AutomationPreset) {
+    setEditingSub(null);
+    setName(preset?.name || "");
+    setUrl(preset?.urlPlaceholder || "");
+    setAdapterOverride(preset?.adapter || "auto");
+    setIsActive(true);
+    setSelectedEvents(
+      preset?.recommendedEvents || ["order.created", "order.delivered", "lead.created", "booking.created"]
+    );
+    setSecret("");
+    setActivePreset(preset?.id || null);
+    setIsModalOpen(true);
+  }
+
+  function openEditModal(sub: WebhookSubscriptionView) {
+    setEditingSub(sub);
+    setName(sub.name || "");
+    setUrl(sub.targetUrl.split("#")[0]!);
+    setAdapterOverride(sub.adapter || "auto");
+    setIsActive(sub.isActive);
+    setSelectedEvents(sub.events);
+    setSecret(sub.secretToken);
+    setActivePreset(null);
+    setIsModalOpen(true);
+  }
+
+  function closeModal() {
+    setIsModalOpen(false);
+    setEditingSub(null);
+  }
+
   function applyPreset(preset: AutomationPreset) {
     setActivePreset(preset.id);
+    setAdapterOverride(preset.adapter);
     setSelectedEvents(preset.recommendedEvents);
+    if (!name || AUTOMATION_PRESETS.some((p) => name === p.name)) {
+      setName(preset.name);
+    }
     if (!url || AUTOMATION_PRESETS.some((p) => url === p.urlPlaceholder)) {
       setUrl(preset.urlPlaceholder);
     }
   }
-
-  function handleRetryFailed() {
-    setRetryMessage(null);
-    startRetry(async () => {
-      const res = await retryFailedWebhookDeliveriesAction();
-      if (res.ok) {
-        setRetryMessage(res.message || "Failed delivery jobs re-queued.");
-      } else {
-        setRetryMessage(res.error || "Failed to retry delivery jobs.");
-      }
-    });
-  }
-
-  // Calculate consecutive failures for DLQ alert
-  let consecutiveFailures = 0;
-  for (const log of overview.recentLogs) {
-    if (!log.isSuccess) consecutiveFailures++;
-    else break;
-  }
-  const selectedPresetMeta = AUTOMATION_PRESETS.find((p) => p.id === activePreset);
-
-  useEffect(() => {
-    if (sub?.targetUrl) setUrl(sub.targetUrl);
-    if (sub?.secretToken) setSecret(sub.secretToken);
-    if (sub?.events) setSelectedEvents(sub.events);
-    if (sub?.isActive !== undefined) setIsActive(sub.isActive);
-  }, [sub]);
 
   function toggleEvent(key: string) {
     if (selectedEvents.includes(key)) {
@@ -145,15 +224,48 @@ export function WebhookForm({
     }
   }
 
-  function handleRotate() {
-    if (!confirm("Are you sure you want to rotate your webhook signing secret? Any services verifying old signatures will fail until updated.")) {
+  function selectAllEvents() {
+    setSelectedEvents(overview.availableEvents.map((e) => e.key));
+  }
+
+  function deselectAllEvents() {
+    setSelectedEvents([]);
+  }
+
+  function handleQuickToggle(subId: string, currentActive: boolean) {
+    startToggle(async () => {
+      await toggleWebhookEndpointAction(subId, !currentActive);
+    });
+  }
+
+  function handleDeleteEndpoint(subId: string, endpointName?: string) {
+    if (
+      !confirm(
+        `Are you sure you want to delete the endpoint "${endpointName || "Webhook"}"? All delivery history will be removed.`
+      )
+    ) {
+      return;
+    }
+    startDelete(async () => {
+      await deleteWebhookEndpointAction(subId);
+    });
+  }
+
+  function handleRotate(subId?: string) {
+    if (
+      !confirm(
+        "Are you sure you want to rotate this webhook signing secret? Any services verifying old signatures will fail until updated."
+      )
+    ) {
       return;
     }
     setRotateNotice(null);
     startRotate(async () => {
-      const res = await rotateWebhookSecretAction();
+      const res = await rotateWebhookSecretAction(subId);
       if (res.ok && res.secretToken) {
-        setSecret(res.secretToken);
+        if (editingSub && editingSub.id === subId) {
+          setSecret(res.secretToken);
+        }
         setRotateNotice("Secret rotated successfully. Remember to update your verification endpoint.");
       } else {
         setRotateNotice(res.error || "Failed to rotate secret.");
@@ -161,374 +273,1188 @@ export function WebhookForm({
     });
   }
 
-  function handleTestPing() {
+  function handleTestPing(subscriptionId?: string, event: WebhookEventKey | "ping" = "ping") {
     setPingResult(null);
     startPing(async () => {
-      const res = await sendTestWebhookPingAction();
+      const res = await sendTestWebhookPingAction({ subscriptionId, event });
       setPingResult({
         ok: res.ok,
         message: res.message || (res.ok ? "Ping succeeded!" : "Ping failed."),
+        endpointId: subscriptionId,
       });
     });
   }
 
+  function handleRetryFailed(subscriptionId?: string) {
+    setRetryMessage(null);
+    startRetry(async () => {
+      const res = await retryFailedWebhookDeliveriesAction(subscriptionId);
+      if (res.ok) {
+        setRetryMessage(res.message || "Failed delivery jobs re-queued.");
+      } else {
+        setRetryMessage(res.error || "Failed to retry delivery jobs.");
+      }
+    });
+  }
+
+  // Close modal when form succeeds
+  useEffect(() => {
+    if (formState.ok) {
+      closeModal();
+    }
+  }, [formState]);
+
+  // Sample data for live preview
+  const sampleData = useMemo(() => getSampleEventData(previewEvent), [previewEvent]);
+
+  // Primary active subscription (fallback for single endpoint cards)
+  const subscriptions = overview.subscriptions || (overview.subscription ? [overview.subscription] : []);
+
   return (
     <div className="stack" style={{ gap: 24 }} data-testid="merchant-webhook-workspace">
-      {/* Configuration Form */}
-      <form action={formAction} className="stack" style={{ gap: 20 }}>
-        {formState.message && (
-          <div className="notice notice-success" data-testid="save-success-banner">
-            {formState.message}
+      {/* Top Banner Notifications */}
+      {formState.message && (
+        <div className="notice notice-success" data-testid="save-success-banner">
+          {formState.message}
+        </div>
+      )}
+      {formState.error && (
+        <div className="notice notice-danger" data-testid="save-error-banner">
+          {formState.error}
+        </div>
+      )}
+
+      {/* DLQ Consecutive Failure Alert */}
+      {consecutiveFailures >= 5 && (
+        <div
+          className="notice notice-danger"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 16,
+            boxShadow: "0 4px 12px rgba(220, 38, 38, 0.15)",
+          }}
+          data-testid="dlq-consecutive-failure-alert"
+        >
+          <div>
+            <strong>⚠️ Webhook Delivery Alert:</strong> Endpoints have encountered {consecutiveFailures}{" "}
+            consecutive delivery failures. Your external chat webhook or HTTP receiver may be down, timing
+            out, or rejecting payloads.
           </div>
-        )}
-        {formState.error && (
-          <div className="notice notice-danger" data-testid="save-error-banner">
-            {formState.error}
-          </div>
-        )}
-
-        {/* DLQ Failure Threshold Alert */}
-        {consecutiveFailures >= 5 && (
-          <div
-            className="notice notice-danger"
-            style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}
-            data-testid="dlq-consecutive-failure-alert"
-          >
-            <div>
-              <strong>Webhook Delivery Alert:</strong> Your endpoint has failed {consecutiveFailures} consecutive deliveries. Your receiving service may be down, timing out, or returning 5xx server errors.
-            </div>
-            {canEdit && (
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={handleRetryFailed}
-                disabled={retryPending}
-                style={{ whiteSpace: "nowrap" }}
-                data-testid="dlq-retry-btn"
-              >
-                {retryPending ? "Retrying..." : "Retry Failed Deliveries"}
-              </button>
-            )}
-          </div>
-        )}
-
-        <section className="card">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <div>
-              <h2 style={{ fontSize: 18, margin: 0 }}>Endpoint Destination</h2>
-              <p className="muted" style={{ margin: "4px 0 0", fontSize: 13 }}>
-                Target URL where real-time JSON event payloads will be sent via HTTP POST.
-              </p>
-            </div>
-            <label style={{ display: "inline-flex", alignItems: "center", gap: 8, cursor: canEdit ? "pointer" : "default", fontSize: 14 }}>
-              <input
-                type="checkbox"
-                name="isActive"
-                value="true"
-                checked={isActive}
-                disabled={!canEdit}
-                onChange={(e) => setIsActive(e.target.checked)}
-                data-testid="webhook-active-toggle"
-              />
-              <span style={{ fontWeight: 600 }}>{isActive ? "Active (Receiving Events)" : "Paused"}</span>
-            </label>
-          </div>
-
-          {/* Quick Automation Presets Bar */}
-          <div style={{ marginBottom: 20 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-              <label style={{ fontWeight: 600, fontSize: 13, margin: 0 }}>
-                Quick Automation Presets
-              </label>
-              <span className="muted" style={{ fontSize: 12 }}>
-                Auto-configures recommended events & schema hints
-              </span>
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {AUTOMATION_PRESETS.map((p) => {
-                const isSelected = activePreset === p.id;
-                return (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => applyPreset(p)}
-                    disabled={!canEdit}
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 6,
-                      padding: "6px 12px",
-                      borderRadius: 6,
-                      fontSize: 13,
-                      fontWeight: 500,
-                      cursor: canEdit ? "pointer" : "default",
-                      border: isSelected ? "1.5px solid var(--accent, #0066cc)" : "1px solid var(--border, #cbd5e1)",
-                      backgroundColor: isSelected ? "rgba(0, 102, 204, 0.08)" : "var(--card-bg, #ffffff)",
-                      color: isSelected ? "var(--accent, #0066cc)" : "inherit",
-                    }}
-                    data-testid={`preset-btn-${p.id}`}
-                  >
-                    <span
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: "50%",
-                        backgroundColor: p.badgeColor,
-                      }}
-                    />
-                    <span>{p.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-            {selectedPresetMeta && (
-              <div
-                style={{
-                  marginTop: 10,
-                  padding: "10px 14px",
-                  borderRadius: 6,
-                  backgroundColor: "var(--bg-muted, #f8fafc)",
-                  border: "1px solid var(--border, #e2e8f0)",
-                  fontSize: 12,
-                  lineHeight: 1.45,
-                }}
-                data-testid="preset-helper-card"
-              >
-                <strong style={{ color: selectedPresetMeta.badgeColor }}>{selectedPresetMeta.badge}:</strong>{" "}
-                {selectedPresetMeta.helperText}{" "}
-                <span className="muted" style={{ display: "block", marginTop: 4 }}>
-                  💡 {selectedPresetMeta.guideNote}
-                </span>
-              </div>
-            )}
-          </div>
-
-          <div className="field" style={{ marginBottom: 16 }}>
-            <label htmlFor="targetUrl" style={{ fontWeight: 600, fontSize: 13, display: "block", marginBottom: 6 }}>
-              Webhook Target URL
-            </label>
-            <input
-              id="targetUrl"
-              name="targetUrl"
-              type="url"
-              className="input"
-              placeholder="https://your-domain.com/api/webhooks/biztrack"
-              value={url}
-              disabled={!canEdit}
-              onChange={(e) => setUrl(e.target.value)}
-              required
-              data-testid="webhook-target-url-input"
-              style={{ width: "100%", fontFamily: "monospace", fontSize: 14 }}
-            />
-            <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-              Must start with <code>https://</code> (recommended) or <code>http://</code> for local staging.
-            </p>
-          </div>
-
-          <h3 style={{ fontSize: 15, margin: "20px 0 10px" }}>Subscribed Events</h3>
-          <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
-            Select the business events you want delivered to this endpoint.
-          </p>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 10 }}>
-            {overview.availableEvents.map((evt) => {
-              const checked = selectedEvents.includes(evt.key);
-              return (
-                <label
-                  key={evt.key}
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: 10,
-                    padding: "10px 14px",
-                    border: checked ? "1px solid var(--accent, #0066cc)" : "1px solid var(--border, #e5e7eb)",
-                    borderRadius: 8,
-                    backgroundColor: checked ? "rgba(0, 102, 204, 0.04)" : "transparent",
-                    cursor: canEdit ? "pointer" : "default",
-                  }}
-                  data-testid={`event-toggle-${evt.key}`}
-                >
-                  <input
-                    type="checkbox"
-                    name="events"
-                    value={evt.key}
-                    checked={checked}
-                    disabled={!canEdit}
-                    onChange={() => toggleEvent(evt.key)}
-                    style={{ marginTop: 3 }}
-                  />
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <span style={{ fontWeight: 600, fontSize: 14 }}>{evt.label}</span>
-                      <code style={{ fontSize: 11, padding: "1px 4px", borderRadius: 4, background: "#f1f5f9" }}>
-                        {evt.key}
-                      </code>
-                    </div>
-                    <p className="muted" style={{ margin: "2px 0 0", fontSize: 12, lineHeight: 1.35 }}>
-                      {evt.description}
-                    </p>
-                  </div>
-                </label>
-              );
-            })}
-          </div>
-
-          <input type="hidden" name="secretToken" value={secret} />
-
           {canEdit && (
-            <div style={{ marginTop: 20, display: "flex", justifyContent: "flex-end" }}>
-              <SubmitButton
-                className="btn btn-primary"
-                pending="Saving configuration…"
-                disabled={isSaving}
-                data-testid="save-webhook-btn"
-              >
-                Save Webhook Settings
-              </SubmitButton>
-            </div>
-          )}
-        </section>
-      </form>
-
-      {/* Secret & Verification Card */}
-      <section className="card">
-        <h2 style={{ fontSize: 18, margin: "0 0 6px" }}>HMAC-SHA256 Signing Secret</h2>
-        <p className="muted" style={{ fontSize: 13, margin: "0 0 14px" }}>
-          Outbound webhook requests include an <code>X-BizTrack-Signature: t=&lt;timestamp&gt;,v1=&lt;signature&gt;</code> header.
-          Compute the HMAC-SHA256 of <code>&lt;timestamp&gt;.&lt;payload&gt;</code> using this secret to verify sender authenticity.
-        </p>
-
-        {rotateNotice && (
-          <div className="notice notice-info" style={{ marginBottom: 12 }}>
-            {rotateNotice}
-          </div>
-        )}
-
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <div
-            style={{
-              flex: 1,
-              minWidth: 260,
-              padding: "8px 12px",
-              background: "#f8fafc",
-              border: "1px solid #e2e8f0",
-              borderRadius: 6,
-              fontFamily: "monospace",
-              fontSize: 13,
-              letterSpacing: showSecret ? "normal" : "0.15em",
-            }}
-            data-testid="webhook-secret-display"
-          >
-            {secret ? (showSecret ? secret : "••••••••••••••••••••••••••••••••••••••••••••••••") : "(Will be generated upon save)"}
-          </div>
-
-          {secret && (
-            <>
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={() => setShowSecret(!showSecret)}
-                data-testid="toggle-secret-visibility-btn"
-              >
-                {showSecret ? "Hide" : "Reveal"}
-              </button>
-              <CopyButton value={secret} label="Webhook Secret" />
-            </>
-          )}
-
-          {canEdit && sub && (
             <button
               type="button"
               className="btn btn-secondary btn-sm"
-              disabled={rotatePending}
-              onClick={handleRotate}
-              data-testid="rotate-secret-btn"
-              style={{ color: "var(--danger, #dc2626)" }}
+              onClick={() => handleRetryFailed()}
+              disabled={retryPending}
+              style={{ whiteSpace: "nowrap" }}
+              data-testid="dlq-retry-btn"
             >
-              {rotatePending ? "Rotating…" : "Rotate Secret"}
+              {retryPending ? "Retrying..." : "Batch Re-queue Jobs"}
             </button>
           )}
         </div>
-      </section>
+      )}
 
-      {/* Test Ping Dispatcher */}
-      <section className="card" data-testid="test-ping-card">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-          <div>
-            <h2 style={{ fontSize: 18, margin: 0 }}>Test Dispatch</h2>
-            <p className="muted" style={{ margin: "4px 0 0", fontSize: 13 }}>
-              Send a sample <code>ping</code> payload with a valid HMAC signature to verify your receiver endpoint.
-            </p>
-          </div>
-          {canEdit && (
-            <button
-              type="button"
-              className="btn btn-secondary"
-              disabled={pingPending || !sub?.targetUrl}
-              onClick={handleTestPing}
-              data-testid="send-test-ping-btn"
-            >
-              {pingPending ? "Sending Test Ping…" : "Send Test Ping"}
-            </button>
-          )}
-        </div>
-
-        {!sub?.targetUrl && (
-          <p className="muted" style={{ fontSize: 12, marginTop: 8 }}>
-            Save your webhook URL above to enable test ping dispatch.
+      {/* Header Bar with Add Button */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 12,
+        }}
+      >
+        <div>
+          <h2 style={{ fontSize: 20, margin: 0, fontWeight: 700 }}>Configured Alert Endpoints</h2>
+          <p className="muted" style={{ margin: "4px 0 0", fontSize: 13 }}>
+            Manage chat platforms (Discord, Slack, Telegram) and automated webhooks (Zapier, Make, Custom API).
           </p>
-        )}
-
-        {pingResult && (
-          <div
-            className={`notice ${pingResult.ok ? "notice-success" : "notice-danger"}`}
-            style={{ marginTop: 14 }}
-            data-testid="test-ping-result-banner"
+        </div>
+        {canEdit && (
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => openAddModal()}
+            data-testid="add-endpoint-btn"
+            style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
           >
-            <b>{pingResult.ok ? "✓ Delivery Succeeded" : "✕ Delivery Failed"}</b>: {pingResult.message}
-          </div>
+            <span>+ Add Webhook Endpoint</span>
+          </button>
         )}
-      </section>
+      </div>
 
-      {/* Delivery Logs & History */}
-      <section className="card" data-testid="delivery-logs-card">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+      {/* Endpoints Grid */}
+      {subscriptions.length === 0 ? (
+        <section
+          className="card"
+          style={{
+            padding: "36px 24px",
+            textAlign: "center",
+            background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
+            border: "2px dashed #cbd5e1",
+          }}
+        >
+          <div style={{ fontSize: 32, marginBottom: 12 }}>🚀</div>
+          <h3 style={{ fontSize: 18, margin: "0 0 8px", fontWeight: 600 }}>No Endpoints Configured Yet</h3>
+          <p className="muted" style={{ maxWidth: 540, margin: "0 auto 24px", fontSize: 14 }}>
+            Connect Discord channels, Telegram groups, Slack rooms, or Zapier to receive instant order,
+            delivery, lead, and booking notifications.
+          </p>
+          <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 10 }}>
+            {AUTOMATION_PRESETS.slice(0, 3).map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => openAddModal(preset)}
+                data-testid={`preset-btn-${preset.id}`}
+                style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
+              >
+                <span
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    backgroundColor: preset.badgeColor,
+                  }}
+                />
+                <span>Add {preset.name}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))",
+            gap: 16,
+          }}
+        >
+          {subscriptions.map((subItem) => {
+            const adapter = subItem.adapter || detectWebhookAdapter(subItem.targetUrl);
+            const isRevealed = revealedSecrets[subItem.id] || false;
+            const cleanUrl = subItem.targetUrl.split("#")[0]!;
+
+            // Platform branding color
+            const platformColor =
+              adapter === "discord"
+                ? "#5865F2"
+                : adapter === "slack"
+                ? "#4A154B"
+                : adapter === "telegram"
+                ? "#229ED9"
+                : cleanUrl.includes("zapier.com")
+                ? "#FF4A00"
+                : cleanUrl.includes("make.com")
+                ? "#6D28D9"
+                : "#64748B";
+
+            const platformLabel =
+              adapter === "discord"
+                ? "Discord Embed"
+                : adapter === "slack"
+                ? "Slack Block Kit"
+                : adapter === "telegram"
+                ? "Telegram Bot"
+                : cleanUrl.includes("zapier.com")
+                ? "Zapier Catch Hook"
+                : cleanUrl.includes("make.com")
+                ? "Make.com"
+                : "Generic JSON";
+
+            return (
+              <div
+                key={subItem.id}
+                className="card"
+                data-testid={`endpoint-card-${subItem.id}`}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  position: "relative",
+                  borderLeft: `4px solid ${platformColor}`,
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+                  opacity: subItem.isActive ? 1 : 0.7,
+                }}
+              >
+                <div>
+                  {/* Card Header: Platform Tag + Name + Active Switch */}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      marginBottom: 10,
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                        <span
+                          style={{
+                            padding: "2px 8px",
+                            borderRadius: 12,
+                            fontSize: 11,
+                            fontWeight: 700,
+                            letterSpacing: "0.03em",
+                            backgroundColor: `${platformColor}15`,
+                            color: platformColor,
+                            border: `1px solid ${platformColor}30`,
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          {platformLabel}
+                        </span>
+                        {!subItem.isActive && (
+                          <span
+                            style={{
+                              padding: "2px 6px",
+                              borderRadius: 4,
+                              fontSize: 11,
+                              fontWeight: 600,
+                              background: "#fee2e2",
+                              color: "#991b1b",
+                            }}
+                          >
+                            PAUSED
+                          </span>
+                        )}
+                      </div>
+                      <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>
+                        {subItem.name || (adapter === "discord" ? "Discord Channel" : adapter === "slack" ? "Slack Alert" : adapter === "telegram" ? "Telegram Alert" : "Webhook Endpoint")}
+                      </h3>
+                    </div>
+
+                    {/* Active toggle */}
+                    {canEdit && (
+                      <button
+                        type="button"
+                        onClick={() => handleQuickToggle(subItem.id, subItem.isActive)}
+                        disabled={togglePending}
+                        data-testid={`toggle-active-btn-${subItem.id}`}
+                        style={{
+                          background: subItem.isActive ? "#dcfce7" : "#f1f5f9",
+                          color: subItem.isActive ? "#166534" : "#64748b",
+                          border: `1px solid ${subItem.isActive ? "#bbf7d0" : "#cbd5e1"}`,
+                          borderRadius: 16,
+                          padding: "3px 10px",
+                          fontSize: 12,
+                          fontWeight: 600,
+                          cursor: "pointer",
+                        }}
+                      >
+                        {subItem.isActive ? "Active" : "Pause"}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Target URL with Copy Button */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      background: "#f8fafc",
+                      padding: "6px 10px",
+                      borderRadius: 6,
+                      marginBottom: 12,
+                      border: "1px solid #e2e8f0",
+                    }}
+                  >
+                    <span
+                      style={{
+                        flex: 1,
+                        fontFamily: "monospace",
+                        fontSize: 12,
+                        color: "#334155",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                      title={cleanUrl}
+                    >
+                      {cleanUrl}
+                    </span>
+                    <CopyButton value={cleanUrl} label="URL" />
+                  </div>
+
+                  {/* Subscribed Events Badges */}
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 4 }}>
+                      SUBSCRIBED EVENTS ({subItem.events.length})
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                      {subItem.events.map((evtKey) => (
+                        <span
+                          key={evtKey}
+                          style={{
+                            fontSize: 11,
+                            padding: "2px 6px",
+                            borderRadius: 4,
+                            background: "#f1f5f9",
+                            color: "#334155",
+                            fontFamily: "monospace",
+                          }}
+                        >
+                          {evtKey}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Signing Secret */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 8,
+                      fontSize: 12,
+                      padding: "6px 8px",
+                      background: "#fafafa",
+                      borderRadius: 6,
+                      border: "1px solid #f1f5f9",
+                      marginBottom: 14,
+                    }}
+                  >
+                    <span style={{ color: "#64748b" }}>Secret:</span>
+                    <span
+                      style={{
+                        fontFamily: "monospace",
+                        letterSpacing: isRevealed ? "normal" : "0.1em",
+                        color: "#475569",
+                      }}
+                    >
+                      {isRevealed ? subItem.secretToken : "••••••••••••••••"}
+                    </span>
+                    <div style={{ display: "flex", gap: 4 }}>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setRevealedSecrets({
+                            ...revealedSecrets,
+                            [subItem.id]: !isRevealed,
+                          })
+                        }
+                        style={{
+                          background: "transparent",
+                          border: 0,
+                          cursor: "pointer",
+                          fontSize: 11,
+                          color: "#0284c7",
+                        }}
+                      >
+                        {isRevealed ? "Hide" : "Show"}
+                      </button>
+                      <CopyButton value={subItem.secretToken} label="Secret" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Bottom Actions */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    borderTop: "1px solid #f1f5f9",
+                    paddingTop: 12,
+                    marginTop: 6,
+                  }}
+                >
+                  {/* Event test ping selector */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <select
+                      id={`ping-event-${subItem.id}`}
+                      defaultValue="ping"
+                      style={{
+                        fontSize: 12,
+                        padding: "4px 8px",
+                        borderRadius: 6,
+                        border: "1px solid #cbd5e1",
+                        background: "#ffffff",
+                      }}
+                      data-testid={`test-ping-event-select-${subItem.id}`}
+                    >
+                      <option value="ping">Ping Event</option>
+                      <option value="order.created">Order Created</option>
+                      <option value="order.delivered">Order Delivered</option>
+                      <option value="lead.created">Lead Captured</option>
+                      <option value="booking.created">Booking Created</option>
+                    </select>
+
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      disabled={pingPending}
+                      onClick={() => {
+                        const sel = document.getElementById(
+                          `ping-event-${subItem.id}`
+                        ) as HTMLSelectElement | null;
+                        const evt = (sel?.value || "ping") as WebhookEventKey | "ping";
+                        handleTestPing(subItem.id, evt);
+                      }}
+                      data-testid={`send-test-ping-btn-${subItem.id}`}
+                    >
+                      {pingPending ? "Testing..." : "Test"}
+                    </button>
+                  </div>
+
+                  {/* Edit / Delete Buttons */}
+                  {canEdit && (
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => openEditModal(subItem)}
+                        data-testid={`edit-endpoint-btn-${subItem.id}`}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => handleDeleteEndpoint(subItem.id, subItem.name)}
+                        disabled={deletePending}
+                        data-testid={`delete-endpoint-btn-${subItem.id}`}
+                        style={{ color: "var(--danger, #dc2626)" }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Global Ping Result Banner */}
+      {pingResult && (
+        <div
+          className={`notice ${pingResult.ok ? "notice-success" : "notice-danger"}`}
+          data-testid="test-ping-result-banner"
+          style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+        >
           <div>
-            <h2 style={{ fontSize: 18, margin: 0 }}>Recent Delivery Logs</h2>
+            <b>{pingResult.ok ? "✓ Test Ping Succeeded" : "✕ Test Ping Failed"}</b>: {pingResult.message}
+          </div>
+          <button
+            type="button"
+            onClick={() => setPingResult(null)}
+            style={{ background: "transparent", border: 0, cursor: "pointer", color: "inherit" }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Global Secret Rotation Notice */}
+      {rotateNotice && (
+        <div className="notice notice-info" style={{ marginBottom: 12 }}>
+          {rotateNotice}
+        </div>
+      )}
+
+      {/* Add / Edit Endpoint Modal */}
+      {isModalOpen && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(15, 23, 42, 0.65)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            padding: 16,
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) closeModal();
+          }}
+        >
+          <div
+            className="card"
+            style={{
+              width: "100%",
+              maxWidth: 820,
+              maxHeight: "90vh",
+              overflowY: "auto",
+              boxShadow: "0 20px 40px rgba(0, 0, 0, 0.25)",
+              borderRadius: 12,
+              padding: 24,
+              backgroundColor: "#ffffff",
+            }}
+            data-testid="endpoint-modal"
+          >
+            {/* Modal Title Bar */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 18,
+                borderBottom: "1px solid #e2e8f0",
+                paddingBottom: 14,
+              }}
+            >
+              <div>
+                <h2 style={{ fontSize: 18, margin: 0, fontWeight: 700 }}>
+                  {editingSub ? "Edit Webhook Endpoint" : "Add Webhook Endpoint"}
+                </h2>
+                <p className="muted" style={{ margin: "2px 0 0", fontSize: 13 }}>
+                  Configure notification destination and customize native chat alerts.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={closeModal}
+                style={{
+                  background: "transparent",
+                  border: 0,
+                  fontSize: 20,
+                  cursor: "pointer",
+                  color: "#64748b",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Presets Selector (when creating new) */}
+            {!editingSub && (
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontWeight: 600, fontSize: 13, display: "block", marginBottom: 8 }}>
+                  Quick Platform Presets
+                </label>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {AUTOMATION_PRESETS.map((p) => {
+                    const isSelected = activePreset === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => applyPreset(p)}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 6,
+                          padding: "6px 12px",
+                          borderRadius: 6,
+                          fontSize: 13,
+                          fontWeight: 500,
+                          cursor: "pointer",
+                          border: isSelected
+                            ? "1.5px solid var(--accent, #0066cc)"
+                            : "1px solid var(--border, #cbd5e1)",
+                          backgroundColor: isSelected ? "rgba(0, 102, 204, 0.08)" : "#ffffff",
+                          color: isSelected ? "var(--accent, #0066cc)" : "inherit",
+                        }}
+                        data-testid={`preset-btn-${p.id}`}
+                      >
+                        <span
+                          style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: "50%",
+                            backgroundColor: p.badgeColor,
+                          }}
+                        />
+                        <span>{p.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <form action={formAction} className="stack" style={{ gap: 16 }}>
+              {editingSub?.id && <input type="hidden" name="id" value={editingSub.id} />}
+              <input type="hidden" name="secretToken" value={secret} />
+
+              {/* Endpoint Name & Adapter Type */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div className="field">
+                  <label htmlFor="endpointName" style={{ fontWeight: 600, fontSize: 13, display: "block", marginBottom: 4 }}>
+                    Endpoint Name
+                  </label>
+                  <input
+                    id="endpointName"
+                    name="name"
+                    type="text"
+                    className="input"
+                    placeholder="e.g. Discord #sales or Telegram Warehouse"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    data-testid="endpoint-name-input"
+                    style={{ width: "100%", fontSize: 13 }}
+                  />
+                </div>
+
+                <div className="field">
+                  <label htmlFor="adapterSelect" style={{ fontWeight: 600, fontSize: 13, display: "block", marginBottom: 4 }}>
+                    Chat Alert Format
+                  </label>
+                  <select
+                    id="adapterSelect"
+                    name="adapter"
+                    className="input"
+                    value={adapterOverride}
+                    onChange={(e) => setAdapterOverride(e.target.value as WebhookAdapterType | "auto")}
+                    data-testid="adapter-select"
+                    style={{ width: "100%", fontSize: 13 }}
+                  >
+                    <option value="auto">Auto-Detect from URL (Recommended)</option>
+                    <option value="discord">Discord (Rich Embeds & Color Strips)</option>
+                    <option value="slack">Slack (Block Kit Headers & Fields)</option>
+                    <option value="telegram">Telegram (Formatted Markdown Push)</option>
+                    <option value="generic">Generic JSON (Zapier / Make / API)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Target URL */}
+              <div className="field">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                  <label htmlFor="targetUrl" style={{ fontWeight: 600, fontSize: 13, margin: 0 }}>
+                    Target Webhook URL
+                  </label>
+                  <span style={{ fontSize: 12, color: "#64748b" }}>
+                    Detected Adapter: <strong style={{ color: "#0f172a" }}>{effectiveAdapter.toUpperCase()}</strong>
+                  </span>
+                </div>
+                <input
+                  id="targetUrl"
+                  name="targetUrl"
+                  type="url"
+                  className="input"
+                  placeholder="https://discord.com/api/webhooks/... or https://hooks.slack.com/..."
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  required
+                  data-testid="webhook-target-url-input"
+                  style={{ width: "100%", fontFamily: "monospace", fontSize: 13 }}
+                />
+                {effectiveAdapter === "telegram" && (
+                  <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+                    💡 Telegram Format: <code>https://api.telegram.org/bot&lt;TOKEN&gt;/sendMessage?chat_id=&lt;CHAT_ID&gt;</code>
+                  </p>
+                )}
+              </div>
+
+              {/* Subscribed Events Selection */}
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                  <label style={{ fontWeight: 600, fontSize: 13, margin: 0 }}>
+                    Subscribed Events ({selectedEvents.length}/{overview.availableEvents.length})
+                  </label>
+                  <div style={{ fontSize: 12 }}>
+                    <button
+                      type="button"
+                      onClick={selectAllEvents}
+                      style={{ background: "transparent", border: 0, color: "#0284c7", cursor: "pointer", marginRight: 8 }}
+                    >
+                      Select All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={deselectAllEvents}
+                      style={{ background: "transparent", border: 0, color: "#64748b", cursor: "pointer" }}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 8 }}>
+                  {overview.availableEvents.map((evt) => {
+                    const checked = selectedEvents.includes(evt.key);
+                    return (
+                      <label
+                        key={evt.key}
+                        style={{
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: 8,
+                          padding: "8px 10px",
+                          border: checked ? "1px solid var(--accent, #0066cc)" : "1px solid #e2e8f0",
+                          borderRadius: 6,
+                          backgroundColor: checked ? "rgba(0, 102, 204, 0.04)" : "#ffffff",
+                          cursor: "pointer",
+                          fontSize: 12,
+                        }}
+                        data-testid={`event-toggle-${evt.key}`}
+                      >
+                        <input
+                          type="checkbox"
+                          name="events"
+                          value={evt.key}
+                          checked={checked}
+                          onChange={() => toggleEvent(evt.key)}
+                          style={{ marginTop: 2 }}
+                        />
+                        <div>
+                          <div style={{ fontWeight: 600 }}>{evt.label}</div>
+                          <code style={{ fontSize: 10, color: "#64748b" }}>{evt.key}</code>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Active Toggle Switch */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <input
+                  type="checkbox"
+                  id="isActive"
+                  name="isActive"
+                  value="true"
+                  checked={isActive}
+                  onChange={(e) => setIsActive(e.target.checked)}
+                  data-testid="webhook-active-toggle"
+                />
+                <label htmlFor="isActive" style={{ fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
+                  Active (Immediately deliver matching events to this endpoint)
+                </label>
+              </div>
+
+              {/* LIVE INTERACTIVE MESSAGE PREVIEW CARD */}
+              <div
+                style={{
+                  marginTop: 10,
+                  border: "1px solid #e2e8f0",
+                  borderRadius: 10,
+                  overflow: "hidden",
+                  backgroundColor: "#f8fafc",
+                }}
+                data-testid="live-chat-preview"
+              >
+                {/* Preview Header & Event Switcher */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "8px 14px",
+                    background: "#0f172a",
+                    color: "#ffffff",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 600 }}>
+                    <span>👁️ Live Chat Alert Preview</span>
+                    <span
+                      style={{
+                        padding: "1px 6px",
+                        borderRadius: 10,
+                        fontSize: 10,
+                        background: "rgba(255,255,255,0.2)",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {effectiveAdapter}
+                    </span>
+                  </div>
+
+                  {/* Event sample switcher */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
+                    <span style={{ color: "#94a3b8" }}>Event:</span>
+                    <select
+                      value={previewEvent}
+                      onChange={(e) => setPreviewEvent(e.target.value as WebhookEventKey | "ping")}
+                      style={{
+                        fontSize: 11,
+                        padding: "2px 6px",
+                        borderRadius: 4,
+                        background: "#1e293b",
+                        color: "#f8fafc",
+                        border: "1px solid #334155",
+                      }}
+                      data-testid="preview-event-select"
+                    >
+                      <option value="order.created">Order Created</option>
+                      <option value="order.delivered">Parcel Delivered</option>
+                      <option value="lead.created">Lead Captured</option>
+                      <option value="booking.created">Booking Scheduled</option>
+                      <option value="customer.registered">Customer Registered</option>
+                      <option value="ping">Ping Test</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Rendered Preview Screen */}
+                <div style={{ padding: 14 }}>
+                  {/* DISCORD PREVIEW */}
+                  {effectiveAdapter === "discord" && (
+                    <div
+                      style={{
+                        backgroundColor: "#313338",
+                        borderRadius: 8,
+                        padding: 14,
+                        color: "#dbdee1",
+                        fontFamily: "system-ui, -apple-system, sans-serif",
+                        fontSize: 13,
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                        <div
+                          style={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: "50%",
+                            background: "#5865F2",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "#fff",
+                            fontWeight: 700,
+                            fontSize: 12,
+                          }}
+                        >
+                          BT
+                        </div>
+                        <span style={{ fontWeight: 600, color: "#f2f3f5" }}>BizTrack Alerts</span>
+                        <span
+                          style={{
+                            backgroundColor: "#5865F2",
+                            color: "#fff",
+                            borderRadius: 4,
+                            padding: "0 4px",
+                            fontSize: 9,
+                            fontWeight: 700,
+                          }}
+                        >
+                          APP
+                        </span>
+                        <span style={{ fontSize: 11, color: "#949ba4" }}>Today at 20:30</span>
+                      </div>
+
+                      <div style={{ color: "#f2f3f5", fontWeight: 600, marginBottom: 6 }}>
+                        {previewEvent === "order.created"
+                          ? `🛍️ New Order Placed: #${String(sampleData.orderNumber || "BT-10482")}`
+                          : previewEvent === "order.delivered"
+                          ? `🚚 Parcel Delivered: #${String(sampleData.orderNumber || "BT-10482")}`
+                          : previewEvent === "lead.created"
+                          ? `📩 New Lead Captured: ${String(sampleData.leadType || "Inquiry")}`
+                          : previewEvent === "booking.created"
+                          ? `📅 New Appointment Booked: ${String(sampleData.serviceTitle || "Consultation")}`
+                          : `🔔 BizTrack Webhook Connection Test`}
+                      </div>
+
+                      {/* Discord Embed Box */}
+                      <div
+                        style={{
+                          backgroundColor: "#2b2d31",
+                          borderLeft: `4px solid ${
+                            previewEvent === "order.created"
+                              ? "#2ecc71"
+                              : previewEvent === "order.delivered"
+                              ? "#3498db"
+                              : previewEvent === "lead.created"
+                              ? "#9b59b6"
+                              : previewEvent === "booking.created"
+                              ? "#f39c12"
+                              : "#5865f2"
+                          }`,
+                          borderRadius: 4,
+                          padding: 12,
+                        }}
+                      >
+                        <div style={{ fontWeight: 700, color: "#00a8fc", marginBottom: 8 }}>
+                          {previewEvent === "order.created"
+                            ? `Order #${String(sampleData.orderNumber || "BT-10482")} — ৳${Number(sampleData.total || 2500).toLocaleString("en-BD")}`
+                            : previewEvent === "order.delivered"
+                            ? `Delivery Confirmed — ${String(sampleData.courier || "Steadfast")}`
+                            : previewEvent === "lead.created"
+                            ? `Inquiry from ${String(sampleData.name || "Sadia Islam")}`
+                            : previewEvent === "booking.created"
+                            ? `${String(sampleData.serviceTitle || "Consultation")} — ${String(sampleData.patientName || "Client")}`
+                            : "Test Ping Succeeded! 🚀"}
+                        </div>
+
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "1fr 1fr",
+                            gap: 8,
+                            fontSize: 12,
+                            marginBottom: 8,
+                          }}
+                        >
+                          <div>
+                            <div style={{ color: "#949ba4", fontSize: 11, fontWeight: 600 }}>CUSTOMER / CLIENT</div>
+                            <div style={{ color: "#f2f3f5" }}>
+                              {String(sampleData.customerName || sampleData.name || sampleData.patientName || "Customer")}
+                            </div>
+                          </div>
+                          <div>
+                            <div style={{ color: "#949ba4", fontSize: 11, fontWeight: 600 }}>PHONE NUMBER</div>
+                            <div style={{ color: "#00a8fc", fontFamily: "monospace" }}>
+                              {String(sampleData.phone || "01712345678")}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{ fontSize: 11, color: "#949ba4", borderTop: "1px solid #35373c", paddingTop: 6 }}>
+                          BizTrack Outbound Webhook • Today at 20:30
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* SLACK PREVIEW */}
+                  {effectiveAdapter === "slack" && (
+                    <div
+                      style={{
+                        backgroundColor: "#ffffff",
+                        borderRadius: 8,
+                        padding: 14,
+                        border: "1px solid #e2e8f0",
+                        fontSize: 13,
+                        lineHeight: 1.45,
+                        color: "#1d1c1d",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                        <div
+                          style={{
+                            width: 24,
+                            height: 24,
+                            borderRadius: 4,
+                            background: "#4A154B",
+                            color: "#fff",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontWeight: 700,
+                            fontSize: 11,
+                          }}
+                        >
+                          BT
+                        </div>
+                        <span style={{ fontWeight: 800 }}>BizTrack BD</span>
+                        <span
+                          style={{
+                            background: "#e8e8e8",
+                            padding: "1px 4px",
+                            borderRadius: 3,
+                            fontSize: 10,
+                            fontWeight: 600,
+                          }}
+                        >
+                          APP
+                        </span>
+                        <span style={{ fontSize: 11, color: "#616061" }}>20:30</span>
+                      </div>
+
+                      <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 8 }}>
+                        {previewEvent === "order.created"
+                          ? `🛍️ New Order #${String(sampleData.orderNumber || "BT-10482")} Placed!`
+                          : previewEvent === "order.delivered"
+                          ? `🚚 Parcel Delivered: #${String(sampleData.orderNumber || "BT-10482")}`
+                          : previewEvent === "lead.created"
+                          ? `📩 New Lead Captured: ${String(sampleData.leadType || "Inquiry")}`
+                          : previewEvent === "booking.created"
+                          ? `📅 New Booking Scheduled: ${String(sampleData.serviceTitle || "Consultation")}`
+                          : `🔔 BizTrack Webhook Connection Test`}
+                      </div>
+
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr",
+                          gap: 8,
+                          background: "#f8fafc",
+                          padding: "10px 12px",
+                          borderRadius: 6,
+                          marginBottom: 8,
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: 11 }}>Customer:</div>
+                          <div>{String(sampleData.customerName || sampleData.name || "Customer")}</div>
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: 11 }}>Total / Method:</div>
+                          <div>৳{Number(sampleData.total || 2500).toLocaleString("en-BD")} (COD)</div>
+                        </div>
+                      </div>
+
+                      <div style={{ fontSize: 11, color: "#616061" }}>
+                        ⚡ <a href="#" onClick={(e) => e.preventDefault()} style={{ color: "#1264a3" }}>Open Order in BizTrack Admin</a> • Just now
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TELEGRAM PREVIEW */}
+                  {effectiveAdapter === "telegram" && (
+                    <div
+                      style={{
+                        backgroundColor: "#8c9ca9",
+                        backgroundImage: "radial-gradient(#9cb0c0 1px, transparent 1px)",
+                        backgroundSize: "16px 16px",
+                        borderRadius: 8,
+                        padding: 14,
+                        display: "flex",
+                        justifyContent: "flex-start",
+                      }}
+                    >
+                      <div
+                        style={{
+                          backgroundColor: "#ffffff",
+                          borderRadius: "12px 12px 12px 2px",
+                          padding: "10px 14px",
+                          maxWidth: "85%",
+                          boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
+                          fontSize: 13,
+                          lineHeight: 1.4,
+                          color: "#111827",
+                        }}
+                      >
+                        <div style={{ fontWeight: 700, color: "#0284c7", marginBottom: 4 }}>
+                          {previewEvent === "order.created"
+                            ? `🛍️ New Order #${String(sampleData.orderNumber || "BT-10482")} Placed!`
+                            : previewEvent === "order.delivered"
+                            ? `🚚 Parcel Delivered: #${String(sampleData.orderNumber || "BT-10482")}`
+                            : previewEvent === "lead.created"
+                            ? `📩 New Lead Captured: ${String(sampleData.leadType || "Inquiry")}`
+                            : previewEvent === "booking.created"
+                            ? `📅 New Booking: ${String(sampleData.serviceTitle || "Consultation")}`
+                            : `🔔 BizTrack Webhook Connection Test`}
+                        </div>
+
+                        <div style={{ margin: "6px 0", fontSize: 12 }}>
+                          <div><b>Total:</b> ৳{Number(sampleData.total || 2500).toLocaleString("en-BD")} (COD)</div>
+                          <div><b>Customer:</b> {String(sampleData.customerName || sampleData.name || "Customer")} (Dhaka)</div>
+                          <div><b>Phone:</b> <code style={{ background: "#f1f5f9", padding: "1px 4px", borderRadius: 3 }}>{String(sampleData.phone || "01712345678")}</code></div>
+                        </div>
+
+                        <div style={{ marginTop: 8, fontSize: 12 }}>
+                          <a href="#" onClick={(e) => e.preventDefault()} style={{ color: "#0284c7", textDecoration: "none", fontWeight: 600 }}>
+                            👉 Open Order in Admin
+                          </a>
+                        </div>
+
+                        <div style={{ textAlign: "right", fontSize: 10, color: "#9ca3af", marginTop: 4 }}>
+                          20:30 ✓✓
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* GENERIC JSON PREVIEW */}
+                  {effectiveAdapter === "generic" && (
+                    <pre
+                      style={{
+                        margin: 0,
+                        padding: 12,
+                        background: "#0f172a",
+                        color: "#38bdf8",
+                        borderRadius: 6,
+                        fontFamily: "monospace",
+                        fontSize: 12,
+                        maxHeight: 180,
+                        overflowY: "auto",
+                      }}
+                    >
+                      {JSON.stringify(
+                        {
+                          event: previewEvent,
+                          id: `evt_sample_${Date.now()}`,
+                          timestamp: Date.now(),
+                          tenantId: "tenant_current",
+                          data: sampleData,
+                        },
+                        null,
+                        2
+                      )}
+                    </pre>
+                  )}
+                </div>
+              </div>
+
+              {/* Modal Buttons */}
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 14 }}>
+                <button type="button" className="btn btn-secondary" onClick={closeModal}>
+                  Cancel
+                </button>
+                <SubmitButton
+                  className="btn btn-primary"
+                  pending="Saving endpoint…"
+                  disabled={isSaving}
+                  data-testid="save-webhook-btn"
+                >
+                  {editingSub ? "Save Changes" : "Create Endpoint"}
+                </SubmitButton>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* DELIVERY AUDIT LOGS & PAYLOAD INSPECTOR */}
+      <section className="card" data-testid="delivery-logs-card">
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 14,
+            flexWrap: "wrap",
+            gap: 10,
+          }}
+        >
+          <div>
+            <h2 style={{ fontSize: 18, margin: 0, fontWeight: 700 }}>Recent Delivery Logs</h2>
             <p className="muted" style={{ margin: "4px 0 0", fontSize: 13 }}>
-              Audit trail of recent outbound webhook attempts and response codes.
+              Audit trail of recent outbound webhook attempts, response codes, and payload payloads.
             </p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 13 }}>
-            <span>Total: <b>{overview.stats.totalDeliveries}</b></span>
-            <span style={{ color: "var(--success, #16a34a)" }}>Success: <b>{overview.stats.successfulDeliveries}</b></span>
+          <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 13 }}>
+            <span>
+              Total: <b>{overview.stats.totalDeliveries}</b>
+            </span>
+            <span style={{ color: "var(--success, #16a34a)" }}>
+              Success: <b>{overview.stats.successfulDeliveries}</b>
+            </span>
             {overview.stats.failedDeliveries > 0 && (
-              <span style={{ color: "var(--danger, #dc2626)" }}>Failed: <b>{overview.stats.failedDeliveries}</b></span>
+              <span style={{ color: "var(--danger, #dc2626)" }}>
+                Failed: <b>{overview.stats.failedDeliveries}</b>
+              </span>
             )}
             {canEdit && overview.stats.failedDeliveries > 0 && (
               <button
                 type="button"
                 className="btn btn-secondary btn-sm"
-                onClick={handleRetryFailed}
+                onClick={() => handleRetryFailed()}
                 disabled={retryPending}
-                style={{ marginLeft: 8 }}
+                style={{ marginLeft: 6 }}
                 data-testid="retry-failed-deliveries-btn"
               >
-                {retryPending ? "Retrying..." : "Retry Failed Deliveries"}
+                {retryPending ? "Retrying..." : "Retry Failed"}
               </button>
             )}
           </div>
         </div>
 
         {retryMessage && (
-          <div className="notice notice-info" style={{ marginBottom: 16 }} data-testid="retry-result-banner">
+          <div className="notice notice-info" style={{ marginBottom: 14 }} data-testid="retry-result-banner">
             {retryMessage}
           </div>
         )}
 
         {overview.recentLogs.length === 0 ? (
-          <div className="empty" style={{ padding: "24px 0", textAlign: "center", color: "#64748b" }}>
-            No webhook deliveries recorded yet. Send a test ping or wait for an order/lead event.
+          <div className="empty" style={{ padding: "28px 0", textAlign: "center", color: "#64748b" }}>
+            No webhook deliveries recorded yet. Send a test ping or trigger an order/lead event.
           </div>
         ) : (
           <div style={{ overflowX: "auto" }}>
@@ -537,14 +1463,18 @@ export function WebhookForm({
                 <tr style={{ textAlign: "left", borderBottom: "1px solid #e2e8f0" }}>
                   <th style={{ padding: "8px 10px" }}>Status</th>
                   <th style={{ padding: "8px 10px" }}>Event</th>
-                  <th style={{ padding: "8px 10px" }}>Timestamp</th>
-                  <th style={{ padding: "8px 10px" }}>HTTP Code</th>
+                  <th style={{ padding: "8px 10px" }}>Endpoint</th>
+                  <th style={{ padding: "8px 10px" }}>Time</th>
+                  <th style={{ padding: "8px 10px" }}>Response</th>
                   <th style={{ padding: "8px 10px", textAlign: "right" }}>Payload</th>
                 </tr>
               </thead>
               <tbody>
                 {overview.recentLogs.map((log) => {
                   const isExpanded = expandedLogId === log.id;
+                  const logSub = subscriptions.find((s) => s.id === log.subscriptionId);
+                  const cleanLogUrl = log.targetUrl.split("#")[0]!;
+
                   return (
                     <tr key={log.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
                       <td style={{ padding: "8px 10px" }}>
@@ -567,11 +1497,20 @@ export function WebhookForm({
                           {log.eventType}
                         </code>
                       </td>
-                      <td style={{ padding: "8px 10px", color: "#64748b" }}>
-                        {new Date(log.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                      <td style={{ padding: "8px 10px", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <span title={cleanLogUrl}>
+                          {logSub?.name || cleanLogUrl.replace(/^https?:\/\//, "").slice(0, 24)}
+                        </span>
                       </td>
-                      <td style={{ padding: "8px 10px", fontFamily: "monospace" }}>
-                        {log.responseStatus ? `HTTP ${log.responseStatus}` : "Timeout/Network"}
+                      <td style={{ padding: "8px 10px", color: "#64748b" }}>
+                        {new Date(log.createdAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                        })}
+                      </td>
+                      <td style={{ padding: "8px 10px", fontFamily: "monospace", fontSize: 12 }}>
+                        {log.responseStatus ? `HTTP ${log.responseStatus}` : "Timeout/Err"}
                       </td>
                       <td style={{ padding: "8px 10px", textAlign: "right" }}>
                         <button
@@ -591,6 +1530,7 @@ export function WebhookForm({
           </div>
         )}
 
+        {/* Payload Inspector Drawer */}
         {expandedLogId && (
           <div
             style={{
@@ -601,13 +1541,20 @@ export function WebhookForm({
               borderRadius: 8,
               fontFamily: "monospace",
               fontSize: 12,
-              maxHeight: 260,
+              maxHeight: 280,
               overflowY: "auto",
             }}
             data-testid="inspected-payload-box"
           >
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, color: "#94a3b8" }}>
-              <span>Log ID: {expandedLogId}</span>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: 8,
+                color: "#94a3b8",
+              }}
+            >
+              <span>Payload Detail (Log: {expandedLogId})</span>
               <button
                 type="button"
                 onClick={() => setExpandedLogId(null)}

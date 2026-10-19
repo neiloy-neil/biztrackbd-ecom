@@ -119,6 +119,7 @@ export { accessState, statusFor, addPeriod, ACCESS_LABELS, GRACE_DAYS, READ_ONLY
 export { scanBrandRisk } from "./platform/brand";
 export * from "./platform/templates";
 export * from "./platform/template-bundle";
+export * from "./platform/template-studio";
 export { installTemplatePages } from "./builder/versions";
 export { createEmailProof, emailProofValid, sendSignupCode, confirmSignupEmail, verificationRequired, type ConfirmedEmail } from "./platform/signup-verify";
 export { signupStore, checkSubdomain, SignupInput, THEMES, SUBDOMAIN_MESSAGES, type SignedUp, type SubdomainCheck } from "./platform/signup";

@@ -5,6 +5,8 @@ import {
   validateWebhookUrl,
   getMerchantWebhookOverview,
   saveMerchantWebhookSubscription,
+  deleteMerchantWebhookSubscription,
+  toggleMerchantWebhookSubscription,
   rotateMerchantWebhookSecret,
   sendTestWebhookPing,
   emitMerchantWebhookEvent,
@@ -235,6 +237,160 @@ describe("Merchant Webhook Management Suite", () => {
       });
 
       expect(__getMemoryNotificationJobs().length).toBe(0);
+    });
+  });
+
+  describe("Multi-Endpoint Webhook Architecture & Chat Adapters", () => {
+    it("supports multiple endpoints per tenant with names, adapters, and independent toggles", async () => {
+      const discordSub = await saveMerchantWebhookSubscription("tenant-multi", ownerActor, {
+        name: "Discord Sales Alerts",
+        targetUrl: "https://discord.com/api/webhooks/123/token-abc",
+        adapter: "discord",
+        events: ["order.created", "order.delivered"],
+        isActive: true,
+      });
+
+      const telegramSub = await saveMerchantWebhookSubscription("tenant-multi", ownerActor, {
+        name: "Telegram Warehouse Channel",
+        targetUrl: "https://api.telegram.org/bot123456:ABC-DEF/sendMessage?chat_id=-100987654321",
+        adapter: "telegram",
+        events: ["order.created"],
+        isActive: true,
+      });
+      expect(telegramSub.adapter).toBe("telegram");
+
+      const slackSub = await saveMerchantWebhookSubscription("tenant-multi", ownerActor, {
+        name: "Slack Ops Team",
+        targetUrl: "https://hooks.slack.com/services/T00/B00/X00",
+        adapter: "slack",
+        events: ["lead.created"],
+        isActive: true,
+      });
+
+      const overview = await getMerchantWebhookOverview("tenant-multi", ownerActor);
+      expect(overview.subscriptions.length).toBe(3);
+      expect(overview.subscriptions.map((s) => s.adapter)).toEqual(
+        expect.arrayContaining(["discord", "telegram", "slack"])
+      );
+      expect(overview.subscriptions.map((s) => s.name)).toEqual(
+        expect.arrayContaining(["Discord Sales Alerts", "Telegram Warehouse Channel", "Slack Ops Team"])
+      );
+
+      // Toggle Discord endpoint to paused
+      const toggled = await toggleMerchantWebhookSubscription(
+        "tenant-multi",
+        ownerActor,
+        discordSub.id,
+        false
+      );
+      expect(toggled.isActive).toBe(false);
+
+      const overviewAfterToggle = await getMerchantWebhookOverview("tenant-multi", ownerActor);
+      const discordAfter = overviewAfterToggle.subscriptions.find((s) => s.id === discordSub.id);
+      expect(discordAfter?.isActive).toBe(false);
+
+      // Delete Slack endpoint
+      const delRes = await deleteMerchantWebhookSubscription("tenant-multi", ownerActor, slackSub.id);
+      expect(delRes.deleted).toBe(true);
+
+      const overviewAfterDelete = await getMerchantWebhookOverview("tenant-multi", ownerActor);
+      expect(overviewAfterDelete.subscriptions.length).toBe(2);
+      expect(overviewAfterDelete.subscriptions.some((s) => s.id === slackSub.id)).toBe(false);
+    });
+
+    it("dispatches event to all matching active endpoints adapting format per platform", async () => {
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = vi.fn().mockResolvedValue(new Response("OK", { status: 200 }));
+
+      try {
+        // 1. Discord endpoint for order.created
+        await saveMerchantWebhookSubscription("tenant-fanout", ownerActor, {
+          name: "Discord Channel",
+          targetUrl: "https://discord.com/api/webhooks/999/disc-tok",
+          adapter: "discord",
+          events: ["order.created"],
+          isActive: true,
+        });
+
+        // 2. Telegram endpoint for order.created
+        await saveMerchantWebhookSubscription("tenant-fanout", ownerActor, {
+          name: "Telegram Group",
+          targetUrl: "https://api.telegram.org/bot123456:TOKEN/sendMessage?chat_id=-555",
+          adapter: "telegram",
+          events: ["order.created"],
+          isActive: true,
+        });
+
+        // 3. Generic endpoint for lead.created only (should NOT receive order.created)
+        await saveMerchantWebhookSubscription("tenant-fanout", ownerActor, {
+          name: "Zapier Leads",
+          targetUrl: "https://hooks.zapier.com/hooks/catch/111/222",
+          adapter: "generic",
+          events: ["lead.created"],
+          isActive: true,
+        });
+
+        await emitMerchantWebhookEvent("tenant-fanout", "order.created", {
+          orderNumber: "BT-8899",
+          customerName: "Rahim Chowdhury",
+          total: 3500,
+        });
+
+        const jobs = __getMemoryNotificationJobs();
+        expect(jobs.length).toBe(2);
+
+        const discordJob = jobs.find((j) => j.recipient.includes("discord.com"));
+        const telegramJob = jobs.find((j) => j.recipient.includes("telegram.org"));
+
+        expect(discordJob).toBeDefined();
+        expect(discordJob?.recipient).toBe("https://discord.com/api/webhooks/999/disc-tok");
+        const parsedDiscord = JSON.parse(discordJob!.body);
+        expect(parsedDiscord.embeds).toBeDefined();
+        expect(parsedDiscord.embeds[0].title).toContain("Order #BT-8899");
+
+        expect(telegramJob).toBeDefined();
+        expect(telegramJob?.recipient).toBe("https://api.telegram.org/bot123456:TOKEN/sendMessage");
+        const parsedTelegram = JSON.parse(telegramJob!.body);
+        expect(parsedTelegram.chat_id).toBe("-555");
+        expect(parsedTelegram.text).toContain("New Order #BT-8899 Placed!");
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    });
+
+    it("sends platform-adapted test pings with custom events", async () => {
+      const originalFetch = globalThis.fetch;
+      let sentUrl = "";
+      let sentBody = "";
+
+      globalThis.fetch = vi.fn().mockImplementation(async (url, init) => {
+        sentUrl = String(url);
+        sentBody = String(init?.body);
+        return new Response(JSON.stringify({ ok: true }), { status: 200 });
+      });
+
+      try {
+        const sub = await saveMerchantWebhookSubscription("tenant-testping", ownerActor, {
+          name: "Slack Channel",
+          targetUrl: "https://hooks.slack.com/services/T11/B22/K33",
+          adapter: "slack",
+          events: ["booking.created"],
+          isActive: true,
+        });
+
+        const res = await sendTestWebhookPing("tenant-testping", ownerActor, {
+          subscriptionId: sub.id,
+          event: "booking.created",
+        });
+
+        expect(res.ok).toBe(true);
+        expect(sentUrl).toBe("https://hooks.slack.com/services/T11/B22/K33");
+        const parsedSlack = JSON.parse(sentBody);
+        expect(parsedSlack.blocks).toBeDefined();
+        expect(parsedSlack.blocks[0].text.text).toContain("Booking Scheduled");
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
     });
   });
 });
