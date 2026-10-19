@@ -826,6 +826,12 @@ export function Builder(props: Props) {
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [dragOver, setDragOver] = useState<number | null>(null);
   const [conflict, setConflict] = useState<{ stamp: string | null } | null>(null);
+  // Canvas Zoom, Stage Backdrop, and Interactive Resizing
+  const [zoomMode, setZoomMode] = useState<"fit" | number>("fit");
+  const [customWidth, setCustomWidth] = useState<number | null>(null);
+  const [canvasBackdrop, setCanvasBackdrop] = useState<"neutral" | "light" | "checker">("neutral");
+  const [resizing, setResizing] = useState<"left" | "right" | null>(null);
+  const resizeStart = useRef<{ clientX: number; startW: number } | null>(null);
   const [, bump] = useState(0);
   const frame = useRef<HTMLIFrameElement>(null);
   const stage = useRef<HTMLDivElement>(null);
@@ -869,7 +875,7 @@ export function Builder(props: Props) {
         ready.current = true;
         post({ type: "bt-preview:update", page: latest.current.page, theme: latest.current.theme, lang: latest.current.lang, locked });
         if (selectedRef.current) post({ type: "bt-preview:focus", id: selectedRef.current });
-      } else if (m?.type === "bt-preview:select" && typeof m.id === "string" && latest.current.page.sections.some((s) => s.id === m.id)) {
+      } else if ((m?.type === "bt-preview:select" || m?.type === "bt-preview:open-settings") && typeof m.id === "string" && latest.current.page.sections.some((s) => s.id === m.id)) {
         setSelected(m.id);
         setTab("settings");
         setSheet(true);
@@ -1213,16 +1219,79 @@ export function Builder(props: Props) {
 
   // ---- the preview stage: fits the chosen device into the space available
   const [scale, setScale] = useState(1);
-  const devW = narrow ? 390 : DEVICE_WIDTH[device];
+  const baseW = narrow ? 390 : DEVICE_WIDTH[device];
+  const activeW = customWidth ?? baseW;
+
   useEffect(() => {
     const el = stage.current;
     if (!el) return;
-    const fit = () => setScale(devW ? Math.min(1, (el.clientWidth - 24) / devW) : 1);
-    fit();
-    const ro = new ResizeObserver(fit);
+    const compute = () => {
+      if (zoomMode === "fit") {
+        setScale(activeW ? Math.min(1, (el.clientWidth - 48) / activeW) : 1);
+      } else {
+        setScale(zoomMode);
+      }
+    };
+    compute();
+    const ro = new ResizeObserver(compute);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [devW]);
+  }, [activeW, zoomMode]);
+
+  // Keyboard shortcuts for canvas zoom (Ctrl/Cmd +, -, 0)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === "=" || e.key === "+")) {
+        e.preventDefault();
+        setZoomMode((curr) => {
+          const val = curr === "fit" ? scale : curr;
+          return Math.min(2.0, Math.round((val + 0.15) * 100) / 100);
+        });
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "-") {
+        e.preventDefault();
+        setZoomMode((curr) => {
+          const val = curr === "fit" ? scale : curr;
+          return Math.max(0.4, Math.round((val - 0.15) * 100) / 100);
+        });
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "0") {
+        e.preventDefault();
+        setZoomMode("fit");
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [scale]);
+
+  const onResizeStart = (e: React.PointerEvent<HTMLDivElement>, direction: "left" | "right") => {
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setResizing(direction);
+    const startW = activeW ?? (stage.current ? Math.min(1280, stage.current.clientWidth - 48) : 1200);
+    resizeStart.current = { clientX: e.clientX, startW };
+  };
+
+  const onResizeMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!resizing || !resizeStart.current) return;
+    const delta = e.clientX - resizeStart.current.clientX;
+    const factor = resizing === "right" ? 2 * delta : -2 * delta;
+    let newW = Math.max(320, Math.min(1600, Math.round(resizeStart.current.startW + factor)));
+
+    // Magnetic snap within +-12px
+    const snaps = [390, 768, 1024, 1440];
+    for (const snap of snaps) {
+      if (Math.abs(newW - snap) <= 12) {
+        newW = snap;
+        break;
+      }
+    }
+    setCustomWidth(newW);
+  };
+
+  const onResizeEnd = (e: React.PointerEvent<HTMLDivElement>) => {
+    try { e.currentTarget.releasePointerCapture(e.pointerId); } catch { /* ignore */ }
+    setResizing(null);
+    resizeStart.current = null;
+  };
 
   const tabs: { id: Tab; label: string; test?: string }[] = narrow
     ? [{ id: "layers", label: "Sections" }, { id: "settings", label: "Settings" }, { id: "theme", label: kind === "home" ? "Style" : "Page", test: "tab-theme" }, { id: "history", label: "History", test: "tab-history" }]
@@ -1402,7 +1471,7 @@ export function Builder(props: Props) {
           {!narrow && (
             <div className="bld-seg" role="group" aria-label="Preview size">
               {([["desktop", "Computer", <IDesktop key="d" />], ["tablet", "Tablet", <ITablet key="t" />], ["phone", "Phone", <IPhone key="p" />]] as const).map(([d, name, icon]) => (
-                <button key={d} type="button" aria-pressed={device === d} aria-label={name} title={name} onClick={() => setDevice(d)}>{icon}</button>
+                <button key={d} type="button" aria-pressed={device === d} aria-label={name} title={name} onClick={() => { setDevice(d); setCustomWidth(null); }}>{icon}</button>
               ))}
             </div>
           )}
@@ -1434,10 +1503,149 @@ export function Builder(props: Props) {
       <div className="bld-body">
         {!narrow && <aside className="bld-left" aria-label="Sections">{layers}</aside>}
 
-        <main className="bld-stage" ref={stage}>
-          <div className="bld-device" style={{ width: devW ? devW : "100%", transform: devW ? `scale(${scale})` : undefined, height: devW ? `${100 / scale}%` : "100%" }}>
-            <iframe ref={frame} src={props.previewUrl} title="Preview of your store" data-testid="preview-frame" referrerPolicy="no-referrer" sandbox="allow-scripts allow-same-origin" />
+        <main className="bld-stage" ref={stage} data-backdrop={canvasBackdrop}>
+          <div className="bld-device-wrapper">
+            {/* Left resizer handle */}
+            {!narrow && (
+              <div
+                className={`bld-resizer bld-resizer-left${resizing === "left" ? " active" : ""}`}
+                onPointerDown={(e) => onResizeStart(e, "left")}
+                onPointerMove={onResizeMove}
+                onPointerUp={onResizeEnd}
+                onPointerCancel={onResizeEnd}
+                onDoubleClick={() => setCustomWidth(null)}
+                title="Drag to resize viewport • Double click to reset"
+                aria-label="Resize viewport left"
+              >
+                <div className="bld-resizer-bar" />
+              </div>
+            )}
+
+            <div
+              className="bld-device"
+              style={{
+                width: activeW ? activeW : "100%",
+                transform: `scale(${scale})`,
+                height: `${100 / scale}%`,
+                transition: resizing ? "none" : "width 0.15s ease",
+              }}
+            >
+              <iframe
+                ref={frame}
+                src={props.previewUrl}
+                title="Preview of your store"
+                data-testid="preview-frame"
+                referrerPolicy="no-referrer"
+                sandbox="allow-scripts allow-same-origin"
+              />
+            </div>
+
+            {/* Right resizer handle */}
+            {!narrow && (
+              <div
+                className={`bld-resizer bld-resizer-right${resizing === "right" ? " active" : ""}`}
+                onPointerDown={(e) => onResizeStart(e, "right")}
+                onPointerMove={onResizeMove}
+                onPointerUp={onResizeEnd}
+                onPointerCancel={onResizeEnd}
+                onDoubleClick={() => setCustomWidth(null)}
+                title="Drag to resize viewport • Double click to reset"
+                aria-label="Resize viewport right"
+              >
+                <div className="bld-resizer-bar" />
+              </div>
+            )}
           </div>
+
+          {/* Bottom Floating Canvas Stage Dock */}
+          {!narrow && (
+            <div className="bld-stage-dock" data-testid="stage-dock">
+              {/* Zoom Out */}
+              <button
+                type="button"
+                onClick={() => setZoomMode((curr) => {
+                  const val = curr === "fit" ? scale : curr;
+                  return Math.max(0.4, Math.round((val - 0.15) * 100) / 100);
+                })}
+                title="Zoom out (Ctrl -)"
+                aria-label="Zoom out"
+              >
+                −
+              </button>
+
+              {/* Zoom percentage badge */}
+              <button
+                type="button"
+                onClick={() => setZoomMode(zoomMode === 1 ? "fit" : 1)}
+                title="Click to toggle 100% / Fit (Ctrl 0)"
+                aria-label="Zoom level"
+              >
+                {Math.round(scale * 100)}%
+              </button>
+
+              {/* Zoom In */}
+              <button
+                type="button"
+                onClick={() => setZoomMode((curr) => {
+                  const val = curr === "fit" ? scale : curr;
+                  return Math.min(2.0, Math.round((val + 0.15) * 100) / 100);
+                })}
+                title="Zoom in (Ctrl +)"
+                aria-label="Zoom in"
+              >
+                +
+              </button>
+
+              {/* Fit Button */}
+              <button
+                type="button"
+                className={zoomMode === "fit" ? "active" : ""}
+                onClick={() => setZoomMode("fit")}
+                title="Fit to window (Ctrl 0)"
+              >
+                Fit
+              </button>
+
+              <div className="bld-dock-sep" />
+
+              {/* Viewport Dimension Readout */}
+              <div className="bld-dim-badge" title="Active viewport dimensions">
+                {activeW ? `${activeW}px` : "100% Fluid"}
+                {activeW === 390 ? " • Mobile" : activeW === 768 ? " • Tablet" : activeW === 1024 ? " • Laptop" : activeW && activeW >= 1200 ? " • Desktop" : ""}
+              </div>
+
+              <div className="bld-dock-sep" />
+
+              {/* Backdrop framing toggle */}
+              <button
+                type="button"
+                className={canvasBackdrop === "neutral" ? "active" : ""}
+                onClick={() => setCanvasBackdrop("neutral")}
+                title="Studio Dark backdrop"
+                aria-label="Dark backdrop"
+              >
+                ⬛
+              </button>
+              <button
+                type="button"
+                className={canvasBackdrop === "light" ? "active" : ""}
+                onClick={() => setCanvasBackdrop("light")}
+                title="Studio Light backdrop"
+                aria-label="Light backdrop"
+              >
+                ⬜
+              </button>
+              <button
+                type="button"
+                className={canvasBackdrop === "checker" ? "active" : ""}
+                onClick={() => setCanvasBackdrop("checker")}
+                title="Transparency Checkerboard grid"
+                aria-label="Checkerboard backdrop"
+              >
+                🏁
+              </button>
+            </div>
+          )}
         </main>
 
         <aside className="bld-right" aria-label={narrow ? "Editor panel" : "Settings"}>

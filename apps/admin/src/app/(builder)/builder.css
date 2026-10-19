@@ -189,3 +189,111 @@ details.bld-group[open] > summary.bld-gh::after { transform: rotate(180deg); }
   text-overflow: ellipsis;
 }
 
+/* ---- Stage Backdrops & Framing */
+.bld-stage[data-backdrop="neutral"] {
+  background: #0B0F19;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 0);
+  background-size: 20px 20px;
+}
+.bld-stage[data-backdrop="light"] {
+  background: #F1F5F9;
+}
+.bld-stage[data-backdrop="checker"] {
+  background-color: #E2E8F0;
+  background-image: linear-gradient(45deg, #CBD5E1 25%, transparent 25%), linear-gradient(-45deg, #CBD5E1 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #CBD5E1 75%), linear-gradient(-45deg, transparent 75%, #CBD5E1 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+
+/* ---- Viewport Drag Resizers */
+.bld-device-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  max-width: 100%;
+}
+.bld-resizer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 18px;
+  cursor: col-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+  touch-action: none;
+  user-select: none;
+}
+.bld-resizer-left { left: -18px; }
+.bld-resizer-right { right: -18px; }
+.bld-resizer-bar {
+  width: 5px;
+  height: 48px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.6);
+  transition: all 0.15s ease;
+}
+.bld-resizer:hover .bld-resizer-bar, .bld-resizer.active .bld-resizer-bar {
+  background: #5B4FE8;
+  height: 64px;
+  box-shadow: 0 0 12px rgba(91, 79, 232, 0.7);
+}
+
+/* ---- Bottom Floating Stage Dock */
+.bld-stage-dock {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.4);
+  color: #F8FAFC;
+  font-size: 12px;
+  font-weight: 600;
+  pointer-events: auto;
+}
+.bld-stage-dock button {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #E2E8F0;
+  font-size: 12px;
+  transition: all 0.15s ease;
+}
+.bld-stage-dock button:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #FFF;
+}
+.bld-stage-dock button.active {
+  background: #5B4FE8;
+  color: #FFF;
+}
+.bld-stage-dock .bld-dock-sep {
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 2px;
+}
+.bld-stage-dock .bld-dim-badge {
+  font-size: 11px;
+  color: #94A3B8;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  white-space: nowrap;
+}
+

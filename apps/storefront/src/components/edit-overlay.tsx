@@ -33,12 +33,15 @@ const EDIT_CSS = `
 .lp-pick-btn{margin-top:10px;padding:8px 14px;border-radius:99px;border:2px dashed #5B4FE8;background:rgba(255,255,255,.92);color:#5B4FE8;font:700 13px/1 system-ui;cursor:pointer}
 .lp-pick{display:flex;align-items:center;justify-content:center;min-height:120px;border:2px dashed rgba(91,79,232,.55);border-radius:12px;color:#5B4FE8;font-weight:700;cursor:pointer}
 .bt-ovl{position:absolute;left:0;top:0;width:100%;pointer-events:none;z-index:60}
-.bt-bar{position:absolute;right:8px;display:flex;gap:2px;padding:3px;background:#fff;border:1px solid #cfcdf5;border-radius:10px;box-shadow:0 4px 14px rgba(26,26,78,.2);pointer-events:auto}
-.bt-bar button{all:unset;box-sizing:border-box;width:36px;height:36px;display:grid;place-items:center;border-radius:8px;cursor:pointer;color:#26264f;font:600 16px/1 system-ui}
-.bt-bar button:hover:not(:disabled){background:#eceafd}
-.bt-bar button:disabled{opacity:.35;cursor:not-allowed}
+.bt-bar{position:absolute;right:12px;display:flex;align-items:center;gap:3px;padding:4px 6px;background:rgba(255,255,255,0.96);backdrop-filter:blur(10px);border:1px solid #D1D5DB;border-radius:999px;box-shadow:0 10px 25px -5px rgba(0,0,0,0.18),0 8px 10px -6px rgba(0,0,0,0.1);pointer-events:auto;z-index:70}
+.bt-bar-badge{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:linear-gradient(135deg,#5B4FE8,#4338CA);color:#fff;font:600 12px/1.2 system-ui;white-space:nowrap;user-select:none;margin-right:2px}
+.bt-bar-badge .bt-pos{opacity:0.85;font-size:10px;font-weight:500;padding-left:4px;border-left:1px solid rgba(255,255,255,0.3)}
+.bt-bar button{all:unset;box-sizing:border-box;width:30px;height:30px;display:grid;place-items:center;border-radius:999px;cursor:pointer;color:#334155;font:600 14px/1 system-ui;transition:background 0.12s ease,color 0.12s ease}
+.bt-bar button:hover:not(:disabled){background:#F1F5F9;color:#0F172A}
+.bt-bar button:disabled{opacity:.3;cursor:not-allowed}
 .bt-bar .bt-grip{cursor:grab;touch-action:none}
-.bt-bar .bt-del{color:#b42318}
+.bt-bar .bt-del:hover:not(:disabled){background:#FEE2E2;color:#DC2626}
+.bt-bar .bt-settings:hover:not(:disabled){background:#EDE9FE;color:#5B4FE8}
 .bt-gap{position:absolute;left:0;width:100%;height:32px;display:flex;align-items:center;justify-content:center;pointer-events:auto;opacity:0;transition:opacity .15s ease;z-index:55}
 .bt-gap:hover,.bt-gap:focus-within{opacity:1}
 .bt-gap::before{content:"";position:absolute;left:6%;right:6%;top:50%;height:2px;background:linear-gradient(90deg,transparent,#5B4FE8 20%,#5B4FE8 80%,transparent);transform:translateY(-50%)}
@@ -211,14 +214,21 @@ export function EditOverlay({ page, selectedId, send, onTyping }: { page: PageJs
           const section = page.sections[idx(r.id)];
           const required = Boolean(section && sectionDef(section.type)?.required);
           const i = idx(r.id);
+          const def = section ? sectionDef(section.type) : undefined;
+          const label = section?.label || def?.label || section?.type || "Section";
           return (
-            <div key={`bar-${r.id}`} className="bt-bar" style={{ top: r.top + 8 }} role="toolbar" aria-label="This section" data-testid="section-bar">
+            <div key={`bar-${r.id}`} className="bt-bar" style={{ top: Math.max(8, r.top + 8) }} role="toolbar" aria-label="This section" data-testid="section-bar">
+              <div className="bt-bar-badge" title={def?.description || label}>
+                <span>{label}</span>
+                <span className="bt-pos">{i + 1}/{page.sections.length}</span>
+              </div>
               <button type="button" className="bt-grip" aria-label="Drag to move this section" title="Drag to move" onPointerDown={(e) => onGripDown(e, r.id)} onPointerMove={onGripMove} onPointerUp={onGripUp} onPointerCancel={onGripUp} onLostPointerCapture={finishDrag}>⠿</button>
-              <button type="button" aria-label="Move up" disabled={i <= 0} onClick={() => send({ type: "bt-preview:op", id: r.id, op: "up" })}>↑</button>
-              <button type="button" aria-label="Move down" disabled={i < 0 || i >= page.sections.length - 1} onClick={() => send({ type: "bt-preview:op", id: r.id, op: "down" })}>↓</button>
-              <button type="button" aria-label={section?.disabled ? "Show this section" : "Hide this section"} disabled={required} onClick={() => send({ type: "bt-preview:op", id: r.id, op: "hide" })}>{section?.disabled ? "◌" : "◉"}</button>
-              <button type="button" aria-label="Duplicate this section" onClick={() => send({ type: "bt-preview:op", id: r.id, op: "dup" })}>⧉</button>
-              <button type="button" className="bt-del" aria-label="Delete this section" disabled={required} onClick={() => send({ type: "bt-preview:op", id: r.id, op: "delete" })}>✕</button>
+              <button type="button" aria-label="Move up" title="Move up" disabled={i <= 0} onClick={() => send({ type: "bt-preview:op", id: r.id, op: "up" })}>↑</button>
+              <button type="button" aria-label="Move down" title="Move down" disabled={i < 0 || i >= page.sections.length - 1} onClick={() => send({ type: "bt-preview:op", id: r.id, op: "down" })}>↓</button>
+              <button type="button" className="bt-settings" aria-label="Edit section settings" title="Edit settings in inspector" onClick={() => send({ type: "bt-preview:open-settings", id: r.id })}>⚙</button>
+              <button type="button" aria-label={section?.disabled ? "Show this section" : "Hide this section"} title={section?.disabled ? "Show section" : "Hide section"} disabled={required} onClick={() => send({ type: "bt-preview:op", id: r.id, op: "hide" })}>{section?.disabled ? "◌" : "◉"}</button>
+              <button type="button" aria-label="Duplicate this section" title="Duplicate section (Ctrl+D)" onClick={() => send({ type: "bt-preview:op", id: r.id, op: "dup" })}>⧉</button>
+              <button type="button" className="bt-del" aria-label="Delete this section" title="Delete section" disabled={required} onClick={() => send({ type: "bt-preview:op", id: r.id, op: "delete" })}>✕</button>
             </div>
           );
         })}
