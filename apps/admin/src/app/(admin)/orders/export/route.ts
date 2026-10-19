@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
   const from = days ? new Date(`${shiftDay(todayIso, -(days - 1))}T00:00:00+06:00`) : undefined;
   try {
     const csv = await ordersCsv(s.tenantId, s.actor, { tab, q: q.get("q") ?? undefined, payment, district, courier: q.get("courier") ?? undefined, tag: q.get("tag") ?? undefined, from });
-    return new NextResponse(`﻿${csv}`, {
+    return new NextResponse(`\uFEFF${csv}`, {
       headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="orders-${todayIso}.csv"`, "Cache-Control": "no-store" },
     });
   } catch (e) {

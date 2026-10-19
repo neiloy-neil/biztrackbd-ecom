@@ -508,7 +508,7 @@ export async function createPosOrder(
 
     // 6. Customer lookup or Walk-in assignment
     let customerId: string | null = null;
-    let customerName = input.customer?.name?.trim() || "Walk-in Customer";
+    const customerName = input.customer?.name?.trim() || "Walk-in Customer";
     let customerPhone = "01000000000";
 
     if (input.customer?.phone) {

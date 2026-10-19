@@ -23,7 +23,7 @@ export interface CustomerImportResult {
 
 const norm = (h: string) => h.normalize("NFC").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 const clean = (s: string | undefined, max: number) => (s ?? "").replace(/\s+/g, " ").trim().slice(0, max);
-const cleanTag = (t: string) => t.normalize("NFC").toLowerCase().replace(/[^\p{L}\p{M}\p{N} \-]/gu, "").replace(/\s+/g, " ").trim().slice(0, 24);
+const cleanTag = (t: string) => t.normalize("NFC").toLowerCase().replace(/[^\p{L}\p{M}\p{N} -]/gu, "").replace(/\s+/g, " ").trim().slice(0, 24);
 
 /**
  * Brings customers in from a spreadsheet: a plain list (Name, Phone, Email, Tags, Notes) or a Shopify customer export

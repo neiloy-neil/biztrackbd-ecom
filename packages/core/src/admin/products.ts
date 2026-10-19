@@ -326,7 +326,7 @@ export async function saveCategory(tenantId: string, actor: StaffActor, input: C
   const sortOrder = input.sortOrder === undefined ? undefined : Math.min(Math.max(Math.round(input.sortOrder), 0), 9999);
   return withTenant(tenantId, async (tx) => {
     // One level of sub-categories: the parent must exist, must be top-level itself, and a category that has children cannot become one.
-    let parentId: string | null | undefined = input.parentId === undefined ? undefined : input.parentId || null;
+    const parentId: string | null | undefined = input.parentId === undefined ? undefined : input.parentId || null;
     if (parentId) {
       if (parentId === categoryId) throw new ValidationError("A category cannot be inside itself", { field: "parentId" });
       const parent = await tx.category.findFirst({ where: { id: parentId } });

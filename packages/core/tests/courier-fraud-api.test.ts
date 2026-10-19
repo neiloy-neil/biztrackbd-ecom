@@ -153,7 +153,7 @@ describe("Unified 5-Courier Fraud API Engine", () => {
   });
 
   it("falls back to GET endpoint if POST fails", async () => {
-    let attempts: string[] = [];
+    const attempts: string[] = [];
 
     const mockFetch = async (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
       const method = init?.method ?? "GET";

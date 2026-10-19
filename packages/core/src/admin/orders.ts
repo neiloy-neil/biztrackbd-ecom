@@ -16,7 +16,7 @@ const actorName = (a: StaffActor) => a.name ?? a.email;
 
 /** A label is a few lowercase words: "call first", "gift". Trimmed, one space between words, no symbols that break a URL or a CSV. */
 export function cleanTag(raw: string): string {
-  return raw.normalize("NFC").toLowerCase().replace(/[^\p{L}\p{M}\p{N} \-]/gu, "").replace(/\s+/g, " ").trim().slice(0, 24);
+  return raw.normalize("NFC").toLowerCase().replace(/[^\p{L}\p{M}\p{N} -]/gu, "").replace(/\s+/g, " ").trim().slice(0, 24);
 }
 
 export type OrderTab = "all" | "new" | "check" | "risk" | "to_pack" | "shipped" | "delivered" | "returns" | "cancelled";

@@ -116,8 +116,8 @@ export async function analyzeImportContentAction(
     }
 
     // Service item heuristic: bullet points (•, -, *, 1., 2.) or short lines under Services section
-    if (currentSection === "SERVICES" || /^[•\-\*]\s+/.test(line)) {
-      const clean = line.replace(/^[•\-\*\d.]+\s*/, "").trim();
+    if (currentSection === "SERVICES" || /^[•\-*]\s+/.test(line)) {
+      const clean = line.replace(/^[•\-*\d.]+\s*/, "").trim();
       if (clean.length > 3 && clean.length < 100) {
         // Price detection inside service line (e.g. "5000 tk" or "BDT 3,000" or "$50")
         const priceMatch = clean.match(/(?:bdt|tk|৳|\$)\s*([\d,]+)/i);
@@ -142,7 +142,7 @@ export async function analyzeImportContentAction(
       currentSection === "TEAM" ||
       /\b(dr\.|doctor|prof\.|professor|consultant|ceo|cto|founder|specialist|mbbs|fcps)\b/i.test(line)
     ) {
-      const clean = line.replace(/^[•\-\*\d.]+\s*/, "").trim();
+      const clean = line.replace(/^[•\-*\d.]+\s*/, "").trim();
       if (clean.length > 3 && clean.length < 100) {
         // Extract doctor degrees if in parentheses or after comma
         const parts = clean.split(/[,–(]/);

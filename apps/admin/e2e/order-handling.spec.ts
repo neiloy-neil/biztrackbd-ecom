@@ -39,7 +39,7 @@ test.describe.serial("handling orders", () => {
     expect(res.status()).toBe(200);
     expect(res.headers()["content-type"]).toContain("text/csv");
     const text = await res.text();
-    const lines = text.replace(/^﻿/, "").split("\r\n");
+    const lines = text.replace(/^\uFEFF/, "").split("\r\n");
     expect(lines[0]).toContain('"Order"');
     expect(lines).toHaveLength(2);
     expect(lines[1]).toContain(orderNumber);

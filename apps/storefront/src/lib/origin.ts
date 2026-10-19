@@ -21,7 +21,7 @@ export function resolveStorefrontOrigin(
   const fwdProto = headersList.get("x-forwarded-proto");
   const fwdPort = headersList.get("x-forwarded-port");
 
-  let proto = fwdProto || (rawHost.startsWith("localhost") || rawHost.startsWith("127.0.0.1") ? "http" : "https");
+  const proto = fwdProto || (rawHost.startsWith("localhost") || rawHost.startsWith("127.0.0.1") ? "http" : "https");
   let host = rawHost;
 
   if (!host.includes(":")) {

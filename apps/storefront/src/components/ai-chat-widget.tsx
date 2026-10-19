@@ -12,14 +12,17 @@ interface Props {
   storeName?: string;
 }
 
-export function AiChatWidget({
-  enabled = true,
+export function AiChatWidget(props: Props) {
+  if (props.enabled === false) return null;
+  return <AiChatWidgetInner {...props} />;
+}
+
+function AiChatWidgetInner({
   botName,
   welcomeMessage,
   escalatePhone,
   storeName = "আমাদের শপ",
 }: Props) {
-  if (!enabled) return null;
 
   const displayName = botName?.trim() || "AI শপিং অ্যাসিস্ট্যান্ট";
   const defaultWelcome =
