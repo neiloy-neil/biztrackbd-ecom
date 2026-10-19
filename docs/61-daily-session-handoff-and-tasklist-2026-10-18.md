@@ -236,6 +236,7 @@ During today's interactive `/grill-me` alignment session, we architected, engine
 24. `commit 978f678`: `feat(builder): implement Elementor-style 3-tab inspector (Content, Style, Advanced) (Phase B)`
 25. `commit 0ccc46b`: `feat(builder): implement draggable accordion repeaters with title previews and micro-controls (Phase C)`
 26. `commit 3046639`: `feat(builder): implement drag-and-drop block & pattern insertion into layers (Phase D)`
+27. `commit 06e2ba1`: `feat(builder): add left sidebar retract controls, interactive border splitter, and breathing room`
 
 
 ---
