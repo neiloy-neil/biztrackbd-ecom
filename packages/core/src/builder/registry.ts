@@ -2674,9 +2674,21 @@ export interface PageSection {
   style?: SectionStyle;
 }
 
+export interface PageSeoSettings {
+  title?: string;
+  description?: string;
+  keywords?: string;
+  socialImage?: string;
+  noIndex?: boolean;
+  canonicalUrl?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+}
+
 export interface PageJson {
   version: 1;
   sections: PageSection[];
+  seo?: PageSeoSettings;
 }
 
 export const MAX_SECTIONS = 30;
@@ -2919,7 +2931,195 @@ export function validatePage(kind: PageKind, raw: unknown): PageJson {
     if (!found) throw new ValidationError(`This page needs the "${label}" section`);
     if (found.disabled) throw new ValidationError(`The "${label}" section cannot be hidden: this page does not work without it`);
   }
-  return { version: 1, sections };
+  const seo = normalizePageSeo((raw as { seo?: unknown }).seo);
+  return { version: 1, sections, ...(seo ? { seo } : {}) };
+}
+
+export function normalizePageSeo(raw?: unknown): PageSeoSettings | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const o = raw as Record<string, unknown>;
+  const seo: PageSeoSettings = {};
+
+  if (typeof o.title === "string") {
+    const t = plain(o.title, 80).trim();
+    if (t) seo.title = t;
+  }
+  if (typeof o.description === "string") {
+    const d = plain(o.description, 320).trim();
+    if (d) seo.description = d;
+  }
+  if (typeof o.keywords === "string") {
+    const k = plain(o.keywords, 200).trim();
+    if (k) seo.keywords = k;
+  }
+  if (typeof o.socialImage === "string") {
+    const img = o.socialImage.trim();
+    if (safeImage(img) && img !== "") {
+      seo.socialImage = img;
+    }
+  }
+  if (typeof o.noIndex === "boolean" && o.noIndex) {
+    seo.noIndex = true;
+  }
+  if (typeof o.canonicalUrl === "string") {
+    const u = o.canonicalUrl.trim();
+    if (safeUrl(u) && u !== "") {
+      seo.canonicalUrl = u.slice(0, 300);
+    }
+  }
+  if (typeof o.ogTitle === "string") {
+    const ot = plain(o.ogTitle, 100).trim();
+    if (ot) seo.ogTitle = ot;
+  }
+  if (typeof o.ogDescription === "string") {
+    const od = plain(o.ogDescription, 320).trim();
+    if (od) seo.ogDescription = od;
+  }
+
+  return Object.keys(seo).length > 0 ? seo : undefined;
+}
+
+/**
+ * Intelligent client-side heuristic extracting page title, description, and social cover image
+ * from existing sections (e.g. Hero, Banner, Text, FAQ).
+ */
+export function extractPageSeoHeuristic(page: PageJson, fallbackTitle?: string): PageSeoSettings {
+  let titleCandidate = "";
+  let descCandidate = "";
+  let imageCandidate = "";
+
+  for (const s of page.sections) {
+    if (s.disabled) continue;
+    const settings = (s.settings || {}) as Record<string, unknown>;
+
+    // 1. Look for image candidates
+    if (!imageCandidate) {
+      if (typeof settings.image === "string" && settings.image.trim() !== "" && safeImage(settings.image.trim())) {
+        imageCandidate = settings.image.trim();
+      } else if (typeof settings.heroImage === "string" && settings.heroImage.trim() !== "" && safeImage(settings.heroImage.trim())) {
+        imageCandidate = settings.heroImage.trim();
+      } else if (typeof settings.coverImage === "string" && settings.coverImage.trim() !== "" && safeImage(settings.coverImage.trim())) {
+        imageCandidate = settings.coverImage.trim();
+      } else if (typeof settings.bgImage === "string" && settings.bgImage.trim() !== "" && safeImage(settings.bgImage.trim())) {
+        imageCandidate = settings.bgImage.trim();
+      } else if (typeof s.style?.bgImage === "string" && s.style.bgImage.trim() !== "" && safeImage(s.style.bgImage.trim())) {
+        imageCandidate = s.style.bgImage.trim();
+      }
+    }
+
+    // 2. Look for title candidates
+    if (!titleCandidate) {
+      const candidate = settings.title || settings.heading || settings.headline;
+      if (typeof candidate === "string" && candidate.trim()) {
+        titleCandidate = candidate.trim();
+      }
+    }
+
+    // 3. Look for description candidates
+    if (!descCandidate) {
+      const candidate = settings.subtitle || settings.subheading || settings.tagline || settings.text || settings.body || settings.description;
+      if (typeof candidate === "string" && candidate.trim() && candidate.trim() !== titleCandidate) {
+        descCandidate = candidate.trim().replace(/\s+/g, " ");
+      }
+    }
+  }
+
+  const finalTitle = plain(titleCandidate || fallbackTitle || "Store Page", 70);
+  const finalDesc = plain(
+    descCandidate || `${finalTitle} - Explore our curated selections, products and services with fast delivery across Bangladesh.`,
+    160
+  );
+
+  return {
+    title: finalTitle,
+    description: finalDesc,
+    ...(imageCandidate ? { socialImage: imageCandidate } : {}),
+  };
+}
+
+export interface SeoChecklistItem {
+  id: string;
+  label: string;
+  passed: boolean;
+  score: number;
+  maxScore: number;
+  tip: string;
+}
+
+export interface SeoHealthReport {
+  score: number;
+  status: "good" | "warning" | "bad";
+  checklist: SeoChecklistItem[];
+}
+
+/**
+ * Calculates a live 0-100 SEO health score and actionable checklist for Google & Social sharing.
+ */
+export function calculateSeoHealthScore(seo?: PageSeoSettings, _page?: PageJson): SeoHealthReport {
+  const title = (seo?.title || "").trim();
+  const desc = (seo?.description || "").trim();
+  const titleLen = title.length;
+  const descLen = desc.length;
+
+  const checklist: SeoChecklistItem[] = [
+    {
+      id: "title_present",
+      label: "Page title is defined",
+      passed: titleLen >= 5,
+      score: titleLen >= 5 ? 25 : 0,
+      maxScore: 25,
+      tip: "Define a clear, descriptive title for search engines.",
+    },
+    {
+      id: "title_length",
+      label: "Title has optimal length (40–65 chars)",
+      passed: titleLen >= 40 && titleLen <= 65,
+      score: titleLen >= 40 && titleLen <= 65 ? 15 : titleLen > 0 && titleLen < 40 ? 8 : 0,
+      maxScore: 15,
+      tip: titleLen > 65 ? `Title is ${titleLen} characters (over 65 may get truncated by Google).` : "Target 40 to 65 characters to maximize visibility in Google search results.",
+    },
+    {
+      id: "desc_present",
+      label: "Meta description is defined",
+      passed: descLen >= 20,
+      score: descLen >= 20 ? 25 : 0,
+      maxScore: 25,
+      tip: "Provide a summary to convince users to click on search results.",
+    },
+    {
+      id: "desc_length",
+      label: "Description has optimal length (120–165 chars)",
+      passed: descLen >= 120 && descLen <= 165,
+      score: descLen >= 120 && descLen <= 165 ? 15 : descLen > 0 && descLen < 120 ? 7 : 0,
+      maxScore: 15,
+      tip: descLen > 165 ? `Description is ${descLen} characters (over 165 will be cut off with ...).` : "Aim for 120 to 165 characters for high search snippet click-through.",
+    },
+    {
+      id: "social_image",
+      label: "Social share card image attached",
+      passed: Boolean(seo?.socialImage && seo.socialImage.trim().length > 0),
+      score: seo?.socialImage ? 10 : 0,
+      maxScore: 10,
+      tip: "Add an OpenGraph image (1200×630px recommended) for Facebook & WhatsApp previews.",
+    },
+    {
+      id: "indexing",
+      label: "Search engine indexing enabled",
+      passed: !seo?.noIndex,
+      score: !seo?.noIndex ? 10 : 0,
+      maxScore: 10,
+      tip: seo?.noIndex ? "This page is marked as 'noindex' (hidden from search engines)." : "Search crawlers can index and rank this page.",
+    },
+  ];
+
+  const totalScore = checklist.reduce((sum, item) => sum + item.score, 0);
+  const status: "good" | "warning" | "bad" = totalScore >= 80 ? "good" : totalScore >= 45 ? "warning" : "bad";
+
+  return {
+    score: totalScore,
+    status,
+    checklist,
+  };
 }
 
 let counter = 0;

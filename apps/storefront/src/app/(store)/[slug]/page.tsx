@@ -39,7 +39,37 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
   const store = await getStore();
   if (preview) return { title: "Preview", robots: { index: false, follow: false }, referrer: "no-referrer" };
   const custom = await getPublicCustomPage(store.id, slug);
-  if (custom) return { title: custom.seoTitle || custom.title, description: custom.seoDescription ?? undefined, alternates: { canonical: `/${slug}` } };
+  if (custom) {
+    const s = custom.page.seo;
+    const title = s?.title || custom.seoTitle || custom.title;
+    const description = s?.description || custom.seoDescription || undefined;
+    const canonical = s?.canonicalUrl || `/${slug}`;
+    const ogTitle = s?.ogTitle || title;
+    const ogDesc = s?.ogDescription || description;
+    const ogImage = s?.socialImage;
+    const noIndex = Boolean(s?.noIndex);
+
+    return {
+      title,
+      description,
+      keywords: s?.keywords,
+      robots: noIndex ? { index: false, follow: false } : { index: true, follow: true },
+      alternates: { canonical },
+      openGraph: {
+        title: ogTitle,
+        description: ogDesc,
+        url: canonical,
+        siteName: store.subdomain,
+        images: ogImage ? [{ url: ogImage, width: 1200, height: 630, alt: ogTitle }] : undefined,
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: ogTitle,
+        description: ogDesc,
+        images: ogImage ? [ogImage] : undefined,
+      },
+    };
+  }
   const page = await getPublishedPage(store.id, slug);
   if (page) return { title: page.title, alternates: { canonical: `/${slug}` } };
 
@@ -97,8 +127,52 @@ export default async function CleanRootStorePage({ params, searchParams }: { par
       siteMode: modeMeta.siteMode,
       businessVertical: modeMeta.vertical ?? undefined,
     };
+
+    const faqItems: Array<{ q: string; a: string }> = [];
+    for (const s of custom.page.sections) {
+      if (s.disabled) continue;
+      if (s.type === "accordion-faq" || s.type === "lp-faq") {
+        const items = (s.settings?.items || []) as Array<{ q?: string; a?: string; qBn?: string; aBn?: string }>;
+        for (const it of items) {
+          const q = it.q || it.qBn;
+          const a = it.a || it.aBn;
+          if (q && a) faqItems.push({ q, a });
+        }
+      }
+    }
+
+    const jsonLd = [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        name: custom.page.seo?.title || custom.seoTitle || custom.title,
+        description: custom.page.seo?.description || custom.seoDescription || undefined,
+        url: `/${slug}`,
+      },
+      ...(faqItems.length > 0
+        ? [
+            {
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: faqItems.map((item) => ({
+                "@type": "Question",
+                name: item.q,
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: item.a,
+                },
+              })),
+            },
+          ]
+        : []),
+    ];
+
     return (
       <article data-testid="store-page-sections" style={{ paddingBottom: 40 }}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         {preview
           ? <PreviewBridge kind="custom" initialPage={custom.page} initialTheme={preview.theme} data={data} lang={lang} adminOrigin={adminOrigin()} site={site} />
           : <Sections page={custom.page} data={data} lang={lang} t={t} site={site} />}

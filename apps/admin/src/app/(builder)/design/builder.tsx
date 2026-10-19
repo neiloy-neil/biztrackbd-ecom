@@ -12,6 +12,7 @@ import {
   type SectionStyle, type SectionBgType, type SectionPaddingY, type SectionHideOn, type SectionTextColor,
   type SectionAnimation, type SectionAnimDuration, type SectionAnimDelay, type SectionPattern,
   type SectionTextAlign, type SectionTextScale, type SectionBgPattern, type SectionMobileStyle,
+  normalizePageSeo, extractPageSeoHeuristic, calculateSeoHealthScore, type PageSeoSettings, type SeoHealthReport,
 } from "@biztrackbd/core/builder-client";
 import { ImagePicker } from "@/components/image-picker";
 import { LANDING_GROUPS, STORE_SECTION_CATEGORIES, SectionThumb } from "./section-thumbs";
@@ -22,7 +23,7 @@ export interface VersionItem { version: number; label: string | null; createdAt:
 type Settings = Record<string, unknown>;
 type Snap = { page: PageJson; theme: ThemeSettings };
 type Device = "desktop" | "tablet" | "phone";
-type Tab = "layers" | "settings" | "theme" | "history";
+type Tab = "layers" | "settings" | "theme" | "seo" | "history";
 
 interface Props {
   pageKey: string;
@@ -76,6 +77,12 @@ const ILayers = () => <svg {...svg}><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5
 const IBlocks = () => <svg {...svg}><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /></svg>;
 const IPalette = () => <svg {...svg}><path d="M12 2a10 10 0 00-10 10 9.9 9.9 0 005 8.66c.55.32 1.25.13 1.57-.42.23-.39.22-.88-.02-1.28A4 4 0 0112 16a2 2 0 012 2v.5a2.5 2.5 0 005 0V17a7 7 0 001.4-4.2A10 10 0 0012 2z" /><circle cx="7.5" cy="10.5" r="1.5" /><circle cx="12" cy="7.5" r="1.5" /><circle cx="16.5" cy="10.5" r="1.5" /></svg>;
 const IHistory = () => <svg {...svg}><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>;
+const ISeo = () => (
+  <svg {...svg}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+  </svg>
+);
 const ICollapseLeft = () => <svg {...svg} width={16} height={16}><polyline points="15 18 9 12 15 6" /></svg>;
 const IExpandRight = () => <svg {...svg} width={16} height={16}><polyline points="9 18 15 12 9 6" /></svg>;
 const IZen = () => <svg {...svg}><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" /></svg>;
@@ -1502,6 +1509,348 @@ function ThemePanel({ theme, onChange, disabled }: { theme: ThemeSettings; onCha
   );
 }
 
+function SeoInspector({
+  seo,
+  page,
+  pageTitle,
+  pageSlug,
+  storeOrigin,
+  storeName,
+  onChangeSeo,
+  onAutoFill,
+  disabled,
+}: {
+  seo?: PageSeoSettings;
+  page: PageJson;
+  pageTitle: string;
+  pageSlug: string;
+  storeOrigin: string;
+  storeName: string;
+  onChangeSeo: (patch: Partial<PageSeoSettings>) => void;
+  onAutoFill: () => void;
+  disabled: boolean;
+}) {
+  const [serpMode, setSerpMode] = useState<"desktop" | "mobile">("desktop");
+  const [showChecklist, setShowChecklist] = useState(false);
+  const [useCustomOg, setUseCustomOg] = useState(Boolean(seo?.ogTitle || seo?.ogDescription));
+
+  const report = useMemo(() => calculateSeoHealthScore(seo, page), [seo, page]);
+  const title = seo?.title || "";
+  const desc = seo?.description || "";
+  const keywords = seo?.keywords || "";
+  const socialImg = seo?.socialImage || "";
+  const noIndex = Boolean(seo?.noIndex);
+  const canonical = seo?.canonicalUrl || "";
+
+  const titleLength = title.length;
+  const descLength = desc.length;
+
+  const displayTitle = title || pageTitle || "Store Page";
+  const displayDesc =
+    desc || `${displayTitle} — Discover premium products and fast delivery across Bangladesh with Cash on Delivery.`;
+
+  const ogTitle = useCustomOg ? seo?.ogTitle || displayTitle : displayTitle;
+  const ogDesc = useCustomOg ? seo?.ogDescription || displayDesc : displayDesc;
+
+  const displayUrl = `${storeOrigin.replace(/^https?:\/\//, "")}${pageSlug ? ` › ${pageSlug}` : ""}`;
+
+  return (
+    <div className="bld-seo-container" data-testid="seo-inspector">
+      {/* 1. SEO Health Score & Audit Checklist */}
+      <div className="bld-seo-health-card">
+        <div className="bld-seo-health-header">
+          <div className="bld-seo-health-title">
+            <span>🎯</span>
+            <span>SEO Health Score</span>
+          </div>
+          <span className={`bld-seo-score-pill ${report.status}`}>
+            {report.score}/100 • {report.status === "good" ? "Optimized" : report.status === "warning" ? "Needs Attention" : "Incomplete"}
+          </span>
+        </div>
+
+        <div className="bld-seo-progress-bar">
+          <div
+            className="bld-seo-progress-fill"
+            style={{
+              width: `${Math.max(5, report.score)}%`,
+              backgroundColor: report.status === "good" ? "#10b981" : report.status === "warning" ? "#f59e0b" : "#ef4444",
+            }}
+          />
+        </div>
+
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginTop: 2 }}>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={onAutoFill}
+            disabled={disabled}
+            title="Scan Hero, Heading and Text sections to auto-generate title & description"
+            data-testid="seo-autofill-btn"
+          >
+            <span>✨ Auto-fill from Content</span>
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-sm"
+            style={{ background: "transparent", border: 0, color: "var(--ink-2)", fontSize: 12, cursor: "pointer", textDecoration: "underline" }}
+            onClick={() => setShowChecklist((v) => !v)}
+          >
+            {showChecklist ? "Hide checklist ▲" : "View audit checklist ▼"}
+          </button>
+        </div>
+
+        {showChecklist && (
+          <div className="bld-seo-checklist">
+            {report.checklist.map((item) => (
+              <div key={item.id} className={`bld-seo-check-item ${item.passed ? "passed" : ""}`}>
+                <span className={`bld-seo-check-icon ${item.passed ? "ok" : "warn"}`}>
+                  {item.passed ? "✓" : "⚠"}
+                </span>
+                <div>
+                  <div style={{ fontWeight: item.passed ? 600 : 500 }}>{item.label}</div>
+                  {!item.passed && <div className="muted" style={{ fontSize: 11 }}>{item.tip}</div>}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 2. Google SERP Preview Card */}
+      <div className="bld-group">
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+          <div className="bld-gh" style={{ margin: 0 }}>Google Search Preview</div>
+          <Segmented
+            label="SERP device preview"
+            value={serpMode}
+            onChange={(v) => setSerpMode(v as "desktop" | "mobile")}
+            options={[
+              { value: "desktop", label: "🖥️ Desktop" },
+              { value: "mobile", label: "📱 Mobile" },
+            ]}
+          />
+        </div>
+
+        <div className={`bld-serp-preview ${serpMode}`} data-testid="serp-preview">
+          <div className="bld-serp-header">
+            <span className="bld-serp-favicon" aria-hidden>🌐</span>
+            <span className="bld-serp-domain">{storeName || "BizTrack Store"}</span>
+            <span className="bld-serp-path">{displayUrl}</span>
+          </div>
+          <div className="bld-serp-title" title={displayTitle}>
+            {displayTitle}
+          </div>
+          <p className="bld-serp-snippet">
+            {displayDesc}
+          </p>
+        </div>
+
+        {/* Title Input */}
+        <div className="field" style={{ marginTop: 12, marginBottom: 0 }}>
+          <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+            <label className="label" htmlFor="seo-meta-title" style={{ margin: 0 }}>Page Title</label>
+            <span className={`bld-char-badge ${titleLength >= 40 && titleLength <= 65 ? "optimal" : titleLength > 65 ? "warning" : "neutral"}`}>
+              {titleLength}/60 chars
+            </span>
+          </div>
+          <input
+            id="seo-meta-title"
+            className="input"
+            type="text"
+            value={title}
+            disabled={disabled}
+            maxLength={70}
+            placeholder={pageTitle || "Page title"}
+            onChange={(e) => onChangeSeo({ title: e.target.value })}
+            data-testid="seo-title-input"
+          />
+          <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+            Google typically displays the first 50–60 characters of a page title.
+          </div>
+        </div>
+
+        {/* Description Textarea */}
+        <div className="field" style={{ marginTop: 12, marginBottom: 0 }}>
+          <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+            <label className="label" htmlFor="seo-meta-desc" style={{ margin: 0 }}>Meta Description</label>
+            <span className={`bld-char-badge ${descLength >= 120 && descLength <= 165 ? "optimal" : descLength > 165 ? "warning" : "neutral"}`}>
+              {descLength}/160 chars
+            </span>
+          </div>
+          <textarea
+            id="seo-meta-desc"
+            className="textarea"
+            rows={3}
+            value={desc}
+            disabled={disabled}
+            maxLength={280}
+            placeholder="A compelling, clear summary for search results..."
+            style={{ padding: 10 }}
+            onChange={(e) => onChangeSeo({ description: e.target.value })}
+            data-testid="seo-desc-input"
+          />
+          <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+            Keep descriptions between 120 and 160 characters for maximum search snippet effectiveness.
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Social Media & Messaging Share Card Preview (Facebook, WhatsApp, Twitter) */}
+      <div className="bld-group">
+        <div className="bld-gh">Social Media & WhatsApp Card</div>
+        <p className="muted" style={{ fontSize: 12, margin: "0 0 10px 0" }}>
+          How this page looks when shared on Facebook, WhatsApp, Telegram, or Twitter.
+        </p>
+
+        <div className="bld-social-card-preview" data-testid="social-preview-card">
+          <div className="bld-social-card-media">
+            {socialImg ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={socialImg} alt="Social card preview" className="bld-social-card-img" />
+            ) : (
+              <div style={{ textAlign: "center", color: "#ffffff", padding: 20 }}>
+                <span style={{ fontSize: 32, display: "block", marginBottom: 4 }}>🖼️</span>
+                <span style={{ fontSize: 12, opacity: 0.85 }}>No social image selected (1200×630px recommended)</span>
+              </div>
+            )}
+          </div>
+          <div className="bld-social-card-content">
+            <span className="bld-social-domain">
+              {storeOrigin.replace(/^https?:\/\//, "").toUpperCase()}
+            </span>
+            <div className="bld-social-title">{ogTitle}</div>
+            <div className="bld-social-desc">{ogDesc}</div>
+          </div>
+        </div>
+
+        {/* Social Image Picker */}
+        <div style={{ marginTop: 12 }}>
+          <ImagePicker
+            label="Social Share Image"
+            value={socialImg}
+            disabled={disabled}
+            onChange={(url) => onChangeSeo({ socialImage: url })}
+          />
+          <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+            Recommended dimensions: 1200 × 630 pixels (1.91:1 ratio) for crisp previews on all devices.
+          </div>
+        </div>
+
+        {/* Custom Social Title & Desc Checkbox */}
+        <label className="check" style={{ marginTop: 12, minHeight: 32, alignItems: "center" }}>
+          <input
+            type="checkbox"
+            checked={useCustomOg}
+            disabled={disabled}
+            onChange={(e) => {
+              setUseCustomOg(e.target.checked);
+              if (!e.target.checked) {
+                onChangeSeo({ ogTitle: undefined, ogDescription: undefined });
+              }
+            }}
+          />
+          <span style={{ fontSize: 13 }}>Customize Social Card title & description separately</span>
+        </label>
+
+        {useCustomOg && (
+          <div className="stack" style={{ gap: 10, marginTop: 8, padding: 10, background: "var(--surface-sunken, rgba(0,0,0,0.02))", borderRadius: 8 }}>
+            <div className="field" style={{ margin: 0 }}>
+              <label className="label" htmlFor="seo-og-title">Social Card Title</label>
+              <input
+                id="seo-og-title"
+                className="input"
+                type="text"
+                value={seo?.ogTitle ?? ""}
+                disabled={disabled}
+                maxLength={80}
+                placeholder={displayTitle}
+                onChange={(e) => onChangeSeo({ ogTitle: e.target.value })}
+              />
+            </div>
+            <div className="field" style={{ margin: 0 }}>
+              <label className="label" htmlFor="seo-og-desc">Social Card Description</label>
+              <textarea
+                id="seo-og-desc"
+                className="textarea"
+                rows={2}
+                value={seo?.ogDescription ?? ""}
+                disabled={disabled}
+                maxLength={200}
+                placeholder={displayDesc}
+                style={{ padding: 8 }}
+                onChange={(e) => onChangeSeo({ ogDescription: e.target.value })}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 4. Technical SEO & Indexing Controls */}
+      <details className="bld-group">
+        <summary className="bld-gh" style={{ cursor: "pointer", userSelect: "none" }}>
+          Advanced & Technical SEO
+        </summary>
+        <div className="stack" style={{ gap: 12, marginTop: 10 }}>
+          {/* Indexing Switch */}
+          <div className="field" style={{ margin: 0 }}>
+            <label className="check" style={{ minHeight: 36, alignItems: "center" }}>
+              <input
+                type="checkbox"
+                checked={!noIndex}
+                disabled={disabled}
+                onChange={(e) => onChangeSeo({ noIndex: !e.target.checked })}
+              />
+              <span style={{ fontWeight: 600 }}>Allow Search Engines to Index This Page</span>
+            </label>
+            <div className="muted" style={{ fontSize: 12, marginLeft: 26, marginTop: 2 }}>
+              {noIndex
+                ? "⚠️ Warning: This page is marked 'noindex'. Search engines will NOT show this page in search results."
+                : "Standard setting. Google, Bing, and web crawlers can discover and rank this page."}
+            </div>
+          </div>
+
+          {/* Canonical URL Override */}
+          <div className="field" style={{ margin: 0 }}>
+            <label className="label" htmlFor="seo-canonical">Canonical URL (Optional)</label>
+            <input
+              id="seo-canonical"
+              className="input"
+              type="text"
+              value={canonical}
+              disabled={disabled}
+              placeholder="e.g. https://yourstore.com/main-page"
+              maxLength={250}
+              onChange={(e) => onChangeSeo({ canonicalUrl: e.target.value })}
+            />
+            <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+              Specify the preferred master URL if this page is duplicate or syndicated content.
+            </div>
+          </div>
+
+          {/* Focus Keywords */}
+          <div className="field" style={{ margin: 0 }}>
+            <label className="label" htmlFor="seo-keywords">Focus Keywords / Tags</label>
+            <input
+              id="seo-keywords"
+              className="input"
+              type="text"
+              value={keywords}
+              disabled={disabled}
+              placeholder="e.g. panjabi, cotton, dhaka fashion, eid sale"
+              maxLength={160}
+              onChange={(e) => onChangeSeo({ keywords: e.target.value })}
+            />
+            <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+              Comma-separated target phrases used for metadata keywords and search tagging.
+            </div>
+          </div>
+        </div>
+      </details>
+    </div>
+  );
+}
+
 // ---- The editor ---------------------------------------------------------------------------------------------------
 export function Builder(props: Props) {
   const { pageKey, kind, canEdit, previewOrigin } = props;
@@ -1544,7 +1893,7 @@ export function Builder(props: Props) {
   const resizeStart = useRef<{ clientX: number; startW: number } | null>(null);
   const [, bump] = useState(0);
   const [showShortcuts, setShowShortcuts] = useState(false);
-  const [leftTab, setLeftTab] = useState<"layers" | "library" | "theme" | "history">("layers");
+  const [leftTab, setLeftTab] = useState<"layers" | "library" | "theme" | "seo" | "history">("layers");
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [leftWidth, setLeftWidth] = useState(340);
   const [resizingLeftDock, setResizingLeftDock] = useState(false);
@@ -1739,6 +2088,15 @@ export function Builder(props: Props) {
           });
         }
         return;
+      }
+
+      // Quick tab switcher shortcuts Ctrl+1..5
+      if ((e.ctrlKey || e.metaKey) && !isInput) {
+        if (e.key === "1") { e.preventDefault(); handleRailClick("layers"); return; }
+        if (e.key === "2") { e.preventDefault(); handleRailClick("library"); return; }
+        if (e.key === "3") { e.preventDefault(); handleRailClick("theme"); return; }
+        if (e.key === "4") { e.preventDefault(); handleRailClick("seo"); return; }
+        if (e.key === "5") { e.preventDefault(); handleRailClick("history"); return; }
       }
 
       // Toggle Left Sidebar: Ctrl+B / Cmd+B
@@ -2155,7 +2513,22 @@ export function Builder(props: Props) {
     leftResizeStart.current = null;
   };
 
-  const handleRailClick = (targetTab: "layers" | "library" | "theme" | "history") => {
+  const pageSlug = pageKey === "home" ? "" : pageKey.replace(/^page:/, "").replace(/^custom:/, "");
+
+  const patchSeo = (seoPatch: Partial<PageSeoSettings>) => {
+    edit((pg) => ({
+      ...pg,
+      seo: normalizePageSeo({ ...(pg.seo ?? {}), ...seoPatch }),
+    }));
+  };
+
+  const autoFillSeo = () => {
+    const extracted = extractPageSeoHeuristic(page, props.title);
+    patchSeo(extracted);
+    toast("✨ Auto-filled SEO metadata from page content!");
+  };
+
+  const handleRailClick = (targetTab: "layers" | "library" | "theme" | "seo" | "history") => {
     if (leftTab === targetTab && !leftCollapsed) {
       setLeftCollapsed(true);
     } else {
@@ -2165,8 +2538,19 @@ export function Builder(props: Props) {
   };
 
   const tabs: { id: Tab; label: string; test?: string }[] = narrow
-    ? [{ id: "layers", label: "Sections" }, { id: "settings", label: "Settings" }, { id: "theme", label: kind === "home" ? "Style" : "Page", test: "tab-theme" }, { id: "history", label: "History", test: "tab-history" }]
-    : [{ id: "settings", label: "Settings" }, { id: "theme", label: kind === "home" ? "Template and style" : "Page", test: "tab-theme" }, { id: "history", label: "History", test: "tab-history" }];
+    ? [
+        { id: "layers", label: "Sections" },
+        { id: "settings", label: "Settings" },
+        { id: "seo", label: "SEO", test: "tab-seo" },
+        { id: "theme", label: kind === "home" ? "Style" : "Page", test: "tab-theme" },
+        { id: "history", label: "History", test: "tab-history" },
+      ]
+    : [
+        { id: "settings", label: "Settings" },
+        { id: "seo", label: "SEO & Social", test: "tab-seo" },
+        { id: "theme", label: kind === "home" ? "Template and style" : "Page", test: "tab-theme" },
+        { id: "history", label: "History", test: "tab-history" },
+      ];
   const active: Tab = narrow ? tab : tab === "layers" ? "settings" : tab;
 
   const filteredSections = treeSearch.trim()
@@ -2630,9 +3014,26 @@ export function Builder(props: Props) {
     </section>
   );
 
+  const seoTab = (
+    <div className="stack" style={{ gap: 14 }}>
+      <SeoInspector
+        seo={page.seo}
+        page={page}
+        pageTitle={props.title}
+        pageSlug={pageSlug}
+        storeOrigin={props.previewOrigin}
+        storeName={props.title}
+        onChangeSeo={patchSeo}
+        onAutoFill={autoFillSeo}
+        disabled={!canEdit}
+      />
+    </div>
+  );
+
   const inspector = (
     <div className="bld-panel-body">
       {active === "settings" && settings}
+      {active === "seo" && seoTab}
       {active === "theme" && themeTab}
       {active === "history" && history}
     </div>
@@ -2751,9 +3152,19 @@ export function Builder(props: Props) {
               </button>
               <button
                 type="button"
+                className={`bld-rail-btn${leftTab === "seo" && !leftCollapsed ? " active" : ""}`}
+                onClick={() => handleRailClick("seo")}
+                title={leftTab === "seo" && !leftCollapsed ? "Collapse SEO (Ctrl+4 or Ctrl+B)" : "SEO & Social Share (Ctrl+4)"}
+                aria-label="SEO & Social Share"
+                data-testid="rail-seo-btn"
+              >
+                <ISeo />
+              </button>
+              <button
+                type="button"
                 className={`bld-rail-btn${leftTab === "history" && !leftCollapsed ? " active" : ""}`}
                 onClick={() => handleRailClick("history")}
-                title={leftTab === "history" && !leftCollapsed ? "Collapse History (Ctrl+4 or Ctrl+B)" : "Version History & Drafts (Ctrl+4)"}
+                title={leftTab === "history" && !leftCollapsed ? "Collapse History (Ctrl+5 or Ctrl+B)" : "Version History & Drafts (Ctrl+5)"}
                 aria-label="Version History & Drafts"
               >
                 <IHistory />
@@ -2964,6 +3375,39 @@ export function Builder(props: Props) {
                     </div>
                     <div className="bld-panel-body" style={{ flex: 1, padding: "12px" }}>
                       {history}
+                    </div>
+                  </>
+                )}
+
+                {leftTab === "seo" && (
+                  <>
+                    <div className="bld-dock-head">
+                      <span className="bld-dock-title">
+                        <ISeo />
+                        <span>SEO & Social Share</span>
+                      </span>
+                      <button
+                        type="button"
+                        className="bld-dock-collapse-btn"
+                        onClick={() => setLeftCollapsed(true)}
+                        title="Collapse left sidebar (Ctrl+B)"
+                        aria-label="Collapse sidebar"
+                      >
+                        <ICollapseLeft />
+                      </button>
+                    </div>
+                    <div className="bld-panel-body" style={{ flex: 1, padding: "12px" }}>
+                      <SeoInspector
+                        seo={page.seo}
+                        page={page}
+                        pageTitle={props.title}
+                        pageSlug={pageSlug}
+                        storeOrigin={props.previewOrigin}
+                        storeName={props.title}
+                        onChangeSeo={patchSeo}
+                        onAutoFill={autoFillSeo}
+                        disabled={!canEdit}
+                      />
                     </div>
                   </>
                 )}
@@ -3502,6 +3946,10 @@ export function Builder(props: Props) {
               <div className="bld-shortcut-row">
                 <span className="bld-shortcut-label">Reset Zoom (Fit)</span>
                 <span className="bld-key-badges"><span className="bld-kbd">Ctrl</span><span className="bld-kbd">0</span></span>
+              </div>
+              <div className="bld-shortcut-row">
+                <span className="bld-shortcut-label">SEO & Social Share</span>
+                <span className="bld-key-badges"><span className="bld-kbd">Ctrl</span><span className="bld-kbd">4</span></span>
               </div>
             </div>
           </div>

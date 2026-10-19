@@ -244,8 +244,26 @@ async function writePublished(tx: TenantTx, tenantId: string, themeId: ThemeId, 
   await tx.themeVersion.create({ data: { tenantId, themeId, pageKey, state: "PUBLISHED", version, settings: theme as object, sectionsJson: page as object, label, createdBy: actor.userId } });
   // The theme is store-wide: publishing the home page makes the theme live. A landing page uses the store's current theme.
   if (!isStorePage(pageKey)) {
-    if (pageKey.startsWith("page:")) await tx.page.update({ where: { id: pageKey.slice("page:".length) }, data: { sectionsJson: page as object, isPublished: true } });
+    if (pageKey.startsWith("page:")) {
+      const pageData: Record<string, unknown> = { sectionsJson: page as object, isPublished: true };
+      if (page.seo) {
+        if (page.seo.title !== undefined) pageData.seoTitle = page.seo.title;
+        if (page.seo.description !== undefined) pageData.seoDescription = page.seo.description;
+      }
+      await tx.page.update({ where: { id: pageKey.slice("page:".length) }, data: pageData as any });
+    }
     else await tx.landingPage.update({ where: { id: pageKey.slice("landing:".length) }, data: { sectionsJson: page as object, isPublished: true } });
+  } else if (pageKey === HOME_KEY && page.seo) {
+    const storeSettingsUpdate: Record<string, unknown> = {};
+    if (page.seo.title) storeSettingsUpdate.seoTitle = page.seo.title;
+    if (page.seo.socialImage) storeSettingsUpdate.socialShareImageUrl = page.seo.socialImage;
+    if (page.seo.keywords) storeSettingsUpdate.seoKeywords = page.seo.keywords;
+    if (Object.keys(storeSettingsUpdate).length > 0) {
+      await tx.storeSettings.updateMany({
+        where: { tenantId },
+        data: storeSettingsUpdate,
+      });
+    }
   }
   // Keep the history bounded; the oldest published rows go first.
   const old = await tx.themeVersion.findMany({ where: { themeId, pageKey, state: "PUBLISHED" }, orderBy: { version: "desc" }, skip: MAX_KEPT_VERSIONS, select: { id: true } });
