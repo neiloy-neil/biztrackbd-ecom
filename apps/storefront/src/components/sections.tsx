@@ -1502,8 +1502,35 @@ export function SectionStyleWrapper({
     if (typeof style?.paddingBottom === "number") {
       inlineStyles.paddingBottom = `${style.paddingBottom}px`;
     }
+    if (typeof style?.mobile?.paddingTop === "number") {
+      (inlineStyles as Record<string, string>)["--bt-pt-m"] = `${style.mobile.paddingTop}px`;
+    }
+    if (typeof style?.mobile?.paddingBottom === "number") {
+      (inlineStyles as Record<string, string>)["--bt-pb-m"] = `${style.mobile.paddingBottom}px`;
+    }
     if (typeof style?.paddingTop !== "number" && typeof style?.paddingBottom !== "number" && style?.paddingY) {
       classes.push(`bt-py-${style.paddingY}`);
+    }
+    if (style?.mobile?.paddingY) {
+      classes.push(`bt-py-m-${style.mobile.paddingY}`);
+    }
+    if (style?.textAlign) {
+      classes.push(`bt-align-${style.textAlign}`);
+    }
+    if (style?.mobile?.textAlign) {
+      classes.push(`bt-align-m-${style.mobile.textAlign}`);
+    }
+    if (style?.mobile?.reverseStack) {
+      classes.push("bt-reverse-stack-m");
+    }
+    if (style?.mobile?.textScale) {
+      classes.push(`bt-text-scale-m-${style.mobile.textScale}`);
+    }
+    if (style?.bgPattern && style.bgPattern !== "none") {
+      classes.push("bt-has-pattern", `bt-pattern-${style.bgPattern}`);
+      if (typeof style.bgPatternOpacity === "number") {
+        (inlineStyles as Record<string, string>)["--bt-pat-opacity"] = String(style.bgPatternOpacity / 100);
+      }
     }
     if (style?.cardMode) {
       classes.push("bt-card-mode");

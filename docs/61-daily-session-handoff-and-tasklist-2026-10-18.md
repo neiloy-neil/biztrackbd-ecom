@@ -326,6 +326,26 @@ All browser walkthrough recordings and full-resolution PNG artifacts are saved i
   - Direct local file reading to DataURL and message dispatching to `bt-preview:upload-image`.
   - Admin receives DataURL, posts to authenticated `/api/media`, patches section settings with `setByPath`, and shows success toast feedback.
 
+### Delivered: SiteBuilder UX Evolution — Phase Three (Responsive Mobile Controls & Background Patterns)
+- **Feature A: Mobile Layout Suite (`SectionMobileStyle`)**
+  - Schema extension with `paddingTop`, `paddingBottom`, `paddingY` (clamped 0-240px), `textAlign` (`left` | `center` | `right`), `reverseStack` (boolean), and `textScale` (`compact` 0.85x | `normal` 1.0x | `enlarged` 1.15x).
+  - Storefront CSS custom property cascading (`--bt-pt-m`, `--bt-pb-m`, `.bt-py-m-*`, `.bt-align-m-*`, `.bt-text-scale-m-*`, `.bt-reverse-stack-m`) applied via `@media (max-width: 768px)`.
+  - Multi-column container reversal (`.hero-split`, `.bt-split-grid`, `.bento-grid`, `.banner-card`, `.rich-text-grid`) for fine-grained mobile column stacking control.
+- **Feature B: Background Pattern Overlays (`SectionBgPattern`)**
+  - Curated, mathematically crisp SVG/CSS patterns: `none`, `dots` (dotted matrix), `grid` (architectural mesh), `diagonal` (speed slants), `mesh` (radial mesh), and `cross` (subtle plus pattern).
+  - Live opacity slider (5% to 60%) setting `--bt-pat-opacity` with instantaneous canvas feedback.
+- **Feature C: Elementor/Webflow-Style Inspector UX**
+  - Dual responsive mode switcher `[ 🖥️ Desktop | 📱 Mobile ]` in the Inspector's Style tab.
+  - Automatic synchronization with canvas preview device (selecting Phone automatically switches inspector to Mobile mode).
+  - Visual status indicators: `📱 Custom Mobile Overrides Active` with `↺ Revert to Desktop Inheritance` button vs `🖥️ Inheriting from Desktop`.
+  - In-canvas vertical spacing drag handles dynamically route to `mobile.paddingTop`/`mobile.paddingBottom` when viewing Phone mode.
+  - Structure / Layers panel pills (`■ dots`, `📱 Mobile`) displaying visual overrides at a glance.
+- **Verification & Test Status:**
+  - 48/48 unit tests passing (`packages/core/tests/builder-sections.test.ts`).
+  - 12/12 monorepo packages passing `pnpm typecheck` with 0 errors.
+  - Visual verification with Playwright capturing live desktop pattern chips, mobile overrides banner, and 390px mobile canvas preview.
+
+
 ---
 
 ## 4. Prioritized Tasklist for Tomorrow's Session

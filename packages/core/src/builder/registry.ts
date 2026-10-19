@@ -2628,6 +2628,18 @@ export const SECTION_GRADIENT_PRESETS: Record<string, { label: string; css: stri
 export type SectionAnimation = "none" | "fade" | "slide-up" | "slide-down" | "slide-left" | "slide-right" | "zoom-in";
 export type SectionAnimDuration = "fast" | "normal" | "slow";
 export type SectionAnimDelay = 0 | 150 | 300 | 450;
+export type SectionTextAlign = "left" | "center" | "right";
+export type SectionTextScale = "compact" | "normal" | "enlarged";
+export type SectionBgPattern = "none" | "dots" | "grid" | "diagonal" | "mesh" | "cross";
+
+export interface SectionMobileStyle {
+  paddingTop?: number;
+  paddingBottom?: number;
+  paddingY?: SectionPaddingY;
+  textAlign?: SectionTextAlign;
+  textScale?: SectionTextScale;
+  reverseStack?: boolean;
+}
 
 export interface SectionStyle {
   bgType?: SectionBgType;
@@ -2647,6 +2659,10 @@ export interface SectionStyle {
   animDelay?: SectionAnimDelay;
   anchorId?: string;
   customClass?: string;
+  textAlign?: SectionTextAlign;
+  bgPattern?: SectionBgPattern;
+  bgPatternOpacity?: number;
+  mobile?: SectionMobileStyle;
 }
 
 export interface PageSection {
@@ -2751,6 +2767,47 @@ export function normalizeSectionStyle(raw?: unknown): SectionStyle | undefined {
     const cls = o.customClass.trim().replace(/[^a-zA-Z0-9_\-\s]/g, "").slice(0, 80);
     if (cls) {
       style.customClass = cls;
+    }
+  }
+  if (o.textAlign === "left" || o.textAlign === "center" || o.textAlign === "right") {
+    style.textAlign = o.textAlign;
+  }
+  if (
+    o.bgPattern === "none" ||
+    o.bgPattern === "dots" ||
+    o.bgPattern === "grid" ||
+    o.bgPattern === "diagonal" ||
+    o.bgPattern === "mesh" ||
+    o.bgPattern === "cross"
+  ) {
+    if (o.bgPattern !== "none") style.bgPattern = o.bgPattern;
+  }
+  if (typeof o.bgPatternOpacity === "number" && !Number.isNaN(o.bgPatternOpacity)) {
+    style.bgPatternOpacity = Math.max(0, Math.min(100, Math.round(o.bgPatternOpacity)));
+  }
+  if (o.mobile && typeof o.mobile === "object" && !Array.isArray(o.mobile)) {
+    const m = o.mobile as Record<string, unknown>;
+    const mob: SectionMobileStyle = {};
+    if (typeof m.paddingTop === "number" && !Number.isNaN(m.paddingTop)) {
+      mob.paddingTop = Math.max(0, Math.min(240, Math.round(m.paddingTop)));
+    }
+    if (typeof m.paddingBottom === "number" && !Number.isNaN(m.paddingBottom)) {
+      mob.paddingBottom = Math.max(0, Math.min(240, Math.round(m.paddingBottom)));
+    }
+    if (m.paddingY === "none" || m.paddingY === "compact" || m.paddingY === "normal" || m.paddingY === "spacious") {
+      mob.paddingY = m.paddingY;
+    }
+    if (m.textAlign === "left" || m.textAlign === "center" || m.textAlign === "right") {
+      mob.textAlign = m.textAlign;
+    }
+    if (m.textScale === "compact" || m.textScale === "normal" || m.textScale === "enlarged") {
+      mob.textScale = m.textScale;
+    }
+    if (typeof m.reverseStack === "boolean" && m.reverseStack) {
+      mob.reverseStack = true;
+    }
+    if (Object.keys(mob).length > 0) {
+      style.mobile = mob;
     }
   }
 

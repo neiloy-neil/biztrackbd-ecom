@@ -617,6 +617,89 @@ details.bld-group > summary.bld-gh::after { content: "▾"; margin-left: auto; }
   text-overflow: ellipsis;
 }
 
+/* ---- Pattern Overlay Grid & Chips ---- */
+.bld-pattern-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+}
+.bld-pattern-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border-radius: 8px;
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+.bld-pattern-chip:hover {
+  border-color: var(--brand);
+  background: var(--tint);
+}
+.bld-pattern-chip.selected {
+  border-color: var(--brand);
+  background: var(--tint);
+  box-shadow: 0 0 0 1px var(--brand);
+}
+.bld-pattern-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+.bld-pattern-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* ---- Responsive Device Switcher & Banner ---- */
+.bld-resp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+.bld-resp-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.3;
+}
+.bld-resp-banner.active {
+  background: #EEF2FF;
+  border: 1px solid #C7D2FE;
+  color: #3730A3;
+}
+.bld-resp-banner.inherited {
+  background: #F8FAFC;
+  border: 1px dashed #CBD5E1;
+  color: #64748B;
+}
+.bld-revert-btn {
+  all: unset;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #E0E7FF;
+  color: #4338CA;
+  font-weight: 600;
+  font-size: 11px;
+  transition: all 0.12s ease;
+}
+.bld-revert-btn:hover {
+  background: #4338CA;
+  color: #ffffff;
+}
+
 /* ---- Stage Backdrops & Framing */
 .bld-stage[data-backdrop="neutral"] {
   background: #0B0F19;

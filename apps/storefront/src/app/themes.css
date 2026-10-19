@@ -218,11 +218,104 @@ body[data-store-theme="berber"] .footer b, body[data-store-theme="berber"] .foot
   box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.45);
 }
 
-/* Device Visibility Utilities */
+/* Decorative Background Patterns */
+.bt-section-wrap.bt-has-pattern {
+  position: relative;
+}
+.bt-section-wrap.bt-has-pattern::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--bt-pat-opacity, 0.16);
+  z-index: 1;
+}
+.bt-section-wrap.bt-card-mode.bt-has-pattern::before {
+  border-radius: inherit;
+}
+.bt-section-wrap.bt-pattern-dots::before {
+  background-image: radial-gradient(currentColor 1.25px, transparent 1.25px);
+  background-size: 16px 16px;
+}
+.bt-section-wrap.bt-pattern-grid::before {
+  background-image: linear-gradient(to right, currentColor 1px, transparent 1px),
+                    linear-gradient(to bottom, currentColor 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.bt-section-wrap.bt-pattern-diagonal::before {
+  background-image: repeating-linear-gradient(45deg, currentColor 0, currentColor 1px, transparent 0, transparent 12px);
+}
+.bt-section-wrap.bt-pattern-mesh::before {
+  background-image: radial-gradient(at 0% 0%, currentColor 0px, transparent 50%),
+                    radial-gradient(at 100% 100%, currentColor 0px, transparent 50%);
+  background-size: 32px 32px;
+}
+.bt-section-wrap.bt-pattern-cross::before {
+  background-image: radial-gradient(currentColor 1px, transparent 1px),
+                    radial-gradient(currentColor 1px, transparent 1px);
+  background-position: 0 0, 8px 8px;
+  background-size: 16px 16px;
+}
+
+/* Text Alignment */
+.bt-align-left { text-align: left; }
+.bt-align-center { text-align: center; }
+.bt-align-right { text-align: right; }
+.bt-align-center .wrap,
+.bt-align-center .hero-content {
+  margin-inline: auto;
+}
+
+/* Device Visibility & Mobile Overrides */
 @media (max-width: 768px) {
   .bt-hide-mobile {
     display: none !important;
   }
+  .bt-section-wrap[style*="--bt-pt-m"] {
+    padding-top: var(--bt-pt-m) !important;
+  }
+  .bt-section-wrap[style*="--bt-pb-m"] {
+    padding-bottom: var(--bt-pb-m) !important;
+  }
+  .bt-py-m-none {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  .bt-py-m-compact {
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+  }
+  .bt-py-m-normal {
+    padding-top: 36px !important;
+    padding-bottom: 36px !important;
+  }
+  .bt-py-m-spacious {
+    padding-top: 60px !important;
+    padding-bottom: 60px !important;
+  }
+
+  .bt-align-m-left { text-align: left !important; }
+  .bt-align-m-center { text-align: center !important; }
+  .bt-align-m-right { text-align: right !important; }
+
+  /* Smart Layout Propagation for Split Columns and Bento */
+  .bt-reverse-stack-m > .wrap,
+  .bt-reverse-stack-m .hero-split,
+  .bt-reverse-stack-m .bt-split-grid,
+  .bt-reverse-stack-m .bento-grid {
+    flex-direction: column-reverse !important;
+  }
+
+  /* Typography Scale */
+  .bt-text-scale-m-compact h1 { font-size: calc(var(--step-4, 2.4rem) * 0.85) !important; }
+  .bt-text-scale-m-compact h2 { font-size: calc(var(--step-3, 2rem) * 0.85) !important; }
+  .bt-text-scale-m-compact h3 { font-size: calc(var(--step-2, 1.6rem) * 0.85) !important; }
+  .bt-text-scale-m-compact p { font-size: 0.9em !important; }
+
+  .bt-text-scale-m-enlarged h1 { font-size: calc(var(--step-4, 2.4rem) * 1.15) !important; }
+  .bt-text-scale-m-enlarged h2 { font-size: calc(var(--step-3, 2rem) * 1.15) !important; }
+  .bt-text-scale-m-enlarged h3 { font-size: calc(var(--step-2, 1.6rem) * 1.15) !important; }
+  .bt-text-scale-m-enlarged p { font-size: 1.05em !important; }
 }
 @media (min-width: 769px) {
   .bt-hide-desktop {

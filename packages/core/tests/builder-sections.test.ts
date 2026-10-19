@@ -594,7 +594,98 @@ describe("Visual Theme Builder Studio - New Conversion Sections", () => {
       expect(() => validatePage("custom", customPage)).not.toThrow();
     });
   });
+
+  describe("SectionStyle Responsive Controls & Background Patterns", () => {
+    it("normalizes base text alignment, background pattern and opacity cleanly", () => {
+      const s = normalizeSectionStyle({
+        bgType: "color",
+        bgColor: "#1e1e2f",
+        textAlign: "center",
+        bgPattern: "dots",
+        bgPatternOpacity: 25,
+      });
+
+      expect(s).toBeDefined();
+      expect(s?.bgColor).toBe("#1e1e2f");
+      expect(s?.textAlign).toBe("center");
+      expect(s?.bgPattern).toBe("dots");
+      expect(s?.bgPatternOpacity).toBe(25);
+    });
+
+    it("clamps pattern opacity between 0 and 100 and ignores invalid pattern names", () => {
+      const s = normalizeSectionStyle({
+        bgPattern: "invalid-pattern",
+        bgPatternOpacity: 150,
+      });
+
+      expect(s?.bgPattern).toBeUndefined();
+      expect(s?.bgPatternOpacity).toBe(100);
+
+      const sLow = normalizeSectionStyle({
+        bgPattern: "grid",
+        bgPatternOpacity: -20,
+      });
+      expect(sLow?.bgPattern).toBe("grid");
+      expect(sLow?.bgPatternOpacity).toBe(0);
+    });
+
+    it("normalizes mobile responsive overrides object cleanly with valid bounds", () => {
+      const s = normalizeSectionStyle({
+        paddingTop: 80,
+        paddingBottom: 80,
+        textAlign: "left",
+        mobile: {
+          paddingTop: 32,
+          paddingBottom: 24,
+          paddingY: "compact",
+          textAlign: "center",
+          textScale: "compact",
+          reverseStack: true,
+        },
+      });
+
+      expect(s?.paddingTop).toBe(80);
+      expect(s?.paddingBottom).toBe(80);
+      expect(s?.textAlign).toBe("left");
+      expect(s?.mobile).toBeDefined();
+      expect(s?.mobile?.paddingTop).toBe(32);
+      expect(s?.mobile?.paddingBottom).toBe(24);
+      expect(s?.mobile?.paddingY).toBe("compact");
+      expect(s?.mobile?.textAlign).toBe("center");
+      expect(s?.mobile?.textScale).toBe("compact");
+      expect(s?.mobile?.reverseStack).toBe(true);
+    });
+
+    it("clamps mobile padding bounds and ignores invalid mobile properties", () => {
+      const s = normalizeSectionStyle({
+        mobile: {
+          paddingTop: 500, // should clamp to 240
+          paddingBottom: -50, // should clamp to 0
+          textAlign: "invalid-align",
+          textScale: "huge",
+          reverseStack: false,
+        },
+      });
+
+      expect(s?.mobile).toBeDefined();
+      expect(s?.mobile?.paddingTop).toBe(240);
+      expect(s?.mobile?.paddingBottom).toBe(0);
+      expect(s?.mobile?.textAlign).toBeUndefined();
+      expect(s?.mobile?.textScale).toBeUndefined();
+      expect(s?.mobile?.reverseStack).toBeUndefined();
+    });
+
+    it("omits empty mobile overrides object", () => {
+      const s = normalizeSectionStyle({
+        paddingTop: 60,
+        mobile: {},
+      });
+      expect(s?.paddingTop).toBe(60);
+      expect(s?.mobile).toBeUndefined();
+    });
+  });
 });
+
 
 
 

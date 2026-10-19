@@ -11,6 +11,7 @@ import {
   type Field, type ListSpec, type PageJson, type PageKind, type PageSection, type SectionDef, type ThemeSettings, type SiteMode, type BusinessVertical,
   type SectionStyle, type SectionBgType, type SectionPaddingY, type SectionHideOn, type SectionTextColor,
   type SectionAnimation, type SectionAnimDuration, type SectionAnimDelay, type SectionPattern,
+  type SectionTextAlign, type SectionTextScale, type SectionBgPattern, type SectionMobileStyle,
 } from "@biztrackbd/core/builder-client";
 import { ImagePicker } from "@/components/image-picker";
 import { LANDING_GROUPS, STORE_SECTION_CATEGORIES, SectionThumb } from "./section-thumbs";
@@ -502,11 +503,21 @@ const COLOR_SWATCHES = [
   { label: "Emerald", hex: "#064e3b" },
 ];
 
-/** Style tab of the Elementor-style 3-tab inspector: component options, background tone, swatches, gradients, card container, and vertical spacing. */
+const BG_PATTERNS: { id: SectionBgPattern; label: string; icon: string }[] = [
+  { id: "none", label: "None", icon: "🚫" },
+  { id: "dots", label: "Dots", icon: "⠒" },
+  { id: "grid", label: "Grid", icon: "⊞" },
+  { id: "diagonal", label: "Slant", icon: "⫽" },
+  { id: "mesh", label: "Mesh", icon: "✺" },
+  { id: "cross", label: "Cross", icon: "✛" },
+];
+
+/** Style tab of the Elementor-style 3-tab inspector: component options, background tone, swatches, gradients, card container, patterns, and responsive layout spacing. */
 function SectionStyleTab({
   def,
   section,
   disabled,
+  activeDevice,
   imgSignal,
   onChangeSettings,
   onChangeStyle,
@@ -514,6 +525,7 @@ function SectionStyleTab({
   def?: SectionDef;
   section: PageSection;
   disabled: boolean;
+  activeDevice?: Device;
   imgSignal?: { path: string; n: number };
   onChangeSettings: (patch: Settings) => void;
   onChangeStyle: (patch: Partial<SectionStyle>) => void;
@@ -522,6 +534,26 @@ function SectionStyleTab({
   const bgType: SectionBgType = style.bgType ?? "default";
   const paddingY: SectionPaddingY = style.paddingY ?? "normal";
   const textColor: SectionTextColor = style.textColor ?? "default";
+
+  const [deviceTarget, setDeviceTarget] = useState<"desktop" | "mobile">(activeDevice === "phone" ? "mobile" : "desktop");
+
+  useEffect(() => {
+    if (activeDevice === "phone") {
+      setDeviceTarget("mobile");
+    } else if (activeDevice === "desktop") {
+      setDeviceTarget("desktop");
+    }
+  }, [activeDevice]);
+
+  const hasMobileOverrides = Boolean(
+    style.mobile &&
+      (typeof style.mobile.paddingTop === "number" ||
+        typeof style.mobile.paddingBottom === "number" ||
+        style.mobile.paddingY !== undefined ||
+        style.mobile.textAlign !== undefined ||
+        style.mobile.textScale !== undefined ||
+        style.mobile.reverseStack !== undefined)
+  );
 
   const isSpecial = section.type === "floating-whatsapp" || section.type === "announcement-bar";
   const sectionStyleFields = def ? def.fields.filter((f) => !f.bn && isStyle(f)) : [];
@@ -547,7 +579,7 @@ function SectionStyleTab({
         </div>
       )}
 
-      {/* Global Background & Tone */}
+      {/* Global Background, Appearance & Patterns */}
       {!isSpecial && (
         <details className="bld-group" open>
           <summary className="bld-gh">Background & Appearance</summary>
@@ -686,6 +718,46 @@ function SectionStyleTab({
               </div>
             )}
 
+            {/* Background Pattern Overlay */}
+            <div className="field" style={{ margin: 0, opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}>
+              <label className="label">Background Pattern Overlay</label>
+              <div className="bld-pattern-grid">
+                {BG_PATTERNS.map((p) => {
+                  const isSel = (style.bgPattern ?? "none") === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      className={`bld-pattern-chip ${isSel ? "selected" : ""}`}
+                      disabled={disabled}
+                      onClick={() => onChangeStyle({ bgPattern: p.id })}
+                    >
+                      <span className="bld-pattern-icon">{p.icon}</span>
+                      <span className="bld-pattern-title">{p.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {style.bgPattern && style.bgPattern !== "none" && (
+                <div className="stack" style={{ gap: 4, marginTop: 8 }}>
+                  <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
+                    <span className="muted" style={{ fontSize: 12 }}>Pattern Opacity</span>
+                    <span style={{ fontSize: 12, fontWeight: 700 }}>{style.bgPatternOpacity ?? 16}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={5}
+                    max={60}
+                    step={5}
+                    value={style.bgPatternOpacity ?? 16}
+                    disabled={disabled}
+                    onChange={(e) => onChangeStyle({ bgPatternOpacity: Number(e.target.value) })}
+                    style={{ width: "100%", accentColor: "var(--brand)" }}
+                  />
+                </div>
+              )}
+            </div>
+
             <div className="field" style={{ margin: 0, opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}>
               <label className="label">Text Contrast</label>
               <Segmented
@@ -717,25 +789,251 @@ function SectionStyleTab({
         </details>
       )}
 
-      {/* Spacing & Layout */}
+      {/* Spacing & Layout with Responsive Overrides */}
       {!isSpecial && (
         <details className="bld-group" open>
-          <summary className="bld-gh">Spacing & Layout</summary>
-          <div className="stack" style={{ gap: 12, marginTop: 10 }}>
-            <div className="field" style={{ margin: 0, opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}>
-              <label className="label">Vertical Spacing (Padding)</label>
-              <Segmented
-                label="Vertical spacing"
-                value={paddingY}
-                onChange={(v) => !disabled && onChangeStyle({ paddingY: v as SectionPaddingY })}
-                options={[
-                  { value: "none", label: "0px" },
-                  { value: "compact", label: "Compact" },
-                  { value: "normal", label: "Normal" },
-                  { value: "spacious", label: "Spacious" },
-                ]}
-              />
+          <summary className="bld-gh">
+            <div className="row" style={{ justifyContent: "space-between", alignItems: "center", width: "100%", paddingRight: 6 }}>
+              <span>Spacing & Layout</span>
+              <div className="bld-seg" style={{ margin: 0 }} onClick={(e) => e.stopPropagation()}>
+                <button
+                  type="button"
+                  aria-pressed={deviceTarget === "desktop"}
+                  title="Desktop default settings"
+                  onClick={() => setDeviceTarget("desktop")}
+                  style={{ fontSize: 11, padding: "2px 8px" }}
+                >
+                  🖥️ Desktop
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={deviceTarget === "mobile"}
+                  title="Mobile phone overrides"
+                  onClick={() => setDeviceTarget("mobile")}
+                  style={{ fontSize: 11, padding: "2px 8px" }}
+                >
+                  📱 Mobile
+                </button>
+              </div>
             </div>
+          </summary>
+          <div className="stack" style={{ gap: 12, marginTop: 10 }}>
+            {deviceTarget === "desktop" ? (
+              <>
+                <div className="field" style={{ margin: 0, opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}>
+                  <label className="label">Vertical Spacing (Desktop)</label>
+                  <Segmented
+                    label="Vertical spacing"
+                    value={paddingY}
+                    onChange={(v) => !disabled && onChangeStyle({ paddingY: v as SectionPaddingY })}
+                    options={[
+                      { value: "none", label: "0px" },
+                      { value: "compact", label: "Compact" },
+                      { value: "normal", label: "Normal" },
+                      { value: "spacious", label: "Spacious" },
+                    ]}
+                  />
+                </div>
+
+                <div className="row" style={{ gap: 12 }}>
+                  <div className="field" style={{ margin: 0, flex: 1 }}>
+                    <label className="label" htmlFor={`${section.id}-pt`}>Top: {style.paddingTop ?? 40}px</label>
+                    <input
+                      id={`${section.id}-pt`}
+                      type="range"
+                      min={0}
+                      max={200}
+                      step={4}
+                      value={style.paddingTop ?? 40}
+                      disabled={disabled}
+                      onChange={(e) => onChangeStyle({ paddingTop: Number(e.target.value) })}
+                      style={{ width: "100%", accentColor: "var(--brand)" }}
+                    />
+                  </div>
+                  <div className="field" style={{ margin: 0, flex: 1 }}>
+                    <label className="label" htmlFor={`${section.id}-pb`}>Bottom: {style.paddingBottom ?? 40}px</label>
+                    <input
+                      id={`${section.id}-pb`}
+                      type="range"
+                      min={0}
+                      max={200}
+                      step={4}
+                      value={style.paddingBottom ?? 40}
+                      disabled={disabled}
+                      onChange={(e) => onChangeStyle({ paddingBottom: Number(e.target.value) })}
+                      style={{ width: "100%", accentColor: "var(--brand)" }}
+                    />
+                  </div>
+                </div>
+
+                <div className="field" style={{ margin: 0, opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}>
+                  <label className="label">Text Alignment (Desktop)</label>
+                  <Segmented
+                    label="Desktop text alignment"
+                    value={style.textAlign ?? "left"}
+                    onChange={(v) => !disabled && onChangeStyle({ textAlign: v as SectionTextAlign })}
+                    options={[
+                      { value: "left", label: "Left" },
+                      { value: "center", label: "Center" },
+                      { value: "right", label: "Right" },
+                    ]}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Mobile Responsive Mode */}
+                <div className={`bld-resp-banner ${hasMobileOverrides ? "active" : "inherited"}`}>
+                  <span>
+                    {hasMobileOverrides ? "📱 Custom Mobile Overrides Active" : "🖥️ Inheriting from Desktop"}
+                  </span>
+                  {hasMobileOverrides && (
+                    <button
+                      type="button"
+                      className="bld-revert-btn"
+                      disabled={disabled}
+                      onClick={() => onChangeStyle({ mobile: undefined })}
+                    >
+                      ↺ Revert
+                    </button>
+                  )}
+                </div>
+
+                <div className="field" style={{ margin: 0, opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}>
+                  <label className="label">Mobile Vertical Spacing</label>
+                  <Segmented
+                    label="Mobile vertical spacing"
+                    value={style.mobile?.paddingY ?? paddingY}
+                    onChange={(v) =>
+                      !disabled &&
+                      onChangeStyle({
+                        mobile: {
+                          ...(style.mobile ?? {}),
+                          paddingY: v as SectionPaddingY,
+                        },
+                      })
+                    }
+                    options={[
+                      { value: "none", label: "0px" },
+                      { value: "compact", label: "Compact" },
+                      { value: "normal", label: "Normal" },
+                      { value: "spacious", label: "Spacious" },
+                    ]}
+                  />
+                </div>
+
+                <div className="row" style={{ gap: 12 }}>
+                  <div className="field" style={{ margin: 0, flex: 1 }}>
+                    <label className="label" htmlFor={`${section.id}-m-pt`}>
+                      Top: {style.mobile?.paddingTop ?? style.paddingTop ?? 24}px
+                    </label>
+                    <input
+                      id={`${section.id}-m-pt`}
+                      type="range"
+                      min={0}
+                      max={160}
+                      step={4}
+                      value={style.mobile?.paddingTop ?? style.paddingTop ?? 24}
+                      disabled={disabled}
+                      onChange={(e) =>
+                        onChangeStyle({
+                          mobile: {
+                            ...(style.mobile ?? {}),
+                            paddingTop: Number(e.target.value),
+                          },
+                        })
+                      }
+                      style={{ width: "100%", accentColor: "var(--brand)" }}
+                    />
+                  </div>
+                  <div className="field" style={{ margin: 0, flex: 1 }}>
+                    <label className="label" htmlFor={`${section.id}-m-pb`}>
+                      Bottom: {style.mobile?.paddingBottom ?? style.paddingBottom ?? 24}px
+                    </label>
+                    <input
+                      id={`${section.id}-m-pb`}
+                      type="range"
+                      min={0}
+                      max={160}
+                      step={4}
+                      value={style.mobile?.paddingBottom ?? style.paddingBottom ?? 24}
+                      disabled={disabled}
+                      onChange={(e) =>
+                        onChangeStyle({
+                          mobile: {
+                            ...(style.mobile ?? {}),
+                            paddingBottom: Number(e.target.value),
+                          },
+                        })
+                      }
+                      style={{ width: "100%", accentColor: "var(--brand)" }}
+                    />
+                  </div>
+                </div>
+
+                <div className="field" style={{ margin: 0, opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}>
+                  <label className="label">Mobile Text Alignment</label>
+                  <Segmented
+                    label="Mobile text alignment"
+                    value={style.mobile?.textAlign ?? style.textAlign ?? "left"}
+                    onChange={(v) =>
+                      !disabled &&
+                      onChangeStyle({
+                        mobile: {
+                          ...(style.mobile ?? {}),
+                          textAlign: v as SectionTextAlign,
+                        },
+                      })
+                    }
+                    options={[
+                      { value: "left", label: "Left" },
+                      { value: "center", label: "Center" },
+                      { value: "right", label: "Right" },
+                    ]}
+                  />
+                </div>
+
+                <div className="field" style={{ margin: 0, opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}>
+                  <label className="label">Mobile Typography Scaling</label>
+                  <Segmented
+                    label="Mobile text scale"
+                    value={style.mobile?.textScale ?? "normal"}
+                    onChange={(v) =>
+                      !disabled &&
+                      onChangeStyle({
+                        mobile: {
+                          ...(style.mobile ?? {}),
+                          textScale: v as SectionTextScale,
+                        },
+                      })
+                    }
+                    options={[
+                      { value: "compact", label: "Compact 85%" },
+                      { value: "normal", label: "Normal 100%" },
+                      { value: "enlarged", label: "Enlarged 115%" },
+                    ]}
+                  />
+                </div>
+
+                <label className="row" style={{ gap: 8, alignItems: "center", cursor: "pointer", marginTop: 4 }}>
+                  <input
+                    type="checkbox"
+                    checked={style.mobile?.reverseStack ?? false}
+                    disabled={disabled}
+                    onChange={(e) =>
+                      onChangeStyle({
+                        mobile: {
+                          ...(style.mobile ?? {}),
+                          reverseStack: e.target.checked,
+                        },
+                      })
+                    }
+                    style={{ width: 16, height: 16, accentColor: "var(--brand)" }}
+                  />
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>Reverse column order on mobile (e.g. image on top)</span>
+                </label>
+              </>
+            )}
           </div>
         </details>
       )}
@@ -1640,7 +1938,19 @@ export function Builder(props: Props) {
     "bt-preview:spacing": (m) => {
       if (locked || typeof m.id !== "string" || (m.edge !== "top" && m.edge !== "bottom") || typeof m.px !== "number") return;
       const px = Math.max(0, Math.min(240, Math.round(m.px)));
-      patchStyle(m.id, m.edge === "top" ? { paddingTop: px } : { paddingBottom: px });
+      if (device === "phone") {
+        const sec = latest.current.page.sections.find((x) => x.id === m.id);
+        const mob = sec?.style?.mobile ?? {};
+        patchStyle(m.id, {
+          mobile: {
+            ...mob,
+            ...(m.edge === "top" ? { paddingTop: px } : { paddingBottom: px }),
+          },
+        });
+        toast(`Mobile ${m.edge} padding: ${px}px`);
+      } else {
+        patchStyle(m.id, m.edge === "top" ? { paddingTop: px } : { paddingBottom: px });
+      }
     },
     "bt-preview:set-lang": (m) => {
       if (m.lang === "bn" || m.lang === "en") setLang(m.lang);
@@ -1961,6 +2271,8 @@ export function Builder(props: Props) {
                 {s.style?.animation && s.style.animation !== "none" && <span className="pill blue" style={{ fontSize: 9, padding: "1px 4px" }} title={`Entrance: ${s.style.animation}`}>✦ {s.style.animation}</span>}
                 {s.style?.hideOn === "mobile" && <span className="pill blue" style={{ fontSize: 9, padding: "1px 4px" }} title="Visible on desktop only">Desktop</span>}
                 {s.style?.hideOn === "desktop" && <span className="pill purple" style={{ fontSize: 9, padding: "1px 4px" }} title="Visible on mobile phones only">Mobile</span>}
+                {s.style?.bgPattern && s.style.bgPattern !== "none" && <span className="pill blue" style={{ fontSize: 9, padding: "1px 4px" }} title={`Pattern: ${s.style.bgPattern}`}>▦ {s.style.bgPattern}</span>}
+                {s.style?.mobile && <span className="pill green" style={{ fontSize: 9, padding: "1px 4px" }} title="Has custom mobile overrides">📱 Mobile</span>}
                 {s.disabled && <span className="pill grey" style={{ fontSize: 9, padding: "1px 4px" }}>Hidden</span>}
               </button>
               {!locked && (
@@ -2260,6 +2572,7 @@ export function Builder(props: Props) {
           def={currentDef}
           section={current}
           disabled={locked}
+          activeDevice={device}
           imgSignal={imgSignal}
           onChangeSettings={(p) => patch(current.id, p)}
           onChangeStyle={(sp) => patchStyle(current.id, sp)}
