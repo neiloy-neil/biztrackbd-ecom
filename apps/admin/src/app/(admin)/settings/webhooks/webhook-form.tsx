@@ -7,10 +7,6 @@ import type {
   WebhookEventKey,
   WebhookAdapterType,
 } from "@biztrackbd/core";
-import {
-  detectWebhookAdapter,
-  getSampleEventData,
-} from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
 import { CopyButton } from "@/components/copy-button";
 import {
@@ -22,6 +18,108 @@ import {
   retryFailedWebhookDeliveriesAction,
   type WebhookFormState,
 } from "./actions";
+
+function detectWebhookAdapter(urlStr: string): WebhookAdapterType {
+  if (!urlStr || typeof urlStr !== "string") return "generic";
+  const lower = urlStr.toLowerCase();
+  if (lower.includes("#adapter=discord")) return "discord";
+  if (lower.includes("#adapter=slack")) return "slack";
+  if (lower.includes("#adapter=telegram")) return "telegram";
+  if (
+    lower.includes("#adapter=generic") ||
+    lower.includes("#adapter=zapier") ||
+    lower.includes("#adapter=make")
+  ) {
+    return "generic";
+  }
+  if (
+    lower.includes("discord.com/api/webhooks") ||
+    lower.includes("discordapp.com/api/webhooks")
+  ) {
+    return "discord";
+  }
+  if (lower.includes("hooks.slack.com/services") || lower.includes("slack.com/api/")) {
+    return "slack";
+  }
+  if (
+    lower.includes("api.telegram.org/bot") ||
+    lower.includes("telegram.org/bot") ||
+    lower.startsWith("tg://")
+  ) {
+    return "telegram";
+  }
+  return "generic";
+}
+
+function getSampleEventData(event: WebhookEventKey | "ping"): Record<string, unknown> {
+  switch (event) {
+    case "order.created":
+      return {
+        orderNumber: "BT-10482",
+        orderId: "ord_sample_10482",
+        customerName: "Sadia Islam",
+        phone: "01712345678",
+        district: "Dhanmondi, Dhaka",
+        address: "House 14, Road 7, Block C",
+        total: 2500,
+        subtotal: 2420,
+        shippingFee: 80,
+        paymentMethod: "Cash on Delivery (COD)",
+        items: [
+          { title: "Premium Embroidered Panjabi - Slate L", quantity: 1, price: 1850 },
+          { title: "Handcrafted Leather Wallet", quantity: 1, price: 570 },
+        ],
+        storeName: "BizTrack Dhaka Flagship",
+      };
+    case "order.delivered":
+      return {
+        orderNumber: "BT-10482",
+        orderId: "ord_sample_10482",
+        customerName: "Sadia Islam",
+        courier: "Steadfast Courier",
+        trackingCode: "ST-88492041",
+        collectedAmount: 2500,
+        deliveredAt: new Date().toISOString(),
+      };
+    case "lead.created":
+      return {
+        leadId: "lead_sample_9021",
+        leadType: "Corporate Quotation",
+        name: "Tanvir Ahmed",
+        phone: "01819283746",
+        district: "Gulshan-2, Dhaka",
+        message: "Need bulk quotation for 150 corporate gift boxes for Eid festival.",
+        source: "Landing Page Quotation Form",
+      };
+    case "booking.created":
+      return {
+        bookingId: "bk_sample_5541",
+        serviceTitle: "Specialist Consultation",
+        patientName: "Dr. Farzana Yasmin",
+        phone: "01912345678",
+        date: "Tomorrow, 4:30 PM",
+        timeSlot: "Evening Slot B",
+        chamber: "Dhanmondi Diagnostic Center (Room 402)",
+      };
+    case "customer.registered":
+      return {
+        customerId: "cust_sample_302",
+        name: "Kamrul Hasan",
+        phone: "01671234567",
+        email: "kamrul@example.com",
+        registeredAt: new Date().toISOString(),
+      };
+    case "ping":
+    default:
+      return {
+        event: "ping",
+        message: "BizTrack Webhooks: Connectivity & Signature Verification Ping",
+        timestamp: Date.now(),
+        service: "BizTrack Outbound Webhook Service",
+        status: "healthy",
+      };
+  }
+}
 
 interface AutomationPreset {
   id: string;
