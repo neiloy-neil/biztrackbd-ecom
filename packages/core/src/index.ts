@@ -493,3 +493,7 @@ export * from "./messaging/chat-adapters";
 
 // Public Developer REST API & Keys (DEV-API-001)
 export * from "./api-keys";
+
+// Analytics & Real-Time Performance Studio (ANALYTICS-001)
+export * from "./analytics";
+
