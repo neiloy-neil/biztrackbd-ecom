@@ -187,11 +187,55 @@ During today's interactive `/grill-me` alignment session, we architected, engine
 15. `commit 4575580`: `feat(builder): add dynamic bento grids, interactive content tabs, and video lightbox widgets`
 16. `commit c1c7136`: `feat(builder): add swipeable review carousel, plan comparison matrix, and promotion popup widgets`
 17. `commit ff0bba5`: `feat(builder): add scroll-reveal animations, custom anchor IDs, and section nicknames & reordering`
+| 16. SITEBUILDER EVOLUTION: ELEMENTOR-STYLE MODULAR WORKSPACE ARCHITECTURE                         |
+|     • Phase A: Left Modular Dock with 48px vertical icon rail (Layers, Block Library, Theme, History)|
+|       - Real-time Layers tree filter search (`bld-tree-search`)                                      |
+|       - Visual section glyphs (🖼️, 🍽️, 📍, 📅, 🛍️, ⭐, 🛡️, 🏷️) & position badges (#1, #2)          |
+|       - Keyboard shortcuts: `Ctrl+B` (toggle left sidebar), `Ctrl+\` (Zen focus mode)                |
+|     • Phase B: Elementor-Style 3-Tab Component Inspector (`[📝 Content | 🎨 Style | ⚙️ Advanced]`)  |
+|       - Header Card with section glyph, position badge, rename input, and quick position jumper      |
+|       - Sticky 3-tab bar pinning during vertical scrolling of long settings forms                   |
+|       - Clean separation: copy/media (Content), appearance/spacing (Style), motion/visibility/anchor (Advanced)|
+|     • Phase C: Draggable Accordion Repeaters for List Items                                          |
+|       - Smart title previews (e.g. food dish names, question titles) with item position badges       |
+|       - Drag grip reordering, accordion expand/collapse, micro-action buttons (move, dup, trash)     |
+|     • Phase D: Drag-from-Sidebar Block Insertion & Bi-Directional Selection Sync                    |
+|       - Blocks & patterns draggable from Left Dock directly into Layers tree at any target index     |
+|       - Bi-directional selection sync between iframe preview canvas and right inspector tabs        |
+|     • Quality Assurance: 43/43 passing tests in builder-sections.test.ts, 0 TypeScript errors       |
++----------------------------------------------------------------------------------------------------+
+```
+
+---
+
+## 2. Chronological Git Commit History
+
+1. `commit 7149021`: `feat(platform): implement portfolio mode architecture, operating mode workspace, and marketing price alignment`
+2. `commit cf8d067`: `feat(notifications): implement event outbox queue and durable background worker with retry and dead-lettering`
+3. `commit 03a49f8`: `feat(onboarding): vertical-aware template and sample content selection in /start wizard`
+4. `commit b4cb183`: `feat(webhooks): merchant webhook management, signature rotation, and test ping tool`
+5. `commit a549a15`: `docs(webhooks): comprehensive integration guide for merchant developers`
+6. `commit fcfd44a`: `docs(handoff): daily session handoff and prioritized tasklist for October 18, 2026`
+7. `commit abfa4aa`: `feat(billing): mode-differentiated pricing, hybrid pro gating, and admin billing enhancements`
+8. `commit 77bc429`: `feat(demo): business and portfolio template preview assets and live demo provisioning`
+9. `commit b302d93`: `feat(builder): add SectionStyle schema, gradient presets, SectionStyleWrapper, and visual canvas separators`
+10. `commit 082b260`: `feat(builder): implement modern dynamic widgets suite (bento-grid, content-tabs, video-lightbox) with storefront renderers and canvas thumbnails`
+11. `commit 765bc25`: `feat(builder): implement Phase 3 social proof and conversion widgets (testimonials-slider, product-reviews, pricing-matrix, exit-intent-popup)`
+12. `commit b13ad66`: `feat(builder): implement responsive visibility, scroll animations, custom section nickname, and anchor ID navigation`
+13. `commit b1c0b39`: `feat(builder): implement floating stage dock, viewport resizers, in-canvas floating toolbar, visual padding handles, and designer keyboard shortcuts`
+14. `commit e4f85e3`: `feat(builder): implement direct text editing in preview canvas with contextual toolbar and bilingual typography controls`
+15. `commit befc38f`: `feat(builder): add in-canvas gap insertion buttons and polish direct manipulation toolbar physics`
+16. `commit 5817d23`: `feat(builder): add 1-click section duplication shortcut (Ctrl+D) in canvas toolbar and navigator list`
+17. `commit 18b76fc`: `feat(builder): add designer keyboard shortcuts modal (?) and canvas zoom keyboard navigation`
 18. `commit 70f1fbd`: `feat(builder): add 1-click section presets & design pattern library with dual-tab drawer and visual mini-previews`
 19. `commit cb66330`: `feat(payments): implement SSLCommerz and Direct bKash automated payment gateways`
 20. `commit d42d3d4`: `feat(builder): implement aBlocks-inspired modern widgets suite and 6 design patterns`
 21. `commit c072ff6`: `fix(billing): resolve sandbox port stripping, align plan features across marketing and admin, and enforce mode-specific gating`
 22. `commit 244155a`: `feat(builder): implement Global Theme Styling Engine with 10 brand palettes, Noto Sans Bengali, corner radii, and surface styling`
+23. `commit b6a1213`: `feat(builder): implement left modular dock with 48px rail, tree search, glyphs, and Zen focus mode (Phase A)`
+24. `commit 978f678`: `feat(builder): implement Elementor-style 3-tab inspector (Content, Style, Advanced) (Phase B)`
+25. `commit 0ccc46b`: `feat(builder): implement draggable accordion repeaters with title previews and micro-controls (Phase C)`
+26. `commit 3046639`: `feat(builder): implement drag-and-drop block & pattern insertion into layers (Phase D)`
 
 
 ---
