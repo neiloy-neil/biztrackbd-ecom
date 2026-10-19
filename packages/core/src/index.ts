@@ -270,24 +270,35 @@ export {
   SYSTEM_PROMPT_COPYWRITER,
   SYSTEM_PROMPT_CUSTOMER_PARSER,
   SYSTEM_PROMPT_STOREFRONT_CHATBOT,
+  SYSTEM_PROMPT_IMAGE_ALTS,
+  SYSTEM_PROMPT_WHATSAPP_BROADCAST,
   type AiTonePreset,
 } from "./ai/prompts";
 export {
   generateProductListing,
+  generateImageAltTags,
   GeneratedProductSchema,
+  GeneratedImageAltItemSchema,
+  GeneratedImageAltListSchema,
   type GeneratedProductListing,
+  type GeneratedImageAltItem,
+  type GeneratedImageAltList,
   type ProductGenerateOptions,
+  type GenerateImageAltOptions,
 } from "./ai/product-generator";
 export {
   generateSocialPost,
   generateSmsCampaignCopy,
   generateBannerCopy,
+  generateWhatsAppBroadcast,
   SocialPostSchema,
   SmsCampaignSchema,
   BannerCopySchema,
+  WhatsAppBroadcastSchema,
   type GeneratedSocialPost,
   type GeneratedSmsCampaign,
   type GeneratedBannerCopy,
+  type GeneratedWhatsAppBroadcast,
   type CopywriterOptions,
 } from "./ai/copywriter";
 export {

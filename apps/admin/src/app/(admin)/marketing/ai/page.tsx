@@ -40,7 +40,7 @@ export default async function AiStudioPage() {
           </div>
           <h1 style={{ margin: 0 }}>Marketing Content Studio</h1>
           <p className="muted" style={{ margin: "4px 0 0", fontSize: 13.5 }}>
-            Create social ad posts, SMS promotional copy, and banner slogans in Bangla or English.
+            Create social ad posts, WhatsApp broadcasts, SMS promotional copy, and banner slogans in Bangla or English.
           </p>
         </div>
         <div className="actions">

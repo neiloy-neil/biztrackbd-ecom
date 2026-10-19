@@ -328,6 +328,7 @@ export interface CallGeminiParams {
   prompt: string;
   systemInstruction?: string;
   imageBase64?: { mimeType: string; data: string };
+  imagesBase64?: Array<{ mimeType: string; data: string }>;
   responseMimeType?: string;
   responseSchema?: Record<string, unknown>;
   temperature?: number;
@@ -359,7 +360,16 @@ export async function callGemini(params: CallGeminiParams): Promise<string> {
 
   const parts: Array<Record<string, unknown>> = [];
 
-  if (params.imageBase64) {
+  if (params.imagesBase64 && params.imagesBase64.length > 0) {
+    for (const img of params.imagesBase64) {
+      parts.push({
+        inlineData: {
+          mimeType: img.mimeType,
+          data: img.data,
+        },
+      });
+    }
+  } else if (params.imageBase64) {
     parts.push({
       inlineData: {
         mimeType: params.imageBase64.mimeType,

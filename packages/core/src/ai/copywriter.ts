@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { assertCan, type StaffActor } from "../permissions";
 import { callGemini, recordAiGeneration, resolveGeminiApiKey } from "./gateway";
-import { SYSTEM_PROMPT_COPYWRITER, type AiTonePreset } from "./prompts";
+import { SYSTEM_PROMPT_COPYWRITER, SYSTEM_PROMPT_WHATSAPP_BROADCAST, type AiTonePreset } from "./prompts";
 
 export const SocialPostSchema = z.object({
   captionBn: z.string().default(""),
@@ -29,6 +29,15 @@ export const BannerCopySchema = z.object({
 });
 export type GeneratedBannerCopy = z.infer<typeof BannerCopySchema>;
 
+export const WhatsAppBroadcastSchema = z.object({
+  headline: z.string().default(""),
+  messageBn: z.string().default(""),
+  messageEn: z.string().default(""),
+  callToAction: z.string().default(""),
+  quickReplySuggestions: z.array(z.string()).default([]),
+});
+export type GeneratedWhatsAppBroadcast = z.infer<typeof WhatsAppBroadcastSchema>;
+
 export interface CopywriterOptions {
   productName?: string;
   category?: string;
@@ -36,6 +45,7 @@ export interface CopywriterOptions {
   discountOffer?: string;
   couponCode?: string;
   tone?: AiTonePreset;
+  customBrandVoice?: string;
   fetchImpl?: typeof fetch;
 }
 
@@ -175,3 +185,50 @@ OUTPUT SCHEMA:
   await recordAiGeneration(tenantId, isCustom);
   return result;
 }
+
+/**
+ * Generates engaging WhatsApp and Messenger direct-broadcast scripts.
+ */
+export async function generateWhatsAppBroadcast(
+  tenantId: string,
+  actor: StaffActor,
+  options: CopywriterOptions
+): Promise<GeneratedWhatsAppBroadcast> {
+  assertCan(actor, "design", "edit");
+  const { apiKey, isCustom, model } = await resolveGeminiApiKey(tenantId);
+
+  const prompt = `
+Generate a high-converting WhatsApp & Messenger broadcast message in JSON format for:
+- Product / Campaign: ${options.productName || "Special Store Update"}
+- Offer / Discount: ${options.discountOffer || "Limited time deal"}
+- Coupon Code: ${options.couponCode || "None"}
+- Key Highlights: ${options.keyPoints || "Fast delivery, Cash on Delivery available"}
+- Cultural Tone: ${options.tone || "DHAKA_YOUTH_TRENDY"}
+- Store Policy / Custom Rules: ${options.customBrandVoice || "Delivery all over Bangladesh, hassle-free returns"}
+
+OUTPUT SCHEMA:
+{
+  "headline": "Catchy headline with emoji (e.g. 🔥 ধামাকা অফার! নতুন কালেকশন এসে গেছে)",
+  "messageBn": "Warm, engaging Bengali broadcast message with *bold* text, bullets for key features, pricing, and order link placeholder {link}",
+  "messageEn": "English version of the broadcast message",
+  "callToAction": "Button / Action text (e.g. অর্ডার করতে মেসেজ দিন / Buy Now)",
+  "quickReplySuggestions": ["অর্ডার করতে চাই", "সাইজ ও কালার দেখতে চাই", "ডেলিভারি চার্জ কত?"]
+}
+`;
+
+  const rawJson = await callGemini({
+    apiKey,
+    model,
+    prompt,
+    systemInstruction: SYSTEM_PROMPT_WHATSAPP_BROADCAST,
+    responseMimeType: "application/json",
+    temperature: 0.7,
+    fetchImpl: options.fetchImpl,
+  });
+
+  const parsed = JSON.parse(rawJson);
+  const result = WhatsAppBroadcastSchema.parse(parsed);
+  await recordAiGeneration(tenantId, isCustom);
+  return result;
+}
+

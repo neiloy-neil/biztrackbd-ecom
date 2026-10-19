@@ -65,7 +65,11 @@ export async function generateProductDescriptionAction(options: {
   price?: number;
   categoryHint?: string;
   tone?: any;
+  customBrandVoice?: string;
   imageBase64?: { mimeType: string; data: string };
+  imagesBase64?: Array<{ mimeType: string; data: string }>;
+  imageUrls?: string[];
+  imageCount?: number;
 }) {
   const s = await requireAction("products", "edit");
   try {
@@ -77,6 +81,27 @@ export async function generateProductDescriptionAction(options: {
     if (e instanceof DomainError) return { ok: false as const, error: e.message };
     console.error("generateProductDescriptionAction failed", e);
     return { ok: false as const, error: "Failed to generate AI product listing." };
+  }
+}
+
+export async function generateImageAltTagsAction(options: {
+  productTitle?: string;
+  categoryHint?: string;
+  imageCount?: number;
+  imageUrls?: string[];
+  imagesBase64?: Array<{ mimeType: string; data: string }>;
+  tone?: any;
+}) {
+  const s = await requireAction("products", "edit");
+  try {
+    const { generateImageAltTags } = await import("@biztrackbd/core");
+    const res = await generateImageAltTags(s.tenantId, s.actor, options);
+    return { ok: true as const, data: res.altTexts };
+  } catch (e) {
+    const { DomainError } = await import("@biztrackbd/core");
+    if (e instanceof DomainError) return { ok: false as const, error: e.message };
+    console.error("generateImageAltTagsAction failed", e);
+    return { ok: false as const, error: "Failed to generate image alt tags." };
   }
 }
 

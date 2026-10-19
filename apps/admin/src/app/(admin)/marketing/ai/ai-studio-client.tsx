@@ -4,11 +4,13 @@ import React, { useState, useTransition } from "react";
 import Link from "next/link";
 import {
   generateSocialPostAction,
+  generateWhatsAppBroadcastAction,
   generateSmsCampaignAction,
   generateBannerCopyAction,
 } from "./actions";
 import type {
   GeneratedSocialPost,
+  GeneratedWhatsAppBroadcast,
   GeneratedSmsCampaign,
   GeneratedBannerCopy,
   AiTonePreset,
@@ -21,7 +23,7 @@ interface ProductOption {
 }
 
 export function AiStudioClient({ products }: { products: ProductOption[] }) {
-  const [tab, setTab] = useState<"social" | "sms" | "banner">("social");
+  const [tab, setTab] = useState<"social" | "whatsapp" | "sms" | "banner">("social");
   const [isPending, startTransition] = useTransition();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -32,10 +34,12 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
   const [discountOffer, setDiscountOffer] = useState("");
   const [couponCode, setCouponCode] = useState("");
   const [keyPoints, setKeyPoints] = useState("");
+  const [customBrandVoice, setCustomBrandVoice] = useState("");
   const [tone, setTone] = useState<AiTonePreset>("DHAKA_YOUTH_TRENDY");
 
   // Output States
   const [socialResult, setSocialResult] = useState<GeneratedSocialPost | null>(null);
+  const [whatsAppResult, setWhatsAppResult] = useState<GeneratedWhatsAppBroadcast | null>(null);
   const [smsResult, setSmsResult] = useState<GeneratedSmsCampaign | null>(null);
   const [bannerResult, setBannerResult] = useState<GeneratedBannerCopy | null>(null);
 
@@ -61,12 +65,17 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
         discountOffer: discountOffer.trim() || undefined,
         couponCode: couponCode.trim() || undefined,
         keyPoints: keyPoints.trim() || undefined,
+        customBrandVoice: customBrandVoice.trim() || undefined,
         tone,
       };
 
       if (tab === "social") {
         const res = await generateSocialPostAction(opts);
         if (res.success && res.data) setSocialResult(res.data);
+        else setErrorMsg(res.error || "Generation failed.");
+      } else if (tab === "whatsapp") {
+        const res = await generateWhatsAppBroadcastAction(opts);
+        if (res.success && res.data) setWhatsAppResult(res.data);
         else setErrorMsg(res.error || "Generation failed.");
       } else if (tab === "sms") {
         const res = await generateSmsCampaignAction(opts);
@@ -88,6 +97,7 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
         <div style={{ display: "flex", gap: "6px", background: "#F1F5F9", padding: "4px", borderRadius: "10px" }}>
           {[
             { id: "social", label: "Facebook / Instagram" },
+            { id: "whatsapp", label: "WhatsApp Broadcast" },
             { id: "sms", label: "SMS Campaign" },
             { id: "banner", label: "Banner & Slogans" },
           ].map((t) => (
@@ -100,8 +110,8 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
               }}
               style={{
                 flex: 1,
-                padding: "8px 12px",
-                fontSize: "13.5px",
+                padding: "8px 10px",
+                fontSize: "12.5px",
                 fontWeight: 600,
                 borderRadius: "8px",
                 border: "none",
@@ -186,6 +196,17 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
         </label>
 
         <label className="field">
+          <span className="label">Custom Brand Voice / Store Policies <span className="opt">(optional)</span></span>
+          <textarea
+            className="input"
+            rows={2}
+            value={customBrandVoice}
+            onChange={(e) => setCustomBrandVoice(e.target.value)}
+            placeholder="e.g. Free home delivery in Dhaka, 24-hr dispatch, 100% genuine warranty"
+          />
+        </label>
+
+        <label className="field">
           <span className="label">Cultural Tone Preset</span>
           <select
             className="input"
@@ -196,6 +217,7 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
             <option value="TRADITIONAL_ELEGANT">মার্জিত ও ঐতিহ্যবাহী (Traditional &amp; Elegant)</option>
             <option value="LUXURY_PREMIUM">প্রিমিয়াম ও লাক্সারি (Luxury &amp; Premium)</option>
             <option value="TECH_MINIMALIST">প্রযুক্তি ও স্পেক্স-ফোকাসড (Tech &amp; Minimalist)</option>
+            <option value="FLASH_SALE_URGENT">হট ডিল ও ফ্ল্যাশ সেল (Flash Sale &amp; Urgent FOMO)</option>
           </select>
         </label>
 
@@ -298,7 +320,107 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
           </div>
         )}
 
-        {/* Tab 2: SMS Campaign */}
+        {/* Tab 2: WhatsApp Broadcast */}
+        {tab === "whatsapp" && (
+          <div>
+            {whatsAppResult ? (
+              <div className="stack" style={{ gap: 14 }}>
+                {whatsAppResult.headline && (
+                  <div style={{ padding: "8px 12px", background: "#FEF9C3", borderRadius: 8, fontSize: 13, border: "1px solid #FEF08A", fontWeight: 700, color: "#854D0E" }}>
+                    {whatsAppResult.headline}
+                  </div>
+                )}
+
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "#15803D" }}>Bengali WhatsApp Broadcast</span>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => handleCopy(whatsAppResult.messageBn, "wa_bn")}
+                      >
+                        {copiedField === "wa_bn" ? "✓ Copied" : "Copy"}
+                      </button>
+                      <a
+                        href={`https://wa.me/?text=${encodeURIComponent(whatsAppResult.messageBn)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-secondary btn-sm"
+                        style={{ color: "#15803D", borderColor: "#86EFAC" }}
+                      >
+                        💬 Web Share
+                      </a>
+                    </div>
+                  </div>
+                  <pre
+                    style={{
+                      background: "#DCF8C6",
+                      border: "1px solid #BBF7D0",
+                      padding: "12px",
+                      borderRadius: "8px",
+                      fontSize: "13px",
+                      whiteSpace: "pre-wrap",
+                      fontFamily: "inherit",
+                      lineHeight: "1.5",
+                      color: "#064E3B",
+                    }}
+                  >
+                    {whatsAppResult.messageBn}
+                  </pre>
+                </div>
+
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "#475569" }}>English WhatsApp Version</span>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => handleCopy(whatsAppResult.messageEn, "wa_en")}
+                    >
+                      {copiedField === "wa_en" ? "✓ Copied" : "Copy"}
+                    </button>
+                  </div>
+                  <pre
+                    style={{
+                      background: "#F8FAFC",
+                      border: "1px solid #E2E8F0",
+                      padding: "12px",
+                      borderRadius: "8px",
+                      fontSize: "13px",
+                      whiteSpace: "pre-wrap",
+                      fontFamily: "inherit",
+                      lineHeight: "1.5",
+                    }}
+                  >
+                    {whatsAppResult.messageEn}
+                  </pre>
+                </div>
+
+                {whatsAppResult.quickReplySuggestions?.length > 0 && (
+                  <div>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "#475569", display: "block", marginBottom: 6 }}>
+                      Suggested Quick Replies
+                    </span>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {whatsAppResult.quickReplySuggestions.map((qr, i) => (
+                        <span key={i} className="pill ok" style={{ cursor: "pointer" }} onClick={() => handleCopy(qr, `qr_${i}`)}>
+                          {qr} {copiedField === `qr_${i}` ? "✓" : ""}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="card empty" style={{ border: "none" }}>
+                Select a product or topic on the left and click <strong>Generate Content</strong> to create ready-to-broadcast WhatsApp scripts.
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab 3: SMS Campaign */}
         {tab === "sms" && (
           <div>
             {smsResult ? (

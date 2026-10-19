@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { CameraIcon, PlusIcon } from "@/components/icons";
 import { taka } from "@/lib/format";
-import { createQuickCategoryAction, generateProductDescriptionAction, generateBarcodeAction, saveProductAction } from "./actions";
+import { createQuickCategoryAction, generateProductDescriptionAction, generateImageAltTagsAction, generateBarcodeAction, saveProductAction } from "./actions";
+import type { GeneratedProductListing, AiTonePreset } from "@biztrackbd/core";
 
 export interface VariantRow {
   id?: string;
@@ -95,10 +96,18 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
   const [busy, setBusy] = useState(false);
   const [showAiModal, setShowAiModal] = useState(false);
   const [aiPromptHint, setAiPromptHint] = useState("");
-  const [aiTone, setAiTone] = useState<"DHAKA_YOUTH_TRENDY" | "TRADITIONAL_ELEGANT" | "LUXURY_PREMIUM" | "TECH_MINIMALIST">("DHAKA_YOUTH_TRENDY");
+  const [aiCustomBrandVoice, setAiCustomBrandVoice] = useState("");
+  const [aiTone, setAiTone] = useState<AiTonePreset>("DHAKA_YOUTH_TRENDY");
   const [aiBusy, setAiBusy] = useState(false);
   const [aiError, setAiError] = useState("");
   const [aiNotice, setAiNotice] = useState("");
+  const [aiGeneratedData, setAiGeneratedData] = useState<GeneratedProductListing | null>(null);
+  const [aiPreviewTab, setAiPreviewTab] = useState<"listing" | "seo" | "social" | "alts">("listing");
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [altBusy, setAltBusy] = useState(false);
+  const [altNotice, setAltNotice] = useState("");
+  const [editingAltIndex, setEditingAltIndex] = useState<number | null>(null);
+  const [editingAltText, setEditingAltText] = useState("");
   const desc = useRef<HTMLTextAreaElement>(null);
   const isNew = !initial.id;
 
@@ -198,14 +207,83 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
             </section>
 
             <section className="card">
-              <div className="card-head"><h2>Photos</h2><span className="muted" style={{ fontSize: 13 }}>{p.images.length} of {MAX_PHOTOS}</span></div>
-              <p className="muted" style={{ marginTop: -6, marginBottom: 10, fontSize: 13.5 }}>The first photo is the cover.</p>
+              <div className="card-head" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <h2 style={{ display: "inline-block", margin: 0, marginRight: 8 }}>Photos</h2>
+                  <span className="muted" style={{ fontSize: 13 }}>{p.images.length} of {MAX_PHOTOS}</span>
+                </div>
+                {p.images.length > 0 && (
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    disabled={altBusy}
+                    onClick={async () => {
+                      setAltBusy(true);
+                      setAltNotice("");
+                      try {
+                        const res = await generateImageAltTagsAction({
+                          productTitle: p.title || p.titleBn || "Product photo",
+                          imageCount: p.images.length,
+                          imageUrls: p.images.map((img) => img.url),
+                          tone: aiTone,
+                        });
+                        if (res.ok && res.data.length > 0) {
+                          const updated = p.images.map((img, i) => {
+                            const tag = res.data.find((d) => d.index === i) || res.data[i];
+                            return { ...img, alt: tag ? `${tag.altEn} (${tag.altBn})` : img.alt };
+                          });
+                          setP((cur) => ({ ...cur, images: updated }));
+                          setAltNotice(`Generated alt tags for ${res.data.length} photos!`);
+                          setTimeout(() => setAltNotice(""), 5000);
+                        } else if (!res.ok) {
+                          setUploadError(res.error);
+                        }
+                      } finally {
+                        setAltBusy(false);
+                      }
+                    }}
+                    style={{ borderColor: "#818CF8", color: "#4F46E5", background: "#EEF2FF", fontWeight: 700, fontSize: 12 }}
+                  >
+                    {altBusy ? "Generating Alts…" : "✨ AI Alt-Tags"}
+                  </button>
+                )}
+              </div>
+              <p className="muted" style={{ marginTop: -6, marginBottom: 10, fontSize: 13.5 }}>
+                The first photo is the cover. Click <b>ALT</b> on any photo to edit accessibility and Google Image tags.
+              </p>
+              {altNotice && <div className="notice good" style={{ marginBottom: 10, fontSize: 13 }}>{altNotice}</div>}
               <div className="photo-grid" data-testid="photos">
                 {p.images.map((img, i) => (
-                  <div key={img.url} className="photo">
+                  <div key={img.url} className="photo" style={{ position: "relative" }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={img.url} alt={img.alt ?? ""} />
                     {i === 0 ? <span className="cover">Cover</span> : <button type="button" className="cover" style={{ border: 0, cursor: "pointer" }} onClick={() => set("images", [img, ...p.images.filter((_, j) => j !== i)])}>Make cover</button>}
+                    <button
+                      type="button"
+                      className="alt-badge"
+                      title={img.alt ? `Alt: ${img.alt} (Click to edit)` : "No alt text set. Click to add."}
+                      onClick={() => {
+                        setEditingAltIndex(i);
+                        setEditingAltText(img.alt || "");
+                      }}
+                      style={{
+                        position: "absolute",
+                        bottom: 6,
+                        left: 6,
+                        background: img.alt ? "rgba(15, 23, 42, 0.85)" : "rgba(239, 68, 68, 0.85)",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "4px",
+                        padding: "2px 6px",
+                        fontSize: "10.5px",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        backdropFilter: "blur(4px)",
+                        zIndex: 2,
+                      }}
+                    >
+                      {img.alt ? "✓ ALT" : "+ ALT"}
+                    </button>
                     <button type="button" className="x" aria-label="Remove photo" onClick={() => set("images", p.images.filter((_, j) => j !== i))}>×</button>
                   </div>
                 ))}
@@ -563,95 +641,495 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
         </div>
       )}
 
+      {/* Image Alt Text Edit Dialog */}
+      {editingAltIndex !== null && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 1000,
+            display: "flex", alignItems: "center", justifyContent: "center", padding: 16,
+          }}
+          onClick={() => setEditingAltIndex(null)}
+        >
+          <div className="card stack" style={{ maxWidth: 460, width: "100%", background: "#fff", borderRadius: 12, padding: 20 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Image Alt Text (SEO &amp; Accessibility)</h3>
+              <button type="button" style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", padding: "0 4px" }} onClick={() => setEditingAltIndex(null)}>×</button>
+            </div>
+            <p className="muted" style={{ fontSize: 12.5, margin: "4px 0 10px" }}>
+              Descriptive text for visually impaired shoppers and Google Image indexing.
+            </p>
+            {editingAltIndex !== null && p.images[editingAltIndex] && (
+              <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12, padding: 8, background: "#F8FAFC", borderRadius: 8 }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={p.images[editingAltIndex]!.url} alt="" style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 6 }} />
+                <span className="muted" style={{ fontSize: 12 }}>Photo {editingAltIndex + 1} of {p.images.length}</span>
+              </div>
+            )}
+            <label className="field" style={{ marginBottom: 12 }}>
+              <span className="label">Alt Text</span>
+              <input
+                className="input"
+                value={editingAltText}
+                onChange={(e) => setEditingAltText(e.target.value)}
+                placeholder="e.g. Front view of Navy Blue Jamdani Pure Cotton Saree"
+                autoFocus
+              />
+            </label>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setEditingAltIndex(null)}>Cancel</button>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={() => {
+                  if (editingAltIndex !== null) {
+                    const updated = [...p.images];
+                    if (updated[editingAltIndex]) {
+                      updated[editingAltIndex] = { ...updated[editingAltIndex]!, alt: editingAltText.trim() || null };
+                      set("images", updated);
+                    }
+                  }
+                  setEditingAltIndex(null);
+                }}
+              >
+                Save Alt Text
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Upgraded AI Catalog Studio & Copilot Modal */}
       {showAiModal && (
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="One-Click Product Generator"
+          aria-label="AI Catalog Studio & Copilot"
           style={{
-            position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000,
+            position: "fixed", inset: 0, background: "rgba(15, 23, 42, 0.65)", zIndex: 1000,
             display: "flex", alignItems: "center", justifyContent: "center", padding: 16,
+            backdropFilter: "blur(4px)",
           }}
-          onClick={(e) => { if (e.target === e.currentTarget) setShowAiModal(false); }}
+          onClick={(e) => { if (e.target === e.currentTarget && !aiBusy) setShowAiModal(false); }}
         >
           <div
             className="card stack"
-            style={{ maxWidth: 500, width: "100%", background: "var(--card-bg, #fff)", borderRadius: 12, padding: 24, boxShadow: "0 20px 25px -5px rgba(0,0,0,0.2)" }}
+            style={{
+              maxWidth: aiGeneratedData ? 820 : 540,
+              width: "100%",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              background: "var(--card-bg, #fff)",
+              borderRadius: 14,
+              padding: 24,
+              boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)",
+              border: "1px solid #E2E8F0",
+              transition: "max-width 0.2s ease",
+            }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 style={{ margin: 0, fontSize: 18 }}>One-Click Product Generator</h3>
-              <button type="button" style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", padding: "0 4px" }} onClick={() => setShowAiModal(false)}>×</button>
+            {/* Header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "1px solid #E2E8F0", paddingBottom: 14, marginBottom: 14 }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 20 }}>✨</span>
+                  <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>AI Catalog Studio &amp; Copilot</h3>
+                </div>
+                <p className="muted" style={{ fontSize: 13, margin: "4px 0 0" }}>
+                  Generate bilingual copy, Google SERP snippets, image alt-tags, and social campaigns in seconds.
+                </p>
+              </div>
+              <button
+                type="button"
+                style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", padding: "0 4px", color: "#64748B" }}
+                onClick={() => setShowAiModal(false)}
+                disabled={aiBusy}
+              >
+                ×
+              </button>
             </div>
-
-            <p className="muted" style={{ fontSize: 13, margin: "6px 0 12px" }}>
-              Enter a product concept or keywords to auto-generate bilingual titles, semantic HTML description, SEO tags and social copy.
-            </p>
 
             {aiError && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{aiError}</div>}
 
-            <label className="field">
-              <span className="label">Product Title / Keywords / Notes</span>
-              <input
-                className="input"
-                value={aiPromptHint}
-                onChange={(e) => setAiPromptHint(e.target.value)}
-                placeholder="e.g. Navy Blue Jamdani Saree, 100% Pure Cotton"
-                autoFocus
-              />
-              <span className="help">Give a brief hint or paste rough supplier notes.</span>
-            </label>
+            {/* SCREEN 1: Prompt & Controls (when no generated data yet) */}
+            {!aiGeneratedData ? (
+              <div className="stack" style={{ gap: 14 }}>
+                <label className="field">
+                  <span className="label">Product Title / Concept / Notes</span>
+                  <input
+                    className="input"
+                    value={aiPromptHint}
+                    onChange={(e) => setAiPromptHint(e.target.value)}
+                    placeholder="e.g. Navy Blue Jamdani Saree, 100% Pure Cotton"
+                    autoFocus
+                  />
+                  <span className="help">Give a brief hint, product name, or paste rough supplier notes.</span>
+                </label>
 
-            <label className="field">
-              <span className="label">Cultural Tone Preset</span>
-              <select
-                className="select"
-                value={aiTone}
-                onChange={(e) => setAiTone(e.target.value as any)}
-              >
-                <option value="DHAKA_YOUTH_TRENDY">ট্রেন্ডি ও আধুনিক (Dhaka Youth &amp; Trendy)</option>
-                <option value="TRADITIONAL_ELEGANT">মার্জিত ও ঐতিহ্যবাহী (Traditional &amp; Elegant)</option>
-                <option value="LUXURY_PREMIUM">প্রিমিয়াম ও লাক্সারি (Luxury &amp; Premium)</option>
-                <option value="TECH_MINIMALIST">প্রযুক্তি ও স্পেক্স-ফোকাসড (Tech &amp; Minimalist)</option>
-              </select>
-            </label>
+                <label className="field">
+                  <span className="label">Cultural Tone Preset</span>
+                  <select
+                    className="select"
+                    value={aiTone}
+                    onChange={(e) => setAiTone(e.target.value as any)}
+                  >
+                    <option value="DHAKA_YOUTH_TRENDY">ট্রেন্ডি ও আধুনিক (Dhaka Youth &amp; Trendy)</option>
+                    <option value="TRADITIONAL_ELEGANT">মার্জিত ও ঐতিহ্যবাহী (Traditional &amp; Elegant)</option>
+                    <option value="LUXURY_PREMIUM">প্রিমিয়াম ও লাক্সারি (Luxury &amp; Premium)</option>
+                    <option value="TECH_MINIMALIST">প্রযুক্তি ও স্পেক্স-ফোকাসড (Tech &amp; Minimalist)</option>
+                    <option value="FLASH_SALE_URGENT">হট ডিল ও ফ্ল্যাশ সেল (Flash Sale &amp; Urgent FOMO)</option>
+                  </select>
+                </label>
 
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16 }}>
-              <button type="button" className="btn btn-secondary" onClick={() => setShowAiModal(false)} disabled={aiBusy}>Cancel</button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                disabled={aiBusy || !aiPromptHint.trim()}
-                onClick={async () => {
-                  setAiBusy(true);
-                  setAiError("");
-                  const res = await generateProductDescriptionAction({
-                    titleHint: aiPromptHint.trim(),
-                    price: p.basePrice || undefined,
-                    tone: aiTone,
-                  });
-                  setAiBusy(false);
-                  if (!res.ok) {
-                    setAiError(res.error);
-                    return;
-                  }
-                  const d = res.data;
-                  setP((cur) => ({
-                    ...cur,
-                    title: d.titleEn || cur.title || d.titleBn,
-                    titleBn: d.titleBn || cur.titleBn,
-                    descriptionHtml: d.descriptionHtml || cur.descriptionHtml,
-                    seoTitle: d.seo.metaTitle || cur.seoTitle,
-                    seoDescription: d.seo.metaDescription || cur.seoDescription,
-                    tags: Array.from(new Set([...cur.tags, ...(d.tags || [])])),
-                  }));
-                  setAiNotice("Product listing generated successfully! Form fields have been populated.");
-                  setShowAiModal(false);
-                  setTimeout(() => setAiNotice(""), 6000);
-                }}
-              >
-                {aiBusy ? "Generating Listing…" : "Generate & Fill Listing"}
-              </button>
-            </div>
+                <label className="field">
+                  <span className="label">Store Policies &amp; Brand Voice <span className="opt">(optional)</span></span>
+                  <textarea
+                    className="textarea"
+                    style={{ minHeight: 65, fontSize: 13 }}
+                    value={aiCustomBrandVoice}
+                    onChange={(e) => setAiCustomBrandVoice(e.target.value)}
+                    placeholder="e.g. Cash on Delivery all over Bangladesh, 7-day hassle-free replacement, Delivery inside Dhaka in 24 hours."
+                  />
+                  <span className="help">Custom instructions to bake directly into descriptions, COD notes, and ad copy.</span>
+                </label>
+
+                {p.images.length > 0 && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", background: "#EEF2FF", border: "1px solid #C7D2FE", borderRadius: 8, fontSize: 12.5, color: "#3730A3" }}>
+                    <span>📸</span>
+                    <span><strong>{p.images.length} gallery photo(s) detected.</strong> Gemini will inspect images to detect attributes and generate SEO alt-tags.</span>
+                  </div>
+                )}
+
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 10 }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowAiModal(false)} disabled={aiBusy}>Cancel</button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    disabled={aiBusy || !aiPromptHint.trim()}
+                    onClick={async () => {
+                      setAiBusy(true);
+                      setAiError("");
+                      const res = await generateProductDescriptionAction({
+                        titleHint: aiPromptHint.trim(),
+                        price: p.basePrice || undefined,
+                        tone: aiTone,
+                        customBrandVoice: aiCustomBrandVoice.trim() || undefined,
+                        imageCount: p.images.length,
+                        imageUrls: p.images.map((img) => img.url),
+                      });
+                      setAiBusy(false);
+                      if (!res.ok) {
+                        setAiError(res.error);
+                        return;
+                      }
+                      setAiGeneratedData(res.data);
+                      setAiPreviewTab("listing");
+                    }}
+                  >
+                    {aiBusy ? "Analyzing & Generating Listing…" : "✨ Generate & Preview"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* SCREEN 2: Interactive Preview & Review Tabs */
+              <div className="stack" style={{ gap: 16 }}>
+                {/* Tab Switcher */}
+                <div style={{ display: "flex", gap: 6, background: "#F1F5F9", padding: 4, borderRadius: 10 }}>
+                  {[
+                    { id: "listing", label: "🏷️ Product Copy", badge: null },
+                    { id: "seo", label: "🔍 Google SERP Card", badge: "Live" },
+                    { id: "social", label: "📣 Social & WhatsApp", badge: "2 Channels" },
+                    { id: "alts", label: `🖼️ Alt-Tags (${aiGeneratedData.imageAltTexts?.length || p.images.length})`, badge: null },
+                  ].map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setAiPreviewTab(t.id as any)}
+                      style={{
+                        flex: 1,
+                        padding: "8px 12px",
+                        border: "none",
+                        borderRadius: 8,
+                        background: aiPreviewTab === t.id ? "#fff" : "transparent",
+                        fontWeight: aiPreviewTab === t.id ? 700 : 500,
+                        fontSize: 13,
+                        color: aiPreviewTab === t.id ? "#0F172A" : "#64748B",
+                        boxShadow: aiPreviewTab === t.id ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 6,
+                      }}
+                    >
+                      {t.label}
+                      {t.badge && (
+                        <span style={{ fontSize: 10, background: "#E0E7FF", color: "#3730A3", padding: "1px 5px", borderRadius: 4 }}>
+                          {t.badge}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                {/* TAB 1: Product Copy (Titles, Excerpt, HTML Description) */}
+                {aiPreviewTab === "listing" && (
+                  <div className="stack" style={{ gap: 12 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                      <div style={{ padding: 10, background: "#F8FAFC", borderRadius: 8, border: "1px solid #E2E8F0" }}>
+                        <span className="muted" style={{ fontSize: 11, textTransform: "uppercase", fontWeight: 700 }}>English Title</span>
+                        <div style={{ fontWeight: 600, fontSize: 14, marginTop: 4 }}>{aiGeneratedData.titleEn || "N/A"}</div>
+                      </div>
+                      <div style={{ padding: 10, background: "#F8FAFC", borderRadius: 8, border: "1px solid #E2E8F0" }}>
+                        <span className="muted" style={{ fontSize: 11, textTransform: "uppercase", fontWeight: 700 }}>Bangla Title (বাংলা)</span>
+                        <div style={{ fontWeight: 600, fontSize: 14, marginTop: 4 }} lang="bn">{aiGeneratedData.titleBn || "N/A"}</div>
+                      </div>
+                    </div>
+
+                    {aiGeneratedData.shortExcerptBn && (
+                      <div style={{ padding: "8px 12px", background: "#FEF9C3", borderRadius: 8, fontSize: 13, border: "1px solid #FEF08A" }}>
+                        <strong>সারসংক্ষেপ:</strong> {aiGeneratedData.shortExcerptBn}
+                      </div>
+                    )}
+
+                    <div style={{ border: "1px solid #E2E8F0", borderRadius: 8, overflow: "hidden" }}>
+                      <div style={{ background: "#F8FAFC", padding: "8px 12px", borderBottom: "1px solid #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: 12.5, fontWeight: 700, color: "#334155" }}>Rich HTML Description Preview</span>
+                        <span className="muted" style={{ fontSize: 11 }}>Semantic HTML with lists</span>
+                      </div>
+                      <div
+                        style={{ padding: 14, maxHeight: 180, overflowY: "auto", fontSize: 13.5, lineHeight: 1.6 }}
+                        dangerouslySetInnerHTML={{ __html: aiGeneratedData.descriptionHtml || "<p>No description generated</p>" }}
+                      />
+                    </div>
+
+                    {aiGeneratedData.tags?.length > 0 && (
+                      <div>
+                        <span className="muted" style={{ fontSize: 12, marginRight: 8 }}>Suggested Tags:</span>
+                        <div className="chips" style={{ display: "inline-flex", gap: 4, flexWrap: "wrap" }}>
+                          {aiGeneratedData.tags.map((tg) => (
+                            <span key={tg} className="chip" style={{ fontSize: 11.5 }}>#{tg}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* TAB 2: Google SERP Preview Card */}
+                {aiPreviewTab === "seo" && (
+                  <div className="stack" style={{ gap: 14 }}>
+                    <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+                      Live simulation of how this product snippet will appear in Google Search for Bangladeshi online shoppers:
+                    </p>
+
+                    <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 10, padding: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+                      {/* Google URL Breadcrumb */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                        <span style={{ width: 18, height: 18, borderRadius: "50%", background: "#4285F4", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700 }}>G</span>
+                        <span style={{ fontSize: 12, color: "#202124" }}>yourstore.biztrack.bd › products › {p.slug || "item"}</span>
+                      </div>
+                      {/* Google Blue Title Link */}
+                      <div style={{ fontSize: 18, color: "#1A0DAB", fontWeight: 500, lineHeight: 1.3, marginBottom: 4, cursor: "pointer", textDecoration: "underline" }}>
+                        {aiGeneratedData.seo.metaTitle || aiGeneratedData.titleEn || p.title}
+                      </div>
+                      {/* Google Meta Snippet */}
+                      <div style={{ fontSize: 13.5, color: "#4D5156", lineHeight: 1.5 }}>
+                        {aiGeneratedData.seo.metaDescription || "Order authentic items online with fast Cash on Delivery across Bangladesh."}
+                      </div>
+                    </div>
+
+                    {/* Character Count Gauges */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                      <div style={{ padding: 10, background: "#F8FAFC", borderRadius: 8, border: "1px solid #E2E8F0" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{ fontSize: 12, fontWeight: 700 }}>Meta Title Length</span>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: (aiGeneratedData.seo.metaTitle?.length || 0) <= 60 ? "#16A34A" : "#DC2626" }}>
+                            {aiGeneratedData.seo.metaTitle?.length || 0} / 60 chars
+                          </span>
+                        </div>
+                        <span className="muted" style={{ fontSize: 11.5 }}>Recommended for Google Search in BD</span>
+                      </div>
+                      <div style={{ padding: 10, background: "#F8FAFC", borderRadius: 8, border: "1px solid #E2E8F0" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{ fontSize: 12, fontWeight: 700 }}>Meta Description Length</span>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: (aiGeneratedData.seo.metaDescription?.length || 0) <= 160 ? "#16A34A" : "#DC2626" }}>
+                            {aiGeneratedData.seo.metaDescription?.length || 0} / 160 chars
+                          </span>
+                        </div>
+                        <span className="muted" style={{ fontSize: 11.5 }}>Includes call-to-action &amp; COD note</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 3: Social & WhatsApp Copy */}
+                {aiPreviewTab === "social" && (
+                  <div className="stack" style={{ gap: 14 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                      {/* Facebook / Instagram Card */}
+                      <div style={{ border: "1px solid #E2E8F0", borderRadius: 10, padding: 14, background: "#F8FAFC" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: "#1877F2" }}>Facebook &amp; Instagram Post</span>
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => {
+                              navigator.clipboard.writeText(aiGeneratedData.adCopy.facebookCaption);
+                              setCopiedField("fb");
+                              setTimeout(() => setCopiedField(null), 2000);
+                            }}
+                          >
+                            {copiedField === "fb" ? "Copied!" : "📋 Copy Post"}
+                          </button>
+                        </div>
+                        <div style={{ fontSize: 12.5, whiteSpace: "pre-wrap", maxHeight: 180, overflowY: "auto", background: "#fff", padding: 10, borderRadius: 6, border: "1px solid #E2E8F0" }}>
+                          {aiGeneratedData.adCopy.facebookCaption || "No social copy available."}
+                        </div>
+                      </div>
+
+                      {/* WhatsApp Broadcast Card */}
+                      <div style={{ border: "1px solid #E2E8F0", borderRadius: 10, padding: 14, background: "#F0FDF4" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: "#15803D" }}>WhatsApp Broadcast Script</span>
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => {
+                              navigator.clipboard.writeText(aiGeneratedData.adCopy.whatsAppBroadcast);
+                              setCopiedField("wa");
+                              setTimeout(() => setCopiedField(null), 2000);
+                            }}
+                          >
+                            {copiedField === "wa" ? "Copied!" : "📋 Copy WhatsApp"}
+                          </button>
+                        </div>
+                        <div style={{ fontSize: 12.5, whiteSpace: "pre-wrap", maxHeight: 180, overflowY: "auto", background: "#DCF8C6", padding: 10, borderRadius: 8, border: "1px solid #BBF7D0", color: "#064E3B" }}>
+                          {aiGeneratedData.adCopy.whatsAppBroadcast || "No WhatsApp script available."}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 4: Image Alt-Tags */}
+                {aiPreviewTab === "alts" && (
+                  <div className="stack" style={{ gap: 10 }}>
+                    <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+                      Proposed accessibility and SEO alt-tags for product images:
+                    </p>
+                    <div style={{ maxHeight: 220, overflowY: "auto", border: "1px solid #E2E8F0", borderRadius: 8 }}>
+                      {aiGeneratedData.imageAltTexts && aiGeneratedData.imageAltTexts.length > 0 ? (
+                        aiGeneratedData.imageAltTexts.map((altItem, idx) => (
+                          <div key={idx} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderBottom: idx < aiGeneratedData.imageAltTexts.length - 1 ? "1px solid #E2E8F0" : "none" }}>
+                            <span style={{ fontWeight: 700, fontSize: 12, width: 65, color: "#64748B" }}>Photo {idx + 1}</span>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: 13, fontWeight: 600 }}>{altItem.altEn}</div>
+                              <div style={{ fontSize: 12, color: "#64748B" }} lang="bn">{altItem.altBn}</div>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ padding: 14, textAlign: "center", color: "#64748B", fontSize: 13 }}>
+                          No image alt tags generated. Upload product photos to auto-generate tags.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* ACTION FOOTER */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid #E2E8F0", paddingTop: 14, marginTop: 4, flexWrap: "wrap", gap: 8 }}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => setAiGeneratedData(null)}
+                  >
+                    ← Edit Prompt / Back
+                  </button>
+
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => {
+                        setP((cur) => ({
+                          ...cur,
+                          descriptionHtml: aiGeneratedData.descriptionHtml || cur.descriptionHtml,
+                        }));
+                        setAiNotice("Description applied to editor!");
+                        setShowAiModal(false);
+                        setTimeout(() => setAiNotice(""), 5000);
+                      }}
+                    >
+                      Apply Description Only
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => {
+                        setP((cur) => ({
+                          ...cur,
+                          seoTitle: aiGeneratedData.seo.metaTitle || cur.seoTitle,
+                          seoDescription: aiGeneratedData.seo.metaDescription || cur.seoDescription,
+                        }));
+                        setAiNotice("SEO metadata applied to editor!");
+                        setShowAiModal(false);
+                        setTimeout(() => setAiNotice(""), 5000);
+                      }}
+                    >
+                      Apply SEO Only
+                    </button>
+                    {aiGeneratedData.imageAltTexts?.length > 0 && p.images.length > 0 && (
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => {
+                          const updated = p.images.map((img, i) => {
+                            const tag = aiGeneratedData.imageAltTexts.find((d) => d.index === i) || aiGeneratedData.imageAltTexts[i];
+                            return { ...img, alt: tag ? `${tag.altEn} (${tag.altBn})` : img.alt };
+                          });
+                          setP((cur) => ({ ...cur, images: updated }));
+                          setAiNotice("Image alt-tags applied to photos!");
+                          setShowAiModal(false);
+                          setTimeout(() => setAiNotice(""), 5000);
+                        }}
+                      >
+                        Apply Alt-Tags Only
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={() => {
+                        const d = aiGeneratedData;
+                        const updatedImages = p.images.map((img, i) => {
+                          const tag = d.imageAltTexts?.find((x) => x.index === i) || d.imageAltTexts?.[i];
+                          return { ...img, alt: tag ? `${tag.altEn} (${tag.altBn})` : img.alt };
+                        });
+
+                        setP((cur) => ({
+                          ...cur,
+                          title: d.titleEn || cur.title || d.titleBn,
+                          titleBn: d.titleBn || cur.titleBn,
+                          descriptionHtml: d.descriptionHtml || cur.descriptionHtml,
+                          seoTitle: d.seo.metaTitle || cur.seoTitle,
+                          seoDescription: d.seo.metaDescription || cur.seoDescription,
+                          tags: Array.from(new Set([...cur.tags, ...(d.tags || [])])),
+                          images: updatedImages,
+                        }));
+                        setAiNotice("All AI listing fields, SEO, and alt-tags applied successfully!");
+                        setShowAiModal(false);
+                        setTimeout(() => setAiNotice(""), 6000);
+                      }}
+                      style={{ background: "#4F46E5", fontWeight: 700 }}
+                    >
+                      ✓ Apply All to Product
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
