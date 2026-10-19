@@ -11,6 +11,7 @@ import {
 import { requireAccess } from "@/lib/session";
 import {
   publishTemplateAction,
+  uploadTemplateFileAction,
   setTemplateStatusAction,
   toggleModuleMaintenanceAction,
   setModulePlanOverrideAction,
@@ -59,11 +60,11 @@ export default async function ThemesPage({
           <p className="muted" style={{ padding: 24 }}>Templates are managed by the platform owner.</p>
         ) : (
           <div style={{ overflowX: "auto" }}>
-            <div style={{ minWidth: 820 }}>
+            <div style={{ minWidth: 920 }}>
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "minmax(0, 1.6fr) 110px 70px 110px 110px 200px",
+                  gridTemplateColumns: "minmax(0, 1.6fr) 110px 70px 110px 110px 300px",
                   padding: "10px 24px",
                   background: "var(--bg)",
                   borderBottom: "1px solid var(--line)",
@@ -88,7 +89,7 @@ export default async function ThemesPage({
                     data-testid={`template-${t.id}`}
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "minmax(0, 1.6fr) 110px 70px 110px 110px 200px",
+                      gridTemplateColumns: "minmax(0, 1.6fr) 110px 70px 110px 110px 300px",
                       padding: "10px 24px",
                       minHeight: 64,
                       alignItems: "center",
@@ -111,6 +112,7 @@ export default async function ThemesPage({
                       </span>
                     </div>
                     <div style={{ textAlign: "right", display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                      <a className="btn btn-secondary btn-sm" href={`/themes/export/${t.id}`} download>Download</a>
                       {canEdit && t.status !== "PUBLISHED" && (
                         <form action={setTemplateStatusAction.bind(null, t.id, "PUBLISHED")}>
                           <button type="submit" className="btn btn-secondary btn-sm">Publish</button>
@@ -129,6 +131,27 @@ export default async function ThemesPage({
           </div>
         )}
       </div>
+
+      {canEdit && (
+        <form action={uploadTemplateFileAction} className="card stack" style={{ padding: 24 }} data-testid="upload-template">
+          <h2 style={{ fontSize: 16 }}>Upload a template file</h2>
+          <p className="muted" style={{ fontSize: 13.5 }}>
+            One .json file: colours, page layouts, header and footer, business pages and preview pictures. Download any template above to see the format.
+            Once live it appears in the marketing gallery and signup, and each merchant can apply it from their design screen, then edit it. Merchants already using
+            it are offered the new version as drafts and never lose their own edits.
+          </p>
+          <label className="field" style={{ margin: 0 }}>
+            <span className="label">Template file</span>
+            <input className="input" type="file" name="file" accept="application/json,.json" required />
+          </label>
+          <label className="row" style={{ gap: 8, fontSize: 13.5 }}>
+            <input type="checkbox" name="draft" /> Save as a draft (do not show it yet)
+          </label>
+          <div>
+            <button type="submit" className="btn btn-primary" data-testid="upload-template-go">Upload template</button>
+          </div>
+        </form>
+      )}
 
       {canEdit && (
         <form action={publishTemplateAction} className="card stack" style={{ padding: 24 }} data-testid="publish-template">

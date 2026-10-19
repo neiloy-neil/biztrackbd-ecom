@@ -39,6 +39,10 @@ export interface GalleryTheme {
   vertical?: string;
   colors?: { accent: string; background: string; text: string };
   previewFeatures?: string[];
+  /** A template uploaded by staff: no live demo store, so it is shown from its preview pictures (https links) instead. */
+  uploaded?: boolean;
+  previewDesktop?: string;
+  previewMobile?: string;
 }
 
 export const ECOMMERCE_TEMPLATES: GalleryTheme[] = [
@@ -222,10 +226,12 @@ export interface PublishedGalleryTheme extends GalleryTheme {
 
 export function TemplateGallery({
   extra = [],
+  businessExtra = [],
   hidden = [],
   initialMode = "ecommerce",
 }: {
   extra?: PublishedGalleryTheme[];
+  businessExtra?: PublishedGalleryTheme[];
   hidden?: string[]
   initialMode?: GalleryMode;
 }) {
@@ -246,7 +252,8 @@ export function TemplateGallery({
   );
 
   const ecomAll = [...ECOMMERCE_TEMPLATES.filter((t) => !hidden.includes(t.id)), ...extra];
-  const currentTemplates = activeMode === "ecommerce" ? ecomAll : BUSINESS_TEMPLATES_DATA;
+  const bizAll = [...BUSINESS_TEMPLATES_DATA, ...businessExtra.filter((x) => !BUSINESS_TEMPLATES_DATA.some((b) => b.id === x.id))];
+  const currentTemplates = activeMode === "ecommerce" ? ecomAll : bizAll;
 
   const filtered = activeCategory === "all"
     ? currentTemplates
@@ -259,7 +266,7 @@ export function TemplateGallery({
       }))
     : BIZ_CATEGORIES.map((c) => ({
         ...c,
-        count: c.id === "all" ? BUSINESS_TEMPLATES_DATA.length : BUSINESS_TEMPLATES_DATA.filter((t) => t.category === c.id).length,
+        count: c.id === "all" ? bizAll.length : bizAll.filter((t) => t.category === c.id).length,
       }));
 
   const handleModeSwitch = (mode: GalleryMode) => {
@@ -511,7 +518,18 @@ export function TemplateGallery({
                   border: "1px solid var(--line, #E2E2EC)",
                 }}
               >
-                {t.colors ? (
+                {t.uploaded && t.previewDesktop ? (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element -- staff-uploaded preview on an external https host */}
+                    <img src={t.previewDesktop} alt={`${t.name} template home page`} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
+                    {t.previewMobile && (
+                      <div style={{ position: "absolute", right: 12, bottom: -8, width: "28%", height: "75%", borderRadius: 10, overflow: "hidden", border: "2px solid #FFFFFF", boxShadow: "0 6px 16px rgba(26, 26, 78, 0.2)" }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={t.previewMobile} alt={`${t.name} mobile preview`} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
+                      </div>
+                    )}
+                  </>
+                ) : t.colors ? (
                   <div
                     aria-hidden
                     style={{
@@ -842,7 +860,7 @@ export function TemplateGallery({
 
             {/* Right: Actions */}
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <a
+              {!previewTemplate.uploaded && <a
                 href={demoUrl(THEME_HOSTS[previewTemplate.id] ?? previewTemplate.id)}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -857,7 +875,7 @@ export function TemplateGallery({
                 }}
               >
                 Open in new tab ↗
-              </a>
+              </a>}
 
               <Link
                 href={getStartUrl(previewTemplate)}
@@ -923,6 +941,14 @@ export function TemplateGallery({
                 transition: "width 0.25s ease, height 0.25s ease",
               }}
             >
+              {previewTemplate.uploaded ? (
+                // eslint-disable-next-line @next/next/no-img-element -- staff-uploaded preview on an external https host
+                <img
+                  src={(viewportMode === "mobile" ? previewTemplate.previewMobile : previewTemplate.previewDesktop) ?? previewTemplate.previewDesktop ?? previewTemplate.previewMobile ?? ""}
+                  alt={`${previewTemplate.name} preview`}
+                  style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "top", background: "#F8FAFC" }}
+                />
+              ) : (
               <iframe
                 src={demoUrl(THEME_HOSTS[previewTemplate.id] ?? previewTemplate.id)}
                 title={`${previewTemplate.name} live demo`}
@@ -932,6 +958,7 @@ export function TemplateGallery({
                   border: "none",
                 }}
               />
+              )}
             </div>
           </div>
         </div>

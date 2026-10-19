@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { listPublishedTemplates, THEMES } from "@biztrackbd/core";
-import { TemplateGallery, type PublishedGalleryTheme } from "@/components/template-gallery";
+import { listPublishedTemplates } from "@biztrackbd/core";
+import { splitPublishedTemplates } from "@/lib/published-gallery";
+import { TemplateGallery } from "@/components/template-gallery";
 import { demoAdminUrl } from "@/lib/demo-admin";
 
 const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
@@ -30,7 +31,6 @@ export const metadata: Metadata = {
   },
 };
 
-const LABELS: Record<string, string> = { fashion: "Fashion", electronics: "Electronics", kids: "Kids", streetwear: "Streetwear", beauty: "Beauty", other: "More" };
 
 export default async function TemplatesPage({
   searchParams,
@@ -42,14 +42,7 @@ export default async function TemplatesPage({
 
   // Templates published by staff appear here with no deploy; an original they take down disappears. If the list cannot be read, the originals show.
   const published = await listPublishedTemplates().catch(() => []);
-  const originals = new Set<string>(THEMES.map((t) => t.id));
-  const hidden = published.length ? THEMES.filter((t) => !published.some((p) => p.id === t.id)).map((t) => t.id) : [];
-  const extra: PublishedGalleryTheme[] = published
-    .filter((p) => !originals.has(p.id))
-    .map((p) => ({
-      id: p.id, name: p.name, sub: p.blurb, category: p.category === "other" ? "fashion" : p.category, categoryLabel: LABELS[p.category] ?? "More",
-      tag1: p.tags[0] ?? p.audience ?? "", tag2: p.tags[1] ?? "", module: p.moduleLabel ?? "New", colors: { accent: p.settings.accent, background: p.settings.background, text: p.settings.text },
-    }));
+  const { extra, businessExtra, hidden } = splitPublishedTemplates(published);
   return (
     <section className="block">
       <div className="wrap">
@@ -91,7 +84,7 @@ export default async function TemplatesPage({
           </p>
         </div>
 
-        <TemplateGallery extra={extra} hidden={hidden} initialMode={initialMode} />
+        <TemplateGallery extra={extra} businessExtra={businessExtra} hidden={hidden} initialMode={initialMode} />
       </div>
     </section>
   );

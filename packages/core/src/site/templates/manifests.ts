@@ -270,16 +270,16 @@ export const BUSINESS_TEMPLATES: BusinessTemplateManifest[] = [
       menu: {
         auto: false,
         items: [
-          { id: "m1", type: "link", label: "Home", labelBn: "হোম", ref: "", url: "/" },
-          { id: "m2", type: "link", label: "Menu", labelBn: "মেন্যু", ref: "menu", url: "/menu" },
-          { id: "m3", type: "link", label: "Reservations", labelBn: "বুকিং", ref: "reservations", url: "/reservations" },
-          { id: "m4", type: "link", label: "Contact", labelBn: "যোগাযোগ", ref: "contact", url: "/contact" },
+          { id: "menu-1", type: "link", label: "Home", labelBn: "হোম", ref: "", url: "/" },
+          { id: "menu-2", type: "link", label: "Menu", labelBn: "মেন্যু", ref: "menu", url: "/menu" },
+          { id: "menu-3", type: "link", label: "Reservations", labelBn: "বুকিং", ref: "reservations", url: "/reservations" },
+          { id: "menu-4", type: "link", label: "Contact", labelBn: "যোগাযোগ", ref: "contact", url: "/contact" },
         ],
       },
       footer: {
         columns: [
           {
-            id: "f1",
+            id: "foot-1",
             type: "text",
             title: "Dhaka Bistro",
             titleBn: "ঢাকা বিস্ট্রো",
@@ -288,7 +288,7 @@ export const BUSINESS_TEMPLATES: BusinessTemplateManifest[] = [
             links: [],
           },
           {
-            id: "f2",
+            id: "foot-2",
             type: "links",
             title: "Quick Links",
             titleBn: "প্রয়োজনীয় লিঙ্ক",
@@ -301,7 +301,7 @@ export const BUSINESS_TEMPLATES: BusinessTemplateManifest[] = [
             ],
           },
           {
-            id: "f3",
+            id: "foot-3",
             type: "contact",
             title: "Contact",
             titleBn: "যোগাযোগ",

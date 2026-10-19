@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listPublishedTemplates, THEMES } from "@biztrackbd/core";
-import { TemplateGallery, type PublishedGalleryTheme } from "@/components/template-gallery";
+import { listPublishedTemplates } from "@biztrackbd/core";
+import { TemplateGallery } from "@/components/template-gallery";
+import { splitPublishedTemplates } from "@/lib/published-gallery";
 import { demoAdminUrl } from "@/lib/demo-admin";
 
 const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
@@ -41,14 +42,6 @@ export const metadata: Metadata = {
   },
 };
 
-const LABELS: Record<string, string> = {
-  fashion: "Fashion",
-  electronics: "Electronics",
-  kids: "Kids",
-  streetwear: "Streetwear",
-  beauty: "Beauty",
-  other: "More",
-};
 
 const VERTICAL_SHORTCUTS = [
   { label: "Restaurants & Cafés", href: "/business/restaurant-websites", icon: "🍽️" },
@@ -61,25 +54,7 @@ const VERTICAL_SHORTCUTS = [
 
 export default async function BusinessTemplatesPage() {
   const published = await listPublishedTemplates().catch(() => []);
-  const originals = new Set<string>(THEMES.map((t) => t.id));
-  const hidden = published.length ? THEMES.filter((t) => !published.some((p) => p.id === t.id)).map((t) => t.id) : [];
-  const extra: PublishedGalleryTheme[] = published
-    .filter((p) => !originals.has(p.id))
-    .map((p) => ({
-      id: p.id,
-      name: p.name,
-      sub: p.blurb,
-      category: p.category === "other" ? "fashion" : p.category,
-      categoryLabel: LABELS[p.category] ?? "More",
-      tag1: p.tags[0] ?? p.audience ?? "",
-      tag2: p.tags[1] ?? "",
-      module: p.moduleLabel ?? "New",
-      colors: {
-        accent: p.settings.accent,
-        background: p.settings.background,
-        text: p.settings.text,
-      },
-    }));
+  const { extra, businessExtra, hidden } = splitPublishedTemplates(published);
 
   return (
     <section className="block" style={{ paddingTop: 40, paddingBottom: 80 }}>
@@ -213,7 +188,7 @@ export default async function BusinessTemplatesPage() {
         </div>
 
         {/* Template Gallery Initialized in Business Mode */}
-        <TemplateGallery extra={extra} hidden={hidden} initialMode="business" />
+        <TemplateGallery extra={extra} businessExtra={businessExtra} hidden={hidden} initialMode="business" />
 
         {/* Cross-Link Banner to eCommerce Storefronts & Hybrid */}
         <div

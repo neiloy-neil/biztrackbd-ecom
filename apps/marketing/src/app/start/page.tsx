@@ -82,6 +82,13 @@ export default async function Start({
   } else if (wantedTemplate === "public-profile") {
     resolvedMode = "PORTFOLIO";
     resolvedVertical = "PUBLIC_FIGURE";
+  } else {
+    // A business template staff uploaded carries its own mode and vertical.
+    const uploaded = templates.find((t) => t.id === wantedTemplate);
+    if (uploaded?.siteMode && uploaded.siteMode !== "ECOMMERCE" && uploaded.vertical) {
+      resolvedMode = uploaded.siteMode;
+      resolvedVertical = uploaded.vertical;
+    }
   }
 
   const rawMode = typeof sp.mode === "string" ? sp.mode.toUpperCase() : "";

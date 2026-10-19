@@ -7,6 +7,8 @@ import {
   TEMPLATE_CATEGORIES,
   listTenants,
   publishTemplateFromStore,
+  importTemplateBundle,
+  MAX_TEMPLATE_BUNDLE_BYTES,
   setTemplateStatus,
   toggleGlobalModuleMaintenance,
   setModulePlanOverride,
@@ -43,6 +45,25 @@ export async function publishTemplateAction(form: FormData): Promise<void> {
   }
   revalidatePath("/themes");
   back({ done: `Published ${get("id").toLowerCase()}. Stores using an older version are offered this one; new stores start from it.` });
+}
+
+/** Uploads a template file: it is checked part by part, saved, and (unless "save as draft" is ticked) goes live in the gallery, signup and every store's picker. */
+export async function uploadTemplateFileAction(form: FormData): Promise<void> {
+  const s = await requireAction("plans", "edit");
+  const file = form.get("file");
+  if (!(file instanceof File) || file.size === 0) return back({ err: "Choose a template .json file to upload." });
+  if (file.size > MAX_TEMPLATE_BUNDLE_BYTES) return back({ err: "The template file is too large (1 MB at most)." });
+  const publish = form.get("draft") !== "on";
+  let msg = "";
+  try {
+    const { template, created } = await importTemplateBundle(s.actor, await file.text(), { publish });
+    msg = `${created ? "Added" : "Updated"} ${template.id} (v${template.version}). ${publish ? "It is live: the marketing gallery, signup and every store's template picker show it now." : "Saved as a draft. Press Publish to show it."}`;
+  } catch (e) {
+    if (e instanceof DomainError) return back({ err: e.message });
+    throw e;
+  }
+  revalidatePath("/themes");
+  back({ done: msg });
 }
 
 export async function setTemplateStatusAction(id: string, status: string): Promise<void> {

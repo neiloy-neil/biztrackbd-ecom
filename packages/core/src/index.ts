@@ -118,6 +118,7 @@ export {
 export { accessState, statusFor, addPeriod, ACCESS_LABELS, GRACE_DAYS, READ_ONLY_UNTIL_DAY, type AccessState, type Access, type AccessInput } from "./platform/lifecycle";
 export { scanBrandRisk } from "./platform/brand";
 export * from "./platform/templates";
+export * from "./platform/template-bundle";
 export { installTemplatePages } from "./builder/versions";
 export { createEmailProof, emailProofValid, sendSignupCode, confirmSignupEmail, verificationRequired, type ConfirmedEmail } from "./platform/signup-verify";
 export { signupStore, checkSubdomain, SignupInput, THEMES, SUBDOMAIN_MESSAGES, type SignedUp, type SubdomainCheck } from "./platform/signup";
@@ -474,3 +475,4 @@ export * from "./platform/tracking";
 export * from "./messaging/queue";
 export * from "./messaging/templates";
 export * from "./messaging/webhook";
+export * from "./messaging/chat-adapters";

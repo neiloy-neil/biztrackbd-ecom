@@ -169,6 +169,15 @@ export function TemplateSwitcher({
             >
               <input type="hidden" name="templateId" value={t.id} />
               <div className="row" style={{ gap: 10, alignItems: "center" }}>
+                {t.previews?.desktop || t.previews?.mobile ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- staff-uploaded preview on an external https host
+                  <img
+                    src={t.previews.desktop ?? t.previews.mobile}
+                    alt=""
+                    loading="lazy"
+                    style={{ width: 56, height: 40, borderRadius: 6, objectFit: "cover", objectPosition: "top", border: `2px solid ${t.settings?.accent || "var(--primary)"}`, flex: "none" }}
+                  />
+                ) : (
                 <span
                   aria-hidden
                   style={{
@@ -180,6 +189,7 @@ export function TemplateSwitcher({
                     flex: "none",
                   }}
                 />
+                )}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                     <b>{t.name}</b>

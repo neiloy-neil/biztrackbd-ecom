@@ -11,6 +11,7 @@ import { assertCan, type StaffActor } from "../permissions";
 import { assertPlatformCan, type PlatformActor } from "./admin";
 import { BUSINESS_TEMPLATES, type CustomPageManifest } from "../site/templates/manifests";
 import type { SiteMode, BusinessVertical } from "../site/mode";
+import { parseTemplateBundle, exportTemplateBundle, BUNDLE_SITE_MODES, BUNDLE_VERTICALS } from "./template-bundle";
 
 /**
  * Store templates that platform staff publish without a deploy (docs/46, stage 5).
@@ -49,6 +50,8 @@ export interface TemplateInfo {
   siteMode?: SiteMode;
   vertical?: BusinessVertical;
   customPages?: CustomPageManifest[];
+  /** Pictures for the gallery cards (https links), from an uploaded template file. */
+  previews?: { desktop?: string; mobile?: string };
 }
 
 const BUILT_IN_CATEGORY: Record<string, TemplateCategory> = { kapor: "fashion", gadgetstudio: "electronics", "mini-bunny": "kids", axionwear: "streetwear", bindu: "beauty", berber: "fashion" };
@@ -98,7 +101,23 @@ function fromRow(r: Row): TemplateInfo {
   let chrome: Chrome | null = BUILT_IN_CHROMES[r.id] ?? null;
   if (raw._chrome !== undefined) { try { chrome = templateChrome(raw._chrome); } catch { /* keep the original's */ } }
   const category = (TEMPLATE_CATEGORIES as readonly string[]).includes(r.category) ? (r.category as TemplateCategory) : "other";
-  return { id: r.id, name: r.name, blurb: r.blurb, audience: r.audience, baseLook, category, tags: r.tags, moduleLabel: r.moduleLabel, version: r.version, status: r.status as TemplateStatus, builtIn: false, settings, pages, chrome };
+  const info: TemplateInfo = { id: r.id, name: r.name, blurb: r.blurb, audience: r.audience, baseLook, category, tags: r.tags, moduleLabel: r.moduleLabel, version: r.version, status: r.status as TemplateStatus, builtIn: false, settings, pages, chrome };
+  // An uploaded template file also carries its mode, business pages and preview pictures, under a key of their own (like _chrome).
+  const meta = (raw._meta && typeof raw._meta === "object" ? raw._meta : null) as Record<string, unknown> | null;
+  if (meta) {
+    const mode = (BUNDLE_SITE_MODES as readonly string[]).includes(String(meta.siteMode)) ? (meta.siteMode as SiteMode) : undefined;
+    if (mode && mode !== "ECOMMERCE" && (BUNDLE_VERTICALS as readonly string[]).includes(String(meta.vertical))) { info.siteMode = mode; info.vertical = meta.vertical as BusinessVertical; }
+    if (Array.isArray(meta.customPages)) {
+      const cps: CustomPageManifest[] = [];
+      for (const c of meta.customPages as CustomPageManifest[]) { try { cps.push({ ...c, layout: validatePage("custom", c.layout) }); } catch { /* skip a damaged page */ } }
+      if (cps.length) info.customPages = cps;
+    }
+    const pv = (meta.previews && typeof meta.previews === "object" ? meta.previews : {}) as Record<string, unknown>;
+    const https = (v: unknown) => (typeof v === "string" && v.startsWith("https://") ? v : undefined);
+    const previews = { desktop: https(pv.desktop), mobile: https(pv.mobile) };
+    if (previews.desktop || previews.mobile) info.previews = previews;
+  }
+  return info;
 }
 
 /** The templates a visitor or a new store can choose: the originals (unless replaced or archived) and every published one. */
@@ -201,6 +220,46 @@ export async function publishTemplateFromStore(actor: PlatformActor, input: Publ
     return row;
   });
   return fromRow(saved as Row);
+}
+
+export type ImportedTemplate = { template: TemplateInfo; created: boolean };
+
+/**
+ * Takes an uploaded template file (see template-bundle.ts) and saves it as a template. A new id is made version 1 (an id of one of the six
+ * originals starts at 2, so stores made from the original are offered it); an id that exists becomes the next version. With `publish` it is
+ * live in the gallery, the signup and every store's template picker at once; without, it waits as a draft. Stores already using the template
+ * are not touched: they are offered the new version as drafts.
+ */
+export async function importTemplateBundle(actor: PlatformActor, text: string, opts: { publish: boolean }, db: PrismaClient = getPlatformPrisma()): Promise<ImportedTemplate> {
+  assertPlatformCan(actor, "plans", "edit");
+  const b = parseTemplateBundle(text);
+  const pages: Record<string, unknown> = { ...b.pages };
+  for (const kind of STORE_PAGE_KINDS) if (!pages[kind]) pages[kind] = defaultPageFor(kind);
+  if (b.chrome) pages._chrome = b.chrome;
+  if (b.siteMode !== "ECOMMERCE" || b.customPages.length || b.previews.desktop || b.previews.mobile) {
+    pages._meta = { siteMode: b.siteMode, vertical: b.vertical ?? null, customPages: b.customPages, previews: b.previews };
+  }
+  const data = { name: b.name, blurb: b.blurb, audience: b.audience, baseLook: b.baseLook, category: b.category, tags: b.tags, moduleLabel: b.moduleLabel, settingsJson: b.settings as object, pagesJson: pages as object };
+  const isOriginal = STORE_THEMES.some((t) => t.id === b.id) || BUSINESS_TEMPLATES.some((t) => t.id === b.id);
+  const status: TemplateStatus = opts.publish ? "PUBLISHED" : "DRAFT";
+  const saved = await db.$transaction(async (tx) => {
+    const existing = await tx.template.findUnique({ where: { id: b.id } });
+    const row = existing
+      ? await tx.template.update({ where: { id: b.id }, data: { ...data, status, version: existing.version + 1, ...(opts.publish ? { publishedAt: new Date() } : {}) } })
+      : await tx.template.create({ data: { id: b.id, ...data, status, version: isOriginal ? 2 : 1, ...(opts.publish ? { publishedAt: new Date() } : {}) } });
+    await tx.platformAuditLog.create({ data: { actorId: actor.id, action: "template.uploaded", details: { id: b.id, version: row.version, status, siteMode: b.siteMode }, ipAddress: actor.ip ?? null } });
+    return { row, created: !existing };
+  });
+  return { template: fromRow(saved.row as Row), created: saved.created };
+}
+
+/** A template as a downloadable file, so it can be edited elsewhere and uploaded again. */
+export function templateToFile(t: TemplateInfo): string {
+  return exportTemplateBundle({
+    id: t.id, name: t.name, blurb: t.blurb, audience: t.audience, category: t.category, tags: t.tags, moduleLabel: t.moduleLabel, baseLook: t.baseLook,
+    siteMode: t.siteMode ?? "ECOMMERCE", vertical: t.vertical, previews: t.previews ?? {}, settings: t.settings,
+    pages: t.pages ?? Object.fromEntries(STORE_PAGE_KINDS.map((k) => [k, defaultPageFor(k)])), chrome: t.chrome, customPages: t.customPages,
+  });
 }
 
 /** Hides a template from new stores and the gallery (ARCHIVED), brings it back (PUBLISHED), or sets it aside before it is shown (DRAFT). Stores using it keep working. */
