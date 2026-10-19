@@ -22,11 +22,157 @@
 .bld-ib.danger { color: var(--danger); }
 .bld-alerts { padding: 8px 12px 0; flex: none; display: grid; gap: 8px; }
 
-/* ---- Body: three zones */
-.bld-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 300px minmax(0, 1fr) 360px; }
-.bld-left, .bld-right { background: var(--surface); min-height: 0; overflow-y: auto; }
-.bld-left { border-right: 1px solid var(--line); padding: 14px; }
-.bld-right { border-left: 1px solid var(--line); display: flex; flex-direction: column; }
+/* ---- Body: three zones with responsive collapsible docks ---- */
+.bld-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: var(--bld-left-w, 320px) minmax(0, 1fr) var(--bld-right-w, 360px);
+  transition: grid-template-columns 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.bld-left-dock {
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.bld-icon-rail {
+  width: 48px;
+  flex: none;
+  background: var(--bg);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0;
+  gap: 8px;
+  z-index: 10;
+  box-sizing: border-box;
+}
+.bld-rail-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+.bld-rail-btn:hover {
+  background: var(--chip);
+  color: var(--ink);
+}
+.bld-rail-btn.active {
+  background: var(--tint);
+  color: var(--brand);
+}
+.bld-rail-btn.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 0 4px 4px 0;
+  background: var(--brand);
+}
+.bld-rail-bottom {
+  margin-top: auto;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.bld-dock-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  background: var(--surface);
+  box-sizing: border-box;
+}
+.bld-dock-head {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: none;
+  background: var(--surface);
+}
+.bld-dock-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.bld-dock-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--chip);
+  color: var(--ink-2);
+}
+.bld-tree-search {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+.bld-tree-input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 12px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.bld-tree-input:focus {
+  border-color: var(--brand);
+}
+.bld-glyph {
+  font-size: 14px;
+  line-height: 1;
+  flex: none;
+  width: 20px;
+  text-align: center;
+}
+.bld-right {
+  background: var(--surface);
+  min-height: 0;
+  overflow-y: auto;
+  border-left: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease;
+}
+.bld-right.collapsed {
+  width: 0 !important;
+  opacity: 0;
+  overflow: hidden;
+  border-left: 0;
+  padding: 0;
+}
 .bld-stage { position: relative; min-width: 0; min-height: 0; height: 100%; overflow: auto; display: flex; justify-content: center; align-items: stretch; background: var(--chip); padding: 16px 24px 80px 24px; box-sizing: border-box; }
 .bld-device { transform-origin: top center; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 12px 36px rgba(15, 23, 42, .22); width: 100%; height: 100%; min-height: 100%; display: flex; flex-direction: column; }
 .bld-device iframe { width: 100%; height: 100%; min-height: 100%; border: 0; display: block; flex: 1; }

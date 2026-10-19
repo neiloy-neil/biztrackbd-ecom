@@ -70,6 +70,68 @@ const ITrash = () => <svg {...svg} width={16} height={16}><path d="M4 7h16M10 11
 const IUp = () => <svg {...svg} width={16} height={16}><path d="M6 15l6-6 6 6" /></svg>;
 const IDown = () => <svg {...svg} width={16} height={16}><path d="M6 9l6 6 6-6" /></svg>;
 const ILink = () => <svg {...svg}><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1" /></svg>;
+const ILayers = () => <svg {...svg}><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>;
+const IBlocks = () => <svg {...svg}><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /></svg>;
+const IPalette = () => <svg {...svg}><path d="M12 2a10 10 0 00-10 10 9.9 9.9 0 005 8.66c.55.32 1.25.13 1.57-.42.23-.39.22-.88-.02-1.28A4 4 0 0112 16a2 2 0 012 2v.5a2.5 2.5 0 005 0V17a7 7 0 001.4-4.2A10 10 0 0012 2z" /><circle cx="7.5" cy="10.5" r="1.5" /><circle cx="12" cy="7.5" r="1.5" /><circle cx="16.5" cy="10.5" r="1.5" /></svg>;
+const IHistory = () => <svg {...svg}><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>;
+const ICollapseLeft = () => <svg {...svg} width={16} height={16}><polyline points="15 18 9 12 15 6" /></svg>;
+const IExpandRight = () => <svg {...svg} width={16} height={16}><polyline points="9 18 15 12 9 6" /></svg>;
+const IZen = () => <svg {...svg}><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" /></svg>;
+
+function sectionGlyph(type: string): string {
+  switch (type) {
+    case "hero":
+    case "doctor-hero":
+    case "banner":
+      return "🖼️";
+    case "restaurant-menu":
+      return "🍽️";
+    case "restaurant-hours-location":
+    case "clinic-chambers":
+      return "📍";
+    case "reservation-cta":
+      return "📅";
+    case "featured-products":
+    case "collection-products":
+      return "🛍️";
+    case "category-grid":
+      return "🗂️";
+    case "testimonials-slider":
+    case "product-reviews":
+      return "⭐";
+    case "trust-strip":
+      return "🛡️";
+    case "bento-grid":
+      return "▦";
+    case "content-tabs":
+      return "📑";
+    case "pricing-matrix":
+      return "🏷️";
+    case "accordion-faq":
+      return "❓";
+    case "video-lightbox":
+    case "video-reels":
+      return "▶️";
+    case "countdown-timer":
+      return "⏱️";
+    case "promo-popup":
+      return "🎁";
+    case "floating-whatsapp":
+      return "💬";
+    case "contact-form":
+      return "✉️";
+    case "team-grid":
+      return "👥";
+    case "process-timeline":
+      return "⏳";
+    case "flip-box":
+      return "🔄";
+    case "image-comparison":
+      return "🪞";
+    default:
+      return "▤";
+  }
+}
 
 function useNarrow(): boolean {
   return useSyncExternalStore(
@@ -834,6 +896,10 @@ export function Builder(props: Props) {
   const resizeStart = useRef<{ clientX: number; startW: number } | null>(null);
   const [, bump] = useState(0);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [leftTab, setLeftTab] = useState<"layers" | "library" | "theme" | "history">("layers");
+  const [leftCollapsed, setLeftCollapsed] = useState(false);
+  const [rightCollapsed, setRightCollapsed] = useState(false);
+  const [treeSearch, setTreeSearch] = useState("");
   const frame = useRef<HTMLIFrameElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const ready = useRef(false);
@@ -1014,6 +1080,28 @@ export function Builder(props: Props) {
           });
         }
         return;
+      }
+
+      // Toggle Left Sidebar: Ctrl+B / Cmd+B
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
+        if (!isInput) {
+          e.preventDefault();
+          setLeftCollapsed((prev) => !prev);
+          return;
+        }
+      }
+
+      // Zen Focus Mode (Toggle Both Sidebars): Ctrl+\ / Cmd+\
+      if ((e.ctrlKey || e.metaKey) && e.key === "\\") {
+        if (!isInput) {
+          e.preventDefault();
+          setLeftCollapsed((prevL) => {
+            const next = !prevL;
+            setRightCollapsed(next);
+            return next;
+          });
+          return;
+        }
       }
 
       // Escape key: close shortcuts modal or deselect section
@@ -1379,46 +1467,82 @@ export function Builder(props: Props) {
     : [{ id: "settings", label: "Settings" }, { id: "theme", label: kind === "home" ? "Template and style" : "Page", test: "tab-theme" }, { id: "history", label: "History", test: "tab-history" }];
   const active: Tab = narrow ? tab : tab === "layers" ? "settings" : tab;
 
+  const filteredSections = treeSearch.trim()
+    ? page.sections.filter((s) => {
+        const def = sectionDef(s.type);
+        const q = treeSearch.toLowerCase().trim();
+        return (
+          s.label?.toLowerCase().includes(q) ||
+          def?.label.toLowerCase().includes(q) ||
+          s.type.toLowerCase().includes(q) ||
+          s.style?.anchorId?.toLowerCase().includes(q)
+        );
+      })
+    : page.sections;
+
   const layers = (
     <div className="bld-layers" data-testid="layers">
       {props.sectionsLocked && <div className="notice" role="note" data-testid="sections-locked">Your plan lets you change colours and style. {kind === "home" ? "To rearrange or edit sections, move up to the Pro plan." : "Editing this page is part of the Business plan."} <Link className="link" href="/billing">See plans</Link></div>}
       <ol className="bld-list" aria-label="Sections on this page">
-        {page.sections.map((s, i) => {
+        {filteredSections.map((s) => {
           const def = sectionDef(s.type);
+          const origIdx = page.sections.findIndex((x) => x.id === s.id);
           return (
             <li
               key={s.id}
-              className={`bld-row${s.id === selected ? " on" : ""}${s.disabled ? " off" : ""}${dragOver === i && dragFrom !== null && dragFrom !== i ? (dragFrom < i ? " over-after" : " over-before") : ""}`}
+              className={`bld-row${s.id === selected ? " on" : ""}${s.disabled ? " off" : ""}${dragOver === origIdx && dragFrom !== null && dragFrom !== origIdx ? (dragFrom < origIdx ? " over-after" : " over-before") : ""}`}
               data-testid="section-row" data-type={s.type}
               draggable={!locked && !narrow}
-              onDragStart={(e) => { setDragFrom(i); e.dataTransfer.effectAllowed = "move"; }}
-              onDragOver={(e) => { if (dragFrom !== null) { e.preventDefault(); setDragOver(i); } }}
-              onDrop={(e) => { e.preventDefault(); if (dragFrom !== null) reorder(dragFrom, i); setDragFrom(null); setDragOver(null); }}
+              onDragStart={(e) => { setDragFrom(origIdx); e.dataTransfer.effectAllowed = "move"; }}
+              onDragOver={(e) => { if (dragFrom !== null) { e.preventDefault(); setDragOver(origIdx); } }}
+              onDrop={(e) => { e.preventDefault(); if (dragFrom !== null) reorder(dragFrom, origIdx); setDragFrom(null); setDragOver(null); }}
               onDragEnd={() => { setDragFrom(null); setDragOver(null); }}
             >
               {!locked && !narrow && <span className="bld-grip" aria-hidden><IGrip /></span>}
               <button type="button" className="bld-pick" onClick={() => choose(s.id)} aria-pressed={s.id === selected}>
-                <b>{s.label || def?.label || s.type}</b>
-                {s.label && <span className="pill" style={{ fontSize: 10, padding: "1px 5px", background: "var(--line-2)" }}>{def?.label}</span>}
-                {s.style?.anchorId && <span className="pill grey" style={{ fontSize: 10, padding: "1px 5px" }}>#{s.style.anchorId}</span>}
-                {s.style?.animation && s.style.animation !== "none" && <span className="pill blue" style={{ fontSize: 10, padding: "1px 5px" }} title={`Entrance: ${s.style.animation}`}>✦ {s.style.animation}</span>}
-                {s.style?.hideOn === "mobile" && <span className="pill blue" title="Visible on desktop only">Desktop</span>}
-                {s.style?.hideOn === "desktop" && <span className="pill purple" title="Visible on mobile phones only">Mobile</span>}
-                {s.disabled && <span className="pill grey">Hidden</span>}
+                <span className="bld-glyph" aria-hidden>{sectionGlyph(s.type)}</span>
+                <span style={{ display: "inline-flex", flexDirection: "column", minWidth: 0, flex: 1, gap: 1 }}>
+                  <b style={{ fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.label || def?.label || s.type}</b>
+                  {s.label && <span style={{ fontSize: 10, color: "var(--ink-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{def?.label}</span>}
+                </span>
+                <span className="pill grey" style={{ fontSize: 9, padding: "1px 4px", opacity: 0.8 }}>#{origIdx + 1}</span>
+                {s.style?.anchorId && <span className="pill grey" style={{ fontSize: 9, padding: "1px 4px" }}>#{s.style.anchorId}</span>}
+                {s.style?.animation && s.style.animation !== "none" && <span className="pill blue" style={{ fontSize: 9, padding: "1px 4px" }} title={`Entrance: ${s.style.animation}`}>✦ {s.style.animation}</span>}
+                {s.style?.hideOn === "mobile" && <span className="pill blue" style={{ fontSize: 9, padding: "1px 4px" }} title="Visible on desktop only">Desktop</span>}
+                {s.style?.hideOn === "desktop" && <span className="pill purple" style={{ fontSize: 9, padding: "1px 4px" }} title="Visible on mobile phones only">Mobile</span>}
+                {s.disabled && <span className="pill grey" style={{ fontSize: 9, padding: "1px 4px" }}>Hidden</span>}
               </button>
               {!locked && (
                 <span className="bld-acts">
-                  <button type="button" className="bld-ib" disabled={i === 0} onClick={() => move(s.id, -1)} aria-label={`Move ${s.label || def?.label} up`} title="Move up (Alt+Up)"><IUp /></button>
-                  <button type="button" className="bld-ib" disabled={i === page.sections.length - 1} onClick={() => move(s.id, 1)} aria-label={`Move ${s.label || def?.label} down`} title="Move down (Alt+Down)"><IDown /></button>
+                  <button type="button" className="bld-ib" disabled={origIdx === 0} onClick={() => move(s.id, -1)} aria-label={`Move ${s.label || def?.label} up`} title="Move up (Alt+Up)"><IUp /></button>
+                  <button type="button" className="bld-ib" disabled={origIdx === page.sections.length - 1} onClick={() => move(s.id, 1)} aria-label={`Move ${s.label || def?.label} down`} title="Move down (Alt+Down)"><IDown /></button>
                   <button type="button" className="bld-ib" onClick={() => toggle(s.id)} disabled={isRequired(s.type)} title={isRequired(s.type) ? "This page needs this section" : undefined} aria-label={`${s.disabled ? "Show" : "Hide"} ${def?.label}`}><IEye off={s.disabled} /></button>
+                  <button type="button" className="bld-ib" onClick={() => duplicate(s)} disabled={full(s.type)} aria-label={`Duplicate ${s.label || def?.label}`} title="Duplicate section (Ctrl+D)"><ICopy /></button>
+                  {!isRequired(s.type) && <button type="button" className="bld-ib danger" onClick={() => remove(s.id)} aria-label={`Delete ${s.label || def?.label}`} title="Delete section"><ITrash /></button>}
                 </span>
               )}
             </li>
           );
         })}
-        {page.sections.length === 0 && <li className="muted" style={{ padding: 12 }}>This page is empty. Add a section below.</li>}
+        {filteredSections.length === 0 && (
+          <li className="muted" style={{ padding: 16, textAlign: "center", fontSize: 13 }}>
+            {treeSearch.trim() ? `No sections match "${treeSearch}"` : "This page is empty. Add a section below."}
+          </li>
+        )}
       </ol>
-      {!locked && <button type="button" className="btn btn-secondary btn-block" onClick={() => setLibrary(true)} data-testid="add-section"><IPlus /> Add section</button>}
+      {!locked && (
+        <button
+          type="button"
+          className="btn btn-secondary btn-block"
+          onClick={() => {
+            setLeftTab("library");
+            setLeftCollapsed(false);
+          }}
+          data-testid="add-section"
+        >
+          <IPlus /> Add section
+        </button>
+      )}
     </div>
   );
 
@@ -1559,6 +1683,31 @@ export function Builder(props: Props) {
           <Segmented label="Preview language" value={lang} onChange={setLang} options={[{ value: "en", label: "EN" }, { value: "bn", label: "বাং" }]} />
           <button type="button" className="bld-ib" onClick={undo} disabled={!canUndo || !canEdit} aria-label="Undo" title="Undo (Ctrl+Z)"><IUndo /></button>
           <button type="button" className="bld-ib" onClick={redo} disabled={!canRedo || !canEdit} aria-label="Redo" title="Redo (Ctrl+Shift+Z)"><IRedo /></button>
+          {!narrow && (
+            <button
+              type="button"
+              className={`bld-ib${leftCollapsed && rightCollapsed ? " on" : ""}`}
+              onClick={() => {
+                const both = leftCollapsed && rightCollapsed;
+                setLeftCollapsed(!both);
+                setRightCollapsed(!both);
+              }}
+              title="Zen Focus Mode (Ctrl+\)"
+              aria-label="Zen Focus Mode"
+            >
+              <IZen />
+            </button>
+          )}
+          {!narrow && rightCollapsed && (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => setRightCollapsed(false)}
+              title="Expand Inspector panel"
+            >
+              Inspector ◀
+            </button>
+          )}
           {!narrow && <button type="button" className="btn btn-secondary btn-sm" onClick={copyLink} title="Copy a private link to your saved draft"><ILink /> Share preview</button>}
           {!narrow && <a href={props.liveUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm">View live page</a>}
           {canEdit && <button type="button" className="btn btn-primary btn-sm" onClick={doPublish} disabled={busy || save === "saving" || (!dirty && !props.hasDraft)} data-testid="publish">{busy ? "Working…" : "Publish"}</button>}
@@ -1581,8 +1730,230 @@ export function Builder(props: Props) {
         </div>
       )}
 
-      <div className="bld-body">
-        {!narrow && <aside className="bld-left" aria-label="Sections">{layers}</aside>}
+      <div
+        className="bld-body"
+        style={{
+          "--bld-left-w": leftCollapsed ? "48px" : "320px",
+          "--bld-right-w": rightCollapsed ? "0px" : "360px",
+        } as React.CSSProperties}
+      >
+        {!narrow && (
+          <aside
+            className="bld-left-dock"
+            aria-label="Editor tools"
+            style={{ width: leftCollapsed ? 48 : 320 }}
+          >
+            <nav className="bld-icon-rail" aria-label="Workspace tool selector">
+              <button
+                type="button"
+                className={`bld-rail-btn${leftTab === "layers" && !leftCollapsed ? " active" : ""}`}
+                onClick={() => {
+                  setLeftTab("layers");
+                  setLeftCollapsed(false);
+                }}
+                title="Layers & Structure (Ctrl+1)"
+                aria-label="Layers & Structure"
+              >
+                <ILayers />
+              </button>
+              <button
+                type="button"
+                className={`bld-rail-btn${leftTab === "library" && !leftCollapsed ? " active" : ""}`}
+                onClick={() => {
+                  setLeftTab("library");
+                  setLeftCollapsed(false);
+                }}
+                title="Add Blocks & Patterns (Ctrl+2)"
+                aria-label="Add Blocks & Patterns"
+              >
+                <IBlocks />
+              </button>
+              <button
+                type="button"
+                className={`bld-rail-btn${leftTab === "theme" && !leftCollapsed ? " active" : ""}`}
+                onClick={() => {
+                  setLeftTab("theme");
+                  setLeftCollapsed(false);
+                }}
+                title="Global Theme & Styles (Ctrl+3)"
+                aria-label="Global Theme & Styles"
+              >
+                <IPalette />
+              </button>
+              <button
+                type="button"
+                className={`bld-rail-btn${leftTab === "history" && !leftCollapsed ? " active" : ""}`}
+                onClick={() => {
+                  setLeftTab("history");
+                  setLeftCollapsed(false);
+                }}
+                title="Version History & Drafts (Ctrl+4)"
+                aria-label="Version History & Drafts"
+              >
+                <IHistory />
+              </button>
+
+              <div className="bld-rail-bottom">
+                <button
+                  type="button"
+                  className="bld-rail-btn"
+                  onClick={() => setLeftCollapsed(!leftCollapsed)}
+                  title={leftCollapsed ? "Expand left sidebar (Ctrl+B)" : "Collapse left sidebar (Ctrl+B)"}
+                  aria-label={leftCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                >
+                  {leftCollapsed ? <IExpandRight /> : <ICollapseLeft />}
+                </button>
+              </div>
+            </nav>
+
+            {!leftCollapsed && (
+              <div className="bld-dock-panel">
+                {leftTab === "layers" && (
+                  <>
+                    <div className="bld-dock-head">
+                      <span className="bld-dock-title">
+                        <ILayers />
+                        <span>Structure / Layers</span>
+                      </span>
+                      <span className="bld-dock-badge" title="Sections count">
+                        {page.sections.length}/30
+                      </span>
+                    </div>
+                    <div className="bld-tree-search">
+                      <input
+                        type="search"
+                        className="bld-tree-input"
+                        placeholder="Filter sections..."
+                        value={treeSearch}
+                        onChange={(e) => setTreeSearch(e.target.value)}
+                        aria-label="Filter sections in tree"
+                      />
+                    </div>
+                    <div className="bld-panel-body" style={{ flex: 1, padding: "10px 12px" }}>
+                      {layers}
+                    </div>
+                  </>
+                )}
+
+                {leftTab === "library" && (
+                  <>
+                    <div className="bld-dock-head">
+                      <span className="bld-dock-title">
+                        <IBlocks />
+                        <span>Block Library</span>
+                      </span>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        style={{ fontSize: 11, padding: "2px 8px" }}
+                        onClick={() => setLibrary(true)}
+                        title="Open expanded gallery modal"
+                      >
+                        Gallery ↗
+                      </button>
+                    </div>
+                    <div className="bld-panel-body" style={{ flex: 1, padding: "12px" }}>
+                      <div className="row" style={{ gap: 6, marginBottom: 10 }}>
+                        <button
+                          type="button"
+                          className={`btn btn-sm ${libraryTab === "components" ? "btn-primary" : "btn-secondary"}`}
+                          style={{ flex: 1, fontSize: 11 }}
+                          onClick={() => setLibraryTab("components")}
+                        >
+                          Blocks ({defs.length})
+                        </button>
+                        <button
+                          type="button"
+                          className={`btn btn-sm ${libraryTab === "patterns" ? "btn-primary" : "btn-secondary"}`}
+                          style={{ flex: 1, fontSize: 11 }}
+                          onClick={() => setLibraryTab("patterns")}
+                        >
+                          Patterns ({SECTION_PATTERNS.length})
+                        </button>
+                      </div>
+
+                      {libraryTab === "components" ? (
+                        <div className="bld-lib" style={{ gap: 8 }}>
+                          {defs.map((d) => (
+                            <button
+                              key={d.type}
+                              type="button"
+                              className="bld-card"
+                              style={{ padding: "8px 10px", minHeight: "auto" }}
+                              disabled={locked || full(d.type)}
+                              onClick={() => add(d.type)}
+                              title={d.description}
+                            >
+                              <div className="row" style={{ alignItems: "center", gap: 8 }}>
+                                <span className="bld-glyph">{sectionGlyph(d.type)}</span>
+                                <div style={{ minWidth: 0, flex: 1 }}>
+                                  <b style={{ fontSize: 13, display: "block" }}>{d.label}</b>
+                                  <span style={{ fontSize: 11, display: "block", color: "var(--ink-3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{d.description}</span>
+                                </div>
+                                <span style={{ color: "var(--brand)", fontWeight: 700, fontSize: 12 }}>+</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="bld-lib" style={{ gap: 8 }}>
+                          {SECTION_PATTERNS.map((pat) => (
+                            <button
+                              key={pat.id}
+                              type="button"
+                              className="bld-card"
+                              style={{ padding: "8px 10px", minHeight: "auto" }}
+                              disabled={locked || full(pat.sectionType)}
+                              onClick={() => addPattern(pat)}
+                              title={pat.description}
+                            >
+                              <div className="row" style={{ alignItems: "center", gap: 8 }}>
+                                <span className="bld-glyph">⭐</span>
+                                <div style={{ minWidth: 0, flex: 1 }}>
+                                  <b style={{ fontSize: 13, display: "block" }}>{pat.title}</b>
+                                  <span style={{ fontSize: 11, display: "block", color: "var(--ink-3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pat.description}</span>
+                                </div>
+                                <span style={{ color: "var(--brand)", fontWeight: 700, fontSize: 12 }}>+</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {leftTab === "theme" && (
+                  <>
+                    <div className="bld-dock-head">
+                      <span className="bld-dock-title">
+                        <IPalette />
+                        <span>Theme & Styles</span>
+                      </span>
+                    </div>
+                    <div className="bld-panel-body" style={{ flex: 1, padding: "12px" }}>
+                      {themeTab}
+                    </div>
+                  </>
+                )}
+
+                {leftTab === "history" && (
+                  <>
+                    <div className="bld-dock-head">
+                      <span className="bld-dock-title">
+                        <IHistory />
+                        <span>Version History</span>
+                      </span>
+                    </div>
+                    <div className="bld-panel-body" style={{ flex: 1, padding: "12px" }}>
+                      {history}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </aside>
+        )}
 
         <main className="bld-stage" ref={stage} data-backdrop={canvasBackdrop}>
           <div
@@ -1746,12 +2117,26 @@ export function Builder(props: Props) {
           )}
         </main>
 
-        <aside className="bld-right" aria-label={narrow ? "Editor panel" : "Settings"}>
+        <aside className={`bld-right${rightCollapsed ? " collapsed" : ""}`} aria-label={narrow ? "Editor panel" : "Settings"}>
           {visual && narrow && <button type="button" className="bld-handle" onClick={() => setSheet((v) => !v)} aria-expanded={sheet} data-testid="sheet-handle"><span aria-hidden /><b>{sheet ? "Show the page" : current && currentDef ? `Edit: ${currentDef.label}` : "Sections and settings"}</b></button>}
-          <div className="bld-tabs" role="tablist" aria-label="Editor">
-            {tabs.map((t) => (
-              <button key={t.id} type="button" role="tab" aria-selected={active === t.id} onClick={() => setTab(t.id)} data-testid={t.test ?? `tab-${t.id}`}>{t.label}</button>
-            ))}
+          <div className="bld-tabs" role="tablist" aria-label="Editor" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", gap: 2 }}>
+              {tabs.map((t) => (
+                <button key={t.id} type="button" role="tab" aria-selected={active === t.id} onClick={() => setTab(t.id)} data-testid={t.test ?? `tab-${t.id}`}>{t.label}</button>
+              ))}
+            </div>
+            {!narrow && (
+              <button
+                type="button"
+                className="bld-ib"
+                onClick={() => setRightCollapsed(true)}
+                title="Collapse Inspector"
+                aria-label="Collapse Inspector"
+                style={{ width: 28, height: 28, marginRight: 4 }}
+              >
+                <IExpandRight />
+              </button>
+            )}
           </div>
           {narrow && active === "layers" ? <div className="bld-panel-body">{layers}</div> : inspector}
         </aside>
