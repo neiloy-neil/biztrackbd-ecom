@@ -69,6 +69,7 @@ const ICopy = () => <svg {...svg} width={16} height={16}><rect x="9" y="9" width
 const ITrash = () => <svg {...svg} width={16} height={16}><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" /></svg>;
 const IUp = () => <svg {...svg} width={16} height={16}><path d="M6 15l6-6 6 6" /></svg>;
 const IDown = () => <svg {...svg} width={16} height={16}><path d="M6 9l6 6 6-6" /></svg>;
+const IMore = () => <svg {...svg} width={16} height={16}><circle cx="12" cy="12" r="1.5" /><circle cx="6" cy="12" r="1.5" /><circle cx="18" cy="12" r="1.5" /></svg>;
 const ILink = () => <svg {...svg}><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1" /></svg>;
 const ILayers = () => <svg {...svg}><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>;
 const IBlocks = () => <svg {...svg}><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /></svg>;
@@ -1253,6 +1254,7 @@ export function Builder(props: Props) {
   const [rightCollapsed, setRightCollapsed] = useState(false);
   const [inspTab, setInspTab] = useState<"content" | "style" | "advanced">("content");
   const [treeSearch, setTreeSearch] = useState("");
+  const [openRowMenu, setOpenRowMenu] = useState<string | null>(null);
   const frame = useRef<HTMLIFrameElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const ready = useRef(false);
@@ -1306,7 +1308,12 @@ export function Builder(props: Props) {
       }
     }
     window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
+    const onWindowClick = () => setOpenRowMenu(null);
+    window.addEventListener("click", onWindowClick);
+    return () => {
+      window.removeEventListener("message", onMessage);
+      window.removeEventListener("click", onWindowClick);
+    };
   }, [previewOrigin, post, visual, locked]);
   // Publishing and going back reload the editor from the server, which resets this component: the notice is carried across in the tab.
   useEffect(() => {
@@ -1957,12 +1964,82 @@ export function Builder(props: Props) {
                 {s.disabled && <span className="pill grey" style={{ fontSize: 9, padding: "1px 4px" }}>Hidden</span>}
               </button>
               {!locked && (
-                <span className="bld-acts">
-                  <button type="button" className="bld-ib" disabled={origIdx === 0} onClick={() => move(s.id, -1)} aria-label={`Move ${s.label || def?.label} up`} title="Move up (Alt+Up)"><IUp /></button>
-                  <button type="button" className="bld-ib" disabled={origIdx === page.sections.length - 1} onClick={() => move(s.id, 1)} aria-label={`Move ${s.label || def?.label} down`} title="Move down (Alt+Down)"><IDown /></button>
-                  <button type="button" className="bld-ib" onClick={() => toggle(s.id)} disabled={isRequired(s.type)} title={isRequired(s.type) ? "This page needs this section" : undefined} aria-label={`${s.disabled ? "Show" : "Hide"} ${def?.label}`}><IEye off={s.disabled} /></button>
-                  <button type="button" className="bld-ib" onClick={() => duplicate(s)} disabled={full(s.type)} aria-label={`Duplicate ${s.label || def?.label}`} title="Duplicate section (Ctrl+D)"><ICopy /></button>
-                  {!isRequired(s.type) && <button type="button" className="bld-ib danger" onClick={() => remove(s.id)} aria-label={`Delete ${s.label || def?.label}`} title="Delete section"><ITrash /></button>}
+                <span className="bld-acts" style={{ position: "relative" }}>
+                  <button
+                    type="button"
+                    className="bld-ib"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggle(s.id);
+                    }}
+                    disabled={isRequired(s.type)}
+                    title={isRequired(s.type) ? "This page needs this section" : s.disabled ? "Show section" : "Hide section"}
+                    aria-label={`${s.disabled ? "Show" : "Hide"} ${def?.label}`}
+                  >
+                    <IEye off={s.disabled} />
+                  </button>
+                  <button
+                    type="button"
+                    className="bld-ib"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenRowMenu(openRowMenu === s.id ? null : s.id);
+                    }}
+                    title="More actions (Move, Duplicate, Delete)"
+                    aria-label={`More actions for ${s.label || def?.label}`}
+                    aria-expanded={openRowMenu === s.id}
+                  >
+                    <IMore />
+                  </button>
+                  {openRowMenu === s.id && (
+                    <div className="bld-row-menu" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        type="button"
+                        className="bld-row-menu-item"
+                        disabled={origIdx === 0}
+                        onClick={() => {
+                          move(s.id, -1);
+                          setOpenRowMenu(null);
+                        }}
+                      >
+                        <IUp /> <span>Move up (Alt+↑)</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="bld-row-menu-item"
+                        disabled={origIdx === page.sections.length - 1}
+                        onClick={() => {
+                          move(s.id, 1);
+                          setOpenRowMenu(null);
+                        }}
+                      >
+                        <IDown /> <span>Move down (Alt+↓)</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="bld-row-menu-item"
+                        disabled={full(s.type)}
+                        onClick={() => {
+                          duplicate(s);
+                          setOpenRowMenu(null);
+                        }}
+                      >
+                        <ICopy /> <span>Duplicate (Ctrl+D)</span>
+                      </button>
+                      {!isRequired(s.type) && (
+                        <button
+                          type="button"
+                          className="bld-row-menu-item danger"
+                          onClick={() => {
+                            remove(s.id);
+                            setOpenRowMenu(null);
+                          }}
+                        >
+                          <ITrash /> <span>Delete</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </span>
               )}
             </li>
