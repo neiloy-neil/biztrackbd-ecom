@@ -16,6 +16,7 @@ import {
   publishTemplateAction,
   uploadTemplateFileAction,
   createWorkshopAction,
+  generatePreviewsAction,
   openWorkshopEditorAction,
   setTemplateStatusAction,
   toggleModuleMaintenanceAction,
@@ -66,11 +67,11 @@ export default async function ThemesPage({
           <p className="muted" style={{ padding: 24 }}>Templates are managed by the platform owner.</p>
         ) : (
           <div style={{ overflowX: "auto" }}>
-            <div style={{ minWidth: 920 }}>
+            <div style={{ minWidth: 1040 }}>
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "minmax(0, 1.6fr) 110px 70px 110px 110px 300px",
+                  gridTemplateColumns: "minmax(0, 1.6fr) 110px 70px 110px 110px 420px",
                   padding: "10px 24px",
                   background: "var(--bg)",
                   borderBottom: "1px solid var(--line)",
@@ -95,7 +96,7 @@ export default async function ThemesPage({
                     data-testid={`template-${t.id}`}
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "minmax(0, 1.6fr) 110px 70px 110px 110px 300px",
+                      gridTemplateColumns: "minmax(0, 1.6fr) 110px 70px 110px 110px 420px",
                       padding: "10px 24px",
                       minHeight: 64,
                       alignItems: "center",
@@ -119,6 +120,13 @@ export default async function ThemesPage({
                     </div>
                     <div style={{ textAlign: "right", display: "flex", gap: 8, justifyContent: "flex-end" }}>
                       <a className="btn btn-secondary btn-sm" href={`/themes/export/${t.id}`} download>Download</a>
+                      {canEdit && t.saved && !t.builtIn && (
+                        <form action={generatePreviewsAction.bind(null, t.id)}>
+                          <button type="submit" className="btn btn-secondary btn-sm" data-testid={`previews-${t.id}`} title={t.previews?.desktop ? "Take new gallery pictures" : "No gallery pictures yet"}>
+                            {t.previews?.desktop ? "Refresh previews" : "Generate previews"}
+                          </button>
+                        </form>
+                      )}
                       {canEdit && t.status !== "PUBLISHED" && (
                         <form action={setTemplateStatusAction.bind(null, t.id, "PUBLISHED")}>
                           <button type="submit" className="btn btn-secondary btn-sm">Publish</button>

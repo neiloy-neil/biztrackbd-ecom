@@ -10,6 +10,7 @@ import {
   importTemplateBundle,
   createWorkshopStore,
   listWorkshopStores,
+  previewTargetFor,
   createImpersonationTicket,
   MAX_TEMPLATE_BUNDLE_BYTES,
   setTemplateStatus,
@@ -74,6 +75,33 @@ export async function openWorkshopEditorAction(tenantId: string): Promise<never>
   const ticket = await createImpersonationTicket(s.actor, tenantId);
   const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3000";
   redirect(`${adminUrl}/api/auth/impersonate?ticket=${encodeURIComponent(ticket)}&next=/design`);
+}
+
+/** Asks the preview worker (a GitHub Action) to photograph the template's workshop store and save the pictures on the template. */
+export async function generatePreviewsAction(templateId: string): Promise<void> {
+  const s = await requireAction("plans", "edit");
+  let msg = "";
+  try {
+    const target = await previewTargetFor(s.actor, templateId);
+    const token = process.env.TEMPLATE_PREVIEWS_GITHUB_TOKEN;
+    const repo = process.env.TEMPLATE_PREVIEWS_GITHUB_REPO;
+    if (!token || !repo) {
+      msg = `Preview automation is not connected yet. Run the "Template previews" workflow on GitHub with template ${target.templateId} and url ${target.url} (see docs/templates/TEMPLATE-FILE-DEVELOPER-GUIDE.md).`;
+    } else {
+      const res = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/template-previews.yml/dispatches`, {
+        method: "POST",
+        headers: { authorization: `Bearer ${token}`, accept: "application/vnd.github+json", "x-github-api-version": "2022-11-28", "content-type": "application/json" },
+        body: JSON.stringify({ ref: process.env.TEMPLATE_PREVIEWS_GITHUB_REF || "main", inputs: { template: target.templateId, url: target.url } }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (!res.ok) return back({ err: `GitHub did not start the preview job (${res.status}). Check the token and repository settings.` });
+      msg = `Preview job started for ${templateId}. The pictures appear on the template in a minute or two; refresh this page.`;
+    }
+  } catch (e) {
+    if (e instanceof DomainError) return back({ err: e.message });
+    throw e;
+  }
+  back({ done: msg });
 }
 
 /** Uploads a template file: it is checked part by part, saved, and (unless "save as draft" is ticked) goes live in the gallery, signup and every store's picker. */

@@ -1,0 +1,43 @@
+# Takes the gallery pictures (desktop and phone) of a template and saves them on it.
+# Started from Platform admin > Themes and modules > "Generate previews", or by hand from the Actions tab.
+# Secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (storage), PLATFORM_URL (https://platform.biztrack.bd), TEMPLATE_PREVIEW_SECRET (the same value as in the platform project),
+#          NEXT_PUBLIC_ROOT_DOMAIN (biztrack.bd). Not yet run on GitHub's runners: check the first run.
+name: Template previews
+
+on:
+  workflow_dispatch:
+    inputs:
+      template:
+        description: Template id (for example eid-kapor)
+        required: true
+      url:
+        description: Address of the workshop store to photograph
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  previews:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @biztrackbd/storefront exec playwright install --with-deps chromium
+      - name: Take and save the pictures
+        # The inputs go in through the environment, never into the command text.
+        env:
+          TEMPLATE_ID: ${{ inputs.template }}
+          STORE_URL: ${{ inputs.url }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PLATFORM_URL: ${{ secrets.PLATFORM_URL }}
+          TEMPLATE_PREVIEW_SECRET: ${{ secrets.TEMPLATE_PREVIEW_SECRET }}
+          NEXT_PUBLIC_ROOT_DOMAIN: ${{ secrets.NEXT_PUBLIC_ROOT_DOMAIN }}
+        run: pnpm --filter @biztrackbd/storefront exec node e2e/template-previews.mjs "$TEMPLATE_ID" "$STORE_URL"
