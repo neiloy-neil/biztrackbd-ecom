@@ -490,3 +490,6 @@ export * from "./messaging/queue";
 export * from "./messaging/templates";
 export * from "./messaging/webhook";
 export * from "./messaging/chat-adapters";
+
+// Public Developer REST API & Keys (DEV-API-001)
+export * from "./api-keys";

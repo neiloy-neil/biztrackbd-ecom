@@ -130,6 +130,8 @@ model Tenant {
   referrals             CustomerReferral[]
   smsOptOuts            SmsOptOut[]
   apiKeys               ApiKeyCredential[]
+  idempotencyRecords    ApiIdempotencyRecord[]
+  apiRequestLogs        ApiRequestLog[]
   webhookSubs           WebhookSubscription[]
   landingPages          LandingPage[]
   landingDaily          LandingDaily[]
@@ -892,16 +894,55 @@ model ApiKeyCredential {
   tenantId    String
   name        String // e.g. "ManyChat Production Bot"
   keyPrefix   String // "bzk_live_..."
-  hashedToken String // bcrypt hash of full secret
+  hashedToken String    @unique // SHA-256 hash of secret token
+  environment String    @default("LIVE") // "LIVE" | "TEST"
   scopes      String[] // ["orders:read", "orders:write", "products:read"]
   lastUsedAt  DateTime?
   expiresAt   DateTime?
+  revokedAt   DateTime?
   isActive    Boolean   @default(true)
 
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  tenant      Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  requestLogs ApiRequestLog[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @default(now()) @updatedAt
 
   @@index([tenantId, keyPrefix])
+  @@index([tenantId, isActive])
+}
+
+model ApiIdempotencyRecord {
+  id             String   @id @default(cuid())
+  tenantId       String
+  idempotencyKey String
+  endpoint       String
+  statusCode     Int
+  responseBody   String   @db.Text
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, idempotencyKey])
+  @@index([expiresAt])
+}
+
+model ApiRequestLog {
+  id         String   @id @default(cuid())
+  tenantId   String
+  apiKeyId   String?
+  keyPrefix  String?
+  endpoint   String
+  method     String
+  statusCode Int
+  ipAddress  String?
+  durationMs Int
+  createdAt  DateTime @default(now())
+
+  tenant Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  apiKey ApiKeyCredential? @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
 }
 
 model WebhookSubscription {
