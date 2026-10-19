@@ -176,34 +176,238 @@ function FieldInput({ f, value, onChange, disabled, idPrefix, openSignal = 0 }: 
   );
 }
 
-function ListEditor({ spec, items, onChange, disabled, idPrefix, imgSignal }: { spec: ListSpec; items: Settings[]; onChange: (items: Settings[]) => void; disabled: boolean; idPrefix: string; imgSignal?: { path: string; n: number } }) {
-  const set = (i: number, patch: Settings) => onChange(items.map((it, j) => (j === i ? { ...it, ...patch } : it)));
+function getItemPreviewTitle(it: Settings, spec: ListSpec, index: number): string {
+  const candidate = (
+    it.title ||
+    it.heading ||
+    it.question ||
+    it.label ||
+    it.name ||
+    it.dishName ||
+    it.author ||
+    it.text
+  );
+  if (typeof candidate === "string" && candidate.trim()) {
+    return candidate.trim();
+  }
+  return `${spec.itemLabel} ${index + 1}`;
+}
+
+function ListEditor({
+  spec,
+  items,
+  onChange,
+  disabled,
+  idPrefix,
+  imgSignal,
+}: {
+  spec: ListSpec;
+  items: Settings[];
+  onChange: (items: Settings[]) => void;
+  disabled: boolean;
+  idPrefix: string;
+  imgSignal?: { path: string; n: number };
+}) {
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+
+  const set = (i: number, patch: Settings) =>
+    onChange(items.map((it, j) => (j === i ? { ...it, ...patch } : it)));
+
   const move = (i: number, d: -1 | 1) => {
     const j = i + d;
     if (j < 0 || j >= items.length) return;
     const next = [...items];
     [next[i], next[j]] = [next[j]!, next[i]!];
     onChange(next);
+    setExpandedIndex(j);
   };
+
+  const reorder = (from: number, to: number) => {
+    if (from === to) return;
+    const next = [...items];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved!);
+    onChange(next);
+    setExpandedIndex(to);
+  };
+
+  const duplicateItem = (i: number) => {
+    if (items.length >= spec.max || disabled) return;
+    const clone = structuredClone(items[i]);
+    const next = [...items];
+    next.splice(i + 1, 0, clone!);
+    onChange(next);
+    setExpandedIndex(i + 1);
+  };
+
+  const addItem = () => {
+    if (items.length >= spec.max || disabled) return;
+    const next = [...items, structuredClone(spec.defaultItem)];
+    onChange(next);
+    setExpandedIndex(next.length - 1);
+  };
+
   return (
     <fieldset className="stack" style={{ border: 0, padding: 0, margin: 0 }}>
-      <legend style={{ fontWeight: 700, marginBottom: 6 }}>{spec.label}</legend>
-      {items.map((it, i) => (
-        <div key={i} className="bld-item" data-testid="list-item">
-          <div className="row" style={{ justifyContent: "space-between", marginBottom: 8 }}>
-            <b style={{ fontSize: 13 }}>{spec.itemLabel} {i + 1}</b>
-            <span className="row" style={{ gap: 4 }}>
-              <button type="button" className="bld-ib" disabled={disabled || i === 0} onClick={() => move(i, -1)} aria-label={`Move ${spec.itemLabel.toLowerCase()} ${i + 1} up`}><IUp /></button>
-              <button type="button" className="bld-ib" disabled={disabled || i === items.length - 1} onClick={() => move(i, 1)} aria-label={`Move ${spec.itemLabel.toLowerCase()} ${i + 1} down`}><IDown /></button>
-              <button type="button" className="bld-ib" disabled={disabled || items.length <= spec.min} onClick={() => onChange(items.filter((_, j) => j !== i))} aria-label={`Remove ${spec.itemLabel.toLowerCase()} ${i + 1}`}><ITrash /></button>
-            </span>
-          </div>
-          <div className="stack" style={{ gap: 8 }}>
-            {spec.fields.map((f) => <FieldInput key={f.key} f={f} value={it[f.key]} disabled={disabled} idPrefix={`${idPrefix}-${i}`} openSignal={imgSignal?.path === `${spec.key}.${i}.${f.key}` ? imgSignal.n : 0} onChange={(v) => set(i, { [f.key]: v })} />)}
-          </div>
-        </div>
-      ))}
-      {items.length < spec.max && !disabled && <button type="button" className="btn btn-secondary btn-sm" onClick={() => onChange([...items, structuredClone(spec.defaultItem)])}>Add {spec.itemLabel.toLowerCase()}</button>}
+      <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+        <legend style={{ fontWeight: 700, margin: 0, fontSize: 13 }}>
+          {spec.label} <span className="muted" style={{ fontWeight: 500, fontSize: 11 }}>({items.length}/{spec.max})</span>
+        </legend>
+        {items.length < spec.max && !disabled && (
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={addItem}
+            style={{ fontSize: 11, height: 26, padding: "0 8px" }}
+          >
+            + Add {spec.itemLabel.toLowerCase()}
+          </button>
+        )}
+      </div>
+
+      <div className="bld-repeater" role="list">
+        {items.map((it, i) => {
+          const isExpanded = expandedIndex === i;
+          const title = getItemPreviewTitle(it, spec, i);
+          const hasCustomTitle = title !== `${spec.itemLabel} ${i + 1}`;
+
+          return (
+            <div
+              key={i}
+              className={`bld-repeater-item${isExpanded ? " expanded" : ""}${dragOverIdx === i && dragIdx !== null && dragIdx !== i ? (dragIdx < i ? " over-after" : " over-before") : ""}`}
+              data-testid="list-item"
+              draggable={!disabled}
+              onDragStart={(e) => {
+                setDragIdx(i);
+                e.dataTransfer.effectAllowed = "move";
+              }}
+              onDragOver={(e) => {
+                if (dragIdx !== null) {
+                  e.preventDefault();
+                  setDragOverIdx(i);
+                }
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (dragIdx !== null) {
+                  reorder(dragIdx, i);
+                }
+                setDragIdx(null);
+                setDragOverIdx(null);
+              }}
+              onDragEnd={() => {
+                setDragIdx(null);
+                setDragOverIdx(null);
+              }}
+            >
+              {/* Accordion Row Header */}
+              <div
+                className="bld-repeater-head"
+                onClick={() => setExpandedIndex(isExpanded ? null : i)}
+                title="Click to expand/collapse"
+              >
+                {!disabled && (
+                  <span
+                    className="bld-repeater-grip"
+                    onClick={(e) => e.stopPropagation()}
+                    aria-hidden
+                    title="Drag to reorder"
+                  >
+                    <IGrip />
+                  </span>
+                )}
+                <div className="bld-repeater-title">
+                  <span>{title}</span>
+                  {hasCustomTitle && <span className="muted">#{i + 1}</span>}
+                </div>
+                <div className="bld-repeater-actions" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    className="bld-ib"
+                    disabled={disabled || i === 0}
+                    onClick={() => move(i, -1)}
+                    aria-label={`Move up`}
+                    title="Move up"
+                    style={{ width: 24, height: 24 }}
+                  >
+                    <IUp />
+                  </button>
+                  <button
+                    type="button"
+                    className="bld-ib"
+                    disabled={disabled || i === items.length - 1}
+                    onClick={() => move(i, 1)}
+                    aria-label={`Move down`}
+                    title="Move down"
+                    style={{ width: 24, height: 24 }}
+                  >
+                    <IDown />
+                  </button>
+                  <button
+                    type="button"
+                    className="bld-ib"
+                    disabled={disabled || items.length >= spec.max}
+                    onClick={() => duplicateItem(i)}
+                    aria-label={`Duplicate`}
+                    title="Duplicate item"
+                    style={{ width: 24, height: 24 }}
+                  >
+                    <ICopy />
+                  </button>
+                  <button
+                    type="button"
+                    className="bld-ib danger"
+                    disabled={disabled || items.length <= spec.min}
+                    onClick={() => {
+                      onChange(items.filter((_, j) => j !== i));
+                      if (expandedIndex === i) setExpandedIndex(null);
+                      else if (expandedIndex !== null && expandedIndex > i) setExpandedIndex(expandedIndex - 1);
+                    }}
+                    aria-label={`Remove`}
+                    title="Delete item"
+                    style={{ width: 24, height: 24 }}
+                  >
+                    <ITrash />
+                  </button>
+                </div>
+                <span className="bld-repeater-chevron" aria-hidden>
+                  ▾
+                </span>
+              </div>
+
+              {/* Accordion Expanded Body */}
+              {isExpanded && (
+                <div className="bld-repeater-body">
+                  {spec.fields.map((f) => (
+                    <FieldInput
+                      key={f.key}
+                      f={f}
+                      value={it[f.key]}
+                      disabled={disabled}
+                      idPrefix={`${idPrefix}-${i}`}
+                      openSignal={imgSignal?.path === `${spec.key}.${i}.${f.key}` ? imgSignal.n : 0}
+                      onChange={(v) => set(i, { [f.key]: v })}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {items.length < spec.max && !disabled && (
+        <button
+          type="button"
+          className="btn btn-secondary btn-block"
+          onClick={addItem}
+          style={{ marginTop: 8 }}
+        >
+          + Add {spec.itemLabel.toLowerCase()}
+        </button>
+      )}
     </fieldset>
   );
 }
