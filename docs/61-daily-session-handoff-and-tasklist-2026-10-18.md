@@ -237,6 +237,7 @@ During today's interactive `/grill-me` alignment session, we architected, engine
 25. `commit 0ccc46b`: `feat(builder): implement draggable accordion repeaters with title previews and micro-controls (Phase C)`
 26. `commit 3046639`: `feat(builder): implement drag-and-drop block & pattern insertion into layers (Phase D)`
 27. `commit 06e2ba1`: `feat(builder): add left sidebar retract controls, interactive border splitter, and breathing room`
+28. `commit 76b1382`: `feat(builder): streamline layers row actions with more dropdown and audit platform responsiveness`
 
 
 ---
