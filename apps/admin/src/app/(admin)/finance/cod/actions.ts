@@ -2,7 +2,17 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { DomainError, acceptShortPayment, importStatement, raiseDispute, syncCourierStatuses } from "@biztrackbd/core";
+import {
+  DomainError,
+  acceptShortPayment,
+  batchAcceptDiscrepancies,
+  importStatement,
+  raiseDispute,
+  saveCourierRates,
+  saveToleranceSettings,
+  syncCourierStatuses,
+  verifySettlementDeposit,
+} from "@biztrackbd/core";
 import { getSession, requireAction } from "@/lib/session";
 
 const MAX_FILE = 1_500_000;
@@ -21,8 +31,13 @@ export async function importAction(form: FormData): Promise<void> {
   let result;
   try {
     result = await importStatement(s.tenantId, s.actor, {
-      courier: String(form.get("courier") ?? ""), invoiceNumber: String(form.get("invoiceNumber") ?? ""), disbursedAt: String(form.get("disbursedAt") ?? ""),
-      paymentMethod: String(form.get("paymentMethod") ?? ""), bankAccountLast4: String(form.get("last4") ?? "").trim() || undefined, csv: await file.text(),
+      courier: String(form.get("courier") ?? ""),
+      invoiceNumber: String(form.get("invoiceNumber") ?? ""),
+      disbursedAt: String(form.get("disbursedAt") ?? ""),
+      paymentMethod: String(form.get("paymentMethod") ?? ""),
+      bankAccountLast4: String(form.get("last4") ?? "").trim() || undefined,
+      csv: await file.text(),
+      source: "CSV_IMPORT",
     });
   } catch (e) {
     if (e instanceof DomainError) go({ err: e.message });
@@ -30,7 +45,16 @@ export async function importAction(form: FormData): Promise<void> {
     go({ err: "Could not read that file. Nothing was changed." });
   }
   revalidatePath("/finance/cod");
-  go({ imported: result.invoiceNumber, parcels: result.parcels, matched: result.matched, short: result.shortPaid, returned: result.returned, unmatched: result.unmatched.length, dup: result.duplicates.length, shortfall: result.shortfall });
+  go({
+    imported: result.invoiceNumber,
+    parcels: result.parcels,
+    matched: result.matched,
+    short: result.shortPaid,
+    returned: result.returned,
+    unmatched: result.unmatched.length,
+    dup: result.duplicates.length,
+    shortfall: result.shortfall,
+  });
 }
 
 export async function acceptAction(lineId: string): Promise<void> {
@@ -55,6 +79,57 @@ export async function disputeAction(lineId: string, form: FormData): Promise<voi
   }
   revalidatePath("/finance/cod");
   go({ done: "disputed" });
+}
+
+/** 1-click batch accept short payment variances (e.g. within tolerance). */
+export async function batchAcceptAction(form: FormData): Promise<void> {
+  const s = await requireAction("reports", "edit");
+  const maxShortfallRaw = form.get("maxShortfall");
+  const maxShortfall = maxShortfallRaw ? Number(maxShortfallRaw) : undefined;
+  try {
+    const res = await batchAcceptDiscrepancies(s.tenantId, s.actor, { maxShortfall });
+    revalidatePath("/finance/cod");
+    go({ done: "batch_accepted", count: res.acceptedCount, amount: res.totalShortfall });
+  } catch (e) {
+    if (e instanceof DomainError) go({ err: e.message });
+    throw e;
+  }
+}
+
+/** Verifies that a courier payout hit the merchant's bank/bKash account with UTR/TrxID. */
+export async function verifyDepositAction(form: FormData): Promise<void> {
+  const s = await requireAction("reports", "edit");
+  const settlementId = String(form.get("settlementId") ?? "");
+  const bankTxnRef = String(form.get("bankTxnRef") ?? "");
+  try {
+    await verifySettlementDeposit(s.tenantId, s.actor, { settlementId, bankTxnRef });
+    revalidatePath("/finance/cod");
+    go({ done: "deposit_verified" });
+  } catch (e) {
+    if (e instanceof DomainError) go({ err: e.message });
+    throw e;
+  }
+}
+
+/** Saves shipping fee rates, COD commission %, tolerance threshold, and return restock guard. */
+export async function saveSettingsAction(form: FormData): Promise<void> {
+  const s = await requireAction("orders", "edit");
+  const inside = Number(form.get("inside") ?? 70);
+  const outside = Number(form.get("outside") ?? 130);
+  const codPercent = Number(form.get("codPercent") ?? 1);
+  const toleranceAmount = Number(form.get("toleranceAmount") ?? 10);
+  const autoRestockOnReturn = form.get("autoRestockOnReturn") === "true";
+  const defaultCourier = String(form.get("defaultCourier") ?? "").trim() || null;
+
+  try {
+    await saveCourierRates(s.tenantId, s.actor, { inside, outside, codPercent, defaultCourier });
+    await saveToleranceSettings(s.tenantId, s.actor, { toleranceAmount, autoRestockOnReturn });
+    revalidatePath("/finance/cod");
+    go({ done: "settings_saved", view: "settings" });
+  } catch (e) {
+    if (e instanceof DomainError) go({ err: e.message, view: "settings" });
+    throw e;
+  }
 }
 
 /** "Sync couriers now": asks every courier about every parcel that is still out. */

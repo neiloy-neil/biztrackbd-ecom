@@ -5,6 +5,7 @@ import { COURIER_PROVIDERS, type CourierProviderKey } from "../couriers/types";
 import { NotFoundError, ValidationError } from "../errors";
 import { money } from "../orders/pricing";
 import { assertCan, type StaffActor } from "../permissions";
+import { emitMerchantWebhookEvent } from "../messaging/webhook";
 import { headerKey, parseCsv, parseMoney } from "./csv";
 
 /**
@@ -26,13 +27,31 @@ export interface FeeRates {
   inside: number;
   outside: number;
   codPercent: number;
+  toleranceAmount: number;
+  autoRestockOnReturn: boolean;
 }
 
-export const DEFAULT_RATES: FeeRates = { inside: 70, outside: 130, codPercent: 1 };
+export const DEFAULT_RATES: FeeRates = { inside: 70, outside: 130, codPercent: 1, toleranceAmount: 10, autoRestockOnReturn: false };
 
 export async function loadRates(tx: TenantTx): Promise<FeeRates> {
-  const s = await tx.storeSettings.findFirst({ select: { courierFeeInsideDhaka: true, courierFeeOutsideDhaka: true, courierCodFeePercent: true } });
-  return s ? { inside: Number(s.courierFeeInsideDhaka), outside: Number(s.courierFeeOutsideDhaka), codPercent: Number(s.courierCodFeePercent) } : DEFAULT_RATES;
+  const s = await tx.storeSettings.findFirst({
+    select: {
+      courierFeeInsideDhaka: true,
+      courierFeeOutsideDhaka: true,
+      courierCodFeePercent: true,
+      courierToleranceAmount: true,
+      courierAutoRestockOnReturn: true,
+    },
+  });
+  return s
+    ? {
+        inside: Number(s.courierFeeInsideDhaka),
+        outside: Number(s.courierFeeOutsideDhaka),
+        codPercent: Number(s.courierCodFeePercent),
+        toleranceAmount: s.courierToleranceAmount != null ? Number(s.courierToleranceAmount) : 10,
+        autoRestockOnReturn: Boolean(s.courierAutoRestockOnReturn),
+      }
+    : DEFAULT_RATES;
 }
 
 interface PricedOrder {
@@ -60,6 +79,7 @@ export const StatementInput = z.object({
   paymentMethod: z.enum(["BEFTN_BANK", "BKASH_COMMERCIAL"]),
   bankAccountLast4: z.string().regex(/^\d{4}$/, "Last 4 digits only").optional(),
   csv: z.string().min(1, "Choose the statement file").max(1_500_000, "That file is too large"),
+  source: z.enum(["CSV_IMPORT", "API_SYNC", "WEBHOOK"]).optional(),
 });
 export type StatementInput = z.infer<typeof StatementInput>;
 
@@ -145,6 +165,11 @@ export interface ImportResult {
   returned: number;
   disbursed: number;
   shortfall: number;
+  totalCodCollected?: number;
+  deliveryFeesTotal?: number;
+  codServiceFee?: number;
+  returnCharges?: number;
+  toleranceAppliedTotal?: number;
   /** Statement rows that match none of this store's parcels for that courier (maybe another store's file, or a typo). */
   unmatched: { row: number; ref: string }[];
   /** Rows for parcels already settled by an earlier statement. They are not counted twice. */
@@ -158,7 +183,7 @@ export async function importStatement(tenantId: string, actor: StaffActor, raw: 
   const input = parsed.data;
   const rows = readStatement(input.csv);
 
-  return withTenant(tenantId, async (tx) => {
+  const ret = await withTenant(tenantId, async (tx) => {
     // Say so first if this payout is already in, rather than reporting its parcels as duplicates one by one.
     const known = await tx.courierSettlementInvoice.findFirst({ where: { courierProvider: input.courier, invoiceNumber: input.invoiceNumber }, select: { id: true } });
     if (known) throw new ValidationError("This payout invoice was already imported");
@@ -173,7 +198,7 @@ export async function importStatement(tenantId: string, actor: StaffActor, raw: 
 
     const unmatched: ImportResult["unmatched"] = [];
     const duplicates: ImportResult["duplicates"] = [];
-    const lines: { orderId: string; consignmentId: string; r: StatementRow; expectedNet: number; result: LineResult }[] = [];
+    const lines: { orderId: string; consignmentId: string; r: StatementRow; expectedNet: number; result: LineResult; toleranceApplied: number }[] = [];
     const taken = new Set<string>();
     for (const r of rows) {
       const o = byRef.get(r.ref) ?? byRef.get(r.invoice);
@@ -183,13 +208,20 @@ export async function importStatement(tenantId: string, actor: StaffActor, raw: 
       const exp = expectedFor(o, rates);
       let result: LineResult;
       let expectedNet = exp.net;
+      let toleranceApplied = 0;
+      const diff = exp.net - r.net;
+
       if (r.returned || o.status === "RETURNED") {
         // A returned parcel has no cash to compare; the courier's return charge is simply recorded.
         result = "RETURNED";
         expectedNet = r.net;
-      } else if (r.net < exp.net - TOLERANCE) result = "SHORT_PAID";
-      else result = "MATCHED";
-      lines.push({ orderId: o.id, consignmentId: o.consignmentId ?? r.ref, r, expectedNet, result });
+      } else if (diff > rates.toleranceAmount) {
+        result = "SHORT_PAID";
+      } else {
+        result = "MATCHED";
+        if (diff > 0) toleranceApplied = money(diff);
+      }
+      lines.push({ orderId: o.id, consignmentId: o.consignmentId ?? r.ref, r, expectedNet, result, toleranceApplied });
     }
     if (lines.length === 0) throw new ValidationError("None of the parcels in this file are yours for that courier. Check you chose the right courier and file.", { unmatched: unmatched.length });
 
@@ -199,6 +231,7 @@ export async function importStatement(tenantId: string, actor: StaffActor, raw: 
       settlement = await tx.courierSettlementInvoice.create({
         data: {
           tenantId, courierProvider: input.courier, invoiceNumber: input.invoiceNumber, paymentMethod: input.paymentMethod, bankAccountLast4: input.bankAccountLast4 ?? null,
+          source: input.source ?? "CSV_IMPORT",
           disbursedAt: new Date(`${input.disbursedAt}T00:00:00+06:00`),
           disbursedAmount: sum((l) => l.r.net), totalCodCollected: sum((l) => l.r.collected), deliveryFeesTotal: sum((l) => l.r.delivery),
           codServiceFee: sum((l) => l.r.codFee), returnCharges: sum((l) => l.r.returnFee),
@@ -214,6 +247,8 @@ export async function importStatement(tenantId: string, actor: StaffActor, raw: 
         // A returned parcel's line carries the trip's whole charge (delivery plus return), which is what the profit screen needs.
         deliveryCharge: l.result === "RETURNED" ? money(l.r.delivery + l.r.returnFee) : l.r.delivery,
         codFeeDeduction: l.r.codFee, netPaidToStore: l.r.net, expectedNet: l.expectedNet, result: l.result,
+        toleranceApplied: l.toleranceApplied,
+        disputeStatus: l.result === "SHORT_PAID" ? "OPEN" : "NONE",
       })),
     });
     const ids = (res: LineResult) => lines.filter((l) => l.result === res).map((l) => l.orderId);
@@ -223,17 +258,56 @@ export async function importStatement(tenantId: string, actor: StaffActor, raw: 
     await tx.orderEvent.createMany({
       data: lines.map((l) => ({
         tenantId, orderId: l.orderId, type: "SETTLEMENT", actorId: actor.userId, actorName: actor.name ?? actor.email,
-        message: l.result === "SHORT_PAID" ? `${input.courier} payout ${input.invoiceNumber}: paid ৳${l.r.net}, expected ৳${l.expectedNet}` : l.result === "RETURNED" ? `${input.courier} payout ${input.invoiceNumber}: returned parcel` : `${input.courier} payout ${input.invoiceNumber}: ৳${l.r.net} received`,
-        data: { settlementId: settlement.id, result: l.result, net: l.r.net, expectedNet: l.expectedNet },
+        message: l.result === "SHORT_PAID" ? `${input.courier} payout ${input.invoiceNumber}: paid ৳${l.r.net}, expected ৳${l.expectedNet}` : l.result === "RETURNED" ? `${input.courier} payout ${input.invoiceNumber}: returned parcel` : l.toleranceApplied > 0 ? `${input.courier} payout ${input.invoiceNumber}: ৳${l.r.net} received (৳${l.toleranceApplied} variance accepted)` : `${input.courier} payout ${input.invoiceNumber}: ৳${l.r.net} received`,
+        data: { settlementId: settlement.id, result: l.result, net: l.r.net, expectedNet: l.expectedNet, toleranceApplied: l.toleranceApplied },
       })),
     });
     const shortfall = money(lines.filter((l) => l.result === "SHORT_PAID").reduce((s, l) => s + (l.expectedNet - l.r.net), 0));
-    await audit(tx, tenantId, actor, "cod.statement_imported", { courier: input.courier, invoiceNumber: input.invoiceNumber, parcels: lines.length, unmatched: unmatched.length, shortfall });
+    const toleranceAppliedTotal = money(lines.reduce((s, l) => s + l.toleranceApplied, 0));
+    await audit(tx, tenantId, actor, "cod.statement_imported", { courier: input.courier, invoiceNumber: input.invoiceNumber, parcels: lines.length, unmatched: unmatched.length, shortfall, toleranceAppliedTotal });
     return {
       settlementId: settlement.id, invoiceNumber: input.invoiceNumber, parcels: lines.length, matched: ids("MATCHED").length, shortPaid: ids("SHORT_PAID").length, returned: ids("RETURNED").length,
       disbursed: Number(settlement.disbursedAmount), shortfall, unmatched, duplicates,
+      totalCodCollected: Number(settlement.totalCodCollected),
+      deliveryFeesTotal: Number(settlement.deliveryFeesTotal),
+      codServiceFee: Number(settlement.codServiceFee),
+      returnCharges: Number(settlement.returnCharges),
+      toleranceAppliedTotal,
     };
   });
+
+  try {
+    await emitMerchantWebhookEvent(tenantId, "cod.settlement_received", {
+      settlementId: ret.settlementId,
+      courier: input.courier,
+      invoiceNumber: input.invoiceNumber,
+      disbursedAmount: ret.disbursed,
+      totalCodCollected: ret.totalCodCollected,
+      deliveryFeesTotal: ret.deliveryFeesTotal,
+      codServiceFee: ret.codServiceFee,
+      returnCharges: ret.returnCharges,
+      parcelsCount: ret.parcels,
+      matchedCount: ret.matched,
+      shortPaidCount: ret.shortPaid,
+      returnedCount: ret.returned,
+      shortfall: ret.shortfall,
+      paymentMethod: input.paymentMethod,
+      disbursedAt: input.disbursedAt,
+    });
+    if (ret.shortPaid > 0) {
+      await emitMerchantWebhookEvent(tenantId, "cod.discrepancy_flagged", {
+        settlementId: ret.settlementId,
+        courier: input.courier,
+        invoiceNumber: input.invoiceNumber,
+        shortfall: ret.shortfall,
+        shortPaidParcels: ret.shortPaid,
+      });
+    }
+  } catch (err) {
+    console.warn("Failed to dispatch COD settlement webhook", err);
+  }
+
+  return ret;
 }
 
 // ---- Screens -------------------------------------------------------------------------------------------------------
@@ -306,6 +380,9 @@ export interface ReconRow {
   reason: string | null;
   deliveryCharge: number;
   codFee: number;
+  toleranceApplied: number;
+  disputeNote: string | null;
+  disputeStatus: string | null;
 }
 
 function guessReason(shortfall: number, collected: number, rates: FeeRates, codFeeTaken: number, netPaid: number): string {
@@ -331,7 +408,7 @@ export async function listReconciliation(tenantId: string, actor: StaffActor, op
     });
     for (const l of lines) {
       const result = l.result as LineResult;
-      const accepted = result === "SHORT_PAID" && l.order.settlementStatus === "SETTLED";
+      const accepted = result === "SHORT_PAID" && (l.order.settlementStatus === "SETTLED" || l.disputeStatus === "RESOLVED");
       const short = money(Number(l.expectedNet) - Number(l.netPaidToStore));
       rows.push({
         key: `line:${l.id}`, lineId: l.id, orderId: l.orderId, orderNumber: l.order.orderNumber, courier: l.order.courierProvider ?? "", consignmentId: l.consignmentId, customerName: l.order.customerName,
@@ -339,6 +416,9 @@ export async function listReconciliation(tenantId: string, actor: StaffActor, op
         shortfall: accepted || result !== "SHORT_PAID" ? 0 : short, invoiceNumber: l.settlement.invoiceNumber, daysWaiting: null,
         reason: result === "SHORT_PAID" && !accepted ? guessReason(short, Number(l.codCollected), rates, Number(l.codFeeDeduction), Number(l.netPaidToStore)) : null,
         deliveryCharge: Number(l.deliveryCharge), codFee: Number(l.codFeeDeduction),
+        toleranceApplied: Number(l.toleranceApplied ?? 0),
+        disputeNote: l.disputeNote,
+        disputeStatus: l.disputeStatus,
       });
     }
     const waiting = await tx.order.findMany({
@@ -351,6 +431,9 @@ export async function listReconciliation(tenantId: string, actor: StaffActor, op
         key: `order:${o.id}`, lineId: null, orderId: o.id, orderNumber: o.orderNumber, courier: o.courierProvider ?? "", consignmentId: o.consignmentId, customerName: o.customerName,
         state: "NOT_PAID", overdue: days > OVERDUE_DAYS, collected: exp.collected, expectedNet: exp.net, netPaid: null, shortfall: 0, invoiceNumber: null, daysWaiting: days,
         reason: null, deliveryCharge: exp.delivery, codFee: exp.codFee,
+        toleranceApplied: 0,
+        disputeNote: null,
+        disputeStatus: null,
       });
     }
     const keep = (r: ReconRow) =>
@@ -370,14 +453,37 @@ export interface SettlementRow {
   deductions: number;
   parcels: number;
   paymentMethod: string;
+  bankAccountLast4: string | null;
+  bankTxnRef: string | null;
+  verifiedAt: Date | null;
+  verifiedBy: string | null;
+  source: string;
 }
 
 export async function listSettlements(tenantId: string, actor: StaffActor): Promise<SettlementRow[]> {
   assertCan(actor, "reports", "view");
-  const rows = await withTenant(tenantId, (tx) => tx.courierSettlementInvoice.findMany({ orderBy: { disbursedAt: "desc" }, take: 100, include: { _count: { select: { settledOrders: true } } } }));
+  const rows = await withTenant(tenantId, (tx) =>
+    tx.courierSettlementInvoice.findMany({
+      orderBy: { disbursedAt: "desc" },
+      take: 100,
+      include: { _count: { select: { settledOrders: true } } },
+    })
+  );
   return rows.map((s) => ({
-    id: s.id, courier: s.courierProvider, invoiceNumber: s.invoiceNumber, disbursedAt: s.disbursedAt, disbursedAmount: Number(s.disbursedAmount), collected: Number(s.totalCodCollected),
-    deductions: money(Number(s.deliveryFeesTotal) + Number(s.codServiceFee) + Number(s.returnCharges)), parcels: s._count.settledOrders, paymentMethod: s.paymentMethod,
+    id: s.id,
+    courier: s.courierProvider,
+    invoiceNumber: s.invoiceNumber,
+    disbursedAt: s.disbursedAt,
+    disbursedAmount: Number(s.disbursedAmount),
+    collected: Number(s.totalCodCollected),
+    deductions: money(Number(s.deliveryFeesTotal) + Number(s.codServiceFee) + Number(s.returnCharges)),
+    parcels: s._count.settledOrders,
+    paymentMethod: s.paymentMethod,
+    bankAccountLast4: s.bankAccountLast4,
+    bankTxnRef: s.bankTxnRef,
+    verifiedAt: s.verifiedAt,
+    verifiedBy: s.verifiedBy,
+    source: s.source,
   }));
 }
 
@@ -389,6 +495,7 @@ export async function acceptShortPayment(tenantId: string, actor: StaffActor, li
     if (!l) throw new NotFoundError("Payout line");
     if (l.result !== "SHORT_PAID") throw new ValidationError("This parcel was not short paid");
     await tx.order.update({ where: { id: l.orderId }, data: { settlementStatus: "SETTLED" } });
+    await tx.courierSettledOrder.update({ where: { id: lineId }, data: { disputeStatus: "RESOLVED" } });
     await tx.orderEvent.create({
       data: { tenantId, orderId: l.orderId, type: "SETTLEMENT", actorId: actor.userId, actorName: actor.name ?? actor.email, message: `Short payment accepted (paid ৳${Number(l.netPaidToStore)}, expected ৳${Number(l.expectedNet)})`, data: { lineId } },
     });
@@ -404,10 +511,187 @@ export async function raiseDispute(tenantId: string, actor: StaffActor, lineId: 
   await withTenant(tenantId, async (tx) => {
     const l = await tx.courierSettledOrder.findFirst({ where: { id: lineId }, include: { order: { select: { orderNumber: true } } } });
     if (!l) throw new NotFoundError("Payout line");
+    await tx.courierSettledOrder.update({
+      where: { id: lineId },
+      data: { disputeNote: why, disputeStatus: "OPEN" },
+    });
     await tx.orderEvent.create({
       data: { tenantId, orderId: l.orderId, type: "SETTLEMENT", actorId: actor.userId, actorName: actor.name ?? actor.email, message: `Dispute raised with the courier: ${why}`, data: { lineId } },
     });
     await audit(tx, tenantId, actor, "cod.dispute_raised", { orderNumber: l.order.orderNumber, note: why });
+  });
+}
+
+/** 1-click batch accept short payments, optionally limited to those within a max shortfall threshold. */
+export async function batchAcceptDiscrepancies(
+  tenantId: string,
+  actor: StaffActor,
+  opts: { lineIds?: string[]; maxShortfall?: number } = {}
+): Promise<{ acceptedCount: number; totalShortfall: number }> {
+  assertCan(actor, "reports", "edit");
+  return withTenant(tenantId, async (tx) => {
+    const whereClause: Prisma.CourierSettledOrderWhereInput = {
+      result: "SHORT_PAID",
+      order: { settlementStatus: "DISCREPANCY_FLAGGED" },
+    };
+    if (opts.lineIds && opts.lineIds.length > 0) {
+      whereClause.id = { in: opts.lineIds };
+    }
+    const flagged = await tx.courierSettledOrder.findMany({
+      where: whereClause,
+      include: { order: { select: { id: true, orderNumber: true } } },
+    });
+    const eligible = opts.maxShortfall != null
+      ? flagged.filter((l) => Number(l.expectedNet) - Number(l.netPaidToStore) <= opts.maxShortfall!)
+      : flagged;
+    if (eligible.length === 0) return { acceptedCount: 0, totalShortfall: 0 };
+
+    const orderIds = eligible.map((l) => l.orderId);
+    const lineIds = eligible.map((l) => l.id);
+    await tx.order.updateMany({ where: { id: { in: orderIds } }, data: { settlementStatus: "SETTLED" } });
+    await tx.courierSettledOrder.updateMany({
+      where: { id: { in: lineIds } },
+      data: { disputeStatus: "RESOLVED" },
+    });
+    await tx.orderEvent.createMany({
+      data: eligible.map((l) => ({
+        tenantId,
+        orderId: l.orderId,
+        type: "SETTLEMENT",
+        actorId: actor.userId,
+        actorName: actor.name ?? actor.email,
+        message: `Batch short payment accepted (paid ৳${Number(l.netPaidToStore)}, expected ৳${Number(l.expectedNet)})`,
+        data: { lineId: l.id },
+      })),
+    });
+    const totalShortfall = money(eligible.reduce((s, l) => s + (Number(l.expectedNet) - Number(l.netPaidToStore)), 0));
+    await audit(tx, tenantId, actor, "cod.batch_short_payment_accepted", {
+      count: eligible.length,
+      totalShortfall,
+    });
+    return { acceptedCount: eligible.length, totalShortfall };
+  });
+}
+
+/** Formats all flagged courier discrepancy rows into a CSV dispute sheet for courier relationship managers. */
+export async function exportDisputeSheet(
+  tenantId: string,
+  actor: StaffActor,
+  opts: { courier?: string } = {}
+): Promise<string> {
+  assertCan(actor, "reports", "view");
+  const rows = await listReconciliation(tenantId, actor, { courier: opts.courier, filter: "attention" });
+  const disputes = rows.filter((r) => r.state === "SHORT_PAID" || r.state === "MISSING");
+  const header = [
+    "Courier",
+    "Consignment ID",
+    "Order Number",
+    "Customer Name",
+    "Payout Invoice",
+    "Collected (BDT)",
+    "Expected Net (BDT)",
+    "Courier Paid (BDT)",
+    "Shortfall (BDT)",
+    "Detected Reason",
+    "Dispute Note",
+  ];
+  const lines = disputes.map((d) => [
+    `"${(d.courier || "").replace(/"/g, '""')}"`,
+    `"${(d.consignmentId || "").replace(/"/g, '""')}"`,
+    `"${(d.orderNumber || "").replace(/"/g, '""')}"`,
+    `"${(d.customerName || "").replace(/"/g, '""')}"`,
+    `"${(d.invoiceNumber || "").replace(/"/g, '""')}"`,
+    d.collected.toFixed(2),
+    d.expectedNet.toFixed(2),
+    (d.netPaid ?? 0).toFixed(2),
+    d.shortfall.toFixed(2),
+    `"${(d.reason || "").replace(/"/g, '""')}"`,
+    `"${(d.disputeNote || "").replace(/"/g, '""')}"`,
+  ].join(","));
+  return [header.join(","), ...lines].join("\r\n");
+}
+
+/** Verifies that a courier payout has hit the bank or bKash merchant account with UTR / TrxID reference. */
+export async function verifySettlementDeposit(
+  tenantId: string,
+  actor: StaffActor,
+  input: { settlementId: string; bankTxnRef: string }
+): Promise<void> {
+  assertCan(actor, "reports", "edit");
+  const ref = input.bankTxnRef.trim();
+  if (ref.length < 3) throw new ValidationError("Enter the bank UTR or transaction reference");
+  await withTenant(tenantId, async (tx) => {
+    const s = await tx.courierSettlementInvoice.findFirst({ where: { id: input.settlementId } });
+    if (!s) throw new NotFoundError("Settlement invoice");
+    await tx.courierSettlementInvoice.update({
+      where: { id: s.id },
+      data: {
+        bankTxnRef: ref,
+        verifiedAt: new Date(),
+        verifiedBy: actor.name ?? actor.email,
+      },
+    });
+    await audit(tx, tenantId, actor, "cod.deposit_verified", {
+      invoiceNumber: s.invoiceNumber,
+      bankTxnRef: ref,
+      amount: Number(s.disbursedAmount),
+    });
+  });
+}
+
+/** Exports double-entry accounting journal vouchers in CSV format for Tally, QuickBooks, or Xero. */
+export async function exportAccountingJournal(
+  tenantId: string,
+  actor: StaffActor,
+  settlementId: string
+): Promise<string> {
+  assertCan(actor, "reports", "view");
+  return withTenant(tenantId, async (tx) => {
+    const s = await tx.courierSettlementInvoice.findFirst({
+      where: { id: settlementId },
+      include: { _count: { select: { settledOrders: true } } },
+    });
+    if (!s) throw new NotFoundError("Settlement invoice");
+    const date = s.disbursedAt.toISOString().slice(0, 10);
+    const voucher = `JV-COD-${s.invoiceNumber}`;
+    const bankAcc = s.paymentMethod === "BKASH_COMMERCIAL" ? "bKash Merchant Account (1020)" : "Bank Clearing Account (1010)";
+    const disbursed = Number(s.disbursedAmount);
+    const delivery = Number(s.deliveryFeesTotal);
+    const codFee = Number(s.codServiceFee);
+    const returns = Number(s.returnCharges);
+    const collected = Number(s.totalCodCollected);
+
+    const rows = [
+      ["Date", "Voucher No", "Account Title", "Account Code", "Debit (BDT)", "Credit (BDT)", "Narration"],
+      [date, voucher, bankAcc, s.paymentMethod === "BKASH_COMMERCIAL" ? "1020" : "1010", disbursed.toFixed(2), "0.00", `Disbursed payout for invoice ${s.invoiceNumber} (${s.courierProvider})`],
+      [date, voucher, "Logistics & Delivery Expense", "5010", delivery.toFixed(2), "0.00", `Forward courier delivery charges for ${s._count.settledOrders} parcels`],
+      [date, voucher, "Courier COD Commission Expense", "5020", codFee.toFixed(2), "0.00", `COD collection service fee (1% + VAT)`],
+      ...(returns > 0 ? [[date, voucher, "Return Logistics Losses", "5030", returns.toFixed(2), "0.00", `Courier return penalties and return trip charges`]] : []),
+      [date, voucher, `Accounts Receivable - ${s.courierProvider} Courier`, "1120", "0.00", collected.toFixed(2), `Clearance of collected customer COD cash held by courier`],
+    ];
+    return rows.map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\r\n");
+  });
+}
+
+/** Saves tolerance threshold and return restocking guard settings. */
+export async function saveToleranceSettings(
+  tenantId: string,
+  actor: StaffActor,
+  input: { toleranceAmount: number; autoRestockOnReturn: boolean }
+): Promise<void> {
+  assertCan(actor, "orders", "edit");
+  if (!Number.isFinite(input.toleranceAmount) || input.toleranceAmount < 0 || input.toleranceAmount > 500) {
+    throw new ValidationError("Tolerance amount must be between 0 and 500 Taka");
+  }
+  await withTenant(tenantId, async (tx) => {
+    const { count } = await tx.storeSettings.updateMany({
+      data: {
+        courierToleranceAmount: money(input.toleranceAmount),
+        courierAutoRestockOnReturn: input.autoRestockOnReturn,
+      },
+    });
+    if (count === 0) throw new NotFoundError("Store settings");
+    await audit(tx, tenantId, actor, "settings.courier_tolerance", input);
   });
 }
 

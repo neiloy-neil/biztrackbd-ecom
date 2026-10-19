@@ -74,6 +74,16 @@ export const WEBHOOK_EVENTS = [
     label: "Customer Registered",
     description: "Triggered when a new customer registers or completes their first purchase.",
   },
+  {
+    key: "cod.settlement_received",
+    label: "COD Remittance Received",
+    description: "Triggered when a courier remittance payout statement is imported or synced.",
+  },
+  {
+    key: "cod.discrepancy_flagged",
+    label: "COD Discrepancy Flagged",
+    description: "Triggered when courier deductions exceed expected fees beyond the configured tolerance.",
+  },
 ] as const;
 
 export type WebhookEventKey = (typeof WEBHOOK_EVENTS)[number]["key"];

@@ -118,6 +118,36 @@ export function getSampleEventData(event: WebhookEventKey | "ping"): Record<stri
         adminPath: "/customers",
       };
 
+    case "cod.settlement_received":
+      return {
+        settlementId: "stl_sample_301",
+        courier: "STEADFAST",
+        invoiceNumber: "INV-SF-98210",
+        disbursedAmount: 48500,
+        totalCodCollected: 52000,
+        deliveryFeesTotal: 3000,
+        codServiceFee: 500,
+        returnCharges: 0,
+        parcelsCount: 42,
+        matchedCount: 40,
+        shortPaidCount: 2,
+        returnedCount: 0,
+        shortfall: 140,
+        paymentMethod: "BEFTN_BANK",
+        disbursedAt: "2026-10-20",
+        adminPath: "/finance/cod",
+      };
+
+    case "cod.discrepancy_flagged":
+      return {
+        settlementId: "stl_sample_301",
+        courier: "STEADFAST",
+        invoiceNumber: "INV-SF-98210",
+        shortfall: 140,
+        shortPaidParcels: 2,
+        adminPath: "/finance/cod?filter=attention",
+      };
+
     case "ping":
     default:
       return {
@@ -268,6 +298,59 @@ export function formatDiscordWebhookPayload(
             { name: "Email Address", value: email, inline: true },
           ],
           footer: { text: "BizTrack Customer Directory" },
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    };
+  }
+
+  if (event === "cod.settlement_received") {
+    const courier = String(data.courier || "Courier");
+    const inv = String(data.invoiceNumber || "Payout");
+    const disbursed = Number(data.disbursedAmount || 0).toLocaleString("en-BD");
+    const collected = Number(data.totalCodCollected || 0).toLocaleString("en-BD");
+    const count = Number(data.parcelsCount || 0);
+    const short = Number(data.shortfall || 0);
+
+    return {
+      content: `💰 **COD Remittance Received: ${courier} (${inv})**`,
+      embeds: [
+        {
+          title: `${courier} Payout ৳${disbursed} Disbursed`,
+          url: `${baseAdmin}/finance/cod`,
+          color: 0x27ae60, // Emerald Green
+          fields: [
+            { name: "Net Disbursed", value: `৳${disbursed}`, inline: true },
+            { name: "COD Collected", value: `৳${collected}`, inline: true },
+            { name: "Total Parcels", value: `${count} parcels`, inline: true },
+            { name: "Variance / Short", value: short > 0 ? `৳${short.toLocaleString("en-BD")} short` : "Fully Matched ✅", inline: true },
+          ],
+          footer: { text: "BizTrack Treasury & COD Reconciliation" },
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    };
+  }
+
+  if (event === "cod.discrepancy_flagged") {
+    const courier = String(data.courier || "Courier");
+    const inv = String(data.invoiceNumber || "Payout");
+    const short = Number(data.shortfall || 0).toLocaleString("en-BD");
+    const count = Number(data.shortPaidParcels || 0);
+
+    return {
+      content: `⚠️ **COD Discrepancy Flagged: ${courier}**`,
+      embeds: [
+        {
+          title: `Courier Deduction Mismatch — ৳${short} Shortfall`,
+          url: `${baseAdmin}/finance/cod?filter=attention`,
+          color: 0xe74c3c, // Red #E74C3C
+          fields: [
+            { name: "Courier & Payout", value: `${courier} (${inv})`, inline: true },
+            { name: "Discrepancy Amount", value: `৳${short}`, inline: true },
+            { name: "Flagged Parcels", value: `${count} orders require dispute/acceptance`, inline: false },
+          ],
+          footer: { text: "BizTrack COD Reconciliation Alert" },
           timestamp: new Date().toISOString(),
         },
       ],
@@ -473,6 +556,72 @@ export function formatSlackWebhookPayload(
     };
   }
 
+  if (event === "cod.settlement_received") {
+    const courier = String(data.courier || "Courier");
+    const inv = String(data.invoiceNumber || "Payout");
+    const disbursed = Number(data.disbursedAmount || 0).toLocaleString("en-BD");
+    const collected = Number(data.totalCodCollected || 0).toLocaleString("en-BD");
+    const count = Number(data.parcelsCount || 0);
+    const short = Number(data.shortfall || 0);
+
+    return {
+      text: `💰 COD Remittance Received: ${courier} (${inv}) - ৳${disbursed}`,
+      blocks: [
+        {
+          type: "header",
+          text: { type: "plain_text", text: `💰 COD Remittance Received: ${courier}`, emoji: true },
+        },
+        {
+          type: "section",
+          fields: [
+            { type: "mrkdwn", text: `*Invoice No:*\n${inv}` },
+            { type: "mrkdwn", text: `*Net Disbursed:*\n৳${disbursed}` },
+            { type: "mrkdwn", text: `*COD Collected:*\n৳${collected}` },
+            { type: "mrkdwn", text: `*Parcels:*\n${count} parcels` },
+            { type: "mrkdwn", text: `*Status:*\n${short > 0 ? `⚠️ ৳${short.toLocaleString("en-BD")} short` : "Fully Matched ✅"}` },
+          ],
+        },
+        {
+          type: "context",
+          elements: [
+            { type: "mrkdwn", text: `📊 <${baseAdmin}/finance/cod|Open COD Reconciliation Workspace>` },
+          ],
+        },
+      ],
+    };
+  }
+
+  if (event === "cod.discrepancy_flagged") {
+    const courier = String(data.courier || "Courier");
+    const inv = String(data.invoiceNumber || "Payout");
+    const short = Number(data.shortfall || 0).toLocaleString("en-BD");
+    const count = Number(data.shortPaidParcels || 0);
+
+    return {
+      text: `⚠️ COD Discrepancy Flagged: ${courier} ৳${short} short`,
+      blocks: [
+        {
+          type: "header",
+          text: { type: "plain_text", text: `⚠️ COD Discrepancy Flagged: ${courier}`, emoji: true },
+        },
+        {
+          type: "section",
+          fields: [
+            { type: "mrkdwn", text: `*Payout Invoice:*\n${inv}` },
+            { type: "mrkdwn", text: `*Shortfall Amount:*\n৳${short}` },
+            { type: "mrkdwn", text: `*Affected Parcels:*\n${count} orders` },
+          ],
+        },
+        {
+          type: "context",
+          elements: [
+            { type: "mrkdwn", text: `👉 <${baseAdmin}/finance/cod?filter=attention|Review & Export Dispute Sheet>` },
+          ],
+        },
+      ],
+    };
+  }
+
   // Ping & fallback
   return {
     text: `🔔 BizTrack Webhook Connection Test Succeeded!`,
@@ -595,6 +744,38 @@ export function formatTelegramWebhookPayload(
       `*Phone:* \`${phone}\``,
       ``,
       `👉 [Open Bookings Workspace](${baseAdmin}/bookings)`,
+    ].join("\n");
+  } else if (event === "cod.settlement_received") {
+    const courier = String(data.courier || "Courier");
+    const inv = String(data.invoiceNumber || "Payout");
+    const disbursed = Number(data.disbursedAmount || 0).toLocaleString("en-BD");
+    const count = Number(data.parcelsCount || 0);
+    const short = Number(data.shortfall || 0);
+
+    text = [
+      `💰 *COD Remittance Received: ${courier}*`,
+      ``,
+      `*Payout Invoice:* ${inv}`,
+      `*Net Disbursed:* ৳${disbursed}`,
+      `*Parcels:* ${count} orders`,
+      `*Status:* ${short > 0 ? `⚠️ ৳${short.toLocaleString("en-BD")} short` : "Fully Matched ✅"}`,
+      ``,
+      `👉 [Open COD Reconciliation](${baseAdmin}/finance/cod)`,
+    ].join("\n");
+  } else if (event === "cod.discrepancy_flagged") {
+    const courier = String(data.courier || "Courier");
+    const inv = String(data.invoiceNumber || "Payout");
+    const short = Number(data.shortfall || 0).toLocaleString("en-BD");
+    const count = Number(data.shortPaidParcels || 0);
+
+    text = [
+      `⚠️ *COD Discrepancy Flagged: ${courier}*`,
+      ``,
+      `*Payout Invoice:* ${inv}`,
+      `*Shortfall Amount:* ৳${short}`,
+      `*Flagged Parcels:* ${count} orders`,
+      ``,
+      `👉 [Review & Export Dispute Sheet](${baseAdmin}/finance/cod?filter=attention)`,
     ].join("\n");
   } else {
     text = [

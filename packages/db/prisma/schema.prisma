@@ -1535,6 +1535,10 @@ model CourierSettlementInvoice {
   returnCharges     Decimal         @db.Decimal(12, 2)
   paymentMethod     String // "BEFTN_BANK" | "BKASH_COMMERCIAL"
   bankAccountLast4  String?
+  bankTxnRef        String? // Bank UTR or bKash TrxID when deposit is verified
+  verifiedAt        DateTime? // When deposit was confirmed in bank/bKash
+  verifiedBy        String? // Staff actor who verified
+  source            String          @default("CSV_IMPORT") // "CSV_IMPORT" | "API_SYNC" | "WEBHOOK"
   disbursedAt       DateTime
 
   tenant        Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -1546,17 +1550,20 @@ model CourierSettlementInvoice {
 }
 
 model CourierSettledOrder {
-  id              String  @id @default(cuid())
-  tenantId        String
-  settlementId    String
-  orderId         String
-  consignmentId   String
-  codCollected    Decimal @db.Decimal(12, 2)
-  deliveryCharge  Decimal @db.Decimal(12, 2)
-  codFeeDeduction Decimal @db.Decimal(12, 2)
-  netPaidToStore  Decimal @db.Decimal(12, 2)
-  expectedNet     Decimal @db.Decimal(12, 2) // what we calculated; difference drives the "Short paid" status on the canvas
-  result          String  @default("MATCHED") // "MATCHED" | "SHORT_PAID" | "MISSING" | "RETURNED"
+  id               String  @id @default(cuid())
+  tenantId         String
+  settlementId     String
+  orderId          String
+  consignmentId    String
+  codCollected     Decimal @db.Decimal(12, 2)
+  deliveryCharge   Decimal @db.Decimal(12, 2)
+  codFeeDeduction  Decimal @db.Decimal(12, 2)
+  netPaidToStore   Decimal @db.Decimal(12, 2)
+  expectedNet      Decimal @db.Decimal(12, 2) // what we calculated; difference drives the "Short paid" status on the canvas
+  toleranceApplied Decimal @default(0.00) @db.Decimal(12, 2)
+  disputeNote      String?
+  disputeStatus    String? // "NONE" | "OPEN" | "RESOLVED"
+  result           String  @default("MATCHED") // "MATCHED" | "SHORT_PAID" | "MISSING" | "RETURNED"
 
   settlement CourierSettlementInvoice @relation(fields: [settlementId], references: [id], onDelete: Cascade)
   order      Order                    @relation(fields: [orderId], references: [id], onDelete: Cascade)
@@ -1848,6 +1855,8 @@ model StoreSettings {
   courierFeeOutsideDhaka     Decimal   @default(130.00) @db.Decimal(12, 2)
   courierCodFeePercent       Decimal   @default(1.00) @db.Decimal(5, 2)
   defaultCourier             String? // preselected on the order screen
+  courierToleranceAmount     Decimal   @default(10.00) @db.Decimal(12, 2) // Auto-tolerance variance in Taka
+  courierAutoRestockOnReturn Boolean   @default(false) // Require physical warehouse check before restock
   reviewsAutoPublish         Boolean   @default(false) // off: a new review waits for the owner (AdmReviews)
   abandonedSmsEnabled        Boolean   @default(true) // send the 30-minute recovery SMS
   metaPixelId                String? // the public Meta (Facebook) Pixel id; the server-side token lives in the vault as META_CAPI

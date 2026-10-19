@@ -463,8 +463,9 @@ const STATUS_WORDS: Record<OrderStatus, string> = {
 };
 
 /** Moves an order along the state machine. Locks the row, restocks on cancel/return, keeps customer totals right. */
-export async function transitionOrder(tenantId: string, orderId: string, to: OrderStatus, actor: Actor, reason?: string, opts: { refused?: boolean } = {}) {
+export async function transitionOrder(tenantId: string, orderId: string, to: OrderStatus, actor: Actor, reason?: string, opts: { refused?: boolean; forceRestock?: boolean } = {}) {
   const notices: Notice[] = [];
+  let didRestock = false;
   const updated = await withTenant(tenantId, async (tx) => {
     const rows = await tx.$queryRaw<{ status: OrderStatus }[]>`SELECT "status" FROM "Order" WHERE "id" = ${orderId} FOR UPDATE`;
     const current = rows[0];
@@ -473,7 +474,12 @@ export async function transitionOrder(tenantId: string, orderId: string, to: Ord
 
     const order = await tx.order.findFirstOrThrow({ where: { id: orderId }, include: { items: true } });
 
-    if (RESTOCKS_ON.includes(to)) {
+    const settings = await tx.storeSettings.findFirst({ select: { courierAutoRestockOnReturn: true } });
+    const autoRestock = settings?.courierAutoRestockOnReturn ?? false;
+    const shouldRestock = to === "CANCELLED" || (to === "RETURNED" && (opts.forceRestock || autoRestock));
+
+    if (shouldRestock) {
+      didRestock = true;
       const restock = new Map<string, number>();
       for (const i of order.items) if (i.variantId) restock.set(i.variantId, (restock.get(i.variantId) ?? 0) + i.quantity);
       for (const id of [...restock.keys()].sort()) {
@@ -532,7 +538,7 @@ export async function transitionOrder(tenantId: string, orderId: string, to: Ord
   await sendNotices(tenantId, notices);
   const told = to === "SHIPPED" ? "ORDER_SHIPPED" : to === "DELIVERED" ? "DELIVERED" : to === "CANCELLED" ? "ORDER_CANCELLED" : null;
   if (told) await notifyOrder(tenantId, orderId, told);
-  if (RESTOCKS_ON.includes(to)) await afterRestock(tenantId);
+  if (didRestock) await afterRestock(tenantId);
   if (to === "CANCELLED" || to === "RETURNED" || to === "REFUNDED") {
     sendServerCancellation(tenantId, orderId, reason ?? `Order ${to}`).catch(() => undefined);
   }
