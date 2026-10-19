@@ -35,6 +35,8 @@ import { ProcessTimelineSection, type TimelineStepItem } from "./widgets/process
 import { FlipBoxSection, type FlipCardItem } from "./widgets/flip-box";
 import { ImageHotspotsSection, type HotspotPin } from "./widgets/image-hotspots";
 import { FilterableGridSection, type FilterableItem } from "./widgets/filterable-grid";
+import { VisitorCounterSection } from "./widgets/visitor-counter";
+import { StockScarcitySection } from "./widgets/stock-scarcity";
 
 /**
  * Draws a page built in the editor. It has no server-only code, so the live store (server) and the editor's preview
@@ -1464,6 +1466,53 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
             lang={lang}
             ed={ed}
             editing={editing}
+          />
+        </div>
+      );
+    }
+    case "visitor-counter": {
+      return (
+        <div data-section={id}>
+          <VisitorCounterSection
+            headline={str(s.headline)}
+            headlineBn={str(s.headlineBn)}
+            minViewers={typeof s.minViewers === "number" ? s.minViewers : 8}
+            maxViewers={typeof s.maxViewers === "number" ? s.maxViewers : 28}
+            showCartCount={s.showCartCount !== false}
+            cartText={str(s.cartText)}
+            cartTextBn={str(s.cartTextBn)}
+            pulseIntervalSec={typeof s.pulseIntervalSec === "number" ? s.pulseIntervalSec : 6}
+            icon={str(s.icon) || "fire"}
+            badgeStyle={(s.badgeStyle as "pill" | "card" | "minimal") || "pill"}
+            lang={lang}
+            editMarks={{
+              headline: ed("headline"),
+              cartText: ed("cartText"),
+            }}
+          />
+        </div>
+      );
+    }
+    case "stock-scarcity": {
+      return (
+        <div data-section={id}>
+          <StockScarcitySection
+            headline={str(s.headline)}
+            headlineBn={str(s.headlineBn)}
+            scarcityText={str(s.scarcityText)}
+            scarcityTextBn={str(s.scarcityTextBn)}
+            threshold={typeof s.threshold === "number" ? s.threshold : 4}
+            showProgressBar={s.showProgressBar !== false}
+            progressPercent={typeof s.progressPercent === "number" ? s.progressPercent : 84}
+            urgencyColor={str(s.urgencyColor) || "#EF4444"}
+            badgeText={str(s.badgeText)}
+            badgeTextBn={str(s.badgeTextBn)}
+            lang={lang}
+            editMarks={{
+              headline: ed("headline"),
+              scarcityText: ed("scarcityText"),
+              badgeText: ed("badgeText"),
+            }}
           />
         </div>
       );

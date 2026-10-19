@@ -9,6 +9,7 @@ import {
   listPublishedPosts,
   isModuleActive,
   getTenantModeAndVertical,
+  getRecentSalesFeed,
 } from "@biztrackbd/core";
 import { CartProvider } from "@/components/cart-provider";
 import { Footer } from "@/components/footer";
@@ -21,6 +22,7 @@ import { StorefrontTracker } from "@/components/tracker";
 import { WhatsAppFloatingButton } from "@/components/whatsapp-floating-button";
 import { MobileStickyActionBar } from "@/components/mobile-sticky-action-bar";
 import { AiChatWidget } from "@/components/ai-chat-widget";
+import { SocialProofToasts } from "@/components/social-proof-toasts";
 import { getLang, makeT } from "@/lib/i18n";
 import { getOrigin } from "@/lib/origin";
 import { findStore, getStoreCapabilities } from "@/lib/tenant";
@@ -92,7 +94,11 @@ export default async function StoreLayout({ children }: { children: React.ReactN
     getLang(store.locale),
   ]);
   const t = makeT(lang);
-  const [footerPages, blog] = await Promise.all([listFooterPages(store.id), listPublishedPosts(store.id, { pageSize: 1 })]);
+  const [footerPages, blog, recentSales] = await Promise.all([
+    listFooterPages(store.id),
+    listPublishedPosts(store.id, { pageSize: 1 }),
+    capabilities.commerce ? getRecentSalesFeed(store.id).catch(() => []) : Promise.resolve([]),
+  ]);
   // The header and footer the merchant built and published (docs/47 part C). None: today's header and footer.
   const chrome = await getLiveChrome(store.id).catch(() => null);
   const [info, categories, tracking, points, isAiActive, { siteMode, vertical }, origin] = await Promise.all([
@@ -169,6 +175,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
           storeName={info.storeName}
         />
       )}
+      <SocialProofToasts feed={recentSales} lang={lang} />
     </CartProvider>
   );
 }

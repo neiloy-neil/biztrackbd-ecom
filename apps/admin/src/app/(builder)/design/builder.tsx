@@ -13,6 +13,7 @@ import {
   type SectionAnimation, type SectionAnimDuration, type SectionAnimDelay, type SectionPattern,
   type SectionTextAlign, type SectionTextScale, type SectionBgPattern, type SectionMobileStyle,
   normalizePageSeo, extractPageSeoHeuristic, calculateSeoHealthScore, type PageSeoSettings, type SeoHealthReport,
+  type SocialProofSettings, normalizeSocialProof,
 } from "@biztrackbd/core/builder-client";
 import { ImagePicker } from "@/components/image-picker";
 import { LANDING_GROUPS, STORE_SECTION_CATEGORIES, SectionThumb } from "./section-thumbs";
@@ -23,7 +24,7 @@ export interface VersionItem { version: number; label: string | null; createdAt:
 type Settings = Record<string, unknown>;
 type Snap = { page: PageJson; theme: ThemeSettings };
 type Device = "desktop" | "tablet" | "phone";
-type Tab = "layers" | "settings" | "theme" | "seo" | "history";
+type Tab = "layers" | "settings" | "theme" | "seo" | "fomo" | "history";
 
 interface Props {
   pageKey: string;
@@ -83,6 +84,12 @@ const ISeo = () => (
     <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
   </svg>
 );
+const IFomo = () => (
+  <svg {...svg}>
+    <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+    <path d="M13.73 21a2 2 0 01-3.46 0" />
+  </svg>
+);
 const ICollapseLeft = () => <svg {...svg} width={16} height={16}><polyline points="15 18 9 12 15 6" /></svg>;
 const IExpandRight = () => <svg {...svg} width={16} height={16}><polyline points="9 18 15 12 9 6" /></svg>;
 const IZen = () => <svg {...svg}><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" /></svg>;
@@ -137,6 +144,10 @@ function sectionGlyph(type: string): string {
       return "🔄";
     case "image-comparison":
       return "🪞";
+    case "visitor-counter":
+      return "🔥";
+    case "stock-scarcity":
+      return "⚡";
     default:
       return "▤";
   }
@@ -1851,6 +1862,298 @@ function SeoInspector({
   );
 }
 
+function FomoInspector({
+  socialProof,
+  onChange,
+  onTriggerPreview,
+  onAddSection,
+  disabled,
+}: {
+  socialProof?: SocialProofSettings;
+  onChange: (patch: Partial<SocialProofSettings>) => void;
+  onTriggerPreview: () => void;
+  onAddSection: (type: "visitor-counter" | "stock-scarcity") => void;
+  disabled: boolean;
+}) {
+  const DEFAULT_FOMO: Required<SocialProofSettings> = {
+    enabled: true,
+    position: "bottom-left",
+    initialDelaySec: 4,
+    intervalSec: 14,
+    displayDurationSec: 5,
+    showOnMobile: true,
+    safeAreaBottomPx: 76,
+    maxItems: 8,
+    anonymizeNames: true,
+    includeDistricts: true,
+  };
+  const norm: Required<SocialProofSettings> = {
+    ...DEFAULT_FOMO,
+    ...(normalizeSocialProof(socialProof) ?? {}),
+  };
+  const isEnabled = norm.enabled;
+
+  return (
+    <div className="bld-fomo-container" data-testid="fomo-inspector">
+      {/* 1. Hero Card: Master Toggle & Preview Trigger */}
+      <div className="bld-fomo-hero-card">
+        <div className="bld-fomo-hero-header">
+          <div className="bld-fomo-hero-title">
+            <span>⚡</span>
+            <span>Live Social Proof Toasts</span>
+          </div>
+          <span className={`bld-fomo-badge ${isEnabled ? "active" : "inactive"}`}>
+            {isEnabled ? "Active" : "Disabled"}
+          </span>
+        </div>
+        <p className="muted" style={{ fontSize: 12, margin: 0 }}>
+          Display floating notification toasts showing verified recent orders from authentic shoppers to boost buyer trust and conversions.
+        </p>
+
+        <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: disabled ? "not-allowed" : "pointer" }}>
+          <input
+            type="checkbox"
+            checked={isEnabled}
+            disabled={disabled}
+            onChange={(e) => onChange({ enabled: e.target.checked })}
+            data-testid="fomo-enable-toggle"
+          />
+          <span style={{ fontWeight: 600, fontSize: 13 }}>Enable Floating Purchase Toasts</span>
+        </label>
+
+        <button
+          type="button"
+          className="bld-fomo-trigger-btn"
+          onClick={onTriggerPreview}
+          data-testid="fomo-trigger-preview-btn"
+          title="Fires a live sample toast in the preview canvas right now"
+        >
+          <span>🚀 Trigger Preview Toast</span>
+        </button>
+      </div>
+
+      {/* 2. Position & Ergonomics */}
+      <div className="bld-fomo-card">
+        <div className="bld-fomo-card-title">
+          <span>📍</span>
+          <span>Toast Position on Screen</span>
+        </div>
+        <div className="bld-fomo-pos-grid">
+          {(
+            [
+              ["bottom-left", "Bottom Left"],
+              ["bottom-right", "Bottom Right"],
+              ["top-left", "Top Left"],
+              ["top-right", "Top Right"],
+            ] as const
+          ).map(([pos, label]) => (
+            <button
+              key={pos}
+              type="button"
+              className={`bld-fomo-pos-btn${norm.position === pos ? " active" : ""}`}
+              onClick={() => onChange({ position: pos })}
+              disabled={disabled}
+              data-testid={`fomo-pos-${pos}`}
+            >
+              <span className="bld-fomo-pos-dot" />
+              <span>{label}</span>
+            </button>
+          ))}
+        </div>
+
+        <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 8 }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: disabled ? "not-allowed" : "pointer", fontSize: 12 }}>
+            <input
+              type="checkbox"
+              checked={norm.showOnMobile}
+              disabled={disabled}
+              onChange={(e) => onChange({ showOnMobile: e.target.checked })}
+              data-testid="fomo-mobile-toggle"
+            />
+            <span style={{ fontWeight: 500 }}>Show toasts on mobile devices (&lt; 640px)</span>
+          </label>
+
+          <div className="field" style={{ margin: 0 }}>
+            <label className="label" htmlFor="fomo-safe-bottom" style={{ fontSize: 12 }}>
+              Mobile Bottom Safe Clearance (px)
+            </label>
+            <input
+              id="fomo-safe-bottom"
+              className="input"
+              type="number"
+              min={0}
+              max={200}
+              value={norm.safeAreaBottomPx}
+              disabled={disabled}
+              onChange={(e) => onChange({ safeAreaBottomPx: parseInt(e.target.value, 10) || 0 })}
+              data-testid="fomo-safe-bottom-input"
+            />
+            <div className="muted" style={{ fontSize: 11, marginTop: 4 }}>
+              Prevents toasts from overlapping sticky bottom add-to-cart bars and floating WhatsApp buttons. Default: 76px.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Cycle Timings */}
+      <div className="bld-fomo-card">
+        <div className="bld-fomo-card-title">
+          <span>⏱️</span>
+          <span>Cycle Timings & Display Delays</span>
+        </div>
+        <div className="bld-fomo-grid-2">
+          <div className="field" style={{ margin: 0 }}>
+            <label className="label" htmlFor="fomo-initial-delay" style={{ fontSize: 12 }}>
+              First Toast Delay (sec)
+            </label>
+            <input
+              id="fomo-initial-delay"
+              className="input"
+              type="number"
+              min={1}
+              max={60}
+              value={norm.initialDelaySec}
+              disabled={disabled}
+              onChange={(e) => onChange({ initialDelaySec: parseInt(e.target.value, 10) || 1 })}
+              data-testid="fomo-initial-delay-input"
+            />
+          </div>
+          <div className="field" style={{ margin: 0 }}>
+            <label className="label" htmlFor="fomo-duration" style={{ fontSize: 12 }}>
+              Toast Duration (sec)
+            </label>
+            <input
+              id="fomo-duration"
+              className="input"
+              type="number"
+              min={2}
+              max={30}
+              value={norm.displayDurationSec}
+              disabled={disabled}
+              onChange={(e) => onChange({ displayDurationSec: parseInt(e.target.value, 10) || 2 })}
+              data-testid="fomo-duration-input"
+            />
+          </div>
+        </div>
+        <div className="field" style={{ margin: 0 }}>
+          <label className="label" htmlFor="fomo-interval" style={{ fontSize: 12 }}>
+            Interval Between Toasts (sec)
+          </label>
+          <input
+            id="fomo-interval"
+            className="input"
+            type="number"
+            min={4}
+            max={120}
+            value={norm.intervalSec}
+            disabled={disabled}
+            onChange={(e) => onChange({ intervalSec: parseInt(e.target.value, 10) || 4 })}
+            data-testid="fomo-interval-input"
+          />
+          <div className="muted" style={{ fontSize: 11, marginTop: 4 }}>
+            Time to pause between rotating to the next customer purchase notification.
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Privacy & Anonymization */}
+      <div className="bld-fomo-card">
+        <div className="bld-fomo-card-title">
+          <span>🛡️</span>
+          <span>Customer Privacy & Feed</span>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: disabled ? "not-allowed" : "pointer", fontSize: 12 }}>
+            <input
+              type="checkbox"
+              checked={norm.anonymizeNames}
+              disabled={disabled}
+              onChange={(e) => onChange({ anonymizeNames: e.target.checked })}
+              data-testid="fomo-anonymize-toggle"
+            />
+            <span style={{ fontWeight: 500 }}>Anonymize buyer names (e.g. &quot;Tanvir A.&quot;)</span>
+          </label>
+
+          <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: disabled ? "not-allowed" : "pointer", fontSize: 12 }}>
+            <input
+              type="checkbox"
+              checked={norm.includeDistricts}
+              disabled={disabled}
+              onChange={(e) => onChange({ includeDistricts: e.target.checked })}
+              data-testid="fomo-districts-toggle"
+            />
+            <span style={{ fontWeight: 500 }}>Show delivery district / city (e.g. &quot;Dhanmondi, Dhaka&quot;)</span>
+          </label>
+
+          <div className="field" style={{ margin: 0 }}>
+            <label className="label" htmlFor="fomo-max-items" style={{ fontSize: 12 }}>
+              Max Sales in Rotation Queue
+            </label>
+            <input
+              id="fomo-max-items"
+              className="input"
+              type="number"
+              min={1}
+              max={20}
+              value={norm.maxItems}
+              disabled={disabled}
+              onChange={(e) => onChange({ maxItems: parseInt(e.target.value, 10) || 1 })}
+              data-testid="fomo-max-items-input"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* 5. In-Canvas Sections Quick Add */}
+      <div className="bld-fomo-card">
+        <div className="bld-fomo-card-title">
+          <span>🧩</span>
+          <span>In-Canvas Urgency Sections</span>
+        </div>
+        <p className="muted" style={{ fontSize: 12, margin: 0 }}>
+          You can also insert embedded FOMO and social proof sections directly into your page layout:
+        </p>
+
+        <div className="bld-fomo-widget-cta">
+          <div className="bld-fomo-widget-item">
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600 }}>🔥 Live Visitors Badge</div>
+              <div className="muted" style={{ fontSize: 11 }}>Shopper count &amp; live cart interest indicator</div>
+            </div>
+            <button
+              type="button"
+              className="bld-ib"
+              style={{ fontSize: 12, padding: "4px 10px", borderRadius: 6, background: "var(--surface)", border: "1px solid var(--line)" }}
+              onClick={() => onAddSection("visitor-counter")}
+              disabled={disabled}
+              data-testid="fomo-add-visitor-counter-btn"
+            >
+              + Add
+            </button>
+          </div>
+
+          <div className="bld-fomo-widget-item">
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600 }}>⚡ Stock Scarcity Urgency</div>
+              <div className="muted" style={{ fontSize: 11 }}>Low stock countdown bar &amp; progress gauge</div>
+            </div>
+            <button
+              type="button"
+              className="bld-ib"
+              style={{ fontSize: 12, padding: "4px 10px", borderRadius: 6, background: "var(--surface)", border: "1px solid var(--line)" }}
+              onClick={() => onAddSection("stock-scarcity")}
+              disabled={disabled}
+              data-testid="fomo-add-stock-scarcity-btn"
+            >
+              + Add
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ---- The editor ---------------------------------------------------------------------------------------------------
 export function Builder(props: Props) {
   const { pageKey, kind, canEdit, previewOrigin } = props;
@@ -1893,7 +2196,7 @@ export function Builder(props: Props) {
   const resizeStart = useRef<{ clientX: number; startW: number } | null>(null);
   const [, bump] = useState(0);
   const [showShortcuts, setShowShortcuts] = useState(false);
-  const [leftTab, setLeftTab] = useState<"layers" | "library" | "theme" | "seo" | "history">("layers");
+  const [leftTab, setLeftTab] = useState<"layers" | "library" | "theme" | "seo" | "fomo" | "history">("layers");
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [leftWidth, setLeftWidth] = useState(340);
   const [resizingLeftDock, setResizingLeftDock] = useState(false);
@@ -2090,13 +2393,14 @@ export function Builder(props: Props) {
         return;
       }
 
-      // Quick tab switcher shortcuts Ctrl+1..5
+      // Quick tab switcher shortcuts Ctrl+1..6
       if ((e.ctrlKey || e.metaKey) && !isInput) {
         if (e.key === "1") { e.preventDefault(); handleRailClick("layers"); return; }
         if (e.key === "2") { e.preventDefault(); handleRailClick("library"); return; }
         if (e.key === "3") { e.preventDefault(); handleRailClick("theme"); return; }
         if (e.key === "4") { e.preventDefault(); handleRailClick("seo"); return; }
-        if (e.key === "5") { e.preventDefault(); handleRailClick("history"); return; }
+        if (e.key === "5") { e.preventDefault(); handleRailClick("fomo"); return; }
+        if (e.key === "6") { e.preventDefault(); handleRailClick("history"); return; }
       }
 
       // Toggle Left Sidebar: Ctrl+B / Cmd+B
@@ -2528,7 +2832,29 @@ export function Builder(props: Props) {
     toast("✨ Auto-filled SEO metadata from page content!");
   };
 
-  const handleRailClick = (targetTab: "layers" | "library" | "theme" | "seo" | "history") => {
+  const patchSocialProof = (fomoPatch: Partial<SocialProofSettings>) => {
+    edit((pg) => ({
+      ...pg,
+      socialProof: normalizeSocialProof({ ...(pg.socialProof ?? {}), ...fomoPatch }),
+    }));
+  };
+
+  const triggerPreviewFomo = () => {
+    post({ type: "bt-preview:trigger-fomo" });
+    toast("🚀 Triggered live social proof toast in preview!");
+  };
+
+  const addFomoWidget = (type: "visitor-counter" | "stock-scarcity") => {
+    const sec = newSection(type);
+    edit((pg) => ({
+      ...pg,
+      sections: [...pg.sections, sec],
+    }));
+    setSelected(sec.id);
+    toast(`Added ${sectionDef(type)?.label ?? type} section to page`);
+  };
+
+  const handleRailClick = (targetTab: "layers" | "library" | "theme" | "seo" | "fomo" | "history") => {
     if (leftTab === targetTab && !leftCollapsed) {
       setLeftCollapsed(true);
     } else {
@@ -2541,12 +2867,14 @@ export function Builder(props: Props) {
     ? [
         { id: "layers", label: "Sections" },
         { id: "settings", label: "Settings" },
+        { id: "fomo", label: "Social Proof", test: "tab-fomo" },
         { id: "seo", label: "SEO", test: "tab-seo" },
         { id: "theme", label: kind === "home" ? "Style" : "Page", test: "tab-theme" },
         { id: "history", label: "History", test: "tab-history" },
       ]
     : [
         { id: "settings", label: "Settings" },
+        { id: "fomo", label: "Social Proof", test: "tab-fomo" },
         { id: "seo", label: "SEO & Social", test: "tab-seo" },
         { id: "theme", label: kind === "home" ? "Template and style" : "Page", test: "tab-theme" },
         { id: "history", label: "History", test: "tab-history" },
@@ -3030,9 +3358,22 @@ export function Builder(props: Props) {
     </div>
   );
 
+  const fomoTab = (
+    <div className="stack" style={{ gap: 14 }}>
+      <FomoInspector
+        socialProof={page.socialProof}
+        onChange={patchSocialProof}
+        onTriggerPreview={triggerPreviewFomo}
+        onAddSection={addFomoWidget}
+        disabled={!canEdit}
+      />
+    </div>
+  );
+
   const inspector = (
     <div className="bld-panel-body">
       {active === "settings" && settings}
+      {active === "fomo" && fomoTab}
       {active === "seo" && seoTab}
       {active === "theme" && themeTab}
       {active === "history" && history}
@@ -3162,10 +3503,21 @@ export function Builder(props: Props) {
               </button>
               <button
                 type="button"
+                className={`bld-rail-btn${leftTab === "fomo" && !leftCollapsed ? " active" : ""}`}
+                onClick={() => handleRailClick("fomo")}
+                title={leftTab === "fomo" && !leftCollapsed ? "Collapse Social Proof (Ctrl+5 or Ctrl+B)" : "Social Proof & FOMO (Ctrl+5)"}
+                aria-label="Social Proof & FOMO"
+                data-testid="rail-fomo-btn"
+              >
+                <IFomo />
+              </button>
+              <button
+                type="button"
                 className={`bld-rail-btn${leftTab === "history" && !leftCollapsed ? " active" : ""}`}
                 onClick={() => handleRailClick("history")}
-                title={leftTab === "history" && !leftCollapsed ? "Collapse History (Ctrl+5 or Ctrl+B)" : "Version History & Drafts (Ctrl+5)"}
+                title={leftTab === "history" && !leftCollapsed ? "Collapse History (Ctrl+6 or Ctrl+B)" : "Version History & Drafts (Ctrl+6)"}
                 aria-label="Version History & Drafts"
+                data-testid="rail-history-btn"
               >
                 <IHistory />
               </button>
@@ -3406,6 +3758,35 @@ export function Builder(props: Props) {
                         storeName={props.title}
                         onChangeSeo={patchSeo}
                         onAutoFill={autoFillSeo}
+                        disabled={!canEdit}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {leftTab === "fomo" && (
+                  <>
+                    <div className="bld-dock-head">
+                      <span className="bld-dock-title">
+                        <IFomo />
+                        <span>Social Proof & FOMO</span>
+                      </span>
+                      <button
+                        type="button"
+                        className="bld-dock-collapse-btn"
+                        onClick={() => setLeftCollapsed(true)}
+                        title="Collapse left sidebar (Ctrl+B)"
+                        aria-label="Collapse sidebar"
+                      >
+                        <ICollapseLeft />
+                      </button>
+                    </div>
+                    <div className="bld-panel-body" style={{ flex: 1, padding: "12px" }}>
+                      <FomoInspector
+                        socialProof={page.socialProof}
+                        onChange={patchSocialProof}
+                        onTriggerPreview={triggerPreviewFomo}
+                        onAddSection={addFomoWidget}
                         disabled={!canEdit}
                       />
                     </div>
@@ -3950,6 +4331,14 @@ export function Builder(props: Props) {
               <div className="bld-shortcut-row">
                 <span className="bld-shortcut-label">SEO & Social Share</span>
                 <span className="bld-key-badges"><span className="bld-kbd">Ctrl</span><span className="bld-kbd">4</span></span>
+              </div>
+              <div className="bld-shortcut-row">
+                <span className="bld-shortcut-label">Social Proof & FOMO</span>
+                <span className="bld-key-badges"><span className="bld-kbd">Ctrl</span><span className="bld-kbd">5</span></span>
+              </div>
+              <div className="bld-shortcut-row">
+                <span className="bld-shortcut-label">Version History & Drafts</span>
+                <span className="bld-key-badges"><span className="bld-kbd">Ctrl</span><span className="bld-kbd">6</span></span>
               </div>
             </div>
           </div>

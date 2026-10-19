@@ -2417,6 +2417,91 @@ export const SECTIONS: SectionDef[] = [
       ],
     },
   },
+  {
+    type: "visitor-counter",
+    label: "Live Visitor Counter",
+    description: "Real-time shopper counter badge with live cart interest and pulsing animations.",
+    page: "home",
+    pages: ["custom", "landing", "product", "collection", "cart"],
+    category: "proof",
+    max: 4,
+    fields: [
+      t("headline", "Heading / Text", 100),
+      tb("headline", "Heading (Bangla)", 100),
+      { key: "minViewers", label: "Minimum viewers", type: "number", min: 1, max: 200 },
+      { key: "maxViewers", label: "Maximum viewers", type: "number", min: 2, max: 500 },
+      { key: "showCartCount", label: "Show items in cart count", type: "checkbox" },
+      t("cartText", "Cart text", 80),
+      tb("cartText", "Cart text (Bangla)", 80),
+      { key: "pulseIntervalSec", label: "Pulsing interval (seconds)", type: "number", min: 3, max: 60 },
+      {
+        key: "icon",
+        label: "Counter icon",
+        type: "select",
+        options: [
+          { value: "fire", label: "🔥 Fire" },
+          { value: "eye", label: "👁️ Eye" },
+          { value: "users", label: "👥 Users" },
+          { value: "sparkles", label: "✨ Sparkles" },
+        ],
+      },
+      {
+        key: "badgeStyle",
+        label: "Badge style",
+        type: "select",
+        options: [
+          { value: "pill", label: "Compact floating pill" },
+          { value: "card", label: "Framed counter card" },
+          { value: "minimal", label: "Minimal inline text" },
+        ],
+      },
+    ],
+    defaults: {
+      headline: "people are viewing this right now",
+      headlineBn: "জন এই মুহূর্তে দেখছেন",
+      minViewers: 8,
+      maxViewers: 28,
+      showCartCount: true,
+      cartText: "people have this in their cart",
+      cartTextBn: "জনের কার্টে এই পণ্যটি রয়েছে",
+      pulseIntervalSec: 6,
+      icon: "fire",
+      badgeStyle: "pill",
+    },
+  },
+  {
+    type: "stock-scarcity",
+    label: "Stock Scarcity Bar",
+    description: "Dynamic low-stock urgency bar with animated fire badge and progress gauge.",
+    page: "home",
+    pages: ["custom", "landing", "product", "collection", "cart"],
+    category: "promotions",
+    max: 4,
+    fields: [
+      t("headline", "Heading", 80),
+      tb("headline", "Heading (Bangla)", 80),
+      t("scarcityText", "Scarcity message", 120),
+      tb("scarcityText", "Scarcity message (Bangla)", 120),
+      { key: "threshold", label: "Remaining items number", type: "number", min: 1, max: 50 },
+      { key: "showProgressBar", label: "Show urgency progress bar", type: "checkbox" },
+      { key: "progressPercent", label: "Sold percentage (%)", type: "number", min: 10, max: 98 },
+      { key: "urgencyColor", label: "Urgency colour", type: "color" },
+      t("badgeText", "Urgency badge tag", 30),
+      tb("badgeText", "Urgency badge tag (Bangla)", 30),
+    ],
+    defaults: {
+      headline: "Hurry, low stock!",
+      headlineBn: "সীমিত স্টক! দ্রুত অর্ডার করুন",
+      scarcityText: "Only {count} items left in stock — selling fast!",
+      scarcityTextBn: "আর মাত্র {count}টি বাকি আছে — স্টক শেষ হওয়ার আগেই নিন!",
+      threshold: 4,
+      showProgressBar: true,
+      progressPercent: 84,
+      urgencyColor: "#EF4444",
+      badgeText: "High Demand",
+      badgeTextBn: "উচ্চ চাহিদা",
+    },
+  },
 ];
 
 export interface StoreSectionCategory {
@@ -2452,8 +2537,8 @@ export const STORE_SECTION_CATEGORIES: StoreSectionCategory[] = [
   },
   { id: "hero", title: "Header & Hero", icon: "", types: ["hero", "banner", "announcement-bar", "doctor-hero", "logo-marquee"] },
   { id: "products", title: "Product Showcases", icon: "", types: ["featured-products", "category-grid", "product-related", "collection-products", "image-hotspots", "flip-box", "filterable-grid"] },
-  { id: "trust", title: "Trust & Social Proof", icon: "", types: ["trust-strip", "product-reviews", "video-reels", "team-grid", "portfolio-grid", "video-lightbox", "bento-grid", "testimonials-slider", "image-comparison", "logo-marquee", "process-timeline"] },
-  { id: "promotions", title: "Promotions & Urgency", icon: "", types: ["countdown-timer", "marquee-ticker", "floating-contact", "reservation-cta", "promo-popup", "flip-box"] },
+  { id: "trust", title: "Trust & Social Proof", icon: "", types: ["trust-strip", "product-reviews", "visitor-counter", "video-reels", "team-grid", "portfolio-grid", "video-lightbox", "bento-grid", "testimonials-slider", "image-comparison", "logo-marquee", "process-timeline"] },
+  { id: "promotions", title: "Promotions & Urgency", icon: "", types: ["countdown-timer", "stock-scarcity", "marquee-ticker", "floating-contact", "reservation-cta", "promo-popup", "flip-box"] },
   {
     id: "content",
     title: "Content & FAQs",
@@ -2568,6 +2653,8 @@ const COMMERCE_SECTIONS = new Set([
   "cart-main",
   "lp-order-form",
   "drop-spotlight",
+  "visitor-counter",
+  "stock-scarcity",
 ]);
 
 export const isCommerceSection = (def: SectionDef): boolean =>
@@ -2685,10 +2772,24 @@ export interface PageSeoSettings {
   ogDescription?: string;
 }
 
+export interface SocialProofSettings {
+  enabled?: boolean;
+  position?: "bottom-left" | "bottom-right" | "top-left" | "top-right";
+  initialDelaySec?: number;
+  intervalSec?: number;
+  displayDurationSec?: number;
+  showOnMobile?: boolean;
+  safeAreaBottomPx?: number;
+  maxItems?: number;
+  anonymizeNames?: boolean;
+  includeDistricts?: boolean;
+}
+
 export interface PageJson {
   version: 1;
   sections: PageSection[];
   seo?: PageSeoSettings;
+  socialProof?: SocialProofSettings;
 }
 
 export const MAX_SECTIONS = 30;
@@ -2932,7 +3033,47 @@ export function validatePage(kind: PageKind, raw: unknown): PageJson {
     if (found.disabled) throw new ValidationError(`The "${label}" section cannot be hidden: this page does not work without it`);
   }
   const seo = normalizePageSeo((raw as { seo?: unknown }).seo);
-  return { version: 1, sections, ...(seo ? { seo } : {}) };
+  const socialProof = normalizeSocialProof((raw as { socialProof?: unknown }).socialProof);
+  return { version: 1, sections, ...(seo ? { seo } : {}), ...(socialProof ? { socialProof } : {}) };
+}
+
+export function normalizeSocialProof(raw?: unknown): SocialProofSettings | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const o = raw as Record<string, unknown>;
+  const sp: SocialProofSettings = {};
+
+  if (typeof o.enabled === "boolean") {
+    sp.enabled = o.enabled;
+  }
+  if (o.position === "bottom-left" || o.position === "bottom-right" || o.position === "top-left" || o.position === "top-right") {
+    sp.position = o.position;
+  }
+  if (typeof o.initialDelaySec === "number" && Number.isFinite(o.initialDelaySec)) {
+    sp.initialDelaySec = Math.max(1, Math.min(60, Math.round(o.initialDelaySec)));
+  }
+  if (typeof o.intervalSec === "number" && Number.isFinite(o.intervalSec)) {
+    sp.intervalSec = Math.max(3, Math.min(180, Math.round(o.intervalSec)));
+  }
+  if (typeof o.displayDurationSec === "number" && Number.isFinite(o.displayDurationSec)) {
+    sp.displayDurationSec = Math.max(2, Math.min(30, Math.round(o.displayDurationSec)));
+  }
+  if (typeof o.showOnMobile === "boolean") {
+    sp.showOnMobile = o.showOnMobile;
+  }
+  if (typeof o.safeAreaBottomPx === "number" && Number.isFinite(o.safeAreaBottomPx)) {
+    sp.safeAreaBottomPx = Math.max(0, Math.min(240, Math.round(o.safeAreaBottomPx)));
+  }
+  if (typeof o.maxItems === "number" && Number.isFinite(o.maxItems)) {
+    sp.maxItems = Math.max(1, Math.min(50, Math.round(o.maxItems)));
+  }
+  if (typeof o.anonymizeNames === "boolean") {
+    sp.anonymizeNames = o.anonymizeNames;
+  }
+  if (typeof o.includeDistricts === "boolean") {
+    sp.includeDistricts = o.includeDistricts;
+  }
+
+  return Object.keys(sp).length > 0 ? sp : undefined;
 }
 
 export function normalizePageSeo(raw?: unknown): PageSeoSettings | undefined {
