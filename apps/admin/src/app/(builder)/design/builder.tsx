@@ -210,21 +210,75 @@ function ListEditor({ spec, items, onChange, disabled, idPrefix, imgSignal }: { 
 
 const isStyle = (f: Field) => f.type === "color" || f.type === "select" || f.type === "number" || f.type === "checkbox";
 
-/** A section's settings in three groups: what it says, how it looks, and the Bangla twins tucked into one fold (instead of every field twice). */
-function SectionForm({ def, section, onChange, disabled, bnOpen, imgSignal }: { def: SectionDef; section: PageSection; onChange: (patch: Settings) => void; disabled: boolean; bnOpen: boolean; imgSignal?: { path: string; n: number } }) {
-  if (def.fields.length === 0 && !def.list) return <p className="muted" style={{ fontSize: 14 }}>This section has nothing to set. It shows your delivery and payment promises.</p>;
+/** Content tab of the Elementor-style 3-tab inspector: text copy, list repeater items, and Bengali translations. */
+function SectionContentTab({
+  def,
+  section,
+  onChange,
+  disabled,
+  bnOpen,
+  imgSignal,
+}: {
+  def: SectionDef;
+  section: PageSection;
+  onChange: (patch: Settings) => void;
+  disabled: boolean;
+  bnOpen: boolean;
+  imgSignal?: { path: string; n: number };
+}) {
   const content = def.fields.filter((f) => !f.bn && !isStyle(f));
-  const style = def.fields.filter((f) => !f.bn && isStyle(f));
   const bn = def.fields.filter((f) => f.bn);
-  const row = (f: Field) => <FieldInput key={f.key} f={f} value={section.settings[f.key]} disabled={disabled} idPrefix={section.id} openSignal={imgSignal?.path === f.key ? imgSignal.n : 0} onChange={(v) => onChange({ [f.key]: v })} />;
+  const row = (f: Field) => (
+    <FieldInput
+      key={f.key}
+      f={f}
+      value={section.settings[f.key]}
+      disabled={disabled}
+      idPrefix={section.id}
+      openSignal={imgSignal?.path === f.key ? imgSignal.n : 0}
+      onChange={(v) => onChange({ [f.key]: v })}
+    />
+  );
+
+  const hasNothing = content.length === 0 && !def.list && bn.length === 0;
+
   return (
     <div className="stack" style={{ gap: 14 }} data-testid="section-form">
-      {content.length > 0 && <div className="bld-group"><div className="bld-gh">Content</div><div className="stack" style={{ gap: 10 }}>{content.map(row)}</div></div>}
-      {def.list && <div className="bld-group"><ListEditor spec={def.list} items={(section.settings[def.list.key] as Settings[]) ?? []} disabled={disabled} idPrefix={section.id} imgSignal={imgSignal} onChange={(items) => onChange({ [def.list!.key]: items })} /></div>}
-      {style.length > 0 && <div className="bld-group"><div className="bld-gh">Style</div><div className="stack" style={{ gap: 10 }}>{style.map(row)}</div></div>}
+      {hasNothing && (
+        <div className="bld-group" style={{ textAlign: "center", padding: "24px 16px" }}>
+          <span style={{ fontSize: 28, display: "block", marginBottom: 8 }}>📋</span>
+          <b style={{ fontSize: 13, color: "var(--ink)" }}>Automatic Store Content</b>
+          <p className="muted" style={{ margin: "6px auto 0", fontSize: 12, maxWidth: 280, lineHeight: 1.45 }}>
+            This section renders live store items automatically. Use the <b>Style</b> or <b>Advanced</b> tab to customize colors, spacing, and entrance animations.
+          </p>
+        </div>
+      )}
+
+      {content.length > 0 && (
+        <div className="bld-group">
+          <div className="bld-gh">Content & Copy</div>
+          <div className="stack" style={{ gap: 10 }}>{content.map(row)}</div>
+        </div>
+      )}
+
+      {def.list && (
+        <div className="bld-group">
+          <ListEditor
+            spec={def.list}
+            items={(section.settings[def.list.key] as Settings[]) ?? []}
+            disabled={disabled}
+            idPrefix={section.id}
+            imgSignal={imgSignal}
+            onChange={(items) => onChange({ [def.list!.key]: items })}
+          />
+        </div>
+      )}
+
       {bn.length > 0 && (
         <details className="bld-group bld-bn" open={bnOpen}>
-          <summary className="bld-gh">Bangla text <span className="muted" style={{ fontWeight: 500 }}>(optional)</span></summary>
+          <summary className="bld-gh">
+            Bangla text <span className="muted" style={{ fontWeight: 500 }}>(ঐচ্ছিক)</span>
+          </summary>
           <div className="stack" style={{ gap: 10, marginTop: 10 }}>{bn.map(row)}</div>
         </details>
       )}
@@ -243,37 +297,62 @@ const COLOR_SWATCHES = [
   { label: "Emerald", hex: "#064e3b" },
 ];
 
-function SectionAppearanceForm({
+/** Style tab of the Elementor-style 3-tab inspector: component options, background tone, swatches, gradients, card container, and vertical spacing. */
+function SectionStyleTab({
+  def,
   section,
   disabled,
-  onChange,
-  onReplayAnim,
+  imgSignal,
+  onChangeSettings,
+  onChangeStyle,
 }: {
+  def?: SectionDef;
   section: PageSection;
   disabled: boolean;
-  onChange: (patch: Partial<SectionStyle>) => void;
-  onReplayAnim?: () => void;
+  imgSignal?: { path: string; n: number };
+  onChangeSettings: (patch: Settings) => void;
+  onChangeStyle: (patch: Partial<SectionStyle>) => void;
 }) {
   const style = section.style ?? {};
   const bgType: SectionBgType = style.bgType ?? "default";
   const paddingY: SectionPaddingY = style.paddingY ?? "normal";
   const textColor: SectionTextColor = style.textColor ?? "default";
-  const hideOn: SectionHideOn = style.hideOn ?? "none";
 
   const isSpecial = section.type === "floating-whatsapp" || section.type === "announcement-bar";
+  const sectionStyleFields = def ? def.fields.filter((f) => !f.bn && isStyle(f)) : [];
+  const row = (f: Field) => (
+    <FieldInput
+      key={f.key}
+      f={f}
+      value={section.settings[f.key]}
+      disabled={disabled}
+      idPrefix={section.id}
+      openSignal={imgSignal?.path === f.key ? imgSignal.n : 0}
+      onChange={(v) => onChangeSettings({ [f.key]: v })}
+    />
+  );
 
   return (
-    <div className="stack" style={{ gap: 14, marginTop: 14 }} data-testid="section-appearance">
+    <div className="stack" style={{ gap: 14 }} data-testid="section-style-tab">
+      {/* Component Specific Style Options */}
+      {sectionStyleFields.length > 0 && (
+        <div className="bld-group">
+          <div className="bld-gh">Component Options</div>
+          <div className="stack" style={{ gap: 10 }}>{sectionStyleFields.map(row)}</div>
+        </div>
+      )}
+
+      {/* Global Background & Tone */}
       {!isSpecial && (
         <details className="bld-group" open>
-          <summary className="bld-gh">Appearance & Background</summary>
+          <summary className="bld-gh">Background & Appearance</summary>
           <div className="stack" style={{ gap: 12, marginTop: 10 }}>
             <div className="field" style={{ margin: 0, opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}>
               <label className="label">Background Tone</label>
               <Segmented
                 label="Background style"
                 value={bgType}
-                onChange={(v) => !disabled && onChange({ bgType: v as SectionBgType })}
+                onChange={(v) => !disabled && onChangeStyle({ bgType: v as SectionBgType })}
                 options={[
                   { value: "default", label: "Default" },
                   { value: "color", label: "Color" },
@@ -294,7 +373,7 @@ function SectionAppearanceForm({
                       className="bld-color-input"
                       value={style.bgColor ?? "#ffffff"}
                       disabled={disabled}
-                      onChange={(e) => onChange({ bgColor: e.target.value })}
+                      onChange={(e) => onChangeStyle({ bgColor: e.target.value })}
                     />
                     <input
                       type="text"
@@ -302,7 +381,7 @@ function SectionAppearanceForm({
                       style={{ width: 110, fontFamily: "monospace" }}
                       value={style.bgColor ?? "#ffffff"}
                       disabled={disabled}
-                      onChange={(e) => onChange({ bgColor: e.target.value })}
+                      onChange={(e) => onChangeStyle({ bgColor: e.target.value })}
                       placeholder="#ffffff"
                     />
                   </div>
@@ -321,7 +400,7 @@ function SectionAppearanceForm({
                         outline: style.bgColor?.toLowerCase() === sw.hex ? "2px solid var(--brand)" : "1px solid var(--line-2)",
                       }}
                       disabled={disabled}
-                      onClick={() => onChange({ bgColor: sw.hex })}
+                      onClick={() => onChangeStyle({ bgColor: sw.hex })}
                     />
                   ))}
                 </div>
@@ -340,7 +419,7 @@ function SectionAppearanceForm({
                         type="button"
                         className={`bld-gradient-chip ${isSelected ? "selected" : ""}`}
                         disabled={disabled}
-                        onClick={() => onChange({ bgGradient: key })}
+                        onClick={() => onChangeStyle({ bgGradient: key })}
                       >
                         <span className="bld-gradient-preview" style={{ background: item.css }} />
                         <span className="bld-gradient-title">{item.label}</span>
@@ -361,7 +440,7 @@ function SectionAppearanceForm({
                     className="input"
                     value={style.bgImage ?? ""}
                     disabled={disabled}
-                    onChange={(e) => onChange({ bgImage: e.target.value })}
+                    onChange={(e) => onChangeStyle({ bgImage: e.target.value })}
                     placeholder="https://... or /media/..."
                   />
                   <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
@@ -375,7 +454,7 @@ function SectionAppearanceForm({
                     <Segmented
                       label="Overlay tint"
                       value={style.bgOverlayTint ?? "dark"}
-                      onChange={(v) => !disabled && onChange({ bgOverlayTint: v as "dark" | "light" })}
+                      onChange={(v) => !disabled && onChangeStyle({ bgOverlayTint: v as "dark" | "light" })}
                       options={[
                         { value: "dark", label: "Dark" },
                         { value: "light", label: "Light" },
@@ -394,7 +473,7 @@ function SectionAppearanceForm({
                       step={5}
                       value={style.bgOverlay ?? 40}
                       disabled={disabled}
-                      onChange={(e) => onChange({ bgOverlay: Number(e.target.value) })}
+                      onChange={(e) => onChangeStyle({ bgOverlay: Number(e.target.value) })}
                       style={{ width: "100%", accentColor: "var(--brand)" }}
                     />
                   </div>
@@ -407,7 +486,7 @@ function SectionAppearanceForm({
               <Segmented
                 label="Text contrast"
                 value={textColor}
-                onChange={(v) => !disabled && onChange({ textColor: v as SectionTextColor })}
+                onChange={(v) => !disabled && onChangeStyle({ textColor: v as SectionTextColor })}
                 options={[
                   { value: "default", label: "Default" },
                   { value: "dark", label: "Dark text" },
@@ -424,7 +503,7 @@ function SectionAppearanceForm({
                 type="checkbox"
                 checked={style.cardMode ?? false}
                 disabled={disabled}
-                onChange={(e) => onChange({ cardMode: e.target.checked })}
+                onChange={(e) => onChangeStyle({ cardMode: e.target.checked })}
                 style={{ width: 16, height: 16, accentColor: "var(--brand)" }}
               />
               <span style={{ fontSize: 13, fontWeight: 600 }}>Wrap in floating card container</span>
@@ -433,16 +512,17 @@ function SectionAppearanceForm({
         </details>
       )}
 
-      <details className="bld-group" open>
-        <summary className="bld-gh">Spacing & Responsive</summary>
-        <div className="stack" style={{ gap: 12, marginTop: 10 }}>
-          {!isSpecial && (
+      {/* Spacing & Layout */}
+      {!isSpecial && (
+        <details className="bld-group" open>
+          <summary className="bld-gh">Spacing & Layout</summary>
+          <div className="stack" style={{ gap: 12, marginTop: 10 }}>
             <div className="field" style={{ margin: 0, opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}>
               <label className="label">Vertical Spacing (Padding)</label>
               <Segmented
                 label="Vertical spacing"
                 value={paddingY}
-                onChange={(v) => !disabled && onChange({ paddingY: v as SectionPaddingY })}
+                onChange={(v) => !disabled && onChangeStyle({ paddingY: v as SectionPaddingY })}
                 options={[
                   { value: "none", label: "0px" },
                   { value: "compact", label: "Compact" },
@@ -451,14 +531,41 @@ function SectionAppearanceForm({
                 ]}
               />
             </div>
-          )}
+          </div>
+        </details>
+      )}
+    </div>
+  );
+}
 
+/** Advanced tab of the Elementor-style 3-tab inspector: responsive device visibility, entrance animations with speed/delay & preview replay, anchor ID and custom CSS classes. */
+function SectionAdvancedTab({
+  section,
+  disabled,
+  onChangeStyle,
+  onReplayAnim,
+}: {
+  section: PageSection;
+  disabled: boolean;
+  onChangeStyle: (patch: Partial<SectionStyle>) => void;
+  onReplayAnim?: () => void;
+}) {
+  const style = section.style ?? {};
+  const hideOn: SectionHideOn = style.hideOn ?? "none";
+  const isSpecial = section.type === "floating-whatsapp" || section.type === "announcement-bar";
+
+  return (
+    <div className="stack" style={{ gap: 14 }} data-testid="section-appearance">
+      {/* 1. Responsive & Device Visibility */}
+      <details className="bld-group" open>
+        <summary className="bld-gh">Responsive Visibility</summary>
+        <div className="stack" style={{ gap: 12, marginTop: 10 }}>
           <div className="field" style={{ margin: 0, opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}>
-            <label className="label">Device Visibility</label>
+            <label className="label">Show On Devices</label>
             <Segmented
               label="Device visibility"
               value={hideOn}
-              onChange={(v) => !disabled && onChange({ hideOn: v as SectionHideOn })}
+              onChange={(v) => !disabled && onChangeStyle({ hideOn: v as SectionHideOn })}
               options={[
                 { value: "none", label: "All devices" },
                 { value: "mobile", label: "Desktop only" },
@@ -479,6 +586,7 @@ function SectionAppearanceForm({
         </div>
       </details>
 
+      {/* 2. Motion & Scroll Effects */}
       {!isSpecial && (
         <details className="bld-group" open>
           <summary className="bld-gh">Motion & Scroll Effects</summary>
@@ -491,7 +599,7 @@ function SectionAppearanceForm({
                 disabled={disabled}
                 onChange={(e) => {
                   const anim = e.target.value as SectionAnimation;
-                  onChange({ animation: anim });
+                  onChangeStyle({ animation: anim });
                   if (anim !== "none") {
                     setTimeout(() => onReplayAnim?.(), 50);
                   }
@@ -515,7 +623,7 @@ function SectionAppearanceForm({
                     label="Animation speed"
                     value={style.animDuration ?? "normal"}
                     onChange={(v) => {
-                      onChange({ animDuration: v as SectionAnimDuration });
+                      onChangeStyle({ animDuration: v as SectionAnimDuration });
                       setTimeout(() => onReplayAnim?.(), 50);
                     }}
                     options={[
@@ -532,7 +640,7 @@ function SectionAppearanceForm({
                     label="Animation delay"
                     value={String(style.animDelay ?? 0)}
                     onChange={(v) => {
-                      onChange({ animDelay: Number(v) as SectionAnimDelay });
+                      onChangeStyle({ animDelay: Number(v) as SectionAnimDelay });
                       setTimeout(() => onReplayAnim?.(), 50);
                     }}
                     options={[
@@ -561,8 +669,9 @@ function SectionAppearanceForm({
         </details>
       )}
 
+      {/* 3. Developer & Anchor */}
       <details className="bld-group">
-        <summary className="bld-gh">Advanced & Developer</summary>
+        <summary className="bld-gh">Developer & Attributes</summary>
         <div className="stack" style={{ gap: 12, marginTop: 10 }}>
           <div className="field" style={{ margin: 0 }}>
             <label className="label" htmlFor={`${section.id}-anchor-id`}>
@@ -580,7 +689,7 @@ function SectionAppearanceForm({
                 maxLength={32}
                 onChange={(e) => {
                   const cleaned = e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, "");
-                  onChange({ anchorId: cleaned });
+                  onChangeStyle({ anchorId: cleaned });
                 }}
               />
             </div>
@@ -603,7 +712,7 @@ function SectionAppearanceForm({
               maxLength={80}
               onChange={(e) => {
                 const cleaned = e.target.value.replace(/[^a-zA-Z0-9_\-\s]/g, "");
-                onChange({ customClass: cleaned });
+                onChangeStyle({ customClass: cleaned });
               }}
             />
             <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
@@ -612,6 +721,42 @@ function SectionAppearanceForm({
           </div>
         </div>
       </details>
+    </div>
+  );
+}
+
+/** Backward-compatible wrapper */
+function SectionForm({ def, section, onChange, disabled, bnOpen, imgSignal }: { def: SectionDef; section: PageSection; onChange: (patch: Settings) => void; disabled: boolean; bnOpen: boolean; imgSignal?: { path: string; n: number } }) {
+  return <SectionContentTab def={def} section={section} onChange={onChange} disabled={disabled} bnOpen={bnOpen} imgSignal={imgSignal} />;
+}
+
+/** Backward-compatible wrapper */
+function SectionAppearanceForm({
+  section,
+  disabled,
+  onChange,
+  onReplayAnim,
+}: {
+  section: PageSection;
+  disabled: boolean;
+  onChange: (patch: Partial<SectionStyle>) => void;
+  onReplayAnim?: () => void;
+}) {
+  return (
+    <div className="stack" style={{ gap: 14 }}>
+      <SectionStyleTab
+        def={sectionDef(section.type)}
+        section={section}
+        disabled={disabled}
+        onChangeSettings={() => {}}
+        onChangeStyle={onChange}
+      />
+      <SectionAdvancedTab
+        section={section}
+        disabled={disabled}
+        onChangeStyle={onChange}
+        onReplayAnim={onReplayAnim}
+      />
     </div>
   );
 }
@@ -899,6 +1044,7 @@ export function Builder(props: Props) {
   const [leftTab, setLeftTab] = useState<"layers" | "library" | "theme" | "history">("layers");
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
+  const [inspTab, setInspTab] = useState<"content" | "style" | "advanced">("content");
   const [treeSearch, setTreeSearch] = useState("");
   const frame = useRef<HTMLIFrameElement>(null);
   const stage = useRef<HTMLDivElement>(null);
@@ -945,6 +1091,7 @@ export function Builder(props: Props) {
       } else if ((m?.type === "bt-preview:select" || m?.type === "bt-preview:open-settings") && typeof m.id === "string" && latest.current.page.sections.some((s) => s.id === m.id)) {
         setSelected(m.id);
         setTab("settings");
+        setRightCollapsed(false);
         setSheet(true);
         post({ type: "bt-preview:focus", id: m.id });
       } else if (m && typeof m.type === "string" && m.type.startsWith("bt-preview:") && visual) {
@@ -1135,7 +1282,7 @@ export function Builder(props: Props) {
   const current = page.sections.find((s) => s.id === selected) ?? null;
   const currentDef = current ? sectionDef(current.type) : undefined;
 
-  const choose = (id: string) => { setSelected(id); post({ type: "bt-preview:focus", id }); if (narrow) setTab("settings"); };
+  const choose = (id: string) => { setSelected(id); post({ type: "bt-preview:focus", id }); setRightCollapsed(false); if (narrow) setTab("settings"); };
   function add(type: string) {
     const s = newSection(type);
     const at = addAt;
@@ -1145,6 +1292,7 @@ export function Builder(props: Props) {
       return { ...p, sections: next };
     });
     setSelected(s.id);
+    setRightCollapsed(false);
     setAddAt(null);
     setLibrary(false);
     setTab(narrow ? "settings" : "layers");
@@ -1168,6 +1316,7 @@ export function Builder(props: Props) {
       return { ...p, sections: next };
     });
     setSelected(s.id);
+    setRightCollapsed(false);
     setAddAt(null);
     setLibrary(false);
     setTab(narrow ? "settings" : "layers");
@@ -1550,74 +1699,198 @@ export function Builder(props: Props) {
 
   const settings = current && currentDef ? (
     <section aria-label={`Edit ${current.label || currentDef.label}`} className="bld-insp">
-      <div className="bld-insp-head" style={{ alignItems: "flex-start" }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div className="row" style={{ alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-            <h2 style={{ margin: 0 }}>{current.label || currentDef.label}</h2>
-            {current.label && <span className="pill grey" style={{ fontSize: 11 }}>{currentDef.label}</span>}
-            {current.style?.anchorId && <span className="pill grey" style={{ fontSize: 11 }}>#{current.style.anchorId}</span>}
+      {/* 1. Header Card with Glyph, Title, Pos & Top Actions */}
+      <div className="bld-insp-header">
+        <div className="row" style={{ alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 8 }}>
+          <div className="row" style={{ alignItems: "center", gap: 8, minWidth: 0, flex: 1 }}>
+            <span className="bld-glyph" style={{ fontSize: 20 }} aria-hidden>
+              {sectionGlyph(current.type)}
+            </span>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div className="row" style={{ alignItems: "center", gap: 6 }}>
+                <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {current.label || currentDef.label}
+                </h2>
+                <span className="pill grey" style={{ fontSize: 10, padding: "1px 5px" }}>#{currentIndex + 1}</span>
+                {current.style?.anchorId && (
+                  <span className="pill grey" style={{ fontSize: 10, padding: "1px 5px" }}>#{current.style.anchorId}</span>
+                )}
+              </div>
+              {current.label && (
+                <span className="muted" style={{ fontSize: 11, display: "block" }}>{currentDef.label}</span>
+              )}
+            </div>
           </div>
-          <div className="row" style={{ gap: 6, alignItems: "center", marginTop: 6, flexWrap: "wrap" }}>
-            <input
-              type="text"
-              className="input"
-              style={{ maxWidth: 180, height: 28, fontSize: 12, padding: "2px 8px" }}
-              placeholder={`Nickname (${currentDef.label})`}
-              value={current.label ?? ""}
-              disabled={locked}
-              onChange={(e) => patchLabel(current.id, e.target.value)}
-              title="Give this section a custom nickname in the navigator list"
-            />
-            {current.label && (
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                style={{ height: 28, padding: "0 6px", fontSize: 11 }}
-                disabled={locked}
-                onClick={() => patchLabel(current.id, undefined)}
-                title="Reset nickname"
-              >
-                Reset
-              </button>
-            )}
-            {!locked && page.sections.length > 1 && (
-              <select
-                className="select"
-                style={{ maxWidth: 125, height: 28, fontSize: 11, padding: "2px 6px" }}
-                value={currentIndex}
-                onChange={(e) => moveTo(current.id, Number(e.target.value))}
-                title="Quick jump to section position"
-                aria-label="Move to position"
-              >
-                {page.sections.map((sec, idx) => (
-                  <option key={sec.id} value={idx}>
-                    Pos {idx + 1}: {sec.label || sectionDef(sec.type)?.label || sec.type}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-          <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>{currentDef.description}</p>
-          {isRequired(current.type) && <p className="muted" style={{ marginTop: 4, fontSize: 12 }}>You can move it and change its settings, but not hide or remove it.</p>}
-        </div>
-        {!locked && (
           <span className="row" style={{ gap: 4, flexWrap: "nowrap" }}>
-            <button type="button" className="bld-ib" onClick={() => toggle(current.id)} disabled={isRequired(current.type)} aria-label={`${current.disabled ? "Show" : "Hide"} this section`}><IEye off={current.disabled} /></button>
-            <button type="button" className="bld-ib" onClick={() => duplicate(current)} disabled={full(current.type)} aria-label="Duplicate this section" title="Duplicate (Ctrl+D)"><ICopy /></button>
-            {!isRequired(current.type) && <button type="button" className="bld-ib danger" onClick={() => remove(current.id)} aria-label="Delete this section" title="Delete section (Del)"><ITrash /></button>}
+            {!locked && (
+              <>
+                <button
+                  type="button"
+                  className="bld-ib"
+                  onClick={() => toggle(current.id)}
+                  disabled={isRequired(current.type)}
+                  aria-label={`${current.disabled ? "Show" : "Hide"} this section`}
+                  title={current.disabled ? "Show section" : "Hide section"}
+                >
+                  <IEye off={current.disabled} />
+                </button>
+                <button
+                  type="button"
+                  className="bld-ib"
+                  onClick={() => duplicate(current)}
+                  disabled={full(current.type)}
+                  aria-label="Duplicate this section"
+                  title="Duplicate (Ctrl+D)"
+                >
+                  <ICopy />
+                </button>
+                {!isRequired(current.type) && (
+                  <button
+                    type="button"
+                    className="bld-ib danger"
+                    onClick={() => remove(current.id)}
+                    aria-label="Delete this section"
+                    title="Delete section (Del)"
+                  >
+                    <ITrash />
+                  </button>
+                )}
+              </>
+            )}
+            <button
+              type="button"
+              className="bld-ib"
+              onClick={() => setSelected(null)}
+              aria-label="Deselect section"
+              title="Close section settings (Esc)"
+              style={{ fontSize: 12, fontWeight: 700 }}
+            >
+              ✕
+            </button>
           </span>
-        )}
+        </div>
+
+        {/* Nickname, Quick Jump Position & Description */}
+        <div className="row" style={{ gap: 6, alignItems: "center", flexWrap: "wrap", marginBottom: 8 }}>
+          <input
+            type="text"
+            className="input"
+            style={{ flex: 1, minWidth: 130, height: 28, fontSize: 12, padding: "2px 8px" }}
+            placeholder={`Rename (${currentDef.label})`}
+            value={current.label ?? ""}
+            disabled={locked}
+            onChange={(e) => patchLabel(current.id, e.target.value)}
+            title="Give this section a custom nickname in the navigator list"
+          />
+          {current.label && (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              style={{ height: 28, padding: "0 6px", fontSize: 11 }}
+              disabled={locked}
+              onClick={() => patchLabel(current.id, undefined)}
+              title="Reset nickname"
+            >
+              Reset
+            </button>
+          )}
+          {!locked && page.sections.length > 1 && (
+            <select
+              className="select"
+              style={{ maxWidth: 115, height: 28, fontSize: 11, padding: "2px 6px" }}
+              value={currentIndex}
+              onChange={(e) => moveTo(current.id, Number(e.target.value))}
+              title="Quick jump to section position"
+              aria-label="Move to position"
+            >
+              {page.sections.map((sec, idx) => (
+                <option key={sec.id} value={idx}>
+                  #{idx + 1} {sec.label || sectionDef(sec.type)?.label || sec.type}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+        <p className="muted" style={{ fontSize: 12, margin: 0 }}>{currentDef.description}</p>
+        {isRequired(current.type) && <p className="muted" style={{ marginTop: 4, fontSize: 12 }}>You can move it and change its settings, but not hide or remove it.</p>}
       </div>
-      <SectionForm def={currentDef} section={current} disabled={locked} bnOpen={lang === "bn"} imgSignal={imgSignal} onChange={(p) => patch(current.id, p)} />
-      <SectionAppearanceForm
-        section={current}
-        disabled={locked}
-        onChange={(sp) => patchStyle(current.id, sp)}
-        onReplayAnim={() => post({ type: "bt-preview:replay-anim", id: current.id })}
-      />
+
+      {/* 2. Elementor-Style Sticky 3 Tabs */}
+      <div className="bld-insp-tabs-sticky">
+        <div className="bld-insp-tabs" role="tablist" aria-label="Section inspector tabs">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={inspTab === "content"}
+            className={`bld-insp-tab${inspTab === "content" ? " active" : ""}`}
+            onClick={() => setInspTab("content")}
+            data-testid="insp-tab-content"
+          >
+            <span>📝</span> Content
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={inspTab === "style"}
+            className={`bld-insp-tab${inspTab === "style" ? " active" : ""}`}
+            onClick={() => setInspTab("style")}
+            data-testid="insp-tab-style"
+          >
+            <span>🎨</span> Style
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={inspTab === "advanced"}
+            className={`bld-insp-tab${inspTab === "advanced" ? " active" : ""}`}
+            onClick={() => setInspTab("advanced")}
+            data-testid="insp-tab-advanced"
+          >
+            <span>⚙️</span> Advanced
+          </button>
+        </div>
+      </div>
+
+      {/* 3. Sub-form Panels */}
+      {inspTab === "content" && (
+        <SectionContentTab
+          def={currentDef}
+          section={current}
+          disabled={locked}
+          bnOpen={lang === "bn"}
+          imgSignal={imgSignal}
+          onChange={(p) => patch(current.id, p)}
+        />
+      )}
+
+      {inspTab === "style" && (
+        <SectionStyleTab
+          def={currentDef}
+          section={current}
+          disabled={locked}
+          imgSignal={imgSignal}
+          onChangeSettings={(p) => patch(current.id, p)}
+          onChangeStyle={(sp) => patchStyle(current.id, sp)}
+        />
+      )}
+
+      {inspTab === "advanced" && (
+        <SectionAdvancedTab
+          section={current}
+          disabled={locked}
+          onChangeStyle={(sp) => patchStyle(current.id, sp)}
+          onReplayAnim={() => post({ type: "bt-preview:replay-anim", id: current.id })}
+        />
+      )}
     </section>
   ) : (
-    <div className="bld-empty"><b>Pick a section</b><p className="muted">Choose one in the list, or click it in the preview, to change its text, pictures and style.</p></div>
+    <div className="bld-empty">
+      <span style={{ fontSize: 32, display: "block", marginBottom: 12 }}>🎯</span>
+      <b>Pick a section</b>
+      <p className="muted" style={{ maxWidth: 260, margin: "6px auto 0", fontSize: 13 }}>
+        Click any section in the preview canvas or select one from the Layers list on the left to edit its content, style, and motion.
+      </p>
+    </div>
   );
 
   const themeTab = (
