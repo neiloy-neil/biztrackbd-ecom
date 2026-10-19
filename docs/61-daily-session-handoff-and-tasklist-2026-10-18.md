@@ -58,6 +58,21 @@ During today's interactive `/grill-me` alignment session, we architected, engine
 |     • Curated gradient presets (Midnight Sky, Warm Sunset, Deep Emerald, Royal Indigo, etc.)       |
 |     • Storefront SectionStyleWrapper: background tones, overlays, card container, text contrast   |
 |     • Responsive visibility controls: Hide on Mobile (.bt-hide-mobile) / Hide on Desktop           |
++----------------------------------------------------------------------------------------------------+
+|  8. SITEBUILDER EVOLUTION: PHASE 6 — GLOBAL THEME STYLING ENGINE                                   |
+|     • 10 curated brand palettes with live WCAG AA contrast meters & dynamic color token generation |
+|     • Google's Noto_Sans_Bengali (--font-notosansbn) self-hosted font bundling for Bengali stores |
+|     • Segmented corner radii (0px Sharp, 6px Subtle, 10px Soft, 16px Round, 999px Pill)           |
+|     • Elevated button glow physics & card surface borders                                         |
++----------------------------------------------------------------------------------------------------+
+|  9. SITEBUILDER EVOLUTION: PHASE 7 — STAGE DOCK, RESIZERS & IN-CANVAS DIRECT MANIPULATION          |
+|     • Floating glassmorphic stage dock: Zoom -/+/Fit/%, dimension indicator, Studio backdrops     |
+|     • Viewport drag resizer with magnetic snapping (390px, 768px, 1024px, 1440px)                  |
+|     • In-canvas action pill with section badges (Hero • 1/4) and direct ⚙ Settings shortcut       |
+|     • In-place contentEditable text editing with floating Notion-style contextual toolbar          |
+|     • Aa/বা Bengali typography switcher & EN ⇄ বাং dual-language localized field toggle            |
+|     • Visual spacing drag handles (↕ Top, ↕ Bottom) with live badges and magnetic 8px snapping     |
+|     • Designer keyboard shortcuts engine (Ctrl+Z, Ctrl+D, Ctrl+S, Alt+Up/Down) & ? cheat sheet modal|
 |     • Admin Inspector Section Appearance & Spacing cards with live update & undo/redo history     |
 |     • Polished in-canvas '+ Add section' gap separator with hover glow & interactive pill button   |
 +----------------------------------------------------------------------------------------------------+

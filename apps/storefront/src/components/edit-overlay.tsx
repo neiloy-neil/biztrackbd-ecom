@@ -49,11 +49,55 @@ const EDIT_CSS = `
 .bt-gap button:hover{transform:scale(1.05);background:#473dc7}
 @media (hover:none){.bt-gap{opacity:.75}}
 .bt-drop{position:absolute;left:4%;width:92%;height:4px;background:#5B4FE8;border-radius:4px;box-shadow:0 0 0 3px rgba(91,79,232,.25);pointer-events:none}
+/* Floating in-canvas Notion-style text toolbar */
+.bt-text-toolbar{position:absolute;z-index:90;display:flex;align-items:center;gap:3px;padding:4px 6px;background:rgba(255,255,255,0.98);backdrop-filter:blur(12px);border:1px solid #CBD5E1;border-radius:10px;box-shadow:0 12px 28px -4px rgba(0,0,0,0.22),0 6px 12px -3px rgba(0,0,0,0.12);pointer-events:auto;animation:btToolbarPop 0.15s cubic-bezier(0.16,1,0.3,1)}
+@keyframes btToolbarPop{0%{opacity:0;transform:scale(0.95) translateY(4px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+.bt-text-toolbar button{all:unset;box-sizing:border-box;min-width:28px;height:28px;padding:0 6px;display:flex;align-items:center;justify-content:center;border-radius:6px;cursor:pointer;color:#334155;font:600 13px/1 system-ui;transition:background 0.12s ease,color 0.12s ease;user-select:none}
+.bt-text-toolbar button:hover{background:#F1F5F9;color:#0F172A}
+.bt-text-toolbar button.active{background:#EDE9FE;color:#5B4FE8;font-weight:700}
+.bt-text-toolbar .bt-sep{width:1px;height:16px;background:#E2E8F0;margin:0 2px}
+.bt-text-toolbar .bt-lang-btn{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:#F1F5F9;color:#475569;border:1px solid #E2E8F0}
+.bt-text-toolbar .bt-lang-btn:hover{background:#EEF2FF;color:#4F46E5;border-color:#C7D2FE}
+.bt-text-toolbar .bt-font-btn{font-size:12px;font-weight:600}
+.bt-text-toolbar .bt-done-btn{background:#5B4FE8;color:#fff;border-radius:6px;padding:0 8px;font-weight:700}
+.bt-text-toolbar .bt-done-btn:hover{background:#4338CA;color:#fff}
+.bt-noto-bn{font-family:var(--font-notosansbn),sans-serif !important}
+/* Visual section spacing drag bands */
+.bt-space-band{position:absolute;left:0;width:100%;display:flex;align-items:center;justify-content:center;pointer-events:auto;z-index:65;user-select:none}
+.bt-space-top{transform:translateY(-50%)}
+.bt-space-bottom{transform:translateY(-50%)}
+.bt-space-grip{height:24px;padding:0 12px;display:inline-flex;align-items:center;gap:6px;border-radius:999px;background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);border:1px solid #C7D2FE;color:#4F46E5;font:600 11px/1 system-ui;box-shadow:0 4px 12px rgba(79,70,229,0.18);cursor:ns-resize;transition:all 0.15s ease}
+.bt-space-grip:hover,.bt-space-grip.dragging{background:#4F46E5;color:#fff;border-color:#4338CA;transform:scale(1.05);box-shadow:0 6px 16px rgba(79,70,229,0.35)}
+.bt-space-badge{font-size:10px;font-weight:700;letter-spacing:0.02em}
 `;
+
+const MAGNETIC_SPACINGS = [0, 16, 24, 32, 48, 64, 80, 96, 128];
+function snapSpacing(val: number): number {
+  for (const s of MAGNETIC_SPACINGS) {
+    if (Math.abs(val - s) <= 6) return s;
+  }
+  return Math.max(0, Math.min(240, Math.round(val)));
+}
 
 export function EditOverlay({ page, selectedId, send, onTyping }: { page: PageJson; selectedId: string | null; send: Send; onTyping: (typing: boolean) => void }) {
   const [rects, setRects] = useState<Rect[]>([]);
   const [drop, setDrop] = useState<number | null>(null);
+  const [activeEdit, setActiveEdit] = useState<{
+    id: string;
+    path: string;
+    hasTwin: boolean;
+    rect: { top: number; left: number; width: number; height: number };
+    targetEl: HTMLElement;
+  } | null>(null);
+  const [spacingDrag, setSpacingDrag] = useState<{
+    id: string;
+    edge: "top" | "bottom";
+    startY: number;
+    startPx: number;
+    currentPx: number;
+  } | null>(null);
+  const spacingDragRef = useRef<typeof spacingDrag>(null);
+  spacingDragRef.current = spacingDrag;
   const dragging = useRef<{ id: string; pointer: number } | null>(null);
   const dropRef = useRef<number | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -103,13 +147,35 @@ export function EditOverlay({ page, selectedId, send, onTyping }: { page: PageJs
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => flush(el), 180);
     };
-    const onFocusIn = (e: Event) => { if (target(e)) onTyping(true); };
+    const onFocusIn = (e: Event) => {
+      const el = target(e);
+      if (el) {
+        onTyping(true);
+        const id = idOf(el);
+        const path = el.getAttribute("data-edit");
+        if (id && path) {
+          const r = el.getBoundingClientRect();
+          setActiveEdit({
+            id,
+            path,
+            hasTwin: el.hasAttribute("data-tw"),
+            rect: { top: r.top + window.scrollY, left: r.left + window.scrollX, width: r.width, height: r.height },
+            targetEl: el,
+          });
+        }
+      }
+    };
     const onFocusOut = (e: Event) => {
       const el = target(e);
       if (!el) return;
       if (timer.current) { clearTimeout(timer.current); timer.current = null; }
       flush(el);
       onTyping(false);
+      setTimeout(() => {
+        if (!document.activeElement?.closest("[data-edit]") && !document.activeElement?.closest(".bt-text-toolbar")) {
+          setActiveEdit(null);
+        }
+      }, 180);
     };
     const onKey = (e: KeyboardEvent) => {
       const el = target(e);
@@ -180,6 +246,39 @@ export function EditOverlay({ page, selectedId, send, onTyping }: { page: PageJs
     finishDrag();
   };
 
+  const onSpacingDown = (e: React.PointerEvent, id: string, edge: "top" | "bottom", initialPx: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); } catch { /* ignore */ }
+    setSpacingDrag({
+      id,
+      edge,
+      startY: e.clientY,
+      startPx: initialPx,
+      currentPx: initialPx,
+    });
+  };
+
+  const onSpacingMove = (e: React.PointerEvent) => {
+    const d = spacingDragRef.current;
+    if (!d) return;
+    const delta = d.edge === "top" ? (d.startY - e.clientY) : (e.clientY - d.startY);
+    const raw = Math.max(0, Math.min(240, d.startPx + delta));
+    const snapped = snapSpacing(raw);
+    setSpacingDrag((prev) => (prev ? { ...prev, currentPx: snapped } : null));
+  };
+
+  const onSpacingUp = (e: React.PointerEvent) => {
+    const d = spacingDragRef.current;
+    if (!d) return;
+    try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch { /* ignore */ }
+    const finalPx = d.currentPx;
+    const edge = d.edge;
+    const id = d.id;
+    setSpacingDrag(null);
+    send({ type: "bt-preview:spacing", id, edge, px: finalPx });
+  };
+
   const yOfSlot = (slot: number): number => {
     if (rects.length === 0) return 0;
     if (slot <= 0) return rects[0]!.top;
@@ -216,23 +315,118 @@ export function EditOverlay({ page, selectedId, send, onTyping }: { page: PageJs
           const i = idx(r.id);
           const def = section ? sectionDef(section.type) : undefined;
           const label = section?.label || def?.label || section?.type || "Section";
+          const currentTopPx = typeof section?.style?.paddingTop === "number" ? section.style.paddingTop : 48;
+          const currentBottomPx = typeof section?.style?.paddingBottom === "number" ? section.style.paddingBottom : 48;
+
           return (
-            <div key={`bar-${r.id}`} className="bt-bar" style={{ top: Math.max(8, r.top + 8) }} role="toolbar" aria-label="This section" data-testid="section-bar">
-              <div className="bt-bar-badge" title={def?.description || label}>
-                <span>{label}</span>
-                <span className="bt-pos">{i + 1}/{page.sections.length}</span>
+            <div key={`sel-group-${r.id}`}>
+              {/* Floating Action Pill */}
+              <div key={`bar-${r.id}`} className="bt-bar" style={{ top: Math.max(8, r.top + 8) }} role="toolbar" aria-label="This section" data-testid="section-bar">
+                <div className="bt-bar-badge" title={def?.description || label}>
+                  <span>{label}</span>
+                  <span className="bt-pos">{i + 1}/{page.sections.length}</span>
+                </div>
+                <button type="button" className="bt-grip" aria-label="Drag to move this section" title="Drag to move" onPointerDown={(e) => onGripDown(e, r.id)} onPointerMove={onGripMove} onPointerUp={onGripUp} onPointerCancel={onGripUp} onLostPointerCapture={finishDrag}>⠿</button>
+                <button type="button" aria-label="Move up" title="Move up" disabled={i <= 0} onClick={() => send({ type: "bt-preview:op", id: r.id, op: "up" })}>↑</button>
+                <button type="button" aria-label="Move down" title="Move down" disabled={i < 0 || i >= page.sections.length - 1} onClick={() => send({ type: "bt-preview:op", id: r.id, op: "down" })}>↓</button>
+                <button type="button" className="bt-settings" aria-label="Edit section settings" title="Edit settings in inspector" onClick={() => send({ type: "bt-preview:open-settings", id: r.id })}>⚙</button>
+                <button type="button" aria-label={section?.disabled ? "Show this section" : "Hide this section"} title={section?.disabled ? "Show section" : "Hide section"} disabled={required} onClick={() => send({ type: "bt-preview:op", id: r.id, op: "hide" })}>{section?.disabled ? "◌" : "◉"}</button>
+                <button type="button" aria-label="Duplicate this section" title="Duplicate section (Ctrl+D)" onClick={() => send({ type: "bt-preview:op", id: r.id, op: "dup" })}>⧉</button>
+                <button type="button" className="bt-del" aria-label="Delete this section" title="Delete section" disabled={required} onClick={() => send({ type: "bt-preview:op", id: r.id, op: "delete" })}>✕</button>
               </div>
-              <button type="button" className="bt-grip" aria-label="Drag to move this section" title="Drag to move" onPointerDown={(e) => onGripDown(e, r.id)} onPointerMove={onGripMove} onPointerUp={onGripUp} onPointerCancel={onGripUp} onLostPointerCapture={finishDrag}>⠿</button>
-              <button type="button" aria-label="Move up" title="Move up" disabled={i <= 0} onClick={() => send({ type: "bt-preview:op", id: r.id, op: "up" })}>↑</button>
-              <button type="button" aria-label="Move down" title="Move down" disabled={i < 0 || i >= page.sections.length - 1} onClick={() => send({ type: "bt-preview:op", id: r.id, op: "down" })}>↓</button>
-              <button type="button" className="bt-settings" aria-label="Edit section settings" title="Edit settings in inspector" onClick={() => send({ type: "bt-preview:open-settings", id: r.id })}>⚙</button>
-              <button type="button" aria-label={section?.disabled ? "Show this section" : "Hide this section"} title={section?.disabled ? "Show section" : "Hide section"} disabled={required} onClick={() => send({ type: "bt-preview:op", id: r.id, op: "hide" })}>{section?.disabled ? "◌" : "◉"}</button>
-              <button type="button" aria-label="Duplicate this section" title="Duplicate section (Ctrl+D)" onClick={() => send({ type: "bt-preview:op", id: r.id, op: "dup" })}>⧉</button>
-              <button type="button" className="bt-del" aria-label="Delete this section" title="Delete section" disabled={required} onClick={() => send({ type: "bt-preview:op", id: r.id, op: "delete" })}>✕</button>
+
+              {/* Top Spacing Drag Handle */}
+              <div className="bt-space-band bt-space-top" style={{ top: r.top }}>
+                <div
+                  className={`bt-space-grip${spacingDrag?.id === r.id && spacingDrag.edge === "top" ? " dragging" : ""}`}
+                  onPointerDown={(e) => onSpacingDown(e, r.id, "top", currentTopPx)}
+                  onPointerMove={onSpacingMove}
+                  onPointerUp={onSpacingUp}
+                  onPointerCancel={onSpacingUp}
+                  title="Drag vertically to adjust top section padding"
+                >
+                  <span>↕ Top</span>
+                  <span className="bt-space-badge">
+                    {spacingDrag?.id === r.id && spacingDrag.edge === "top" ? `${spacingDrag.currentPx}px` : `${currentTopPx}px`}
+                  </span>
+                </div>
+              </div>
+
+              {/* Bottom Spacing Drag Handle */}
+              <div className="bt-space-band bt-space-bottom" style={{ top: r.top + r.height }}>
+                <div
+                  className={`bt-space-grip${spacingDrag?.id === r.id && spacingDrag.edge === "bottom" ? " dragging" : ""}`}
+                  onPointerDown={(e) => onSpacingDown(e, r.id, "bottom", currentBottomPx)}
+                  onPointerMove={onSpacingMove}
+                  onPointerUp={onSpacingUp}
+                  onPointerCancel={onSpacingUp}
+                  title="Drag vertically to adjust bottom section padding"
+                >
+                  <span>↕ Bottom</span>
+                  <span className="bt-space-badge">
+                    {spacingDrag?.id === r.id && spacingDrag.edge === "bottom" ? `${spacingDrag.currentPx}px` : `${currentBottomPx}px`}
+                  </span>
+                </div>
+              </div>
             </div>
           );
         })}
         {drop !== null && <div className="bt-drop" style={{ top: yOfSlot(drop) - 2 }} />}
+
+        {/* Floating in-canvas Notion-style text toolbar */}
+        {activeEdit && (
+          <div
+            className="bt-text-toolbar"
+            style={{
+              top: Math.max(8, activeEdit.rect.top - 46),
+              left: Math.max(12, Math.min(window.innerWidth - 300, activeEdit.rect.left)),
+            }}
+            onMouseDown={(e) => e.preventDefault()}
+            role="toolbar"
+            aria-label="Text formatting toolbar"
+          >
+            <button
+              type="button"
+              className="bt-font-btn"
+              title="Toggle Bengali typography font (Aa / বা)"
+              onClick={() => {
+                if (activeEdit?.targetEl) {
+                  const hasBn = activeEdit.targetEl.classList.toggle("bt-noto-bn");
+                  activeEdit.targetEl.style.fontFamily = hasBn ? "var(--font-notosansbn), sans-serif" : "";
+                }
+              }}
+            >
+              Aa/বা
+            </button>
+
+            {activeEdit.hasTwin && (
+              <button
+                type="button"
+                className="bt-lang-btn"
+                title="Switch between English and Bengali view in preview"
+                onClick={() => {
+                  send({ type: "bt-preview:set-lang", lang: "bn" });
+                }}
+              >
+                EN ⇄ বাং
+              </button>
+            )}
+
+            <div className="bt-sep" />
+
+            <button
+              type="button"
+              className="bt-done-btn"
+              title="Done editing text (Esc or Enter)"
+              onClick={() => {
+                activeEdit?.targetEl.blur();
+                setActiveEdit(null);
+              }}
+            >
+              ✓ Done
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

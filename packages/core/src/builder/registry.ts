@@ -2638,6 +2638,8 @@ export interface SectionStyle {
   bgOverlayTint?: "dark" | "light";
   textColor?: SectionTextColor;
   paddingY?: SectionPaddingY;
+  paddingTop?: number;
+  paddingBottom?: number;
   cardMode?: boolean;
   hideOn?: SectionHideOn;
   animation?: SectionAnimation;
@@ -2709,6 +2711,12 @@ export function normalizeSectionStyle(raw?: unknown): SectionStyle | undefined {
   }
   if (o.paddingY === "none" || o.paddingY === "compact" || o.paddingY === "normal" || o.paddingY === "spacious") {
     style.paddingY = o.paddingY;
+  }
+  if (typeof o.paddingTop === "number" && !Number.isNaN(o.paddingTop)) {
+    style.paddingTop = Math.max(0, Math.min(240, Math.round(o.paddingTop)));
+  }
+  if (typeof o.paddingBottom === "number" && !Number.isNaN(o.paddingBottom)) {
+    style.paddingBottom = Math.max(0, Math.min(240, Math.round(o.paddingBottom)));
   }
   if (typeof o.cardMode === "boolean" && o.cardMode) {
     style.cardMode = true;

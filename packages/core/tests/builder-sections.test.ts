@@ -380,6 +380,22 @@ describe("Visual Theme Builder Studio - New Conversion Sections", () => {
       expect(style?.customClass).toBe("hero-glow  card-highlight scriptalert1script");
     });
 
+    it("normalizes and clamps visual spacing paddingTop and paddingBottom", () => {
+      const style = normalizeSectionStyle({
+        paddingTop: 64,
+        paddingBottom: 96,
+      });
+      expect(style?.paddingTop).toBe(64);
+      expect(style?.paddingBottom).toBe(96);
+
+      const clamped = normalizeSectionStyle({
+        paddingTop: -20,
+        paddingBottom: 500,
+      });
+      expect(clamped?.paddingTop).toBe(0);
+      expect(clamped?.paddingBottom).toBe(240);
+    });
+
     it("validates and preserves section label (custom nickname) in validatePage", () => {
       const page: PageJson = {
         version: 1,

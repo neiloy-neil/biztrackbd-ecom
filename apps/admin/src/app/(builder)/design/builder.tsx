@@ -833,6 +833,7 @@ export function Builder(props: Props) {
   const [resizing, setResizing] = useState<"left" | "right" | null>(null);
   const resizeStart = useRef<{ clientX: number; startW: number } | null>(null);
   const [, bump] = useState(0);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const frame = useRef<HTMLIFrameElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const ready = useRef(false);
@@ -997,6 +998,34 @@ export function Builder(props: Props) {
         return;
       }
 
+      // Shortcuts modal toggle: ? or Shift+/
+      if (e.key === "?" && !isInput) {
+        e.preventDefault();
+        setShowShortcuts((prev) => !prev);
+        return;
+      }
+
+      // Quick save with Ctrl+S / Cmd+S
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        if (canEdit && !locked) {
+          flush().then((ok) => {
+            if (ok) toast("Draft saved");
+          });
+        }
+        return;
+      }
+
+      // Escape key: close shortcuts modal or deselect section
+      if (e.key === "Escape") {
+        setShowShortcuts(false);
+        if (selected && !isInput) {
+          e.preventDefault();
+          setSelected(null);
+        }
+        return;
+      }
+
       // Delete with Delete key when not typing in an input
       if (e.key === "Delete" && !isInput) {
         if (!selected || locked) return;
@@ -1010,7 +1039,7 @@ export function Builder(props: Props) {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [undo, redo, selected, locked]);
+  }, [undo, redo, selected, locked, canEdit, flush]);
 
   const defs = sectionsFor(kind, { mode: props.siteMode, vertical: props.businessVertical });
   const count = (type: string) => page.sections.filter((s) => s.type === type).length;
@@ -1156,6 +1185,14 @@ export function Builder(props: Props) {
       if (locked || typeof m.index !== "number") return;
       setAddAt(Math.max(0, Math.min(Math.round(m.index), latest.current.page.sections.length)));
       setLibrary(true);
+    },
+    "bt-preview:spacing": (m) => {
+      if (locked || typeof m.id !== "string" || (m.edge !== "top" && m.edge !== "bottom") || typeof m.px !== "number") return;
+      const px = Math.max(0, Math.min(240, Math.round(m.px)));
+      patchStyle(m.id, m.edge === "top" ? { paddingTop: px } : { paddingBottom: px });
+    },
+    "bt-preview:set-lang": (m) => {
+      if (m.lang === "bn" || m.lang === "en") setLang(m.lang);
     },
   };
 
@@ -1644,6 +1681,17 @@ export function Builder(props: Props) {
               >
                 🏁
               </button>
+
+              <div className="bld-dock-sep" />
+
+              <button
+                type="button"
+                onClick={() => setShowShortcuts(true)}
+                title="Keyboard Shortcuts (?)"
+                aria-label="Keyboard Shortcuts"
+              >
+                ⌨ Shortcuts
+              </button>
             </div>
           )}
         </main>
@@ -1914,6 +1962,74 @@ export function Builder(props: Props) {
           </div>
         )}
       </Drawer>
+
+      {showShortcuts && (
+        <div
+          className="bld-modal-backdrop"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowShortcuts(false);
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Keyboard Shortcuts"
+        >
+          <div className="bld-shortcuts-card">
+            <div className="bld-shortcuts-head">
+              <h3>⌨ Keyboard Shortcuts</h3>
+              <button
+                type="button"
+                className="bld-ib"
+                onClick={() => setShowShortcuts(false)}
+                aria-label="Close shortcuts modal"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="bld-shortcuts-grid">
+              <div className="bld-shortcut-row">
+                <span className="bld-shortcut-label">Undo action</span>
+                <span className="bld-key-badges"><span className="bld-kbd">Ctrl</span><span className="bld-kbd">Z</span></span>
+              </div>
+              <div className="bld-shortcut-row">
+                <span className="bld-shortcut-label">Redo action</span>
+                <span className="bld-key-badges"><span className="bld-kbd">Ctrl</span><span className="bld-kbd">Shift</span><span className="bld-kbd">Z</span></span>
+              </div>
+              <div className="bld-shortcut-row">
+                <span className="bld-shortcut-label">Duplicate section</span>
+                <span className="bld-key-badges"><span className="bld-kbd">Ctrl</span><span className="bld-kbd">D</span></span>
+              </div>
+              <div className="bld-shortcut-row">
+                <span className="bld-shortcut-label">Save draft</span>
+                <span className="bld-key-badges"><span className="bld-kbd">Ctrl</span><span className="bld-kbd">S</span></span>
+              </div>
+              <div className="bld-shortcut-row">
+                <span className="bld-shortcut-label">Move section up</span>
+                <span className="bld-key-badges"><span className="bld-kbd">Alt</span><span className="bld-kbd">↑</span></span>
+              </div>
+              <div className="bld-shortcut-row">
+                <span className="bld-shortcut-label">Move section down</span>
+                <span className="bld-key-badges"><span className="bld-kbd">Alt</span><span className="bld-kbd">↓</span></span>
+              </div>
+              <div className="bld-shortcut-row">
+                <span className="bld-shortcut-label">Delete section</span>
+                <span className="bld-key-badges"><span className="bld-kbd">Delete</span></span>
+              </div>
+              <div className="bld-shortcut-row">
+                <span className="bld-shortcut-label">Toggle shortcuts</span>
+                <span className="bld-key-badges"><span className="bld-kbd">?</span></span>
+              </div>
+              <div className="bld-shortcut-row">
+                <span className="bld-shortcut-label">Zoom In / Out</span>
+                <span className="bld-key-badges"><span className="bld-kbd">Ctrl</span><span className="bld-kbd">+</span> / <span className="bld-kbd">-</span></span>
+              </div>
+              <div className="bld-shortcut-row">
+                <span className="bld-shortcut-label">Reset Zoom (Fit)</span>
+                <span className="bld-key-badges"><span className="bld-kbd">Ctrl</span><span className="bld-kbd">0</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

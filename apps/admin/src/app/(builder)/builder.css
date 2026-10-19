@@ -297,3 +297,92 @@ details.bld-group[open] > summary.bld-gh::after { transform: rotate(180deg); }
   white-space: nowrap;
 }
 
+/* ---- Keyboard Shortcuts Cheat Sheet Modal ---- */
+.bld-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: bldFadeIn 0.15s ease-out;
+}
+@keyframes bldFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.bld-shortcuts-card {
+  width: 100%;
+  max-width: 580px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  color: var(--ink);
+}
+.bld-shortcuts-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.bld-shortcuts-head h3 {
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.bld-shortcuts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 600px) {
+  .bld-shortcuts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.bld-shortcut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 13px;
+}
+.bld-shortcut-label {
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.bld-key-badges {
+  display: inline-flex;
+  gap: 4px;
+}
+.bld-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--chip);
+  border: 1px solid var(--line);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.1);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+

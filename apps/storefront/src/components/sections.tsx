@@ -1496,7 +1496,13 @@ export function SectionStyleWrapper({
   if (style?.hideOn === "desktop") classes.push("bt-hide-desktop");
 
   if (!isFloating && !isAnnouncement) {
-    if (style?.paddingY) {
+    if (typeof style?.paddingTop === "number") {
+      inlineStyles.paddingTop = `${style.paddingTop}px`;
+    }
+    if (typeof style?.paddingBottom === "number") {
+      inlineStyles.paddingBottom = `${style.paddingBottom}px`;
+    }
+    if (typeof style?.paddingTop !== "number" && typeof style?.paddingBottom !== "number" && style?.paddingY) {
       classes.push(`bt-py-${style.paddingY}`);
     }
     if (style?.cardMode) {
