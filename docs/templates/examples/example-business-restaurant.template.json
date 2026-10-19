@@ -1,0 +1,406 @@
+{
+  "format": "biztrack-template",
+  "formatVersion": 1,
+  "id": "example-bistro",
+  "name": "Example Bistro",
+  "blurb": "Warm, atmospheric restaurant theme with digital menu, table reservation request, and location showcase.",
+  "audience": "Restaurants, cafes, bistros, bakeries, and cloud kitchens",
+  "category": "other",
+  "tags": [
+    "restaurant",
+    "food",
+    "cafe",
+    "bistro"
+  ],
+  "moduleLabel": null,
+  "baseLook": "berber",
+  "siteMode": "PORTFOLIO",
+  "vertical": "RESTAURANT",
+  "previews": {},
+  "settings": {
+    "accent": "#D97706",
+    "background": "#FFFDF8",
+    "text": "#1C1917",
+    "radius": "soft",
+    "font": "serif",
+    "button": "filled",
+    "buttonShape": "rounded",
+    "buttonSize": "medium",
+    "cardRatio": "square",
+    "cardHover": "lift",
+    "spacing": "airy",
+    "width": "wide"
+  },
+  "pages": {
+    "home": {
+      "version": 1,
+      "sections": [
+        {
+          "id": "hero_1",
+          "type": "hero",
+          "settings": {
+            "heading": "Authentic Flavors, Handcrafted Daily",
+            "headingBn": "খাঁটি স্বাদ ও আতিথেয়তার অনন্য ঠিকানা",
+            "subhead": "Experience Dhaka's finest culinary traditions prepared with fresh local ingredients and passionate craftsmanship.",
+            "subheadBn": "প্রতিদিন তাজা ও খাঁটি উপাদানে তৈরি মুখরোচক খাবার নিয়ে আমরা প্রস্তুত আপনাকে স্বাগত জানাতে।",
+            "ctaText": "View Our Menu",
+            "ctaTextBn": "মেন্যু দেখুন",
+            "ctaLink": "/menu",
+            "secondCtaText": "Book a Table",
+            "secondCtaTextBn": "টেবিল বুক করুন",
+            "secondCtaLink": "/reservations"
+          }
+        },
+        {
+          "id": "menu_1",
+          "type": "restaurant-menu",
+          "settings": {
+            "title": "Signature Specialties",
+            "titleBn": "আমাদের স্পেশাল মেন্যু",
+            "subtitle": "Freshly prepared daily with 100% authentic Halal ingredients",
+            "subtitleBn": "প্রতিদিন খাঁটি উপাদানে প্রস্তুতকৃত ১০০% হালাল খাবার",
+            "showDietary": true
+          }
+        },
+        {
+          "id": "hours_1",
+          "type": "restaurant-hours-location",
+          "settings": {
+            "title": "Opening Hours & Location",
+            "titleBn": "খোলার সময়সূচী ও ঠিকানা",
+            "hoursWeekday": "Sat – Thu: 12:00 PM – 11:00 PM",
+            "hoursWeekdayBn": "শনি – বৃহঃ দুপুর ১২টা – রাত ১১টা",
+            "hoursWeekend": "Friday: 1:30 PM – 11:30 PM",
+            "hoursWeekendBn": "শুক্রবারঃ দুপুর ১:৩০ – রাত ১১:৩০",
+            "address": "Road 11, Block D, Banani, Dhaka 1213",
+            "addressBn": "রোড ১১, ব্লক ডি, বনানী, ঢাকা ১২১৩",
+            "phone": "+8801700000000",
+            "mapLink": "https://maps.google.com"
+          }
+        },
+        {
+          "id": "reserve_1",
+          "type": "reservation-cta",
+          "settings": {
+            "title": "Reserve Your Table",
+            "titleBn": "টেবিল অগ্রিম বুক করুন",
+            "subtitle": "Planning a dinner or special event? Reserve your table in seconds.",
+            "subtitleBn": "পারিবারিক নৈশভোজ বা বন্ধুদের সাথে আড্ডার জন্য এখনই বুকিং দিন।",
+            "buttonText": "Request Reservation",
+            "buttonTextBn": "বুকিং রিকোয়েস্ট পাঠান",
+            "whatsapp": "+8801700000000",
+            "disclaimer": "No upfront payment required. We will confirm your reservation via WhatsApp or call within 30 minutes.",
+            "disclaimerBn": "কোন অগ্রিম ফি নেই। রিকোয়েস্ট পাঠানোর ৩০ মিনিটের মধ্যে কল বা হোয়াটসঅ্যাপে কনফার্মেশন পাবেন।"
+          }
+        },
+        {
+          "id": "float_1",
+          "type": "floating-contact",
+          "settings": {
+            "phone": "01700000000",
+            "whatsapp": "01700000000",
+            "position": "bottom-right",
+            "message": "Hello! I would like to reserve a table at Dhaka Bistro.",
+            "messageBn": "আসসালামু আলাইকুম! আমি ঢাকা বিস্ট্রোতে একটি টেবিল বুক করতে চাই।",
+            "label": "Chat or Reserve",
+            "labelBn": "বুকিং বা জিজ্ঞাসা"
+          }
+        }
+      ]
+    },
+    "product": {
+      "version": 1,
+      "sections": [
+        {
+          "id": "product_main_1",
+          "type": "product-main",
+          "settings": {
+            "showRating": true,
+            "showAssurance": true,
+            "showDescription": true
+          }
+        },
+        {
+          "id": "product_reviews_1",
+          "type": "product-reviews",
+          "settings": {
+            "title": "Customer reviews",
+            "titleBn": "ক্রেতাদের রিভিউ"
+          }
+        },
+        {
+          "id": "product_related_1",
+          "type": "product-related",
+          "settings": {
+            "title": "Goes well with",
+            "titleBn": "এর সাথে মানানসই",
+            "limit": 4
+          }
+        }
+      ]
+    },
+    "collection": {
+      "version": 1,
+      "sections": [
+        {
+          "id": "collection_header_1",
+          "type": "collection-header",
+          "settings": {
+            "showDescription": true,
+            "showCount": true
+          }
+        },
+        {
+          "id": "collection_products_1",
+          "type": "collection-products",
+          "settings": {
+            "showSort": true
+          }
+        }
+      ]
+    },
+    "cart": {
+      "version": 1,
+      "sections": [
+        {
+          "id": "cart_main_1",
+          "type": "cart-main",
+          "settings": {
+            "title": "Your cart",
+            "titleBn": "আপনার কার্ট"
+          }
+        }
+      ]
+    }
+  },
+  "chrome": {
+    "version": 1,
+    "header": {
+      "logo": "left",
+      "sticky": true,
+      "search": "none",
+      "showLanguage": true,
+      "showAccount": false,
+      "announcement": {
+        "mode": "custom",
+        "text": "✨ Authentic Dining Experience — Call 01700000000 for reservations",
+        "textBn": "✨ ঐতিহ্যবাহী খাবারের স্বাদ নিতে বুকিং করুন ০১৭০০০০০০০০ নম্বরে",
+        "link": "/reservations",
+        "bgColor": "#D97706",
+        "textColor": "#FFFFFF"
+      }
+    },
+    "menu": {
+      "auto": false,
+      "items": [
+        {
+          "id": "menu-1",
+          "type": "link",
+          "label": "Home",
+          "labelBn": "হোম",
+          "ref": "",
+          "url": "/"
+        },
+        {
+          "id": "menu-2",
+          "type": "link",
+          "label": "Menu",
+          "labelBn": "মেন্যু",
+          "ref": "menu",
+          "url": "/menu"
+        },
+        {
+          "id": "menu-3",
+          "type": "link",
+          "label": "Reservations",
+          "labelBn": "বুকিং",
+          "ref": "reservations",
+          "url": "/reservations"
+        },
+        {
+          "id": "menu-4",
+          "type": "link",
+          "label": "Contact",
+          "labelBn": "যোগাযোগ",
+          "ref": "contact",
+          "url": "/contact"
+        }
+      ]
+    },
+    "footer": {
+      "columns": [
+        {
+          "id": "foot-1",
+          "type": "text",
+          "title": "Dhaka Bistro",
+          "titleBn": "ঢাকা বিস্ট্রো",
+          "body": "Celebrating Bangladesh's rich culinary traditions with modern gourmet touches.",
+          "bodyBn": "খাঁটি স্বাদ ও স্বাস্থ্যকর খাবারের বিশ্বস্ত ঠিকানা।",
+          "links": []
+        },
+        {
+          "id": "foot-2",
+          "type": "links",
+          "title": "Quick Links",
+          "titleBn": "প্রয়োজনীয় লিঙ্ক",
+          "body": "",
+          "bodyBn": "",
+          "links": [
+            {
+              "id": "fl1",
+              "type": "link",
+              "label": "Our Menu",
+              "labelBn": "মেন্যু",
+              "ref": "menu",
+              "url": "/menu"
+            },
+            {
+              "id": "fl2",
+              "type": "link",
+              "label": "Book a Table",
+              "labelBn": "বুকিং",
+              "ref": "reservations",
+              "url": "/reservations"
+            },
+            {
+              "id": "fl3",
+              "type": "link",
+              "label": "Find Location",
+              "labelBn": "ঠিকানা",
+              "ref": "contact",
+              "url": "/contact"
+            }
+          ]
+        },
+        {
+          "id": "foot-3",
+          "type": "contact",
+          "title": "Contact",
+          "titleBn": "যোগাযোগ",
+          "body": "Road 11, Banani, Dhaka\nPhone: +8801700000000",
+          "bodyBn": "রোড ১১, বনানী, ঢাকা\nফোনঃ ০১৭০০০০০০০০",
+          "links": []
+        }
+      ],
+      "copyright": "Dhaka Bistro. All rights reserved.",
+      "copyrightBn": "ঢাকা বিস্ট্রো। সর্বস্বত্ব সংরক্ষিত।"
+    }
+  },
+  "customPages": [
+    {
+      "slug": "menu",
+      "title": "Our Full Menu",
+      "titleBn": "আমাদের সম্পূর্ণ মেন্যু",
+      "description": "Explore our complete food and beverage menu.",
+      "descriptionBn": "আমাদের সম্পূর্ণ সুস্বাদু মেন্যু তালিকা দেখুন।",
+      "layout": {
+        "version": 1,
+        "sections": [
+          {
+            "id": "menu_full_1",
+            "type": "restaurant-menu",
+            "settings": {
+              "title": "Complete Dining Menu",
+              "titleBn": "সম্পূর্ণ ডাইনিং মেন্যু",
+              "subtitle": "Made fresh to order with authentic seasonal ingredients",
+              "subtitleBn": "অর্ডার অনুযায়ী তাজা ও স্বাস্থ্যকর উপায়ে প্রস্তুত",
+              "showDietary": true
+            }
+          },
+          {
+            "id": "reserve_cta_1",
+            "type": "reservation-cta",
+            "settings": {
+              "title": "Craving Something Delicious?",
+              "titleBn": "মুখরোচক খাবারের স্বাদ নিতে চান?",
+              "subtitle": "Book your table now or order via WhatsApp.",
+              "subtitleBn": "টেবিল বুক করুন অথবা হোয়াটসঅ্যাপে যোগাযোগ করুন।",
+              "buttonText": "Reserve a Table",
+              "buttonTextBn": "টেবিল বুক করুন",
+              "whatsapp": "+8801700000000"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "slug": "reservations",
+      "title": "Table Reservations",
+      "titleBn": "টেবিল বুকিং",
+      "description": "Book your dining table online with instant WhatsApp confirmation.",
+      "descriptionBn": "সহজে অনলাইনে টেবিল বুকিং করুন।",
+      "layout": {
+        "version": 1,
+        "sections": [
+          {
+            "id": "reserve_main_1",
+            "type": "reservation-cta",
+            "settings": {
+              "title": "Reserve Your Table",
+              "titleBn": "টেবিল বুকিং রিকোয়েস্ট",
+              "subtitle": "We look forward to serving you an unforgettable culinary experience.",
+              "subtitleBn": "আমরা আপনাকে সেরা আতিথেয়তা দিতে প্রস্তুত।",
+              "buttonText": "Submit Reservation Request",
+              "buttonTextBn": "বুকিং রিকোয়েস্ট পাঠান",
+              "whatsapp": "+8801700000000"
+            }
+          },
+          {
+            "id": "hours_loc_1",
+            "type": "restaurant-hours-location",
+            "settings": {
+              "title": "Location & Dining Hours",
+              "titleBn": "লোকেশন ও রেস্টুরেন্ট খোলা থাকার সময়",
+              "hoursWeekday": "Sat – Thu: 12:00 PM – 11:00 PM",
+              "hoursWeekdayBn": "শনি – বৃহঃ দুপুর ১২টা – রাত ১১টা",
+              "hoursWeekend": "Friday: 1:30 PM – 11:30 PM",
+              "hoursWeekendBn": "শুক্রবারঃ দুপুর ১:৩০ – রাত ১১:৩০",
+              "address": "Road 11, Block D, Banani, Dhaka 1213",
+              "addressBn": "রোড ১১, ব্লক ডি, বনানী, ঢাকা ১২১৩",
+              "phone": "+8801700000000"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "slug": "contact",
+      "title": "Location & Contact",
+      "titleBn": "যোগাযোগ ও ঠিকানা",
+      "description": "Find Dhaka Bistro's location, contact phone, and operating hours.",
+      "descriptionBn": "ঢাকা বিস্ট্রোর ঠিকানা ও যোগাযোগের বিবরণ।",
+      "layout": {
+        "version": 1,
+        "sections": [
+          {
+            "id": "hours_contact_1",
+            "type": "restaurant-hours-location",
+            "settings": {
+              "title": "Find Us",
+              "titleBn": "আমাদের ঠিকানা",
+              "hoursWeekday": "Sat – Thu: 12:00 PM – 11:00 PM",
+              "hoursWeekdayBn": "শনি – বৃহঃ দুপুর ১২টা – রাত ১১টা",
+              "hoursWeekend": "Friday: 1:30 PM – 11:30 PM",
+              "hoursWeekendBn": "শুক্রবারঃ দুপুর ১:৩০ – রাত ১১:৩০",
+              "address": "Road 11, Block D, Banani, Dhaka 1213",
+              "addressBn": "রোড ১১, ব্লক ডি, বনানী, ঢাকা ১২১৩",
+              "phone": "+8801700000000"
+            }
+          },
+          {
+            "id": "contact_form_1",
+            "type": "contact-form",
+            "settings": {
+              "heading": "Get in Touch",
+              "headingBn": "যোগাযোগ করুন",
+              "subhead": "For catering inquiries, private dining events, or feedback.",
+              "subheadBn": "ক্যাটারিং, প্রাইভেট ডাইনিং বা যেকোন মতামতের জন্য বার্তা পাঠান।",
+              "buttonText": "Send Message",
+              "buttonTextBn": "বার্তা পাঠান"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

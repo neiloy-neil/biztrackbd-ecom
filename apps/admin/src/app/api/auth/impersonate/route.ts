@@ -26,5 +26,7 @@ export async function GET(req: NextRequest) {
     maxAge: 15 * 60, // 15 minutes
   });
 
-  return NextResponse.redirect(new URL("/orders", req.nextUrl.origin));
+  // Template Studio opens the design editor directly. Only these places may be asked for; anything else lands on orders.
+  const next = req.nextUrl.searchParams.get("next");
+  return NextResponse.redirect(new URL(next === "/design" ? next : "/orders", req.nextUrl.origin));
 }

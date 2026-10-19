@@ -8,6 +8,9 @@ import {
   listTenants,
   publishTemplateFromStore,
   importTemplateBundle,
+  createWorkshopStore,
+  listWorkshopStores,
+  createImpersonationTicket,
   MAX_TEMPLATE_BUNDLE_BYTES,
   setTemplateStatus,
   toggleGlobalModuleMaintenance,
@@ -45,6 +48,32 @@ export async function publishTemplateAction(form: FormData): Promise<void> {
   }
   revalidatePath("/themes");
   back({ done: `Published ${get("id").toLowerCase()}. Stores using an older version are offered this one; new stores start from it.` });
+}
+
+/** Template Studio: makes a workshop store to design a template in. */
+export async function createWorkshopAction(form: FormData): Promise<void> {
+  const s = await requireAction("plans", "edit");
+  const get = (k: string) => String(form.get(k) ?? "").trim();
+  let msg = "";
+  try {
+    const w = await createWorkshopStore(s.actor, { name: get("name"), slug: get("slug"), startFrom: get("startFrom") || undefined, siteMode: get("siteMode") || "ECOMMERCE", vertical: get("vertical") || null });
+    msg = `Workshop ${w.subdomain} is ready. Press "Open editor" to design it, then "Save as template" when it is done.`;
+  } catch (e) {
+    if (e instanceof DomainError) return back({ err: e.message });
+    throw e;
+  }
+  revalidatePath("/themes");
+  back({ done: msg });
+}
+
+/** Opens a workshop's design editor in the merchant admin (a short, logged staff session). */
+export async function openWorkshopEditorAction(tenantId: string): Promise<never> {
+  const s = await requireAction("plans", "edit");
+  // This button must only ever open a workshop: it is not a way into merchants' stores.
+  if (!(await listWorkshopStores(s.actor)).some((w) => w.tenantId === tenantId)) return back({ err: "That is not a workshop store." });
+  const ticket = await createImpersonationTicket(s.actor, tenantId);
+  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3000";
+  redirect(`${adminUrl}/api/auth/impersonate?ticket=${encodeURIComponent(ticket)}&next=/design`);
 }
 
 /** Uploads a template file: it is checked part by part, saved, and (unless "save as draft" is ticked) goes live in the gallery, signup and every store's picker. */

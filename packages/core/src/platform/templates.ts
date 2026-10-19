@@ -188,7 +188,7 @@ export async function publishTemplateFromStore(actor: PlatformActor, input: Publ
   if (!ID.test(id) || id.length < 3 || id.length > 40) throw new ValidationError("The template id can use small letters, numbers and dashes, like eid-kapor (3 to 40 characters)", { field: "id" });
   const name = input.name.trim();
   if (name.length < 2 || name.length > 60) throw new ValidationError("Give the template a name of 2 to 60 characters", { field: "name" });
-  const tenant = await db.tenant.findFirst({ where: { id: input.tenantId }, select: { id: true, themeId: true, demoKind: true } });
+  const tenant = await db.tenant.findFirst({ where: { id: input.tenantId }, select: { id: true, themeId: true, demoKind: true, siteMode: true, businessVertical: true } });
   if (!tenant) throw new NotFoundError("Store");
   if (tenant.demoKind) throw new ValidationError("Choose a real store: a demo store is erased after a few hours", { field: "tenantId" });
   const baseLook: ThemeId = isThemeId(tenant.themeId) ? tenant.themeId : "kapor";
@@ -204,6 +204,18 @@ export async function publishTemplateFromStore(actor: PlatformActor, input: Publ
   }
   const chrome = await liveChromeForTemplate(tenant.id, db);
   if (chrome) pages._chrome = chrome;
+  // A business site also carries its extra pages (menu, reservations, ...) and its mode, so the template can be applied to a business site.
+  const isBusiness = tenant.siteMode !== "ECOMMERCE" && !!tenant.businessVertical && (BUNDLE_VERTICALS as readonly string[]).includes(tenant.businessVertical);
+  const customPages: CustomPageManifest[] = [];
+  if (isBusiness) {
+    const rows = await db.page.findMany({ where: { tenantId: tenant.id, isPublished: true }, orderBy: { createdAt: "asc" }, select: { id: true, slug: true, title: true, seoDescription: true } });
+    for (const r of rows) {
+      if (customPages.length >= 12 || !ID.test(r.slug)) continue;
+      const ver = await live(`page:${r.id}`);
+      if (!ver) continue;
+      try { customPages.push({ slug: r.slug, title: r.title.slice(0, 80), titleBn: "", description: (r.seoDescription ?? "").slice(0, 200), descriptionBn: "", layout: validatePage("custom", ver.sectionsJson) }); } catch { /* a page that no longer validates is left out */ }
+    }
+  }
   const category = (TEMPLATE_CATEGORIES as readonly string[]).includes(input.category ?? "") ? input.category! : "other";
   const tags = (input.tags ?? []).map((t) => t.trim().slice(0, 30)).filter(Boolean).slice(0, 4);
   const data = {
@@ -212,6 +224,9 @@ export async function publishTemplateFromStore(actor: PlatformActor, input: Publ
   };
   const saved = await db.$transaction(async (tx) => {
     const existing = await tx.template.findUnique({ where: { id } });
+    // Preview pictures belong to the template, not the workshop: a new version keeps the ones it has until new ones are made.
+    const oldMeta = ((existing?.pagesJson as Record<string, unknown> | null)?._meta ?? null) as { previews?: unknown } | null;
+    if (isBusiness || oldMeta?.previews) (data.pagesJson as Record<string, unknown>)._meta = { siteMode: isBusiness ? tenant.siteMode : "ECOMMERCE", vertical: isBusiness ? tenant.businessVertical : null, customPages, previews: oldMeta?.previews ?? {} };
     const row = existing
       ? await tx.template.update({ where: { id }, data: { ...data, status: "PUBLISHED", version: existing.version + 1, publishedAt: new Date() } })
       // An original template is version 1, so a published replacement starts at 2 and is offered to the stores made from the original.

@@ -4,6 +4,9 @@ import {
   TEMPLATE_CATEGORIES,
   canPlatform,
   listTemplatesForStaff,
+  listWorkshopStores,
+  BUNDLE_VERTICALS,
+  type WorkshopStore,
   getAppCatalogWithTelemetry,
   type StaffTemplateRow,
   type ManagedAppCatalogItem,
@@ -12,6 +15,8 @@ import { requireAccess } from "@/lib/session";
 import {
   publishTemplateAction,
   uploadTemplateFileAction,
+  createWorkshopAction,
+  openWorkshopEditorAction,
   setTemplateStatusAction,
   toggleModuleMaintenanceAction,
   setModulePlanOverrideAction,
@@ -37,9 +42,10 @@ export default async function ThemesPage({
   const canSee = canPlatform(s.actor.role, "plans", "view");
   const canEdit = canPlatform(s.actor.role, "plans", "edit");
 
-  const [templates, modules]: [StaffTemplateRow[], ManagedAppCatalogItem[]] = await Promise.all([
+  const [templates, modules, workshops]: [StaffTemplateRow[], ManagedAppCatalogItem[], WorkshopStore[]] = await Promise.all([
     canSee ? listTemplatesForStaff(s.actor) : Promise.resolve([]),
     getAppCatalogWithTelemetry(s.actor),
+    canSee ? listWorkshopStores(s.actor).catch(() => []) : Promise.resolve([]),
   ]);
 
   return (
@@ -133,6 +139,67 @@ export default async function ThemesPage({
       </div>
 
       {canEdit && (
+        <div className="card stack" style={{ padding: 24 }} data-testid="template-studio">
+          <h2 style={{ fontSize: 16 }}>Template studio</h2>
+          <p className="muted" style={{ fontSize: 13.5 }}>
+            Design a template in the real visual editor. Make a workshop store, open its editor, build the pages, then save it as a template below.
+            Stores and business sites both work; a business workshop also carries its extra pages (menu, reservations, and so on).
+          </p>
+          {workshops.length > 0 && (
+            <div className="stack" style={{ gap: 8 }} data-testid="workshops">
+              {workshops.map((w) => (
+                <div key={w.tenantId} className="row" style={{ gap: 12, alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", borderTop: "1px solid var(--line)", paddingTop: 8 }}>
+                  <div>
+                    <b>{w.name}</b>
+                    <div style={{ fontSize: 12, color: "var(--ink-3)" }}>{w.subdomain} · {w.siteMode === "ECOMMERCE" ? "Store" : `Business · ${w.businessVertical}`}</div>
+                  </div>
+                  <form action={openWorkshopEditorAction.bind(null, w.tenantId)}>
+                    <button type="submit" className="btn btn-secondary btn-sm" data-testid={`open-workshop-${w.subdomain}`}>Open editor</button>
+                  </form>
+                </div>
+              ))}
+            </div>
+          )}
+          <form action={createWorkshopAction} className="row" style={{ gap: 12, flexWrap: "wrap", alignItems: "flex-end" }}>
+            <label className="field" style={{ margin: 0, flex: "1 1 180px" }}>
+              <span className="label">Workshop name</span>
+              <input className="input" name="name" required maxLength={60} placeholder="Eid fashion workshop" />
+            </label>
+            <label className="field" style={{ margin: 0, flex: "1 1 140px" }}>
+              <span className="label">Address word</span>
+              <input className="input" name="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="eid-fashion" />
+            </label>
+            <label className="field" style={{ margin: 0, flex: "1 1 160px" }}>
+              <span className="label">Start from</span>
+              <select className="select" name="startFrom" defaultValue="">
+                <option value="">Default look</option>
+                {templates.filter((t) => t.status === "PUBLISHED").map((t) => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            </label>
+            <label className="field" style={{ margin: 0, flex: "1 1 140px" }}>
+              <span className="label">Kind</span>
+              <select className="select" name="siteMode" defaultValue="ECOMMERCE">
+                <option value="ECOMMERCE">Online store</option>
+                <option value="PORTFOLIO">Business site</option>
+              </select>
+            </label>
+            <label className="field" style={{ margin: 0, flex: "1 1 160px" }}>
+              <span className="label">Business type (business only)</span>
+              <select className="select" name="vertical" defaultValue="">
+                <option value="">None</option>
+                {BUNDLE_VERTICALS.map((v) => (
+                  <option key={v} value={v}>{v}</option>
+                ))}
+              </select>
+            </label>
+            <button type="submit" className="btn btn-primary" data-testid="create-workshop-go">Create workshop</button>
+          </form>
+        </div>
+      )}
+
+      {canEdit && (
         <form action={uploadTemplateFileAction} className="card stack" style={{ padding: 24 }} data-testid="upload-template">
           <h2 style={{ fontSize: 16 }}>Upload a template file</h2>
           <p className="muted" style={{ fontSize: 13.5 }}>
@@ -155,14 +222,15 @@ export default async function ThemesPage({
 
       {canEdit && (
         <form action={publishTemplateAction} className="card stack" style={{ padding: 24 }} data-testid="publish-template">
-          <h2 style={{ fontSize: 16 }}>Publish a template from a store</h2>
+          <h2 style={{ fontSize: 16 }}>Save a workshop as a template</h2>
           <p className="muted" style={{ fontSize: 13.5 }}>
-            Build the design in an ordinary store with the visual editor and publish it there (colours, home, product, collection and cart pages).
+            Takes the workshop's live design (colours, home, product, collection and cart pages, header and footer, and a business site's extra pages) and makes it a template, or a new version of one. Publish the pages in the editor first. Saving again with the same id keeps its preview pictures.
           </p>
           <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
             <label className="field" style={{ margin: 0, flex: "1 1 200px" }}>
               <span className="label">Workshop store address</span>
-              <input className="input" name="store" required placeholder="my-workshop" />
+              <input className="input" name="store" required list="workshop-addresses" placeholder="ws-eid-fashion" />
+              <datalist id="workshop-addresses">{workshops.map((w) => <option key={w.tenantId} value={w.subdomain} />)}</datalist>
             </label>
             <label className="field" style={{ margin: 0, flex: "1 1 160px" }}>
               <span className="label">Template id</span>

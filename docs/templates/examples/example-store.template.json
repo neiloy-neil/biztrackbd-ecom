@@ -1,0 +1,133 @@
+{
+  "format": "biztrack-template",
+  "formatVersion": 1,
+  "id": "example-store",
+  "name": "Example Store",
+  "blurb": "A starter online-store template.",
+  "audience": "Fashion shops",
+  "category": "fashion",
+  "tags": [
+    "Fashion",
+    "Starter"
+  ],
+  "moduleLabel": null,
+  "baseLook": "kapor",
+  "siteMode": "ECOMMERCE",
+  "previews": {
+    "desktop": "https://example.com/previews/example-store-desktop.webp",
+    "mobile": "https://example.com/previews/example-store-mobile.webp"
+  },
+  "settings": {
+    "accent": "#8A2855",
+    "background": "#FFF9F7",
+    "text": "#321E28",
+    "radius": "round",
+    "font": "serif"
+  },
+  "pages": {
+    "home": {
+      "version": 1,
+      "sections": [
+        {
+          "id": "hero-1",
+          "type": "hero",
+          "settings": {
+            "eyebrow": "NEW COLLECTION",
+            "eyebrowBn": "নতুন কালেকশন",
+            "title": "Eid Collection",
+            "titleBn": "যত্নে তৈরি। সারা বাংলাদেশে পৌঁছে দিই।",
+            "text": "Handpicked for the season",
+            "textBn": "নতুন পণ্য দেখুন, পছন্দের উপায়ে দাম দিন।",
+            "ctaText": "Shop now",
+            "ctaTextBn": "কালেকশন দেখুন",
+            "ctaLink": "/search?sale=1",
+            "image": "",
+            "align": "left"
+          }
+        },
+        {
+          "id": "featured-1",
+          "type": "featured-products",
+          "settings": {
+            "title": "New arrivals",
+            "titleBn": "নতুন পণ্য",
+            "source": "new",
+            "categorySlug": "",
+            "limit": 8,
+            "columns": "4"
+          }
+        },
+        {
+          "id": "trust-1",
+          "type": "trust-strip",
+          "settings": {}
+        }
+      ]
+    },
+    "product": {
+      "version": 1,
+      "sections": [
+        {
+          "id": "product-1",
+          "type": "product-main",
+          "settings": {
+            "showRating": true,
+            "showAssurance": true,
+            "showDescription": true
+          }
+        },
+        {
+          "id": "reviews-1",
+          "type": "product-reviews",
+          "settings": {
+            "title": "Customer reviews",
+            "titleBn": "ক্রেতাদের রিভিউ"
+          }
+        },
+        {
+          "id": "related-1",
+          "type": "product-related",
+          "settings": {
+            "title": "Goes well with",
+            "titleBn": "এর সাথে মানানসই",
+            "limit": 4
+          }
+        }
+      ]
+    },
+    "collection": {
+      "version": 1,
+      "sections": [
+        {
+          "id": "header-1",
+          "type": "collection-header",
+          "settings": {
+            "showDescription": true,
+            "showCount": true
+          }
+        },
+        {
+          "id": "products-1",
+          "type": "collection-products",
+          "settings": {
+            "showSort": true
+          }
+        }
+      ]
+    },
+    "cart": {
+      "version": 1,
+      "sections": [
+        {
+          "id": "cart-1",
+          "type": "cart-main",
+          "settings": {
+            "title": "Your cart",
+            "titleBn": "আপনার কার্ট"
+          }
+        }
+      ]
+    }
+  },
+  "customPages": []
+}
