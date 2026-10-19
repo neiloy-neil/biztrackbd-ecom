@@ -1194,6 +1194,50 @@ export function Builder(props: Props) {
     "bt-preview:set-lang": (m) => {
       if (m.lang === "bn" || m.lang === "en") setLang(m.lang);
     },
+    "bt-preview:insert": (m) => {
+      if (locked || typeof m.index !== "number" || typeof m.blockType !== "string") return;
+      const d = sectionDef(m.blockType);
+      if (!d || full(m.blockType)) return;
+      const s = newSection(m.blockType);
+      const at = Math.max(0, Math.min(Math.round(m.index), latest.current.page.sections.length));
+      edit((p) => {
+        const next = [...p.sections];
+        next.splice(at, 0, s);
+        return { ...p, sections: next };
+      });
+      setSelected(s.id);
+      setTab("settings");
+      toast(`Added ${d.label}`);
+    },
+    "bt-preview:edit-image-url": (m) => {
+      if (locked || typeof m.id !== "string" || typeof m.path !== "string" || typeof m.url !== "string") return;
+      edit((pg) => ({
+        ...pg,
+        sections: pg.sections.map((x) => (x.id === m.id ? { ...x, settings: setByPath(x.settings, m.path as string, m.url as string) } : x)),
+      }));
+      toast("Image updated");
+    },
+    "bt-preview:upload-image": async (m) => {
+      if (locked || typeof m.id !== "string" || typeof m.path !== "string" || typeof m.dataUrl !== "string") return;
+      try {
+        toast("Uploading picture...");
+        const res = await fetch(m.dataUrl as string);
+        const blob = await res.blob();
+        const fd = new FormData();
+        const fname = typeof m.filename === "string" && m.filename ? m.filename : "uploaded-picture.webp";
+        fd.append("file", new File([blob], fname, { type: blob.type || "image/webp" }));
+        const up = await fetch("/api/media", { method: "POST", body: fd });
+        const json = await up.json().catch(() => ({}));
+        if (!up.ok || !json.url) throw new Error(json.error || "Upload failed");
+        edit((pg) => ({
+          ...pg,
+          sections: pg.sections.map((x) => (x.id === m.id ? { ...x, settings: setByPath(x.settings, m.path as string, json.url as string) } : x)),
+        }));
+        toast("Picture replaced");
+      } catch (err) {
+        toast(err instanceof Error ? err.message : "Failed to upload image");
+      }
+    },
   };
 
   async function flush(): Promise<boolean> {
@@ -1541,7 +1585,14 @@ export function Builder(props: Props) {
         {!narrow && <aside className="bld-left" aria-label="Sections">{layers}</aside>}
 
         <main className="bld-stage" ref={stage} data-backdrop={canvasBackdrop}>
-          <div className="bld-device-wrapper">
+          <div
+            className="bld-device-wrapper"
+            style={{
+              width: activeW ? `${activeW}px` : "100%",
+              maxWidth: activeW ? `${activeW}px` : "100%",
+              transition: resizing ? "none" : "width 0.15s ease",
+            }}
+          >
             {/* Left resizer handle */}
             {!narrow && (
               <div
@@ -1561,10 +1612,9 @@ export function Builder(props: Props) {
             <div
               className="bld-device"
               style={{
-                width: activeW ? activeW : "100%",
-                transform: `scale(${scale})`,
-                height: `${100 / scale}%`,
-                transition: resizing ? "none" : "width 0.15s ease",
+                width: "100%",
+                height: scale === 1 ? "100%" : `${100 / scale}%`,
+                transform: scale !== 1 ? `scale(${scale})` : undefined,
               }}
             >
               <iframe

@@ -260,6 +260,26 @@ All browser walkthrough recordings and full-resolution PNG artifacts are saved i
   4. Aligned `hero` and `countdown-timer` settings keys in `patterns.ts` with the registered schemas.
   5. Allowed `.hero` and `.wrap` to yield transparency inside `.bt-card-mode` so floating card custom backgrounds display beautifully.
 
+### Additional Bugfix: SiteBuilder Stage & Preview Canvas Sizing (Squished Box Bug) Resolved
+- **Problem:** The preview iframe collapsed vertically into a tiny 300x150 default box at the top of the canvas with scrollbars. Root cause: `.bld-stage` used `align-items: flex-start` without `height: 100%`, and `.bld-device-wrapper` had no explicit width or full height, collapsing flex child heights to 0px / auto.
+- **Resolution:**
+  1. Updated `.bld-stage` in `apps/admin/src/app/(builder)/builder.css` with `height: 100%; align-items: stretch;`.
+  2. Updated `.bld-device-wrapper` with `height: 100%; min-height: 100%; align-items: stretch;` and explicit width sizing.
+  3. Ensured `.bld-device` and the `iframe` fill 100% stage height and viewport width smoothly across all zoom levels and device presets.
+
+### Delivered: SiteBuilder UX Evolution — Phase Two (In-Canvas Block Popover & Image Overlays)
+- **Feature A: Contextual In-Canvas Block Picker Popover (`.bt-gap-popover`)**
+  - Anchored directly at section gap seams when clicking `+ Add section`.
+  - Instant live search input filtering blocks by title, description, or type.
+  - Horizontal category tabs (`All`, `Business & Verticals`, `Header & Hero`, `Product Showcases`, `Trust & Social Proof`, `Promotions & Urgency`, `Content & FAQs`) using `STORE_SECTION_CATEGORIES`.
+  - 1-click `+ Insert` dispatching `bt-preview:insert` directly into `apps/admin` builder state, updating undo/redo history and opening the settings inspector.
+  - Quick action link to browse full library drawer in sidebar if needed.
+- **Feature B: In-Canvas Image Quick-Action Overlay & Drag-and-Drop File Upload**
+  - Sleek glassmorphic badge (`📷 Replace Picture`) on hovering any `[data-edit-image]` element.
+  - Native HTML5 Drag & Drop listener on `[data-edit-image]` with `.bt-drag-over` highlighting and `"📥 Drop image to replace"` badge.
+  - Direct local file reading to DataURL and message dispatching to `bt-preview:upload-image`.
+  - Admin receives DataURL, posts to authenticated `/api/media`, patches section settings with `setByPath`, and shows success toast feedback.
+
 ---
 
 ## 4. Prioritized Tasklist for Tomorrow's Session

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { sectionDef, type PageJson } from "@biztrackbd/core/builder-client";
+import { sectionDef, sectionsFor, STORE_SECTION_CATEGORIES, type PageJson } from "@biztrackbd/core/builder-client";
 
 /**
  * Editing a landing page on the page itself (docs/46, stage 4). It lives in the editor's preview only: the live store never loads it.
@@ -30,6 +30,10 @@ const EDIT_CSS = `
 [data-edit]:empty::before{content:"Type here";opacity:.5}
 [data-edit-image]{cursor:pointer;position:relative}
 [data-edit-image]:hover{outline:2px solid #5B4FE8;outline-offset:-2px}
+[data-edit-image]::after{content:"📷 Replace Picture";position:absolute;right:10px;bottom:10px;padding:5px 12px;background:rgba(15,23,42,0.85);backdrop-filter:blur(8px);color:#fff;font:600 11px/1 system-ui,sans-serif;border-radius:999px;border:1px solid rgba(255,255,255,0.2);box-shadow:0 4px 12px rgba(0,0,0,0.25);pointer-events:none;opacity:0;transform:translateY(4px);transition:all .15s ease;z-index:40}
+[data-edit-image]:hover::after{opacity:1;transform:translateY(0)}
+[data-edit-image].bt-drag-over{outline:3px dashed #5B4FE8 !important;outline-offset:-3px;background-color:rgba(91,79,232,0.12) !important}
+[data-edit-image].bt-drag-over::after{content:"📥 Drop image here";background:#5B4FE8;color:#fff;opacity:1;transform:translateY(0)}
 .lp-pick-btn{margin-top:10px;padding:8px 14px;border-radius:99px;border:2px dashed #5B4FE8;background:rgba(255,255,255,.92);color:#5B4FE8;font:700 13px/1 system-ui;cursor:pointer}
 .lp-pick{display:flex;align-items:center;justify-content:center;min-height:120px;border:2px dashed rgba(91,79,232,.55);border-radius:12px;color:#5B4FE8;font-weight:700;cursor:pointer}
 .bt-ovl{position:absolute;left:0;top:0;width:100%;pointer-events:none;z-index:60}
@@ -69,6 +73,32 @@ const EDIT_CSS = `
 .bt-space-grip{height:24px;padding:0 12px;display:inline-flex;align-items:center;gap:6px;border-radius:999px;background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);border:1px solid #C7D2FE;color:#4F46E5;font:600 11px/1 system-ui;box-shadow:0 4px 12px rgba(79,70,229,0.18);cursor:ns-resize;transition:all 0.15s ease}
 .bt-space-grip:hover,.bt-space-grip.dragging{background:#4F46E5;color:#fff;border-color:#4338CA;transform:scale(1.05);box-shadow:0 6px 16px rgba(79,70,229,0.35)}
 .bt-space-badge{font-size:10px;font-weight:700;letter-spacing:0.02em}
+/* In-Canvas Contextual Block Picker Popover */
+.bt-gap-popover{position:absolute;left:50%;transform:translateX(-50%);width:min(92vw,480px);max-height:480px;background:rgba(255,255,255,0.98);backdrop-filter:blur(16px);border:1px solid #CBD5E1;border-radius:16px;box-shadow:0 20px 40px -8px rgba(15,23,42,0.28),0 8px 16px -4px rgba(15,23,42,0.12);display:flex;flex-direction:column;z-index:100;pointer-events:auto;overflow:hidden;animation:btPopIn .18s cubic-bezier(0.16,1,0.3,1)}
+@keyframes btPopIn{0%{opacity:0;transform:translate(-50%,-6px) scale(0.96)}100%{opacity:1;transform:translate(-50%,0) scale(1)}}
+.bt-pop-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px;border-bottom:1px solid #F1F5F9}
+.bt-pop-title{font:700 14px/1.2 system-ui,sans-serif;color:#0F172A;display:flex;align-items:center;gap:6px}
+.bt-pop-close{all:unset;box-sizing:border-box;width:26px;height:26px;display:grid;place-items:center;border-radius:999px;color:#64748B;cursor:pointer;font:600 14px/1 system-ui;transition:all .12s ease}
+.bt-pop-close:hover{background:#F1F5F9;color:#0F172A}
+.bt-pop-search-wrap{padding:8px 16px}
+.bt-pop-search{width:100%;box-sizing:border-box;height:36px;padding:0 12px;border-radius:8px;border:1px solid #E2E8F0;background:#F8FAFC;font:500 13px/1 system-ui,sans-serif;color:#0F172A;outline:none;transition:all .15s ease}
+.bt-pop-search:focus{border-color:#5B4FE8;background:#fff;box-shadow:0 0 0 3px rgba(91,79,232,0.12)}
+.bt-pop-cats{display:flex;gap:6px;padding:4px 16px 8px;overflow-x:auto;scrollbar-width:none}
+.bt-pop-cats::-webkit-scrollbar{display:none}
+.bt-pop-cat-btn{all:unset;box-sizing:border-box;padding:4px 10px;border-radius:999px;background:#F1F5F9;color:#475569;font:600 11px/1.2 system-ui,sans-serif;cursor:pointer;white-space:nowrap;transition:all .12s ease}
+.bt-pop-cat-btn:hover{background:#E2E8F0;color:#0F172A}
+.bt-pop-cat-btn.active{background:#5B4FE8;color:#fff}
+.bt-pop-list{flex:1;overflow-y:auto;padding:8px 16px;display:flex;flex-direction:column;gap:8px;max-height:280px}
+.bt-pop-card{all:unset;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-radius:10px;border:1px solid #E2E8F0;background:#fff;cursor:pointer;transition:all .12s ease}
+.bt-pop-card:hover{border-color:#5B4FE8;background:#F5F3FF;transform:translateY(-1px);box-shadow:0 4px 12px rgba(91,79,232,0.08)}
+.bt-pop-card-info{display:flex;flex-direction:column;gap:2px;min-width:0}
+.bt-pop-card-title{font:600 13px/1.2 system-ui,sans-serif;color:#0F172A}
+.bt-pop-card-desc{font:400 11px/1.3 system-ui,sans-serif;color:#64748B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px}
+.bt-pop-card-add{font:700 11px/1 system-ui,sans-serif;color:#5B4FE8;padding:4px 10px;border-radius:6px;background:#EDE9FE;flex-shrink:0;transition:all .12s ease}
+.bt-pop-card:hover .bt-pop-card-add{background:#5B4FE8;color:#fff}
+.bt-pop-footer{padding:8px 16px;background:#F8FAFC;border-top:1px solid #F1F5F9;display:flex;justify-content:flex-end}
+.bt-pop-sidebar-btn{all:unset;font:600 11px/1.2 system-ui,sans-serif;color:#5B4FE8;cursor:pointer;display:flex;align-items:center;gap:4px}
+.bt-pop-sidebar-btn:hover{text-decoration:underline}
 `;
 
 const MAGNETIC_SPACINGS = [0, 16, 24, 32, 48, 64, 80, 96, 128];
@@ -96,6 +126,9 @@ export function EditOverlay({ page, selectedId, send, onTyping }: { page: PageJs
     startPx: number;
     currentPx: number;
   } | null>(null);
+  const [pickerGap, setPickerGap] = useState<{ index: number; top: number } | null>(null);
+  const [pickerSearch, setPickerSearch] = useState("");
+  const [pickerCategory, setPickerCategory] = useState("all");
   const spacingDragRef = useRef<typeof spacingDrag>(null);
   spacingDragRef.current = spacingDrag;
   const dragging = useRef<{ id: string; pointer: number } | null>(null);
@@ -195,12 +228,55 @@ export function EditOverlay({ page, selectedId, send, onTyping }: { page: PageJs
       const id = idOf(img);
       if (id) send({ type: "bt-preview:image", id, path: img.getAttribute("data-edit-image") });
     };
+    const onDragOver = (e: DragEvent) => {
+      const img = (e.target as Element | null)?.closest?.("[data-edit-image]");
+      if (img && e.dataTransfer?.types?.includes("Files")) {
+        e.preventDefault();
+        e.stopPropagation();
+        img.classList.add("bt-drag-over");
+      }
+    };
+    const onDragLeave = (e: DragEvent) => {
+      const img = (e.target as Element | null)?.closest?.("[data-edit-image]");
+      if (img) {
+        img.classList.remove("bt-drag-over");
+      }
+    };
+    const onDrop = (e: DragEvent) => {
+      const img = (e.target as Element | null)?.closest?.("[data-edit-image]") as HTMLElement | null;
+      if (!img) return;
+      img.classList.remove("bt-drag-over");
+      const file = e.dataTransfer?.files?.[0];
+      if (!file || !file.type.startsWith("image/")) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const id = idOf(img);
+      const path = img.getAttribute("data-edit-image");
+      if (!id || !path) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === "string") {
+          send({
+            type: "bt-preview:upload-image",
+            id,
+            path,
+            dataUrl: reader.result,
+            filename: file.name,
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    };
+
     document.addEventListener("input", onInput, true);
     document.addEventListener("focusin", onFocusIn, true);
     document.addEventListener("focusout", onFocusOut, true);
     document.addEventListener("keydown", onKey, true);
     document.addEventListener("paste", onPaste, true);
     document.addEventListener("click", onClick, true);
+    document.addEventListener("dragover", onDragOver, true);
+    document.addEventListener("dragleave", onDragLeave, true);
+    document.addEventListener("drop", onDrop, true);
     return () => {
       document.removeEventListener("input", onInput, true);
       document.removeEventListener("focusin", onFocusIn, true);
@@ -208,8 +284,32 @@ export function EditOverlay({ page, selectedId, send, onTyping }: { page: PageJs
       document.removeEventListener("keydown", onKey, true);
       document.removeEventListener("paste", onPaste, true);
       document.removeEventListener("click", onClick, true);
+      document.removeEventListener("dragover", onDragOver, true);
+      document.removeEventListener("dragleave", onDragLeave, true);
+      document.removeEventListener("drop", onDrop, true);
     };
   }, [send, onTyping]);
+
+  useEffect(() => {
+    if (!pickerGap) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setPickerGap(null);
+    };
+    const onDocClick = (e: MouseEvent) => {
+      if (
+        !(e.target as Element | null)?.closest(".bt-gap-popover") &&
+        !(e.target as Element | null)?.closest(".bt-gap")
+      ) {
+        setPickerGap(null);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("click", onDocClick);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("click", onDocClick);
+    };
+  }, [pickerGap]);
 
   // ---- dragging a section by its grip: mouse or finger
   const slotAt = (y: number): number => {
@@ -289,13 +389,39 @@ export function EditOverlay({ page, selectedId, send, onTyping }: { page: PageJs
   const height = rects.length ? rects[rects.length - 1]!.top + rects[rects.length - 1]!.height : 0;
   const idx = (id: string) => page.sections.findIndex((s) => s.id === id);
 
+  const allDefs = sectionsFor("home");
+  const filteredDefs = allDefs.filter((d) => {
+    if (pickerCategory !== "all") {
+      const cat = STORE_SECTION_CATEGORIES.find((c) => c.id === pickerCategory);
+      if (cat && !cat.types.includes(d.type)) return false;
+    }
+    if (pickerSearch.trim()) {
+      const q = pickerSearch.toLowerCase().trim();
+      return (
+        d.label.toLowerCase().includes(q) ||
+        d.description.toLowerCase().includes(q) ||
+        d.type.toLowerCase().includes(q)
+      );
+    }
+    return true;
+  });
+
   return (
     <>
       <style id="bt-edit-css">{EDIT_CSS}</style>
       <div className="bt-ovl" style={{ height }} aria-hidden={false}>
         {rects.map((r, i) => (
           <div key={`gap-${r.id}`} className="bt-gap" style={{ top: r.top - 16 }}>
-            <button type="button" aria-label={`Add a section ${i === 0 ? "at the top" : "here"}`} data-testid={`gap-${i}`} onClick={() => send({ type: "bt-preview:add", index: i })}>
+            <button
+              type="button"
+              aria-label={`Add a section ${i === 0 ? "at the top" : "here"}`}
+              data-testid={`gap-${i}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setPickerGap((prev) => (prev?.index === i ? null : { index: i, top: r.top }));
+                setPickerSearch("");
+              }}
+            >
               <span>+</span>
               <span>Add section</span>
             </button>
@@ -303,10 +429,114 @@ export function EditOverlay({ page, selectedId, send, onTyping }: { page: PageJs
         ))}
         {rects.length > 0 && (
           <div className="bt-gap" style={{ top: rects[rects.length - 1]!.top + rects[rects.length - 1]!.height - 16 }}>
-            <button type="button" aria-label="Add a section at the end" data-testid="gap-end" onClick={() => send({ type: "bt-preview:add", index: rects.length })}>
+            <button
+              type="button"
+              aria-label="Add a section at the end"
+              data-testid="gap-end"
+              onClick={(e) => {
+                e.stopPropagation();
+                const endTop = rects[rects.length - 1]!.top + rects[rects.length - 1]!.height;
+                setPickerGap((prev) => (prev?.index === rects.length ? null : { index: rects.length, top: endTop }));
+                setPickerSearch("");
+              }}
+            >
               <span>+</span>
               <span>Add section</span>
             </button>
+          </div>
+        )}
+
+        {/* In-Canvas Contextual Block Picker Popover */}
+        {pickerGap !== null && (
+          <div
+            className="bt-gap-popover"
+            style={{ top: Math.max(16, pickerGap.top + 16) }}
+            role="dialog"
+            aria-label="Choose a block to insert"
+            data-testid="gap-popover"
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <div className="bt-pop-header">
+              <span className="bt-pop-title">
+                <span>➕ Add Block</span>
+                <span style={{ fontSize: 11, fontWeight: 500, color: "#64748B" }}>
+                  (at position {pickerGap.index + 1})
+                </span>
+              </span>
+              <button
+                type="button"
+                className="bt-pop-close"
+                aria-label="Close block picker"
+                onClick={() => setPickerGap(null)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="bt-pop-search-wrap">
+              <input
+                type="text"
+                className="bt-pop-search"
+                placeholder="Search blocks (e.g. Menu, Hero, Reviews, FAQ)..."
+                value={pickerSearch}
+                onChange={(e) => setPickerSearch(e.target.value)}
+                autoFocus
+              />
+            </div>
+
+            <div className="bt-pop-cats">
+              {STORE_SECTION_CATEGORIES.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  className={`bt-pop-cat-btn${pickerCategory === cat.id ? " active" : ""}`}
+                  onClick={() => setPickerCategory(cat.id)}
+                >
+                  {cat.title}
+                </button>
+              ))}
+            </div>
+
+            <div className="bt-pop-list">
+              {filteredDefs.length === 0 ? (
+                <div style={{ padding: "24px 16px", textAlign: "center", color: "#64748B", fontSize: 13 }}>
+                  No matching blocks found for &quot;{pickerSearch}&quot;
+                </div>
+              ) : (
+                filteredDefs.map((d) => (
+                  <button
+                    key={d.type}
+                    type="button"
+                    className="bt-pop-card"
+                    data-testid={`pop-card-${d.type}`}
+                    onClick={() => {
+                      send({ type: "bt-preview:insert", index: pickerGap.index, blockType: d.type });
+                      setPickerGap(null);
+                    }}
+                  >
+                    <div className="bt-pop-card-info">
+                      <div className="bt-pop-card-title">{d.label}</div>
+                      <div className="bt-pop-card-desc">{d.description}</div>
+                    </div>
+                    <span className="bt-pop-card-add">+ Insert</span>
+                  </button>
+                ))
+              )}
+            </div>
+
+            <div className="bt-pop-footer">
+              <button
+                type="button"
+                className="bt-pop-sidebar-btn"
+                onClick={() => {
+                  send({ type: "bt-preview:add", index: pickerGap.index });
+                  setPickerGap(null);
+                }}
+              >
+                Browse full block library in sidebar →
+              </button>
+            </div>
           </div>
         )}
         {rects.filter((r) => r.id === selectedId).map((r) => {
