@@ -1247,6 +1247,9 @@ export function Builder(props: Props) {
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [leftTab, setLeftTab] = useState<"layers" | "library" | "theme" | "history">("layers");
   const [leftCollapsed, setLeftCollapsed] = useState(false);
+  const [leftWidth, setLeftWidth] = useState(340);
+  const [resizingLeftDock, setResizingLeftDock] = useState(false);
+  const leftResizeStart = useRef<{ clientX: number; startW: number } | null>(null);
   const [rightCollapsed, setRightCollapsed] = useState(false);
   const [inspTab, setInspTab] = useState<"content" | "style" | "advanced">("content");
   const [treeSearch, setTreeSearch] = useState("");
@@ -1815,6 +1818,35 @@ export function Builder(props: Props) {
     resizeStart.current = null;
   };
 
+  const onLeftResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setResizingLeftDock(true);
+    leftResizeStart.current = { clientX: e.clientX, startW: leftWidth };
+  };
+
+  const onLeftResizeMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!resizingLeftDock || !leftResizeStart.current) return;
+    const delta = e.clientX - leftResizeStart.current.clientX;
+    const newW = Math.max(280, Math.min(480, Math.round(leftResizeStart.current.startW + delta)));
+    setLeftWidth(newW);
+  };
+
+  const onLeftResizeEnd = (e: React.PointerEvent<HTMLDivElement>) => {
+    try { e.currentTarget.releasePointerCapture(e.pointerId); } catch { /* ignore */ }
+    setResizingLeftDock(false);
+    leftResizeStart.current = null;
+  };
+
+  const handleRailClick = (targetTab: "layers" | "library" | "theme" | "history") => {
+    if (leftTab === targetTab && !leftCollapsed) {
+      setLeftCollapsed(true);
+    } else {
+      setLeftTab(targetTab);
+      setLeftCollapsed(false);
+    }
+  };
+
   const tabs: { id: Tab; label: string; test?: string }[] = narrow
     ? [{ id: "layers", label: "Sections" }, { id: "settings", label: "Settings" }, { id: "theme", label: kind === "home" ? "Style" : "Page", test: "tab-theme" }, { id: "history", label: "History", test: "tab-history" }]
     : [{ id: "settings", label: "Settings" }, { id: "theme", label: kind === "home" ? "Template and style" : "Page", test: "tab-theme" }, { id: "history", label: "History", test: "tab-history" }];
@@ -1946,6 +1978,7 @@ export function Builder(props: Props) {
         <button
           type="button"
           className="btn btn-secondary btn-block"
+          style={{ boxSizing: "border-box", justifyContent: "center" }}
           onDragOver={(e) => {
             if (
               e.dataTransfer.types.includes("application/biztrack-block-type") ||
@@ -2288,7 +2321,7 @@ export function Builder(props: Props) {
       <div
         className="bld-body"
         style={{
-          "--bld-left-w": leftCollapsed ? "48px" : "320px",
+          "--bld-left-w": leftCollapsed ? "48px" : `${leftWidth}px`,
           "--bld-right-w": rightCollapsed ? "0px" : "360px",
         } as React.CSSProperties}
       >
@@ -2296,17 +2329,14 @@ export function Builder(props: Props) {
           <aside
             className="bld-left-dock"
             aria-label="Editor tools"
-            style={{ width: leftCollapsed ? 48 : 320 }}
+            style={{ width: leftCollapsed ? 48 : leftWidth }}
           >
             <nav className="bld-icon-rail" aria-label="Workspace tool selector">
               <button
                 type="button"
                 className={`bld-rail-btn${leftTab === "layers" && !leftCollapsed ? " active" : ""}`}
-                onClick={() => {
-                  setLeftTab("layers");
-                  setLeftCollapsed(false);
-                }}
-                title="Layers & Structure (Ctrl+1)"
+                onClick={() => handleRailClick("layers")}
+                title={leftTab === "layers" && !leftCollapsed ? "Collapse Layers (Ctrl+1 or Ctrl+B)" : "Layers & Structure (Ctrl+1)"}
                 aria-label="Layers & Structure"
               >
                 <ILayers />
@@ -2314,11 +2344,8 @@ export function Builder(props: Props) {
               <button
                 type="button"
                 className={`bld-rail-btn${leftTab === "library" && !leftCollapsed ? " active" : ""}`}
-                onClick={() => {
-                  setLeftTab("library");
-                  setLeftCollapsed(false);
-                }}
-                title="Add Blocks & Patterns (Ctrl+2)"
+                onClick={() => handleRailClick("library")}
+                title={leftTab === "library" && !leftCollapsed ? "Collapse Library (Ctrl+2 or Ctrl+B)" : "Add Blocks & Patterns (Ctrl+2)"}
                 aria-label="Add Blocks & Patterns"
               >
                 <IBlocks />
@@ -2326,11 +2353,8 @@ export function Builder(props: Props) {
               <button
                 type="button"
                 className={`bld-rail-btn${leftTab === "theme" && !leftCollapsed ? " active" : ""}`}
-                onClick={() => {
-                  setLeftTab("theme");
-                  setLeftCollapsed(false);
-                }}
-                title="Global Theme & Styles (Ctrl+3)"
+                onClick={() => handleRailClick("theme")}
+                title={leftTab === "theme" && !leftCollapsed ? "Collapse Theme (Ctrl+3 or Ctrl+B)" : "Global Theme & Styles (Ctrl+3)"}
                 aria-label="Global Theme & Styles"
               >
                 <IPalette />
@@ -2338,11 +2362,8 @@ export function Builder(props: Props) {
               <button
                 type="button"
                 className={`bld-rail-btn${leftTab === "history" && !leftCollapsed ? " active" : ""}`}
-                onClick={() => {
-                  setLeftTab("history");
-                  setLeftCollapsed(false);
-                }}
-                title="Version History & Drafts (Ctrl+4)"
+                onClick={() => handleRailClick("history")}
+                title={leftTab === "history" && !leftCollapsed ? "Collapse History (Ctrl+4 or Ctrl+B)" : "Version History & Drafts (Ctrl+4)"}
                 aria-label="Version History & Drafts"
               >
                 <IHistory />
@@ -2370,9 +2391,20 @@ export function Builder(props: Props) {
                         <ILayers />
                         <span>Structure / Layers</span>
                       </span>
-                      <span className="bld-dock-badge" title="Sections count">
-                        {page.sections.length}/30
-                      </span>
+                      <div className="row" style={{ gap: 6, alignItems: "center" }}>
+                        <span className="bld-dock-badge" title="Sections count">
+                          {page.sections.length}/30
+                        </span>
+                        <button
+                          type="button"
+                          className="bld-dock-collapse-btn"
+                          onClick={() => setLeftCollapsed(true)}
+                          title="Collapse left sidebar (Ctrl+B)"
+                          aria-label="Collapse sidebar"
+                        >
+                          <ICollapseLeft />
+                        </button>
+                      </div>
                     </div>
                     <div className="bld-tree-search">
                       <input
@@ -2397,15 +2429,26 @@ export function Builder(props: Props) {
                         <IBlocks />
                         <span>Block Library</span>
                       </span>
-                      <button
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                        style={{ fontSize: 11, padding: "2px 8px" }}
-                        onClick={() => setLibrary(true)}
-                        title="Open expanded gallery modal"
-                      >
-                        Gallery ↗
-                      </button>
+                      <div className="row" style={{ gap: 6, alignItems: "center" }}>
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          style={{ fontSize: 11, padding: "2px 8px" }}
+                          onClick={() => setLibrary(true)}
+                          title="Open expanded gallery modal"
+                        >
+                          Gallery ↗
+                        </button>
+                        <button
+                          type="button"
+                          className="bld-dock-collapse-btn"
+                          onClick={() => setLeftCollapsed(true)}
+                          title="Collapse left sidebar (Ctrl+B)"
+                          aria-label="Collapse sidebar"
+                        >
+                          <ICollapseLeft />
+                        </button>
+                      </div>
                     </div>
                     <div className="bld-panel-body" style={{ flex: 1, padding: "12px" }}>
                       <div className="row" style={{ gap: 6, marginBottom: 10 }}>
@@ -2496,6 +2539,15 @@ export function Builder(props: Props) {
                         <IPalette />
                         <span>Theme & Styles</span>
                       </span>
+                      <button
+                        type="button"
+                        className="bld-dock-collapse-btn"
+                        onClick={() => setLeftCollapsed(true)}
+                        title="Collapse left sidebar (Ctrl+B)"
+                        aria-label="Collapse sidebar"
+                      >
+                        <ICollapseLeft />
+                      </button>
                     </div>
                     <div className="bld-panel-body" style={{ flex: 1, padding: "12px" }}>
                       {themeTab}
@@ -2510,6 +2562,15 @@ export function Builder(props: Props) {
                         <IHistory />
                         <span>Version History</span>
                       </span>
+                      <button
+                        type="button"
+                        className="bld-dock-collapse-btn"
+                        onClick={() => setLeftCollapsed(true)}
+                        title="Collapse left sidebar (Ctrl+B)"
+                        aria-label="Collapse sidebar"
+                      >
+                        <ICollapseLeft />
+                      </button>
                     </div>
                     <div className="bld-panel-body" style={{ flex: 1, padding: "12px" }}>
                       {history}
@@ -2518,6 +2579,31 @@ export function Builder(props: Props) {
                 )}
               </div>
             )}
+
+            {/* Left Sidebar Splitter & Floating Retract Pill */}
+            <div
+              className={`bld-sidebar-splitter${resizingLeftDock ? " active" : ""}${leftCollapsed ? " collapsed" : ""}`}
+              onPointerDown={!leftCollapsed ? onLeftResizeStart : undefined}
+              onPointerMove={!leftCollapsed ? onLeftResizeMove : undefined}
+              onPointerUp={!leftCollapsed ? onLeftResizeEnd : undefined}
+              onPointerCancel={!leftCollapsed ? onLeftResizeEnd : undefined}
+              onDoubleClick={() => setLeftWidth(340)}
+              title={leftCollapsed ? "Click to expand sidebar (Ctrl+B)" : "Drag to resize sidebar • Double-click to reset (Ctrl+B)"}
+            >
+              <div className="bld-splitter-line" />
+              <button
+                type="button"
+                className={`bld-sidebar-toggle-pill${leftCollapsed ? " collapsed" : ""}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLeftCollapsed(!leftCollapsed);
+                }}
+                title={leftCollapsed ? "Expand left sidebar (Ctrl+B)" : "Collapse left sidebar (Ctrl+B)"}
+                aria-label={leftCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              >
+                {leftCollapsed ? <IExpandRight /> : <ICollapseLeft />}
+              </button>
+            </div>
           </aside>
         )}
 
