@@ -294,7 +294,13 @@ export function MenuDiningClient({
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg, #f8fafc)", paddingBottom: totalCount > 0 ? 120 : 60 }}>
+    <div
+      style={{
+        minHeight: "100vh", background: "var(--bg, #f8fafc)", paddingBottom: totalCount > 0 ? 120 : 60,
+        // This page was written with its own variable names; map them to the store theme so a dark theme gets light text and chips.
+        ...({ "--fg": "var(--ink)", "--muted": "var(--ink-2)", "--border": "var(--line)", "--btn-bg": "var(--accent)", "--btn-fg": "var(--accent-ink)", "--tint-1": "var(--surface)" } as React.CSSProperties),
+      }}
+    >
       {/* Top Restaurant Header */}
       <header
         style={{
@@ -890,7 +896,7 @@ export function MenuDiningClient({
                               borderRadius: 4,
                               fontWeight: 600,
                               background: tag === "chef_special" ? "rgba(217, 119, 6, 0.1)" : "rgba(34, 197, 94, 0.1)",
-                              color: tag === "chef_special" ? "#b45309" : "#15803d",
+                              color: tag === "chef_special" ? "color-mix(in srgb, #b45309 60%, var(--ink))" : "color-mix(in srgb, #15803d 60%, var(--ink))",
                             }}
                           >
                             {tag === "chef_special" ? "⭐ Special" : tag === "halal" ? "🟢 Halal" : tag === "spicy" ? "🌶️ Spicy" : tag === "vegetarian" ? "🥬 Veg" : tag}
@@ -1257,7 +1263,7 @@ export function MenuDiningClient({
                   style={{
                     width: "100%",
                     background: "rgba(22, 163, 74, 0.08)",
-                    color: "#15803d",
+                    color: "color-mix(in srgb, #15803d 60%, var(--ink))",
                     border: "1px solid rgba(22, 163, 74, 0.25)",
                     padding: "12px",
                     borderRadius: 12,

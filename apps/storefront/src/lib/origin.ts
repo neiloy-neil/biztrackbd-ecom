@@ -17,11 +17,13 @@ export function resolveStorefrontOrigin(
 
   const fwdHost = headersList.get("x-forwarded-host");
   const directHost = headersList.get("host");
-  const rawHost = (fwdHost || directHost || `localhost:${fallbackPort}`).split(",")[0]!.trim();
+  let rawHost = (fwdHost || directHost || `localhost:${fallbackPort}`).split(",")[0]!.trim();
+  // A forwarded host that lost its port (seen with <store>.localhost) while the direct host still has it: keep the port the visitor used.
+  if (!rawHost.includes(":") && directHost && directHost.includes(":") && directHost.split(":")[0] === rawHost) rawHost = directHost;
   const fwdProto = headersList.get("x-forwarded-proto");
   const fwdPort = headersList.get("x-forwarded-port");
 
-  const proto = fwdProto || (rawHost.startsWith("localhost") || rawHost.startsWith("127.0.0.1") ? "http" : "https");
+  const proto = fwdProto || (/(^|\.)localhost(:|$)|^127\.0\.0\.1/.test(rawHost) ? "http" : "https");
   let host = rawHost;
 
   if (!host.includes(":")) {
