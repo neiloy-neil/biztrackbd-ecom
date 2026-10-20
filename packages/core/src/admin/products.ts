@@ -129,7 +129,8 @@ export const SaveProductInput = z.object({
 export type SaveProductInput = z.input<typeof SaveProductInput>;
 
 /** Images the store may reference: its own uploads, or https links (for example Supabase Storage). Blocks javascript: and data: URLs. */
-const IMAGE_OK = /^(\/media\/[A-Za-z0-9/_.-]+|https:\/\/[^\s"'<>]+)$/;
+// Own stored photos (/media), the app's bundled sample pictures (/demo), or a secure web address.
+const IMAGE_OK = /^(\/(?:media|demo)\/[A-Za-z0-9/_.-]+|https:\/\/[^\s"'<>]+)$/;
 
 export async function saveProduct(tenantId: string, actor: StaffActor, raw: unknown, productId?: string): Promise<{ id: string; slug: string; removedImages: string[] }> {
   assertCan(actor, "products", "edit");

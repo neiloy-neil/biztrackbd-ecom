@@ -67,6 +67,8 @@ export function renderCode128Svg(
   options: BarcodeRenderOptions = {}
 ): string {
   const cleanVal = (value || "").trim().toUpperCase() || "000000";
+  // The value is drawn as text inside the SVG, so it must never carry markup: escape it for the text node.
+  const textVal = cleanVal.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const height = options.height ?? 50;
   const barWidth = options.barWidth ?? 2;
   const showText = options.showText ?? true;
@@ -105,7 +107,7 @@ export function renderCode128Svg(
     .join("");
 
   const textSvg = showText
-    ? `<text x="${totalWidth / 2}" y="${height + fontSize + 2}" font-family="monospace, monospace" font-size="${fontSize}" font-weight="600" fill="${color}" text-anchor="middle" letter-spacing="2">${cleanVal}</text>`
+    ? `<text x="${totalWidth / 2}" y="${height + fontSize + 2}" font-family="monospace, monospace" font-size="${fontSize}" font-weight="600" fill="${color}" text-anchor="middle" letter-spacing="2">${textVal}</text>`
     : "";
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalWidth} ${totalHeight}" width="${totalWidth}" height="${totalHeight}" style="background:${bg};max-width:100%;height:auto;">
