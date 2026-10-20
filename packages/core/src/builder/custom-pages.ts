@@ -12,7 +12,7 @@ import { customKey } from "./versions";
  */
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const RESERVED = new Set([
+export const RESERVED_PAGE_SLUGS = new Set([
   "new", "edit", "api", "admin", "cart", "checkout", "products", "c", "p", "blog", "l",
   "order", "account", "login", "search", "draft", "wholesale", "media", "go", "ref", "partner",
   "icon.svg", "robots.txt", "sitemap.xml", "manifest.json"
@@ -138,7 +138,7 @@ export async function createCustomPage(tenantId: string, actor: StaffActor, inpu
   const title = input.title.trim();
   if (title.length < 2 || title.length > 80) throw new ValidationError("Give the page a name of 2 to 80 characters", { field: "title" });
   const slug = (input.slug?.trim() || slugify(title)).toLowerCase();
-  if (!SLUG.test(slug) || slug.length > 60 || RESERVED.has(slug)) throw new ValidationError("The address can use small letters, numbers and dashes, like about-us", { field: "slug" });
+  if (!SLUG.test(slug) || slug.length > 60 || RESERVED_PAGE_SLUGS.has(slug)) throw new ValidationError("The address can use small letters, numbers and dashes, like about-us", { field: "slug" });
   const layout = (customPageTemplate(input.templateId) ?? CUSTOM_PAGE_TEMPLATES[0]!).build();
   return withTenant(tenantId, async (tx) => {
     const tenant = await tx.tenant.findFirstOrThrow({ select: { planTier: true } });

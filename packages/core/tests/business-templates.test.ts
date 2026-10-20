@@ -177,4 +177,18 @@ describe("BizTrack Business Templates & Section Filtering", () => {
       expect(isBusinessDemoHost("randomstore")).toBe(false);
     });
   });
+
+  it("no template page uses an address the storefront already serves (like /media)", async () => {
+    const { BUSINESS_TEMPLATES, RESERVED_PAGE_SLUGS } = await import("../src");
+    for (const t of BUSINESS_TEMPLATES) for (const p of t.customPages) expect(RESERVED_PAGE_SLUGS.has(p.slug), `${t.id}/${p.slug}`).toBe(false);
+  });
+
+  it("every template's hero says its own words, not the clothing-store defaults", async () => {
+    const { BUSINESS_TEMPLATES, validatePage, sectionDef } = await import("../src");
+    const dflt = (sectionDef("hero")!.defaults as { title: string }).title;
+    for (const t of BUSINESS_TEMPLATES) {
+      const hero = validatePage("home", t.pages.home).sections.find((x) => x.type === "hero");
+      if (hero) expect(hero.settings.title, t.id).not.toBe(dflt);
+    }
+  });
 });
