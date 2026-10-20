@@ -123,7 +123,7 @@ export function CourierDispatchSimulator() {
           <label style={{ display: "block", fontSize: 13.5, fontWeight: 700, color: "var(--ink)", marginBottom: 8 }}>
             2. Choose Delivery Provider:
           </label>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {COURIERS.map((c) => (
               <button
                 key={c.id}
@@ -216,7 +216,7 @@ export function CourierDispatchSimulator() {
         </div>
 
         {/* Right: Automated Bangla SMS & Hub Pickup */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0, overflowWrap: "anywhere" }}>
           <div>
             <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-3)", textTransform: "uppercase", marginBottom: 6 }}>
               Automated Bangla Tracking SMS:

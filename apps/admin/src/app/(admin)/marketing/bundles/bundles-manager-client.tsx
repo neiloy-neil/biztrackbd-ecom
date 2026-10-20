@@ -483,7 +483,7 @@ export function BundlesManagerClient({
       </div>
 
       {/* Responsive Tab Bar */}
-      <div style={{ display: "flex", gap: 8, borderBottom: "1px solid var(--border, #e5e7eb)", marginBottom: 20 }}>
+      <div style={{ display: "flex", gap: 8, borderBottom: "1px solid var(--border, #e5e7eb)", marginBottom: 20, overflowX: "auto", maxWidth: "100%" }}>
         <button
           type="button"
           onClick={() => setTab("bundles")}

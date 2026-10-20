@@ -84,7 +84,7 @@ export function AnnouncementBanner({ announcements, lang }: BannerProps) {
               <path d="M4 10v4h3l8 4V6L7 10H4zM18 9a4 4 0 010 6" />
             </svg>
 
-            <div style={{ flex: 1, fontSize: 13, lineHeight: 1.5, color: "#4B4B73" }}>
+            <div style={{ flex: 1, minWidth: 0, overflowWrap: "anywhere", fontSize: 13, lineHeight: 1.5, color: "#4B4B73" }}>
               <b style={{ color: "#B45309", display: "block", marginBottom: 2 }}>{title}</b>
               <div>{body}</div>
             </div>

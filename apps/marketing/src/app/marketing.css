@@ -2388,3 +2388,16 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   .md\:py-20 { padding-top: 80px; padding-bottom: 80px; }
   .md\:py-24 { padding-top: 96px; padding-bottom: 96px; }
 }
+
+/* Phones: wide comparison tables scroll inside themselves instead of widening the page. */
+@media (max-width: 720px) {
+  table { display: block; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+@media (max-width: 720px) {
+  .comparison-table-v2 { display: block; max-width: 100%; overflow-x: auto; }
+  .tco-selector-tabs { max-width: 100%; overflow-x: auto; }
+  .tco-calc-pane { min-width: 0; max-width: 100%; }
+}
+@media (max-width: 720px) {
+  .tco-badge-risk, .tco-badge-paid { white-space: normal; max-width: 100%; }
+}

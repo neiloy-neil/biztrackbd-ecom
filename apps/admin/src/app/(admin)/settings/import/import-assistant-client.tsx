@@ -229,7 +229,7 @@ export function ImportAssistantClient({ storeOrigin }: Props) {
             Paste text from your existing website, Facebook About section, doctor prescription pad, or service brochure. Our assistant extracts your contact details, services list, and staff profiles automatically.
           </p>
 
-          <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 12 }}>
             <span style={{ fontSize: "0.8rem", color: "#64748b", fontWeight: 600, alignSelf: "center" }}>
               Quick Templates:
             </span>

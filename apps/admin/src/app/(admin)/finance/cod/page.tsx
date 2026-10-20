@@ -334,7 +334,7 @@ export default async function CodRecon({
             </nav>
 
             {/* Quick Action Toolbar */}
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
               <a
                 href={`/api/finance/cod/dispute-sheet${courier ? `?courier=${courier}` : ""}`}
                 download

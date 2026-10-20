@@ -645,6 +645,7 @@ export function LeadsManager({
 
       {/* Main Split-Pane Workspace */}
       <div
+        className="leads-split"
         style={{
           display: "grid",
           gridTemplateColumns: "minmax(340px, 420px) 1fr",

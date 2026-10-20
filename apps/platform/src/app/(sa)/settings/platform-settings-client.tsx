@@ -377,7 +377,7 @@ export function PlatformSettingsClient({
       )}
 
       {/* Navigation Tabs */}
-      <div style={{ display: "flex", gap: 8, borderBottom: "1px solid #E7E7F0", paddingBottom: 2 }}>
+      <div style={{ display: "flex", gap: 8, borderBottom: "1px solid #E7E7F0", paddingBottom: 2, overflowX: "auto", maxWidth: "100%" }}>
         <button
           type="button"
           onClick={() => { setActiveTab("ai"); setNotice(null); }}

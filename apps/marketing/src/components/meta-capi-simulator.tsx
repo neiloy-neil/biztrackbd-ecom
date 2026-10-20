@@ -74,7 +74,7 @@ export function MetaCapiSimulator() {
         >
           {/* Channel A: Browser Pixel */}
           <div style={{ background: "#FFFFFF", padding: "18px 20px", borderRadius: 10, border: "1px solid var(--line)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
               <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-3)", textTransform: "uppercase" }}>
                 1. Client Browser Pixel
               </span>
@@ -91,7 +91,7 @@ export function MetaCapiSimulator() {
 
           {/* Channel B: Server CAPI */}
           <div style={{ background: "#FFFFFF", padding: "18px 20px", borderRadius: 10, border: "1.5px solid #86EFAC" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
               <span style={{ fontSize: 12, fontWeight: 700, color: "#166534", textTransform: "uppercase" }}>
                 2. Server-Side CAPI (BizTrackBD)
               </span>
