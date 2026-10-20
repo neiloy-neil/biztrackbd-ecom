@@ -405,12 +405,20 @@ export async function getDashboard(tenantId: string, actor: StaffActor, now = ne
     const cashAtRisk = fraudRadarOrders.reduce((sum, o) => sum + Number(o.totalAmount), 0);
     const highRiskOrdersCount = fraudRadarOrders.filter((o) => o.fraudRiskLevel === "HIGH" || o.fraudReview === "HELD").length;
 
+    // Real conversion over the last 7 days: orders placed out of product page views. Zero when nothing has been tracked yet (never a made-up figure).
+    const weekAgo = new Date(Date.now() - 7 * 24 * 3600 * 1000);
+    const [weekViews, weekOrders] = await Promise.all([
+      tx.trackingEvent.count({ where: { tenantId, name: { in: ["PageView", "ViewContent"] }, createdAt: { gte: weekAgo } } }),
+      tx.order.count({ where: { tenantId, deletedAt: null, status: { notIn: ["CANCELLED"] }, createdAt: { gte: weekAgo } } }),
+    ]);
+    const conversionRate = weekViews > 0 ? Math.min(100, Math.round((weekOrders / weekViews) * 1000) / 10) : 0;
+
     const telemetry: DashboardTelemetry = {
       aovToday,
       aovYesterday,
       cashAtRisk: Math.round(cashAtRisk),
       highRiskOrdersCount,
-      conversionRate: 3.4,
+      conversionRate,
     };
 
     const activityFeed: DashboardActivityEvent[] = recentOrderEvents.map((ev) => ({

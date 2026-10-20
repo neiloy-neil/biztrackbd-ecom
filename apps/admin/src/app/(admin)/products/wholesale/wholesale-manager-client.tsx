@@ -15,6 +15,8 @@ import {
 import type { WholesaleTierInput, WholesalePriceOverrideInput, WholesaleSettingsInput } from "@biztrackbd/core";
 
 interface Props {
+  /** The store's own registration page (on the storefront address, not the admin one). */
+  registerUrl: string;
   initialData: {
     overview: {
       totalApproved: number;
@@ -97,7 +99,7 @@ interface Props {
 
 type Tab = "applications" | "tiers" | "prices" | "settings";
 
-export function WholesaleManagerClient({ initialData }: Props) {
+export function WholesaleManagerClient({ initialData, registerUrl }: Props) {
   const [tab, setTab] = useState<Tab>("applications");
   const [isPending, startTransition] = useTransition();
   const [appFilter, setAppFilter] = useState<"ALL" | "PENDING" | "APPROVED" | "REJECTED">("PENDING");
@@ -215,9 +217,9 @@ export function WholesaleManagerClient({ initialData }: Props) {
           <Link href="/orders?channel=WHOLESALE" className="btn btn-secondary btn-sm" prefetch={false}>
             Wholesale Orders →
           </Link>
-          <Link href="/wholesale/register" target="_blank" className="btn btn-secondary btn-sm" prefetch={false}>
+          <a href={registerUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm">
             Preview Reseller Portal ↗
-          </Link>
+          </a>
         </div>
       </div>
 

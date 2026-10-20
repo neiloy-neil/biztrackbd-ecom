@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getModuleStatus } from "@biztrackbd/core";
 import { requireAccess } from "@/lib/session";
+import { storefrontOrigin } from "@/lib/store-url";
 import { AppDisabledNotice } from "@/components/app-disabled-notice";
 import { getWholesaleManagerDataAction } from "./actions";
 import { WholesaleManagerClient } from "./wholesale-manager-client";
@@ -28,5 +29,5 @@ export default async function WholesalePage() {
 
   const data = await getWholesaleManagerDataAction();
 
-  return <WholesaleManagerClient initialData={data} />;
+  return <WholesaleManagerClient initialData={data} registerUrl={`${storefrontOrigin(s.tenantSubdomain)}/wholesale/register`} />;
 }

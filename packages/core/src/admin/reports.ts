@@ -52,8 +52,8 @@ async function totalsFor(
   to: string
 ): Promise<PeriodTotals> {
   const [r] = await tx.$queryRaw<TotalsRow[]>`
-    SELECT count(*) FILTER (WHERE status NOT IN ('CANCELLED', 'RETURNED', 'REFUNDED'))::int AS orders,
-           COALESCE(sum("totalAmount") FILTER (WHERE status NOT IN ('CANCELLED', 'RETURNED', 'REFUNDED')), 0)::float8 AS sales,
+    SELECT count(*) FILTER (WHERE status NOT IN ('CANCELLED', 'RETURNED', 'REFUNDED') AND NOT ("paymentMethod"::text LIKE 'GATEWAY%' AND "paymentStatus"::text <> 'PAID'))::int AS orders,
+           COALESCE(sum("totalAmount") FILTER (WHERE status NOT IN ('CANCELLED', 'RETURNED', 'REFUNDED') AND NOT ("paymentMethod"::text LIKE 'GATEWAY%' AND "paymentStatus"::text <> 'PAID')), 0)::float8 AS sales,
            count(*) FILTER (WHERE status IN ('RETURNED', 'REFUNDED'))::int AS returns,
            count(*) FILTER (WHERE status <> 'CANCELLED')::int AS placed
     FROM "Order" WHERE "deletedAt" IS NULL
@@ -89,7 +89,7 @@ export async function getSalesReport(
 
     const cur = await tx.$queryRaw<{ d: string; sales: number }[]>`
       SELECT to_char((("createdAt" AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Dhaka')::date, 'YYYY-MM-DD') AS d, COALESCE(sum("totalAmount"), 0)::float8 AS sales
-      FROM "Order" WHERE "deletedAt" IS NULL AND status NOT IN ('CANCELLED', 'RETURNED', 'REFUNDED')
+      FROM "Order" WHERE "deletedAt" IS NULL AND status NOT IN ('CANCELLED', 'RETURNED', 'REFUNDED') AND NOT ("paymentMethod"::text LIKE 'GATEWAY%' AND "paymentStatus"::text <> 'PAID')
         AND (("createdAt" AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Dhaka')::date BETWEEN ${prevFrom}::date AND ${to}::date GROUP BY 1`;
     const sale = (d: string) => Math.round(cur.find((r) => r.d === d)?.sales ?? 0);
     const series = Array.from({ length: days }, (_, i) => {
@@ -99,7 +99,7 @@ export async function getSalesReport(
 
     const districts = await tx.$queryRaw<{ district: string; sales: number }[]>`
       SELECT "shippingDistrict" AS district, sum("totalAmount")::float8 AS sales FROM "Order"
-      WHERE "deletedAt" IS NULL AND status NOT IN ('CANCELLED', 'RETURNED', 'REFUNDED')
+      WHERE "deletedAt" IS NULL AND status NOT IN ('CANCELLED', 'RETURNED', 'REFUNDED') AND NOT ("paymentMethod"::text LIKE 'GATEWAY%' AND "paymentStatus"::text <> 'PAID')
         AND (("createdAt" AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Dhaka')::date BETWEEN ${from}::date AND ${to}::date
       GROUP BY 1 ORDER BY 2 DESC`;
     const top5 = districts.slice(0, 5).map((d) => ({ district: d.district, sales: Math.round(d.sales) }));
@@ -110,13 +110,13 @@ export async function getSalesReport(
       SELECT oi."productId" AS id, max(oi."productTitle") AS title, sum(oi.quantity)::int AS units, sum(oi."totalPrice")::float8 AS sales,
              CASE WHEN bool_and(p."costPrice" IS NOT NULL) THEN sum(oi.quantity * p."costPrice")::float8 ELSE NULL END AS cost
       FROM "OrderItem" oi JOIN "Order" o ON o.id = oi."orderId" JOIN "Product" p ON p.id = oi."productId"
-      WHERE o."deletedAt" IS NULL AND o.status NOT IN ('CANCELLED', 'RETURNED', 'REFUNDED')
+      WHERE o."deletedAt" IS NULL AND o.status NOT IN ('CANCELLED', 'RETURNED', 'REFUNDED') AND NOT (o."paymentMethod"::text LIKE 'GATEWAY%' AND o."paymentStatus"::text <> 'PAID')
         AND ((o."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Dhaka')::date BETWEEN ${from}::date AND ${to}::date
       GROUP BY oi."productId" ORDER BY 4 DESC LIMIT 10`;
 
     const pay = await tx.$queryRaw<{ method: string; orders: number; sales: number }[]>`
       SELECT "paymentMethod"::text AS method, count(*)::int AS orders, sum("totalAmount")::float8 AS sales FROM "Order"
-      WHERE "deletedAt" IS NULL AND status NOT IN ('CANCELLED', 'RETURNED', 'REFUNDED')
+      WHERE "deletedAt" IS NULL AND status NOT IN ('CANCELLED', 'RETURNED', 'REFUNDED') AND NOT ("paymentMethod"::text LIKE 'GATEWAY%' AND "paymentStatus"::text <> 'PAID')
         AND (("createdAt" AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Dhaka')::date BETWEEN ${from}::date AND ${to}::date
       GROUP BY 1 ORDER BY 3 DESC`;
 
