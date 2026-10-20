@@ -235,7 +235,8 @@ export async function submitPaymentProof(tenantId: string, actor: StaffActor, ra
   } catch {
     throw new ValidationError("Enter the mobile number you sent the money from, like 01712345678", { field: "senderNumber" });
   }
-  const tenant = await getBasePrisma().tenant.findUnique({ where: { id: tenantId }, select: { siteMode: true } });
+  // Read through the store's own context: the plain client runs as the app role, which row-level security hides every store from.
+  const tenant = await withTenant(tenantId, (tx) => tx.tenant.findFirst({ select: { siteMode: true } }));
   if (!tenant) throw new NotFoundError("Store");
   const plans = await listPublicPlansForSiteMode(tenant.siteMode);
   const plan = plans.find((candidate) => candidate.tier === input.plan);

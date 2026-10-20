@@ -4,11 +4,15 @@ import { assertCan, type StaffActor } from "../permissions";
 import { sendServerPurchase } from "../growth/tracking";
 import { loadCredentials } from "../vault/integrations";
 
+// The shared sandbox address and its public test key exist for development only. In production a store without its own keys must not be
+// offered online payment, or shoppers would be sent to a sandbox where any made-up transaction id marks the order paid.
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+
 export const DEFAULT_UDDOKTAPAY_BASE_URL =
-  process.env.UDDOKTAPAY_BASE_URL || "https://sandbox.uddoktapay.com";
+  process.env.UDDOKTAPAY_BASE_URL || (IS_PRODUCTION ? "https://pay.uddoktapay.com" : "https://sandbox.uddoktapay.com");
 
 export const DEFAULT_UDDOKTAPAY_API_KEY =
-  process.env.UDDOKTAPAY_API_KEY || "982d381360a69d419689740d9f2e26ce36fb7a50";
+  process.env.UDDOKTAPAY_API_KEY || (IS_PRODUCTION ? "" : "982d381360a69d419689740d9f2e26ce36fb7a50");
 
 let fetchImpl: typeof fetch = (...a) => fetch(...a);
 export function setUddoktaPayFetchForTests(f: typeof fetch | undefined): void {
@@ -59,6 +63,7 @@ export async function createUddoktaPayCharge(
 ): Promise<UddoktaPayChargeResponse> {
   const baseUrl = (req.baseUrl || DEFAULT_UDDOKTAPAY_BASE_URL).replace(/\/$/, "");
   const apiKey = req.apiKey || DEFAULT_UDDOKTAPAY_API_KEY;
+  if (!apiKey) throw new ValidationError("Online payment is not set up for this store");
 
   const body = {
     full_name: req.fullName || "Customer",
@@ -112,6 +117,7 @@ export async function verifyUddoktaPayPayment(opts: {
 }): Promise<UddoktaPayVerifyResponse> {
   const baseUrl = (opts.baseUrl || DEFAULT_UDDOKTAPAY_BASE_URL).replace(/\/$/, "");
   const apiKey = opts.apiKey || DEFAULT_UDDOKTAPAY_API_KEY;
+  if (!apiKey) throw new ValidationError("Online payment is not set up for this store");
 
   const res = await fetchImpl(`${baseUrl}/api/verify-payment`, {
     method: "POST",
