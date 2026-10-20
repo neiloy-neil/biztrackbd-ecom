@@ -28,6 +28,7 @@ const origin = (u, label) => {
 // name, schedule (UTC cron), app, path. Dhaka is UTC+6.
 const JOBS = [
   ["biztrack-abandoned", "*/5 * * * *", "admin", "/api/cron/abandoned"],
+  ["biztrack-expire-unpaid", "*/10 * * * *", "admin", "/api/cron/expire-unpaid"],
   ["biztrack-courier-sync", "*/30 * * * *", "admin", "/api/cron/courier-sync"],
   ["biztrack-domains", "*/5 * * * *", "admin", "/api/cron/domains"],
   ["biztrack-loyalty", "0 20 * * *", "admin", "/api/cron/loyalty"], // 02:00 Dhaka
