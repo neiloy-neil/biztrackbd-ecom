@@ -13,7 +13,7 @@ import type { Lang } from "@/lib/i18n-core";
 interface Props {
   categories: PublicMenuCategory[];
   table: string | null;
-  storeInfo: StoreInfo;
+  storeInfo: Pick<StoreInfo, "storeName" | "logoUrl" | "addressLine" | "whatsappNumber" | "contactPhone">;
   siteMode: string;
   lang: Lang;
 }

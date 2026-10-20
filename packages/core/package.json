@@ -13,7 +13,8 @@
     "./backup": "./src/backup/index.ts",
     "./barcode-render": "./src/admin/barcode-render.ts",
     "./reports-presets": "./src/admin/reports-presets.ts",
-    "./attribution": "./src/growth/attribution.ts"
+    "./attribution": "./src/growth/attribution.ts",
+    "./api-key-scopes": "./src/api-keys/types.ts"
   },
   "scripts": {
     "build": "echo \"core is consumed from source\"",

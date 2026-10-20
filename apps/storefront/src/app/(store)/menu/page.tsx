@@ -33,7 +33,14 @@ export default async function MenuPage({
     <MenuDiningClient
       categories={categories}
       table={table?.trim() || null}
-      storeInfo={storeInfo}
+      // Only the public fields the menu draws: the full settings record holds API secrets and must never reach the browser.
+      storeInfo={{
+        storeName: storeInfo.storeName,
+        logoUrl: storeInfo.logoUrl,
+        addressLine: storeInfo.addressLine,
+        whatsappNumber: storeInfo.whatsappNumber,
+        contactPhone: storeInfo.contactPhone,
+      }}
       siteMode={modeMeta.siteMode}
       lang={lang}
     />

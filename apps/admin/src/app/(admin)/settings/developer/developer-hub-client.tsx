@@ -6,7 +6,7 @@ import {
   API_SCOPE_PRESETS,
   type ApiKeyEnvironment,
   type ApiKeyScope,
-} from "@biztrackbd/core";
+} from "@biztrackbd/core/api-key-scopes";
 import { CopyButton } from "@/components/copy-button";
 import { SubmitButton } from "@/components/ui";
 import {
