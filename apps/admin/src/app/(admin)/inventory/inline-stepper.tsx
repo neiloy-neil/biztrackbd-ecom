@@ -18,6 +18,8 @@ export function InlineStockStepper({
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // A ref, not state: two clicks in the same frame both see busy=false from state, so the second would send a stale delta.
+  const busyRef = useRef(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
@@ -25,7 +27,7 @@ export function InlineStockStepper({
   }, [stock]);
 
   async function applyAdjustment(mode: "delta" | "setTo", amount: number) {
-    if (busy) return;
+    if (busyRef.current) return;
     const prevStock = stock;
     const targetStock = mode === "delta" ? Math.max(0, stock + amount) : Math.max(0, amount);
     if (targetStock === prevStock && mode === "setTo") return;
@@ -33,11 +35,14 @@ export function InlineStockStepper({
     // Optimistic UI update
     onStockChange(targetStock);
     setVal(String(targetStock));
+    busyRef.current = true;
     setBusy(true);
     setError(null);
 
-    const res = await quickAdjustStockAction(variantId, mode, amount);
-    setBusy(false);
+    const res = await quickAdjustStockAction(variantId, mode, amount).finally(() => {
+      busyRef.current = false;
+      setBusy(false);
+    });
 
     if (!res.ok) {
       // Rollback on server failure
