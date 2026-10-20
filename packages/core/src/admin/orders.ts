@@ -40,7 +40,7 @@ export interface OrderFilters {
   tab?: OrderTab;
   /** Order number, customer name or phone. */
   q?: string;
-  payment?: "COD" | "MANUAL_BKASH" | "MANUAL_NAGAD";
+  payment?: "COD" | "CASH" | "MANUAL_BKASH" | "MANUAL_NAGAD";
   district?: string;
   /** The courier an order was booked with (STEADFAST, PATHAO, REDX). */
   courier?: string;

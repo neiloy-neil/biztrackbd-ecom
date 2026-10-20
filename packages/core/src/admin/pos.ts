@@ -151,7 +151,7 @@ export async function getActivePosSession(tenantId: string, registerId: string) 
           else if (p.method === "CARD") totalCardSales += amt;
         }
       } else {
-        if (o.paymentMethod === "COD") totalCashSales += orderTotal;
+        if (o.paymentMethod === "COD" || o.paymentMethod === "CASH") totalCashSales += orderTotal;
         else if (o.paymentMethod === "MANUAL_BKASH" || o.paymentMethod === "MANUAL_NAGAD") totalMfsSales += orderTotal;
         else totalCardSales += orderTotal;
       }
@@ -304,7 +304,7 @@ export async function closePosSession(
           else if (p.method === "CARD") totalCardSales += amt;
         }
       } else {
-        if (o.paymentMethod === "COD") totalCashSales += orderTotal;
+        if (o.paymentMethod === "COD" || o.paymentMethod === "CASH") totalCashSales += orderTotal;
         else if (o.paymentMethod === "MANUAL_BKASH" || o.paymentMethod === "MANUAL_NAGAD") totalMfsSales += orderTotal;
         else totalCardSales += orderTotal;
       }
@@ -534,8 +534,8 @@ export async function createPosOrder(
 
     // 8. Determine primary payment method enum
     const primaryMethod = input.payments.length === 1
-      ? (input.payments[0]!.method === "CASH" ? "COD" : input.payments[0]!.method)
-      : (input.payments.some((p) => p.method === "CASH") ? "COD" : "MANUAL_BKASH");
+      ? (input.payments[0]!.method)
+      : (input.payments.some((p) => p.method === "CASH") ? "CASH" : "MANUAL_BKASH");
 
     // 9. Create Order
     const order = await tx.order.create({

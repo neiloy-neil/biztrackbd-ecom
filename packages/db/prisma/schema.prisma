@@ -431,6 +431,7 @@ enum PaymentStatus {
 
 enum PaymentMethodType {
   COD
+  CASH
   MANUAL_BKASH
   MANUAL_NAGAD
   MANUAL_ROCKET

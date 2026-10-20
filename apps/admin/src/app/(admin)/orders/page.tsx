@@ -34,7 +34,7 @@ function RiskPill({ o }: { o: { fraudReview: string | null; fraudRiskLevel: stri
   return null;
 }
 const RANGES = [["today", "Today"], ["7", "Last 7 days"], ["30", "Last 30 days"]] as const;
-const PAYMENTS = [{ value: "COD", label: "Cash on delivery" }, { value: "MANUAL_BKASH", label: "bKash" }, { value: "MANUAL_NAGAD", label: "Nagad" }];
+const PAYMENTS = [{ value: "COD", label: "Cash on delivery" }, { value: "CASH", label: "Cash at counter" }, { value: "MANUAL_BKASH", label: "bKash" }, { value: "MANUAL_NAGAD", label: "Nagad" }];
 const DISTRICTS = BD_GEO.flatMap((d) => d.districts.map((x) => x.name)).sort();
 
 export default async function Orders({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
@@ -43,7 +43,7 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
   await demoTick(s);
   const tab = (TABS.find((t) => t.key === one(sp.tab))?.key ?? "all") as OrderTab;
   const q = one(sp.q)?.trim() ?? "";
-  const payment = (["COD", "MANUAL_BKASH", "MANUAL_NAGAD"] as const).find((p) => p === one(sp.payment));
+  const payment = (["COD", "CASH", "MANUAL_BKASH", "MANUAL_NAGAD"] as const).find((p) => p === one(sp.payment));
   const range = RANGES.find((r) => r[0] === one(sp.range))?.[0] ?? "";
   const district = DISTRICTS.find((d) => d === one(sp.district)) ?? "";
   const courierWanted = one(sp.courier) ?? "";

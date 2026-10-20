@@ -364,7 +364,7 @@ export async function getRealtimeStudioMetrics(
     const paymentBreakdown: PaymentMethodShare[] = Array.from(paymentMap.entries())
       .map(([method, data]) => ({
         method,
-        label: method === "COD" ? "Cash on Delivery (COD)" : method.replace(/_/g, " "),
+        label: method === "COD" ? "Cash on Delivery (COD)" : method === "CASH" ? "Cash at counter" : method.replace(/_/g, " "),
         count: data.count,
         sales: data.sales,
         percentage: Math.round((data.count / totalOrdersP) * 1000) / 10,

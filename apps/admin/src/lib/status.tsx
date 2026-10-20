@@ -10,7 +10,7 @@ export function OrderPill({ status }: { status: string }): ReactNode {
   return <span className={`pill ${tone}`}>{label}</span>;
 }
 
-const METHOD: Record<string, string> = { COD: "COD", MANUAL_BKASH: "bKash", MANUAL_NAGAD: "Nagad", MANUAL_ROCKET: "Rocket", GATEWAY_SSLCOMMERZ: "Card", GATEWAY_UDDOKTAPAY: "Online payment", GATEWAY_BKASH: "bKash (online)", GATEWAY_STRIPE: "Card", BANK_TRANSFER: "Bank Transfer", POS_CASH: "Cash", POS_CARD: "Card", POS_MFS: "MFS" };
+const METHOD: Record<string, string> = { COD: "COD", CASH: "Cash", MANUAL_BKASH: "bKash", MANUAL_NAGAD: "Nagad", MANUAL_ROCKET: "Rocket", GATEWAY_SSLCOMMERZ: "Card", GATEWAY_UDDOKTAPAY: "Online payment", GATEWAY_BKASH: "bKash (online)", GATEWAY_STRIPE: "Card", BANK_TRANSFER: "Bank Transfer", POS_CASH: "Cash", POS_CARD: "Card", POS_MFS: "MFS" };
 export const methodName = (m: string) => METHOD[m] ?? m;
 
 /** What the owner needs to know about payment at a glance: "Check bKash" asks them to act, "Paid" and "COD" do not. */
