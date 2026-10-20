@@ -39,6 +39,8 @@ export function MobileStickyActionBar({
         @media (min-width: 769px) {
           .mobile-sticky-bar { display: none !important; }
         }
+        /* Pages with their own fixed buy bar (product, cart, checkout) keep it clear: two bars at the bottom covered Add to cart and Place order. */
+        body:has(.stickybar) .mobile-sticky-bar { display: none !important; }
       `}</style>
 
       {phone && (

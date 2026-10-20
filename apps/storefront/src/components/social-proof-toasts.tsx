@@ -17,6 +17,9 @@ export function SocialProofToasts({
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [paused, setPaused] = useState(false);
+  // The made-up sample sale is only for the editor preview. A live store with no sales shows nothing: never a fake "Verified Order".
+  const [inEditorPreview, setInEditorPreview] = useState(false);
+  useEffect(() => { setInEditorPreview(typeof window !== "undefined" && window.parent !== window); }, []);
   const touchStartX = useRef<number | null>(null);
 
   const isBn = lang === "bn";
@@ -28,7 +31,7 @@ export function SocialProofToasts({
   const showOnMobile = settings?.showOnMobile ?? true;
   const safeAreaBottom = settings?.safeAreaBottomPx ?? 76;
 
-  const activeFeed = feed.length > 0 ? feed : [
+  const activeFeed = feed.length > 0 ? feed : !inEditorPreview ? [] : [
     {
       id: "demo-preview-item",
       buyerName: isBn ? "তানভীর এ." : "Tanvir A.",

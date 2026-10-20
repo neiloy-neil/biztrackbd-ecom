@@ -705,7 +705,7 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
           <label className="field" style={{ marginBottom: 0 }}>
             <span className="label">{s.couponCode} <span className="opt">{s.optional}</span></span>
             <div className="coupon-row">
-              <input id="f-coupon" className="input" value={couponInput} onChange={(e) => setCouponInput(e.target.value)} autoComplete="off" {...invalid("coupon")} />
+              <input id="f-coupon" className="input" value={couponInput} onChange={(e) => { const v = e.target.value; setCouponInput(v); if (!v.trim()) { setCoupon(""); setErrors((er) => (er.coupon ? { ...er, coupon: undefined } : er)); } }} autoComplete="off" {...invalid("coupon")} />
               <button type="button" className="btn btn-ghost" onClick={() => setCoupon(couponInput.trim())}>{s.apply}</button>
             </div>
             {err("coupon")}
