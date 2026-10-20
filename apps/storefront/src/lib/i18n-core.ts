@@ -44,7 +44,7 @@ const en = {
   chooseOne: "Choose…", orderTotal: "Total", orderFailed: "Something went wrong. Your order was not placed. Please try again.",
   deliversEverywhere: "We deliver across Bangladesh.", noDelivery: "We do not deliver to that district yet.",
   // success
-  thanks: "Thank you, {name}", orderPlaced: "Your order {number} is placed.", sentDetails: "We sent the details to {phone}.",
+  thanks: "Thank you, {name}", orderPlaced: "Your order {number} is placed.", sentDetails: "We will contact you on {phone} about this order. Keep this page for the details.",
   checkingPayment: "We are checking your payment", checkingPaymentS: "TrxID {trx} for {amount}. You will get an SMS within 2 hours when it is confirmed. We pack your order after that.",
   codSuccess: "Pay {amount} in cash when it arrives.", deliveryTo: "Delivery to {place}", expectedDelivery: "Expected delivery", trackOrder: "Track my order", callToConfirm: "We will call you to confirm your order.",
   // account
@@ -101,7 +101,7 @@ const bn: Record<Key, string> = {
   couponCode: "কুপন কোড", apply: "প্রয়োগ", couponApplied: "কুপন {code} প্রয়োগ হয়েছে", placeOrder: "অর্ডার করুন", placing: "অর্ডার হচ্ছে…",
   chooseOne: "বেছে নিন…", orderTotal: "মোট", orderFailed: "কিছু একটা ভুল হয়েছে। আপনার অর্ডার হয়নি। আবার চেষ্টা করুন।",
   deliversEverywhere: "আমরা সারা বাংলাদেশে ডেলিভারি দিই।", noDelivery: "ওই জেলায় এখনও ডেলিভারি দিই না।",
-  thanks: "ধন্যবাদ, {name}", orderPlaced: "আপনার অর্ডার {number} হয়েছে।", sentDetails: "বিস্তারিত {phone} নম্বরে পাঠানো হয়েছে।",
+  thanks: "ধন্যবাদ, {name}", orderPlaced: "আপনার অর্ডার {number} হয়েছে।", sentDetails: "অর্ডার নিয়ে আমরা {phone} নম্বরে যোগাযোগ করব। বিস্তারিত দেখতে এই পাতাটি রেখে দিন।",
   checkingPayment: "আমরা আপনার পেমেন্ট যাচাই করছি", checkingPaymentS: "{amount} এর TrxID {trx}। নিশ্চিত হলে ২ ঘণ্টার মধ্যে SMS পাবেন। তারপর আমরা প্যাক করব।",
   codSuccess: "পণ্য হাতে পেয়ে {amount} নগদ দিন।", deliveryTo: "ডেলিভারি: {place}", expectedDelivery: "সম্ভাব্য ডেলিভারি", trackOrder: "অর্ডার ট্র্যাক করুন", callToConfirm: "অর্ডার নিশ্চিত করতে আমরা ফোন করব।",
   myOrders: "আমার অর্ডার", signIn: "সাইন ইন", signInS: "মোবাইল নম্বর দিন। আমরা একটি কোড পাঠাব।", sendCode: "কোড পাঠান", enterCode: "৬ অঙ্কের কোড লিখুন",

@@ -213,18 +213,18 @@ export function PlatformTracker() {
             background: "#FFFFFF",
             border: "1.5px solid var(--line-strong)",
             borderRadius: 14,
-            padding: "16px 20px",
+            padding: "12px 14px",
             boxShadow: "0 12px 36px rgba(15, 23, 42, 0.15)",
           }}
         >
           <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-            <span style={{ fontSize: 22 }} aria-hidden="true">🛡️</span>
+            <span style={{ fontSize: 18 }} aria-hidden="true">🛡️</span>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 13.5, fontWeight: 700, color: "var(--ink)" }}>
                 Your Privacy &amp; Consent Choices
               </div>
               <p style={{ fontSize: 12.5, color: "var(--ink-2)", marginTop: 4, lineHeight: 1.5 }}>
-                We use essential cookies for account security and navigation. With your affirmative permission, we also use anonymised analytics to measure feature usage. We never sell your personal data or phone numbers.
+                Essential cookies keep the site secure and working. With your permission we also use anonymised analytics. We never sell your personal data or phone numbers.
               </p>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
                 <button
