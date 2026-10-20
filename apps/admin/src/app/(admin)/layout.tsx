@@ -319,7 +319,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           ))}
         </nav>
         <CommandPalette />
-        <AdminCopilotWidget />
+        <AdminCopilotWidget lang={lang} />
       </div>
     </ShellProvider>
   );

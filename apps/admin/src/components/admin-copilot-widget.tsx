@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import type { AdminCopilotMessage, AdminCopilotResponse, AdminCopilotActionLink } from "@biztrackbd/core";
 
-export function AdminCopilotWidget() {
+export function AdminCopilotWidget({ lang = "en" }: { lang?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<
     Array<{
@@ -123,7 +123,7 @@ export function AdminCopilotWidget() {
         aria-label="Toggle AI Business Copilot"
       >
         <span style={{ fontSize: "16px" }}>✨</span>
-        <span>{isOpen ? "কো-পাইলট বন্ধ করুন" : "AI কো-পাইলট"}</span>
+        <span>{lang === "bn" ? (isOpen ? "কো-পাইলট বন্ধ করুন" : "AI কো-পাইলট") : isOpen ? "Close co-pilot" : "AI Co-pilot"}</span>
         <span
           style={{
             width: "8px",

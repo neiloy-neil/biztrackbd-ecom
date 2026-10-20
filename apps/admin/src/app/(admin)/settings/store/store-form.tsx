@@ -45,7 +45,7 @@ export function StoreForm({ initial }: { initial: StoreValues }) {
   }
 
   return (
-    <form action={action} className="stack" data-testid="store-form" onChange={() => setDirty(true)} onInput={() => setDirty(true)}>
+    <form action={action} noValidate className="stack" data-testid="store-form" onChange={() => setDirty(true)} onInput={() => setDirty(true)}>
       <div className="tabs" role="tablist" aria-label="Store details sections">
         {TABS.map(([k, l]) => <button key={k} type="button" role="tab" id={`tab-${k}`} aria-selected={tab === k} aria-controls={`panel-${k}`} className="tabbtn" onClick={() => setTab(k)} data-testid={`store-tab-${k}`}>{l}</button>)}
       </div>

@@ -40,7 +40,7 @@ export default async function Done({ searchParams }: { searchParams: Promise<Rec
 
         {Number(one(sp.kept)) > 0 && (
           <p className="notice good" role="status" data-testid="kept-done" style={{ marginTop: 12, textAlign: "left" }}>
-            Your demo store came with you: {one(sp.kept)} products with their pictures and your home page. Everything can be edited.
+            Your store comes with {one(sp.kept)} ready-made products and a home page. Everything can be edited.
           </p>
         )}
 
