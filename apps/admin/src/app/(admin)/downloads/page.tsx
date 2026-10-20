@@ -1,7 +1,10 @@
+import type { Metadata } from "next";
 import { listDownloads } from "@biztrackbd/core";
 import { requireAccess } from "@/lib/session";
 import { storefrontOrigin } from "@/lib/store-url";
 import { DownloadsManager } from "./downloads-manager";
+
+export const metadata: Metadata = { title: "Downloads" };
 
 export const dynamic = "force-dynamic";
 

@@ -384,7 +384,7 @@ export function ModeTransitionClient({
                   type="checkbox"
                   id="confirmedConsent"
                   name="confirmedConsent"
-                  defaultChecked
+                  required
                   style={{ marginTop: 3, width: 18, height: 18, accentColor: "#5B4FE8" }}
                 />
                 <span style={{ fontSize: 13.5, color: "var(--ink)", lineHeight: 1.5 }}>

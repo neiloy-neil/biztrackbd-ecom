@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getAdminMenu, getStoreInfo, getTenantCapabilities } from "@biztrackbd/core";
 import { requireAccess } from "@/lib/session";
 import { storefrontOrigin } from "@/lib/store-url";
 import { MenuManager } from "./menu-manager";
+
+export const metadata: Metadata = { title: "Digital menu" };
 
 export const dynamic = "force-dynamic";
 

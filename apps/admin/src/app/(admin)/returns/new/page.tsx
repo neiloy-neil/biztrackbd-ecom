@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { RETURN_REASONS, exchangeOptions, getOrderDetail, returnableItems } from "@biztrackbd/core";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
@@ -13,7 +13,8 @@ export default async function NewReturn({ searchParams }: { searchParams: Promis
   const sp = await searchParams;
   const s = await requireAccess("orders", "edit");
   const orderId = one(sp.order);
-  if (!orderId) notFound();
+  // A return starts from an order: without one, go to the returns list (which explains how) instead of a 404.
+  if (!orderId) redirect("/returns");
   const order = await getOrderDetail(s.tenantId, s.actor, orderId).catch(() => null);
   if (!order) notFound();
   const [{ eligible, items }, options] = await Promise.all([returnableItems(s.tenantId, s.actor, orderId), exchangeOptions(s.tenantId, s.actor)]);
