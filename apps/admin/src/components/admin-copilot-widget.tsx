@@ -103,7 +103,7 @@ export function AdminCopilotWidget() {
         onClick={() => setIsOpen(!isOpen)}
         style={{
           position: "fixed",
-          bottom: "24px",
+          bottom: "calc(24px + var(--float-lift, 0px))",
           right: "24px",
           zIndex: 990,
           display: "flex",
@@ -140,7 +140,7 @@ export function AdminCopilotWidget() {
         <div
           style={{
             position: "fixed",
-            bottom: "82px",
+            bottom: "calc(82px + var(--float-lift, 0px))",
             right: "24px",
             width: "430px",
             maxWidth: "calc(100vw - 32px)",

@@ -5,7 +5,7 @@
   --brand-ink: #fff;
   --ink: #1A1A4E;
   --ink-2: #4B4B73;
-  --ink-3: #6B6B8D;
+  --ink-3: #5C5C80;
   --tint: #F4F3FF;
   --bg: #FAFAFC;
   --surface: #fff;
@@ -15,7 +15,7 @@
   --success-bg: #E8F6EE;
   --warning: #B45309;
   --warning-bg: #FDF3E3;
-  --danger: #DC2626;
+  --danger: #B91C1C;
   --danger-bg: #FDECEC;
   --danger-ink: #B91C1C; /* text on the pale red: 6:1, where --danger itself is 4.3:1 */
   --info: #0369A1;
@@ -23,6 +23,8 @@
   --radius: 10px;
   --font: var(--font-jakarta), var(--font-hind), system-ui, -apple-system, "Segoe UI", sans-serif;
   --nav-h: 64px;
+  /* Floating buttons sit above the phone bottom bar; on desktop there is none. */
+  --float-lift: calc(var(--nav-h) + 12px);
   --notice-ink: #7A3E00;
   --chip: #EEEEF4;
   --row-hover: #FCFCFE;
@@ -80,6 +82,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .nav-badge { position: absolute; top: 6px; left: calc(50% + 6px); min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: var(--danger-solid); color: #fff; font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
 
 @media (min-width: 900px) {
+  :root { --float-lift: 0px; }
   .only-desktop { display: block; }
   .only-mobile { display: none; }
   .shell { display: grid; grid-template-columns: 248px 1fr; }

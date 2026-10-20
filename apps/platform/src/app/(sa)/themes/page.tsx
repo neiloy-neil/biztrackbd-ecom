@@ -85,7 +85,7 @@ export default async function ThemesPage({
                 <div>BASED ON</div>
                 <div>VERSION</div>
                 <div style={{ textAlign: "right" }}>STORES</div>
-                <div>STATUS</div>
+                <div style={{ paddingLeft: 16 }}>STATUS</div>
                 <div />
               </div>
               {templates.map((t) => {
@@ -113,7 +113,7 @@ export default async function ThemesPage({
                     <div>{t.baseLook}</div>
                     <div className="num">v{t.version}</div>
                     <div className="num" style={{ textAlign: "right" }}>{t.storesUsing}</div>
-                    <div>
+                    <div style={{ paddingLeft: 16 }}>
                       <span style={{ padding: "3px 8px", borderRadius: 8, fontSize: 12, fontWeight: 700, background: st.bg, color: st.color }}>
                         {st.label}
                       </span>

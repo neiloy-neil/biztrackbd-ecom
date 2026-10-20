@@ -100,7 +100,7 @@ export function PricingView({
               transition: "all 0.2s ease",
             }}
           >
-            <span aria-hidden="true">🛍️</span> Online Store Plans <span style={{ fontSize: 11, opacity: 0.85, fontWeight: 600 }}>(From ৳699/mo)</span>
+            <span aria-hidden="true">🛍️</span> Online Store Plans <span style={{ fontSize: 11, opacity: 1, fontWeight: 600 }}>(From ৳699/mo)</span>
           </button>
 
           <button
@@ -128,7 +128,7 @@ export function PricingView({
               transition: "all 0.2s ease",
             }}
           >
-            <span aria-hidden="true">🏢</span> Business &amp; Dining <span style={{ fontSize: 11, opacity: 0.85, fontWeight: 600 }}>(From ৳399/mo)</span>
+            <span aria-hidden="true">🏢</span> Business &amp; Dining <span style={{ fontSize: 11, opacity: 1, fontWeight: 600 }}>(From ৳399/mo)</span>
           </button>
         </div>
       </div>

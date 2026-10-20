@@ -2,13 +2,13 @@
 :root {
   --brand: #5B4FE8;
   --brand-dark: #4A3FD0;
-  --business: #0D9488;
-  --business-dark: #0F766E;
+  --business: #0F766E;
+  --business-dark: #115E59;
   --business-tint: #F0FDFA;
   --business-border: #CCFBF1;
   --ink: #1A1A4E;
   --ink-2: #4B4B73;
-  --ink-3: #6B6B8D;
+  --ink-3: #5C5C80;
   --ink-ledger: #121826;
   --tint: #F4F3FF;
   --tint-border: #E0DEFD;
@@ -496,7 +496,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   padding: 10px 18px;
   border-radius: 10px;
   background: #F6921E;
-  color: #fff;
+  color: #1C1917;
   font-size: 13.5px;
   font-weight: 800;
 }
@@ -924,7 +924,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   border-bottom: 1px solid #E2E8F0;
   font-size: 12px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  color: #64748B;
+  color: #526077;
 }
 
 .window-dots {
@@ -1136,7 +1136,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   justify-content: space-between;
   font-size: 12.5px;
   line-height: 1.4;
-  color: #94A3B8;
+  color: #526077;
   gap: 10px;
 }
 .console-metric-val {
@@ -1224,7 +1224,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   border-radius: 9999px;
   background: #ECFDF5;
   border: 1px solid #A7F3D0;
-  color: #059669;
+  color: #047857;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -1232,7 +1232,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
 }
 .tco-meta-date {
   font-size: 12px;
-  color: #64748B;
+  color: #526077;
   font-weight: 500;
 }
 .tco-title {
@@ -1245,7 +1245,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
 }
 .tco-subtitle {
   font-size: 13.5px;
-  color: #64748B;
+  color: #526077;
   margin: 6px 0 0;
   line-height: 1.5;
 }
@@ -1269,7 +1269,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   border-radius: 8px;
   font-size: 12.5px;
   font-weight: 700;
-  color: #64748B;
+  color: #526077;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
@@ -1369,7 +1369,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   display: flex;
   justify-content: space-between;
   font-size: 11px;
-  color: #94A3B8;
+  color: #526077;
   font-family: var(--font-mono, monospace);
   margin-top: 8px;
 }
@@ -1418,7 +1418,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   text-transform: uppercase;
   font-weight: 800;
   letter-spacing: 0.05em;
-  color: #64748B;
+  color: #526077;
 }
 .tco-pane-biztrack .tco-pane-eyebrow {
   color: var(--brand, #4F46E5);
@@ -1438,7 +1438,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   font-weight: 800;
   background: #FEF2F2;
   border: 1px solid #FCA5A5;
-  color: #DC2626;
+  color: #B91C1C;
   white-space: nowrap;
 }
 .tco-badge-brand {
@@ -1455,7 +1455,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
 }
 .tco-pane-desc {
   font-size: 12.5px;
-  color: #64748B;
+  color: #526077;
   margin: 6px 0 16px;
   line-height: 1.5;
 }
@@ -1481,7 +1481,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
 }
 .tco-line-note {
   font-size: 11px;
-  color: #64748B;
+  color: #526077;
   margin-top: 2px;
   line-height: 1.35;
 }
@@ -1494,7 +1494,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   text-align: right;
 }
 .tco-line-amount.is-free {
-  color: #059669;
+  color: #047857;
   background: #ECFDF5;
   padding: 2px 8px;
   border-radius: 6px;
@@ -1517,7 +1517,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   font-family: var(--font-mono, monospace);
   font-size: 24px;
   font-weight: 900;
-  color: #DC2626;
+  color: #B91C1C;
   display: flex;
   align-items: baseline;
   gap: 4px;
@@ -1534,7 +1534,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
 .tco-total-per-mo {
   font-size: 12px;
   font-weight: 600;
-  color: #64748B;
+  color: #526077;
 }
 
 /* Bottom Savings Banner */
@@ -1716,7 +1716,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   font-family: var(--font-mono, monospace);
   font-size: 12px;
-  color: #94A3B8;
+  color: #526077;
 }
 .admin-mockup-dots {
   display: flex;
@@ -1775,7 +1775,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  color: #94A3B8;
+  color: #526077;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -1829,7 +1829,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   background: rgba(255, 255, 255, 0.03);
   padding: 10px 14px;
   font-weight: 600;
-  color: #94A3B8;
+  color: #526077;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -2240,7 +2240,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
 }
 
 .decision-card-eyebrow.neutral {
-  color: #64748B;
+  color: #526077;
 }
 
 .decision-card h3 {

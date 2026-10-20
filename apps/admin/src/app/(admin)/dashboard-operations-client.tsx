@@ -250,7 +250,7 @@ export function DashboardOperationsClient({
               <div style={{ fontWeight: 700, fontSize: 13.5, letterSpacing: "0.02em" }}>
                 LIVE OPERATIONS PULSE
               </div>
-              <div style={{ fontSize: 11, color: "#94A3B8" }} suppressHydrationWarning>
+              <div style={{ fontSize: 11, color: "#64748B" }} suppressHydrationWarning>
                 Updated {mounted ? formatBDTime(lastRefreshedAt) : "Just now"} ·{" "}
                 <button
                   type="button"
@@ -275,7 +275,7 @@ export function DashboardOperationsClient({
           {/* Right: Key Telemetry Metrics */}
           <div style={{ display: "flex", gap: 20, flexWrap: "wrap", alignItems: "center" }}>
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 11, color: "#94A3B8", textTransform: "uppercase" }}>
+              <div style={{ fontSize: 11, color: "#64748B", textTransform: "uppercase" }}>
                 Today's AOV
               </div>
               <div style={{ fontSize: 16, fontWeight: 800, color: "#F8FAFC" }}>
@@ -296,7 +296,7 @@ export function DashboardOperationsClient({
             </div>
 
             <div style={{ textAlign: "right", borderLeft: "1px solid #334155", paddingLeft: 16 }}>
-              <div style={{ fontSize: 11, color: "#94A3B8", textTransform: "uppercase" }}>
+              <div style={{ fontSize: 11, color: "#64748B", textTransform: "uppercase" }}>
                 COD Cash-at-Risk
               </div>
               <div
@@ -316,7 +316,7 @@ export function DashboardOperationsClient({
             </div>
 
             <div style={{ textAlign: "right", borderLeft: "1px solid #334155", paddingLeft: 16 }}>
-              <div style={{ fontSize: 11, color: "#94A3B8", textTransform: "uppercase" }}>
+              <div style={{ fontSize: 11, color: "#64748B", textTransform: "uppercase" }}>
                 Live Conversion
               </div>
               <div style={{ fontSize: 16, fontWeight: 800, color: "#38BDF8" }}>
@@ -509,7 +509,7 @@ export function DashboardOperationsClient({
                               type="button"
                               onClick={() => handleHoldOrder(item.id, item.orderNumber)}
                               className="btn btn-secondary btn-sm"
-                              style={{ fontSize: 10.5, padding: "2px 8px", color: "#DC2626" }}
+                              style={{ fontSize: 10.5, padding: "2px 8px", color: "#B91C1C" }}
                             >
                               Hold Order
                             </button>
@@ -611,7 +611,7 @@ export function DashboardOperationsClient({
                         {lookupResult.courier.deliveredParcels} delivered ({lookupResult.courier.successRatio}%)
                       </span>{" "}
                       ·{" "}
-                      <span style={{ color: "#DC2626", fontWeight: 700 }}>
+                      <span style={{ color: "#B91C1C", fontWeight: 700 }}>
                         {lookupResult.courier.cancelledParcels} returned
                       </span>
                     </div>
@@ -907,7 +907,7 @@ export function DashboardOperationsClient({
                 />
                 <span style={{ fontWeight: 700 }}>#{ev.orderNumber}</span>
                 <span style={{ color: "#334155" }}>{ev.message}</span>
-                <span style={{ color: "#94A3B8", fontSize: 10 }} suppressHydrationWarning>
+                <span style={{ color: "#64748B", fontSize: 10 }} suppressHydrationWarning>
                   {formatBDTime(ev.createdAt)}
                 </span>
               </div>

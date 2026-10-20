@@ -30,13 +30,17 @@ async function getOrAssignDeviceIdentity(): Promise<{ deviceId: string; signedTo
   const verified = verifyDeviceToken(rawToken);
 
   if (!verified.valid) {
-    reqCookies.set(DEVICE_COOKIE_NAME, verified.signedToken, {
-      maxAge: 365 * 24 * 60 * 60,
-      path: "/",
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-    });
+    try {
+      reqCookies.set(DEVICE_COOKIE_NAME, verified.signedToken, {
+        maxAge: 365 * 24 * 60 * 60,
+        path: "/",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+      });
+    } catch {
+      // Reading the remaining checks while the page renders cannot set a cookie (only an action can). The first real check sets it.
+    }
     return { deviceId: verified.deviceId, signedToken: verified.signedToken, isNew: true };
   }
 

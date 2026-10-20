@@ -27,22 +27,22 @@ function getVerticalInfo(siteMode: string, vertical?: string | null): VerticalIn
   if (siteMode === "PORTFOLIO") {
     switch (vertical) {
       case "RESTAURANT":
-        return { icon: "🍽️", label: "Restaurant", labelBn: "রেস্তোরাঁ", color: "#f97316", bg: "rgba(249,115,22,0.12)" };
+        return { icon: "🍽️", label: "Restaurant", labelBn: "রেস্তোরাঁ", color: "#fb923c", bg: "rgba(249,115,22,0.12)" };
       case "DOCTOR_CLINIC":
-        return { icon: "🏥", label: "Healthcare", labelBn: "ক্লিনিক", color: "#06b6d4", bg: "rgba(6,182,212,0.12)" };
+        return { icon: "🏥", label: "Healthcare", labelBn: "ক্লিনিক", color: "#22d3ee", bg: "rgba(6,182,212,0.12)" };
       case "BUSINESS_COMPANY":
-        return { icon: "🏢", label: "Company", labelBn: "কোম্পানি", color: "#6366f1", bg: "rgba(99,102,241,0.12)" };
+        return { icon: "🏢", label: "Company", labelBn: "কোম্পানি", color: "#a5b4fc", bg: "rgba(99,102,241,0.12)" };
       case "SERVICE_PROVIDER":
-        return { icon: "💼", label: "Services", labelBn: "সেবা", color: "#3b82f6", bg: "rgba(59,130,246,0.12)" };
+        return { icon: "💼", label: "Services", labelBn: "সেবা", color: "#93c5fd", bg: "rgba(59,130,246,0.12)" };
       case "PUBLIC_FIGURE":
-        return { icon: "🎤", label: "Public Figure", labelBn: "পাবলিক ফিগার", color: "#ec4899", bg: "rgba(236,72,153,0.12)" };
+        return { icon: "🎤", label: "Public Figure", labelBn: "পাবলিক ফিগার", color: "#f472b6", bg: "rgba(236,72,153,0.12)" };
       case "PERSONAL_PORTFOLIO":
-        return { icon: "🎨", label: "Portfolio", labelBn: "পোর্টফোলিও", color: "#8b5cf6", bg: "rgba(139,92,246,0.12)" };
+        return { icon: "🎨", label: "Portfolio", labelBn: "পোর্টফোলিও", color: "#c4b5fd", bg: "rgba(139,92,246,0.12)" };
       default:
-        return { icon: "🌐", label: "Business Website", labelBn: "ওয়েবসাইট", color: "#64748b", bg: "rgba(100,116,139,0.12)" };
+        return { icon: "🌐", label: "Business Website", labelBn: "ওয়েবসাইট", color: "#cbd5e1", bg: "rgba(100,116,139,0.12)" };
     }
   }
-  return { icon: "🛍️", label: "Ecommerce Store", labelBn: "ই-কমার্স শপ", color: "#10b981", bg: "rgba(16,185,129,0.12)" };
+  return { icon: "🛍️", label: "Ecommerce Store", labelBn: "ই-কমার্স শপ", color: "#34d399", bg: "rgba(16,185,129,0.12)" };
 }
 
 export function BusinessSwitcher({
@@ -131,12 +131,15 @@ export function BusinessSwitcher({
           width: "100%",
           textAlign: "left",
           cursor: "pointer",
-          border: isOpen ? "1px solid var(--accent, #0070f3)" : undefined,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           gap: 8,
-          background: "var(--sb-chip, rgba(255,255,255,0.06))",
+          // The phone header is light: a plain chip there; the dark sidebar keeps its translucent one.
+          background: compact ? "var(--tint)" : "var(--sb-chip, rgba(255,255,255,0.06))",
+          color: compact ? "var(--ink)" : undefined,
+          border: isOpen ? "1px solid var(--accent, #0070f3)" : compact ? "1px solid var(--line)" : undefined,
+          padding: compact ? "6px 10px" : undefined,
           transition: "all 0.15s ease",
           boxShadow: isOpen ? "0 0 0 2px rgba(0,112,243,0.18)" : "none",
         }}
@@ -159,7 +162,7 @@ export function BusinessSwitcher({
               {activeBiz.storeName || storeName}
             </b>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "11px", opacity: 0.85 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "11px", opacity: 1 }}>
             <span
               style={{
                 display: "inline-block",
