@@ -72,7 +72,7 @@ export default async function Customers({ searchParams }: { searchParams: Promis
             ))}
           </div>
           <table className="table only-desktop">
-            <thead><tr><th>Customer</th><th>Phone</th><th>Location</th><th className="r">Orders</th><th className="r">Spent</th><th>Last order</th><th><span className="sr-only">Quick view</span></th></tr></thead>
+            <thead><tr><th>Customer</th><th>Phone</th><th>Location</th><th className="r">Orders</th><th className="r">Delivered spend</th><th>Last order</th><th><span className="sr-only">Quick view</span></th></tr></thead>
             <tbody>
               {list.rows.map((c) => (
                 <tr key={c.id} data-testid="customer-row">
