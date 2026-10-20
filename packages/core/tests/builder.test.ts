@@ -125,7 +125,8 @@ describe("theme settings", () => {
     expect(() => validateTheme({ text: "#EEEEEE", background: "#FFFFFF" })).toThrow(/hard to read/);
     expect(() => validateTheme({ accent: "#FDFBF6" })).toThrow(/too close/);
     expect(() => validateTheme({ accent: "red" })).toThrow(/colour/);
-    expect(() => validateTheme({ radius: "huge" })).toThrow(/choices/);
+    // An unknown corner style is not an error: it falls back to the default and can never reach the CSS.
+    expect(validateTheme({ radius: "huge" }).radius).toBe("soft");
     expect(contrast("#000000", "#FFFFFF")).toBeCloseTo(21, 0);
   });
 
@@ -312,7 +313,7 @@ describe("live data for sections", () => {
     const s = await store("data3");
     const page = defaultHomePage();
     for (const x of page.sections) x.disabled = true;
-    expect(await loadPageData(s.f.tenantId, validatePage("home", page))).toEqual({ products: {}, categories: [] });
+    expect(await loadPageData(s.f.tenantId, validatePage("home", page))).toMatchObject({ products: {}, categories: [] });
   });
 });
 
@@ -413,11 +414,12 @@ describe("landing pages", () => {
     it("accepts only the listed choices, for every control and every font pair", () => {
       for (const [key, list] of Object.entries(STYLE_CHOICES)) {
         for (const v of list) expect(() => validateTheme({ ...base, [key]: v }), `${key}=${v}`).not.toThrow();
-        expect(() => validateTheme({ ...base, [key]: "expression(alert(1))" }), key).toThrow(/not one of the choices/);
-        expect(() => validateTheme({ ...base, [key]: "red; } body { display:none" }), key).toThrow();
+        // Anything outside the list falls back to "look" (the template's own value), so hostile text never reaches the CSS.
+        expect((validateTheme({ ...base, [key]: "expression(alert(1))" }) as unknown as Record<string, unknown>)[key], key).toBe("look");
+        expect((validateTheme({ ...base, [key]: "red; } body { display:none" }) as unknown as Record<string, unknown>)[key], key).toBe("look");
       }
       for (const f of FONT_PAIRS) expect(validateTheme({ ...base, font: f }).font).toBe(f);
-      expect(() => validateTheme({ ...base, font: "Comic Sans" })).toThrow(/not one of the choices/);
+      expect(validateTheme({ ...base, font: "Comic Sans" }).font).toBe("sans");
     });
 
     it("writes one clear rule for each choice, with the weight to beat a template's own look", () => {

@@ -117,8 +117,10 @@ describe("RISK-003: Public Quota & Anti-Abuse Rate Limiter", () => {
   });
 
   describe("Durable Quota Enforcement", () => {
-    const testDevice = "test-device-uuid-123";
-    const testIpHash = "a1b2c3d4e5f60718";
+    const stamp = Date.now().toString(16);
+    // Unique per run: the counts live in the database, so a fixed id fails on the second run against the same database.
+    const testDevice = `test-device-${stamp}`;
+    const testIpHash = stamp.padStart(16, "a").slice(-16);
     const testDay = "2026-10-17";
 
     it("allows up to 5 checks per day for a valid device", async () => {

@@ -321,7 +321,7 @@ describe("courier callbacks", () => {
     expect(after.courierStatus).toBe("DELIVERED");
   });
 
-  it("returned: puts the stock back and counts against the buyer's record", async () => {
+  it("returned: keeps the stock out until the warehouse checks the parcel (the default), and counts against the buyer's record", async () => {
     const s = await store("hookreturn");
     const before = (await owner.productVariant.findUniqueOrThrow({ where: { id: vid(s.f) } })).stockQuantity;
     const o = await shipped(s);
@@ -332,7 +332,8 @@ describe("courier callbacks", () => {
     expect(after.status).toBe("RETURNED");
     expect(after.returnedAt).not.toBeNull();
     expect(after.trustRecorded).toBe("RETURNED");
-    expect((await owner.productVariant.findUniqueOrThrow({ where: { id: vid(s.f) } })).stockQuantity).toBe(before);
+    // courierAutoRestockOnReturn is off by default: a returned parcel is only put back on the shelf after a physical check.
+    expect((await owner.productVariant.findUniqueOrThrow({ where: { id: vid(s.f) } })).stockQuantity).toBe(before - 1);
   });
 
   it("refused at the door is remembered as a refusal", async () => {

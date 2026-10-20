@@ -58,8 +58,10 @@ const fails = async (p: Promise<unknown>, code?: string, msg?: RegExp) => {
 describe("store templates published without a deploy (docs/46 stage 5)", () => {
   it("starts with the six originals, and a store made from one remembers it", async () => {
     const list = await listPublishedTemplates();
-    expect(list.map((t) => t.id)).toEqual(STORE_THEMES.map((t) => t.id));
-    expect(list.every((t) => t.builtIn && t.pages === null)).toBe(true);
+    // The business templates (restaurant, clinic, ...) are built in too; the store originals come first and use the built-in layouts.
+    const stores = list.filter((t) => !t.siteMode);
+    expect(stores.map((t) => t.id)).toEqual(STORE_THEMES.map((t) => t.id));
+    expect(stores.every((t) => t.builtIn && t.pages === null)).toBe(true);
     const s = await store("berber");
     const t = await owner.tenant.findUniqueOrThrow({ where: { id: s.tenantId } });
     expect(t).toMatchObject({ themeId: "berber", templateId: "berber", templateVersion: 1 });
