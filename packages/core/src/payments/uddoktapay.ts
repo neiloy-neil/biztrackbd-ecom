@@ -63,7 +63,8 @@ export function normalizeUddoktaPayBaseUrl(raw: string): string {
   let v = raw.trim();
   if (!v) throw new ValidationError("UddoktaPay base URL is empty");
   if (!/^https?:\/\//i.test(v)) v = `https://${v}`;
-  v = v.replace(/\/+$/, "").replace(/\/api$/i, "");
+  // People paste the panel's "Base URL" (.../api) or even a full endpoint (.../api/checkout-v2). The code adds the endpoint itself.
+  v = v.replace(/\/+$/, "").replace(/\/api(?:\/(?:checkout(?:-v2)?|verify-payment|refund-payment))?$/i, "");
   try {
     const u = new URL(v);
     if (!u.hostname.includes(".") && u.hostname !== "localhost") throw new Error("host");
@@ -71,6 +72,20 @@ export function normalizeUddoktaPayBaseUrl(raw: string): string {
     throw new ValidationError("UddoktaPay base URL is not a valid address, e.g. https://pay.example.com");
   }
   return v;
+}
+
+/**
+ * The two addresses UddoktaPay uses after a payment: where it sends the customer back, and where it reports the result without the
+ * customer's browser. Both are sent with every charge, so nothing has to be set in the UddoktaPay panel; they are shown to owners only
+ * as a reference, or to paste as the panel's default.
+ *  - "plan": a store paying BizTrackBD for its plan. `origin` is the admin address.
+ *  - "store": a customer paying a store. `origin` is the store's own address (the store is found from the host).
+ */
+export function uddoktaPayUrls(kind: "plan" | "store", origin: string): { webhook: string; returnUrl: string } {
+  const base = origin.trim().replace(/\/+$/, "");
+  return kind === "plan"
+    ? { webhook: `${base}/api/webhooks/uddoktapay`, returnUrl: `${base}/api/billing/uddoktapay/callback` }
+    : { webhook: `${base}/api/payments/uddoktapay/webhook`, returnUrl: `${base}/api/payments/uddoktapay/callback` };
 }
 
 /**
@@ -316,61 +331,65 @@ export async function processUddoktaPaySubscriptionSuccess(
   const db = getPlatformPrisma();
   let firstTimeSeen = false;
   let owner: { email: string | null; phone: string | null; name: string | null } = { email: null, phone: null, name: null };
-  await db.$transaction(async (tx) => {
-    const tenant = await tx.tenant.findUnique({ where: { id: tenantId } });
-    if (!tenant) throw new NotFoundError("Tenant");
-    owner = { email: tenant.ownerEmail, phone: tenant.ownerPhone, name: tenant.ownerName };
+  try {
+    await db.$transaction(async (tx) => {
+      const tenant = await tx.tenant.findUnique({ where: { id: tenantId } });
+      if (!tenant) throw new NotFoundError("Tenant");
+      owner = { email: tenant.ownerEmail, phone: tenant.ownerPhone, name: tenant.ownerName };
 
-    const now = new Date();
-    const periodEnd = new Date(now);
-    if (interval === "YEARLY") {
-      periodEnd.setFullYear(periodEnd.getFullYear() + 1);
-    } else {
-      periodEnd.setMonth(periodEnd.getMonth() + 1);
-    }
-
-    // Upsert subscription
-    await tx.subscription.upsert({
-      where: { tenantId },
-      create: {
-        tenantId,
-        planTier: planTier as "STARTER" | "PRO" | "BUSINESS",
-        interval,
-        status: "ACTIVE",
-        amount: Number(verified.amount || "1990"),
-        currentPeriodStart: now,
-        currentPeriodEnd: periodEnd,
-        gateway: "UDDOKTAPAY",
-        cancelAtPeriodEnd: false,
-      },
-      update: {
-        planTier: planTier as "STARTER" | "PRO" | "BUSINESS",
-        interval,
-        status: "ACTIVE",
-        amount: Number(verified.amount || "1990"),
-        currentPeriodStart: now,
-        currentPeriodEnd: periodEnd,
-        gateway: "UDDOKTAPAY",
-        cancelAtPeriodEnd: false,
-      },
-    });
-
-    // Create payment proof record marked APPROVED
-    const rawMethod = (verified.paymentMethod || "").toUpperCase();
-    const mfsProvider: "BKASH" | "NAGAD" | "ROCKET" | "UPAY" =
-      rawMethod.includes("NAGAD") ? "NAGAD"
-      : rawMethod.includes("ROCKET") ? "ROCKET"
-      : rawMethod.includes("UPAY") ? "UPAY"
-      : "BKASH";
-    const senderNumber =
-      verified.senderNumber && verified.senderNumber.length >= 11
-        ? verified.senderNumber
-        : "01700000000";
-
-    const trxId = verified.transactionId || invoiceId;
-    const existingProof = await tx.paymentProof.findUnique({ where: { trxId } });
-    if (!existingProof) {
+      // The return page, the gateway's webhook and a replay can all report the same payment. Apply it once: a repeat must not push the
+      // paid-until date out again.
+      const trxId = verified.transactionId || invoiceId;
+      const existingProof = await tx.paymentProof.findUnique({ where: { trxId } });
+      if (existingProof) return;
       firstTimeSeen = true;
+
+      const now = new Date();
+      const periodEnd = new Date(now);
+      if (interval === "YEARLY") {
+        periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+      } else {
+        periodEnd.setMonth(periodEnd.getMonth() + 1);
+      }
+
+      // Upsert subscription
+      await tx.subscription.upsert({
+        where: { tenantId },
+        create: {
+          tenantId,
+          planTier: planTier as "STARTER" | "PRO" | "BUSINESS",
+          interval,
+          status: "ACTIVE",
+          amount: Number(verified.amount || "1990"),
+          currentPeriodStart: now,
+          currentPeriodEnd: periodEnd,
+          gateway: "UDDOKTAPAY",
+          cancelAtPeriodEnd: false,
+        },
+        update: {
+          planTier: planTier as "STARTER" | "PRO" | "BUSINESS",
+          interval,
+          status: "ACTIVE",
+          amount: Number(verified.amount || "1990"),
+          currentPeriodStart: now,
+          currentPeriodEnd: periodEnd,
+          gateway: "UDDOKTAPAY",
+          cancelAtPeriodEnd: false,
+        },
+      });
+
+      // Create payment proof record marked APPROVED
+      const rawMethod = (verified.paymentMethod || "").toUpperCase();
+      const mfsProvider: "BKASH" | "NAGAD" | "ROCKET" | "UPAY" =
+        rawMethod.includes("NAGAD") ? "NAGAD"
+        : rawMethod.includes("ROCKET") ? "ROCKET"
+        : rawMethod.includes("UPAY") ? "UPAY"
+        : "BKASH";
+      const senderNumber =
+        verified.senderNumber && verified.senderNumber.length >= 11
+          ? verified.senderNumber
+          : "01700000000";
+
       await tx.paymentProof.create({
         data: {
           tenantId,
@@ -386,14 +405,18 @@ export async function processUddoktaPaySubscriptionSuccess(
           appliedTo: periodEnd,
         },
       });
-    }
 
-    // Update tenant status if trial/past due
-    await tx.tenant.update({
-      where: { id: tenantId },
-      data: { status: "ACTIVE" },
+      // Update tenant status if trial/past due
+      await tx.tenant.update({
+        where: { id: tenantId },
+        data: { status: "ACTIVE" },
+      });
     });
-  });
+  } catch (err) {
+    // Two requests for the same payment at the same instant: the other one applied it (the proof's transaction id is unique).
+    if ((err as { code?: string }).code !== "P2002") throw err;
+    firstTimeSeen = false;
+  }
 
   // Tell Meta once per payment (a refreshed callback page finds the proof already stored). Never blocks the customer.
   if (firstTimeSeen) {

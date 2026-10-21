@@ -206,5 +206,17 @@ describe("UddoktaPay Automated Payment Engine", () => {
       expect(proof?.mfsProvider).toBe("BKASH");
       expect(proof?.senderNumber).toBe("01999888777");
     });
+
+    // The gateway's webhook (or a refreshed return page) reports the same payment again: nothing changes, nothing is added.
+    const before = await withTenant(tenantId, (tx) => tx.subscription.findUniqueOrThrow({ where: { tenantId } }));
+    await new Promise((r) => setTimeout(r, 25));
+    const again = await processUddoktaPaySubscriptionSuccess("inv_sub_555");
+    expect(again.ok).toBe(true);
+    await withTenant(tenantId, async (tx) => {
+      const sub = await tx.subscription.findUniqueOrThrow({ where: { tenantId } });
+      expect(sub.currentPeriodEnd.getTime()).toBe(before.currentPeriodEnd.getTime());
+      expect(sub.currentPeriodStart.getTime()).toBe(before.currentPeriodStart.getTime());
+      expect(await tx.paymentProof.count({ where: { tenantId, trxId: dynamicTrx } })).toBe(1);
+    });
   });
 });

@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { DomainError, cancelPendingProof, createUddoktaPayCharge, getBillingOverview, submitPaymentProof } from "@biztrackbd/core";
+import { DomainError, cancelPendingProof, createUddoktaPayCharge, getBillingOverview, submitPaymentProof, uddoktaPayUrls } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 import { resolveAdminOrigin } from "@/lib/origin";
 
@@ -29,7 +29,8 @@ export async function initiateOnlineBillingAction(plan: string, interval: "MONTH
         interval,
         type: "subscription",
       },
-      redirectUrl: `${origin}/api/billing/uddoktapay/callback`,
+      redirectUrl: uddoktaPayUrls("plan", origin).returnUrl,
+      webhookUrl: uddoktaPayUrls("plan", origin).webhook,
       cancelUrl: `${origin}/billing?cancelled=1`,
       returnType: "GET",
     });
