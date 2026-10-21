@@ -579,9 +579,9 @@ export default async function TenantDetail({
                       <input name="reason" type="text" required placeholder="e.g. VIP goodwill top-up for Eid campaign" className="input" style={{ width: "100%", height: 38, fontSize: 13 }} />
                     </div>
 
-                    <button type="submit" className="btn btn-primary" style={{ height: 38, fontSize: 13 }}>
+                    <SubmitButton className="btn btn-primary" style={{ height: 38, fontSize: 13 }} pending="Working…">
                       Grant Quota
-                    </button>
+                    </SubmitButton>
                   </form>
                 )}
 
@@ -992,13 +992,12 @@ export default async function TenantDetail({
 
                       {canAdjust && (
                         <form action={overrideTenantModuleAction.bind(null, id, app.key, !isEnabled)} style={{ marginTop: 12 }}>
-                          <button
-                            type="submit"
+                          <SubmitButton
                             className={`btn btn-sm ${isEnabled ? "btn-secondary" : "btn-primary"}`}
                             style={{ width: "100%", fontSize: 12 }}
-                          >
+                           pending="Working…">
                             {isEnabled ? "Revoke Entitlement" : "Grant VIP Access"}
-                          </button>
+                          </SubmitButton>
                         </form>
                       )}
                     </div>

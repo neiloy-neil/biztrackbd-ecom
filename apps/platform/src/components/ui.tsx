@@ -3,15 +3,26 @@
 import Link from "next/link";
 import { useFormStatus } from "react-dom";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { Button, type ButtonProps } from "@biztrackbd/ui";
 import { qs } from "@/lib/query";
 
 /** A submit button that disables itself while its form is sending, so a double tap cannot send twice. */
-export function SubmitButton({ children, pending, className = "btn btn-primary", ...rest }: ButtonHTMLAttributes<HTMLButtonElement> & { pending?: ReactNode }) {
+export function SubmitButton({ children, pending, className = "btn btn-primary", ...rest }: ButtonHTMLAttributes<HTMLButtonElement> & { pending?: ReactNode | false }) {
   const { pending: busy } = useFormStatus();
   return (
     <button {...rest} type="submit" className={className} disabled={busy || rest.disabled} aria-busy={busy}>
-      {busy ? (pending ?? "Saving…") : children}
+      {busy && pending !== false ? (pending ?? "Saving…") : children}
     </button>
+  );
+}
+
+/** The kit Button that disables itself while its form is sending, so a second tap cannot send twice. */
+export function PendingButton({ children, pendingLabel, ...rest }: ButtonProps & { pendingLabel?: ReactNode }) {
+  const { pending } = useFormStatus();
+  return (
+    <Button {...rest} type="submit" disabled={pending || rest.disabled} aria-busy={pending}>
+      {pending && pendingLabel ? pendingLabel : children}
+    </Button>
   );
 }
 

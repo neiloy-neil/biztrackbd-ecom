@@ -3,6 +3,7 @@ import Link from "next/link";
 import { listTenantTickets } from "@biztrackbd/core";
 import { getSession } from "@/lib/session";
 import { createTicketAction } from "./actions";
+import { SubmitButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Help & Support" };
@@ -71,9 +72,9 @@ export default async function MerchantSupportPage({
         </label>
 
         <div>
-          <button type="submit" className="btn btn-primary" style={{ height: 40, padding: "0 20px" }}>
+          <SubmitButton className="btn btn-primary" style={{ height: 40, padding: "0 20px" }} pending="Working…">
             Submit ticket
-          </button>
+          </SubmitButton>
         </div>
       </form>
 

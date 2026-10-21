@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { REPORT_PRESETS } from "@biztrackbd/core/reports-presets";
+import { SubmitButton } from "@/components/ui";
 
 export function DateRangeFilter({
   basePath,
@@ -152,13 +153,12 @@ export function DateRangeFilter({
             />
           </div>
 
-          <button
-            type="submit"
+          <SubmitButton
             className="btn btn-primary btn-sm"
             style={{ padding: "4px 12px", fontSize: 12 }}
-          >
+           pending="Working…">
             Apply Range
-          </button>
+          </SubmitButton>
         </form>
       )}
     </div>

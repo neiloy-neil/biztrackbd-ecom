@@ -3,6 +3,7 @@ import Link from "next/link";
 import { listPlatformInquiries, type InquiryStatus } from "@biztrackbd/core";
 import { requireAccess } from "@/lib/session";
 import { updateInquiryStatusAction } from "./actions";
+import { SubmitButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Marketing inquiries" };
@@ -251,40 +252,39 @@ export default async function InquiriesPage({
                       <form action={updateInquiryStatusAction}>
                         <input type="hidden" name="id" value={item.id} />
                         <input type="hidden" name="status" value="NEW" />
-                        <button type="submit" className="btn btn-sm btn-secondary">
+                        <SubmitButton className="btn btn-sm btn-secondary" pending="Working…">
                           Mark New
-                        </button>
+                        </SubmitButton>
                       </form>
                     )}
                     {item.status !== "CONTACTED" && (
                       <form action={updateInquiryStatusAction}>
                         <input type="hidden" name="id" value={item.id} />
                         <input type="hidden" name="status" value="CONTACTED" />
-                        <button type="submit" className="btn btn-sm btn-secondary">
+                        <SubmitButton className="btn btn-sm btn-secondary" pending="Working…">
                           Mark Contacted
-                        </button>
+                        </SubmitButton>
                       </form>
                     )}
                     {item.status !== "CONVERTED" && (
                       <form action={updateInquiryStatusAction}>
                         <input type="hidden" name="id" value={item.id} />
                         <input type="hidden" name="status" value="CONVERTED" />
-                        <button
-                          type="submit"
+                        <SubmitButton
                           className="btn btn-sm btn-secondary"
                           style={{ borderColor: "#15803D", color: "#15803D" }}
-                        >
+                         pending="Working…">
                           ✓ Converted Store
-                        </button>
+                        </SubmitButton>
                       </form>
                     )}
                     {item.status !== "ARCHIVED" && (
                       <form action={updateInquiryStatusAction}>
                         <input type="hidden" name="id" value={item.id} />
                         <input type="hidden" name="status" value="ARCHIVED" />
-                        <button type="submit" className="btn btn-sm btn-secondary" style={{ opacity: 0.7 }}>
+                        <SubmitButton className="btn btn-sm btn-secondary" style={{ opacity: 0.7 }} pending="Working…">
                           Archive
-                        </button>
+                        </SubmitButton>
                       </form>
                     )}
                   </div>

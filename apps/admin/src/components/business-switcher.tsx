@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useTransition } from "react";
 import type { BusinessAccountSummary } from "@biztrackbd/core";
 import { switchBusinessAction, createBusinessAction, type CreateBusinessState } from "@/app/(admin)/business-actions";
 import { ChevronIcon, PlusIcon } from "./icons";
+import { SubmitButton } from "@/components/ui";
 
 export interface BusinessSwitcherProps {
   businesses: BusinessAccountSummary[];
@@ -344,8 +345,9 @@ export function BusinessSwitcher({
                   <form key={biz.tenantId} action={switchBusinessAction} style={{ width: "100%" }}>
                     <input type="hidden" name="tenantId" value={biz.tenantId} />
                     <input type="hidden" name="subdomain" value={biz.subdomain} />
-                    <button
-                      type="submit"
+                    <SubmitButton
+                      pending={false}
+                      className=""
                       style={{
                         width: "100%",
                         textAlign: "left",
@@ -396,7 +398,7 @@ export function BusinessSwitcher({
                       <span style={{ fontSize: "11px", color: "var(--accent, #0070f3)", opacity: 0.85, fontWeight: 600 }}>
                         {lang === "bn" ? "যান →" : "Switch →"}
                       </span>
-                    </button>
+                    </SubmitButton>
                   </form>
                 );
               })

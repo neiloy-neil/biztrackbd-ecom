@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { BellIcon, ChevronIcon, ExternalIcon, SearchIcon } from "@/components/icons";
 import { setLangAction } from "@/app/(admin)/lang-actions";
+import { SubmitButton } from "@/components/ui";
 
 export interface Counts { check: number; newOrders: number; toPack: number; returnsPending: number; lowStock: number; items: { key: string; text: string; href: string; tone: "bad" | "warn" | "info"; count: number }[] }
 export interface NavGroup { id: string; label: string; icon: ReactNode; items: { href: string; label: string; exact?: boolean; badge?: "check" }[]; /** Pages that also light this group up, for a group that is one link to a section with its own navigation. */ activePrefixes?: string[] }
@@ -103,8 +104,8 @@ export function TopActions({ storeHref, lang, compact }: { storeHref: string; la
       </button>
       {!compact && <a className="btn btn-secondary btn-sm only-wide" href={storeHref} target="_blank" rel="noreferrer"><ExternalIcon width={16} height={16} />{strings.viewStore}</a>}
       <form action={setLangAction} className="lang" aria-label="Language">
-        <button type="submit" name="lang" value="en" aria-pressed={lang === "en"}>EN</button>
-        <button type="submit" name="lang" value="bn" aria-pressed={lang === "bn"}>বাং</button>
+        <SubmitButton name="lang" value="en" aria-pressed={lang === "en"} pending={false} className="">EN</SubmitButton>
+        <SubmitButton name="lang" value="bn" aria-pressed={lang === "bn"} pending={false} className="">বাং</SubmitButton>
       </form>
       <Bell strings={strings} items={counts.items} />
     </div>

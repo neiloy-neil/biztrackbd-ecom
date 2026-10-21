@@ -21,6 +21,7 @@ import { LANG_COOKIE, asLang, tr } from "@/lib/i18n";
 import { storefrontOrigin } from "@/lib/store-url";
 import { logoutAction } from "../login/actions";
 import { switchDevUser } from "./dev-actions";
+import { SubmitButton } from "@/components/ui";
 
 // Every admin page depends on who is signed in, so nothing here may be prerendered at build time.
 export const dynamic = "force-dynamic";
@@ -284,14 +285,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                   <select id="dev_user" name="email" defaultValue={s.user.email} className="select input-sm" style={{ marginTop: 4 }}>
                     {staff.map((u) => <option key={u.email} value={u.email}>{u.name} ({ROLE_LABELS[u.role]})</option>)}
                   </select>
-                  <button type="submit" className="btn btn-secondary btn-sm btn-block" style={{ marginTop: 6 }}>Switch</button>
+                  <SubmitButton className="btn btn-secondary btn-sm btn-block" style={{ marginTop: 6 }} pending={false}>Switch</SubmitButton>
                 </form>
               </>
             ) : (
               <div style={{ marginTop: 10 }}>
                 <div className="muted" style={{ fontSize: 12, overflowWrap: "anywhere" }} data-testid="who-email">{s.user.email}</div>
                 <NavLink href="/security">Sign-in and security</NavLink>
-                <form action={logoutAction}><button type="submit" className="btn btn-secondary btn-sm btn-block" style={{ marginTop: 6 }} data-testid="sign-out">{tr(lang, "Sign out")}</button></form>
+                <form action={logoutAction}><SubmitButton className="btn btn-secondary btn-sm btn-block" style={{ marginTop: 6 }} data-testid="sign-out" pending={false}>{tr(lang, "Sign out")}</SubmitButton></form>
               </div>
             )}
           </div>

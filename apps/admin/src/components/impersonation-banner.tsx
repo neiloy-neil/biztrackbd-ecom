@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { SubmitButton } from "@/components/ui";
 
 export function ImpersonationBanner({
   tenantName,
@@ -71,8 +72,7 @@ export function ImpersonationBanner({
         </span>
       </div>
       <form action="/api/auth/impersonate/exit" method="post" style={{ margin: 0 }}>
-        <button
-          type="submit"
+        <SubmitButton
           className="btn btn-danger btn-sm"
           style={{
             height: 30,
@@ -86,9 +86,9 @@ export function ImpersonationBanner({
             cursor: "pointer",
           }}
           data-testid="exit-impersonation-btn"
-        >
+         pending="Working…">
           Exit Session
-        </button>
+        </SubmitButton>
       </form>
     </div>
   );

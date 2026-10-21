@@ -5,6 +5,7 @@ import { safeNext } from "@/lib/auth";
 import { one } from "@/lib/query";
 import { resolveAuth } from "@/lib/session";
 import { chooseStoreAction, logoutAction } from "../login/actions";
+import { SubmitButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Choose a store" };
@@ -25,11 +26,11 @@ export default async function ChooseStore({ searchParams }: { searchParams: Prom
           <form key={s.tenantId} action={chooseStoreAction}>
             <input type="hidden" name="tenantId" value={s.tenantId} />
             <input type="hidden" name="next" value={next} />
-            <button type="submit" className="btn btn-secondary btn-block" style={{ justifyContent: "space-between" }}><b>{s.storeName}</b><span className="muted">{ROLE_LABELS[s.role]}</span></button>
+            <SubmitButton className="btn btn-secondary btn-block" style={{ justifyContent: "space-between" }} pending={false}><b>{s.storeName}</b><span className="muted">{ROLE_LABELS[s.role]}</span></SubmitButton>
           </form>
         ))}
       </div>
-      <form action={logoutAction} style={{ marginTop: 14 }}><button type="submit" className="link" style={{ background: "none", border: 0, cursor: "pointer", minHeight: 40 }}>Sign out</button></form>
+      <form action={logoutAction} style={{ marginTop: 14 }}><SubmitButton className="link" style={{ background: "none", border: 0, cursor: "pointer", minHeight: 40 }} pending={false}>Sign out</SubmitButton></form>
     </div>
   );
 }

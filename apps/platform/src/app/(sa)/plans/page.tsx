@@ -247,22 +247,20 @@ export default async function PlansPage({
                         {canEdit && (
                           <>
                             <form action={togglePromoAction.bind(null, pr.id, !pr.isActive)} style={{ margin: 0 }}>
-                              <button
-                                type="submit"
+                              <SubmitButton
                                 className={`btn btn-sm ${pr.isActive ? "btn-secondary" : "btn-primary"}`}
                                 style={{ fontSize: 11 }}
-                              >
+                               pending="Working…">
                                 {pr.isActive ? "Deactivate" : "Activate"}
-                              </button>
+                              </SubmitButton>
                             </form>
                             <form action={deletePromoAction.bind(null, pr.id)} style={{ margin: 0 }}>
-                              <button
-                                type="submit"
+                              <SubmitButton
                                 className="btn btn-sm btn-secondary"
                                 style={{ fontSize: 11, color: "#DC2626" }}
-                              >
+                               pending="Working…">
                                 Delete
-                              </button>
+                              </SubmitButton>
                             </form>
                           </>
                         )}
@@ -339,9 +337,9 @@ export default async function PlansPage({
               </div>
 
               <div>
-                <button type="submit" className="btn btn-primary">
+                <SubmitButton className="btn btn-primary" pending="Working…">
                   Create Subscription Promo Code
-                </button>
+                </SubmitButton>
               </div>
             </form>
           )}

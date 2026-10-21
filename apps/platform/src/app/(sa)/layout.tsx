@@ -6,6 +6,7 @@ import { getSession } from "@/lib/session";
 import { authMode } from "@/lib/auth";
 import { logoutAction } from "../login/actions";
 import { switchDevUser } from "./dev-actions";
+import { SubmitButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -79,11 +80,11 @@ export default async function SaLayout({ children }: { children: React.ReactNode
               <select id="dev_user" name="email" defaultValue={s.user.email} className="select input-sm" style={{ marginTop: 4, width: "100%", background: "#252568", color: "#fff", borderColor: "#34347F" }}>
                 {users.map((u) => <option key={u.email} value={u.email}>{u.name} ({ROLE[u.role] ?? u.role})</option>)}
               </select>
-              <button type="submit" className="btn btn-secondary btn-sm btn-block" style={{ marginTop: 6, width: "100%", background: "#34347F", color: "#fff", borderColor: "#4E4E9E" }}>Switch</button>
+              <SubmitButton className="btn btn-secondary btn-sm btn-block" style={{ marginTop: 6, width: "100%", background: "#34347F", color: "#fff", borderColor: "#4E4E9E" }} pending={false}>Switch</SubmitButton>
             </form>
           ) : (
             <form action={logoutAction} style={{ marginTop: 10 }}>
-              <button type="submit" className="btn btn-secondary btn-sm btn-block" data-testid="sign-out" style={{ width: "100%", background: "#34347F", color: "#fff", borderColor: "#4E4E9E" }}>Sign out</button>
+              <SubmitButton className="btn btn-secondary btn-sm btn-block" data-testid="sign-out" style={{ width: "100%", background: "#34347F", color: "#fff", borderColor: "#4E4E9E" }} pending={false}>Sign out</SubmitButton>
             </form>
           )}
         </div>

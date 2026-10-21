@@ -22,6 +22,7 @@ import {
   toggleModuleMaintenanceAction,
   setModulePlanOverrideAction,
 } from "./actions";
+import { SubmitButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Themes and modules" };
@@ -122,19 +123,19 @@ export default async function ThemesPage({
                       <a className="btn btn-secondary btn-sm" href={`/themes/export/${t.id}`} download>Download</a>
                       {canEdit && t.saved && !t.builtIn && (
                         <form action={generatePreviewsAction.bind(null, t.id)}>
-                          <button type="submit" className="btn btn-secondary btn-sm" data-testid={`previews-${t.id}`} title={t.previews?.desktop ? "Take new gallery pictures" : "No gallery pictures yet"}>
+                          <SubmitButton className="btn btn-secondary btn-sm" data-testid={`previews-${t.id}`} title={t.previews?.desktop ? "Take new gallery pictures" : "No gallery pictures yet"} pending="Working…">
                             {t.previews?.desktop ? "Refresh previews" : "Generate previews"}
-                          </button>
+                          </SubmitButton>
                         </form>
                       )}
                       {canEdit && t.status !== "PUBLISHED" && (
                         <form action={setTemplateStatusAction.bind(null, t.id, "PUBLISHED")}>
-                          <button type="submit" className="btn btn-secondary btn-sm">Publish</button>
+                          <SubmitButton className="btn btn-secondary btn-sm" pending="Working…">Publish</SubmitButton>
                         </form>
                       )}
                       {canEdit && t.status !== "ARCHIVED" && (
                         <form action={setTemplateStatusAction.bind(null, t.id, "ARCHIVED")}>
-                          <button type="submit" className="btn btn-secondary btn-sm">Archive</button>
+                          <SubmitButton className="btn btn-secondary btn-sm" pending="Working…">Archive</SubmitButton>
                         </form>
                       )}
                     </div>
@@ -162,7 +163,7 @@ export default async function ThemesPage({
                     <div style={{ fontSize: 12, color: "var(--ink-3)" }}>{w.subdomain} · {w.siteMode === "ECOMMERCE" ? "Store" : `Business · ${w.businessVertical}`}</div>
                   </div>
                   <form action={openWorkshopEditorAction.bind(null, w.tenantId)}>
-                    <button type="submit" className="btn btn-secondary btn-sm" data-testid={`open-workshop-${w.subdomain}`}>Open editor</button>
+                    <SubmitButton className="btn btn-secondary btn-sm" data-testid={`open-workshop-${w.subdomain}`} pending="Working…">Open editor</SubmitButton>
                   </form>
                 </div>
               ))}
@@ -202,7 +203,7 @@ export default async function ThemesPage({
                 ))}
               </select>
             </label>
-            <button type="submit" className="btn btn-primary" data-testid="create-workshop-go">Create workshop</button>
+            <SubmitButton className="btn btn-primary" data-testid="create-workshop-go" pending="Working…">Create workshop</SubmitButton>
           </form>
         </div>
       )}
@@ -223,7 +224,7 @@ export default async function ThemesPage({
             <input type="checkbox" name="draft" /> Save as a draft (do not show it yet)
           </label>
           <div>
-            <button type="submit" className="btn btn-primary" data-testid="upload-template-go">Upload template</button>
+            <SubmitButton className="btn btn-primary" data-testid="upload-template-go" pending="Working…">Upload template</SubmitButton>
           </div>
         </form>
       )}
@@ -268,9 +269,9 @@ export default async function ThemesPage({
             </label>
           </div>
           <div>
-            <button type="submit" className="btn btn-primary" data-testid="publish-template-go">
+            <SubmitButton className="btn btn-primary" data-testid="publish-template-go" pending="Working…">
               Publish template
-            </button>
+            </SubmitButton>
           </div>
         </form>
       )}
@@ -370,13 +371,12 @@ export default async function ThemesPage({
                     <form action={toggleModuleMaintenanceAction} style={{ margin: 0 }}>
                       <input type="hidden" name="moduleKey" value={m.key} />
                       <input type="hidden" name="isUnderMaintenance" value={m.isGloballyDisabled ? "false" : "true"} />
-                      <button
-                        type="submit"
+                      <SubmitButton
                         className={`btn btn-sm ${m.isGloballyDisabled ? "btn-primary" : "btn-secondary"}`}
                         style={{ fontSize: 11.5 }}
-                      >
+                       pending="Working…">
                         {m.isGloballyDisabled ? "Lift Maintenance" : "Kill-Switch"}
-                      </button>
+                      </SubmitButton>
                     </form>
                   )}
                 </div>

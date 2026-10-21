@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getTenantTicketDetail } from "@biztrackbd/core";
 import { getSession } from "@/lib/session";
 import { replyTicketAction } from "../actions";
+import { SubmitButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Ticket Details" };
@@ -155,9 +156,9 @@ export default async function MerchantTicketDetailPage({
             style={{ padding: 12, lineHeight: 1.55 }}
           />
           <div>
-            <button type="submit" className="btn btn-primary" style={{ height: 38, padding: "0 18px" }}>
+            <SubmitButton className="btn btn-primary" style={{ height: 38, padding: "0 18px" }} pending="Working…">
               Send reply
-            </button>
+            </SubmitButton>
           </div>
         </form>
       ) : (

@@ -525,8 +525,8 @@ export function DeleteAddressButton({
 }) {
   return (
     <form action={deleteAddressAction.bind(null, customerId, addressId)} style={{ display: "inline" }}>
-      <button
-        type="submit"
+      <SubmitButton
+        pending="Working…"
         className="link"
         style={{ color: "var(--danger, #DC2626)", fontSize: 12, cursor: "pointer", background: "none", border: "none", padding: 0 }}
         onClick={(e) => {
@@ -534,7 +534,7 @@ export function DeleteAddressButton({
         }}
       >
         Remove
-      </button>
+      </SubmitButton>
     </form>
   );
 }

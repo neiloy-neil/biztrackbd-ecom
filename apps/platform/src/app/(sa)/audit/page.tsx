@@ -16,6 +16,7 @@ import {
   updateStaffRoleAction,
   toggleStaffActiveAction,
 } from "./actions";
+import { SubmitButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Team and audit log" };
@@ -177,13 +178,12 @@ export default async function AuditPage({
                     <div style={{ textAlign: "right" }}>
                       {canEditTeam && u.id !== s.actor.id && (
                         <form action={toggleStaffActiveAction.bind(null, u.id)} style={{ margin: 0 }}>
-                          <button
-                            type="submit"
+                          <SubmitButton
                             className={`btn btn-sm ${u.isActive ? "btn-secondary" : "btn-primary"}`}
                             style={{ fontSize: 11.5 }}
-                          >
+                           pending="Working…">
                             {u.isActive ? "Deactivate" : "Activate"}
-                          </button>
+                          </SubmitButton>
                         </form>
                       )}
                     </div>
@@ -225,9 +225,9 @@ export default async function AuditPage({
               </div>
 
               <div>
-                <button type="submit" className="btn btn-primary">
+                <SubmitButton className="btn btn-primary" pending="Working…">
                   Invite Staff Member
-                </button>
+                </SubmitButton>
               </div>
             </form>
           )}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { setModuleAction } from "@/app/(admin)/settings/apps/actions";
+import { SubmitButton } from "@/components/ui";
 
 interface Props {
   appName: string;
@@ -98,13 +99,12 @@ export function AppDisabledNotice({
         ) : (
           <>
             <form action={setModuleAction.bind(null, appKey, true)}>
-              <button
-                type="submit"
+              <SubmitButton
                 className="btn btn-primary"
                 style={{ padding: "10px 24px", fontSize: 14, fontWeight: 600 }}
-              >
+               pending="Working…">
                 Enable {appName} Now
-              </button>
+              </SubmitButton>
             </form>
             <Link
               href="/settings/apps"

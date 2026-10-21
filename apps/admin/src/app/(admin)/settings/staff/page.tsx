@@ -6,6 +6,7 @@ import { Chip } from "@/lib/chips";
 import { requireAccess } from "@/lib/session";
 import { changeRoleAction, revokeAction, setActiveAction } from "./actions";
 import { InviteForm } from "./invite-form";
+import { PendingButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +52,7 @@ export default async function Staff() {
                   {isOwner || isMe ? ROLE_LABELS[m.role] : (
                     <form action={changeRoleAction.bind(null, m.id)} className="row">
                       <select name="role" aria-label={`Role for ${m.name ?? m.email}`} defaultValue={m.role} style={{ padding: 6 }}>{roles.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}</select>
-                      <Button type="submit" variant="secondary" style={{ minHeight: 40, padding: "4px 10px" }}>Save</Button>
+                      <PendingButton variant="secondary" style={{ minHeight: 40, padding: "4px 10px" }} pendingLabel="Working…">Save</PendingButton>
                     </form>
                   )}
                 </td>
@@ -59,7 +60,7 @@ export default async function Staff() {
                 <td>
                   {!isOwner && !isMe && (
                     <form action={setActiveAction.bind(null, m.id, !m.isActive)}>
-                      <Button type="submit" variant={m.isActive ? "danger" : "secondary"} style={{ minHeight: 40, padding: "4px 10px" }}>{m.isActive ? "Deactivate" : "Reactivate"}</Button>
+                      <PendingButton variant={m.isActive ? "danger" : "secondary"} style={{ minHeight: 40, padding: "4px 10px" }} pendingLabel="Working…">{m.isActive ? "Deactivate" : "Reactivate"}</PendingButton>
                     </form>
                   )}
                 </td>
@@ -71,7 +72,7 @@ export default async function Staff() {
               <td><strong>{i.email}</strong><div className="muted">Invited</div></td>
               <td>{ROLE_LABELS[i.role]}</td>
               <td><Chip value="PENDING" /> <span className="muted">{i.expired ? "Expired" : `Expires ${i.expiresAt.toLocaleDateString("en-GB")}`}</span></td>
-              <td><form action={revokeAction.bind(null, i.id)}><Button type="submit" variant="secondary" style={{ minHeight: 40, padding: "4px 10px" }}>Remove</Button></form></td>
+              <td><form action={revokeAction.bind(null, i.id)}><PendingButton variant="secondary" style={{ minHeight: 40, padding: "4px 10px" }} pendingLabel="Working…">Remove</PendingButton></form></td>
             </tr>
           ))}
         </tbody>
