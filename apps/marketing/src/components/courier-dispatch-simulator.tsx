@@ -58,7 +58,7 @@ export function CourierDispatchSimulator() {
       style={{
         padding: "32px 28px",
         background: "#FFFFFF",
-        boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
+        boxShadow: "0 10px 30px rgba(11, 77, 59, 0.06)",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
@@ -91,7 +91,7 @@ export function CourierDispatchSimulator() {
                 fontSize: 13,
                 fontWeight: destination === "dhaka" ? 700 : 500,
                 border: destination === "dhaka" ? "2px solid var(--brand)" : "1px solid var(--line)",
-                background: destination === "dhaka" ? "var(--tint)" : "#FAFAFC",
+                background: destination === "dhaka" ? "var(--tint)" : "#FBF7EC",
                 color: destination === "dhaka" ? "var(--brand)" : "var(--ink-2)",
                 cursor: "pointer",
               }}
@@ -108,7 +108,7 @@ export function CourierDispatchSimulator() {
                 fontSize: 13,
                 fontWeight: destination === "outside" ? 700 : 500,
                 border: destination === "outside" ? "2px solid var(--brand)" : "1px solid var(--line)",
-                background: destination === "outside" ? "var(--tint)" : "#FAFAFC",
+                background: destination === "outside" ? "var(--tint)" : "#FBF7EC",
                 color: destination === "outside" ? "var(--brand)" : "var(--ink-2)",
                 cursor: "pointer",
               }}
@@ -135,9 +135,9 @@ export function CourierDispatchSimulator() {
                   borderRadius: 8,
                   fontSize: 12.5,
                   fontWeight: selectedCourierId === c.id ? 700 : 500,
-                  border: selectedCourierId === c.id ? "2px solid #1D4ED8" : "1px solid var(--line)",
-                  background: selectedCourierId === c.id ? "#EFF6FF" : "#FAFAFC",
-                  color: selectedCourierId === c.id ? "#1D4ED8" : "var(--ink-2)",
+                  border: selectedCourierId === c.id ? "2px solid #11795A" : "1px solid var(--line)",
+                  background: selectedCourierId === c.id ? "#E3F1EA" : "#FBF7EC",
+                  color: selectedCourierId === c.id ? "#11795A" : "var(--ink-2)",
                   cursor: "pointer",
                   textAlign: "center",
                 }}
@@ -156,7 +156,7 @@ export function CourierDispatchSimulator() {
           display: "grid",
           gridTemplateColumns: "1.2fr 1fr",
           gap: 24,
-          background: "#F8FAFC",
+          background: "#FBF7EC",
           borderRadius: 12,
           padding: "22px 24px",
           border: "1px solid var(--line)",
@@ -172,22 +172,22 @@ export function CourierDispatchSimulator() {
           <div
             style={{
               background: "#FFFFFF",
-              border: "1.5px solid #1E293B",
+              border: "1.5px solid #0B4D3B",
               borderRadius: 8,
               padding: "16px 18px",
               fontFamily: "monospace",
-              color: "#0F172A",
+              color: "#0B4D3B",
               fontSize: 12,
               boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1.5px solid #0F172A", paddingBottom: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1.5px solid #0B4D3B", paddingBottom: 8 }}>
               <div>
                 <strong style={{ fontSize: 15 }}>{selectedCourier.name.toUpperCase()}</strong>
                 <div style={{ fontSize: 11 }}>TRACKING: {consignmentNo}</div>
               </div>
               <div style={{ textAlign: "right" }}>
-                <span style={{ border: "1px solid #0F172A", padding: "2px 6px", fontSize: 11, fontWeight: 700 }}>
+                <span style={{ border: "1px solid #0B4D3B", padding: "2px 6px", fontSize: 11, fontWeight: 700 }}>
                   {destination === "dhaka" ? "ZONE: DHAKA CITY" : "ZONE: OUTSIDE DHAKA"}
                 </span>
               </div>
@@ -199,17 +199,17 @@ export function CourierDispatchSimulator() {
               <div style={{ fontSize: 10, letterSpacing: "1px", fontWeight: 400, marginTop: 2 }}>*{consignmentNo}*</div>
             </div>
 
-            <div style={{ borderTop: "1px dashed #0F172A", paddingTop: 8, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <div style={{ borderTop: "1px dashed #0B4D3B", paddingTop: 8, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               <div>
-                <div style={{ fontSize: 10, textTransform: "uppercase", color: "#64748B" }}>Recipient:</div>
+                <div style={{ fontSize: 10, textTransform: "uppercase", color: "#3D5A52" }}>Recipient:</div>
                 <strong>Tanzimul Haque</strong>
                 <div>01712-345678</div>
                 <div>{destination === "dhaka" ? "Uttara Sector 4, Dhaka" : "Zindabazar, Sylhet"}</div>
               </div>
               <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: 10, textTransform: "uppercase", color: "#64748B" }}>COD Collection:</div>
+                <div style={{ fontSize: 10, textTransform: "uppercase", color: "#3D5A52" }}>COD Collection:</div>
                 <div style={{ fontSize: 18, fontWeight: 800 }}>৳ 2,450</div>
-                <div style={{ fontSize: 10, color: "#166534" }}>Delivery Fee: ৳ {deliveryFee}</div>
+                <div style={{ fontSize: 10, color: "#0B4D3B" }}>Delivery Fee: ৳ {deliveryFee}</div>
               </div>
             </div>
           </div>
@@ -224,7 +224,7 @@ export function CourierDispatchSimulator() {
             <div
               style={{
                 background: "#FFFFFF",
-                border: "1px solid #93C5FD",
+                border: "1px solid #8FD3B8",
                 borderRadius: 8,
                 padding: "12px 14px",
                 fontSize: 12.5,
@@ -238,12 +238,12 @@ export function CourierDispatchSimulator() {
 
           <div
             style={{
-              background: "#F0FDF4",
-              border: "1px solid #86EFAC",
+              background: "#E3F1EA",
+              border: "1px solid #8FD3B8",
               borderRadius: 8,
               padding: "12px 14px",
               fontSize: 12.5,
-              color: "#166534",
+              color: "#0B4D3B",
             }}
           >
             <strong>✓ 1-Click Dispatch Confirmed:</strong> Consignment automatically synchronized into your courier merchant account without copying addresses by hand.
@@ -253,7 +253,7 @@ export function CourierDispatchSimulator() {
             <a
               href={demoAdminUrl("gadgetstudio")}
               className="btn btn-primary btn-sm"
-              style={{ width: "100%", justifyContent: "center", background: "#1D4ED8" }}
+              style={{ width: "100%", justifyContent: "center", background: "#11795A" }}
             >
               Test 1-Click Booking in Demo Admin ↗
             </a>

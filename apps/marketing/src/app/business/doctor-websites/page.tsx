@@ -71,7 +71,7 @@ const BLUEPRINT_TABS = [
         <div style={{ fontWeight: 700, fontSize: 14, color: "var(--ink-ledger)" }}>
           Chamber 1: Popular Diagnostic (Banani) &middot; Sat, Mon, Wed (5:00 PM – 9:00 PM)
         </div>
-        <div style={{ fontSize: 12.5, color: "#15803D", marginTop: 4 }}>
+        <div style={{ fontSize: 12.5, color: "#11795A", marginTop: 4 }}>
           Road 11, Banani, Dhaka &middot; New Patient Fee: ৳ 1,500 &middot; Follow-up: ৳ 1,000
         </div>
       </div>
@@ -107,7 +107,7 @@ const BLUEPRINT_TABS = [
       <div style={{ fontSize: 13, color: "var(--ink-2)", lineHeight: 1.5 }}>
         <div><strong>Status:</strong> Confirmed &middot; Serial #14 Assigned</div>
         <div><strong>Action:</strong> Instant WhatsApp serial confirmation receipt ready</div>
-        <div style={{ marginTop: 6, color: "#166534", fontWeight: 700 }}>Zero crowded reception phone calls</div>
+        <div style={{ marginTop: 6, color: "#0B4D3B", fontWeight: 700 }}>Zero crowded reception phone calls</div>
       </div>
     ),
   },

@@ -71,7 +71,7 @@ const BLUEPRINT_TABS = [
         <div style={{ fontWeight: 700, fontSize: 14, color: "var(--ink-ledger)" }}>
           Active Coverage: Banani, Gulshan, Baridhara, Uttara, Dhanmondi &middot; 30-Min Arrival Window
         </div>
-        <div style={{ fontSize: 12.5, color: "#15803D", marginTop: 4 }}>
+        <div style={{ fontSize: 12.5, color: "#11795A", marginTop: 4 }}>
           ✓ Verified technicians currently stationed in North Dhaka
         </div>
       </div>
@@ -93,7 +93,7 @@ const BLUEPRINT_TABS = [
     customerSub: "Customer initiates a WhatsApp chat with pre-filled service package details, avoiding typing on mobile.",
     customerContent: (
       <div style={{ background: "#FFFFFF", padding: "14px 16px", borderRadius: 8, border: "1px solid var(--line)" }}>
-        <div style={{ fontWeight: 700, fontSize: 14, color: "#15803D" }}>
+        <div style={{ fontWeight: 700, fontSize: 14, color: "#11795A" }}>
           WhatsApp Pre-filled: &ldquo;Hello, I need Master AC Servicing for 2 units in Banani.&rdquo;
         </div>
         <div style={{ fontSize: 12.5, color: "var(--ink-3)", marginTop: 4 }}>
@@ -107,7 +107,7 @@ const BLUEPRINT_TABS = [
       <div style={{ fontSize: 13, color: "var(--ink-2)", lineHeight: 1.5 }}>
         <div><strong>Channel:</strong> WhatsApp Direct Button</div>
         <div><strong>Lead Status:</strong> New &rarr; Quote Sent</div>
-        <div style={{ marginTop: 6, color: "#0F766E", fontWeight: 700 }}>Conversation history retained in owner CRM log</div>
+        <div style={{ marginTop: 6, color: "#11795A", fontWeight: 700 }}>Conversation history retained in owner CRM log</div>
       </div>
     ),
   },

@@ -214,14 +214,14 @@ export default function BusinessPricingPage() {
               className="card ledger-border"
               style={{
                 padding: "32px 26px",
-                background: "#FFFDF8",
+                background: "#FBF7EC",
                 borderColor: "var(--business)",
                 borderWidth: 2,
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
                 position: "relative",
-                boxShadow: "0 10px 25px rgba(217, 119, 6, 0.12)",
+                boxShadow: "0 10px 25px rgba(242, 169, 0, , 0.12)",
               }}
             >
               <div
@@ -355,10 +355,10 @@ export default function BusinessPricingPage() {
           >
             <table style={{ width: "100%", minWidth: 640, borderCollapse: "collapse", fontSize: 14 }}>
               <thead>
-                <tr style={{ background: "#F8FAFC", borderBottom: "1.5px solid var(--line-strong)" }}>
+                <tr style={{ background: "#FBF7EC", borderBottom: "1.5px solid var(--line-strong)" }}>
                   <th style={{ padding: "16px 20px", textAlign: "left", color: "var(--ink-ledger)" }}>Capability / Feature</th>
                   <th style={{ padding: "16px 16px", textAlign: "center", color: "var(--ink-ledger)" }}>Starter (৳399)</th>
-                  <th style={{ padding: "16px 16px", textAlign: "center", color: "var(--business)", background: "#FFFDF8" }}>Business (৳799)</th>
+                  <th style={{ padding: "16px 16px", textAlign: "center", color: "var(--business)", background: "#FBF7EC" }}>Business (৳799)</th>
                   <th style={{ padding: "16px 16px", textAlign: "center", color: "var(--ink-ledger)" }}>Plus (৳1,499)</th>
                 </tr>
               </thead>
@@ -366,67 +366,67 @@ export default function BusinessPricingPage() {
                 <tr style={{ borderBottom: "1px solid var(--line)" }}>
                   <td style={{ padding: "14px 20px", fontWeight: 700, color: "var(--ink-ledger)" }}>Operating Architecture</td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>PORTFOLIO (Lead Engine)</td>
-                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FFFDF8", fontWeight: 700, color: "var(--business)" }}>PORTFOLIO or HYBRID (Dual)</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FBF7EC", fontWeight: 700, color: "var(--business)" }}>PORTFOLIO or HYBRID (Dual)</td>
                   <td style={{ padding: "14px 16px", textAlign: "center", fontWeight: 700 }}>PORTFOLIO or HYBRID (Dual)</td>
                 </tr>
                 <tr style={{ borderBottom: "1px solid var(--line)" }}>
                   <td style={{ padding: "14px 20px", fontWeight: 700, color: "var(--ink-ledger)" }}>Zero Data Loss Guarantee</td>
-                  <td style={{ padding: "14px 16px", textAlign: "center", color: "#027A48", fontWeight: 700 }}>100% Leads Retained</td>
-                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FFFDF8", color: "#027A48", fontWeight: 700 }}>100% Leads Retained</td>
-                  <td style={{ padding: "14px 16px", textAlign: "center", color: "#027A48", fontWeight: 700 }}>100% Leads Retained</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", color: "#0B4D3B", fontWeight: 700 }}>100% Leads Retained</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FBF7EC", color: "#0B4D3B", fontWeight: 700 }}>100% Leads Retained</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", color: "#0B4D3B", fontWeight: 700 }}>100% Leads Retained</td>
                 </tr>
                 <tr style={{ borderBottom: "1px solid var(--line)" }}>
                   <td style={{ padding: "14px 20px", fontWeight: 600 }}>Custom Domain Support</td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>✓ Included</td>
-                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FFFDF8" }}>✓ Included</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FBF7EC" }}>✓ Included</td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>✓ Included</td>
                 </tr>
                 <tr style={{ borderBottom: "1px solid var(--line)" }}>
                   <td style={{ padding: "14px 20px", fontWeight: 600 }}>Inbound Lead Capture</td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>✓ Included</td>
-                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FFFDF8" }}>✓ Included</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FBF7EC" }}>✓ Included</td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>✓ Included</td>
                 </tr>
                 <tr style={{ borderBottom: "1px solid var(--line)" }}>
                   <td style={{ padding: "14px 20px", fontWeight: 600 }}>Appointment &amp; Table Booking Engine</td>
                   <td style={{ padding: "14px 16px", textAlign: "center", color: "var(--ink-3)" }}>—</td>
-                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FFFDF8", color: "var(--business)", fontWeight: 700 }}>✓ Included</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FBF7EC", color: "var(--business)", fontWeight: 700 }}>✓ Included</td>
                   <td style={{ padding: "14px 16px", textAlign: "center", fontWeight: 700 }}>✓ Included</td>
                 </tr>
                 <tr style={{ borderBottom: "1px solid var(--line)" }}>
                   <td style={{ padding: "14px 20px", fontWeight: 600 }}>Dual Engine Merchandise Sales</td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>Up to 10 products</td>
-                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FFFDF8", fontWeight: 600, color: "var(--business)" }}>Full Dual Engine (50 items)</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FBF7EC", fontWeight: 600, color: "var(--business)" }}>Full Dual Engine (50 items)</td>
                   <td style={{ padding: "14px 16px", textAlign: "center", fontWeight: 600 }}>Full Dual Engine (200 items)</td>
                 </tr>
                 <tr style={{ borderBottom: "1px solid var(--line)" }}>
                   <td style={{ padding: "14px 20px", fontWeight: 600 }}>Custom Pages Limit</td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>Up to 5 Pages</td>
-                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FFFDF8" }}>Up to 20 Pages</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FBF7EC" }}>Up to 20 Pages</td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>Unlimited</td>
                 </tr>
                 <tr style={{ borderBottom: "1px solid var(--line)" }}>
                   <td style={{ padding: "14px 20px", fontWeight: 600 }}>Downloadable File Center (PDF/CV)</td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>5 Files</td>
-                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FFFDF8" }}>Unlimited</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FBF7EC" }}>Unlimited</td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>Unlimited</td>
                 </tr>
                 <tr style={{ borderBottom: "1px solid var(--line)" }}>
                   <td style={{ padding: "14px 20px", fontWeight: 600 }}>Staff Admin Accounts</td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>1 Account</td>
-                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FFFDF8" }}>3 Accounts</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FBF7EC" }}>3 Accounts</td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>10 Accounts</td>
                 </tr>
                 <tr style={{ borderBottom: "1px solid var(--line)" }}>
                   <td style={{ padding: "14px 20px", fontWeight: 600 }}>Sales Commission</td>
-                  <td style={{ padding: "14px 16px", textAlign: "center", color: "#166534", fontWeight: 700 }}>0%</td>
-                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FFFDF8", color: "#166534", fontWeight: 700 }}>0%</td>
-                  <td style={{ padding: "14px 16px", textAlign: "center", color: "#166534", fontWeight: 700 }}>0%</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", color: "#0B4D3B", fontWeight: 700 }}>0%</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FBF7EC", color: "#0B4D3B", fontWeight: 700 }}>0%</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", color: "#0B4D3B", fontWeight: 700 }}>0%</td>
                 </tr>
                 <tr>
                   <td style={{ padding: "14px 20px", fontWeight: 600 }}>Dhaka Support Assistance</td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>WhatsApp &amp; Email</td>
-                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FFFDF8" }}>WhatsApp &amp; Phone</td>
+                  <td style={{ padding: "14px 16px", textAlign: "center", background: "#FBF7EC" }}>WhatsApp &amp; Phone</td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>Dedicated Concierge</td>
                 </tr>
               </tbody>
@@ -461,7 +461,7 @@ export default function BusinessPricingPage() {
           <h2 style={{ color: "#FFFFFF", fontSize: "clamp(26px, 4.5vw, 42px)", letterSpacing: "-1px", margin: 0 }}>
             Launch your professional business website today
           </h2>
-          <p style={{ color: "var(--ink-3)", maxWidth: 560, margin: "14px auto 28px", fontSize: 16 }}>
+          <p style={{ color: "var(--green-light)", maxWidth: 560, margin: "14px auto 28px", fontSize: 16 }}>
             Start with our 14-day free trial. No foreign credit card required. Pay easily via bKash or Nagad.
           </p>
           <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
@@ -476,7 +476,7 @@ export default function BusinessPricingPage() {
             <Link
               href="/business/templates"
               className="btn btn-secondary btn-lg"
-              style={{ background: "transparent", color: "#FFFFFF", borderColor: "#475569" }}
+              style={{ background: "transparent", color: "#FFFFFF", borderColor: "#3D5A52" }}
             >
               Explore Business Templates
             </Link>

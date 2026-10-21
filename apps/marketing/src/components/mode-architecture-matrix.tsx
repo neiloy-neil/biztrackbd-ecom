@@ -83,8 +83,8 @@ export function ModeArchitectureMatrix() {
             style={{
               fontSize: 12,
               fontWeight: 700,
-              color: "var(--brand, #5B4FE8)",
-              background: "#F0EEFF",
+              color: "var(--brand, #11795A)",
+              background: "#E3F1EA",
               padding: "4px 10px",
               borderRadius: 16,
             }}
@@ -98,7 +98,7 @@ export function ModeArchitectureMatrix() {
             letterSpacing: "-1.1px",
             lineHeight: 1.18,
             fontWeight: 800,
-            color: "var(--ink-ledger, #121826)",
+            color: "var(--ink-ledger, #08382B)",
             margin: 0,
           }}
         >
@@ -107,7 +107,7 @@ export function ModeArchitectureMatrix() {
         <p
           style={{
             fontSize: 16.5,
-            color: "var(--ink-2, #475467)",
+            color: "var(--ink-2, #3D5A52)",
             lineHeight: 1.6,
             margin: "14px auto 0",
           }}
@@ -131,8 +131,8 @@ export function ModeArchitectureMatrix() {
           className="card ledger-border"
           style={{
             padding: "26px 22px",
-            background: activeHighlight === "portfolio" ? "#FAF9FE" : "#FFFFFF",
-            border: activeHighlight === "portfolio" ? "2px solid #5B4FE8" : "1px solid var(--line, #E2E2EC)",
+            background: activeHighlight === "portfolio" ? "#FBF7EC" : "#FFFFFF",
+            border: activeHighlight === "portfolio" ? "2px solid #11795A" : "1px solid var(--line, #DCE7E1)",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
@@ -144,34 +144,34 @@ export function ModeArchitectureMatrix() {
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span className="status-stamp stamp-lead" style={{ fontSize: 11 }}>PORTFOLIO MODE</span>
-              <span style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-3, #98A2B3)" }}>From ৳399/mo</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-3, #6F8F83)" }}>From ৳399/mo</span>
             </div>
-            <h3 style={{ margin: "14px 0 6px", fontSize: 20, color: "var(--ink-ledger, #121826)" }}>
+            <h3 style={{ margin: "14px 0 6px", fontSize: 20, color: "var(--ink-ledger, #08382B)" }}>
               Lead &amp; Booking Engine
             </h3>
-            <p style={{ fontSize: 13.5, color: "var(--ink-2, #475467)", lineHeight: 1.5, margin: "0 0 16px" }}>
+            <p style={{ fontSize: 13.5, color: "var(--ink-2, #3D5A52)", lineHeight: 1.5, margin: "0 0 16px" }}>
               Tailored for doctors, clinics, restaurants, law firms, and consultants who need client inquiries without ecommerce checkout.
             </p>
 
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10, fontSize: 13.5 }}>
               <li style={{ display: "flex", gap: 8 }}>
-                <span style={{ color: "#12B76A" }}>✓</span>
+                <span style={{ color: "#11795A" }}>✓</span>
                 <span><strong>BMDC verified doctor credentials</strong> &amp; chamber schedule routing</span>
               </li>
               <li style={{ display: "flex", gap: 8 }}>
-                <span style={{ color: "#12B76A" }}>✓</span>
+                <span style={{ color: "#11795A" }}>✓</span>
                 <span><strong>Contactless digital QR menu</strong> with dish trays for dining</span>
               </li>
               <li style={{ display: "flex", gap: 8 }}>
-                <span style={{ color: "#12B76A" }}>✓</span>
+                <span style={{ color: "#11795A" }}>✓</span>
                 <span><strong>Anti-bot shielded lead capture</strong> with instant WhatsApp alert</span>
               </li>
               <li style={{ display: "flex", gap: 8 }}>
-                <span style={{ color: "#12B76A" }}>✓</span>
+                <span style={{ color: "#11795A" }}>✓</span>
                 <span><strong>Split-pane Lead Workspace</strong> with private follow-up notes</span>
               </li>
               <li style={{ display: "flex", gap: 8 }}>
-                <span style={{ color: "#5B4FE8" }}>⚡</span>
+                <span style={{ color: "#11795A" }}>⚡</span>
                 <span><strong>1-Click Upgrade to Hybrid</strong> whenever physical items are added</span>
               </li>
             </ul>
@@ -193,9 +193,9 @@ export function ModeArchitectureMatrix() {
           className="card ledger-border"
           style={{
             padding: "26px 22px",
-            background: "#FCFCFF",
-            border: "2px solid #5B4FE8",
-            boxShadow: "0 8px 24px rgba(91,79,232,0.12)",
+            background: "#FBF7EC",
+            border: "2px solid #11795A",
+            boxShadow: "0 8px 24px rgba(17, 121, 90, 0.12)",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
@@ -209,7 +209,7 @@ export function ModeArchitectureMatrix() {
               position: "absolute",
               top: -12,
               right: 18,
-              background: "#5B4FE8",
+              background: "#11795A",
               color: "#FFFFFF",
               fontSize: 10.5,
               fontWeight: 800,
@@ -224,37 +224,37 @@ export function ModeArchitectureMatrix() {
 
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span className="status-stamp stamp-paid" style={{ fontSize: 11, background: "#EDFDF2", color: "#027A48", borderColor: "#A6F4C5" }}>
+              <span className="status-stamp stamp-paid" style={{ fontSize: 11, background: "#E3F1EA", color: "#0B4D3B", borderColor: "#C6DFD3" }}>
                 HYBRID MODE
               </span>
-              <span style={{ fontSize: 13, fontWeight: 700, color: "#5B4FE8" }}>From ৳799/mo (Pro)</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: "#11795A" }}>From ৳799/mo (Pro)</span>
             </div>
-            <h3 style={{ margin: "14px 0 6px", fontSize: 20, color: "var(--ink-ledger, #121826)" }}>
+            <h3 style={{ margin: "14px 0 6px", fontSize: 20, color: "var(--ink-ledger, #08382B)" }}>
               Inquiries + Full Commerce
             </h3>
-            <p style={{ fontSize: 13.5, color: "var(--ink-2, #475467)", lineHeight: 1.5, margin: "0 0 16px" }}>
+            <p style={{ fontSize: 13.5, color: "var(--ink-2, #3D5A52)", lineHeight: 1.5, margin: "0 0 16px" }}>
               Run both engines under one single brand domain: take appointment consultation bookings AND deliver physical merchandise.
             </p>
 
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10, fontSize: 13.5 }}>
               <li style={{ display: "flex", gap: 8 }}>
-                <span style={{ color: "#12B76A" }}>✓</span>
+                <span style={{ color: "#11795A" }}>✓</span>
                 <span><strong>Dual Route Engine:</strong> /appointment and /products run side-by-side</span>
               </li>
               <li style={{ display: "flex", gap: 8 }}>
-                <span style={{ color: "#12B76A" }}>✓</span>
+                <span style={{ color: "#11795A" }}>✓</span>
                 <span><strong>Full Cart &amp; Checkout:</strong> bKash, Nagad, Cards, and Cash on Delivery</span>
               </li>
               <li style={{ display: "flex", gap: 8 }}>
-                <span style={{ color: "#12B76A" }}>✓</span>
+                <span style={{ color: "#11795A" }}>✓</span>
                 <span><strong>Courier Dispatch:</strong> 1-click booking for Pathao, Steadfast, and RedX</span>
               </li>
               <li style={{ display: "flex", gap: 8 }}>
-                <span style={{ color: "#12B76A" }}>✓</span>
+                <span style={{ color: "#11795A" }}>✓</span>
                 <span><strong>Zero Data Loss Guarantee:</strong> Historical leads are never deleted</span>
               </li>
               <li style={{ display: "flex", gap: 8 }}>
-                <span style={{ color: "#12B76A" }}>✓</span>
+                <span style={{ color: "#11795A" }}>✓</span>
                 <span><strong>Unified Admin Command:</strong> Lead Inbox + Order Fulfillment desks</span>
               </li>
             </ul>
@@ -276,8 +276,8 @@ export function ModeArchitectureMatrix() {
           className="card ledger-border"
           style={{
             padding: "26px 22px",
-            background: activeHighlight === "commerce" ? "#FAF9FE" : "#FFFFFF",
-            border: activeHighlight === "commerce" ? "2px solid #5B4FE8" : "1px solid var(--line, #E2E2EC)",
+            background: activeHighlight === "commerce" ? "#FBF7EC" : "#FFFFFF",
+            border: activeHighlight === "commerce" ? "2px solid #11795A" : "1px solid var(--line, #DCE7E1)",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
@@ -289,34 +289,34 @@ export function ModeArchitectureMatrix() {
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span className="status-stamp stamp-pending" style={{ fontSize: 11 }}>COMMERCE MODE</span>
-              <span style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-3, #98A2B3)" }}>From ৳399/mo</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-3, #6F8F83)" }}>From ৳399/mo</span>
             </div>
-            <h3 style={{ margin: "14px 0 6px", fontSize: 20, color: "var(--ink-ledger, #121826)" }}>
+            <h3 style={{ margin: "14px 0 6px", fontSize: 20, color: "var(--ink-ledger, #08382B)" }}>
               Pure Retail e-Commerce
             </h3>
-            <p style={{ fontSize: 13.5, color: "var(--ink-2, #475467)", lineHeight: 1.5, margin: "0 0 16px" }}>
+            <p style={{ fontSize: 13.5, color: "var(--ink-2, #3D5A52)", lineHeight: 1.5, margin: "0 0 16px" }}>
               Built for high-volume retail merchants selling fashion, electronics, gadgets, and consumer goods nationwide.
             </p>
 
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10, fontSize: 13.5 }}>
               <li style={{ display: "flex", gap: 8 }}>
-                <span style={{ color: "#12B76A" }}>✓</span>
+                <span style={{ color: "#11795A" }}>✓</span>
                 <span><strong>High-converting single-page checkout</strong> with fast OTP login</span>
               </li>
               <li style={{ display: "flex", gap: 8 }}>
-                <span style={{ color: "#12B76A" }}>✓</span>
+                <span style={{ color: "#11795A" }}>✓</span>
                 <span><strong>National COD Return Fraud Checker</strong> with cross-merchant scores</span>
               </li>
               <li style={{ display: "flex", gap: 8 }}>
-                <span style={{ color: "#12B76A" }}>✓</span>
+                <span style={{ color: "#11795A" }}>✓</span>
                 <span><strong>Multi-Carrier Courier Rate Shopping</strong> (Steadfast, Pathao, RedX)</span>
               </li>
               <li style={{ display: "flex", gap: 8 }}>
-                <span style={{ color: "#12B76A" }}>✓</span>
+                <span style={{ color: "#11795A" }}>✓</span>
                 <span><strong>Automated Invoices &amp; Barcodes</strong> with pos thermal print support</span>
               </li>
               <li style={{ display: "flex", gap: 8 }}>
-                <span style={{ color: "#5B4FE8" }}>⚡</span>
+                <span style={{ color: "#11795A" }}>⚡</span>
                 <span><strong>Seamless transition to Hybrid</strong> if appointment services are added</span>
               </li>
             </ul>
@@ -341,7 +341,7 @@ export function ModeArchitectureMatrix() {
           maxWidth: 1140,
           margin: "0 auto 48px",
           padding: "24px 28px",
-          background: "#F8F8FC",
+          background: "#FBF7EC",
           display: "flex",
           flexWrap: "wrap",
           alignItems: "center",
@@ -351,37 +351,37 @@ export function ModeArchitectureMatrix() {
         <div style={{ flex: "1 1 340px" }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
             <span style={{ fontSize: 18 }}>🛡️</span>
-            <span style={{ fontSize: 13, fontWeight: 800, color: "#027A48", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+            <span style={{ fontSize: 13, fontWeight: 800, color: "#0B4D3B", textTransform: "uppercase", letterSpacing: "0.5px" }}>
               Guaranteed Zero Data Loss Protocol
             </span>
           </div>
-          <h3 style={{ margin: "0 0 8px", fontSize: 18, color: "var(--ink-ledger, #121826)" }}>
+          <h3 style={{ margin: "0 0 8px", fontSize: 18, color: "var(--ink-ledger, #08382B)" }}>
             What happens when you switch from Portfolio to Hybrid?
           </h3>
-          <p style={{ margin: 0, fontSize: 14, color: "var(--ink-2, #475467)", lineHeight: 1.6 }}>
+          <p style={{ margin: 0, fontSize: 14, color: "var(--ink-2, #3D5A52)", lineHeight: 1.6 }}>
             Unlike Shopify or WordPress—where switching between service templates and ecommerce themes can wipe customization and lead forms—BizTrackBD executes an <strong>atomic, non-destructive mode transition</strong>. Every historical consultation inquiry, patient booking, customer phone record, and timeline note is immutably preserved in PostgreSQL.
           </p>
         </div>
 
         <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
-          <div style={{ background: "#FFFFFF", padding: "12px 18px", borderRadius: 8, border: "1px solid var(--line, #E2E2EC)", minWidth: 160 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "var(--ink-3, #98A2B3)" }}>PRE-FLIGHT DRY RUN</div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink-ledger, #121826)", marginTop: 2 }}>Audited Impact Report</div>
+          <div style={{ background: "#FFFFFF", padding: "12px 18px", borderRadius: 8, border: "1px solid var(--line, #DCE7E1)", minWidth: 160 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "var(--ink-3, #6F8F83)" }}>PRE-FLIGHT DRY RUN</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink-ledger, #08382B)", marginTop: 2 }}>Audited Impact Report</div>
           </div>
-          <div style={{ background: "#FFFFFF", padding: "12px 18px", borderRadius: 8, border: "1px solid var(--line, #E2E2EC)", minWidth: 160 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "var(--ink-3, #98A2B3)" }}>HISTORICAL DATA</div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "#027A48", marginTop: 2 }}>100% Leads Retained</div>
+          <div style={{ background: "#FFFFFF", padding: "12px 18px", borderRadius: 8, border: "1px solid var(--line, #DCE7E1)", minWidth: 160 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "var(--ink-3, #6F8F83)" }}>HISTORICAL DATA</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#0B4D3B", marginTop: 2 }}>100% Leads Retained</div>
           </div>
-          <div style={{ background: "#FFFFFF", padding: "12px 18px", borderRadius: 8, border: "1px solid var(--line, #E2E2EC)", minWidth: 160 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "var(--ink-3, #98A2B3)" }}>OPERATOR CONSENT</div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "#5B4FE8", marginTop: 2 }}>Full Audit Trail</div>
+          <div style={{ background: "#FFFFFF", padding: "12px 18px", borderRadius: 8, border: "1px solid var(--line, #DCE7E1)", minWidth: 160 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "var(--ink-3, #6F8F83)" }}>OPERATOR CONSENT</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#11795A", marginTop: 2 }}>Full Audit Trail</div>
           </div>
         </div>
       </div>
 
       {/* Detailed Technical Feature Matrix by Mode */}
       <div style={{ maxWidth: 1140, margin: "0 auto" }}>
-        <h3 style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-0.5px", marginBottom: 12, color: "var(--ink-ledger, #121826)" }}>
+        <h3 style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-0.5px", marginBottom: 12, color: "var(--ink-ledger, #08382B)" }}>
           Detailed Operating Capabilities by Mode
         </h3>
         <div className="mobile-scroll-cue" style={{ display: "none", fontSize: 12.5, color: "var(--ink-3)", marginBottom: 8, fontStyle: "italic" }}>
@@ -398,7 +398,7 @@ export function ModeArchitectureMatrix() {
                     Leads &amp; Bookings
                   </div>
                 </th>
-                <th scope="col" className="best" style={{ background: "#F4F3FF" }}>
+                <th scope="col" className="best" style={{ background: "#E3F1EA" }}>
                   Hybrid Mode
                   <div style={{ fontSize: 11, fontWeight: 700, color: "var(--brand)", marginTop: 2 }}>
                     DUAL ENGINE
@@ -417,7 +417,7 @@ export function ModeArchitectureMatrix() {
                 <tr key={row.dimension}>
                   <th scope="row" style={{ fontWeight: 700, color: "var(--ink-ledger)" }}>{row.dimension}</th>
                   <td>{row.portfolio}</td>
-                  <td className="best" style={{ background: "#FAF9FE", fontWeight: 600, color: "var(--ink-ledger)" }}>
+                  <td className="best" style={{ background: "#FBF7EC", fontWeight: 600, color: "var(--ink-ledger)" }}>
                     {row.hybrid}
                   </td>
                   <td>{row.commerce}</td>

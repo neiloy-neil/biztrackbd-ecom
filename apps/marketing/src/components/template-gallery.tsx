@@ -126,7 +126,7 @@ export const BUSINESS_TEMPLATES_DATA: GalleryTheme[] = [
     module: "Food & Dining",
     mode: "business",
     vertical: "RESTAURANT",
-    colors: { accent: "#D97706", background: "#FFFDF8", text: "#1C1917" },
+    colors: { accent: "#946300", background: "#FBF7EC", text: "#0B4D3B" },
     previewFeatures: ["Contactless Table QR", "Bilingual Dishes", "Dietary Tags (Halal, Spicy)", "Call Waiter Action"],
   },
   {
@@ -140,7 +140,7 @@ export const BUSINESS_TEMPLATES_DATA: GalleryTheme[] = [
     module: "Clinic & Health",
     mode: "business",
     vertical: "DOCTOR_CLINIC",
-    colors: { accent: "#0284C7", background: "#F8FAFC", text: "#0F172A" },
+    colors: { accent: "#11795A", background: "#FBF7EC", text: "#0B4D3B" },
     previewFeatures: ["BMDC Credentials", "Dhanmondi & Mirpur Chambers", "Visiting Hours", "Appointment Booking"],
   },
   {
@@ -154,7 +154,7 @@ export const BUSINESS_TEMPLATES_DATA: GalleryTheme[] = [
     module: "Corporate Trust",
     mode: "business",
     vertical: "BUSINESS_COMPANY",
-    colors: { accent: "#1E40AF", background: "#FFFFFF", text: "#111827" },
+    colors: { accent: "#0B4D3B", background: "#FFFFFF", text: "#0B4D3B" },
     previewFeatures: ["Practice Areas", "Leadership Bio Grid", "ISO Certification", "Downloadable Profile"],
   },
   {
@@ -168,7 +168,7 @@ export const BUSINESS_TEMPLATES_DATA: GalleryTheme[] = [
     module: "Service Pros",
     mode: "business",
     vertical: "SERVICE_PROVIDER",
-    colors: { accent: "#0D9488", background: "#F0FDFA", text: "#134E4A" },
+    colors: { accent: "#11795A", background: "#E3F1EA", text: "#0B4D3B" },
     previewFeatures: ["Fixed Service Pricing", "Coverage Map", "Free Quote Form", "30-Day Guarantee"],
   },
   {
@@ -182,7 +182,7 @@ export const BUSINESS_TEMPLATES_DATA: GalleryTheme[] = [
     module: "Creative & Tech",
     mode: "business",
     vertical: "PERSONAL_PORTFOLIO",
-    colors: { accent: "#4F46E5", background: "#FAFAFA", text: "#18181B" },
+    colors: { accent: "#11795A", background: "#FBF7EC", text: "#0B4D3B" },
     previewFeatures: ["Fintech & SaaS Case Studies", "Design System Highlights", "Resume Download", "Direct Contact"],
   },
   {
@@ -196,7 +196,7 @@ export const BUSINESS_TEMPLATES_DATA: GalleryTheme[] = [
     module: "Leadership & Media",
     mode: "business",
     vertical: "PUBLIC_FIGURE",
-    colors: { accent: "#4338CA", background: "#FAFAFA", text: "#1E1B4B" },
+    colors: { accent: "#11795A", background: "#FBF7EC", text: "#0B4D3B" },
     previewFeatures: ["Media Kit & Press Kit", "Op-Ed Column Showcase", "Official Biography", "Keynote Invitation Form"],
   },
 ];
@@ -301,10 +301,10 @@ export function TemplateGallery({
           style={{
             display: "inline-flex",
             maxWidth: "100%",
-            background: "#F1F1F8",
+            background: "#FBF7EC",
             padding: "5px",
             borderRadius: "32px",
-            border: "1px solid var(--line, #E2E2EC)",
+            border: "1px solid var(--line, #DCE7E1)",
             boxShadow: "inset 0 1px 3px rgba(0,0,0,0.04)",
             flexWrap: "wrap",
             justifyContent: "center",
@@ -323,7 +323,7 @@ export function TemplateGallery({
               padding: "8px clamp(12px, 3vw, 22px)",
               borderRadius: "28px",
               background: activeMode === "ecommerce" ? "#FFFFFF" : "transparent",
-              color: activeMode === "ecommerce" ? "var(--ink, #101828)" : "#555E72",
+              color: activeMode === "ecommerce" ? "var(--ink, #0B4D3B)" : "#3D5A52",
               fontWeight: 700,
               fontSize: "clamp(13px, 2.5vw, 15px)",
               border: "none",
@@ -341,8 +341,8 @@ export function TemplateGallery({
                 fontSize: "12px",
                 padding: "2px 8px",
                 borderRadius: "12px",
-                background: activeMode === "ecommerce" ? "#EFEFF6" : "#E5E5EE",
-                color: "var(--ink, #101828)",
+                background: activeMode === "ecommerce" ? "#FBF7EC" : "#DCE7E1",
+                color: "var(--ink, #0B4D3B)",
               }}
             >
               {ecomAll.length}
@@ -361,7 +361,7 @@ export function TemplateGallery({
               padding: "8px clamp(12px, 3vw, 22px)",
               borderRadius: "28px",
               background: activeMode === "business" ? "#FFFFFF" : "transparent",
-              color: activeMode === "business" ? "var(--ink, #101828)" : "#555E72",
+              color: activeMode === "business" ? "var(--ink, #0B4D3B)" : "#3D5A52",
               fontWeight: 700,
               fontSize: "clamp(13px, 2.5vw, 15px)",
               border: "none",
@@ -380,8 +380,8 @@ export function TemplateGallery({
                 fontWeight: 700,
                 padding: "2px 8px",
                 borderRadius: "12px",
-                background: "#DCFCE7",
-                color: "#166534",
+                background: "#E3F1EA",
+                color: "#0B4D3B",
               }}
             >
               5 Verticals
@@ -397,7 +397,7 @@ export function TemplateGallery({
           maxWidth: "680px",
           margin: "0 auto 28px",
           fontSize: "14.5px",
-          color: "var(--ink-2, #475467)",
+          color: "var(--ink-2, #3D5A52)",
           lineHeight: 1.5,
         }}
       >
@@ -415,8 +415,8 @@ export function TemplateGallery({
       {/* Category Filter Pills Bar */}
       <div
         style={{
-          borderTop: "1px solid var(--line, #E2E2EC)",
-          borderBottom: "1px solid var(--line, #E2E2EC)",
+          borderTop: "1px solid var(--line, #DCE7E1)",
+          borderBottom: "1px solid var(--line, #DCE7E1)",
           background: "#FFFFFF",
           padding: "14px 0",
           marginBottom: "36px",
@@ -440,9 +440,9 @@ export function TemplateGallery({
                 style={{
                   padding: "8px 16px",
                   borderRadius: 20,
-                  background: isActive ? "var(--ink, #101828)" : "#FFFFFF",
-                  color: isActive ? "#FFFFFF" : "var(--ink-2, #475467)",
-                  border: isActive ? "1px solid var(--ink, #101828)" : "1px solid #D5D5E4",
+                  background: isActive ? "var(--ink, #0B4D3B)" : "#FFFFFF",
+                  color: isActive ? "#FFFFFF" : "var(--ink-2, #3D5A52)",
+                  border: isActive ? "1px solid var(--ink, #0B4D3B)" : "1px solid #C3D4CB",
                   fontSize: 13.5,
                   fontWeight: isActive ? 700 : 600,
                   cursor: "pointer",
@@ -466,8 +466,8 @@ export function TemplateGallery({
             );
           })}
           <div style={{ flexGrow: 1 }} />
-          <div style={{ fontSize: 13.5, color: "var(--ink-2, #475467)" }}>
-            Showing: <strong style={{ color: "var(--ink, #101828)" }}>{filtered.length} designs</strong>
+          <div style={{ fontSize: 13.5, color: "var(--ink-2, #3D5A52)" }}>
+            Showing: <strong style={{ color: "var(--ink, #0B4D3B)" }}>{filtered.length} designs</strong>
           </div>
         </div>
       </div>
@@ -498,7 +498,7 @@ export function TemplateGallery({
               style={{
                 borderRadius: 16,
                 padding: 18,
-                border: "1px solid var(--line, #E2E2EC)",
+                border: "1px solid var(--line, #DCE7E1)",
                 background: "#FFFFFF",
                 display: "flex",
                 flexDirection: "column",
@@ -514,8 +514,8 @@ export function TemplateGallery({
                   borderRadius: 12,
                   overflow: "hidden",
                   position: "relative",
-                  background: t.colors?.background ?? "var(--soft, #F8FAFC)",
-                  border: "1px solid var(--line, #E2E2EC)",
+                  background: t.colors?.background ?? "var(--soft, #FBF7EC)",
+                  border: "1px solid var(--line, #DCE7E1)",
                 }}
               >
                 {t.uploaded && t.previewDesktop ? (
@@ -523,7 +523,7 @@ export function TemplateGallery({
                     {/* eslint-disable-next-line @next/next/no-img-element -- staff-uploaded preview on an external https host */}
                     <img src={t.previewDesktop} alt={`${t.name} template home page`} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
                     {t.previewMobile && (
-                      <div style={{ position: "absolute", right: 12, bottom: -8, width: "28%", height: "75%", borderRadius: 10, overflow: "hidden", border: "2px solid #FFFFFF", boxShadow: "0 6px 16px rgba(26, 26, 78, 0.2)" }}>
+                      <div style={{ position: "absolute", right: 12, bottom: -8, width: "28%", height: "75%", borderRadius: 10, overflow: "hidden", border: "2px solid #FFFFFF", boxShadow: "0 6px 16px rgba(11, 77, 59, , 0.2)" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={t.previewMobile} alt={`${t.name} mobile preview`} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
                       </div>
@@ -605,7 +605,7 @@ export function TemplateGallery({
                         borderRadius: 10,
                         overflow: "hidden",
                         border: "2px solid #FFFFFF",
-                        boxShadow: "0 6px 16px rgba(26, 26, 78, 0.2)",
+                        boxShadow: "0 6px 16px rgba(11, 77, 59, , 0.2)",
                       }}
                     >
                       <Image
@@ -623,7 +623,7 @@ export function TemplateGallery({
               {/* Title and Description */}
               <div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-                  <h3 style={{ fontSize: 19, fontWeight: 700, margin: 0, color: "var(--ink, #101828)" }}>
+                  <h3 style={{ fontSize: 19, fontWeight: 700, margin: 0, color: "var(--ink, #0B4D3B)" }}>
                     {t.name}
                   </h3>
                   {t.mode === "business" && (
@@ -633,8 +633,8 @@ export function TemplateGallery({
                         fontWeight: 700,
                         padding: "2px 7px",
                         borderRadius: "10px",
-                        background: "#ECFDF5",
-                        color: "#047857",
+                        background: "#E3F1EA",
+                        color: "#0B4D3B",
                       }}
                     >
                       {t.categoryLabel}
@@ -644,7 +644,7 @@ export function TemplateGallery({
                 <p
                   style={{
                     fontSize: 13.5,
-                    color: "var(--ink-2, #475467)",
+                    color: "var(--ink-2, #3D5A52)",
                     lineHeight: 1.5,
                     marginTop: 6,
                     minHeight: 42,
@@ -660,8 +660,8 @@ export function TemplateGallery({
                   style={{
                     padding: "3px 10px",
                     borderRadius: 11,
-                    background: "#EFEFF6",
-                    color: "var(--ink-2, #475467)",
+                    background: "#FBF7EC",
+                    color: "var(--ink-2, #3D5A52)",
                     fontSize: 12,
                     fontWeight: 600,
                   }}
@@ -672,8 +672,8 @@ export function TemplateGallery({
                   style={{
                     padding: "3px 10px",
                     borderRadius: 11,
-                    background: "#EFEFF6",
-                    color: "var(--ink-2, #475467)",
+                    background: "#FBF7EC",
+                    color: "var(--ink-2, #3D5A52)",
                     fontSize: 12,
                     fontWeight: 600,
                   }}
@@ -684,8 +684,8 @@ export function TemplateGallery({
                   style={{
                     padding: "3px 10px",
                     borderRadius: 11,
-                    background: t.mode === "business" ? "#ECFDF5" : "var(--tint, #F5F3FF)",
-                    color: t.mode === "business" ? "#047857" : "var(--brand, #5B4FE8)",
+                    background: t.mode === "business" ? "#E3F1EA" : "var(--tint, #E3F1EA)",
+                    color: t.mode === "business" ? "#0B4D3B" : "var(--brand, #11795A)",
                     fontSize: 12,
                     fontWeight: 700,
                   }}
@@ -701,7 +701,7 @@ export function TemplateGallery({
                   gap: 8,
                   marginTop: "auto",
                   paddingTop: 12,
-                  borderTop: "1px solid var(--line, #E2E2EC)",
+                  borderTop: "1px solid var(--line, #DCE7E1)",
                 }}
               >
                 <button
@@ -744,7 +744,7 @@ export function TemplateGallery({
             position: "fixed",
             inset: 0,
             zIndex: 9999,
-            background: "rgba(15, 23, 42, 0.75)",
+            background: "rgba(11, 77, 59, 0.75)",
             backdropFilter: "blur(4px)",
             display: "flex",
             flexDirection: "column",
@@ -755,7 +755,7 @@ export function TemplateGallery({
           <div
             style={{
               height: 56,
-              background: "#0F172A",
+              background: "#0B4D3B",
               color: "#FFFFFF",
               display: "flex",
               alignItems: "center",
@@ -775,7 +775,7 @@ export function TemplateGallery({
                   fontWeight: 700,
                   padding: "2px 8px",
                   borderRadius: 99,
-                  background: previewTemplate.mode === "business" ? "#059669" : "#2563EB",
+                  background: previewTemplate.mode === "business" ? "#11795A" : "#11795A",
                   color: "#FFFFFF",
                 }}
               >
@@ -791,7 +791,7 @@ export function TemplateGallery({
                 display: "flex",
                 alignItems: "center",
                 gap: 4,
-                background: "#1E293B",
+                background: "#0B4D3B",
                 padding: "3px 4px",
                 borderRadius: 8,
               }}
@@ -801,8 +801,8 @@ export function TemplateGallery({
                 aria-pressed={viewportMode === "desktop"}
                 onClick={() => setViewportMode("desktop")}
                 style={{
-                  background: viewportMode === "desktop" ? "#334155" : "transparent",
-                  color: viewportMode === "desktop" ? "#FFFFFF" : "#94A3B8",
+                  background: viewportMode === "desktop" ? "#3D5A52" : "transparent",
+                  color: viewportMode === "desktop" ? "#FFFFFF" : "#6F8F83",
                   border: "none",
                   padding: "4px 10px",
                   borderRadius: 6,
@@ -821,8 +821,8 @@ export function TemplateGallery({
                 aria-pressed={viewportMode === "tablet"}
                 onClick={() => setViewportMode("tablet")}
                 style={{
-                  background: viewportMode === "tablet" ? "#334155" : "transparent",
-                  color: viewportMode === "tablet" ? "#FFFFFF" : "#94A3B8",
+                  background: viewportMode === "tablet" ? "#3D5A52" : "transparent",
+                  color: viewportMode === "tablet" ? "#FFFFFF" : "#6F8F83",
                   border: "none",
                   padding: "4px 10px",
                   borderRadius: 6,
@@ -841,8 +841,8 @@ export function TemplateGallery({
                 aria-pressed={viewportMode === "mobile"}
                 onClick={() => setViewportMode("mobile")}
                 style={{
-                  background: viewportMode === "mobile" ? "#334155" : "transparent",
-                  color: viewportMode === "mobile" ? "#FFFFFF" : "#94A3B8",
+                  background: viewportMode === "mobile" ? "#3D5A52" : "transparent",
+                  color: viewportMode === "mobile" ? "#FFFFFF" : "#6F8F83",
                   border: "none",
                   padding: "4px 10px",
                   borderRadius: 6,
@@ -865,7 +865,7 @@ export function TemplateGallery({
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  color: "#94A3B8",
+                  color: "#6F8F83",
                   fontSize: 12.5,
                   fontWeight: 600,
                   display: "flex",
@@ -880,7 +880,7 @@ export function TemplateGallery({
               <Link
                 href={getStartUrl(previewTemplate)}
                 style={{
-                  background: "var(--brand, #5B4FE8)",
+                  background: "var(--brand, #11795A)",
                   color: "#FFFFFF",
                   fontWeight: 700,
                   fontSize: 13,
@@ -898,7 +898,7 @@ export function TemplateGallery({
                 style={{
                   background: "transparent",
                   border: "none",
-                  color: "#94A3B8",
+                  color: "#6F8F83",
                   fontSize: 20,
                   cursor: "pointer",
                   padding: "2px 6px",
@@ -919,7 +919,7 @@ export function TemplateGallery({
               alignItems: "center",
               justifyContent: "center",
               padding: viewportMode === "desktop" ? "0" : "20px",
-              background: "#090D16",
+              background: "#08382B",
               overflow: "hidden",
             }}
           >
@@ -937,7 +937,7 @@ export function TemplateGallery({
                 borderRadius: viewportMode === "desktop" ? 0 : 16,
                 overflow: "hidden",
                 boxShadow: viewportMode === "desktop" ? "none" : "0 25px 50px -12px rgba(0,0,0,0.5)",
-                border: viewportMode === "desktop" ? "none" : "4px solid #1E293B",
+                border: viewportMode === "desktop" ? "none" : "4px solid #0B4D3B",
                 transition: "width 0.25s ease, height 0.25s ease",
               }}
             >
@@ -946,7 +946,7 @@ export function TemplateGallery({
                 <img
                   src={(viewportMode === "mobile" ? previewTemplate.previewMobile : previewTemplate.previewDesktop) ?? previewTemplate.previewDesktop ?? previewTemplate.previewMobile ?? ""}
                   alt={`${previewTemplate.name} preview`}
-                  style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "top", background: "#F8FAFC" }}
+                  style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "top", background: "#FBF7EC" }}
                 />
               ) : (
               <iframe

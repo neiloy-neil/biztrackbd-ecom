@@ -44,7 +44,7 @@ const BLUEPRINT_TABS = [
     customerContent: (
       <div style={{ background: "#FFFFFF", padding: "14px 16px", borderRadius: 8, border: "1px solid var(--line)" }}>
         <div style={{ fontWeight: 700, fontSize: 14, color: "var(--ink-ledger)" }}>
-          Slow-Braised Mutton Kacchi &middot; ৳ 480 &middot; <span style={{ color: "#D97706" }}>Chef&apos;s Signature</span>
+          Slow-Braised Mutton Kacchi &middot; ৳ 480 &middot; <span style={{ color: "#946300" }}>Chef&apos;s Signature</span>
         </div>
         <div style={{ fontSize: 12.5, color: "var(--ink-3)", marginTop: 4 }}>
           Served with spiced saffron basmati, braised aloo, boiled egg, and authentic mustard chutney.
@@ -96,7 +96,7 @@ const BLUEPRINT_TABS = [
         <div style={{ fontWeight: 700, fontSize: 14, color: "var(--ink-ledger)" }}>
           Banani Branch: Road 11, Block D &middot; Open: 12:00 PM – 11:00 PM
         </div>
-        <div style={{ fontSize: 12.5, color: "#15803D", marginTop: 4 }}>
+        <div style={{ fontSize: 12.5, color: "#11795A", marginTop: 4 }}>
           ✓ Parking available &middot; Dedicated family section
         </div>
       </div>
@@ -107,7 +107,7 @@ const BLUEPRINT_TABS = [
       <div style={{ fontSize: 13, color: "var(--ink-2)", lineHeight: 1.5 }}>
         <div><strong>Metric:</strong> 42 customers clicked &ldquo;Get Directions&rdquo; this Friday</div>
         <div><strong>Referrer:</strong> Local Google Maps Search</div>
-        <div style={{ marginTop: 6, color: "#15803D", fontWeight: 700 }}>Direct foot traffic to your banani dining room</div>
+        <div style={{ marginTop: 6, color: "#11795A", fontWeight: 700 }}>Direct foot traffic to your banani dining room</div>
       </div>
     ),
   },

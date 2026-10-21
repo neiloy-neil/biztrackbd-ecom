@@ -68,9 +68,9 @@ export function PlanRecommender({ onSelectFamily, onHighlightPlan }: PlanRecomme
         boxSizing: "border-box",
         margin: "0 auto 36px",
         padding: "clamp(16px, 4vw, 24px)",
-        background: "#F8FAFC",
+        background: "#FBF7EC",
         border: "1.5px solid var(--line-strong)",
-        boxShadow: "0 4px 16px rgba(15, 23, 42, 0.05)",
+        boxShadow: "0 4px 16px rgba(11, 77, 59, 0.05)",
         textAlign: "left",
       }}
     >
@@ -162,7 +162,7 @@ export function PlanRecommender({ onSelectFamily, onHighlightPlan }: PlanRecomme
           background: "#FFFFFF",
           borderRadius: 10,
           padding: "14px 18px",
-          border: "1.5px solid #E2E1F6",
+          border: "1.5px solid #C6DFD3",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",

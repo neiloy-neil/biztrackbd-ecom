@@ -64,7 +64,7 @@ export function OperationalScenarios() {
             className="eyebrow"
             style={{
               color: "var(--ink-2)",
-              background: "#ECEEF2",
+              background: "#FBF7EC",
               borderColor: "var(--line)",
               borderWidth: 1,
               borderStyle: "solid",
@@ -104,7 +104,7 @@ export function OperationalScenarios() {
                 display: "flex",
                 flexDirection: "column",
                 gap: 16,
-                boxShadow: "0 4px 16px rgba(15, 23, 42, 0.04)",
+                boxShadow: "0 4px 16px rgba(11, 77, 59, 0.04)",
                 background: "#FFFFFF",
               }}
             >
@@ -131,15 +131,15 @@ export function OperationalScenarios() {
                 </div>
               </div>
 
-              <div style={{ background: "#F8FAFC", borderRadius: 8, padding: "12px 14px", border: "1px solid var(--line)", fontSize: 13, lineHeight: 1.5 }}>
-                <div style={{ fontWeight: 700, color: "#B91C1C", marginBottom: 3, fontSize: 12, textTransform: "uppercase" }}>
+              <div style={{ background: "#FBF7EC", borderRadius: 8, padding: "12px 14px", border: "1px solid var(--line)", fontSize: 13, lineHeight: 1.5 }}>
+                <div style={{ fontWeight: 700, color: "#C2410C", marginBottom: 3, fontSize: 12, textTransform: "uppercase" }}>
                   The Operational Friction:
                 </div>
                 <div style={{ color: "var(--ink-2)" }}>{s.challenge}</div>
               </div>
 
               <div style={{ fontSize: 13.5, lineHeight: 1.55, color: "var(--ink)" }}>
-                <div style={{ fontWeight: 700, color: "#15803D", marginBottom: 3, fontSize: 12, textTransform: "uppercase" }}>
+                <div style={{ fontWeight: 700, color: "#11795A", marginBottom: 3, fontSize: 12, textTransform: "uppercase" }}>
                   The BizTrackBD Solution:
                 </div>
                 {s.workflow}
@@ -164,7 +164,7 @@ export function OperationalScenarios() {
         <div
           style={{
             marginTop: 36,
-            background: "#F1F5F9",
+            background: "#FBF7EC",
             borderRadius: 12,
             padding: "18px 24px",
             border: "1px solid var(--line-strong)",

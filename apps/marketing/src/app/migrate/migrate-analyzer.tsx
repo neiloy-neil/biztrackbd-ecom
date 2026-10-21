@@ -173,7 +173,7 @@ export function MigrateAnalyzer() {
           <div
             className="card"
             style={{
-              background: "linear-gradient(135deg, #1A1A4E 0%, #2A2A6E 100%)",
+              background: "linear-gradient(135deg, #0B4D3B 0%, #0B4D3B 100%)",
               color: "#FFFFFF",
               padding: "28px 24px",
               borderRadius: "var(--radius)",
@@ -186,7 +186,7 @@ export function MigrateAnalyzer() {
                     display: "inline-block",
                     padding: "3px 10px",
                     borderRadius: 999,
-                    background: "#5B4FE8",
+                    background: "#11795A",
                     color: "#FFFFFF",
                     fontSize: 12,
                     fontWeight: 700,
@@ -200,7 +200,7 @@ export function MigrateAnalyzer() {
               </div>
               <div style={{ textAlign: "right" }}>
                 <span style={{ display: "block", fontSize: 13, color: "rgba(255,255,255,0.7)" }}>Estimated Annual Cost Savings</span>
-                <span style={{ fontSize: 26, fontWeight: 800, color: "#4ADE80", fontFamily: "var(--font-jakarta)" }}>
+                <span style={{ fontSize: 26, fontWeight: 800, color: "#8FD3B8", fontFamily: "var(--font-display)" }}>
                   ৳ {result.estimatedAnnualSavingsBdt.toLocaleString()}+ / yr
                 </span>
               </div>
@@ -302,7 +302,7 @@ export function MigrateAnalyzer() {
                         position: "absolute",
                         top: 8,
                         left: 8,
-                        background: "rgba(26,26,78,0.85)",
+                        background: "rgba(11, 77, 59, ,0.85)",
                         color: "#fff",
                         fontSize: 11,
                         fontWeight: 600,
@@ -321,7 +321,7 @@ export function MigrateAnalyzer() {
                     {p.title}
                   </h4>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                    <span style={{ fontSize: 17, fontWeight: 800, color: "var(--brand)", fontFamily: "var(--font-jakarta)" }}>
+                    <span style={{ fontSize: 17, fontWeight: 800, color: "var(--brand)", fontFamily: "var(--font-display)" }}>
                       ৳ {p.basePrice.toLocaleString()}
                     </span>
                     {p.compareAtPrice && (

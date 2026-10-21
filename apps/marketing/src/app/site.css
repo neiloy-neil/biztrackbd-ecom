@@ -5,7 +5,7 @@
    ========================================================================== */
 .hero {
   padding: 64px 0 48px;
-  background: #F8FAFC;
+  background: var(--cream);
   border-bottom: 1px solid var(--line);
 }
 
@@ -58,7 +58,7 @@
   border-radius: 14px;
   background: #FFFFFF;
   border: 1px solid var(--line-strong);
-  box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 12px 32px -4px rgba(11, 77, 59, 0.08), 0 4px 12px -2px rgba(11, 77, 59, 0.04);
   overflow: hidden;
   text-align: left;
 }
@@ -69,7 +69,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  background: #F1F5F9;
+  background: var(--cream);
   border-bottom: 1px solid var(--line);
 }
 .window-dots {
@@ -81,9 +81,9 @@
   height: 11px;
   border-radius: 50%;
 }
-.dot-red { background: #EF4444; }
-.dot-yellow { background: #F59E0B; }
-.dot-green { background: #10B981; }
+.dot-red { background: var(--warning); }
+.dot-yellow { background: var(--marigold); }
+.dot-green { background: var(--green-fresh); }
 
 .window-address {
   display: flex;
@@ -123,7 +123,7 @@
 /* Sidebar */
 .admin-side {
   padding: 16px 12px;
-  background: #F8FAFC;
+  background: var(--cream);
   border-right: 1px solid var(--line);
 }
 .admin-brand {
@@ -177,8 +177,8 @@
   color: var(--ink-2);
 }
 .admin-pill.warn {
-  background: #FEF3C7;
-  color: #B45309;
+  background: #FDF1CC;
+  color: var(--gold-dark);
 }
 
 /* Main Area */
@@ -210,7 +210,7 @@
   padding: 4px 10px;
   border-radius: 99px;
   background: var(--success-bg);
-  border: 1px solid #A7F3D0;
+  border: 1px solid #C6DFD3;
   color: var(--success);
 }
 
@@ -245,7 +245,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 9px 14px;
-  background: #F8FAFC;
+  background: var(--cream);
   border-bottom: 1px solid var(--line);
   font-size: 12.5px;
   color: var(--ink-2);
@@ -287,8 +287,8 @@
   font-weight: 700;
   padding: 3px 9px;
   border-radius: 6px;
-  background: #E0E7FF;
-  color: #4338CA;
+  background: var(--mint);
+  color: var(--green-fresh);
 }
 .tag-cod {
   font-size: 11.5px;
@@ -376,7 +376,7 @@
 .bd-list div {
   padding: 14px 16px;
   border-radius: 10px;
-  background: #F8FAFC;
+  background: var(--cream);
   border: 1px solid var(--line);
 }
 .bd-list dt {
@@ -468,7 +468,7 @@
   border: 0;
   border-radius: 99px;
   background: transparent;
-  font: 700 14px var(--font-jakarta), system-ui, sans-serif;
+  font: 700 14px var(--font-display), system-ui, sans-serif;
   color: var(--ink-2);
   cursor: pointer;
   display: inline-flex;
@@ -516,19 +516,19 @@
   margin-top: 14px;
   padding: 12px 14px;
   border-radius: 8px;
-  background: #FEF2F2;
-  border: 1px solid #FECACA;
+  background: #FDF1EA;
+  border: 1px solid #F2C9B3;
 }
 .feat-problem strong {
   display: block;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #B91C1C;
+  color: var(--warning);
   margin-bottom: 4px;
 }
 .feat-problem p {
-  color: #991B1B;
+  color: #9A3412;
   font-size: 13.5px;
   line-height: 1.5;
   margin: 0;
@@ -537,19 +537,19 @@
   margin-top: 10px;
   padding: 12px 14px;
   border-radius: 8px;
-  background: #ECFDF5;
-  border: 1px solid #A7F3D0;
+  background: var(--mint);
+  border: 1px solid #C6DFD3;
 }
 .feat-solution strong {
   display: block;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #047857;
+  color: var(--green-deep);
   margin-bottom: 4px;
 }
 .feat-solution p {
-  color: #065F46;
+  color: var(--green-deep);
   font-size: 13.5px;
   line-height: 1.5;
   margin: 0;
@@ -610,7 +610,7 @@
   font-size: 14px;
 }
 .compare-table thead th {
-  background: #F8FAFC;
+  background: var(--cream);
   font-size: 13px;
   font-weight: 700;
   color: var(--ink-2);
@@ -626,7 +626,7 @@
   color: var(--ink-2);
 }
 .comp-biztrack {
-  background: #F8FAFF;
+  background: var(--mint);
   font-weight: 600;
   color: var(--ink);
 }
@@ -666,7 +666,7 @@
   background: #FFFFFF;
 }
 .foreign-box {
-  background: #F8FAFC;
+  background: var(--cream);
 }
 .biztrack-box {
   background: var(--tint);
@@ -680,7 +680,7 @@
   padding: 3px 10px;
   border-radius: 99px;
   background: var(--success-bg);
-  border: 1px solid #A7F3D0;
+  border: 1px solid #C6DFD3;
   color: var(--success);
   font-size: 11.5px;
   font-weight: 800;
@@ -747,7 +747,7 @@
 }
 
 .cta-band {
-  background: #0F172A;
+  background: var(--green-deep);
   color: #FFFFFF;
   text-align: center;
   padding: 72px 0;
@@ -760,7 +760,7 @@
   color: #FFFFFF;
 }
 .cta-band p {
-  color: #94A3B8;
+  color: var(--green-light);
   margin: 10px 0 24px;
   font-size: 17px;
 }

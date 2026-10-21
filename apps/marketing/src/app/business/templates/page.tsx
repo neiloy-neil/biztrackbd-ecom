@@ -67,20 +67,20 @@ export default async function BusinessTemplatesPage() {
             alignItems: "center",
             gap: 8,
             fontSize: 13,
-            color: "var(--ink-3, #667085)",
+            color: "var(--ink-3, #3D5A52)",
             marginBottom: 20,
             flexWrap: "wrap",
           }}
         >
-          <Link href="/" style={{ color: "var(--ink-2, #475467)", textDecoration: "none" }}>
+          <Link href="/" style={{ color: "var(--ink-2, #3D5A52)", textDecoration: "none" }}>
             Home
           </Link>
           <span aria-hidden="true">›</span>
-          <Link href="/business" style={{ color: "var(--ink-2, #475467)", textDecoration: "none" }}>
+          <Link href="/business" style={{ color: "var(--ink-2, #3D5A52)", textDecoration: "none" }}>
             BizTrackBD Business
           </Link>
           <span aria-hidden="true">›</span>
-          <span style={{ color: "var(--ink, #101828)", fontWeight: 600 }}>Templates</span>
+          <span style={{ color: "var(--ink, #0B4D3B)", fontWeight: 600 }}>Templates</span>
         </nav>
 
         {/* Page Header */}
@@ -94,7 +94,7 @@ export default async function BusinessTemplatesPage() {
               letterSpacing: "-1.2px",
               lineHeight: 1.15,
               fontWeight: 800,
-              color: "var(--ink, #101828)",
+              color: "var(--ink, #0B4D3B)",
               margin: 0,
             }}
           >
@@ -105,7 +105,7 @@ export default async function BusinessTemplatesPage() {
             style={{
               marginTop: 16,
               fontSize: "clamp(16px, 2.5vw, 19px)",
-              color: "var(--ink-2, #475467)",
+              color: "var(--ink-2, #3D5A52)",
               lineHeight: 1.6,
             }}
           >
@@ -117,8 +117,8 @@ export default async function BusinessTemplatesPage() {
               marginTop: 20,
               padding: "14px 18px",
               borderRadius: "12px",
-              background: "#F4F5FB",
-              border: "1px solid var(--line, #E2E2EC)",
+              background: "#E3F1EA",
+              border: "1px solid var(--line, #DCE7E1)",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
@@ -126,8 +126,8 @@ export default async function BusinessTemplatesPage() {
               flexWrap: "wrap",
             }}
           >
-            <div style={{ fontSize: 14.5, color: "var(--ink, #101828)", lineHeight: 1.5 }}>
-              <strong style={{ color: "var(--accent, #3B5BFD)" }}>Want to test lead and booking management?</strong>{" "}
+            <div style={{ fontSize: 14.5, color: "var(--ink, #0B4D3B)", lineHeight: 1.5 }}>
+              <strong style={{ color: "var(--accent, #11795A)" }}>Want to test lead and booking management?</strong>{" "}
               Try our admin workspace with realistic Bangladeshi demo bookings, private notes, and status workflows.
             </div>
             <a
@@ -148,7 +148,7 @@ export default async function BusinessTemplatesPage() {
 
         {/* Vertical Shortcuts Bar */}
         <div style={{ marginTop: 32, marginBottom: 8 }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-3, #667085)", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 10px" }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-3, #3D5A52)", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 10px" }}>
             Explore Vertical Deep-Dives
           </p>
           <div
@@ -171,10 +171,10 @@ export default async function BusinessTemplatesPage() {
                   padding: "7px 14px",
                   borderRadius: 20,
                   background: "#FFFFFF",
-                  border: "1px solid var(--line, #E2E2EC)",
+                  border: "1px solid var(--line, #DCE7E1)",
                   fontSize: 13.5,
                   fontWeight: 600,
-                  color: "var(--ink, #101828)",
+                  color: "var(--ink, #0B4D3B)",
                   textDecoration: "none",
                   whiteSpace: "nowrap",
                   boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
@@ -196,14 +196,14 @@ export default async function BusinessTemplatesPage() {
             marginTop: 64,
             padding: "32px 28px",
             borderRadius: 16,
-            background: "linear-gradient(135deg, #1E1B4B 0%, #312E81 100%)",
+            background: "linear-gradient(135deg, #0B4D3B 0%, #0B4D3B 100%)",
             color: "#FFFFFF",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             flexWrap: "wrap",
             gap: 24,
-            boxShadow: "0 10px 30px rgba(30, 27, 75, 0.15)",
+            boxShadow: "0 10px 30px rgba(11, 77, 59, , 0.15)",
           }}
         >
           <div style={{ maxWidth: 640 }}>
@@ -225,7 +225,7 @@ export default async function BusinessTemplatesPage() {
             <h3 style={{ fontSize: "clamp(20px, 3vw, 26px)", fontWeight: 800, margin: "0 0 8px", color: "#FFFFFF" }}>
               Explore Online Storefront Templates with bKash Checkout
             </h3>
-            <p style={{ margin: 0, fontSize: 15, color: "#C7D2FE", lineHeight: 1.6 }}>
+            <p style={{ margin: 0, fontSize: 15, color: "#C6DFD3", lineHeight: 1.6 }}>
               Need multi-product catalogs, size presets, Steadfast and Pathao courier shipping, and Cash on Delivery return protection? Browse our dedicated eCommerce templates or choose Hybrid mode for both retail and bookings.
             </p>
           </div>
@@ -236,7 +236,7 @@ export default async function BusinessTemplatesPage() {
               className="btn"
               style={{
                 background: "#FFFFFF",
-                color: "#1E1B4B",
+                color: "#0B4D3B",
                 fontWeight: 700,
                 fontSize: 14,
                 padding: "10px 20px",

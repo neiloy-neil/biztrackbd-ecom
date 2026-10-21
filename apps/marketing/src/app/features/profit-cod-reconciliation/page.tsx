@@ -103,9 +103,9 @@ export default function ProfitCodReconciliationPage() {
           <span
             className="eyebrow"
             style={{
-              color: "#15803D",
-              background: "#DCFCE7",
-              borderColor: "#86EFAC",
+              color: "#11795A",
+              background: "#E3F1EA",
+              borderColor: "#8FD3B8",
               borderWidth: 1,
               borderStyle: "solid",
               padding: "4px 14px",
@@ -122,7 +122,7 @@ export default function ProfitCodReconciliationPage() {
           </span>
           <h1 style={{ color: "var(--ink-ledger)", fontSize: "clamp(34px, 5.5vw, 54px)", lineHeight: 1.12, letterSpacing: "-1.5px" }}>
             Topline sales mean nothing <br className="hidden-mobile" />
-            <span style={{ color: "#15803D" }}>until you know your true net profit.</span>
+            <span style={{ color: "#11795A" }}>until you know your true net profit.</span>
           </h1>
           <p className="lead" style={{ maxWidth: 740, margin: "18px auto 0", color: "var(--ink-2)", fontSize: "clamp(16px, 2vw, 19px)", lineHeight: 1.6 }}>
             Automatically deduct product wholesale costs, courier delivery fees, fake COD return losses, and Facebook ad spend from every order. Track exactly how much money couriers owe you down to the last Taka.
@@ -132,7 +132,7 @@ export default function ProfitCodReconciliationPage() {
             <Link
               href="/start?mode=ecommerce"
               className="btn btn-primary btn-lg"
-              style={{ background: "#15803D", borderColor: "#166534" }}
+              style={{ background: "#11795A", borderColor: "#0B4D3B" }}
               prefetch={false}
             >
               Start 14-day free trial
@@ -179,7 +179,7 @@ export default function ProfitCodReconciliationPage() {
               </div>
               <div className="admin-mockup-url">admin.biztrackbd.com/finances/courier-reconciliation</div>
               <div className="admin-mockup-live">
-                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10B981", display: "inline-block" }} />
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#11795A", display: "inline-block" }} />
                 AUTOMATED SETTLEMENT DESK
               </div>
             </div>
@@ -189,7 +189,7 @@ export default function ProfitCodReconciliationPage() {
                 <div className="admin-desk-pill-tabs">
                   <span className="admin-desk-tab is-active">Batch #ST-2026-10-16 (Steadfast)</span>
                   <span className="admin-desk-tab">Disbursed: ৳ 84,200</span>
-                  <span className="admin-desk-tab" style={{ color: "#34D399" }}>Matched: 100%</span>
+                  <span className="admin-desk-tab" style={{ color: "#8FD3B8" }}>Matched: 100%</span>
                 </div>
                 <div className="admin-desk-actions">
                   <button type="button" className="admin-action-btn-primary">
@@ -213,31 +213,15 @@ export default function ProfitCodReconciliationPage() {
                   <tbody>
                     <tr>
                       <td>
-                        <div style={{ fontWeight: 600, color: "#60A5FA" }}>ST-902180</div>
-                        <div style={{ fontSize: 11, color: "#94A3B8" }}>Order #BD-1088 · Dhaka City</div>
+                        <div style={{ fontWeight: 600, color: "#8FD3B8" }}>ST-902180</div>
+                        <div style={{ fontSize: 11, color: "#8FD3B8" }}>Order #BD-1088 · Dhaka City</div>
                       </td>
-                      <td style={{ fontWeight: 700, color: "#F8FAFC" }}>৳ 2,400</td>
-                      <td style={{ color: "#F87171" }}>- ৳ 60</td>
-                      <td style={{ color: "#F87171" }}>- ৳ 1,150</td>
+                      <td style={{ fontWeight: 700, color: "#FBF7EC" }}>৳ 2,400</td>
+                      <td style={{ color: "#F2B79B" }}>- ৳ 60</td>
+                      <td style={{ color: "#F2B79B" }}>- ৳ 1,150</td>
                       <td>
-                        <span style={{ fontWeight: 800, color: "#34D399" }}>+ ৳ 1,190</span>
-                        <div style={{ fontSize: 10, color: "#34D399" }}>49.6% Net Profit</div>
-                      </td>
-                      <td>
-                        <span className="admin-badge-safe">Deposited to Bank</span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div style={{ fontWeight: 600, color: "#60A5FA" }}>ST-902181</div>
-                        <div style={{ fontSize: 11, color: "#94A3B8" }}>Order #BD-1089 · Rajshahi Sadar</div>
-                      </td>
-                      <td style={{ fontWeight: 700, color: "#F8FAFC" }}>৳ 3,650</td>
-                      <td style={{ color: "#F87171" }}>- ৳ 110</td>
-                      <td style={{ color: "#F87171" }}>- ৳ 1,800</td>
-                      <td>
-                        <span style={{ fontWeight: 800, color: "#34D399" }}>+ ৳ 1,740</span>
-                        <div style={{ fontSize: 10, color: "#34D399" }}>47.7% Net Profit</div>
+                        <span style={{ fontWeight: 800, color: "#8FD3B8" }}>+ ৳ 1,190</span>
+                        <div style={{ fontSize: 10, color: "#8FD3B8" }}>49.6% Net Profit</div>
                       </td>
                       <td>
                         <span className="admin-badge-safe">Deposited to Bank</span>
@@ -245,15 +229,31 @@ export default function ProfitCodReconciliationPage() {
                     </tr>
                     <tr>
                       <td>
-                        <div style={{ fontWeight: 600, color: "#60A5FA" }}>ST-902182</div>
-                        <div style={{ fontSize: 11, color: "#94A3B8" }}>Order #BD-1090 · Bogura (Returned)</div>
+                        <div style={{ fontWeight: 600, color: "#8FD3B8" }}>ST-902181</div>
+                        <div style={{ fontSize: 11, color: "#8FD3B8" }}>Order #BD-1089 · Rajshahi Sadar</div>
                       </td>
-                      <td style={{ fontWeight: 700, color: "#94A3B8" }}>৳ 0 (Returned)</td>
-                      <td style={{ color: "#F87171", fontWeight: 700 }}>- ৳ 110 (Loss)</td>
-                      <td style={{ color: "#94A3B8" }}>৳ 0 (Stock Back)</td>
+                      <td style={{ fontWeight: 700, color: "#FBF7EC" }}>৳ 3,650</td>
+                      <td style={{ color: "#F2B79B" }}>- ৳ 110</td>
+                      <td style={{ color: "#F2B79B" }}>- ৳ 1,800</td>
                       <td>
-                        <span style={{ fontWeight: 800, color: "#F87171" }}>- ৳ 110</span>
-                        <div style={{ fontSize: 10, color: "#F87171" }}>Return Courier Penalty</div>
+                        <span style={{ fontWeight: 800, color: "#8FD3B8" }}>+ ৳ 1,740</span>
+                        <div style={{ fontSize: 10, color: "#8FD3B8" }}>47.7% Net Profit</div>
+                      </td>
+                      <td>
+                        <span className="admin-badge-safe">Deposited to Bank</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div style={{ fontWeight: 600, color: "#8FD3B8" }}>ST-902182</div>
+                        <div style={{ fontSize: 11, color: "#8FD3B8" }}>Order #BD-1090 · Bogura (Returned)</div>
+                      </td>
+                      <td style={{ fontWeight: 700, color: "#8FD3B8" }}>৳ 0 (Returned)</td>
+                      <td style={{ color: "#F2B79B", fontWeight: 700 }}>- ৳ 110 (Loss)</td>
+                      <td style={{ color: "#8FD3B8" }}>৳ 0 (Stock Back)</td>
+                      <td>
+                        <span style={{ fontWeight: 800, color: "#F2B79B" }}>- ৳ 110</span>
+                        <div style={{ fontSize: 10, color: "#F2B79B" }}>Return Courier Penalty</div>
                       </td>
                       <td>
                         <span className="admin-badge-danger">Reconciled Loss</span>
@@ -331,16 +331,16 @@ export default function ProfitCodReconciliationPage() {
       </section>
 
       {/* Closing CTA */}
-      <section className="cta-band" style={{ background: "#166534" }}>
+      <section className="cta-band">
         <div className="wrap">
           <h2 style={{ color: "#FFFFFF", fontSize: "clamp(28px, 4.5vw, 42px)", letterSpacing: "-1.2px" }}>
             Take control of your true business profit today
           </h2>
-          <p style={{ color: "#DCFCE7", fontSize: 17, marginTop: 10 }}>
+          <p style={{ color: "#E3F1EA", fontSize: 17, marginTop: 10 }}>
             14 days free &middot; Complete financial ledger &middot; Zero sales commission
           </p>
           <div style={{ marginTop: 24, display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/start?mode=ecommerce" className="btn btn-lg btn-primary" style={{ background: "#FFFFFF", color: "#166534" }} prefetch={false}>
+            <Link href="/start?mode=ecommerce" className="btn btn-lg btn-primary" style={{ background: "#FFFFFF", color: "#0B4D3B" }} prefetch={false}>
               Start 14-day free trial
             </Link>
             <a

@@ -14,7 +14,7 @@ export function MetaCapiSimulator() {
         style={{
           padding: "32px 28px",
           background: "#FFFFFF",
-          boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
+          boxShadow: "0 10px 30px rgba(11, 77, 59, 0.06)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 18 }}>
@@ -34,9 +34,9 @@ export function MetaCapiSimulator() {
                 borderRadius: 16,
                 fontSize: 12.5,
                 fontWeight: 700,
-                border: browserCondition === "adblock" ? "2px solid #B91C1C" : "1px solid var(--line)",
-                background: browserCondition === "adblock" ? "#FEE2E2" : "#FFFFFF",
-                color: browserCondition === "adblock" ? "#B91C1C" : "var(--ink-2)",
+                border: browserCondition === "adblock" ? "2px solid #C2410C" : "1px solid var(--line)",
+                background: browserCondition === "adblock" ? "#FDF1EA" : "#FFFFFF",
+                color: browserCondition === "adblock" ? "#C2410C" : "var(--ink-2)",
                 cursor: "pointer",
               }}
             >
@@ -50,9 +50,9 @@ export function MetaCapiSimulator() {
                 borderRadius: 16,
                 fontSize: 12.5,
                 fontWeight: 700,
-                border: browserCondition === "normal" ? "2px solid #1D4ED8" : "1px solid var(--line)",
-                background: browserCondition === "normal" ? "#EFF6FF" : "#FFFFFF",
-                color: browserCondition === "normal" ? "#1D4ED8" : "var(--ink-2)",
+                border: browserCondition === "normal" ? "2px solid #11795A" : "1px solid var(--line)",
+                background: browserCondition === "normal" ? "#E3F1EA" : "#FFFFFF",
+                color: browserCondition === "normal" ? "#11795A" : "var(--ink-2)",
                 cursor: "pointer",
               }}
             >
@@ -66,7 +66,7 @@ export function MetaCapiSimulator() {
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
             gap: 24,
-            background: "#F8FAFC",
+            background: "#FBF7EC",
             borderRadius: 12,
             padding: "22px 24px",
             border: "1px solid var(--line)",
@@ -90,9 +90,9 @@ export function MetaCapiSimulator() {
           </div>
 
           {/* Channel B: Server CAPI */}
-          <div style={{ background: "#FFFFFF", padding: "18px 20px", borderRadius: 10, border: "1.5px solid #86EFAC" }}>
+          <div style={{ background: "#FFFFFF", padding: "18px 20px", borderRadius: 10, border: "1.5px solid #8FD3B8" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#166534", textTransform: "uppercase" }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#0B4D3B", textTransform: "uppercase" }}>
                 2. Server-Side CAPI (BizTrackBD)
               </span>
               <span className="status-stamp stamp-paid">
@@ -109,10 +109,10 @@ export function MetaCapiSimulator() {
         <div
           style={{
             marginTop: 18,
-            background: "#F0FDF4",
+            background: "#E3F1EA",
             padding: "14px 18px",
             borderRadius: 10,
-            border: "1px solid #86EFAC",
+            border: "1px solid #8FD3B8",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -121,7 +121,7 @@ export function MetaCapiSimulator() {
           }}
         >
           <div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: "#166534", textTransform: "uppercase" }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#0B4D3B", textTransform: "uppercase" }}>
               Meta Events Manager Outcome:
             </div>
             <div style={{ fontSize: 14.5, fontWeight: 700, color: "var(--ink-ledger)", marginTop: 2 }}>
@@ -139,7 +139,7 @@ export function MetaCapiSimulator() {
         className="card ledger-border"
         style={{
           padding: "28px 26px",
-          background: "#F8FAFC",
+          background: "#FBF7EC",
           border: "1.5px solid var(--line-strong)",
         }}
       >

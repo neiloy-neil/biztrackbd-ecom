@@ -83,9 +83,9 @@ export default function MetaPixelCapiPage() {
           <span
             className="eyebrow"
             style={{
-              color: "#0284C7",
-              background: "#E0F2FE",
-              borderColor: "#BAE6FD",
+              color: "#11795A",
+              background: "#E3F1EA",
+              borderColor: "#C6DFD3",
               borderWidth: 1,
               borderStyle: "solid",
               padding: "4px 14px",
@@ -102,7 +102,7 @@ export default function MetaPixelCapiPage() {
           </span>
           <h1 style={{ color: "var(--ink-ledger)", fontSize: "clamp(34px, 5.5vw, 54px)", lineHeight: 1.12, letterSpacing: "-1.5px" }}>
             Recover dropped checkout conversions with <br className="hidden-mobile" />
-            <span style={{ color: "#0284C7" }}>server-side Meta Conversions API.</span>
+            <span style={{ color: "#11795A" }}>server-side Meta Conversions API.</span>
           </h1>
           <p className="lead" style={{ maxWidth: 740, margin: "18px auto 0", color: "var(--ink-2)", fontSize: "clamp(16px, 2vw, 19px)", lineHeight: 1.6 }}>
             Complement browser tracking with resilient server-to-server purchase signals. Transmit direct server events with exact Taka values and automatic deduplication to train Meta&apos;s ad algorithm on your highest-paying buyers.
@@ -112,7 +112,7 @@ export default function MetaPixelCapiPage() {
             <Link
               href="/start?mode=ecommerce"
               className="btn btn-primary btn-lg"
-              style={{ background: "#0284C7", borderColor: "#0369A1" }}
+              style={{ background: "#11795A", borderColor: "#11795A" }}
               prefetch={false}
             >
               Start 14-day free trial
@@ -215,16 +215,16 @@ export default function MetaPixelCapiPage() {
       </section>
 
       {/* Closing CTA */}
-      <section className="cta-band" style={{ background: "#0369A1" }}>
+      <section className="cta-band">
         <div className="wrap">
           <h2 style={{ color: "#FFFFFF", fontSize: "clamp(28px, 4.5vw, 42px)", letterSpacing: "-1.2px" }}>
             Supercharge your Facebook advertising with BizTrackBD
           </h2>
-          <p style={{ color: "#E0F2FE", fontSize: 17, marginTop: 10 }}>
+          <p style={{ color: "#E3F1EA", fontSize: 17, marginTop: 10 }}>
             14 days free &middot; Server-side CAPI included &middot; Zero sales commission
           </p>
           <div style={{ marginTop: 24, display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/start?mode=ecommerce" className="btn btn-lg btn-primary" style={{ background: "#FFFFFF", color: "#0369A1" }} prefetch={false}>
+            <Link href="/start?mode=ecommerce" className="btn btn-lg btn-primary" style={{ background: "#FFFFFF", color: "#11795A" }} prefetch={false}>
               Start 14-day free trial
             </Link>
             <a

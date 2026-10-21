@@ -107,7 +107,7 @@ const BLUEPRINT_TABS = [
       <div style={{ fontSize: 13, color: "var(--ink-2)", lineHeight: 1.5 }}>
         <div><strong>Meeting:</strong> Thursday 3:00 PM &middot; Strategy Room</div>
         <div><strong>Status:</strong> Awaiting Partner Confirmation</div>
-        <div style={{ marginTop: 6, color: "#15803D", fontWeight: 700 }}>One tap to confirm and send calendar invite</div>
+        <div style={{ marginTop: 6, color: "#11795A", fontWeight: 700 }}>One tap to confirm and send calendar invite</div>
       </div>
     ),
   },

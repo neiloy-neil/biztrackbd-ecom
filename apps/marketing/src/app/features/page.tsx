@@ -141,7 +141,7 @@ export default function FeaturesPage() {
                   display: "flex",
                   flexDirection: "column",
                   background: "#FFFFFF",
-                  border: "1px solid var(--line, #E2E2EC)",
+                  border: "1px solid var(--line, #DCE7E1)",
                   borderRadius: 16,
                   padding: 24,
                   boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
@@ -152,21 +152,21 @@ export default function FeaturesPage() {
                     <span className="pill" style={{ fontWeight: 700, fontSize: 11, textTransform: "uppercase" }}>{p.badge}</span>
                     <span className="status-stamp stamp-review" style={{ fontSize: 10 }}>PRODUCTION</span>
                   </div>
-                  <span className="feat-num" style={{ fontFamily: "monospace", fontWeight: 700, color: "var(--ink-2, #64748B)" }}>PILLAR 0{idx + 1}</span>
+                  <span className="feat-num" style={{ fontFamily: "monospace", fontWeight: 700, color: "var(--ink-2, #3D5A52)" }}>PILLAR 0{idx + 1}</span>
                 </div>
-                <h3 style={{ fontSize: 20, fontWeight: 800, margin: "0 0 14px", color: "var(--ink, #101828)" }}>{p.title}</h3>
-                <div className="feat-problem" style={{ marginBottom: 12, background: "#FEF2F2", padding: "12px 14px", borderRadius: 8, borderLeft: "3px solid #EF4444" }}>
-                  <strong style={{ display: "block", color: "#991B1B", fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>The Daily Problem</strong>
-                  <p style={{ margin: 0, fontSize: 13.5, color: "#7F1D1D", lineHeight: 1.5 }}>{p.problem}</p>
+                <h3 style={{ fontSize: 20, fontWeight: 800, margin: "0 0 14px", color: "var(--ink, #0B4D3B)" }}>{p.title}</h3>
+                <div className="feat-problem" style={{ marginBottom: 12, background: "#FDF1EA", padding: "12px 14px", borderRadius: 8, borderLeft: "3px solid #C2410C" }}>
+                  <strong style={{ display: "block", color: "#9A3412", fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>The Daily Problem</strong>
+                  <p style={{ margin: 0, fontSize: 13.5, color: "#9A3412", lineHeight: 1.5 }}>{p.problem}</p>
                 </div>
-                <div className="feat-solution" style={{ marginBottom: 16, background: "#F0FDF4", padding: "12px 14px", borderRadius: 8, borderLeft: "3px solid #22C55E" }}>
-                  <strong style={{ display: "block", color: "#166534", fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>The Operational Solution</strong>
-                  <p style={{ margin: 0, fontSize: 13.5, color: "#14532D", lineHeight: 1.5 }}>{p.solution}</p>
+                <div className="feat-solution" style={{ marginBottom: 16, background: "#E3F1EA", padding: "12px 14px", borderRadius: 8, borderLeft: "3px solid #11795A" }}>
+                  <strong style={{ display: "block", color: "#0B4D3B", fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>The Operational Solution</strong>
+                  <p style={{ margin: 0, fontSize: 13.5, color: "#0B4D3B", lineHeight: 1.5 }}>{p.solution}</p>
                 </div>
                 <ul className="feat-points" style={{ listStyle: "none", padding: 0, margin: "0 0 16px", display: "flex", flexDirection: "column", gap: 8 }}>
                   {p.points.map((pt) => (
-                    <li key={pt} style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 13.5, color: "var(--ink-2, #334155)", lineHeight: 1.45 }}>
-                      <span style={{ color: "var(--brand, #5B4FE8)", fontWeight: 700, fontFamily: "monospace" }}>[✓]</span>
+                    <li key={pt} style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 13.5, color: "var(--ink-2, #3D5A52)", lineHeight: 1.45 }}>
+                      <span style={{ color: "var(--brand, #11795A)", fontWeight: 700, fontFamily: "monospace" }}>[✓]</span>
                       <span>{pt}</span>
                     </li>
                   ))}
@@ -178,14 +178,14 @@ export default function FeaturesPage() {
                     display: "flex",
                     alignItems: "center",
                     gap: 10,
-                    background: "var(--soft, #F8FAFC)",
+                    background: "var(--soft, #FBF7EC)",
                     padding: "10px 14px",
                     borderRadius: 8,
-                    border: "1px solid var(--line, #E2E2EC)",
+                    border: "1px solid var(--line, #DCE7E1)",
                   }}
                 >
                   <span className="status-stamp stamp-paid" style={{ fontSize: 10 }}>VERIFIED PROOF</span>
-                  <span style={{ fontSize: 12.5, fontWeight: 600, color: "var(--ink, #101828)" }}>{p.proof}</span>
+                  <span style={{ fontSize: 12.5, fontWeight: 600, color: "var(--ink, #0B4D3B)" }}>{p.proof}</span>
                 </div>
                 {p.link && (
                   <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid var(--line)" }}>

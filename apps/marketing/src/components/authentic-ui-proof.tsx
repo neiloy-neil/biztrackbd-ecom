@@ -97,7 +97,7 @@ export function AuthenticUiProof() {
   return (
     <div className="card ledger-border" style={{ padding: 0, overflow: "hidden", background: "#FFFFFF" }}>
       {/* Top Header & Tab Navigation */}
-      <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--line)", background: "#FAFAFA" }}>
+      <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--line)", background: "#FBF7EC" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
@@ -217,7 +217,7 @@ export function AuthenticUiProof() {
                     &ldquo;Called at 3:15 PM; requested corporate deck sent via WhatsApp&rdquo;
                   </td>
                   <td>
-                    <span className="pill" style={{ background: "#DCFCE7", color: "#166534" }}>QUALIFIED</span>
+                    <span className="pill" style={{ background: "#E3F1EA", color: "#0B4D3B" }}>QUALIFIED</span>
                   </td>
                 </tr>
                 <tr>
@@ -233,7 +233,7 @@ export function AuthenticUiProof() {
                     &ldquo;Meeting scheduled for Tuesday morning at Banani office&rdquo;
                   </td>
                   <td>
-                    <span className="pill" style={{ background: "#E0E7FF", color: "#3730A3" }}>CONTACTED</span>
+                    <span className="pill" style={{ background: "#E3F1EA", color: "#0B4D3B" }}>CONTACTED</span>
                   </td>
                 </tr>
                 <tr>
@@ -249,7 +249,7 @@ export function AuthenticUiProof() {
                     Pending review
                   </td>
                   <td>
-                    <span className="pill" style={{ background: "#FEF3C7", color: "#92400E" }}>NEW</span>
+                    <span className="pill" style={{ background: "#FDF1CC", color: "#946300" }}>NEW</span>
                   </td>
                 </tr>
               </tbody>
@@ -280,7 +280,7 @@ export function AuthenticUiProof() {
                     <div style={{ fontSize: 11, color: "var(--ink-2)" }}>Sat 6:30 PM – 7:00 PM</div>
                   </td>
                   <td>
-                    <span className="pill" style={{ fontSize: 10, background: "#EFF6FF", color: "#1D4ED8" }}>BMDC A-48291</span>
+                    <span className="pill" style={{ fontSize: 10, background: "#E3F1EA", color: "#11795A" }}>BMDC A-48291</span>
                   </td>
                   <td>
                     <span className="pill ok" style={{ fontSize: 10 }}>SENT (Greenweb)</span>
@@ -297,7 +297,7 @@ export function AuthenticUiProof() {
                     <div style={{ fontSize: 11, color: "var(--ink-2)" }}>Sun 7:00 PM – 7:30 PM</div>
                   </td>
                   <td>
-                    <span className="pill" style={{ fontSize: 10, background: "#EFF6FF", color: "#1D4ED8" }}>BMDC A-48291</span>
+                    <span className="pill" style={{ fontSize: 10, background: "#E3F1EA", color: "#11795A" }}>BMDC A-48291</span>
                   </td>
                   <td>
                     <span className="pill ok" style={{ fontSize: 10 }}>CONFIRMED</span>
@@ -314,10 +314,10 @@ export function AuthenticUiProof() {
                     <div style={{ fontSize: 11, color: "var(--ink-2)" }}>Sat 7:30 PM – 8:00 PM</div>
                   </td>
                   <td>
-                    <span className="pill" style={{ fontSize: 10, background: "#EFF6FF", color: "#1D4ED8" }}>BMDC A-48291</span>
+                    <span className="pill" style={{ fontSize: 10, background: "#E3F1EA", color: "#11795A" }}>BMDC A-48291</span>
                   </td>
                   <td>
-                    <span className="pill" style={{ fontSize: 10, background: "#FEF3C7", color: "#92400E" }}>PENDING</span>
+                    <span className="pill" style={{ fontSize: 10, background: "#FDF1CC", color: "#946300" }}>PENDING</span>
                   </td>
                 </tr>
               </tbody>
@@ -363,7 +363,7 @@ export function AuthenticUiProof() {
                   </td>
                   <td style={{ fontWeight: 700 }}>৳ 1,120</td>
                   <td>
-                    <span className="pill" style={{ background: "#E0E7FF", color: "#3730A3", fontSize: 10 }}>COOKING</span>
+                    <span className="pill" style={{ background: "#E3F1EA", color: "#0B4D3B", fontSize: 10 }}>COOKING</span>
                   </td>
                 </tr>
                 <tr>
@@ -377,7 +377,7 @@ export function AuthenticUiProof() {
                   </td>
                   <td style={{ fontWeight: 700 }}>৳ 500 deposit</td>
                   <td>
-                    <span className="pill" style={{ background: "#DCFCE7", color: "#166534", fontSize: 10 }}>RESERVED</span>
+                    <span className="pill" style={{ background: "#E3F1EA", color: "#0B4D3B", fontSize: 10 }}>RESERVED</span>
                   </td>
                 </tr>
               </tbody>
@@ -430,7 +430,7 @@ export function AuthenticUiProof() {
                     <div style={{ fontSize: 11, color: "var(--ink-3)" }}>Phone: 01822...</div>
                   </td>
                   <td>
-                    <span className="pill" style={{ background: "#E0E7FF", color: "#3730A3", fontSize: 10 }}>DISPATCHED</span>
+                    <span className="pill" style={{ background: "#E3F1EA", color: "#0B4D3B", fontSize: 10 }}>DISPATCHED</span>
                   </td>
                 </tr>
                 <tr>
@@ -447,7 +447,7 @@ export function AuthenticUiProof() {
                     <span style={{ color: "var(--ink-3)", fontSize: 11 }}>Unassigned</span>
                   </td>
                   <td>
-                    <span className="pill" style={{ background: "#FEF3C7", color: "#92400E", fontSize: 10 }}>NEW QUOTE</span>
+                    <span className="pill" style={{ background: "#FDF1CC", color: "#946300", fontSize: 10 }}>NEW QUOTE</span>
                   </td>
                 </tr>
               </tbody>
@@ -506,7 +506,7 @@ export function AuthenticUiProof() {
         </div>
 
         {/* Right: Architectural Breakdown & Verification Badges */}
-        <div style={{ padding: "22px 24px", background: "#F8FAFC", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <div style={{ padding: "22px 24px", background: "#FBF7EC", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div>
             <span className="eyebrow" style={{ fontSize: 11, marginBottom: 6 }}>HOW IT WORKS IN PRODUCTION</span>
             <h4 style={{ margin: "0 0 10px", fontSize: 16, color: "var(--ink-ledger)" }}>{desk.title}</h4>

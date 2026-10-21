@@ -180,7 +180,7 @@ export default function MigratePage() {
                     fontSize: 28,
                     fontWeight: 800,
                     color: "var(--brand)",
-                    fontFamily: "var(--font-jakarta)",
+                    fontFamily: "var(--font-display)",
                   }}
                 >
                   {s.step}
@@ -233,7 +233,7 @@ export default function MigratePage() {
                 Join hundreds of apparel, electronics, and beauty merchants in Dhaka, Chittagong, and Sylhet who switched from Shopify to BizTrackBD.
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-                <Link href="/start" className="btn btn-primary" style={{ background: "#5B4FE8", color: "#FFF", fontWeight: 700 }}>
+                <Link href="/start" className="btn btn-primary" style={{ background: "#11795A", color: "#FFF", fontWeight: 700 }}>
                   Start Onboarding &rarr;
                 </Link>
                 <Link href="/compare" className="btn btn-secondary" style={{ background: "transparent", color: "#FFF", borderColor: "rgba(255,255,255,0.3)" }}>
@@ -255,23 +255,23 @@ export default function MigratePage() {
               </h4>
               <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 10, fontSize: 14, color: "rgba(255,255,255,0.85)" }}>
                 <li style={{ display: "flex", gap: 8 }}>
-                  <span style={{ color: "#4ADE80" }}>✓</span>
+                  <span style={{ color: "#8FD3B8" }}>✓</span>
                   <span><b>$39 USD/mo Shopify base fee</b> &rarr; Replaced by ৳ 399/mo flat BDT</span>
                 </li>
                 <li style={{ display: "flex", gap: 8 }}>
-                  <span style={{ color: "#4ADE80" }}>✓</span>
+                  <span style={{ color: "#8FD3B8" }}>✓</span>
                   <span><b>2% Shopify transaction commission</b> &rarr; Replaced by 0% commission</span>
                 </li>
                 <li style={{ display: "flex", gap: 8 }}>
-                  <span style={{ color: "#4ADE80" }}>✓</span>
+                  <span style={{ color: "#8FD3B8" }}>✓</span>
                   <span><b>3rd-party bKash app ($15/mo)</b> &rarr; Replaced by built-in bKash desk</span>
                 </li>
                 <li style={{ display: "flex", gap: 8 }}>
-                  <span style={{ color: "#4ADE80" }}>✓</span>
+                  <span style={{ color: "#8FD3B8" }}>✓</span>
                   <span><b>Manual Pathao/Steadfast copy-paste</b> &rarr; Replaced by 1-click bulk booking</span>
                 </li>
                 <li style={{ display: "flex", gap: 8 }}>
-                  <span style={{ color: "#4ADE80" }}>✓</span>
+                  <span style={{ color: "#8FD3B8" }}>✓</span>
                   <span><b>Twilio SMS USD account</b> &rarr; Replaced by native Bangla SMS</span>
                 </li>
               </ul>

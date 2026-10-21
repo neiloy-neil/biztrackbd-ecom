@@ -141,7 +141,7 @@ export default function CompareWordPressPage() {
               ← All Platform Comparisons
             </Link>
             <span>/</span>
-            <span style={{ fontWeight: 700, color: "#2563EB" }}>BizTrackBD vs WordPress &amp; Elementor</span>
+            <span style={{ fontWeight: 700, color: "#11795A" }}>BizTrackBD vs WordPress &amp; Elementor</span>
           </div>
 
           <div className="pill-tag-banner pill-tag-blue">
@@ -201,7 +201,7 @@ export default function CompareWordPressPage() {
       <section className="compare-section-subtle">
         <div className="compare-container">
           <div className="stage-section-title">
-            <span className="eyebrow" style={{ color: "#2563EB" }}>Load &amp; Stability Simulation</span>
+            <span className="eyebrow" style={{ color: "#11795A" }}>Load &amp; Stability Simulation</span>
             <h2>Eid Flash Sale Simulation: 10,000 Concurrent Visitors</h2>
             <p>
               Real-world performance under high concurrent traffic spikes common during Bangladeshi holiday campaigns.
@@ -224,13 +224,13 @@ export default function CompareWordPressPage() {
                 <div className="console-pane-header">
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#FFFFFF" }}>WordPress + Elementor VPS</div>
-                    <div style={{ fontSize: 11, color: "#94A3B8" }}>Self-managed cloud server</div>
+                    <div style={{ fontSize: 11, color: "#8FD3B8" }}>Self-managed cloud server</div>
                   </div>
                   <span className="console-status-pill-fail">502 BAD GATEWAY</span>
                 </div>
 
-                <div style={{ borderRadius: 8, background: "rgba(127, 29, 29, 0.4)", border: "1px solid rgba(185, 28, 28, 0.4)", padding: 12, fontSize: 12, color: "#FECACA" }}>
-                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#FCA5A5", marginBottom: 4 }}>
+                <div style={{ borderRadius: 8, background: "rgba(154, 52, 18, 0.4)", border: "1px solid rgba(194, 65, 12, 0.4)", padding: 12, fontSize: 12, color: "#F2C9B3" }}>
+                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#F2B79B", marginBottom: 4 }}>
                     <span>⚠️</span> Error Establishing Database Connection
                   </div>
                   <div>MySQL process memory exhausted. FastCGI workers timed out after 60s. Contact forms and checkout crashed during Facebook ad surge. Requires emergency developer intervention.</div>
@@ -265,13 +265,13 @@ export default function CompareWordPressPage() {
                 <div className="console-pane-header">
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#FFFFFF" }}>BizTrackBD Next.js Edge</div>
-                    <div style={{ fontSize: 11, color: "#60A5FA" }}>Dhaka &amp; Singapore edge network</div>
+                    <div style={{ fontSize: 11, color: "#8FD3B8" }}>Dhaka &amp; Singapore edge network</div>
                   </div>
                   <span className="console-status-pill-success">100% UPTIME • &lt;85ms TTFB</span>
                 </div>
 
-                <div style={{ borderRadius: 8, background: "rgba(6, 78, 59, 0.4)", border: "1px solid rgba(5, 150, 105, 0.4)", padding: 12, fontSize: 12, color: "#A7F3D0" }}>
-                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#6EE7B7", marginBottom: 4 }}>
+                <div style={{ borderRadius: 8, background: "rgba(11, 77, 59, 0.4)", border: "1px solid rgba(17, 121, 90, , 0.4)", padding: 12, fontSize: 12, color: "#C6DFD3" }}>
+                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#8FD3B8", marginBottom: 4 }}>
                     <span>✓</span> Instant Edge Rendering &amp; Zero Crash
                   </div>
                   <div>Pre-rendered HTML served instantly from nearby Dhaka edge nodes. Automated serverless scaling effortlessly handled 10,000+ shoppers with zero database locks and instant bKash checkout.</div>
@@ -316,19 +316,19 @@ export default function CompareWordPressPage() {
               <h3>For Reliable, Zero-Maintenance Business Operations</h3>
               <ul className="decision-list">
                 <li>
-                  <span style={{ color: "#2563EB", fontWeight: 700 }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: 700 }}>✓</span>
                   <span><strong>Predictable Taka billing:</strong> Flat ৳399 to ৳1,499/mo BDT with hosting, automated SSL, security updates, and storage fully covered.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#2563EB", fontWeight: 700 }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: 700 }}>✓</span>
                   <span><strong>Zero plugin maintenance:</strong> Never wake up to broken contact forms or "White Screen of Death" caused by conflicting third-party plugin updates.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#2563EB", fontWeight: 700 }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: 700 }}>✓</span>
                   <span><strong>Sub-100ms mobile speed:</strong> Pre-rendered edge architecture ensures instant loading for Bangladeshi visitors on mobile 3G/4G connections.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#2563EB", fontWeight: 700 }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: 700 }}>✓</span>
                   <span><strong>1-Tap WhatsApp Lead Desk:</strong> Unified customer inquiry workspace with 1-tap WhatsApp chat initiation, team assignment, and private notes.</span>
                 </li>
               </ul>
@@ -341,19 +341,19 @@ export default function CompareWordPressPage() {
               <h3>For Teams with Dedicated In-House PHP Engineers</h3>
               <ul className="decision-list">
                 <li>
-                  <span style={{ color: "#94A3B8", fontWeight: 700 }}>•</span>
+                  <span style={{ color: "#8FD3B8", fontWeight: 700 }}>•</span>
                   <span><strong>Full server root SSH access:</strong> You have an in-house Linux systems administrator who can configure Nginx, PHP-FPM, and Redis caching.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#94A3B8", fontWeight: 700 }}>•</span>
+                  <span style={{ color: "#8FD3B8", fontWeight: 700 }}>•</span>
                   <span><strong>Custom SQL database schemas:</strong> You need to create bespoke relational tables, triggers, and integrate directly with legacy on-premise databases.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#94A3B8", fontWeight: 700 }}>•</span>
+                  <span style={{ color: "#8FD3B8", fontWeight: 700 }}>•</span>
                   <span><strong>Niche community plugins:</strong> You require specific plugins from the WordPress repository that are essential to your enterprise workflow.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#94A3B8", fontWeight: 700 }}>•</span>
+                  <span style={{ color: "#8FD3B8", fontWeight: 700 }}>•</span>
                   <span><strong>Developer budget:</strong> You are comfortable allocating ৳5,000–৳15,000/month for server management, licenses, and developer support.</span>
                 </li>
               </ul>
@@ -378,7 +378,7 @@ export default function CompareWordPressPage() {
                 <tr>
                   <th style={{ width: "28%" }}>Capability</th>
                   <th className="cell-highlight-primary" style={{ width: "28%" }}>
-                    <div className="flex items-center gap-1.5" style={{ color: "#1E1B4B", fontWeight: 800 }}>
+                    <div className="flex items-center gap-1.5" style={{ color: "#0B4D3B", fontWeight: 800 }}>
                       <span>⚡ BizTrackBD</span>
                     </div>
                   </th>
@@ -403,7 +403,7 @@ export default function CompareWordPressPage() {
                       <span className="spec-chip-negative">— Self-Managed</span>
                     </td>
                     <td>
-                      <span style={{ fontSize: 11, fontFamily: "monospace", fontWeight: 700, color: "#2563EB" }}>
+                      <span style={{ fontSize: 11, fontFamily: "monospace", fontWeight: 700, color: "#11795A" }}>
                         {row.verdict}
                       </span>
                     </td>
@@ -420,13 +420,13 @@ export default function CompareWordPressPage() {
         <div className="compare-container">
           <div className="tco-savings-banner">
             <div>
-              <span style={{ display: "inline-block", padding: "3px 10px", borderRadius: 9999, background: "rgba(37, 99, 235, 0.2)", border: "1px solid rgba(96, 165, 250, 0.3)", color: "#93C5FD", fontSize: 11.5, fontWeight: 800, marginBottom: 8 }}>
+              <span style={{ display: "inline-block", padding: "3px 10px", borderRadius: 9999, background: "rgba(17, 121, 90, , 0.2)", border: "1px solid rgba(143, 211, 184, , 0.3)", color: "#8FD3B8", fontSize: 11.5, fontWeight: 800, marginBottom: 8 }}>
                 TCO REALITY IN BANGLADESH
               </span>
               <h3 style={{ fontSize: "clamp(20px, 3vw, 26px)", fontWeight: 800, color: "#FFFFFF", margin: "6px 0 8px" }}>
                 Eliminate ৳ 45,000+ in Annual Hosting, License &amp; Dev Bills
               </h3>
-              <p style={{ fontSize: 14, color: "#CBD5E1", lineHeight: 1.6, maxWidth: 600 }}>
+              <p style={{ fontSize: 14, color: "#C3D4CB", lineHeight: 1.6, maxWidth: 600 }}>
                 A single developer fix after a broken WordPress core update often costs more than an entire year of BizTrackBD. Get high-speed infrastructure without the DevOps overhead.
               </p>
             </div>
@@ -434,7 +434,7 @@ export default function CompareWordPressPage() {
               <Link
                 href="/start?mode=business"
                 className="btn btn-blue btn-lg"
-                style={{ background: "#3B82F6", color: "#0F172A", fontWeight: 800 }}
+                style={{ background: "#11795A", color: "#0B4D3B", fontWeight: 800 }}
               >
                 Start Free Trial
               </Link>

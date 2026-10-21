@@ -52,7 +52,7 @@ const WIX_FAQS = [
   },
   {
     q: "How does Bangla typography render on Wix versus BizTrackBD?",
-    a: "Wix often struggles with complex South Asian scripts like Bengali, causing conjunct ligature breakage (যুক্তবর্ণ ত্রুটি) and font fallback flash on mobile devices. BizTrackBD natively embeds Google Fonts Hind Siliguri and Plus Jakarta Sans with optimized subsetting, ensuring crisp, authentic Bangla text rendering across all Android and iOS smartphones.",
+    a: "Wix often struggles with complex South Asian scripts like Bengali, causing conjunct ligature breakage (যুক্তবর্ণ ত্রুটি) and font fallback flash on mobile devices. BizTrackBD natively embeds Google Fonts Hind Siliguri and Baloo Da 2 with optimized subsetting, ensuring crisp, authentic Bangla text rendering across all Android and iOS smartphones.",
   },
 ];
 
@@ -147,7 +147,7 @@ export default function CompareWixPage() {
               ← All Platform Comparisons
             </Link>
             <span>/</span>
-            <span style={{ fontWeight: 700, color: "#0D9488" }}>BizTrackBD vs Wix</span>
+            <span style={{ fontWeight: 700, color: "#11795A" }}>BizTrackBD vs Wix</span>
           </div>
 
           <div className="pill-tag-banner pill-tag-teal">
@@ -207,7 +207,7 @@ export default function CompareWixPage() {
       <section className="compare-section-subtle">
         <div className="compare-container">
           <div className="stage-section-title">
-            <span className="eyebrow" style={{ color: "#0D9488" }}>Interactive Simulation</span>
+            <span className="eyebrow" style={{ color: "#11795A" }}>Interactive Simulation</span>
             <h2>Real-World Operating Friction in Bangladesh</h2>
             <p>
               What happens when a Bangladeshi clinic, restaurant, or service business tries to run day-to-day operations.
@@ -230,13 +230,13 @@ export default function CompareWixPage() {
                 <div className="console-pane-header">
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#FFFFFF" }}>Wix (Global SaaS Engine)</div>
-                    <div style={{ fontSize: 11, color: "#94A3B8" }}>Western solo practitioner model</div>
+                    <div style={{ fontSize: 11, color: "#8FD3B8" }}>Western solo practitioner model</div>
                   </div>
                   <span className="console-status-pill-fail">DOLLAR CARD FRICTION</span>
                 </div>
 
-                <div style={{ borderRadius: 8, background: "rgba(127, 29, 29, 0.4)", border: "1px solid rgba(185, 28, 28, 0.4)", padding: 12, fontSize: 12, color: "#FECACA" }}>
-                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#FCA5A5", marginBottom: 4 }}>
+                <div style={{ borderRadius: 8, background: "rgba(154, 52, 18, 0.4)", border: "1px solid rgba(194, 65, 12, 0.4)", padding: 12, fontSize: 12, color: "#F2C9B3" }}>
+                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#F2B79B", marginBottom: 4 }}>
                     <span>⚠️</span> Card Declined: Travel Quota Depleted
                   </div>
                   <div>Subscription renewal failed. Dual-currency credit card endorsed against international travel quota ($12,000/yr limit) required. 15% bank surcharge + 15% VAT added.</div>
@@ -271,13 +271,13 @@ export default function CompareWixPage() {
                 <div className="console-pane-header">
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#FFFFFF" }}>BizTrackBD Business OS</div>
-                    <div style={{ fontSize: 11, color: "#2DD4BF" }}>Bangladesh-native business operating system</div>
+                    <div style={{ fontSize: 11, color: "#8FD3B8" }}>Bangladesh-native business operating system</div>
                   </div>
                   <span className="console-status-pill-success">NATIVE BDT • ZERO FRICTION</span>
                 </div>
 
-                <div style={{ borderRadius: 8, background: "rgba(6, 78, 59, 0.4)", border: "1px solid rgba(5, 150, 105, 0.4)", padding: 12, fontSize: 12, color: "#A7F3D0" }}>
-                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#6EE7B7", marginBottom: 4 }}>
+                <div style={{ borderRadius: 8, background: "rgba(11, 77, 59, 0.4)", border: "1px solid rgba(17, 121, 90, , 0.4)", padding: 12, fontSize: 12, color: "#C6DFD3" }}>
+                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#8FD3B8", marginBottom: 4 }}>
                     <span>✓</span> Instant bKash QR Auto-Billing
                   </div>
                   <div>Flat ৳ 399/mo billed directly in Bangladeshi Taka. Pay with personal or merchant bKash, Nagad, Rocket, or local debit. Zero dollar cards, zero bank approvals.</div>
@@ -322,19 +322,19 @@ export default function CompareWixPage() {
               <h3>For Bangladeshi Doctors, Dining &amp; Service Firms</h3>
               <ul className="decision-list">
                 <li>
-                  <span style={{ color: "#0D9488", fontWeight: 700 }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: 700 }}>✓</span>
                   <span><strong>Zero dollar cards:</strong> Pay in Bangladeshi Taka via bKash, Nagad, or debit cards (৳399 to ৳1,499/mo) without international quotas.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#0D9488", fontWeight: 700 }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: 700 }}>✓</span>
                   <span><strong>Bangladeshi vertical realities:</strong> BMDC doctor registration badges, visiting chambers across Banani/Dhanmondi, and QR dining table trays.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#0D9488", fontWeight: 700 }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: 700 }}>✓</span>
                   <span><strong>WhatsApp lead velocity:</strong> Centralized Lead &amp; Booking Inbox with 1-tap WhatsApp chat initiation and internal staff notes.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#0D9488", fontWeight: 700 }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: 700 }}>✓</span>
                   <span><strong>Crisp mobile Bengali:</strong> Native font subsetting for flawless typography on Grameenphone, Robi, and Banglalink connections.</span>
                 </li>
               </ul>
@@ -347,19 +347,19 @@ export default function CompareWixPage() {
               <h3>For Global Creative Agencies &amp; Pixel Customizers</h3>
               <ul className="decision-list">
                 <li>
-                  <span style={{ color: "#94A3B8", fontWeight: 700 }}>•</span>
+                  <span style={{ color: "#8FD3B8", fontWeight: 700 }}>•</span>
                   <span><strong>Free-form pixel canvas:</strong> Drag and drop any visual element to arbitrary coordinates on an unconstrained design canvas.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#94A3B8", fontWeight: 700 }}>•</span>
+                  <span style={{ color: "#8FD3B8", fontWeight: 700 }}>•</span>
                   <span><strong>Global App Market:</strong> Access over 300 specialized niche extensions, Western booking widgets, and international marketing add-ons.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#94A3B8", fontWeight: 700 }}>•</span>
+                  <span style={{ color: "#8FD3B8", fontWeight: 700 }}>•</span>
                   <span><strong>European &amp; US clientele:</strong> Your audience is primarily Western, speaks English or European languages, and transacts via Stripe/PayPal.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#94A3B8", fontWeight: 700 }}>•</span>
+                  <span style={{ color: "#8FD3B8", fontWeight: 700 }}>•</span>
                   <span><strong>USD card budget:</strong> You hold an active corporate dual-currency credit card and are comfortable with ongoing dollar exchange tax.</span>
                 </li>
               </ul>
@@ -384,7 +384,7 @@ export default function CompareWixPage() {
                 <tr>
                   <th style={{ width: "28%" }}>Capability</th>
                   <th className="cell-highlight-teal" style={{ width: "28%" }}>
-                    <div className="flex items-center gap-1.5" style={{ color: "#0F766E", fontWeight: 800 }}>
+                    <div className="flex items-center gap-1.5" style={{ color: "#11795A", fontWeight: 800 }}>
                       <span>🏛️ BizTrackBD Business</span>
                     </div>
                   </th>
@@ -409,7 +409,7 @@ export default function CompareWixPage() {
                       <span className="spec-chip-negative">— USD Card Required</span>
                     </td>
                     <td>
-                      <span style={{ fontSize: 11, fontFamily: "monospace", fontWeight: 700, color: "#0F766E" }}>
+                      <span style={{ fontSize: 11, fontFamily: "monospace", fontWeight: 700, color: "#11795A" }}>
                         {row.verdict}
                       </span>
                     </td>
@@ -426,13 +426,13 @@ export default function CompareWixPage() {
         <div className="compare-container">
           <div className="tco-savings-banner">
             <div>
-              <span style={{ display: "inline-block", padding: "3px 10px", borderRadius: 9999, background: "rgba(13, 148, 136, 0.2)", border: "1px solid rgba(45, 212, 191, 0.3)", color: "#2DD4BF", fontSize: 11.5, fontWeight: 800, marginBottom: 8 }}>
+              <span style={{ display: "inline-block", padding: "3px 10px", borderRadius: 9999, background: "rgba(17, 121, 90, , 0.2)", border: "1px solid rgba(143, 211, 184, , 0.3)", color: "#8FD3B8", fontSize: 11.5, fontWeight: 800, marginBottom: 8 }}>
                 ANNUAL COST REALITY
               </span>
               <h3 style={{ fontSize: "clamp(20px, 3vw, 26px)", fontWeight: 800, color: "#FFFFFF", margin: "6px 0 8px" }}>
                 Save ৳ 25,000 to ৳ 45,000 Every Year on Software Bills
               </h3>
-              <p style={{ fontSize: 14, color: "#CBD5E1", lineHeight: 1.6, maxWidth: 600 }}>
+              <p style={{ fontSize: 14, color: "#C3D4CB", lineHeight: 1.6, maxWidth: 600 }}>
                 By switching from Wix USD billing and eliminating bank foreign exchange surcharges, third-party WhatsApp popups, and currency friction, your business keeps hard-earned profits in local currency.
               </p>
             </div>
@@ -440,7 +440,7 @@ export default function CompareWixPage() {
               <Link
                 href="/start?mode=business"
                 className="btn btn-teal btn-lg"
-                style={{ background: "#14B8A6", color: "#042F2E", fontWeight: 800 }}
+                style={{ background: "#11795A", color: "#08382B", fontWeight: 800 }}
               >
                 Start Free Trial
               </Link>

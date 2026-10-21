@@ -107,7 +107,7 @@ const BLUEPRINT_TABS = [
       <div style={{ fontSize: 13, color: "var(--ink-2)", lineHeight: 1.5 }}>
         <div><strong>Client:</strong> Vertex Innovations Ltd</div>
         <div><strong>Status:</strong> New Lead &rarr; Awaiting Discovery Call</div>
-        <div style={{ marginTop: 6, color: "#15803D", fontWeight: 700 }}>One-tap WhatsApp response sent directly to client</div>
+        <div style={{ marginTop: 6, color: "#11795A", fontWeight: 700 }}>One-tap WhatsApp response sent directly to client</div>
       </div>
     ),
   },

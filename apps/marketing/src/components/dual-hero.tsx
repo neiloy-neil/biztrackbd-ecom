@@ -30,7 +30,7 @@ export function DualHero({
   const [businessStep, setBusinessStep] = useState<number>(3); // Default on "Instant Enquiry"
 
   return (
-    <section className="hero hero-center" style={{ background: "var(--bg-paper)", borderBottom: "1px solid var(--line)" }}>
+    <section className="hero hero-center" style={{ background: mode === "commerce" ? "var(--cream)" : "var(--mint)", borderBottom: "1px solid var(--line)" }}>
       <div className="wrap">
         {/* Goal Switcher Selector */}
         <div style={{ marginBottom: 20 }}>
@@ -84,9 +84,9 @@ export function DualHero({
         <span
           className="eyebrow"
           style={{
-            color: mode === "commerce" ? "var(--brand)" : "var(--business)",
-            background: mode === "commerce" ? "var(--tint)" : "var(--business-tint)",
-            borderColor: mode === "commerce" ? "var(--tint-border)" : "var(--business-border)",
+            color: mode === "commerce" ? "var(--brand)" : "var(--gold-dark)",
+            background: mode === "commerce" ? "var(--tint)" : "var(--marigold-tint)",
+            borderColor: mode === "commerce" ? "var(--tint-border)" : "#F6DE9A",
             borderWidth: 1,
             borderStyle: "solid",
             padding: "4px 14px",
@@ -113,7 +113,7 @@ export function DualHero({
         ) : (
           <h1 style={{ color: "var(--ink-ledger)", fontSize: "clamp(34px, 5.5vw, 54px)", lineHeight: 1.12, letterSpacing: "-1.5px" }}>
             Turn searches, visits and shares <br className="hidden-mobile" />
-            into <span style={{ color: "var(--business)" }}>real customer enquiries.</span>
+            into <span style={{ color: "var(--gold-dark)" }}>real customer enquiries.</span>
           </h1>
         )}
 
@@ -129,6 +129,15 @@ export function DualHero({
             </>
           )}
         </p>
+
+        {mode === "commerce" && (
+          <p className="brand-tagline">
+            <span className="brand-tagline-arrow" aria-hidden="true" />
+            <span className="bn" lang="bn">অর্ডার থেকে টাকা হাতে</span>
+            <span aria-hidden="true">·</span>
+            <span>Your store, your money</span>
+          </p>
+        )}
 
         {/* Action CTAs */}
         <div className="cta" style={{ marginTop: 28, display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
@@ -198,9 +207,9 @@ export function DualHero({
               maxWidth: 1040,
               margin: "0 auto",
               padding: "24px 22px",
-              boxShadow: "0 10px 30px rgba(15, 23, 42, 0.07)",
+              boxShadow: "0 10px 30px rgba(11, 77, 59, 0.07)",
               background: "#FFFFFF",
-              border: `1.5px solid ${mode === "commerce" ? "#E2E1F6" : "#CCFBF1"}`,
+              border: `1.5px solid ${mode === "commerce" ? "#C6DFD3" : "#E3F1EA"}`,
             }}
           >
             {/* Top Rail Header & Controls */}
@@ -236,7 +245,7 @@ export function DualHero({
 
               {/* In-rail Toggles */}
               {mode === "commerce" ? (
-                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, background: "#F1F5F9", padding: 3, borderRadius: 20 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, background: "#FBF7EC", padding: 3, borderRadius: 20 }}>
                   <span style={{ padding: "0 8px", color: "var(--ink-3)", fontWeight: 600 }}>Payment method:</span>
                   <button
                     type="button"
@@ -272,7 +281,7 @@ export function DualHero({
                   </button>
                 </div>
               ) : (
-                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, background: "#F1F5F9", padding: 3, borderRadius: 20 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, background: "#FBF7EC", padding: 3, borderRadius: 20 }}>
                   <span style={{ padding: "0 8px", color: "var(--ink-3)", fontWeight: 600 }}>Inquiry action:</span>
                   <button
                     type="button"
@@ -314,7 +323,7 @@ export function DualHero({
                       borderRadius: 16,
                       border: "none",
                       background: businessAction === "whatsapp" ? "#FFFFFF" : "transparent",
-                      color: businessAction === "whatsapp" ? "#15803D" : "var(--ink-3)",
+                      color: businessAction === "whatsapp" ? "#11795A" : "var(--ink-3)",
                       fontWeight: businessAction === "whatsapp" ? 700 : 500,
                       cursor: "pointer",
                       boxShadow: businessAction === "whatsapp" ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
@@ -353,7 +362,7 @@ export function DualHero({
                         textAlign: "left",
                         borderRadius: 10,
                         border: commerceStep === s.step ? "2px solid var(--brand)" : "1px solid var(--line)",
-                        background: commerceStep === s.step ? "var(--tint)" : "#FAFAFC",
+                        background: commerceStep === s.step ? "var(--tint)" : "#FBF7EC",
                         cursor: "pointer",
                         transition: "all 0.15s ease",
                       }}
@@ -383,7 +392,7 @@ export function DualHero({
                         textAlign: "left",
                         borderRadius: 10,
                         border: businessStep === s.step ? "2px solid var(--business)" : "1px solid var(--line)",
-                        background: businessStep === s.step ? "var(--business-tint)" : "#FAFAFC",
+                        background: businessStep === s.step ? "var(--business-tint)" : "#FBF7EC",
                         cursor: "pointer",
                         transition: "all 0.15s ease",
                       }}
@@ -401,7 +410,7 @@ export function DualHero({
             {/* Active Step Content Simulation Window */}
             <div
               style={{
-                background: "#F8FAFC",
+                background: "#FBF7EC",
                 border: "1px solid var(--line)",
                 borderRadius: 12,
                 padding: "20px 22px",
@@ -519,11 +528,11 @@ export function DualHero({
                           Sale: ৳ 2,450 · Courier Fee: ৳ 70 · Product Cost: ৳ 1,400
                         </h4>
                         <p style={{ margin: "6px 0 0", fontSize: 13.5, color: "var(--ink-2)" }}>
-                          Steadfast deposited <strong>৳ 2,380</strong> into your BRAC Bank account. True net profit: <strong style={{ color: "#15803D" }}>+৳ 980</strong>.
+                          Steadfast deposited <strong>৳ 2,380</strong> into your BRAC Bank account. True net profit: <strong style={{ color: "#11795A" }}>+৳ 980</strong>.
                         </p>
                       </div>
                       <div style={{ textAlign: "right" }}>
-                        <div style={{ fontSize: 20, fontWeight: 800, color: "#15803D" }}>+ ৳ 980 Net</div>
+                        <div style={{ fontSize: 20, fontWeight: 800, color: "#11795A" }}>+ ৳ 980 Net</div>
                         <span style={{ fontSize: 11, color: "var(--ink-3)" }}>Tabular Ledger Record</span>
                       </div>
                     </div>

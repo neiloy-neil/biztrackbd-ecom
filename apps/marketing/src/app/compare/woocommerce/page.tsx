@@ -124,7 +124,7 @@ export default function CompareWooCommercePage() {
               ← All Platform Comparisons
             </Link>
             <span>/</span>
-            <span style={{ fontWeight: 700, color: "#7C3AED" }}>BizTrackBD vs WooCommerce</span>
+            <span style={{ fontWeight: 700, color: "#11795A" }}>BizTrackBD vs WooCommerce</span>
           </div>
 
           <div className="pill-tag-banner pill-tag-purple">
@@ -184,7 +184,7 @@ export default function CompareWooCommercePage() {
       <section className="compare-section-subtle">
         <div className="compare-container">
           <div className="stage-section-title">
-            <span className="eyebrow" style={{ color: "#7C3AED" }}>Interactive Simulation</span>
+            <span className="eyebrow" style={{ color: "#11795A" }}>Interactive Simulation</span>
             <h2>Checkout &amp; Order Pipeline Under Heavy Traffic</h2>
             <p>
               What happens behind the scenes when a campaign surge hits a WordPress store in Bangladesh.
@@ -207,13 +207,13 @@ export default function CompareWooCommercePage() {
                 <div className="console-pane-header">
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#FFFFFF" }}>WooCommerce (Self-Hosted VPS)</div>
-                    <div style={{ fontSize: 11, color: "#94A3B8" }}>24 active plugins + MySQL single node</div>
+                    <div style={{ fontSize: 11, color: "#8FD3B8" }}>24 active plugins + MySQL single node</div>
                   </div>
                   <span className="console-status-pill-fail">502 BAD GATEWAY</span>
                 </div>
 
-                <div style={{ borderRadius: 8, background: "rgba(127, 29, 29, 0.4)", border: "1px solid rgba(185, 28, 28, 0.4)", padding: 12, fontSize: 12, color: "#FECACA" }}>
-                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#FCA5A5", marginBottom: 4 }}>
+                <div style={{ borderRadius: 8, background: "rgba(154, 52, 18, 0.4)", border: "1px solid rgba(194, 65, 12, 0.4)", padding: 12, fontSize: 12, color: "#F2C9B3" }}>
+                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#F2B79B", marginBottom: 4 }}>
                     <span>⚠️</span> Plugin Conflict &amp; Database Lock
                   </div>
                   <div>PHP Fatal error after automated WooCommerce update. bKash gateway failed silently. Abandoned cart rate surged to 42%. MySQL memory exhausted during concurrent checkout. Emergency developer intervention required.</div>
@@ -244,13 +244,13 @@ export default function CompareWooCommercePage() {
                 <div className="console-pane-header">
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#FFFFFF" }}>BizTrackBD Managed Platform</div>
-                    <div style={{ fontSize: 11, color: "#6EE7B7" }}>Serverless Next.js Edge Architecture</div>
+                    <div style={{ fontSize: 11, color: "#8FD3B8" }}>Serverless Next.js Edge Architecture</div>
                   </div>
                   <span className="console-status-pill-success">100% UPTIME</span>
                 </div>
 
-                <div style={{ borderRadius: 8, background: "rgba(6, 78, 59, 0.4)", border: "1px solid rgba(16, 185, 129, 0.4)", padding: 12, fontSize: 12, color: "#A7F3D0" }}>
-                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#6EE7B7", marginBottom: 4 }}>
+                <div style={{ borderRadius: 8, background: "rgba(11, 77, 59, 0.4)", border: "1px solid rgba(17, 121, 90, 0.4)", padding: 12, fontSize: 12, color: "#C6DFD3" }}>
+                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#8FD3B8", marginBottom: 4 }}>
                     <span>✓</span> Zero Maintenance &amp; 1-Click Operations
                   </div>
                   <div>Zero plugin conflicts. Direct customer bKash TrxID verified in 1 tap. Real-time COD delivery rate verified across 5,000+ local merchants. Steadfast parcel booked with barcode sticker in 1 click. Edge TTFB: 68ms.</div>
@@ -284,7 +284,7 @@ export default function CompareWooCommercePage() {
       <section className="py-16 border-b border-[var(--border)]">
         <div className="compare-container">
           <div className="stage-section-title">
-            <span className="eyebrow" style={{ color: "#7C3AED" }}>Decision Matrix</span>
+            <span className="eyebrow" style={{ color: "#11795A" }}>Decision Matrix</span>
             <h2>The Honest Verdict: Who is each platform for?</h2>
             <p>
               We believe in vendor neutrality. Choose the platform that best fits your technical capability and operational focus.
@@ -300,19 +300,19 @@ export default function CompareWooCommercePage() {
               <h3>You have dedicated software engineers</h3>
               <ul className="decision-list">
                 <li>
-                  <span style={{ color: "#16A34A", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>In-House Developers:</strong> You employ full-time software engineers who specialize in PHP and WordPress plugin development.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#16A34A", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>Custom Database Architecture:</strong> You require direct database-level customizations and custom server plugins.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#16A34A", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>Private Server Stack:</strong> You operate your own on-premise private cloud server infrastructure and custom firewalls.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#16A34A", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>DevOps Comfort:</strong> You are comfortable managing MySQL caching, security patches, Redis layers, and database indexing.</span>
                 </li>
               </ul>
@@ -326,19 +326,19 @@ export default function CompareWooCommercePage() {
               <h3>You want an automated commerce desk</h3>
               <ul className="decision-list">
                 <li>
-                  <span style={{ color: "#7C3AED", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>100% Campaign Stability:</strong> You want a reliable online store that never crashes during Eid or Facebook ad traffic spikes.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#7C3AED", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>Built-In Logistics:</strong> You want native multi-courier booking (Steadfast, Pathao, RedX) without buying buggy third-party plugins.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#7C3AED", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>COD Fraud Prevention:</strong> You want a built-in fraud checker that verifies national courier delivery track records before dispatch.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#7C3AED", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>Zero Maintenance Overhead:</strong> You want to focus on marketing and order fulfillment, not debugging broken plugin updates.</span>
                 </li>
               </ul>
@@ -351,7 +351,7 @@ export default function CompareWooCommercePage() {
       <section className="py-16 border-b border-[var(--border)] bg-[var(--surface-subtle)]">
         <div className="compare-container">
           <div className="stage-section-title">
-            <span className="eyebrow" style={{ color: "#7C3AED" }}>Operational Friction</span>
+            <span className="eyebrow" style={{ color: "#11795A" }}>Operational Friction</span>
             <h2>The Hidden Costs of Running WordPress in Bangladesh</h2>
             <p>
               Why standard WooCommerce stores turn into expensive maintenance sinks for local merchants.
@@ -406,7 +406,7 @@ export default function CompareWooCommercePage() {
       <section className="py-16 border-b border-[var(--border)]">
         <div className="compare-container">
           <div className="compare-header-row">
-            <span className="eyebrow" style={{ color: "#7C3AED" }}>
+            <span className="eyebrow" style={{ color: "#11795A" }}>
               Head-to-Head Matrix
             </span>
             <h2>WooCommerce vs BizTrackBD Feature Breakdown</h2>
@@ -421,7 +421,7 @@ export default function CompareWooCommercePage() {
                 <tr>
                   <th style={{ width: "26%" }}>Capability</th>
                   <th className="cell-highlight-primary" style={{ width: "28%" }}>
-                    <div className="flex items-center gap-1.5" style={{ color: "#1E3A8A", fontWeight: 800 }}>
+                    <div className="flex items-center gap-1.5" style={{ color: "#0B4D3B", fontWeight: 800 }}>
                       <span>🛍️ BizTrackBD</span>
                     </div>
                   </th>
@@ -444,7 +444,7 @@ export default function CompareWooCommercePage() {
                       <span className="spec-chip-negative">— Fragile Plugin Stack</span>
                     </td>
                     <td>
-                      <span className="text-[11px] font-mono font-semibold" style={{ color: "#7C3AED" }}>
+                      <span className="text-[11px] font-mono font-semibold" style={{ color: "#11795A" }}>
                         {row.verdict}
                       </span>
                     </td>

@@ -281,8 +281,8 @@ export default function BusinessPage() {
                   <div style={{ fontSize: 13, color: "var(--ink-3)", marginTop: 2 }}>{v.subtitle}</div>
                 </div>
 
-                <div style={{ background: "#F0FDFA", padding: "12px 14px", borderRadius: 8, border: "1px solid #CCFBF1", fontSize: 13 }}>
-                  <div style={{ fontWeight: 700, color: "#0F766E", marginBottom: 3, fontSize: 11.5, textTransform: "uppercase" }}>
+                <div style={{ background: "#E3F1EA", padding: "12px 14px", borderRadius: 8, border: "1px solid #E3F1EA", fontSize: 13 }}>
+                  <div style={{ fontWeight: 700, color: "#11795A", marginBottom: 3, fontSize: 11.5, textTransform: "uppercase" }}>
                     Example Captured Lead:
                   </div>
                   <div style={{ color: "var(--ink-ledger)", fontWeight: 500 }}>&ldquo;{v.sampleLead}&rdquo;</div>
@@ -365,7 +365,7 @@ export default function BusinessPage() {
             className="card ledger-border"
             style={{
               padding: "clamp(20px, 4vw, 36px) clamp(16px, 4vw, 32px)",
-              background: "#F8FAFC",
+              background: "#FBF7EC",
               border: "1.5px solid var(--line-strong)",
             }}
           >
@@ -426,7 +426,7 @@ export default function BusinessPage() {
               </div>
             </div>
 
-            <div className="card ledger-border" style={{ padding: "26px 22px", background: "#FFFFFF", border: "2px solid var(--business)", boxShadow: "0 8px 24px rgba(13, 148, 136, 0.12)" }}>
+            <div className="card ledger-border" style={{ padding: "26px 22px", background: "#FFFFFF", border: "2px solid var(--business)", boxShadow: "0 8px 24px rgba(17, 121, 90, , 0.12)" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <span className="status-stamp stamp-lead" style={{ background: "var(--business)", color: "#FFFFFF" }}>POPULAR · BUSINESS</span>
                 <span className="pill" style={{ fontSize: 11 }}>Most Picked</span>
@@ -503,12 +503,12 @@ export default function BusinessPage() {
       </section>
 
       {/* Closing CTA */}
-      <section className="cta-band" style={{ background: "var(--business-dark)" }}>
+      <section className="cta-band">
         <div className="wrap">
           <h2 style={{ color: "#FFFFFF", fontSize: "clamp(28px, 4.5vw, 42px)", letterSpacing: "-1.2px" }}>
             Launch your professional business website in minutes
           </h2>
-          <p style={{ color: "#CCFBF1", fontSize: 17, marginTop: 10 }}>
+          <p style={{ color: "#E3F1EA", fontSize: 17, marginTop: 10 }}>
             14 days free &middot; Custom domain included &middot; Editable from your smartphone
           </p>
           <div style={{ marginTop: 24, display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>

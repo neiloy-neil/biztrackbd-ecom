@@ -152,7 +152,7 @@ export default function CompareShopifyPage() {
               ← All Platform Comparisons
             </Link>
             <span>/</span>
-            <span style={{ fontWeight: 700, color: "#4F46E5" }}>BizTrackBD vs Shopify</span>
+            <span style={{ fontWeight: 700, color: "#11795A" }}>BizTrackBD vs Shopify</span>
           </div>
 
           <div className="pill-tag-banner pill-tag-indigo">
@@ -212,7 +212,7 @@ export default function CompareShopifyPage() {
       <section className="compare-section-subtle">
         <div className="compare-container">
           <div className="stage-section-title">
-            <span className="eyebrow" style={{ color: "#4F46E5" }}>Interactive Simulation</span>
+            <span className="eyebrow" style={{ color: "#11795A" }}>Interactive Simulation</span>
             <h2>Checkout &amp; Order Fulfillment in Bangladesh</h2>
             <p>
               What happens behind the scenes when a local shopper places an order via mobile phone.
@@ -235,13 +235,13 @@ export default function CompareShopifyPage() {
                 <div className="console-pane-header">
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#FFFFFF" }}>Shopify Basic ($39/mo + Apps)</div>
-                    <div style={{ fontSize: 11, color: "#94A3B8" }}>Global SaaS + fragmented local plugins</div>
+                    <div style={{ fontSize: 11, color: "#8FD3B8" }}>Global SaaS + fragmented local plugins</div>
                   </div>
                   <span className="console-status-pill-fail">2.0% PENALTY CUT</span>
                 </div>
 
-                <div style={{ borderRadius: 8, background: "rgba(127, 29, 29, 0.4)", border: "1px solid rgba(185, 28, 28, 0.4)", padding: 12, fontSize: 12, color: "#FECACA" }}>
-                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#FCA5A5", marginBottom: 4 }}>
+                <div style={{ borderRadius: 8, background: "rgba(154, 52, 18, 0.4)", border: "1px solid rgba(194, 65, 12, 0.4)", padding: 12, fontSize: 12, color: "#F2C9B3" }}>
+                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#F2B79B", marginBottom: 4 }}>
                     <span>⚠️</span> Third-Party Gateway Penalty &amp; Address Confusion
                   </div>
                   <div>Shopify Payments unavailable in BD. Levied 2.0% extra penalty fee. Customer confused by Western ZIP code input. 4 injected app scripts increased mobile page weight to 2.4MB (4.6s load time). Requires manual copy-paste into Steadfast portal.</div>
@@ -272,13 +272,13 @@ export default function CompareShopifyPage() {
                 <div className="console-pane-header">
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#FFFFFF" }}>BizTrackBD Commerce Platform</div>
-                    <div style={{ fontSize: 11, color: "#6EE7B7" }}>Engineered for Bangladesh Domestic Retail</div>
+                    <div style={{ fontSize: 11, color: "#8FD3B8" }}>Engineered for Bangladesh Domestic Retail</div>
                   </div>
                   <span className="console-status-pill-success">0% COMMISSION</span>
                 </div>
 
-                <div style={{ borderRadius: 8, background: "rgba(6, 78, 59, 0.4)", border: "1px solid rgba(16, 185, 129, 0.4)", padding: 12, fontSize: 12, color: "#A7F3D0" }}>
-                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#6EE7B7", marginBottom: 4 }}>
+                <div style={{ borderRadius: 8, background: "rgba(11, 77, 59, 0.4)", border: "1px solid rgba(17, 121, 90, 0.4)", padding: 12, fontSize: 12, color: "#C6DFD3" }}>
+                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#8FD3B8", marginBottom: 4 }}>
                     <span>✓</span> Instant bKash &amp; 1-Click Steadfast Automation
                   </div>
                   <div>Direct customer bKash TrxID verified in 1 tap. Native cascading Division → District → Upazila dropdowns prevented courier misdirection. Steadfast consignment created automatically with barcode label. Return fraud risk: LOW. TTFB: 72ms.</div>
@@ -312,7 +312,7 @@ export default function CompareShopifyPage() {
       <section className="py-16 border-b border-[var(--border)]">
         <div className="compare-container">
           <div className="stage-section-title">
-            <span className="eyebrow" style={{ color: "#4F46E5" }}>Decision Matrix</span>
+            <span className="eyebrow" style={{ color: "#11795A" }}>Decision Matrix</span>
             <h2>The Honest Verdict: Who is each platform for?</h2>
             <p>
               We believe in vendor neutrality. Choose the platform that best fits your business model and target audience.
@@ -328,19 +328,19 @@ export default function CompareShopifyPage() {
               <h3>You are targeting international buyers</h3>
               <ul className="decision-list">
                 <li>
-                  <span style={{ color: "#16A34A", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>Global Cross-Border Exports:</strong> You export apparel, leather goods, or handicrafts to customers in the US, UK, Canada, or EU.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#16A34A", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>Foreign Currency Checkout:</strong> You charge in USD, EUR, or GBP using international credit cards via Stripe or PayPal.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#16A34A", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>Active Dual-Currency Card:</strong> You already possess a bank-endorsed credit card with sufficient annual travel quota ($12k limit).</span>
                 </li>
                 <li>
-                  <span style={{ color: "#16A34A", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>Global Dropshipping:</strong> You rely heavily on overseas dropshipping ecosystems like DSers, CJdropshipping, or AliExpress.</span>
                 </li>
               </ul>
@@ -354,19 +354,19 @@ export default function CompareShopifyPage() {
               <h3>You are selling inside Bangladesh</h3>
               <ul className="decision-list">
                 <li>
-                  <span style={{ color: "#4F46E5", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>Domestic Cash on Delivery &amp; bKash:</strong> Over 80% of your customer orders are paid via COD or mobile wallets (bKash, Nagad).</span>
                 </li>
                 <li>
-                  <span style={{ color: "#4F46E5", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>Zero Sales Commission:</strong> You refuse to pay Shopify's 2.0% penalty cut on every sale on top of local payment gateway charges.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#4F46E5", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>Courier Automation:</strong> You deliver via Steadfast, Pathao, or RedX and want 1-click booking, pickup requests, and barcode label printing.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#4F46E5", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>COD Fraud Prevention:</strong> You want to stop serial parcel rejectors and fake orders before paying courier return penalties (৳135+ each).</span>
                 </li>
               </ul>
@@ -379,7 +379,7 @@ export default function CompareShopifyPage() {
       <section className="py-16 border-b border-[var(--border)] bg-[var(--surface-subtle)]">
         <div className="compare-container">
           <div className="stage-section-title">
-            <span className="eyebrow" style={{ color: "#4F46E5" }}>The 5 Local Realities</span>
+            <span className="eyebrow" style={{ color: "#11795A" }}>The 5 Local Realities</span>
             <h2>Why Global Ecommerce Software Struggles in Bangladesh</h2>
             <p>
               The structural hurdles that turn standard Shopify stores into expensive operational bottlenecks.
@@ -444,7 +444,7 @@ export default function CompareShopifyPage() {
       <section className="py-16 border-b border-[var(--border)]">
         <div className="compare-container">
           <div className="compare-header-row">
-            <span className="eyebrow" style={{ color: "#4F46E5" }}>
+            <span className="eyebrow" style={{ color: "#11795A" }}>
               Feature-by-Feature Breakdown
             </span>
             <h2>Detailed Platform Comparison</h2>
@@ -459,7 +459,7 @@ export default function CompareShopifyPage() {
                 <tr>
                   <th style={{ width: "26%" }}>Feature</th>
                   <th className="cell-highlight-primary" style={{ width: "28%" }}>
-                    <div className="flex items-center gap-1.5" style={{ color: "#1E3A8A", fontWeight: 800 }}>
+                    <div className="flex items-center gap-1.5" style={{ color: "#0B4D3B", fontWeight: 800 }}>
                       <span>🛍️ BizTrackBD</span>
                     </div>
                   </th>
@@ -482,7 +482,7 @@ export default function CompareShopifyPage() {
                       <span className="spec-chip-negative">— Global App / Add-on</span>
                     </td>
                     <td>
-                      <span className="text-[11px] font-mono font-semibold" style={{ color: "#4338CA" }}>
+                      <span className="text-[11px] font-mono font-semibold" style={{ color: "#11795A" }}>
                         {row.verdict}
                       </span>
                     </td>

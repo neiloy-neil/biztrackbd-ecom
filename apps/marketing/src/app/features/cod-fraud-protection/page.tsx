@@ -115,9 +115,9 @@ export default function CodFraudProtectionPage() {
           <span
             className="eyebrow"
             style={{
-              color: "#B91C1C",
-              background: "#FEE2E2",
-              borderColor: "#FCA5A5",
+              color: "#C2410C",
+              background: "#FDF1EA",
+              borderColor: "#F2B79B",
               borderWidth: 1,
               borderStyle: "solid",
               padding: "4px 14px",
@@ -134,7 +134,7 @@ export default function CodFraudProtectionPage() {
           </span>
           <h1 style={{ color: "var(--ink-ledger)", fontSize: "clamp(34px, 5.5vw, 54px)", lineHeight: 1.12, letterSpacing: "-1.5px" }}>
             Stop losing money on <br className="hidden-mobile" />
-            <span style={{ color: "#B91C1C" }}>refused Cash on Delivery parcels.</span>
+            <span style={{ color: "#C2410C" }}>refused Cash on Delivery parcels.</span>
           </h1>
           <p className="lead" style={{ maxWidth: 740, margin: "18px auto 0", color: "var(--ink-2)", fontSize: "clamp(16px, 2vw, 19px)", lineHeight: 1.6 }}>
             Check customer delivery performance records across Steadfast and Pathao before packing. Hold high-risk orders for advance delivery confirmation and protect your hard-earned profit.
@@ -240,7 +240,7 @@ export default function CodFraudProtectionPage() {
               </div>
               <div className="admin-mockup-url">admin.biztrackbd.com/orders/fraud-screening</div>
               <div className="admin-mockup-live">
-                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10B981", display: "inline-block" }} />
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#11795A", display: "inline-block" }} />
                 POOLED COURIER NETWORK AUDIT
               </div>
             </div>
@@ -250,11 +250,11 @@ export default function CodFraudProtectionPage() {
                 <div className="admin-desk-pill-tabs">
                   <span className="admin-desk-tab is-active">Active Screening Desk</span>
                   <span className="admin-desk-tab">Auto-Cleared (41)</span>
-                  <span className="admin-desk-tab" style={{ color: "#FCA5A5" }}>High Risk Held (4)</span>
+                  <span className="admin-desk-tab" style={{ color: "#F2B79B" }}>High Risk Held (4)</span>
                 </div>
                 <div className="admin-desk-actions">
-                  <span style={{ fontSize: 11.5, color: "#94A3B8" }}>
-                    Avoided Return Losses this Month: <strong style={{ color: "#34D399" }}>৳ 42,600</strong>
+                  <span style={{ fontSize: 11.5, color: "#8FD3B8" }}>
+                    Avoided Return Losses this Month: <strong style={{ color: "#8FD3B8" }}>৳ 42,600</strong>
                   </span>
                 </div>
               </div>
@@ -274,52 +274,52 @@ export default function CodFraudProtectionPage() {
                     <tr>
                       <td>
                         <div style={{ fontWeight: 600 }}>01711-***420</div>
-                        <div style={{ fontSize: 11, color: "#94A3B8" }}>Dhanmondi, Dhaka</div>
+                        <div style={{ fontSize: 11, color: "#8FD3B8" }}>Dhanmondi, Dhaka</div>
                       </td>
-                      <td style={{ fontWeight: 700, color: "#F8FAFC" }}>৳ 3,250 COD</td>
+                      <td style={{ fontWeight: 700, color: "#FBF7EC" }}>৳ 3,250 COD</td>
                       <td>
-                        <span style={{ fontWeight: 700, color: "#34D399" }}>24 Delivered · 0 Returns</span>
-                        <div style={{ fontSize: 10, color: "#94A3B8" }}>Steadfast &amp; Pathao verified</div>
+                        <span style={{ fontWeight: 700, color: "#8FD3B8" }}>24 Delivered · 0 Returns</span>
+                        <div style={{ fontSize: 10, color: "#8FD3B8" }}>Steadfast &amp; Pathao verified</div>
                       </td>
                       <td>
                         <span className="admin-badge-safe">100% Success · Safe</span>
                       </td>
                       <td>
-                        <span style={{ fontSize: 11, color: "#34D399", fontWeight: 600 }}>Auto-Cleared for 1-Click Ship</span>
+                        <span style={{ fontSize: 11, color: "#8FD3B8", fontWeight: 600 }}>Auto-Cleared for 1-Click Ship</span>
                       </td>
                     </tr>
                     <tr>
                       <td>
                         <div style={{ fontWeight: 600 }}>01912-***892</div>
-                        <div style={{ fontSize: 11, color: "#94A3B8" }}>Agrabad, Chattogram</div>
+                        <div style={{ fontSize: 11, color: "#8FD3B8" }}>Agrabad, Chattogram</div>
                       </td>
-                      <td style={{ fontWeight: 700, color: "#F8FAFC" }}>৳ 1,800 COD</td>
+                      <td style={{ fontWeight: 700, color: "#FBF7EC" }}>৳ 1,800 COD</td>
                       <td>
-                        <span style={{ fontWeight: 700, color: "#FCD34D" }}>14 Delivered · 1 Return</span>
-                        <div style={{ fontSize: 10, color: "#94A3B8" }}>93% Delivery Ratio</div>
+                        <span style={{ fontWeight: 700, color: "#F2A900" }}>14 Delivered · 1 Return</span>
+                        <div style={{ fontSize: 10, color: "#8FD3B8" }}>93% Delivery Ratio</div>
                       </td>
                       <td>
                         <span className="admin-badge-warn">Low Risk · Standard</span>
                       </td>
                       <td>
-                        <span style={{ fontSize: 11, color: "#60A5FA", fontWeight: 600 }}>Approve Dispatch ↗</span>
+                        <span style={{ fontSize: 11, color: "#8FD3B8", fontWeight: 600 }}>Approve Dispatch ↗</span>
                       </td>
                     </tr>
                     <tr>
                       <td>
                         <div style={{ fontWeight: 600 }}>01823-***119</div>
-                        <div style={{ fontSize: 11, color: "#94A3B8" }}>Uttara Sector 11, Dhaka</div>
+                        <div style={{ fontSize: 11, color: "#8FD3B8" }}>Uttara Sector 11, Dhaka</div>
                       </td>
-                      <td style={{ fontWeight: 700, color: "#F8FAFC" }}>৳ 4,100 COD</td>
+                      <td style={{ fontWeight: 700, color: "#FBF7EC" }}>৳ 4,100 COD</td>
                       <td>
-                        <span style={{ fontWeight: 700, color: "#FCA5A5" }}>1 Delivered · 5 Returns</span>
-                        <div style={{ fontSize: 10, color: "#FCA5A5" }}>16% Success (Serial Rejector)</div>
+                        <span style={{ fontWeight: 700, color: "#F2B79B" }}>1 Delivered · 5 Returns</span>
+                        <div style={{ fontSize: 10, color: "#F2B79B" }}>16% Success (Serial Rejector)</div>
                       </td>
                       <td>
                         <span className="admin-badge-danger">High Return Risk</span>
                       </td>
                       <td>
-                        <span style={{ fontSize: 11, color: "#F87171", fontWeight: 700 }}>Hold &middot; Send ৳130 Courier Advance SMS ↗</span>
+                        <span style={{ fontSize: 11, color: "#F2B79B", fontWeight: 700 }}>Hold &middot; Send ৳130 Courier Advance SMS ↗</span>
                       </td>
                     </tr>
                   </tbody>
@@ -337,7 +337,7 @@ export default function CodFraudProtectionPage() {
             className="card ledger-border"
             style={{
               padding: "32px 28px",
-              background: "#F8FAFC",
+              background: "#FBF7EC",
               border: "1.5px solid var(--line-strong)",
             }}
           >
@@ -379,12 +379,12 @@ export default function CodFraudProtectionPage() {
       </section>
 
       {/* Closing CTA */}
-      <section className="cta-band" style={{ background: "var(--ink-ledger)" }}>
+      <section className="cta-band">
         <div className="wrap">
           <h2 style={{ color: "#FFFFFF", fontSize: "clamp(28px, 4.5vw, 42px)", letterSpacing: "-1.2px" }}>
             Protect your next COD shipment with BizTrackBD
           </h2>
-          <p style={{ color: "#94A3B8", fontSize: 17, marginTop: 10 }}>
+          <p style={{ color: "var(--green-light)", fontSize: 17, marginTop: 10 }}>
             14 days free &middot; Works with Steadfast, Pathao &amp; RedX &middot; Zero sales commission
           </p>
           <div style={{ marginTop: 24, display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>

@@ -884,11 +884,11 @@ export function Wizard({
                           display: "inline-flex",
                           alignItems: "center",
                           gap: 6,
-                          background: "#ECFDF5",
-                          border: "1px solid #A7F3D0",
+                          background: "#E3F1EA",
+                          border: "1px solid #C6DFD3",
                           borderRadius: 8,
                           padding: "6px 12px",
-                          color: "#065F46",
+                          color: "#0B4D3B",
                           fontSize: 13,
                           fontWeight: 600,
                         }}
@@ -903,11 +903,11 @@ export function Wizard({
                             display: "inline-flex",
                             alignItems: "center",
                             gap: 6,
-                            background: "#FEF2F2",
-                            border: "1px solid #FECACA",
+                            background: "#FDF1EA",
+                            border: "1px solid #F2C9B3",
                             borderRadius: 8,
                             padding: "6px 12px",
-                            color: "#991B1B",
+                            color: "#9A3412",
                             fontSize: 13,
                             fontWeight: 600,
                           }}
@@ -936,7 +936,7 @@ export function Wizard({
                                     fontSize: 12.5,
                                     fontWeight: 600,
                                     padding: "4px 10px",
-                                    border: "1px solid var(--line, #e2e8f0)",
+                                    border: "1px solid var(--line, #DCE7E1)",
                                     borderRadius: 6,
                                     background: "#fff",
                                     color: "var(--brand)",
@@ -1106,8 +1106,8 @@ export function Wizard({
               {/* 14-day Free Pro Trial Banner */}
               <div
                 style={{
-                  border: "1.5px solid #A7F3D0",
-                  background: "#ECFDF5",
+                  border: "1.5px solid #C6DFD3",
+                  background: "#E3F1EA",
                   borderRadius: 12,
                   padding: "14px 16px",
                   display: "flex",
@@ -1117,7 +1117,7 @@ export function Wizard({
                 }}
               >
                 <span style={{ fontSize: 22 }}>🎁</span>
-                <div style={{ flex: 1, fontSize: 13.5, color: "#065F46" }}>
+                <div style={{ flex: 1, fontSize: 13.5, color: "#0B4D3B" }}>
                   <b style={{ display: "block", fontSize: 14, marginBottom: 2 }}>
                     {chosenPlan.name} Trial Selected (14 Days · ৳0 Today)
                   </b>
@@ -1178,8 +1178,8 @@ export function Wizard({
                 disabled={pending}
                 data-testid="create"
                 style={{
-                  background: pending ? "#4338CA" : "var(--brand)",
-                  boxShadow: "0 4px 14px rgba(79, 70, 229, 0.35)",
+                  background: pending ? "#11795A" : "var(--brand)",
+                  boxShadow: "0 4px 14px rgba(17, 121, 90, , 0.35)",
                 }}
               >
                 {pending
@@ -1208,8 +1208,8 @@ export function Wizard({
               style={{
                 fontSize: 11,
                 fontWeight: 700,
-                color: "#065F46",
-                background: "#D1FAE5",
+                color: "#0B4D3B",
+                background: "#E3F1EA",
                 padding: "2px 8px",
                 borderRadius: 99,
               }}
@@ -1246,7 +1246,7 @@ export function Wizard({
                 borderRadius: 8,
                 overflow: "hidden",
                 border: "2px solid #FFFFFF",
-                boxShadow: "0 4px 12px rgba(26,26,78,0.2)",
+                boxShadow: "0 4px 12px rgba(11, 77, 59, ,0.2)",
               }}
             >
               <Image

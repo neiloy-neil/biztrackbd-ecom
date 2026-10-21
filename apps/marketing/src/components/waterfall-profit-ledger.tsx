@@ -22,7 +22,7 @@ export function WaterfallProfitLedger() {
         style={{
           padding: "32px 28px",
           background: "#FFFFFF",
-          boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
+          boxShadow: "0 10px 30px rgba(11, 77, 59, 0.06)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
@@ -59,7 +59,7 @@ export function WaterfallProfitLedger() {
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
                 <label style={{ fontWeight: 700, color: "var(--ink)" }}>Wholesale Product Cost:</label>
-                <strong style={{ color: "#B91C1C" }}>-৳ {productCost}</strong>
+                <strong style={{ color: "#C2410C" }}>-৳ {productCost}</strong>
               </div>
               <input
                 type="range"
@@ -68,14 +68,14 @@ export function WaterfallProfitLedger() {
                 step="50"
                 value={productCost}
                 onChange={(e) => setProductCost(Number(e.target.value))}
-                style={{ width: "100%", accentColor: "#B91C1C", cursor: "pointer" }}
+                style={{ width: "100%", accentColor: "#C2410C", cursor: "pointer" }}
               />
             </div>
 
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
                 <label style={{ fontWeight: 700, color: "var(--ink)" }}>Delivery &amp; Courier Fee:</label>
-                <strong style={{ color: "#B91C1C" }}>-৳ {courierFee}</strong>
+                <strong style={{ color: "#C2410C" }}>-৳ {courierFee}</strong>
               </div>
               <input
                 type="range"
@@ -84,14 +84,14 @@ export function WaterfallProfitLedger() {
                 step="5"
                 value={courierFee}
                 onChange={(e) => setCourierFee(Number(e.target.value))}
-                style={{ width: "100%", accentColor: "#B91C1C", cursor: "pointer" }}
+                style={{ width: "100%", accentColor: "#C2410C", cursor: "pointer" }}
               />
             </div>
 
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
                 <label style={{ fontWeight: 700, color: "var(--ink)" }}>Facebook Ad Spend per Order:</label>
-                <strong style={{ color: "#B91C1C" }}>-৳ {adSpend}</strong>
+                <strong style={{ color: "#C2410C" }}>-৳ {adSpend}</strong>
               </div>
               <input
                 type="range"
@@ -100,7 +100,7 @@ export function WaterfallProfitLedger() {
                 step="10"
                 value={adSpend}
                 onChange={(e) => setAdSpend(Number(e.target.value))}
-                style={{ width: "100%", accentColor: "#B91C1C", cursor: "pointer" }}
+                style={{ width: "100%", accentColor: "#C2410C", cursor: "pointer" }}
               />
             </div>
           </div>
@@ -108,7 +108,7 @@ export function WaterfallProfitLedger() {
           {/* Right: Tabular Ledger Card */}
           <div
             style={{
-              background: "#F8FAFC",
+              background: "#FBF7EC",
               border: "1.5px solid var(--line-strong)",
               borderRadius: 12,
               padding: "20px 22px",
@@ -127,34 +127,34 @@ export function WaterfallProfitLedger() {
                   <span>Gross Order Value:</span>
                   <strong style={{ color: "var(--ink-ledger)" }}>+ ৳ {salePrice}</strong>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", color: "#B91C1C" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", color: "#C2410C" }}>
                   <span>Wholesale Inventory Cost:</span>
                   <span>- ৳ {productCost}</span>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", color: "#B91C1C" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", color: "#C2410C" }}>
                   <span>Courier Delivery Fee:</span>
                   <span>- ৳ {courierFee}</span>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", color: "#B91C1C" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", color: "#C2410C" }}>
                   <span>Marketing Ad Cost:</span>
                   <span>- ৳ {adSpend}</span>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", color: "#B91C1C" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", color: "#C2410C" }}>
                   <span>Polybag &amp; Packaging:</span>
                   <span>- ৳ {packagingCost}</span>
                 </div>
               </div>
             </div>
 
-            <div style={{ borderTop: "2px solid #0F172A", paddingTop: 14, marginTop: 16 }}>
+            <div style={{ borderTop: "2px solid #0B4D3B", paddingTop: 14, marginTop: 16 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                 <span style={{ fontSize: 14, fontWeight: 800, color: "var(--ink-ledger)" }}>True Net Profit:</span>
-                <span style={{ fontSize: 24, fontWeight: 800, color: netProfit >= 0 ? "#15803D" : "#B91C1C" }}>
+                <span style={{ fontSize: 24, fontWeight: 800, color: netProfit >= 0 ? "#11795A" : "#C2410C" }}>
                   ৳ {netProfit.toLocaleString("en-IN")}
                 </span>
               </div>
               <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 2, textAlign: "right" }}>
-                Net Margin: <strong style={{ color: "#15803D" }}>{marginPercent}%</strong>
+                Net Margin: <strong style={{ color: "#11795A" }}>{marginPercent}%</strong>
               </div>
             </div>
           </div>
@@ -167,7 +167,7 @@ export function WaterfallProfitLedger() {
         style={{
           padding: "32px 28px",
           background: "#FFFFFF",
-          boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
+          boxShadow: "0 10px 30px rgba(11, 77, 59, 0.06)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 18 }}>
@@ -187,7 +187,7 @@ export function WaterfallProfitLedger() {
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
             gap: 16,
-            background: "#F8FAFC",
+            background: "#FBF7EC",
             borderRadius: 12,
             padding: "20px 22px",
             border: "1px solid var(--line)",
@@ -203,7 +203,7 @@ export function WaterfallProfitLedger() {
 
           <div>
             <div style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>Deducted Courier Fees (1%)</div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: "#B91C1C", marginTop: 4 }}>
+            <div style={{ fontSize: 22, fontWeight: 800, color: "#C2410C", marginTop: 4 }}>
               - ৳ 22,400
             </div>
             <div style={{ fontSize: 11, color: "var(--ink-3)" }}>Outbound &amp; return charges</div>
@@ -211,20 +211,20 @@ export function WaterfallProfitLedger() {
 
           <div>
             <div style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>Bank Account Settled</div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: "#15803D", marginTop: 4 }}>
+            <div style={{ fontSize: 22, fontWeight: 800, color: "#11795A", marginTop: 4 }}>
               ৳ 362,600
             </div>
-            <div style={{ fontSize: 11, color: "#166534" }}>Deposited into BRAC Bank</div>
+            <div style={{ fontSize: 11, color: "#0B4D3B" }}>Deposited into BRAC Bank</div>
           </div>
 
-          <div style={{ background: "#F0FDF4", padding: "10px 14px", borderRadius: 8, border: "1px solid #86EFAC" }}>
-            <div style={{ fontSize: 11.5, color: "#166534", fontWeight: 700, textTransform: "uppercase" }}>
+          <div style={{ background: "#E3F1EA", padding: "10px 14px", borderRadius: 8, border: "1px solid #8FD3B8" }}>
+            <div style={{ fontSize: 11.5, color: "#0B4D3B", fontWeight: 700, textTransform: "uppercase" }}>
               Pending Balance:
             </div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: "#15803D", marginTop: 2 }}>
+            <div style={{ fontSize: 20, fontWeight: 800, color: "#11795A", marginTop: 2 }}>
               ৳ 0.00
             </div>
-            <div style={{ fontSize: 11, color: "#166534" }}>100% Fully Reconciled</div>
+            <div style={{ fontSize: 11, color: "#0B4D3B" }}>100% Fully Reconciled</div>
           </div>
         </div>
 

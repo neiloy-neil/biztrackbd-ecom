@@ -70,7 +70,7 @@ export function PricingView({
             justifyContent: "center",
             padding: 5,
             borderRadius: 28,
-            background: "#F1F1F7",
+            background: "#FBF7EC",
             boxShadow: "inset 0 1px 3px rgba(0,0,0,0.06)",
             gap: 4,
           }}
@@ -90,13 +90,13 @@ export function PricingView({
               gap: 6,
               padding: "8px clamp(12px, 3vw, 22px)",
               borderRadius: 22,
-              border: isStore ? "1px solid #E2E1F6" : "1px solid transparent",
+              border: isStore ? "1px solid #C6DFD3" : "1px solid transparent",
               background: isStore ? "#FFFFFF" : "transparent",
-              color: isStore ? "var(--brand, #5B4FE8)" : "var(--ink-2, #64647A)",
+              color: isStore ? "var(--brand, #11795A)" : "var(--ink-2, #3D5A52)",
               fontWeight: 700,
               fontSize: "clamp(13px, 2.5vw, 15px)",
               cursor: "pointer",
-              boxShadow: isStore ? "0 2px 8px rgba(91,79,232,0.12)" : "none",
+              boxShadow: isStore ? "0 2px 8px rgba(17, 121, 90, 0.12)" : "none",
               transition: "all 0.2s ease",
             }}
           >
@@ -118,13 +118,13 @@ export function PricingView({
               gap: 6,
               padding: "8px clamp(12px, 3vw, 22px)",
               borderRadius: 22,
-              border: !isStore ? "1px solid #E2E1F6" : "1px solid transparent",
+              border: !isStore ? "1px solid #C6DFD3" : "1px solid transparent",
               background: !isStore ? "#FFFFFF" : "transparent",
-              color: !isStore ? "var(--brand, #5B4FE8)" : "var(--ink-2, #64647A)",
+              color: !isStore ? "var(--brand, #11795A)" : "var(--ink-2, #3D5A52)",
               fontWeight: 700,
               fontSize: "clamp(13px, 2.5vw, 15px)",
               cursor: "pointer",
-              boxShadow: !isStore ? "0 2px 8px rgba(91,79,232,0.12)" : "none",
+              boxShadow: !isStore ? "0 2px 8px rgba(17, 121, 90, 0.12)" : "none",
               transition: "all 0.2s ease",
             }}
           >

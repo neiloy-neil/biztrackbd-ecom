@@ -138,8 +138,8 @@ export default function ContactPage() {
                   width: 44,
                   height: 44,
                   borderRadius: 12,
-                  background: "#DCFCE7",
-                  color: "#15803D",
+                  background: "#E3F1EA",
+                  color: "#11795A",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -167,7 +167,7 @@ export default function ContactPage() {
                 style={{
                   marginTop: "auto",
                   paddingTop: 10,
-                  background: "#15803D",
+                  background: "#11795A",
                   borderRadius: 20,
                 }}
               >
@@ -241,8 +241,8 @@ export default function ContactPage() {
                   width: 44,
                   height: 44,
                   borderRadius: 12,
-                  background: "#FEF3C7",
-                  color: "#B45309",
+                  background: "#FDF1CC",
+                  color: "#946300",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",

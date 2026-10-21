@@ -147,7 +147,7 @@ export default async function Home() {
               className="eyebrow"
               style={{
                 color: "var(--ink-2)",
-                background: "#ECEEF2",
+                background: "#FBF7EC",
                 borderColor: "var(--line)",
                 borderWidth: 1,
                 borderStyle: "solid",
@@ -177,15 +177,15 @@ export default async function Home() {
               className="card ledger-border"
               style={{
                 padding: "28px 24px",
-                background: "#FFFDFD",
-                border: "1.5px solid #FECACA",
+                background: "#FBE9DF",
+                border: "1.5px solid #F2C9B3",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
                 <span className="status-stamp stamp-risk">THE SCATTERED BEFORE</span>
                 <span style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>5 Tabs &amp; Manual Friction</span>
               </div>
-              <h3 style={{ margin: 0, fontSize: 20, color: "#991B1B" }}>
+              <h3 style={{ margin: 0, fontSize: 20, color: "#9A3412" }}>
                 Messy manual copying &amp; lost revenue
               </h3>
               <ul style={{ margin: "16px 0 0", paddingLeft: 20, color: "var(--ink-2)", fontSize: 14, lineHeight: 1.8 }}>
@@ -203,8 +203,8 @@ export default async function Home() {
               style={{
                 padding: "28px 24px",
                 background: "#FFFFFF",
-                border: "1.5px solid #DDD9FC",
-                boxShadow: "0 8px 24px rgba(91, 79, 232, 0.08)",
+                border: "1.5px solid #C6DFD3",
+                boxShadow: "0 8px 24px rgba(17, 121, 90, 0.08)",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
@@ -352,7 +352,7 @@ export default async function Home() {
               </div>
             </div>
 
-            <div className="card ledger-border" style={{ padding: "22px 20px", background: "#F4F3FF", border: "1.5px solid var(--brand)" }}>
+            <div className="card ledger-border" style={{ padding: "22px 20px", background: "#E3F1EA", border: "1.5px solid var(--brand)" }}>
               <div style={{ fontSize: 12, fontWeight: 800, color: "var(--brand)", textTransform: "uppercase" }}>Locally Native Desk</div>
               <h3 style={{ margin: "4px 0 8px", fontSize: 18, color: "var(--brand)" }}>BizTrackBD</h3>
               <p style={{ fontSize: 13.5, color: "var(--ink)", lineHeight: 1.5 }}>
@@ -442,12 +442,13 @@ export default async function Home() {
       </section>
 
       {/* Closing CTA Band */}
-      <section className="cta-band" style={{ background: "var(--ink-ledger)" }}>
+      <section className="cta-band">
         <div className="wrap">
+          <span className="brand-tagline-arrow" aria-hidden="true" />
           <h2 style={{ color: "#FFFFFF", fontSize: "clamp(28px, 4.5vw, 42px)", letterSpacing: "-1.2px" }}>
             Put your next order or client inquiry through BizTrackBD
           </h2>
-          <p style={{ color: "#94A3B8", fontSize: 17, marginTop: 10 }}>
+          <p style={{ fontSize: 17, marginTop: 10 }}>
             14 days free &middot; No credit card required &middot; Set up in 10 minutes
           </p>
           <div style={{ marginTop: 24, display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>

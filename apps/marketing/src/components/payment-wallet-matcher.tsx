@@ -8,7 +8,7 @@ export function PaymentWalletMatcher() {
   const [walletType, setWalletType] = useState<"bkash" | "nagad">("bkash");
 
   const sampleTrxId = walletType === "bkash" ? "9LK7129A" : "NG88219B";
-  const walletColor = walletType === "bkash" ? "#E2136E" : "#F97316";
+  const walletColor = walletType === "bkash" ? "#E2136E" : "#F6921E";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
@@ -18,7 +18,7 @@ export function PaymentWalletMatcher() {
         style={{
           padding: "32px 28px",
           background: "#FFFFFF",
-          boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
+          boxShadow: "0 10px 30px rgba(11, 77, 59, 0.06)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
@@ -35,11 +35,11 @@ export function PaymentWalletMatcher() {
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
           {/* The Gateway Escrow Way */}
-          <div style={{ background: "#FFFDFD", padding: "20px 22px", borderRadius: 10, border: "1.5px solid #FECACA" }}>
+          <div style={{ background: "#FDF1EA", padding: "20px 22px", borderRadius: 10, border: "1.5px solid #F2C9B3" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
               <span className="status-stamp stamp-risk">TRADITIONAL PAYMENT GATEWAYS</span>
             </div>
-            <h4 style={{ margin: "0 0 10px", fontSize: 17, color: "#991B1B" }}>
+            <h4 style={{ margin: "0 0 10px", fontSize: 17, color: "#9A3412" }}>
               Funds held in escrow with 2.5% cuts
             </h4>
             <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13.5, color: "var(--ink-2)", lineHeight: 1.7 }}>
@@ -51,11 +51,11 @@ export function PaymentWalletMatcher() {
           </div>
 
           {/* The BizTrackBD Direct Way */}
-          <div style={{ background: "#F0FDF4", padding: "20px 22px", borderRadius: 10, border: "1.5px solid #86EFAC" }}>
+          <div style={{ background: "#E3F1EA", padding: "20px 22px", borderRadius: 10, border: "1.5px solid #8FD3B8" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
               <span className="status-stamp stamp-paid">THE BIZTRACKBD DIRECT WALLET</span>
             </div>
-            <h4 style={{ margin: "0 0 10px", fontSize: 17, color: "#166534" }}>
+            <h4 style={{ margin: "0 0 10px", fontSize: 17, color: "#0B4D3B" }}>
               100% direct to your personal or merchant bKash
             </h4>
             <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13.5, color: "var(--ink)", lineHeight: 1.7 }}>
@@ -74,7 +74,7 @@ export function PaymentWalletMatcher() {
         style={{
           padding: "32px 28px",
           background: "#FFFFFF",
-          boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
+          boxShadow: "0 10px 30px rgba(11, 77, 59, 0.06)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 18 }}>
@@ -110,9 +110,9 @@ export function PaymentWalletMatcher() {
                 borderRadius: 16,
                 fontSize: 12.5,
                 fontWeight: 700,
-                border: walletType === "nagad" ? "2px solid #F97316" : "1px solid var(--line)",
-                background: walletType === "nagad" ? "#FFF7ED" : "#FFFFFF",
-                color: walletType === "nagad" ? "#F97316" : "var(--ink-2)",
+                border: walletType === "nagad" ? "2px solid #C2410C" : "1px solid var(--line)",
+                background: walletType === "nagad" ? "#FDF1EA" : "#FFFFFF",
+                color: walletType === "nagad" ? "#C2410C" : "var(--ink-2)",
                 cursor: "pointer",
               }}
             >
@@ -126,7 +126,7 @@ export function PaymentWalletMatcher() {
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
             gap: 24,
-            background: "#F8FAFC",
+            background: "#FBF7EC",
             borderRadius: 12,
             padding: "22px 24px",
             border: "1px solid var(--line)",
@@ -141,13 +141,13 @@ export function PaymentWalletMatcher() {
             <div style={{ fontSize: 13, color: "var(--ink-2)" }}>
               Send <strong>৳ 2,450</strong> to merchant number <strong>01700-000000</strong>
             </div>
-            <div style={{ marginTop: 10, padding: "8px 12px", background: "#F1F5F9", borderRadius: 6, fontFamily: "monospace", fontSize: 13 }}>
+            <div style={{ marginTop: 10, padding: "8px 12px", background: "#FBF7EC", borderRadius: 6, fontFamily: "monospace", fontSize: 13 }}>
               Customer entered TrxID: <strong style={{ color: walletColor }}>{sampleTrxId}</strong>
             </div>
           </div>
 
           {/* Merchant Desk View */}
-          <div style={{ background: "#FFFFFF", padding: "18px 20px", borderRadius: 10, border: isVerified ? "2px solid #16A34A" : "1.5px solid var(--line)" }}>
+          <div style={{ background: "#FFFFFF", padding: "18px 20px", borderRadius: 10, border: isVerified ? "2px solid #11795A" : "1.5px solid var(--line)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
               <span style={{ fontSize: 11.5, fontWeight: 700, color: "var(--ink-3)", textTransform: "uppercase" }}>
                 Step 2: Merchant Admin Desk
@@ -163,7 +163,7 @@ export function PaymentWalletMatcher() {
 
             <div style={{ marginTop: 14 }}>
               {isVerified ? (
-                <div style={{ color: "#15803D", fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
+                <div style={{ color: "#11795A", fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
                   ✓ Payment confirmed. Order marked &ldquo;Processing&rdquo; and sent to courier queue.
                 </div>
               ) : (

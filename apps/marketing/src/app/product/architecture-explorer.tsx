@@ -30,10 +30,10 @@ export function ArchitectureExplorer() {
           style={{
             display: "inline-flex",
             maxWidth: "100%",
-            background: "#F1F1F8",
+            background: "#FBF7EC",
             padding: "5px",
             borderRadius: "32px",
-            border: "1px solid var(--line, #E2E2EC)",
+            border: "1px solid var(--line, #DCE7E1)",
             boxShadow: "inset 0 1px 3px rgba(0,0,0,0.04)",
             flexWrap: "wrap",
             justifyContent: "center",
@@ -52,7 +52,7 @@ export function ArchitectureExplorer() {
               padding: "9px clamp(14px, 3.5vw, 24px)",
               borderRadius: "28px",
               background: activeMode === "commerce" ? "#FFFFFF" : "transparent",
-              color: activeMode === "commerce" ? "#065F46" : "#667085",
+              color: activeMode === "commerce" ? "#0B4D3B" : "#3D5A52",
               fontWeight: 700,
               fontSize: "clamp(13px, 2.5vw, 15px)",
               border: "none",
@@ -79,7 +79,7 @@ export function ArchitectureExplorer() {
               padding: "9px clamp(14px, 3.5vw, 24px)",
               borderRadius: "28px",
               background: activeMode === "business" ? "#FFFFFF" : "transparent",
-              color: activeMode === "business" ? "var(--accent, #3B5BFD)" : "#667085",
+              color: activeMode === "business" ? "var(--accent, #11795A)" : "#3D5A52",
               fontWeight: 700,
               fontSize: "clamp(13px, 2.5vw, 15px)",
               border: "none",
@@ -106,7 +106,7 @@ export function ArchitectureExplorer() {
               padding: "9px clamp(14px, 3.5vw, 24px)",
               borderRadius: "28px",
               background: activeMode === "hybrid" ? "#FFFFFF" : "transparent",
-              color: activeMode === "hybrid" ? "#7C3AED" : "#667085",
+              color: activeMode === "hybrid" ? "#11795A" : "#3D5A52",
               fontWeight: 700,
               fontSize: "clamp(13px, 2.5vw, 15px)",
               border: "none",
@@ -140,13 +140,13 @@ export function ArchitectureExplorer() {
           </div>
           <div>
             biztrackbd.sys · mode://
-            <span style={{ color: activeMode === "commerce" ? "#059669" : activeMode === "business" ? "#3B5BFD" : "#7C3AED", fontWeight: 700 }}>
+            <span style={{ color: activeMode === "commerce" ? "#11795A" : activeMode === "business" ? "#11795A" : "#11795A", fontWeight: 700 }}>
               {activeMode}
             </span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <span style={{ color: "#10B981" }}>● Live Dhaka Edge</span>
-            <span style={{ fontSize: 11, background: "#E2E8F0", padding: "1px 6px", borderRadius: 4 }}>
+            <span style={{ color: "#11795A" }}>● Live Dhaka Edge</span>
+            <span style={{ fontSize: 11, background: "#DCE7E1", padding: "1px 6px", borderRadius: 4 }}>
               SSL Active
             </span>
           </div>
@@ -158,26 +158,26 @@ export function ArchitectureExplorer() {
             <div
               style={{
                 borderRadius: 12,
-                border: "1px solid #E2E8F0",
+                border: "1px solid #DCE7E1",
                 padding: "20px 18px",
-                background: "#F8FAFC",
+                background: "#FBF7EC",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em", color: "#64748B" }}>
+                <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em", color: "#3D5A52" }}>
                   01. Edge &amp; Delivery
                 </span>
                 <span className="spec-chip-positive" style={{ fontSize: 11 }}>
                   &lt; 85ms TTFB
                 </span>
               </div>
-              <h4 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 6px", color: "#0F172A" }}>
+              <h4 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 6px", color: "#0B4D3B" }}>
                 Next.js Edge Proxy
               </h4>
-              <p style={{ fontSize: 13, color: "#64748B", margin: 0, lineHeight: 1.5 }}>
+              <p style={{ fontSize: 13, color: "#3D5A52", margin: 0, lineHeight: 1.5 }}>
                 Dhaka &amp; Singapore edge caching with automated SSL certificate provisioning on custom domains (.com, .com.bd).
               </p>
-              <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid #E2E8F0", fontSize: 12, color: "#334155" }}>
+              <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid #DCE7E1", fontSize: 12, color: "#3D5A52" }}>
                 <div>✓ Brotli &amp; AVIF Asset Compression</div>
                 <div>✓ Zero-Delay Mobile Render</div>
               </div>
@@ -187,14 +187,14 @@ export function ArchitectureExplorer() {
             <div
               style={{
                 borderRadius: 12,
-                border: activeMode === "commerce" ? "2px solid #10B981" : activeMode === "business" ? "2px solid #3B5BFD" : "2px solid #8B5CF6",
+                border: activeMode === "commerce" ? "2px solid #11795A" : activeMode === "business" ? "2px solid #11795A" : "2px solid #11795A",
                 padding: "20px 18px",
-                background: activeMode === "commerce" ? "#F0FDF4" : activeMode === "business" ? "#EFF6FF" : "#F5F3FF",
+                background: activeMode === "commerce" ? "#E3F1EA" : activeMode === "business" ? "#E3F1EA" : "#E3F1EA",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em", color: activeMode === "commerce" ? "#047857" : activeMode === "business" ? "#1D4ED8" : "#6D28D9" }}>
+                <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em", color: activeMode === "commerce" ? "#0B4D3B" : activeMode === "business" ? "#11795A" : "#11795A" }}>
                   02. Active Engine Modules
                 </span>
                 <span
@@ -204,7 +204,7 @@ export function ArchitectureExplorer() {
                     padding: "2px 8px",
                     borderRadius: 12,
                     background: "#FFFFFF",
-                    color: activeMode === "commerce" ? "#047857" : activeMode === "business" ? "#1D4ED8" : "#6D28D9",
+                    color: activeMode === "commerce" ? "#0B4D3B" : activeMode === "business" ? "#11795A" : "#11795A",
                     border: "1px solid rgba(0,0,0,0.1)",
                   }}
                 >
@@ -214,10 +214,10 @@ export function ArchitectureExplorer() {
 
               {activeMode === "commerce" && (
                 <>
-                  <h4 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 6px", color: "#065F46" }}>
+                  <h4 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 6px", color: "#0B4D3B" }}>
                     Commerce Engine Active
                   </h4>
-                  <ul style={{ margin: 0, paddingLeft: 16, fontSize: 13, color: "#047857", lineHeight: 1.6 }}>
+                  <ul style={{ margin: 0, paddingLeft: 16, fontSize: 13, color: "#0B4D3B", lineHeight: 1.6 }}>
                     <li>bKash &amp; Nagad TrxID Checkout</li>
                     <li>Steadfast &amp; Pathao 1-Click Pickups</li>
                     <li>COD Return Risk Shield Scoring</li>
@@ -228,10 +228,10 @@ export function ArchitectureExplorer() {
 
               {activeMode === "business" && (
                 <>
-                  <h4 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 6px", color: "#1E40AF" }}>
+                  <h4 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 6px", color: "#0B4D3B" }}>
                     Business Engine Active
                   </h4>
-                  <ul style={{ margin: 0, paddingLeft: 16, fontSize: 13, color: "#1D4ED8", lineHeight: 1.6 }}>
+                  <ul style={{ margin: 0, paddingLeft: 16, fontSize: 13, color: "#11795A", lineHeight: 1.6 }}>
                     <li>BMDC Doctor Multi-Chamber Appointments</li>
                     <li>Table QR Menus &amp; Live Order Trays</li>
                     <li>Centralized Lead Inbox &amp; Staff Notes</li>
@@ -242,10 +242,10 @@ export function ArchitectureExplorer() {
 
               {activeMode === "hybrid" && (
                 <>
-                  <h4 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 6px", color: "#5B21B6" }}>
+                  <h4 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 6px", color: "#11795A" }}>
                     Unified Hybrid Pipeline Active
                   </h4>
-                  <ul style={{ margin: 0, paddingLeft: 16, fontSize: 13, color: "#6D28D9", lineHeight: 1.6 }}>
+                  <ul style={{ margin: 0, paddingLeft: 16, fontSize: 13, color: "#11795A", lineHeight: 1.6 }}>
                     <li>Retail checkout alongside appointment booking</li>
                     <li>Single customer record across parcels &amp; leads</li>
                     <li>Unified merchant desk with role permissions</li>
@@ -259,26 +259,26 @@ export function ArchitectureExplorer() {
             <div
               style={{
                 borderRadius: 12,
-                border: "1px solid #E2E8F0",
+                border: "1px solid #DCE7E1",
                 padding: "20px 18px",
-                background: "#F8FAFC",
+                background: "#FBF7EC",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em", color: "#64748B" }}>
+                <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em", color: "#3D5A52" }}>
                   03. Trust &amp; Ledger
                 </span>
                 <span className="spec-chip-positive" style={{ fontSize: 11 }}>
                   AES-256 Vault
                 </span>
               </div>
-              <h4 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 6px", color: "#0F172A" }}>
+              <h4 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 6px", color: "#0B4D3B" }}>
                 Multi-Tenant Vault
               </h4>
-              <p style={{ fontSize: 13, color: "#64748B", margin: 0, lineHeight: 1.5 }}>
+              <p style={{ fontSize: 13, color: "#3D5A52", margin: 0, lineHeight: 1.5 }}>
                 Isolated PostgreSQL database partitions with normalized SHA-256 Meta CAPI server telemetry and role-based staff access controls.
               </p>
-              <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid #E2E8F0", fontSize: 12, color: "#334155" }}>
+              <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid #DCE7E1", fontSize: 12, color: "#3D5A52" }}>
                 <div>✓ Zero Raw PII Leaks</div>
                 <div>✓ 0% Platform Sales Commission</div>
               </div>
@@ -286,10 +286,10 @@ export function ArchitectureExplorer() {
           </div>
 
           {/* Action Row */}
-          <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid #E2E8F0", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-            <div style={{ fontSize: 13.5, color: "#475467" }}>
+          <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid #DCE7E1", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+            <div style={{ fontSize: 13.5, color: "#3D5A52" }}>
               Selected deployment:{" "}
-              <strong style={{ color: "#0F172A" }}>
+              <strong style={{ color: "#0B4D3B" }}>
                 {activeMode === "commerce"
                   ? "BizTrackBD Commerce (Online Retail)"
                   : activeMode === "business"
@@ -305,7 +305,7 @@ export function ArchitectureExplorer() {
                   fontSize: 13,
                   fontWeight: 700,
                   color: "#FFFFFF",
-                  background: activeMode === "commerce" ? "#059669" : activeMode === "business" ? "#3B5BFD" : "#7C3AED",
+                  background: activeMode === "commerce" ? "#11795A" : activeMode === "business" ? "#11795A" : "#11795A",
                   padding: "7px 16px",
                   borderRadius: 6,
                   textDecoration: "none",
@@ -318,8 +318,8 @@ export function ArchitectureExplorer() {
                 style={{
                   fontSize: 13,
                   fontWeight: 600,
-                  color: "#0F172A",
-                  background: "#F1F5F9",
+                  color: "#0B4D3B",
+                  background: "#FBF7EC",
                   padding: "7px 14px",
                   borderRadius: 6,
                   textDecoration: "none",

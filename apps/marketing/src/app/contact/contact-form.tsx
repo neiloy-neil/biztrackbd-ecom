@@ -83,7 +83,7 @@ export function ContactForm() {
             width: 48,
             height: 48,
             borderRadius: 24,
-            background: "#15803D",
+            background: "#11795A",
             color: "#FFFFFF",
             display: "flex",
             alignItems: "center",
@@ -238,12 +238,12 @@ export function ContactForm() {
           required
           checked={consent}
           onChange={(e) => setConsent(e.target.checked)}
-          style={{ marginTop: 2, accentColor: "var(--brand, #5B4FE8)", cursor: "pointer" }}
+          style={{ marginTop: 2, accentColor: "var(--brand, #11795A)", cursor: "pointer" }}
           data-testid="c-consent"
         />
         <span>
           I agree to BizTrackBD contacting me via WhatsApp, phone, or email regarding this inquiry, and acknowledge the{" "}
-          <Link href="/privacy" target="_blank" style={{ color: "var(--brand, #5B4FE8)", textDecoration: "underline" }}>
+          <Link href="/privacy" target="_blank" style={{ color: "var(--brand, #11795A)", textDecoration: "underline" }}>
             Privacy Policy
           </Link>
           .

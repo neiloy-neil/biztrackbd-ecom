@@ -69,10 +69,10 @@ export function CompareView({
           style={{
             display: "inline-flex",
             maxWidth: "100%",
-            background: "#F1F1F8",
+            background: "#FBF7EC",
             padding: "5px",
             borderRadius: "32px",
-            border: "1px solid var(--line, #E2E2EC)",
+            border: "1px solid var(--line, #DCE7E1)",
             boxShadow: "inset 0 1px 3px rgba(0,0,0,0.04)",
             flexWrap: "wrap",
             justifyContent: "center",
@@ -91,7 +91,7 @@ export function CompareView({
               padding: "9px clamp(14px, 3.5vw, 24px)",
               borderRadius: "28px",
               background: isStore ? "#FFFFFF" : "transparent",
-              color: isStore ? "var(--ink, #101828)" : "#555E72",
+              color: isStore ? "var(--ink, #0B4D3B)" : "#3D5A52",
               fontWeight: 700,
               fontSize: "clamp(13px, 2.5vw, 15px)",
               border: "none",
@@ -109,8 +109,8 @@ export function CompareView({
                 fontSize: "12px",
                 padding: "2px 8px",
                 borderRadius: "12px",
-                background: isStore ? "#EFEFF6" : "#E5E5EE",
-                color: "var(--ink, #101828)",
+                background: isStore ? "#FBF7EC" : "#DCE7E1",
+                color: "var(--ink, #0B4D3B)",
               }}
             >
               Shopify · WooCommerce · Pathao
@@ -129,7 +129,7 @@ export function CompareView({
               padding: "9px clamp(14px, 3.5vw, 24px)",
               borderRadius: "28px",
               background: !isStore ? "#FFFFFF" : "transparent",
-              color: !isStore ? "var(--ink, #101828)" : "#555E72",
+              color: !isStore ? "var(--ink, #0B4D3B)" : "#3D5A52",
               fontWeight: 700,
               fontSize: "clamp(13px, 2.5vw, 15px)",
               border: "none",
@@ -147,8 +147,8 @@ export function CompareView({
                 fontSize: "12px",
                 padding: "2px 8px",
                 borderRadius: "12px",
-                background: !isStore ? "#EEF2FF" : "#E5E5EE",
-                color: !isStore ? "var(--accent, #3B5BFD)" : "var(--ink, #101828)",
+                background: !isStore ? "#E3F1EA" : "#DCE7E1",
+                color: !isStore ? "var(--accent, #11795A)" : "var(--ink, #0B4D3B)",
                 fontWeight: 700,
               }}
             >
@@ -184,7 +184,7 @@ export function CompareView({
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
-              borderTop: isStore ? "4px solid #5B4FE8" : "4px solid #0D9488",
+              borderTop: isStore ? "4px solid #11795A" : "4px solid #11795A",
             }}
           >
             <div>
@@ -198,9 +198,9 @@ export function CompareView({
                     letterSpacing: "0.06em",
                     padding: "3px 10px",
                     borderRadius: 20,
-                    background: isStore ? "#F0FDF4" : "#EEF2FF",
-                    color: isStore ? "#166534" : "var(--accent, #3B5BFD)",
-                    border: isStore ? "1px solid #BBF7D0" : "1px solid #C7D2FE",
+                    background: isStore ? "#E3F1EA" : "#E3F1EA",
+                    color: isStore ? "#0B4D3B" : "var(--accent, #11795A)",
+                    border: isStore ? "1px solid #C6DFD3" : "1px solid #C6DFD3",
                   }}
                 >
                   {c.badge}
@@ -212,7 +212,7 @@ export function CompareView({
                     style={{
                       fontSize: 12.5,
                       fontWeight: 700,
-                      color: isStore ? "var(--brand, #5B4FE8)" : "var(--accent, #3B5BFD)",
+                      color: isStore ? "var(--brand, #11795A)" : "var(--accent, #11795A)",
                       textDecoration: "none",
                     }}
                   >
@@ -221,36 +221,36 @@ export function CompareView({
                 )}
               </div>
 
-              <h3 style={{ fontSize: 20, fontWeight: 800, color: "var(--ink, #101828)", margin: "0 0 6px" }}>
+              <h3 style={{ fontSize: 20, fontWeight: 800, color: "var(--ink, #0B4D3B)", margin: "0 0 6px" }}>
                 {c.title}
               </h3>
-              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--ink-3, #667085)", margin: "0 0 14px", lineHeight: 1.4 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--ink-3, #3D5A52)", margin: "0 0 14px", lineHeight: 1.4 }}>
                 {c.tagline}
               </p>
-              <p style={{ fontSize: 14.5, color: "var(--ink-2, #475467)", lineHeight: 1.6, margin: "0 0 20px" }}>
+              <p style={{ fontSize: 14.5, color: "var(--ink-2, #3D5A52)", lineHeight: 1.6, margin: "0 0 20px" }}>
                 {c.summary}
               </p>
 
-              <div style={{ background: "#F9FAFB", padding: "14px 16px", borderRadius: 10, border: "1px solid #F1F2F6", marginBottom: 18 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 4, textTransform: "uppercase" }}>
+              <div style={{ background: "#FBF7EC", padding: "14px 16px", borderRadius: 10, border: "1px solid #FBF7EC", marginBottom: 18 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#3D5A52", marginBottom: 4, textTransform: "uppercase" }}>
                   Where Competitor Wins:
                 </div>
-                <div style={{ fontSize: 13, color: "var(--ink-2, #475467)", lineHeight: 1.5 }}>
+                <div style={{ fontSize: 13, color: "var(--ink-2, #3D5A52)", lineHeight: 1.5 }}>
                   {c.bestForComp}
                 </div>
               </div>
 
-              <div style={{ background: isStore ? "#ECFDF5" : "#F5F3FF", padding: "14px 16px", borderRadius: 10, border: isStore ? "1px solid #D1FAE5" : "1px solid #EDE9FE" }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: isStore ? "#065F46" : "#5B21B6", marginBottom: 4, textTransform: "uppercase" }}>
+              <div style={{ background: isStore ? "#E3F1EA" : "#E3F1EA", padding: "14px 16px", borderRadius: 10, border: isStore ? "1px solid #E3F1EA" : "1px solid #E3F1EA" }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: isStore ? "#0B4D3B" : "#11795A", marginBottom: 4, textTransform: "uppercase" }}>
                   Where BizTrackBD Wins in Bangladesh:
                 </div>
-                <div style={{ fontSize: 13, color: "var(--ink, #101828)", fontWeight: 500, lineHeight: 1.5 }}>
+                <div style={{ fontSize: 13, color: "var(--ink, #0B4D3B)", fontWeight: 500, lineHeight: 1.5 }}>
                   {c.bestForBiztrack}
                 </div>
               </div>
             </div>
 
-            <div style={{ marginTop: 24, paddingTop: 18, borderTop: "1px solid var(--line, #F1F2F6)" }}>
+            <div style={{ marginTop: 24, paddingTop: 18, borderTop: "1px solid var(--line, #FBF7EC)" }}>
               {c.hasDeepPage ? (
                 <Link
                   href={`/compare/${c.slug}`}
@@ -294,15 +294,15 @@ export function CompareView({
               fontWeight: 700,
               textTransform: "uppercase",
               letterSpacing: "0.06em",
-              color: isStore ? "var(--brand, #5B4FE8)" : "var(--accent, #3B5BFD)",
+              color: isStore ? "var(--brand, #11795A)" : "var(--accent, #11795A)",
             }}
           >
             {isStore ? "Retail Platform Matrix" : "Professional Website Matrix"}
           </span>
-          <h2 style={{ fontSize: "clamp(24px, 3.5vw, 32px)", fontWeight: 800, color: "var(--ink, #101828)", margin: "6px 0 10px" }}>
+          <h2 style={{ fontSize: "clamp(24px, 3.5vw, 32px)", fontWeight: 800, color: "var(--ink, #0B4D3B)", margin: "6px 0 10px" }}>
             {isStore ? "Side-by-Side Online Storefront Comparison" : "Side-by-Side Business Website Comparison"}
           </h2>
-          <p style={{ fontSize: 15, color: "var(--ink-2, #475467)", maxWidth: 700, margin: "0 auto", lineHeight: 1.6 }}>
+          <p style={{ fontSize: 15, color: "var(--ink-2, #3D5A52)", maxWidth: 700, margin: "0 auto", lineHeight: 1.6 }}>
             {isStore
               ? "Compare operational capabilities, payment methods, courier automation, and true monthly expenses in Bangladeshi Taka."
               : "Compare local BDT billing, medical doctor chamber scheduling, restaurant table QR menus, and lead management."}
@@ -314,7 +314,7 @@ export function CompareView({
             overflowX: "auto",
             WebkitOverflowScrolling: "touch",
             borderRadius: 14,
-            border: "1px solid var(--line, #E5E7EB)",
+            border: "1px solid var(--line, #DCE7E1)",
             background: "#FFFFFF",
             boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
           }}
@@ -381,9 +381,9 @@ export function CompareView({
             marginTop: 64,
             padding: "36px 32px",
             borderRadius: 16,
-            background: "linear-gradient(135deg, #0F172A 0%, #1E293B 100%)",
+            background: "linear-gradient(135deg, #0B4D3B 0%, #0B4D3B 100%)",
             color: "#FFFFFF",
-            boxShadow: "0 10px 30px rgba(15, 23, 42, 0.15)",
+            boxShadow: "0 10px 30px rgba(11, 77, 59, 0.15)",
           }}
         >
           <div style={{ maxWidth: 760 }}>
@@ -392,8 +392,8 @@ export function CompareView({
                 display: "inline-block",
                 padding: "3px 12px",
                 borderRadius: 20,
-                background: "rgba(59, 91, 253, 0.2)",
-                color: "#93C5FD",
+                background: "rgba(17, 121, 90, , 0.2)",
+                color: "#8FD3B8",
                 fontSize: 12,
                 fontWeight: 700,
                 letterSpacing: "0.04em",
@@ -406,7 +406,7 @@ export function CompareView({
             <h3 style={{ fontSize: "clamp(22px, 3.5vw, 30px)", fontWeight: 800, margin: "0 0 10px", color: "#FFFFFF" }}>
               Stop Paying 15% Foreign Card Tax for Business Websites
             </h3>
-            <p style={{ margin: 0, fontSize: 16, color: "#CBD5E1", lineHeight: 1.6 }}>
+            <p style={{ margin: 0, fontSize: 16, color: "#C3D4CB", lineHeight: 1.6 }}>
               International builders like Wix and Squarespace bill in USD, draining personal credit card travel limits and adding bank conversion fees. BizTrackBD gives your business high-speed edge hosting, custom domain, and an organized Lead Inbox starting from ৳ 399/mo payable directly with bKash or Nagad.
             </p>
           </div>
@@ -416,7 +416,7 @@ export function CompareView({
               href="/business/pricing"
               className="btn btn-primary"
               style={{
-                background: "var(--accent, #3B5BFD)",
+                background: "var(--accent, #11795A)",
                 color: "#FFFFFF",
                 fontWeight: 700,
                 fontSize: 14,

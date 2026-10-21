@@ -65,7 +65,7 @@ export function CodCalculatorSimulator() {
         style={{
           padding: "32px 28px",
           background: "#FFFFFF",
-          boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
+          boxShadow: "0 10px 30px rgba(11, 77, 59, 0.06)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
@@ -114,7 +114,7 @@ export function CodCalculatorSimulator() {
               <label style={{ fontSize: 13.5, fontWeight: 700, color: "var(--ink)" }}>
                 Current Parcel Return Rate:
               </label>
-              <strong style={{ fontSize: 16, color: "#B91C1C" }}>
+              <strong style={{ fontSize: 16, color: "#C2410C" }}>
                 {returnRate}% return rate
               </strong>
             </div>
@@ -125,7 +125,7 @@ export function CodCalculatorSimulator() {
               step="1"
               value={returnRate}
               onChange={(e) => setReturnRate(Number(e.target.value))}
-              style={{ width: "100%", accentColor: "#B91C1C", cursor: "pointer" }}
+              style={{ width: "100%", accentColor: "#C2410C", cursor: "pointer" }}
             />
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--ink-3)", marginTop: 4 }}>
               <span>5% (Low)</span>
@@ -138,10 +138,10 @@ export function CodCalculatorSimulator() {
         {/* Calculation Result Dashboard */}
         <div
           style={{
-            background: "#FFFDFD",
+            background: "#FDF1EA",
             borderRadius: 12,
             padding: "20px 24px",
-            border: "1.5px solid #FECACA",
+            border: "1.5px solid #F2C9B3",
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
             gap: 16,
@@ -149,13 +149,13 @@ export function CodCalculatorSimulator() {
         >
           <div>
             <div style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>Rejected Parcels / Month</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: "#B91C1C", marginTop: 4 }}>
+            <div style={{ fontSize: 24, fontWeight: 800, color: "#C2410C", marginTop: 4 }}>
               {rejectedParcels} parcels
             </div>
           </div>
           <div>
             <div style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>Monthly Courier Fees Lost</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: "#B91C1C", marginTop: 4 }}>
+            <div style={{ fontSize: 24, fontWeight: 800, color: "#C2410C", marginTop: 4 }}>
               ৳ {monthlyLost.toLocaleString("en-IN")}
             </div>
           </div>
@@ -165,14 +165,14 @@ export function CodCalculatorSimulator() {
               ৳ {annualLost.toLocaleString("en-IN")}
             </div>
           </div>
-          <div style={{ background: "#F0FDF4", padding: "10px 14px", borderRadius: 8, border: "1px solid #86EFAC" }}>
-            <div style={{ fontSize: 11.5, color: "#166534", fontWeight: 700, textTransform: "uppercase" }}>
+          <div style={{ background: "#E3F1EA", padding: "10px 14px", borderRadius: 8, border: "1px solid #8FD3B8" }}>
+            <div style={{ fontSize: 11.5, color: "#0B4D3B", fontWeight: 700, textTransform: "uppercase" }}>
               Recoverable Margin:
             </div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: "#15803D", marginTop: 2 }}>
+            <div style={{ fontSize: 20, fontWeight: 800, color: "#11795A", marginTop: 2 }}>
               ~৳ {estimatedSavings.toLocaleString("en-IN")} / mo
             </div>
-            <div style={{ fontSize: 11, color: "#166534" }}>Saved by verifying high-risk orders</div>
+            <div style={{ fontSize: 11, color: "#0B4D3B" }}>Saved by verifying high-risk orders</div>
           </div>
         </div>
       </div>
@@ -183,7 +183,7 @@ export function CodCalculatorSimulator() {
         style={{
           padding: "32px 28px",
           background: "#FFFFFF",
-          boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
+          boxShadow: "0 10px 30px rgba(11, 77, 59, 0.06)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 18 }}>
@@ -211,7 +211,7 @@ export function CodCalculatorSimulator() {
                 fontSize: 13,
                 fontWeight: selectedProfile === idx ? 700 : 500,
                 border: selectedProfile === idx ? "2px solid var(--brand)" : "1px solid var(--line)",
-                background: selectedProfile === idx ? "var(--tint)" : "#FAFAFC",
+                background: selectedProfile === idx ? "var(--tint)" : "#FBF7EC",
                 color: selectedProfile === idx ? "var(--brand)" : "var(--ink-2)",
                 cursor: "pointer",
               }}
@@ -224,7 +224,7 @@ export function CodCalculatorSimulator() {
         {/* Profile Inspection Window */}
         <div
           style={{
-            background: "#F8FAFC",
+            background: "#FBF7EC",
             borderRadius: 12,
             padding: "20px 24px",
             border: "1px solid var(--line)",

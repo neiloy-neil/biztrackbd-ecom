@@ -196,7 +196,7 @@ export function VerticalLandingLayout({
             style={{
               padding: "28px 24px",
               background: "#FFFFFF",
-              boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
+              boxShadow: "0 10px 30px rgba(11, 77, 59, 0.06)",
             }}
           >
             <div
@@ -209,7 +209,7 @@ export function VerticalLandingLayout({
               {/* Left Pane: Customer Action */}
               <div
                 style={{
-                  background: "#F8FAFC",
+                  background: "#FBF7EC",
                   borderRadius: 12,
                   padding: "20px 22px",
                   border: "1px solid var(--line)",
@@ -242,7 +242,7 @@ export function VerticalLandingLayout({
                   borderRadius: 12,
                   padding: "20px 22px",
                   border: "1.5px solid var(--business-border)",
-                  boxShadow: "0 4px 16px rgba(13, 148, 136, 0.08)",
+                  boxShadow: "0 4px 16px rgba(17, 121, 90, , 0.08)",
                   display: "flex",
                   flexDirection: "column",
                   gap: 12,
@@ -306,7 +306,7 @@ export function VerticalLandingLayout({
             className="card ledger-border"
             style={{
               padding: "32px 28px",
-              background: "#F8FAFC",
+              background: "#FBF7EC",
               border: "1.5px solid var(--line-strong)",
             }}
           >
@@ -433,12 +433,12 @@ export function VerticalLandingLayout({
       </section>
 
       {/* Closing CTA */}
-      <section className="cta-band" style={{ background: "var(--business-dark)" }}>
+      <section className="cta-band">
         <div className="wrap">
           <h2 style={{ color: "#FFFFFF", fontSize: "clamp(28px, 4.5vw, 42px)", letterSpacing: "-1.2px" }}>
             {ctaHeading}
           </h2>
-          <p style={{ color: "#CCFBF1", fontSize: 17, marginTop: 10 }}>
+          <p style={{ color: "#E3F1EA", fontSize: 17, marginTop: 10 }}>
             {ctaSub}
           </p>
           <div style={{ marginTop: 24, display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>

@@ -115,7 +115,7 @@ export default function ComparePathaoCommercePage() {
               ← All Platform Comparisons
             </Link>
             <span>/</span>
-            <span style={{ fontWeight: 700, color: "#EA580C" }}>BizTrackBD vs Pathao Commerce</span>
+            <span style={{ fontWeight: 700, color: "#C2410C" }}>BizTrackBD vs Pathao Commerce</span>
           </div>
 
           <div className="pill-tag-banner pill-tag-orange">
@@ -175,7 +175,7 @@ export default function ComparePathaoCommercePage() {
       <section className="compare-section-subtle">
         <div className="compare-container">
           <div className="stage-section-title">
-            <span className="eyebrow" style={{ color: "#EA580C" }}>Interactive Simulation</span>
+            <span className="eyebrow" style={{ color: "#C2410C" }}>Interactive Simulation</span>
             <h2>Logistics Routing &amp; Brand Sovereignty</h2>
             <p>
               What happens behind the scenes when routing orders across Dhaka and 64 national districts.
@@ -198,13 +198,13 @@ export default function ComparePathaoCommercePage() {
                 <div className="console-pane-header">
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#FFFFFF" }}>Pathao Commerce Ecosystem</div>
-                    <div style={{ fontSize: 11, color: "#94A3B8" }}>Single-carrier closed network</div>
+                    <div style={{ fontSize: 11, color: "#8FD3B8" }}>Single-carrier closed network</div>
                   </div>
                   <span className="console-status-pill-fail">CARRIER LOCK-IN</span>
                 </div>
 
-                <div style={{ borderRadius: 8, background: "rgba(127, 29, 29, 0.4)", border: "1px solid rgba(185, 28, 28, 0.4)", padding: 12, fontSize: 12, color: "#FECACA" }}>
-                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#FCA5A5", marginBottom: 4 }}>
+                <div style={{ borderRadius: 8, background: "rgba(154, 52, 18, 0.4)", border: "1px solid rgba(194, 65, 12, 0.4)", padding: 12, fontSize: 12, color: "#F2C9B3" }}>
+                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#F2B79B", marginBottom: 4 }}>
                     <span>⚠️</span> Restricted Carrier Choice &amp; Subdomain Lock
                   </div>
                   <div>Locked to Pathao logistics only. Cannot route outside-Dhaka orders to Steadfast (paying ৳150 instead of ৳130). When local hub backlogs occur, merchant has no fallback courier. Customer purchases on platform subdomain without building independent brand equity.</div>
@@ -235,13 +235,13 @@ export default function ComparePathaoCommercePage() {
                 <div className="console-pane-header">
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#FFFFFF" }}>BizTrackBD Sovereign Multi-Courier</div>
-                    <div style={{ fontSize: 11, color: "#6EE7B7" }}>Independent Merchant Operating Desk</div>
+                    <div style={{ fontSize: 11, color: "#8FD3B8" }}>Independent Merchant Operating Desk</div>
                   </div>
                   <span className="console-status-pill-success">MULTI-CARRIER DESK</span>
                 </div>
 
-                <div style={{ borderRadius: 8, background: "rgba(6, 78, 59, 0.4)", border: "1px solid rgba(16, 185, 129, 0.4)", padding: 12, fontSize: 12, color: "#A7F3D0" }}>
-                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#6EE7B7", marginBottom: 4 }}>
+                <div style={{ borderRadius: 8, background: "rgba(11, 77, 59, 0.4)", border: "1px solid rgba(17, 121, 90, 0.4)", padding: 12, fontSize: 12, color: "#C6DFD3" }}>
+                  <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#8FD3B8", marginBottom: 4 }}>
                     <span>✓</span> Intelligent Carrier Dispatch &amp; Full Brand Ownership
                   </div>
                   <div>Multi-carrier flexibility: Pathao for express Dhaka same-day, Steadfast for 64 districts at flat ৳130 (saves ৳10,000+/mo on 500 parcels). Custom domain (yourbrand.com) with SSL. 100% customer phone &amp; order history data ownership.</div>
@@ -275,7 +275,7 @@ export default function ComparePathaoCommercePage() {
       <section className="py-16 border-b border-[var(--border)]">
         <div className="compare-container">
           <div className="stage-section-title">
-            <span className="eyebrow" style={{ color: "#EA580C" }}>Decision Matrix</span>
+            <span className="eyebrow" style={{ color: "#C2410C" }}>Decision Matrix</span>
             <h2>The Honest Verdict: Who is each platform for?</h2>
             <p>
               We believe in vendor neutrality. Choose the platform that best fits your business stage and long-term brand goals.
@@ -291,19 +291,19 @@ export default function ComparePathaoCommercePage() {
               <h3>You are a casual social chat seller</h3>
               <ul className="decision-list">
                 <li>
-                  <span style={{ color: "#16A34A", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>Casual Chat Commerce:</strong> You are an individual social seller sharing occasional product links directly inside Facebook Messenger chats.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#16A34A", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>Dhaka-Centric Deliveries:</strong> You deliver almost exclusively within Dhaka metropolitan areas using Pathao riders.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#16A34A", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>Zero Technical Setup:</strong> You do not need a custom .com or .com.bd brand domain and want zero DNS configuration.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#16A34A", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#11795A", fontWeight: "bold" }}>✓</span>
                   <span><strong>Immediate Pickup:</strong> You want instant courier rider calls without creating commercial merchant logistics accounts.</span>
                 </li>
               </ul>
@@ -317,19 +317,19 @@ export default function ComparePathaoCommercePage() {
               <h3>You are scaling an eCommerce brand</h3>
               <ul className="decision-list">
                 <li>
-                  <span style={{ color: "#EA580C", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#C2410C", fontWeight: "bold" }}>✓</span>
                   <span><strong>Multi-Courier Choice:</strong> Dispatch via Pathao inside Dhaka, but switch to Steadfast outside Dhaka to save ৳20/parcel.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#EA580C", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#C2410C", fontWeight: "bold" }}>✓</span>
                   <span><strong>Custom Brand Identity:</strong> Build long-term brand equity on your own custom domain (yourbrand.com) with SEO ranking.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#EA580C", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#C2410C", fontWeight: "bold" }}>✓</span>
                   <span><strong>Meta Ads Server-Side CAPI:</strong> Run high-ROI Facebook &amp; Instagram campaigns with server-side event tracking.</span>
                 </li>
                 <li>
-                  <span style={{ color: "#EA580C", fontWeight: "bold" }}>✓</span>
+                  <span style={{ color: "#C2410C", fontWeight: "bold" }}>✓</span>
                   <span><strong>COD Fraud Prevention:</strong> Stop serial parcel rejectors across 5,000+ stores before paying courier delivery and return fees.</span>
                 </li>
               </ul>
@@ -342,7 +342,7 @@ export default function ComparePathaoCommercePage() {
       <section className="py-16 border-b border-[var(--border)] bg-[var(--surface-subtle)]">
         <div className="compare-container">
           <div className="stage-section-title">
-            <span className="eyebrow" style={{ color: "#EA580C" }}>Logistics Independence</span>
+            <span className="eyebrow" style={{ color: "#C2410C" }}>Logistics Independence</span>
             <h2>Why Locking Your Store to One Courier Restricts Growth</h2>
             <p>
               Why relying on a single delivery partner creates hidden costs and operational bottlenecks.
@@ -397,7 +397,7 @@ export default function ComparePathaoCommercePage() {
       <section className="py-16 border-b border-[var(--border)]">
         <div className="compare-container">
           <div className="compare-header-row">
-            <span className="eyebrow" style={{ color: "#EA580C" }}>
+            <span className="eyebrow" style={{ color: "#C2410C" }}>
               Capability Comparison
             </span>
             <h2>Pathao Commerce vs BizTrackBD Matrix</h2>
@@ -412,7 +412,7 @@ export default function ComparePathaoCommercePage() {
                 <tr>
                   <th style={{ width: "26%" }}>Capability</th>
                   <th className="cell-highlight-primary" style={{ width: "28%" }}>
-                    <div className="flex items-center gap-1.5" style={{ color: "#1E3A8A", fontWeight: 800 }}>
+                    <div className="flex items-center gap-1.5" style={{ color: "#0B4D3B", fontWeight: 800 }}>
                       <span>🛍️ BizTrackBD</span>
                     </div>
                   </th>
@@ -435,7 +435,7 @@ export default function ComparePathaoCommercePage() {
                       <span className="spec-chip-negative">— Single Courier Lock-in</span>
                     </td>
                     <td>
-                      <span className="text-[11px] font-mono font-semibold" style={{ color: "#EA580C" }}>
+                      <span className="text-[11px] font-mono font-semibold" style={{ color: "#C2410C" }}>
                         {row.verdict}
                       </span>
                     </td>

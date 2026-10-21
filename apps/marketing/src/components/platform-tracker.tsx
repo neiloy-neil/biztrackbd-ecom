@@ -214,7 +214,7 @@ export function PlatformTracker() {
             border: "1.5px solid var(--line-strong)",
             borderRadius: 14,
             padding: "12px 14px",
-            boxShadow: "0 12px 36px rgba(15, 23, 42, 0.15)",
+            boxShadow: "0 12px 36px rgba(11, 77, 59, 0.15)",
           }}
         >
           <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>

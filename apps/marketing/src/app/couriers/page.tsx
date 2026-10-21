@@ -281,7 +281,7 @@ export default function CouriersPage() {
             >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
                 <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Steadfast Courier</h3>
-                <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: "#F1F5F9", color: "#334155" }}>
+                <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: "#FBF7EC", color: "#3D5A52" }}>
                   STEADFAST_V1
                 </span>
               </div>
@@ -308,12 +308,12 @@ export default function CouriersPage() {
                 background: "#FFFFFF",
                 borderRadius: 16,
                 border: "2px solid var(--brand)",
-                boxShadow: "0 8px 24px rgba(91, 79, 232, 0.1)",
+                boxShadow: "0 8px 24px rgba(17, 121, 90, 0.1)",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
                 <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Pathao Courier</h3>
-                <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: "#EEF2FF", color: "#4F46E5" }}>
+                <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: "#E3F1EA", color: "#11795A" }}>
                   PATHAO_OAUTH2
                 </span>
               </div>
@@ -344,7 +344,7 @@ export default function CouriersPage() {
             >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
                 <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>RedX Delivery</h3>
-                <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: "#F1F5F9", color: "#334155" }}>
+                <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: "#FBF7EC", color: "#3D5A52" }}>
                   REDX_BEARER
                 </span>
               </div>

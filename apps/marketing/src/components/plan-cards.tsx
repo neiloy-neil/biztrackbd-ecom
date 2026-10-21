@@ -46,7 +46,7 @@ export function PlanCards({
           display: "inline-flex",
           padding: 4,
           borderRadius: 22,
-          background: "#EFEFF6",
+          background: "#FBF7EC",
           fontSize: 14,
           fontWeight: 700,
           margin: "0 auto 36px",
@@ -59,7 +59,7 @@ export function PlanCards({
           style={{
             padding: "8px 22px",
             borderRadius: 18,
-            border: !yearly ? "1px solid #E7E7F0" : "1px solid transparent",
+            border: !yearly ? "1px solid #DCE7E1" : "1px solid transparent",
             background: !yearly ? "#FFFFFF" : "transparent",
             color: !yearly ? "var(--ink)" : "var(--ink-2)",
             fontWeight: 700,
@@ -76,7 +76,7 @@ export function PlanCards({
           style={{
             padding: "8px 22px",
             borderRadius: 18,
-            border: yearly ? "1px solid #E7E7F0" : "1px solid transparent",
+            border: yearly ? "1px solid #DCE7E1" : "1px solid transparent",
             background: yearly ? "#FFFFFF" : "transparent",
             color: yearly ? "var(--ink)" : "var(--ink-2)",
             fontWeight: 700,
@@ -93,8 +93,8 @@ export function PlanCards({
               style={{
                 padding: "2px 8px",
                 borderRadius: 9,
-                background: "#E8F6EE",
-                color: "#15803D",
+                background: "#E3F1EA",
+                color: "#11795A",
                 fontSize: 11.5,
                 fontWeight: 700,
               }}
@@ -119,14 +119,14 @@ export function PlanCards({
               className={`card plan${isBest ? " featured" : ""}`}
               data-testid={`plan-${p.tier}`}
               style={{
-                border: isBest ? "2px solid #5B4FE8" : "1px solid #E7E7F0",
+                border: isBest ? "2px solid #11795A" : "1px solid #DCE7E1",
                 borderRadius: 18,
                 padding: "32px 28px",
                 display: "flex",
                 flexDirection: "column",
                 gap: 16,
                 background: "#FFFFFF",
-                boxShadow: isBest ? "0 8px 24px rgba(91, 79, 232, 0.12)" : "none",
+                boxShadow: isBest ? "0 8px 24px rgba(17, 121, 90, 0.12)" : "none",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -136,8 +136,8 @@ export function PlanCards({
                     style={{
                       padding: "3px 11px",
                       borderRadius: 11,
-                      background: "#E9E7FD",
-                      color: "#5B4FE8",
+                      background: "#E3F1EA",
+                      color: "#11795A",
                       fontSize: 12,
                       fontWeight: 700,
                     }}
@@ -190,7 +190,7 @@ export function PlanCards({
 
               <div
                 style={{
-                  borderTop: "1px solid #E7E7F0",
+                  borderTop: "1px solid #DCE7E1",
                   paddingTop: 20,
                   marginTop: 6,
                   display: "flex",
@@ -206,7 +206,7 @@ export function PlanCards({
                       height="18"
                       viewBox="0 0 24 24"
                       fill="none"
-                      stroke="#15803D"
+                      stroke="#11795A"
                       strokeWidth="2.6"
                       strokeLinecap="round"
                       strokeLinejoin="round"

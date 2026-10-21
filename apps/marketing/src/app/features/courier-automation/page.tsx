@@ -103,9 +103,9 @@ export default function CourierAutomationPage() {
           <span
             className="eyebrow"
             style={{
-              color: "#1D4ED8",
-              background: "#DBEAFE",
-              borderColor: "#93C5FD",
+              color: "#11795A",
+              background: "#E3F1EA",
+              borderColor: "#8FD3B8",
               borderWidth: 1,
               borderStyle: "solid",
               padding: "4px 14px",
@@ -122,7 +122,7 @@ export default function CourierAutomationPage() {
           </span>
           <h1 style={{ color: "var(--ink-ledger)", fontSize: "clamp(34px, 5.5vw, 54px)", lineHeight: 1.12, letterSpacing: "-1.5px" }}>
             Book Steadfast, Pathao &amp; RedX <br className="hidden-mobile" />
-            <span style={{ color: "#1D4ED8" }}>straight from each order in 1 click.</span>
+            <span style={{ color: "#11795A" }}>straight from each order in 1 click.</span>
           </h1>
           <p className="lead" style={{ maxWidth: 740, margin: "18px auto 0", color: "var(--ink-2)", fontSize: "clamp(16px, 2vw, 19px)", lineHeight: 1.6 }}>
             Stop copying customer names, phone numbers, and addresses into separate courier tabs at midnight. Connect your courier merchant keys once, print standard thermal labels, and send automated tracking SMS.
@@ -132,7 +132,7 @@ export default function CourierAutomationPage() {
             <Link
               href="/start?mode=ecommerce"
               className="btn btn-primary btn-lg"
-              style={{ background: "#1D4ED8", borderColor: "#1E40AF" }}
+              style={{ background: "#11795A", borderColor: "#0B4D3B" }}
               prefetch={false}
             >
               Start 14-day free trial
@@ -179,7 +179,7 @@ export default function CourierAutomationPage() {
               </div>
               <div className="admin-mockup-url">admin.biztrackbd.com/orders/courier-dispatch</div>
               <div className="admin-mockup-live">
-                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10B981", display: "inline-block" }} />
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#11795A", display: "inline-block" }} />
                 LIVE WORKSPACE DESK
               </div>
             </div>
@@ -216,57 +216,57 @@ export default function CourierAutomationPage() {
                   </thead>
                   <tbody>
                     <tr>
-                      <td style={{ fontWeight: 700, color: "#60A5FA" }}>#BD-1092</td>
+                      <td style={{ fontWeight: 700, color: "#8FD3B8" }}>#BD-1092</td>
                       <td>
                         <div style={{ fontWeight: 600 }}>Fahim Chowdhury</div>
-                        <div style={{ fontSize: 11, color: "#94A3B8" }}>Mirpur-10, Dhaka · 01711-***420</div>
+                        <div style={{ fontSize: 11, color: "#8FD3B8" }}>Mirpur-10, Dhaka · 01711-***420</div>
                       </td>
                       <td>
-                        <span style={{ fontWeight: 700, color: "#34D399" }}>Steadfast ৳60</span>
-                        <div style={{ fontSize: 10, color: "#94A3B8" }}>COD: ৳2,450</div>
+                        <span style={{ fontWeight: 700, color: "#8FD3B8" }}>Steadfast ৳60</span>
+                        <div style={{ fontSize: 10, color: "#8FD3B8" }}>COD: ৳2,450</div>
                       </td>
-                      <td style={{ fontFamily: "var(--font-mono, monospace)", color: "#CBD5E1" }}>ST-902184</td>
+                      <td style={{ fontFamily: "var(--font-mono, monospace)", color: "#C3D4CB" }}>ST-902184</td>
                       <td>
                         <span className="admin-badge-safe">Ready for Pickup</span>
                       </td>
                       <td>
-                        <span style={{ fontSize: 11, color: "#60A5FA", fontWeight: 600 }}>Print Thermal Label ↗</span>
+                        <span style={{ fontSize: 11, color: "#8FD3B8", fontWeight: 600 }}>Print Thermal Label ↗</span>
                       </td>
                     </tr>
                     <tr>
-                      <td style={{ fontWeight: 700, color: "#60A5FA" }}>#BD-1093</td>
+                      <td style={{ fontWeight: 700, color: "#8FD3B8" }}>#BD-1093</td>
                       <td>
                         <div style={{ fontWeight: 600 }}>Nusrat Jahan</div>
-                        <div style={{ fontSize: 11, color: "#94A3B8" }}>Chawkbazar, Chattogram · 01823-***551</div>
+                        <div style={{ fontSize: 11, color: "#8FD3B8" }}>Chawkbazar, Chattogram · 01823-***551</div>
                       </td>
                       <td>
-                        <span style={{ fontWeight: 700, color: "#34D399" }}>Steadfast ৳110</span>
-                        <div style={{ fontSize: 10, color: "#94A3B8" }}>COD: ৳3,800</div>
+                        <span style={{ fontWeight: 700, color: "#8FD3B8" }}>Steadfast ৳110</span>
+                        <div style={{ fontSize: 10, color: "#8FD3B8" }}>COD: ৳3,800</div>
                       </td>
-                      <td style={{ fontFamily: "var(--font-mono, monospace)", color: "#CBD5E1" }}>ST-902185</td>
+                      <td style={{ fontFamily: "var(--font-mono, monospace)", color: "#C3D4CB" }}>ST-902185</td>
                       <td>
                         <span className="admin-badge-safe">Label Printed</span>
                       </td>
                       <td>
-                        <span style={{ fontSize: 11, color: "#60A5FA", fontWeight: 600 }}>Track Courier ↗</span>
+                        <span style={{ fontSize: 11, color: "#8FD3B8", fontWeight: 600 }}>Track Courier ↗</span>
                       </td>
                     </tr>
                     <tr>
-                      <td style={{ fontWeight: 700, color: "#60A5FA" }}>#BD-1094</td>
+                      <td style={{ fontWeight: 700, color: "#8FD3B8" }}>#BD-1094</td>
                       <td>
                         <div style={{ fontWeight: 600 }}>Tanvir Ahmed</div>
-                        <div style={{ fontSize: 11, color: "#94A3B8" }}>Sylhet Sadar · 01912-***892</div>
+                        <div style={{ fontSize: 11, color: "#8FD3B8" }}>Sylhet Sadar · 01912-***892</div>
                       </td>
                       <td>
-                        <span style={{ fontWeight: 700, color: "#F59E0B" }}>Pathao 24h ৳120</span>
-                        <div style={{ fontSize: 10, color: "#94A3B8" }}>COD: ৳1,650</div>
+                        <span style={{ fontWeight: 700, color: "#F2A900" }}>Pathao 24h ৳120</span>
+                        <div style={{ fontSize: 10, color: "#8FD3B8" }}>COD: ৳1,650</div>
                       </td>
-                      <td style={{ fontFamily: "var(--font-mono, monospace)", color: "#CBD5E1" }}>PTH-491028</td>
+                      <td style={{ fontFamily: "var(--font-mono, monospace)", color: "#C3D4CB" }}>PTH-491028</td>
                       <td>
                         <span className="admin-badge-warn">In Transit</span>
                       </td>
                       <td>
-                        <span style={{ fontSize: 11, color: "#60A5FA", fontWeight: 600 }}>Send SMS Update ↗</span>
+                        <span style={{ fontSize: 11, color: "#8FD3B8", fontWeight: 600 }}>Send SMS Update ↗</span>
                       </td>
                     </tr>
                   </tbody>
@@ -341,16 +341,16 @@ export default function CourierAutomationPage() {
       </section>
 
       {/* Closing CTA */}
-      <section className="cta-band" style={{ background: "#0F172A" }}>
+      <section className="cta-band">
         <div className="wrap">
           <h2 style={{ color: "#FFFFFF", fontSize: "clamp(28px, 4.5vw, 42px)", letterSpacing: "-1.2px" }}>
             Automate your next courier dispatch with BizTrackBD
           </h2>
-          <p style={{ color: "#94A3B8", fontSize: 17, marginTop: 10 }}>
+          <p style={{ color: "var(--green-light)", fontSize: 17, marginTop: 10 }}>
             14 days free &middot; Works with Steadfast, Pathao &amp; RedX &middot; Zero sales commission
           </p>
           <div style={{ marginTop: 24, display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/start?mode=ecommerce" className="btn btn-lg btn-primary" style={{ background: "#1D4ED8" }} prefetch={false}>
+            <Link href="/start?mode=ecommerce" className="btn btn-lg btn-primary" prefetch={false}>
               Start 14-day free trial
             </Link>
             <a

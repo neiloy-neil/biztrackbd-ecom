@@ -211,7 +211,7 @@ const productJsonLd = {
 
 export default function ProductArchitecturePage() {
   return (
-    <div style={{ background: "#FAFAFC", minHeight: "100vh" }}>
+    <div style={{ background: "#FBF7EC", minHeight: "100vh" }}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
@@ -221,7 +221,7 @@ export default function ProductArchitecturePage() {
         className="gradient-mesh-hero"
         style={{
           padding: "70px 20px 56px",
-          borderBottom: "1px solid var(--line, #E5E7EB)",
+          borderBottom: "1px solid var(--line, #DCE7E1)",
         }}
       >
         <div style={{ maxWidth: 1140, margin: "0 auto" }}>
@@ -233,16 +233,16 @@ export default function ProductArchitecturePage() {
               alignItems: "center",
               gap: 8,
               fontSize: 13,
-              color: "var(--ink-3, #667085)",
+              color: "var(--ink-3, #3D5A52)",
               marginBottom: 20,
               flexWrap: "wrap",
             }}
           >
-            <Link href="/" style={{ color: "var(--ink-2, #475467)", textDecoration: "none" }}>
+            <Link href="/" style={{ color: "var(--ink-2, #3D5A52)", textDecoration: "none" }}>
               Home
             </Link>
             <span aria-hidden="true">›</span>
-            <span style={{ color: "var(--ink, #101828)", fontWeight: 600 }}>Platform Architecture</span>
+            <span style={{ color: "var(--ink, #0B4D3B)", fontWeight: 600 }}>Platform Architecture</span>
           </nav>
 
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
@@ -253,13 +253,13 @@ export default function ProductArchitecturePage() {
                 gap: 6,
                 padding: "4px 14px",
                 borderRadius: "20px",
-                background: "#EEF2FF",
-                color: "var(--accent, #3B5BFD)",
+                background: "#E3F1EA",
+                color: "var(--accent, #11795A)",
                 fontSize: "12.5px",
                 fontWeight: 800,
                 letterSpacing: "0.04em",
                 textTransform: "uppercase",
-                border: "1px solid #C7D2FE",
+                border: "1px solid #C6DFD3",
               }}
             >
               <span>🏛️</span> Unified Platform Architecture
@@ -279,7 +279,7 @@ export default function ProductArchitecturePage() {
               letterSpacing: "-1.5px",
               lineHeight: 1.12,
               fontWeight: 800,
-              color: "var(--ink, #101828)",
+              color: "var(--ink, #0B4D3B)",
               margin: "0 0 16px",
               maxWidth: 960,
             }}
@@ -291,7 +291,7 @@ export default function ProductArchitecturePage() {
           <p
             style={{
               fontSize: "clamp(17px, 2.5vw, 20px)",
-              color: "var(--ink-2, #475467)",
+              color: "var(--ink-2, #3D5A52)",
               lineHeight: 1.6,
               maxWidth: 820,
               margin: 0,
@@ -310,7 +310,7 @@ export default function ProductArchitecturePage() {
                 fontWeight: 700,
                 borderRadius: 8,
                 textDecoration: "none",
-                boxShadow: "0 4px 14px rgba(91, 79, 232, 0.25)",
+                boxShadow: "0 4px 14px rgba(17, 121, 90, 0.25)",
               }}
             >
               Start Free 14-Day Trial →
@@ -345,7 +345,7 @@ export default function ProductArchitecturePage() {
               style={{
                 fontSize: 12.5,
                 fontWeight: 800,
-                color: "var(--accent, #3B5BFD)",
+                color: "var(--accent, #11795A)",
                 textTransform: "uppercase",
                 letterSpacing: "0.06em",
               }}
@@ -357,13 +357,13 @@ export default function ProductArchitecturePage() {
                 fontSize: "clamp(26px, 4vw, 38px)",
                 fontWeight: 800,
                 letterSpacing: "-0.8px",
-                color: "var(--ink, #101828)",
+                color: "var(--ink, #0B4D3B)",
                 margin: "8px 0 12px",
               }}
             >
               Choose the Engine Built for Your Business Model
             </h2>
-            <p style={{ fontSize: 16, color: "var(--ink-2, #475467)", lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontSize: 16, color: "var(--ink-2, #3D5A52)", lineHeight: 1.6, margin: 0 }}>
               Every deployment shares our high-speed edge infrastructure, automatic SSL, and zero sales commission policy, while activating tools tuned to how you serve customers.
             </p>
           </div>
@@ -383,7 +383,7 @@ export default function ProductArchitecturePage() {
                 display: "flex",
                 flexDirection: "column",
                 position: "relative",
-                borderTop: "4px solid #059669",
+                borderTop: "4px solid #11795A",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
@@ -395,8 +395,8 @@ export default function ProductArchitecturePage() {
                     width: 50,
                     height: 50,
                     borderRadius: 14,
-                    background: "#ECFDF5",
-                    color: "#059669",
+                    background: "#E3F1EA",
+                    color: "#11795A",
                     fontSize: 26,
                   }}
                 >
@@ -407,21 +407,21 @@ export default function ProductArchitecturePage() {
                 </span>
               </div>
 
-              <span style={{ fontSize: 12.5, fontWeight: 800, color: "#059669", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+              <span style={{ fontSize: 12.5, fontWeight: 800, color: "#11795A", textTransform: "uppercase", letterSpacing: "0.04em" }}>
                 Physical Retail &amp; D2C Brands
               </span>
-              <h3 style={{ fontSize: 24, fontWeight: 800, color: "var(--ink, #101828)", margin: "4px 0 12px" }}>
+              <h3 style={{ fontSize: 24, fontWeight: 800, color: "var(--ink, #0B4D3B)", margin: "4px 0 12px" }}>
                 BizTrackBD Commerce
               </h3>
-              <p style={{ fontSize: 15, color: "var(--ink-2, #475467)", lineHeight: 1.6, margin: "0 0 20px" }}>
+              <p style={{ fontSize: 15, color: "var(--ink-2, #3D5A52)", lineHeight: 1.6, margin: "0 0 20px" }}>
                 For fashion apparel, gadget stores, cosmetics, kids brands, and retail merchants selling physical products with home delivery across Bangladesh.
               </p>
 
-              <div style={{ borderTop: "1px solid var(--line, #F1F2F6)", paddingTop: 18, flexGrow: 1 }}>
-                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--ink, #101828)", margin: "0 0 12px" }}>
+              <div style={{ borderTop: "1px solid var(--line, #FBF7EC)", paddingTop: 18, flexGrow: 1 }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--ink, #0B4D3B)", margin: "0 0 12px" }}>
                   Key Capabilities:
                 </p>
-                <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13.5, color: "var(--ink-2, #475467)", lineHeight: 1.75 }}>
+                <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13.5, color: "var(--ink-2, #3D5A52)", lineHeight: 1.75 }}>
                   <li>Instant bKash, Nagad &amp; Cash on Delivery checkout</li>
                   <li>1-click Steadfast &amp; Pathao courier booking</li>
                   <li>COD Return Shield: detects habitual parcel returners</li>
@@ -437,13 +437,13 @@ export default function ProductArchitecturePage() {
                     flex: 1,
                     textAlign: "center",
                     padding: "11px 14px",
-                    background: "#059669",
+                    background: "#11795A",
                     color: "#FFFFFF",
                     fontWeight: 700,
                     borderRadius: 8,
                     fontSize: 14,
                     textDecoration: "none",
-                    boxShadow: "0 2px 8px rgba(5, 150, 105, 0.2)",
+                    boxShadow: "0 2px 8px rgba(17, 121, 90, , 0.2)",
                   }}
                 >
                   View Storefronts →
@@ -452,8 +452,8 @@ export default function ProductArchitecturePage() {
                   href="/start?mode=ecommerce"
                   style={{
                     padding: "11px 16px",
-                    background: "#F3F4F6",
-                    color: "var(--ink, #101828)",
+                    background: "#FBF7EC",
+                    color: "var(--ink, #0B4D3B)",
                     fontWeight: 600,
                     borderRadius: 8,
                     fontSize: 14,
@@ -473,8 +473,8 @@ export default function ProductArchitecturePage() {
                 display: "flex",
                 flexDirection: "column",
                 position: "relative",
-                borderTop: "4px solid var(--accent, #3B5BFD)",
-                boxShadow: "0 10px 30px rgba(59, 91, 253, 0.08)",
+                borderTop: "4px solid var(--accent, #11795A)",
+                boxShadow: "0 10px 30px rgba(17, 121, 90, , 0.08)",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
@@ -486,8 +486,8 @@ export default function ProductArchitecturePage() {
                     width: 50,
                     height: 50,
                     borderRadius: 14,
-                    background: "#EEF2FF",
-                    color: "var(--accent, #3B5BFD)",
+                    background: "#E3F1EA",
+                    color: "var(--accent, #11795A)",
                     fontSize: 26,
                   }}
                 >
@@ -498,21 +498,21 @@ export default function ProductArchitecturePage() {
                 </span>
               </div>
 
-              <span style={{ fontSize: 12.5, fontWeight: 800, color: "var(--accent, #3B5BFD)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+              <span style={{ fontSize: 12.5, fontWeight: 800, color: "var(--accent, #11795A)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
                 Services, Dining &amp; Clinics
               </span>
-              <h3 style={{ fontSize: 24, fontWeight: 800, color: "var(--ink, #101828)", margin: "4px 0 12px" }}>
+              <h3 style={{ fontSize: 24, fontWeight: 800, color: "var(--ink, #0B4D3B)", margin: "4px 0 12px" }}>
                 BizTrackBD Business
               </h3>
-              <p style={{ fontSize: 15, color: "var(--ink-2, #475467)", lineHeight: 1.6, margin: "0 0 20px" }}>
+              <p style={{ fontSize: 15, color: "var(--ink-2, #3D5A52)", lineHeight: 1.6, margin: "0 0 20px" }}>
                 For medical doctors, dining establishments, corporate advisors, tech and home services, portfolios, and public figures needing bookings and leads.
               </p>
 
-              <div style={{ borderTop: "1px solid var(--line, #F1F2F6)", paddingTop: 18, flexGrow: 1 }}>
-                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--ink, #101828)", margin: "0 0 12px" }}>
+              <div style={{ borderTop: "1px solid var(--line, #FBF7EC)", paddingTop: 18, flexGrow: 1 }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--ink, #0B4D3B)", margin: "0 0 12px" }}>
                   Key Capabilities:
                 </p>
-                <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13.5, color: "var(--ink-2, #475467)", lineHeight: 1.75 }}>
+                <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13.5, color: "var(--ink-2, #3D5A52)", lineHeight: 1.75 }}>
                   <li>Contactless QR table ordering &amp; digital menu tray</li>
                   <li>Multi-chamber BMDC doctor appointment booking</li>
                   <li>Affirmative consent lead &amp; quote inquiry routing</li>
@@ -528,13 +528,13 @@ export default function ProductArchitecturePage() {
                     flex: 1,
                     textAlign: "center",
                     padding: "11px 14px",
-                    background: "var(--accent, #3B5BFD)",
+                    background: "var(--accent, #11795A)",
                     color: "#FFFFFF",
                     fontWeight: 700,
                     borderRadius: 8,
                     fontSize: 14,
                     textDecoration: "none",
-                    boxShadow: "0 2px 8px rgba(59, 91, 253, 0.25)",
+                    boxShadow: "0 2px 8px rgba(17, 121, 90, , 0.25)",
                   }}
                 >
                   View Business Sites →
@@ -543,8 +543,8 @@ export default function ProductArchitecturePage() {
                   href="/start?mode=business"
                   style={{
                     padding: "11px 16px",
-                    background: "#F3F4F6",
-                    color: "var(--ink, #101828)",
+                    background: "#FBF7EC",
+                    color: "var(--ink, #0B4D3B)",
                     fontWeight: 600,
                     borderRadius: 8,
                     fontSize: 14,
@@ -564,7 +564,7 @@ export default function ProductArchitecturePage() {
                 display: "flex",
                 flexDirection: "column",
                 position: "relative",
-                borderTop: "4px solid #7C3AED",
+                borderTop: "4px solid #11795A",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
@@ -576,8 +576,8 @@ export default function ProductArchitecturePage() {
                     width: 50,
                     height: 50,
                     borderRadius: 14,
-                    background: "#F5F3FF",
-                    color: "#7C3AED",
+                    background: "#E3F1EA",
+                    color: "#11795A",
                     fontSize: 26,
                   }}
                 >
@@ -588,21 +588,21 @@ export default function ProductArchitecturePage() {
                 </span>
               </div>
 
-              <span style={{ fontSize: 12.5, fontWeight: 800, color: "#7C3AED", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+              <span style={{ fontSize: 12.5, fontWeight: 800, color: "#11795A", textTransform: "uppercase", letterSpacing: "0.04em" }}>
                 Dual Unified Operation
               </span>
-              <h3 style={{ fontSize: 24, fontWeight: 800, color: "var(--ink, #101828)", margin: "4px 0 12px" }}>
+              <h3 style={{ fontSize: 24, fontWeight: 800, color: "var(--ink, #0B4D3B)", margin: "4px 0 12px" }}>
                 BizTrackBD Hybrid
               </h3>
-              <p style={{ fontSize: 15, color: "var(--ink-2, #475467)", lineHeight: 1.6, margin: "0 0 20px" }}>
+              <p style={{ fontSize: 15, color: "var(--ink-2, #3D5A52)", lineHeight: 1.6, margin: "0 0 20px" }}>
                 For bespoke tailoring ateliers, salons selling beauty products, clinics with pharmacies, or workshops pairing part sales with on-site service appointments.
               </p>
 
-              <div style={{ borderTop: "1px solid var(--line, #F1F2F6)", paddingTop: 18, flexGrow: 1 }}>
-                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--ink, #101828)", margin: "0 0 12px" }}>
+              <div style={{ borderTop: "1px solid var(--line, #FBF7EC)", paddingTop: 18, flexGrow: 1 }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--ink, #0B4D3B)", margin: "0 0 12px" }}>
                   Key Capabilities:
                 </p>
-                <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13.5, color: "var(--ink-2, #475467)", lineHeight: 1.75 }}>
+                <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13.5, color: "var(--ink-2, #3D5A52)", lineHeight: 1.75 }}>
                   <li>Both retail cart checkout and booking on one domain</li>
                   <li>Unified catalog: shippable goods alongside bookable services</li>
                   <li>Single admin desk managing parcels, leads &amp; appointments</li>
@@ -618,13 +618,13 @@ export default function ProductArchitecturePage() {
                     flex: 1,
                     textAlign: "center",
                     padding: "11px 14px",
-                    background: "#7C3AED",
+                    background: "#11795A",
                     color: "#FFFFFF",
                     fontWeight: 700,
                     borderRadius: 8,
                     fontSize: 14,
                     textDecoration: "none",
-                    boxShadow: "0 2px 8px rgba(124, 58, 237, 0.2)",
+                    boxShadow: "0 2px 8px rgba(17, 121, 90, , 0.2)",
                   }}
                 >
                   Configure Hybrid Mode →
@@ -633,8 +633,8 @@ export default function ProductArchitecturePage() {
                   href="/contact"
                   style={{
                     padding: "11px 16px",
-                    background: "#F3F4F6",
-                    color: "var(--ink, #101828)",
+                    background: "#FBF7EC",
+                    color: "var(--ink, #0B4D3B)",
                     fontWeight: 600,
                     borderRadius: 8,
                     fontSize: 14,
@@ -650,16 +650,16 @@ export default function ProductArchitecturePage() {
       </section>
 
       {/* Comprehensive Capability Matrix with Elevated Styling */}
-      <section style={{ padding: "50px 20px 80px", background: "#FFFFFF", borderTop: "1px solid var(--line, #E5E7EB)" }}>
+      <section style={{ padding: "50px 20px 80px", background: "#FFFFFF", borderTop: "1px solid var(--line, #DCE7E1)" }}>
         <div style={{ maxWidth: 1140, margin: "0 auto" }}>
           <div style={{ marginBottom: 36 }}>
-            <span style={{ fontSize: 12.5, fontWeight: 800, color: "var(--accent, #3B5BFD)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            <span style={{ fontSize: 12.5, fontWeight: 800, color: "var(--accent, #11795A)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
               Technical Specification
             </span>
-            <h2 style={{ fontSize: "clamp(24px, 3.5vw, 36px)", fontWeight: 800, color: "var(--ink, #101828)", margin: "6px 0 10px" }}>
+            <h2 style={{ fontSize: "clamp(24px, 3.5vw, 36px)", fontWeight: 800, color: "var(--ink, #0B4D3B)", margin: "6px 0 10px" }}>
               Side-by-Side Platform Capability Matrix
             </h2>
-            <p style={{ fontSize: 16, color: "var(--ink-2, #475467)", maxWidth: 740, margin: 0, lineHeight: 1.6 }}>
+            <p style={{ fontSize: 16, color: "var(--ink-2, #3D5A52)", maxWidth: 740, margin: 0, lineHeight: 1.6 }}>
               Review the concrete technical features activated in each mode. You can upgrade, downgrade, or switch modes at any time as your operational needs evolve.
             </p>
           </div>
@@ -669,7 +669,7 @@ export default function ProductArchitecturePage() {
               overflowX: "auto",
               WebkitOverflowScrolling: "touch",
               borderRadius: 14,
-              border: "1px solid var(--line, #E5E7EB)",
+              border: "1px solid var(--line, #DCE7E1)",
               background: "#FFFFFF",
               boxShadow: "0 4px 16px rgba(0,0,0,0.03)",
             }}
@@ -678,16 +678,16 @@ export default function ProductArchitecturePage() {
               <thead>
                 <tr>
                   <th style={{ width: "32%" }}>Capability &amp; Scope</th>
-                  <th style={{ width: "16%", textAlign: "center", color: "#059669" }}>Commerce Engine</th>
-                  <th style={{ width: "16%", textAlign: "center", color: "var(--accent, #3B5BFD)" }}>Business Engine</th>
-                  <th style={{ width: "16%", textAlign: "center", color: "#7C3AED" }}>Hybrid Stack</th>
+                  <th style={{ width: "16%", textAlign: "center", color: "#11795A" }}>Commerce Engine</th>
+                  <th style={{ width: "16%", textAlign: "center", color: "var(--accent, #11795A)" }}>Business Engine</th>
+                  <th style={{ width: "16%", textAlign: "center", color: "#11795A" }}>Hybrid Stack</th>
                   <th style={{ width: "20%" }}>Implementation Detail</th>
                 </tr>
               </thead>
               <tbody>
                 {CAPABILITIES.map((row) => (
                   <tr key={row.feature}>
-                    <td style={{ fontWeight: 600, color: "var(--ink, #101828)" }}>
+                    <td style={{ fontWeight: 600, color: "var(--ink, #0B4D3B)" }}>
                       {row.feature}
                     </td>
 
@@ -696,7 +696,7 @@ export default function ProductArchitecturePage() {
                         row.commerce ? (
                           <span className="spec-chip-positive">✓ Native</span>
                         ) : (
-                          <span style={{ color: "#CBD5E1", fontSize: 18 }}>—</span>
+                          <span style={{ color: "#C3D4CB", fontSize: 18 }}>—</span>
                         )
                       ) : (
                         <span className="spec-chip-neutral">{row.commerce}</span>
@@ -708,7 +708,7 @@ export default function ProductArchitecturePage() {
                         row.business ? (
                           <span className="spec-chip-positive">✓ Native</span>
                         ) : (
-                          <span style={{ color: "#CBD5E1", fontSize: 18 }}>—</span>
+                          <span style={{ color: "#C3D4CB", fontSize: 18 }}>—</span>
                         )
                       ) : (
                         <span className="spec-chip-neutral">{row.business}</span>
@@ -720,14 +720,14 @@ export default function ProductArchitecturePage() {
                         row.hybrid ? (
                           <span className="spec-chip-positive">✓ Native</span>
                         ) : (
-                          <span style={{ color: "#CBD5E1", fontSize: 18 }}>—</span>
+                          <span style={{ color: "#C3D4CB", fontSize: 18 }}>—</span>
                         )
                       ) : (
                         <span className="spec-chip-neutral">{row.hybrid}</span>
                       )}
                     </td>
 
-                    <td style={{ color: "var(--ink-2, #475467)", fontSize: 13, lineHeight: 1.45 }}>
+                    <td style={{ color: "var(--ink-2, #3D5A52)", fontSize: 13, lineHeight: 1.45 }}>
                       {row.note}
                     </td>
                   </tr>
@@ -739,12 +739,12 @@ export default function ProductArchitecturePage() {
       </section>
 
       {/* Pricing Navigation Hub */}
-      <section style={{ padding: "72px 20px", background: "#F5F7FA", borderTop: "1px solid var(--line, #E5E7EB)" }}>
+      <section style={{ padding: "72px 20px", background: "#FBF7EC", borderTop: "1px solid var(--line, #DCE7E1)" }}>
         <div style={{ maxWidth: 960, margin: "0 auto", textAlign: "center" }}>
-          <h2 style={{ fontSize: "clamp(26px, 3.5vw, 34px)", fontWeight: 800, color: "var(--ink, #101828)", margin: "0 0 12px" }}>
+          <h2 style={{ fontSize: "clamp(26px, 3.5vw, 34px)", fontWeight: 800, color: "var(--ink, #0B4D3B)", margin: "0 0 12px" }}>
             Transparent Bangladeshi Taka Pricing for All Deployments
           </h2>
-          <p style={{ fontSize: 16, color: "var(--ink-2, #475467)", margin: "0 auto 32px", maxWidth: 640, lineHeight: 1.6 }}>
+          <p style={{ fontSize: 16, color: "var(--ink-2, #3D5A52)", margin: "0 auto 32px", maxWidth: 640, lineHeight: 1.6 }}>
             Every plan starts at flat, predictable rates from ৳399 to ৳1,499 per month. Pay via bKash, Nagad, or debit cards with zero sales commission.
           </p>
 
@@ -758,7 +758,7 @@ export default function ProductArchitecturePage() {
                 fontWeight: 700,
                 borderRadius: 8,
                 textDecoration: "none",
-                boxShadow: "0 4px 14px rgba(91, 79, 232, 0.25)",
+                boxShadow: "0 4px 14px rgba(17, 121, 90, 0.25)",
               }}
             >
               View Unified Retail &amp; Platform Pricing →

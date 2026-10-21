@@ -311,7 +311,7 @@ export default function CompareHubPage() {
   };
 
   return (
-    <div style={{ background: "#FAFAFC", minHeight: "100vh" }}>
+    <div style={{ background: "#FBF7EC", minHeight: "100vh" }}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -321,8 +321,8 @@ export default function CompareHubPage() {
       <section
         style={{
           padding: "60px 20px 48px",
-          background: "linear-gradient(180deg, #FFFFFF 0%, #F5F7FA 100%)",
-          borderBottom: "1px solid var(--line, #E5E7EB)",
+          background: "linear-gradient(180deg, #FFFFFF 0%, #FBF7EC 100%)",
+          borderBottom: "1px solid var(--line, #DCE7E1)",
         }}
       >
         <div style={{ maxWidth: 1120, margin: "0 auto", textAlign: "center" }}>
@@ -335,16 +335,16 @@ export default function CompareHubPage() {
               justifyContent: "center",
               gap: 8,
               fontSize: 13,
-              color: "var(--ink-3, #667085)",
+              color: "var(--ink-3, #3D5A52)",
               marginBottom: 20,
               flexWrap: "wrap",
             }}
           >
-            <Link href="/" style={{ color: "var(--ink-2, #475467)", textDecoration: "none" }}>
+            <Link href="/" style={{ color: "var(--ink-2, #3D5A52)", textDecoration: "none" }}>
               Home
             </Link>
             <span aria-hidden="true">›</span>
-            <span style={{ color: "var(--ink, #101828)", fontWeight: 600 }}>Platform Comparisons</span>
+            <span style={{ color: "var(--ink, #0B4D3B)", fontWeight: 600 }}>Platform Comparisons</span>
           </nav>
 
           <span
@@ -352,8 +352,8 @@ export default function CompareHubPage() {
               display: "inline-block",
               padding: "4px 14px",
               borderRadius: "20px",
-              background: "#EEF2FF",
-              color: "var(--accent, #3B5BFD)",
+              background: "#E3F1EA",
+              color: "var(--accent, #11795A)",
               fontSize: "12.5px",
               fontWeight: 700,
               letterSpacing: "0.04em",
@@ -370,7 +370,7 @@ export default function CompareHubPage() {
               letterSpacing: "-1.3px",
               lineHeight: 1.15,
               fontWeight: 800,
-              color: "var(--ink, #101828)",
+              color: "var(--ink, #0B4D3B)",
               margin: "0 auto 16px",
               maxWidth: 900,
             }}
@@ -381,7 +381,7 @@ export default function CompareHubPage() {
           <p
             style={{
               fontSize: "clamp(16px, 2.5vw, 19px)",
-              color: "var(--ink-2, #475467)",
+              color: "var(--ink-2, #3D5A52)",
               lineHeight: 1.6,
               maxWidth: 820,
               margin: "0 auto",
@@ -435,13 +435,13 @@ export default function CompareHubPage() {
       </section>
 
       {/* FAQs */}
-      <section style={{ padding: "64px 20px", background: "#FFFFFF", borderTop: "1px solid var(--line, #E5E7EB)" }}>
+      <section style={{ padding: "64px 20px", background: "#FFFFFF", borderTop: "1px solid var(--line, #DCE7E1)" }}>
         <div style={{ maxWidth: 860, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 36 }}>
-            <h2 style={{ fontSize: "clamp(24px, 3.5vw, 34px)", fontWeight: 800, color: "var(--ink, #101828)", margin: "0 0 10px" }}>
+            <h2 style={{ fontSize: "clamp(24px, 3.5vw, 34px)", fontWeight: 800, color: "var(--ink, #0B4D3B)", margin: "0 0 10px" }}>
               Frequently Asked Comparison Questions
             </h2>
-            <p style={{ fontSize: 15, color: "var(--ink-2, #475467)", margin: 0 }}>
+            <p style={{ fontSize: 15, color: "var(--ink-2, #3D5A52)", margin: 0 }}>
               Practical answers regarding local Bangladeshi operations, switching platforms, and commission policies.
             </p>
           </div>
@@ -451,16 +451,16 @@ export default function CompareHubPage() {
               <div
                 key={idx}
                 style={{
-                  background: "#FAFAFC",
+                  background: "#FBF7EC",
                   borderRadius: 12,
-                  border: "1px solid var(--line, #E5E7EB)",
+                  border: "1px solid var(--line, #DCE7E1)",
                   padding: "20px 24px",
                 }}
               >
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--ink, #101828)", margin: "0 0 8px" }}>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--ink, #0B4D3B)", margin: "0 0 8px" }}>
                   {faq.q}
                 </h3>
-                <p style={{ fontSize: 14.5, color: "var(--ink-2, #475467)", lineHeight: 1.6, margin: 0 }}>
+                <p style={{ fontSize: 14.5, color: "var(--ink-2, #3D5A52)", lineHeight: 1.6, margin: 0 }}>
                   {faq.a}
                 </p>
               </div>
@@ -468,10 +468,10 @@ export default function CompareHubPage() {
           </div>
 
           <div style={{ textAlign: "center", marginTop: 48 }}>
-            <h3 style={{ fontSize: 19, fontWeight: 800, color: "var(--ink, #101828)", margin: "0 0 8px" }}>
+            <h3 style={{ fontSize: 19, fontWeight: 800, color: "var(--ink, #0B4D3B)", margin: "0 0 8px" }}>
               Ready to experience an operating system built specifically for Bangladesh?
             </h3>
-            <p style={{ fontSize: 14.5, color: "var(--ink-2, #475467)", margin: "0 0 20px" }}>
+            <p style={{ fontSize: 14.5, color: "var(--ink-2, #3D5A52)", margin: "0 0 20px" }}>
               14-day free trial &middot; 0% sales commission &middot; Setup in 10 minutes with zero dollar cards
             </p>
             <Link
