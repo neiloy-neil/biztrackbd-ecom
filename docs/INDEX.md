@@ -85,3 +85,4 @@ Welcome to the comprehensive documentation repository for BizTrackBD. Below is t
 - [docs/qa/](file:///d:/AI/biztrackbd%20ecom/docs/qa/): Quality assurance workbooks (`BizTrackBD-QC-QA-Checklist.xlsx`).
 - [docs/financials/](file:///d:/AI/biztrackbd%20ecom/docs/financials/): Economic modeling and subscription cost projection models.
 - [docs/email-templates/](file:///d:/AI/biztrackbd%20ecom/docs/email-templates/): Production transactional email copies and layouts.
+- [docs/62-marketing-rebrand-plan-2026-10-22.md](file:///d:/AI/biztrackbd%20ecom/docs/62-marketing-rebrand-plan-2026-10-22.md): Marketing site rebrand to the Growth b identity (plan, phases, verification). Brand source files in `design/brand/`.
