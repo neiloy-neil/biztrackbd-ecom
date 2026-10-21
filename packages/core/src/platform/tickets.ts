@@ -231,10 +231,17 @@ export async function replyPlatformTicket(
   const isInternal = Boolean(input.isInternal);
   const newStatus = input.newStatus ?? (isInternal ? undefined : "WAITING_ON_TENANT");
 
-  const box: { replied?: { id: string; tenantId: string; code: string | null } } = {};
+  const box: { replied?: { id: string; tenantId: string; code: string | null }; repeat?: boolean } = {};
   const [message] = await db.$transaction(async (tx) => {
     const ticket = await tx.supportTicket.findUnique({ where: { id: input.ticketId }, select: { id: true, tenantId: true, code: true } });
     if (!ticket) throw new NotFoundError("Ticket not found");
+    const again = await tx.ticketMessage.findFirst({
+      where: { ticketId: ticket.id, authorType: "PLATFORM", authorId: actor.id, body, isInternal, createdAt: { gte: new Date(Date.now() - 120_000) } },
+    });
+    if (again) {
+      box.repeat = true;
+      return [again];
+    }
     box.replied = { id: ticket.id, tenantId: ticket.tenantId, code: ticket.code };
 
     const created = await tx.ticketMessage.create({
@@ -373,6 +380,14 @@ export async function createTenantTicket(
       select: { planTier: true, customDomain: true },
     });
 
+    // The same person opening the same subject again within two minutes is a double submit, not a second ticket.
+    const recent = await tx.supportTicket.findFirst({
+      where: { openedBy: actor.userId, subject, createdAt: { gte: new Date(Date.now() - 120_000) } },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, code: true },
+    });
+    if (recent) return { id: recent.id, code: recent.code };
+
     const ticket = await tx.supportTicket.create({
       data: {
         tenantId,
@@ -428,6 +443,12 @@ export async function replyTenantTicket(
       where: { id: input.ticketId },
     });
     if (!ticket) throw new NotFoundError("Ticket not found");
+
+    const sameReply = await tx.ticketMessage.findFirst({
+      where: { ticketId: ticket.id, authorType: "TENANT", authorId: actor.userId, body: message, createdAt: { gte: new Date(Date.now() - 120_000) } },
+      select: { id: true },
+    });
+    if (sameReply) return;
 
     await tx.ticketMessage.create({
       data: {

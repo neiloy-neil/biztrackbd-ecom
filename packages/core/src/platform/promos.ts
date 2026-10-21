@@ -106,19 +106,25 @@ export async function createSubscriptionPromo(
     throw new ValidationError(`Promo code "${cleanCode}" already exists.`);
   }
 
-  const promo = await db.subscriptionPromo.create({
-    data: {
-      code: cleanCode,
-      discountType: input.discountType,
-      discountValue: input.discountValue,
-      applicableTiers: input.applicableTiers && input.applicableTiers.length > 0 ? input.applicableTiers : ["ALL"],
-      billingInterval: input.billingInterval ?? "ANY",
-      maxUses: input.maxUses ?? null,
-      validUntil: input.validUntil ?? null,
-      isActive: true,
-      createdBy: actor.email,
-    },
-  });
+  let promo: Awaited<ReturnType<typeof db.subscriptionPromo.create>>;
+  try {
+    promo = await db.subscriptionPromo.create({
+      data: {
+        code: cleanCode,
+        discountType: input.discountType,
+        discountValue: input.discountValue,
+        applicableTiers: input.applicableTiers && input.applicableTiers.length > 0 ? input.applicableTiers : ["ALL"],
+        billingInterval: input.billingInterval ?? "ANY",
+        maxUses: input.maxUses ?? null,
+        validUntil: input.validUntil ?? null,
+        isActive: true,
+        createdBy: actor.email,
+      },
+    });
+  } catch (e) {
+    if ((e as { code?: string }).code === "P2002") throw new ValidationError(`Promo code "${cleanCode}" already exists.`);
+    throw e;
+  }
 
   await db.platformAuditLog.create({
     data: {

@@ -72,14 +72,20 @@ export async function invitePlatformUser(
     throw new ValidationError(`Staff user with email "${cleanEmail}" already exists.`);
   }
 
-  const user = await db.platformUser.create({
-    data: {
-      email: cleanEmail,
-      name: cleanName,
-      role: input.role,
-      isActive: true,
-    },
-  });
+  let user: Awaited<ReturnType<typeof db.platformUser.create>>;
+  try {
+    user = await db.platformUser.create({
+      data: {
+        email: cleanEmail,
+        name: cleanName,
+        role: input.role,
+        isActive: true,
+      },
+    });
+  } catch (e) {
+    if ((e as { code?: string }).code === "P2002") throw new ValidationError(`Staff user with email "${cleanEmail}" already exists.`);
+    throw e;
+  }
 
   await db.platformAuditLog.create({
     data: {

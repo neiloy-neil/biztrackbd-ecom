@@ -3,6 +3,9 @@ import { assertPlatformCan, type PlatformActor } from "./admin";
 import { ValidationError } from "../errors";
 import { trackPlatformInquiryCapi } from "./tracking";
 
+/** The same sender and message inside this window counts as one inquiry. */
+const DUPLICATE_WINDOW_MS = 10 * 60 * 1000;
+
 export type InquiryStatus = "NEW" | "CONTACTED" | "CONVERTED" | "ARCHIVED";
 
 export interface InquiryInput {
@@ -69,6 +72,27 @@ export async function submitPlatformInquiry(input: InquiryInput): Promise<Inquir
   const attributionNote = attrParts.length > 0 ? `[Attribution: ${attrParts.join(", ")}]` : null;
 
   const db = getPlatformPrisma();
+
+  // A double click, a retry after a slow response, or Enter pressed twice must not become two leads.
+  const duplicate = await db.platformInquiry.findFirst({
+    where: { phone, email, message, createdAt: { gte: new Date(Date.now() - DUPLICATE_WINDOW_MS) } },
+    orderBy: { createdAt: "desc" },
+  });
+  if (duplicate) {
+    return {
+      id: duplicate.id,
+      name: duplicate.name,
+      phone: duplicate.phone,
+      email: duplicate.email,
+      topic: duplicate.topic,
+      message: duplicate.message,
+      status: duplicate.status as InquiryStatus,
+      notes: duplicate.notes,
+      createdAt: duplicate.createdAt,
+      updatedAt: duplicate.updatedAt,
+    };
+  }
+
   const created = await db.platformInquiry.create({
     data: {
       name,

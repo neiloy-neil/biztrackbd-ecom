@@ -71,15 +71,40 @@ export async function addTenantQuotaAdjustment(
     throw new ValidationError("An audit reason must be supplied for manual quota overrides.");
   }
 
-  const adj = await db.tenantQuotaAdjustment.create({
-    data: {
+  // A second click on "Add" must not hand out the credits twice.
+  const repeat = await db.tenantQuotaAdjustment.findFirst({
+    where: {
       tenantId,
       type: input.type,
       amount: input.amount,
       reason: input.reason.trim(),
       actorId: actor.id,
+      createdAt: { gte: new Date(Date.now() - 60_000) },
     },
+    orderBy: { createdAt: "desc" },
   });
+  const adj =
+    repeat ??
+    (await db.tenantQuotaAdjustment.create({
+      data: {
+        tenantId,
+        type: input.type,
+        amount: input.amount,
+        reason: input.reason.trim(),
+        actorId: actor.id,
+      },
+    }));
+  if (repeat) {
+    return {
+      id: adj.id,
+      tenantId: adj.tenantId,
+      type: adj.type as "SMS_CREDITS" | "PRODUCT_LIMIT" | "STAFF_LIMIT",
+      amount: adj.amount,
+      reason: adj.reason,
+      actorId: adj.actorId,
+      createdAt: adj.createdAt,
+    };
+  }
 
   await db.platformAuditLog.create({
     data: {
