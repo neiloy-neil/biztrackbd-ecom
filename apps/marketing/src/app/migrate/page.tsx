@@ -1,3 +1,4 @@
+import { getContact } from "@/lib/contact";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MigrateAnalyzer } from "./migrate-analyzer";
@@ -68,7 +69,8 @@ const FAQS = [
   },
 ];
 
-export default function MigratePage() {
+export default async function MigratePage() {
+  const contact = await getContact();
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -135,7 +137,7 @@ export default function MigratePage() {
       {/* Interactive Tool */}
       <section className="sec" style={{ paddingTop: 20, paddingBottom: 60 }}>
         <div className="wrap">
-          <MigrateAnalyzer />
+          <MigrateAnalyzer whatsappBase={contact.whatsappBase} />
         </div>
       </section>
 
@@ -319,7 +321,7 @@ export default function MigratePage() {
               Have questions about your custom theme or order history?
             </p>
             <a
-              href="https://wa.me/8801886675596?text=Hello%20BizTrackBD%20team,%20I%20have%20questions%20about%20migrating%20my%20store."
+              href={`${contact.whatsappBase}?text=Hello%20BizTrackBD%20team,%20I%20have%20questions%20about%20migrating%20my%20store.`}
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-secondary"

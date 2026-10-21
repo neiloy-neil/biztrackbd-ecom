@@ -1,20 +1,36 @@
-/** BizTrackBD's own contact details, used in the footer, the contact page and structured data. Env values win if set. */
-const digits = (v: string) => v.replace(/\D/g, "");
+import { cache } from "react";
+import { getPlatformContactConfig, type PlatformContactConfigView } from "@biztrackbd/core";
 
-const whatsappRaw = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || "+8801886675596";
+/** +8801886675596 -> "+880 1886-675596". Anything that is not a Bangladeshi international number is shown as saved. */
+function displayPhone(intl: string): string {
+  const m = intl.match(/^\+880(\d{4})(\d{6})$/);
+  return m ? `+880 ${m[1]}-${m[2]}` : intl;
+}
 
-export const CONTACT = {
-  email: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "biztrackbd@gmail.com",
-  /** Shown to people. */
-  phoneDisplay: "+880 1886-675596",
-  /** For tel: links. */
-  phoneTel: "+8801886675596",
-  whatsappDisplay: whatsappRaw,
-  /** International digits only, for wa.me. */
-  whatsappDigits: digits(whatsappRaw),
-  facebook: "https://facebook.com/biztrackbd/",
-  instagram: "https://www.instagram.com/biztrackbd/",
-} as const;
+export function shapeContact(cfg: PlatformContactConfigView) {
+  const whatsappDigits = cfg.whatsapp.replace(/\D/g, "");
+  const whatsappBase = `https://wa.me/${whatsappDigits}`;
+  return {
+    email: cfg.email,
+    /** Shown to people. */
+    phoneDisplay: displayPhone(cfg.phone),
+    /** For tel: links. */
+    phoneTel: cfg.phone,
+    whatsappDisplay: cfg.whatsapp,
+    /** International digits only. */
+    whatsappDigits,
+    /** https://wa.me/<digits>, ready for a "?text=" suffix. */
+    whatsappBase,
+    whatsappLink: (text?: string) => (text ? `${whatsappBase}?text=${encodeURIComponent(text)}` : whatsappBase),
+    facebook: cfg.facebookUrl,
+    instagram: cfg.instagramUrl,
+  };
+}
 
-export const whatsappLink = (text?: string) =>
-  `https://wa.me/${CONTACT.whatsappDigits}${text ? `?text=${encodeURIComponent(text)}` : ""}`;
+export type Contact = ReturnType<typeof shapeContact>;
+
+/**
+ * BizTrackBD's own contact details, set in Platform Admin -> Settings -> Contact & Social. Falls back to the built-in defaults
+ * if the database cannot be read, so the footer is never empty. Cached per request.
+ */
+export const getContact = cache(async (): Promise<Contact> => shapeContact(await getPlatformContactConfig()));

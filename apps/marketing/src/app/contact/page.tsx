@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { CONTACT } from "@/lib/contact";
+import { ContactIcon } from "@biztrackbd/ui";
+import { getContact } from "@/lib/contact";
 import Link from "next/link";
 import { ContactForm } from "./contact-form";
 
@@ -27,10 +28,8 @@ export const metadata: Metadata = {
     images: [`${siteUrl}/opengraph-image`],
   },
 };
-const whatsappNumber = CONTACT.whatsappDisplay;
-const supportEmail = CONTACT.email;
 
-const contactJsonLd = {
+const buildContactJsonLd = (whatsappNumber: string, supportEmail: string) => ({
   "@context": "https://schema.org",
   "@type": "ContactPage",
   name: "BizTrackBD Contact & Support",
@@ -61,7 +60,7 @@ const contactJsonLd = {
       },
     ],
   },
-};
+});
 
 const SUPPORT_FAQS = [
   {
@@ -82,8 +81,9 @@ const SUPPORT_FAQS = [
   },
 ];
 
-export default function ContactPage() {
-  const cleanPhone = whatsappNumber.replace(/\D/g, "");
+export default async function ContactPage() {
+  const contact = await getContact();
+  const contactJsonLd = buildContactJsonLd(contact.phoneTel, contact.email);
 
   return (
     <>
@@ -148,7 +148,7 @@ export default function ContactPage() {
                   fontWeight: 800,
                 }}
               >
-                💬
+                <ContactIcon name="whatsapp" size={22} />
               </div>
               <h3 style={{ fontSize: 19, fontWeight: 700, margin: 0, color: "var(--ink)" }}>
                 Direct WhatsApp Desk
@@ -157,11 +157,10 @@ export default function ContactPage() {
                 Quickest way to reach us. For live order questions, courier connection bugs, or general guidance.
               </p>
               <div style={{ fontSize: 13, color: "var(--ink-3)", marginTop: 4 }}>
-                ⏱ Typical reply: <strong>under 20 minutes</strong><br />
-                🕒 Hours: 10:00 AM – 9:00 PM (Daily)
+                <strong style={{ color: "var(--ink)" }}>{contact.whatsappDisplay}</strong>
               </div>
               <a
-                href={`https://wa.me/${cleanPhone}`}
+                href={contact.whatsappLink()}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-primary btn-sm"
@@ -203,7 +202,7 @@ export default function ContactPage() {
                   fontWeight: 800,
                 }}
               >
-                ✉️
+                <ContactIcon name="email" size={22} />
               </div>
               <h3 style={{ fontSize: 19, fontWeight: 700, margin: 0, color: "var(--ink)" }}>
                 Email &amp; Billing Desk
@@ -212,11 +211,10 @@ export default function ContactPage() {
                 For official billing receipts, custom domain setup, CSV bulk catalog imports, and data requests.
               </p>
               <div style={{ fontSize: 13, color: "var(--ink-3)", marginTop: 4 }}>
-                ⏱ Typical reply: <strong>same business day</strong><br />
-                📬 <strong style={{ color: "var(--ink)" }}>{supportEmail}</strong>
+                <strong style={{ color: "var(--ink)" }}>{contact.email}</strong>
               </div>
               <a
-                href={`mailto:${supportEmail}`}
+                href={`mailto:${contact.email}`}
                 className="btn btn-secondary btn-sm"
                 style={{ marginTop: "auto", borderRadius: 20 }}
               >
@@ -273,6 +271,22 @@ export default function ContactPage() {
                 Visit The Digital Dude ↗
               </a>
             </div>
+          </div>
+
+          {/* Call and social */}
+          <div className="cp-strip" aria-label="More ways to reach us">
+            <a href={`tel:${contact.phoneTel}`}>
+              <span className="cp-icon"><ContactIcon name="phone" size={20} /></span>
+              <span className="cp-text"><small>Call us</small><strong>{contact.phoneDisplay}</strong></span>
+            </a>
+            <a href={contact.facebook} target="_blank" rel="noopener noreferrer">
+              <span className="cp-icon"><ContactIcon name="facebook" size={20} /></span>
+              <span className="cp-text"><small>Follow on Facebook</small><strong>facebook.com/biztrackbd</strong></span>
+            </a>
+            <a href={contact.instagram} target="_blank" rel="noopener noreferrer">
+              <span className="cp-icon"><ContactIcon name="instagram" size={20} /></span>
+              <span className="cp-text"><small>Follow on Instagram</small><strong>@biztrackbd</strong></span>
+            </a>
           </div>
 
           {/* Form and Context Split */}

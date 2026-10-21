@@ -19,7 +19,7 @@ Men's Oxford Formal Shoe,3800,3200,12,Footwear,https://images.unsplash.com/photo
 Organic Mustard Honey (500g),650,550,45,Groceries,https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=600&auto=format&fit=crop&q=80,Raw unpasteurized mustard flower honey from Sundarbans.
 Matte Ceramic Mug Set (4 Pcs),1400,1190,18,Home Decor,https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=600&auto=format&fit=crop&q=80,Handcrafted stoneware mugs made in Mirpur ceramic studios.`;
 
-export function MigrateAnalyzer() {
+export function MigrateAnalyzer({ whatsappBase }: { whatsappBase: string }) {
   const [result, setResult] = useState<CatalogParseResult | null>(null);
   const [fileName, setFileName] = useState<string>("");
   const [isPending, startTransition] = useTransition();
@@ -62,10 +62,10 @@ export function MigrateAnalyzer() {
   }
 
   const whatsappHref = result
-    ? `https://wa.me/8801886675596?text=${encodeURIComponent(
+    ? `${whatsappBase}?text=${encodeURIComponent(
         `Hello BizTrackBD team! I inspected my store catalog on /migrate. I have ${result.totalProducts} products (${result.totalVariants} variants) currently on ${result.platform.toUpperCase()} and I would like your Dhaka migration team to assist with zero-downtime migration.`
       )}`
-    : `https://wa.me/8801886675596?text=${encodeURIComponent(
+    : `${whatsappBase}?text=${encodeURIComponent(
         "Hello BizTrackBD team! I would like help migrating my existing ecommerce store to BizTrackBD."
       )}`;
 

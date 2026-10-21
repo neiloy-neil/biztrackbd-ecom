@@ -3,7 +3,7 @@ import { Baloo_Da_2, Hind_Siliguri } from "next/font/google";
 import Link from "next/link";
 import { BrandLockup } from "@/components/brand-logo";
 import { ContactIcon } from "@biztrackbd/ui";
-import { CONTACT, whatsappLink } from "@/lib/contact";
+import { getContact, type Contact } from "@/lib/contact";
 import "./marketing.css";
 import "./site.css";
 
@@ -94,7 +94,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#0B4D3B" };
 
-const globalJsonLd = {
+const buildGlobalJsonLd = (CONTACT: Contact) => ({
   "@context": "https://schema.org",
   "@graph": [
     {
@@ -136,12 +136,15 @@ const globalJsonLd = {
       inLanguage: "en-BD",
     },
   ],
-};
+});
 
 import { PlatformTracker } from "@/components/platform-tracker";
 import { SiteNavigation } from "@/components/site-navigation";
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const CONTACT = await getContact();
+  const whatsappLink = CONTACT.whatsappLink;
+  const globalJsonLd = buildGlobalJsonLd(CONTACT);
   const googleVerification = await getPlatformSiteVerificationCode().catch(() => null);
   return (
     <html lang="en" data-scroll-behavior="smooth" className={`${baloo.variable} ${hind.variable}`}>
@@ -215,13 +218,30 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
               <div className="foot-col foot-contact">
                 <h4>Get in touch</h4>
-                <ul aria-label="Contact details">
-                  <li><a href={`mailto:${CONTACT.email}`}><ContactIcon name="email" size={16} /><span>{CONTACT.email}</span></a></li>
-                  <li><a href={`tel:${CONTACT.phoneTel}`}><ContactIcon name="phone" size={16} /><span>{CONTACT.phoneDisplay}</span></a></li>
-                  <li><a href={whatsappLink()} target="_blank" rel="noopener noreferrer"><ContactIcon name="whatsapp" size={16} /><span>WhatsApp {CONTACT.whatsappDisplay}</span></a></li>
-                  <li><a href={CONTACT.facebook} target="_blank" rel="noopener noreferrer"><ContactIcon name="facebook" size={16} /><span>facebook.com/biztrackbd</span></a></li>
-                  <li><a href={CONTACT.instagram} target="_blank" rel="noopener noreferrer"><ContactIcon name="instagram" size={16} /><span>@biztrackbd</span></a></li>
+                <ul className="contact-cards" aria-label="Contact details">
+                  <li>
+                    <a href={`mailto:${CONTACT.email}`}>
+                      <span className="cc-icon"><ContactIcon name="email" size={20} /></span>
+                      <span className="cc-text"><small>Email us</small><strong>{CONTACT.email}</strong></span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href={`tel:${CONTACT.phoneTel}`}>
+                      <span className="cc-icon"><ContactIcon name="phone" size={20} /></span>
+                      <span className="cc-text"><small>Call us</small><strong>{CONTACT.phoneDisplay}</strong></span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href={whatsappLink()} target="_blank" rel="noopener noreferrer">
+                      <span className="cc-icon"><ContactIcon name="whatsapp" size={20} /></span>
+                      <span className="cc-text"><small>WhatsApp</small><strong>{CONTACT.whatsappDisplay}</strong></span>
+                    </a>
+                  </li>
                 </ul>
+                <div className="contact-pills">
+                  <a href={CONTACT.facebook} target="_blank" rel="noopener noreferrer"><ContactIcon name="facebook" size={16} /><span>Facebook</span></a>
+                  <a href={CONTACT.instagram} target="_blank" rel="noopener noreferrer"><ContactIcon name="instagram" size={16} /><span>Instagram</span></a>
+                </div>
               </div>
 
               <div className="foot-col">
