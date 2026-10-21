@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { submitPlatformInquiry } from "@biztrackbd/core";
+import { DomainError, submitPlatformInquiry } from "@biztrackbd/core";
 
 // Simple in-memory sliding window rate limiter: 5 requests per 10 minutes per IP
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
@@ -167,7 +167,11 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, id: result.id, eventId });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Failed to submit message";
-    return NextResponse.json({ ok: false, error: message }, { status: 400 });
+    // A validation message is for the visitor. Anything else (a database error, say) is ours: log it, show a plain sentence.
+    if (err instanceof DomainError) {
+      return NextResponse.json({ ok: false, error: err.message }, { status: err.httpStatus });
+    }
+    console.error("[contact] could not save the inquiry", err instanceof Error ? err.message : err);
+    return NextResponse.json({ ok: false, error: "We could not send your message right now. Please message us on WhatsApp instead." }, { status: 500 });
   }
 }

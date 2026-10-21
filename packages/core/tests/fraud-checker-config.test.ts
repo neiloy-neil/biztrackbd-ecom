@@ -94,8 +94,8 @@ describe("the fraud checker key lives in platform settings", () => {
         { key: "fraud_checker_api_key", value: "fraud-key-0123456789", description: "x" },
       ],
     });
-    // the table itself is closed to a store connection: no grant, so not even an empty answer
-    await expect(app.platformConfig.findMany()).rejects.toBeTruthy();
+    // a store connection may read only the public rows (contact, SEO; migration 060): none of the secret rows above show up
+    expect(await app.platformConfig.findMany()).toEqual([]);
     const read = async (k: string) => (await app.$queryRaw<{ v: string | null }[]>`SELECT platform_config_value(${k}) AS v`)[0]!.v;
     expect(await read("fraud_checker_api_key")).toBe("fraud-key-0123456789");
     expect(await read("gemini_api_key")).toBe("secret-gemini"); // the platform AI key is the other value a store needs

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { getPlatformPrisma } from "@biztrackbd/db";
 import { assertPlatformCan, type PlatformActor } from "./admin";
 import { ValidationError } from "../errors";
@@ -73,38 +74,18 @@ export async function submitPlatformInquiry(input: InquiryInput): Promise<Inquir
 
   const db = getPlatformPrisma();
 
-  // A double click, a retry after a slow response, or Enter pressed twice must not become two leads.
-  const duplicate = await db.platformInquiry.findFirst({
-    where: { phone, email, message, createdAt: { gte: new Date(Date.now() - DUPLICATE_WINDOW_MS) } },
-    orderBy: { createdAt: "desc" },
+  // The public site's database role may add an inquiry but not read one, so this is a single INSERT that returns nothing. The id comes
+  // from the sender and message plus a 10-minute window: a double click, a retry after a slow response or Enter pressed twice lands on
+  // the same id, and ON CONFLICT DO NOTHING (skipDuplicates) turns the repeat into no new lead.
+  const bucket = Math.floor(Date.now() / DUPLICATE_WINDOW_MS);
+  const id = `inq_${createHash("sha256").update([phone, email.toLowerCase(), message, bucket].join("|")).digest("hex").slice(0, 24)}`;
+  const createdAt = new Date();
+  const { count } = await db.platformInquiry.createMany({
+    data: [{ id, name, phone, email, topic, message, status: "NEW", notes: attributionNote, ipAddress: input.ipAddress ?? null, createdAt, updatedAt: createdAt }],
+    skipDuplicates: true,
   });
-  if (duplicate) {
-    return {
-      id: duplicate.id,
-      name: duplicate.name,
-      phone: duplicate.phone,
-      email: duplicate.email,
-      topic: duplicate.topic,
-      message: duplicate.message,
-      status: duplicate.status as InquiryStatus,
-      notes: duplicate.notes,
-      createdAt: duplicate.createdAt,
-      updatedAt: duplicate.updatedAt,
-    };
-  }
-
-  const created = await db.platformInquiry.create({
-    data: {
-      name,
-      phone,
-      email,
-      topic,
-      message,
-      status: "NEW",
-      notes: attributionNote,
-      ipAddress: input.ipAddress ?? null,
-    },
-  });
+  const created = { id, name, phone, email, topic, message, status: "NEW" as const, notes: attributionNote, createdAt, updatedAt: createdAt };
+  if (count === 0) return created;
 
   // Dispatch Meta CAPI for platform inquiry if consent given
   if (input.consentGiven !== false) {

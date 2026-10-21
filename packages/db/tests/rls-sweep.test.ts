@@ -5,7 +5,10 @@ import { createOwnerClient, createTenantFixture, resetDatabase, seedPlans, testU
 let report: RlsReport;
 // Read by every store on purpose: the plan catalogue, platform announcements, and the Tenant row (which has its own policy: a store sees only itself).
 // Template: the published store templates (the signup, the gallery and the editor read them); a row-level policy hides drafts.
-const PLATFORM_READABLE = ["Plan", "Announcement", "Template", "Tenant"];
+// PlatformConfig: migration 060 lets the marketing site read ONLY the public keys (contact details, SEO text) through a row policy; every
+// secret row stays hidden (the core test "reads only the public settings, never a secret" proves it with real rows).
+// PublicToolUsage: the free courier fraud checker's per-visitor counter, written and read by the marketing site.
+const PLATFORM_READABLE = ["Plan", "Announcement", "Template", "Tenant", "PlatformConfig", "PublicToolUsage"];
 const urls = testUrls();
 
 beforeAll(async () => {
