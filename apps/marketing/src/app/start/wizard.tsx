@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { checkAddressAction, signupAction, type SignupState } from "./actions";
 import { generateTrackingEventId, getAttributionForPayload } from "@/lib/client-attribution";
+import { trackFunnelEvent } from "@/components/platform-tracker";
 
 interface Plan {
   tier: string;
@@ -184,6 +185,7 @@ export function Wizard({
 }) {
   const [state, action, pending] = useActionState<SignupState, FormData>(signupAction, {});
   const [step, setStep] = useState(0);
+  const startedTracked = useRef(false);
   const [eventId] = useState(() => generateTrackingEventId("reg"));
   const [attr, setAttr] = useState(() => getAttributionForPayload());
 
@@ -320,6 +322,10 @@ export function Wizard({
     setProblem(p);
     if (p) return;
     setProblem(null);
+    if (!startedTracked.current) {
+      startedTracked.current = true;
+      trackFunnelEvent("InitiateCheckout", { content_name: "signup_wizard", site_mode: v.siteMode });
+    }
     setStep(step + 1);
   }
 

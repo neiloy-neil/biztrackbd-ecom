@@ -9,6 +9,7 @@ import {
   type ServerEvent,
   trackPlatformInquiryCapi,
   trackPlatformRegistrationCapi,
+  trackPlatformBrowserEventCapi,
 } from "../src";
 
 const sha = (s: string) => createHash("sha256").update(s).digest("hex");
@@ -160,5 +161,38 @@ describe("Meta Conversions API (CAPI) Server-Side Events (DATA-002)", () => {
     expect(call.body.data[0].event_id).toBe("reg_ev_abc");
     expect(call.body.data[0].custom_data.store_name).toBe("Tania Silk House");
     expect(call.body.data[0].custom_data.plan).toBe("BUSINESS");
+  });
+  it("mirrors a consented browser funnel event with the browser's event id and no personal fields", async () => {
+    process.env.PLATFORM_META_PIXEL_ID = "987654321098765";
+    process.env.PLATFORM_META_CAPI_TOKEN = "EAABtest_token_secret";
+
+    const res = await trackPlatformBrowserEventCapi({
+      name: "ViewContent",
+      eventId: "ev_browser_1",
+      url: "https://biztrack.bd/pricing",
+      customData: { content_name: "/pricing" },
+      consentGiven: true,
+      user: { ip: "103.20.30.40", userAgent: "UA", fbp: "fb.1.1700000000.123456789" },
+    });
+
+    expect(res.ok).toBe(true);
+    const ev = interceptedCalls[0]!.body.data[0];
+    expect(ev.event_name).toBe("ViewContent");
+    expect(ev.event_id).toBe("ev_browser_1");
+    expect(ev.action_source).toBe("website");
+    expect(ev.user_data.ph).toBeUndefined();
+    expect(ev.user_data.em).toBeUndefined();
+    expect(ev.user_data.fbp).toBe("fb.1.1700000000.123456789");
+  });
+
+  it("refuses browser funnel events without consent or outside the allowed list", async () => {
+    process.env.PLATFORM_META_PIXEL_ID = "987654321098765";
+    process.env.PLATFORM_META_CAPI_TOKEN = "EAABtest_token_secret";
+
+    const noConsent = await trackPlatformBrowserEventCapi({ name: "PageView", eventId: "ev_2", consentGiven: false });
+    const badName = await trackPlatformBrowserEventCapi({ name: "Purchase" as never, eventId: "ev_3", consentGiven: true });
+    expect(noConsent.ok).toBe(false);
+    expect(badName.ok).toBe(false);
+    expect(interceptedCalls).toHaveLength(0);
   });
 });

@@ -56,6 +56,7 @@ This backlog translates the 17 October 2026 alignment audit into testable work. 
 | DATA-002 | P1 | Implement lead/booking server events only after policy approval | **Resolved & Verified** | Lead, Booking, Inquiry, and Signup server-side events via Meta CAPI with SHA-256 phone/email hashing, PII sanitization, client deduplication (`eventId`), and affirmative consent gating. Verified in `capi-server-events.test.ts`. |
 | DATA-003 | P1 | Preserve first/latest attribution through signup | **Resolved & Verified** | Dual First-touch (`bt_attr_first`) and Last-touch (`bt_attr_last`) attribution persistence (30-day 1st-party cookies) capturing UTMs, referrer, landing page, and `fbc`/`fbp`. Preserved across `/start` wizard onboarding and `/contact`. Verified in `attribution.test.ts`. |
 | DATA-004 | P1 | Build tracking-health view | **Resolved & Verified** | Built Merchant Admin Tracking Health dashboard (`/marketing/pixels/health`) with live test ping dispatch to Meta, 7-day multi-layer event breakdown, and Platform Super Admin diagnostics (`/diagnostics/tracking`). |
+| DATA-005 | P1 | Funnel events on the marketing site: one PageView per page, ViewContent, CTAClick on /start links, InitiateCheckout in the signup wizard, mirrored to CAPI via `/api/track` | **Resolved, tested against a local fake Graph API** | Consent-gated both sides, shared event ids, allow-listed event names and fields. Not yet checked against a real Meta test event code. |
 
 ## Epic 6 — Public forms, permissions, and Business operations
 

@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
-import { initClientAttribution } from "../lib/client-attribution";
+import { generateTrackingEventId, getAttributionForPayload, initClientAttribution } from "../lib/client-attribution";
 
 declare global {
   interface Window {
@@ -38,6 +38,37 @@ export function sanitizeEventPayload(data: Record<string, unknown>): Record<stri
   return safe;
 }
 
+const META_STANDARD_EVENTS = new Set(["PageView", "ViewContent", "Lead", "CompleteRegistration", "InitiateCheckout", "Contact"]);
+
+/** Paths that are not worth a ViewContent: home is covered by PageView, forms have their own events, legal is noise. */
+const NO_VIEW_CONTENT = /^\/($|contact|privacy|terms|start\/done)/;
+
+/**
+ * Fires a funnel event in the browser (Pixel) and mirrors it to the server (CAPI) under the same event id so Meta
+ * merges the two copies. Both are skipped without consent.
+ */
+export function trackFunnelEvent(name: "PageView" | "ViewContent" | "InitiateCheckout" | "CTAClick", data: Record<string, unknown> = {}): void {
+  if (typeof window === "undefined" || getPlatformConsent() !== "granted") return;
+  const eventId = generateTrackingEventId("ev");
+  trackPlatformEvent(name, data, { eventId });
+
+  const attr = getAttributionForPayload();
+  const body = JSON.stringify({
+    name,
+    eventId,
+    url: window.location.origin + window.location.pathname,
+    data: sanitizeEventPayload(data),
+    fbp: attr.fbp,
+    fbc: attr.fbc,
+    consentGiven: true,
+  });
+  try {
+    void fetch("/api/track", { method: "POST", headers: { "Content-Type": "application/json" }, body, keepalive: true }).catch(() => undefined);
+  } catch {
+    /* ignore */
+  }
+}
+
 /** Check current consent state */
 export function getPlatformConsent(): "granted" | "denied" | "unset" {
   if (typeof window === "undefined") return "unset";
@@ -63,13 +94,14 @@ export function trackPlatformEvent(
 
   const safeData = sanitizeEventPayload(data);
 
-  // Meta Pixel with deduplication eventID
+  // Meta Pixel with deduplication eventID. Names outside Meta's standard list are sent as custom events.
   if (window.fbq) {
     try {
+      const verb = META_STANDARD_EVENTS.has(name) ? "track" : "trackCustom";
       if (options?.eventId) {
-        window.fbq("track", name, safeData, { eventID: options.eventId });
+        window.fbq(verb, name, safeData, { eventID: options.eventId });
       } else {
-        window.fbq("track", name, safeData);
+        window.fbq(verb, name, safeData);
       }
     } catch {
       /* ignore */
@@ -123,14 +155,55 @@ export function PlatformTracker() {
     return () => window.removeEventListener("open-cookie-settings", onOpenSettings);
   }, []);
 
+  // One PageView per path, even if several triggers race (consent click, script ready, route change).
+  const lastPageView = useRef<{ path: string; at: number } | null>(null);
+  const firePageView = (p: string) => {
+    const last = lastPageView.current;
+    if (last && last.path === p && Date.now() - last.at < 3000) return;
+    lastPageView.current = { path: p, at: Date.now() };
+    trackFunnelEvent("PageView", { page_path: p });
+    if (!NO_VIEW_CONTENT.test(p)) {
+      trackFunnelEvent("ViewContent", { content_name: p, content_category: p.split("/")[1] || "home" });
+    }
+  };
+
   useEffect(() => {
     if (consent !== "granted") return;
-    if (first.current) {
-      first.current = false;
-      return;
-    }
-    trackPlatformEvent("PageView", { page_path: path });
+    // Wait for the Pixel stub (defined as soon as the inline snippet runs), then report this page.
+    let tries = 0;
+    const timer = window.setInterval(() => {
+      tries += 1;
+      if (window.fbq || !PIXEL_ID || tries > 30) {
+        window.clearInterval(timer);
+        firePageView(path);
+      }
+    }, 100);
+    return () => window.clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path, consent]);
+
+  // Clicks on any "start" link are the top-of-funnel intent signal.
+  useEffect(() => {
+    if (consent !== "granted") return;
+    const onClick = (e: MouseEvent) => {
+      const link = (e.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!link) return;
+      let url: URL;
+      try {
+        url = new URL(link.href, window.location.href);
+      } catch {
+        return;
+      }
+      if (url.origin !== window.location.origin || !url.pathname.startsWith("/start")) return;
+      trackFunnelEvent("CTAClick", {
+        cta_target: url.pathname + url.search.slice(0, 80),
+        cta_text: (link.textContent || "").trim().slice(0, 60),
+        page_path: window.location.pathname,
+      });
+    };
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, [consent]);
 
   const handleConsent = (decision: "granted" | "denied") => {
     try {
@@ -140,13 +213,6 @@ export function PlatformTracker() {
     }
     setConsent(decision);
     setBannerVisible(false);
-
-    if (decision === "granted") {
-      // Fire initial PageView now that user granted consent
-      setTimeout(() => {
-        trackPlatformEvent("PageView", { page_path: path });
-      }, 100);
-    }
   };
 
   return (
@@ -156,7 +222,6 @@ export function PlatformTracker() {
         <Script
           id="platform-meta-pixel"
           strategy="afterInteractive"
-          onReady={() => trackPlatformEvent("PageView", { page_path: path })}
           dangerouslySetInnerHTML={{
             __html: `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${PIXEL_ID}');`,
           }}

@@ -213,6 +213,65 @@ export async function trackPlatformRegistrationCapi(input: PlatformRegistrationE
   }
 }
 
+/** Browser-triggered funnel events the marketing site mirrors to CAPI. Anything else is refused. */
+export const PLATFORM_BROWSER_EVENTS = ["PageView", "ViewContent", "InitiateCheckout", "CTAClick"] as const;
+export type PlatformBrowserEvent = (typeof PLATFORM_BROWSER_EVENTS)[number];
+
+export interface PlatformBrowserEventInput {
+  name: PlatformBrowserEvent;
+  /** Same id the browser Pixel used, so Meta merges the two copies. */
+  eventId: string;
+  url?: string | null;
+  customData?: Record<string, string | number | boolean | null>;
+  user?: PlatformUserContext;
+  /** Must be exactly true: the visitor accepted analytics in the banner. */
+  consentGiven: boolean;
+  testCode?: string | null;
+}
+
+/**
+ * Server copy of a consented browser funnel event (PageView, ViewContent, InitiateCheckout, CTAClick).
+ * Carries no name, email or phone: only IP, user agent and the visitor's own fbp/fbc cookies.
+ */
+export async function trackPlatformBrowserEventCapi(input: PlatformBrowserEventInput): Promise<SendResult> {
+  const pixelId = getPlatformPixelId();
+  const token = getPlatformCapiToken();
+  if (!pixelId || !token) return { ok: false, httpStatus: null, detail: "Platform Meta Pixel or CAPI token is not configured" };
+  if (input.consentGiven !== true) return { ok: false, httpStatus: null, detail: "Consent not given" };
+  if (!PLATFORM_BROWSER_EVENTS.includes(input.name)) return { ok: false, httpStatus: null, detail: "Event not allowed" };
+
+  const event = {
+    name: input.name,
+    eventId: input.eventId,
+    time: new Date(),
+    url: input.url || null,
+    user: {
+      ip: input.user?.ip,
+      userAgent: input.user?.userAgent,
+      fbp: input.user?.fbp,
+      fbc: input.user?.fbc,
+    },
+    customData: input.customData,
+  } as unknown as ServerEvent;
+
+  try {
+    const res = await getPixelFetch()(`${graph()}/${pixelId}/events`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(capiBody(event, input.testCode || getPlatformTestEventCode() || undefined)),
+      signal: AbortSignal.timeout(5000),
+    });
+    const body = (await res.json().catch(() => ({}))) as { events_received?: number; error?: { message?: string } };
+    if (!res.ok) {
+      return { ok: false, httpStatus: res.status, detail: (body.error?.message ?? `Meta answered ${res.status}`).slice(0, 200).replace(token, "[token]") };
+    }
+    if (!body.events_received) return { ok: false, httpStatus: res.status, detail: "Meta did not accept the browser event" };
+    return { ok: true, httpStatus: res.status };
+  } catch {
+    return { ok: false, httpStatus: null, detail: "Could not reach Meta Conversions API" };
+  }
+}
+
 export interface PlatformTrackingDiagnostics {
   pixelConfigured: boolean;
   pixelIdMasked: string | null;
