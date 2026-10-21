@@ -10,7 +10,8 @@ import {
   getPlatformGoogleConfig,
   getPlatformSeoConfig,
   getPlatformContactConfig,
-  uddoktaPayUrls,
+  uddoktaPayPlanUrls,
+  platformOriginFor,
 } from "@biztrackbd/core";
 import { PlatformSettingsClient } from "./platform-settings-client";
 
@@ -36,6 +37,7 @@ export default async function PlatformSettingsPage() {
   ]);
 
   const adminOrigin = (process.env.NEXT_PUBLIC_ADMIN_URL || process.env.ADMIN_ORIGIN || "https://admin.biztrack.bd").replace(/\/+$/, "");
+  const platformOrigin = platformOriginFor(process.env.NEXT_PUBLIC_ROOT_DOMAIN);
 
   return (
     <PlatformSettingsClient
@@ -48,7 +50,7 @@ export default async function PlatformSettingsPage() {
       initialGoogleConfig={googleConfig}
       initialSeoConfig={seoConfig}
       initialContactConfig={contactConfig}
-      planPaymentUrls={uddoktaPayUrls("plan", adminOrigin)}
+      planPaymentUrls={uddoktaPayPlanUrls(adminOrigin, platformOrigin)}
     />
   );
 }

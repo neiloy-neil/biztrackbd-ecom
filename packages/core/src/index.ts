@@ -171,7 +171,7 @@ export { createBrevoSender, emailSenderFromEnv, type EmailSender } from "./growt
 export { currentSmsSender } from "./customers/auth";
 export {
   createUddoktaPayCharge, verifyUddoktaPayPayment, getStoreUddoktaPayConfig, processUddoktaPayOrderSuccess, processUddoktaPaySubscriptionSuccess,
-  DEFAULT_UDDOKTAPAY_BASE_URL, DEFAULT_UDDOKTAPAY_API_KEY, setUddoktaPayFetchForTests, normalizeUddoktaPayBaseUrl, uddoktaPayUrls, getPlatformUddoktaPayCredentials,
+  DEFAULT_UDDOKTAPAY_BASE_URL, DEFAULT_UDDOKTAPAY_API_KEY, setUddoktaPayFetchForTests, normalizeUddoktaPayBaseUrl, uddoktaPayUrls, uddoktaPayPlanUrls, platformOriginFor, checkUddoktaPayPlanInvoice, getPlatformUddoktaPayCredentials,
   type UddoktaPayChargeRequest, type UddoktaPayChargeResponse, type UddoktaPayVerifyResponse,
 } from "./payments/uddoktapay";
 export {

@@ -82,7 +82,9 @@ describe("who can call each admin and platform action", () => {
       "apps/admin/src/app/api/webhooks/whatsapp/route.ts",
       // UddoktaPay's plan-payment webhook: called by the gateway, so there is no session. Nothing in the request is trusted: the invoice id is
       // looked up at the gateway with BizTrackBD's own key and only a COMPLETED answer activates anything (a repeat is applied once).
-      "apps/admin/src/app/api/webhooks/uddoktapay/route.ts",
+      "apps/platform/src/app/api/webhooks/uddoktapay/route.ts",
+      // Where the payer lands after UddoktaPay. It only asks the gateway whether the payment went through and redirects; it writes nothing.
+      "apps/admin/src/app/api/billing/uddoktapay/callback/route.ts",
     ]);
     for (const f of routes.filter((r) => !PUBLIC_ROUTES.has(rel(r)))) {
       const text = readFileSync(f, "utf8");
@@ -91,8 +93,13 @@ describe("who can call each admin and platform action", () => {
     }
     expect(open).toEqual([]);
     // The plan-payment webhook is only safe because it verifies the invoice with the gateway before doing anything.
-    expect(readFileSync(join(ROOT, "apps/admin/src/app/api/webhooks/uddoktapay/route.ts"), "utf8")).toMatch(/processUddoktaPaySubscriptionSuccess\(/);
+    expect(readFileSync(join(ROOT, "apps/platform/src/app/api/webhooks/uddoktapay/route.ts"), "utf8")).toMatch(/processUddoktaPaySubscriptionSuccess\(/);
     expect(readFileSync(join(ROOT, "packages/core/src/payments/uddoktapay.ts"), "utf8")).toMatch(/status !== "COMPLETED"/);
+    // ...and the admin return page must stay read-only: the store apps' database role cannot write subscriptions, and activating on a
+    // redirect anyone can hit would be the wrong place for it.
+    const callback = readFileSync(join(ROOT, "apps/admin/src/app/api/billing/uddoktapay/callback/route.ts"), "utf8");
+    expect(callback).toMatch(/checkUddoktaPayPlanInvoice\(/);
+    expect(callback).not.toMatch(/processUddoktaPaySubscriptionSuccess/);
     // The one public route that creates something must be the one that enforces the limits.
     expect(readFileSync(join(ROOT, "apps/admin/src/app/demo/start/route.ts"), "utf8")).toMatch(/createDemoSession\(/);
     expect(readFileSync(join(ROOT, "packages/core/src/demo/session.ts"), "utf8")).toMatch(/DemoLimitError[\s\S]*DemoBusyError/);

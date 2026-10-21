@@ -1,9 +1,9 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { DomainError, cancelPendingProof, createUddoktaPayCharge, getBillingOverview, submitPaymentProof, uddoktaPayUrls, getPlatformUddoktaPayCredentials } from "@biztrackbd/core";
+import { DomainError, cancelPendingProof, createUddoktaPayCharge, getBillingOverview, submitPaymentProof, getPlatformUddoktaPayCredentials, uddoktaPayPlanUrls, platformOriginFor } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 import { resolveAdminOrigin } from "@/lib/origin";
 
@@ -19,6 +19,9 @@ export async function initiateOnlineBillingAction(plan: string, interval: "MONTH
     const amount = interval === "YEARLY" ? chosen.priceYearly : chosen.priceMonthly;
     const origin = resolveAdminOrigin(await headers(), 3001);
 
+    const urls = uddoktaPayPlanUrls(origin, platformOriginFor(process.env.NEXT_PUBLIC_ROOT_DOMAIN));
+    const h = await headers();
+    const jar = await cookies();
     const platform = await getPlatformUddoktaPayCredentials();
     if (!platform) return { error: "Online payment is not available right now. Please pay by bKash or Nagad and submit your TrxID." };
 
@@ -33,9 +36,14 @@ export async function initiateOnlineBillingAction(plan: string, interval: "MONTH
         plan,
         interval,
         type: "subscription",
+        // The webhook that activates the plan has no browser, so the Pixel details travel with the charge for the Purchase event.
+        ...(jar.get("_fbp")?.value ? { fbp: jar.get("_fbp")!.value.slice(0, 100) } : {}),
+        ...(jar.get("_fbc")?.value ? { fbc: jar.get("_fbc")!.value.slice(0, 150) } : {}),
+        ...(h.get("x-forwarded-for") ? { ip: h.get("x-forwarded-for")!.split(",")[0]!.trim().slice(0, 64) } : {}),
+        ...(h.get("user-agent") ? { ua: h.get("user-agent")!.slice(0, 300) } : {}),
       },
-      redirectUrl: uddoktaPayUrls("plan", origin).returnUrl,
-      webhookUrl: uddoktaPayUrls("plan", origin).webhook,
+      redirectUrl: urls.returnUrl,
+      webhookUrl: urls.webhook,
       cancelUrl: `${origin}/billing?cancelled=1`,
       returnType: "GET",
     });

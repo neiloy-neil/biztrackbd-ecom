@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeUddoktaPayBaseUrl, uddoktaPayUrls } from "../src/payments/uddoktapay";
+import { normalizeUddoktaPayBaseUrl, platformOriginFor, uddoktaPayPlanUrls, uddoktaPayUrls } from "../src/payments/uddoktapay";
 
 describe("normalizeUddoktaPayBaseUrl", () => {
   it.each([
@@ -24,11 +24,17 @@ describe("normalizeUddoktaPayBaseUrl", () => {
 });
 
 describe("uddoktaPayUrls", () => {
-  it("builds the plan payment addresses on the admin origin", () => {
-    expect(uddoktaPayUrls("plan", "https://admin.biztrack.bd")).toEqual({
-      webhook: "https://admin.biztrack.bd/api/webhooks/uddoktapay",
+  it("builds the plan payment addresses: webhook on the platform app, return page on admin", () => {
+    expect(uddoktaPayPlanUrls("https://admin.biztrack.bd/", "https://platform.biztrack.bd")).toEqual({
+      webhook: "https://platform.biztrack.bd/api/webhooks/uddoktapay",
       returnUrl: "https://admin.biztrack.bd/api/billing/uddoktapay/callback",
     });
+  });
+
+  it("finds the platform origin from the root domain", () => {
+    expect(platformOriginFor("biztrack.bd")).toBe("https://platform.biztrack.bd");
+    expect(platformOriginFor("localhost:3000")).toBe("http://localhost:3003");
+    expect(platformOriginFor(undefined)).toBe("http://localhost:3003");
   });
 
   it("builds a store's addresses on the store's own origin, ignoring a trailing slash", () => {

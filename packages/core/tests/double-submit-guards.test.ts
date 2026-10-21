@@ -124,6 +124,41 @@ describe("a second click must not create a second record", () => {
   });
 });
 
+describe("what the public site's database role (biztrack_app) can reach", () => {
+  it("reads only the public settings, never a secret", async () => {
+    await owner.platformConfig.deleteMany({ where: { key: { in: ["contact_email", "platform_seo_title", "google_site_verification", "uddoktapay_api_key", "gemini_api_key"] } } });
+    await owner.platformConfig.createMany({
+      data: [
+        { key: "contact_email", value: "hello@biztrack.bd", description: "t", updatedBy: "t" },
+        { key: "platform_seo_title", value: "Title", description: "t", updatedBy: "t" },
+        { key: "google_site_verification", value: "abc123", description: "t", updatedBy: "t" },
+        { key: "uddoktapay_api_key", value: "SECRET-KEY", description: "t", updatedBy: "t" },
+        { key: "gemini_api_key", value: "SECRET-GEMINI", description: "t", updatedBy: "t" },
+      ],
+    });
+    const rows = await app.$queryRaw<{ key: string }[]>`SELECT key FROM "PlatformConfig" ORDER BY key`;
+    expect(rows.map((r) => r.key)).toEqual(["contact_email", "google_site_verification", "platform_seo_title"]);
+    await expect(app.$executeRaw`UPDATE "PlatformConfig" SET value = 'x'`).rejects.toThrow();
+    await expect(app.$executeRaw`DELETE FROM "PlatformConfig"`).rejects.toThrow();
+  });
+
+  it("can add an inquiry from the contact form, once, and cannot read, change or delete any", async () => {
+    setPlatformPrisma(app);
+    try {
+      const msg = { name: "Tania Akter", phone: "01912345679", email: "tania2@example.test", topic: "setup", message: "How do I connect Steadfast to my store?", consentGiven: false };
+      const a = await submitPlatformInquiry(msg);
+      const b = await submitPlatformInquiry(msg);
+      expect(b.id).toBe(a.id);
+    } finally {
+      setPlatformPrisma(owner);
+    }
+    expect(await owner.platformInquiry.count({ where: { phone: "01912345679" } })).toBe(1);
+    await expect(app.$queryRaw`SELECT id FROM "PlatformInquiry"`).rejects.toThrow();
+    await expect(app.$executeRaw`UPDATE "PlatformInquiry" SET status = 'ARCHIVED'`).rejects.toThrow();
+    await expect(app.$executeRaw`DELETE FROM "PlatformInquiry"`).rejects.toThrow();
+  });
+});
+
 describe("the page-level double-submit lock", () => {
   it("blocks a second submit of the same form inside the window, and lets a later one through", () => {
     const t0 = 1_000_000;

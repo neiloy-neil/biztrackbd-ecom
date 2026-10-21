@@ -78,14 +78,27 @@ export function normalizeUddoktaPayBaseUrl(raw: string): string {
  * The two addresses UddoktaPay uses after a payment: where it sends the customer back, and where it reports the result without the
  * customer's browser. Both are sent with every charge, so nothing has to be set in the UddoktaPay panel; they are shown to owners only
  * as a reference, or to paste as the panel's default.
- *  - "plan": a store paying BizTrackBD for its plan. `origin` is the admin address.
- *  - "store": a customer paying a store. `origin` is the store's own address (the store is found from the host).
+ * A customer paying a store: `origin` is the store's own address (the store is found from the host).
  */
-export function uddoktaPayUrls(kind: "plan" | "store", origin: string): { webhook: string; returnUrl: string } {
+export function uddoktaPayUrls(kind: "store", origin: string): { webhook: string; returnUrl: string } {
   const base = origin.trim().replace(/\/+$/, "");
-  return kind === "plan"
-    ? { webhook: `${base}/api/webhooks/uddoktapay`, returnUrl: `${base}/api/billing/uddoktapay/callback` }
-    : { webhook: `${base}/api/payments/uddoktapay/webhook`, returnUrl: `${base}/api/payments/uddoktapay/callback` };
+  void kind;
+  return { webhook: `${base}/api/payments/uddoktapay/webhook`, returnUrl: `${base}/api/payments/uddoktapay/callback` };
+}
+
+/**
+ * A store paying BizTrackBD for its plan. The webhook is on the PLATFORM app: only it connects with the role that may write
+ * subscriptions (the store apps' role cannot). The customer comes back to the ADMIN app, which only shows the result.
+ */
+export function uddoktaPayPlanUrls(adminOrigin: string, platformOrigin: string): { webhook: string; returnUrl: string } {
+  const trim = (o: string) => o.trim().replace(/\/+$/, "");
+  return { webhook: `${trim(platformOrigin)}/api/webhooks/uddoktapay`, returnUrl: `${trim(adminOrigin)}/api/billing/uddoktapay/callback` };
+}
+
+/** platform.<root domain> in production, localhost:3003 in development. */
+export function platformOriginFor(rootDomain: string | undefined): string {
+  const root = (rootDomain || "localhost:3000").trim();
+  return root.startsWith("localhost") ? "http://localhost:3003" : `https://platform.${root}`;
 }
 
 /**
@@ -322,7 +335,18 @@ export async function processUddoktaPayOrderSuccess(
 }
 
 /**
- * Processes a completed store subscription payment for platform billing.
+ * Looks the plan payment up at the gateway and reports what it says. Writes nothing: the admin app uses it on the page the payer
+ * returns to, and the platform webhook does the activation.
+ */
+export async function checkUddoktaPayPlanInvoice(invoiceId: string): Promise<{ ok: boolean; status: string; tenantId: string; plan: string }> {
+  const platform = await getPlatformUddoktaPayCredentials();
+  if (!platform) throw new ValidationError("Online payment is not set up");
+  const verified = await verifyUddoktaPayPayment({ apiKey: platform.apiKey, baseUrl: platform.baseUrl, invoiceId });
+  return { ok: verified.status === "COMPLETED", status: verified.status, tenantId: verified.metadata?.tenantId || "", plan: verified.metadata?.plan || "" };
+}
+
+/**
+ * Processes a completed store subscription payment for platform billing. Runs in the PLATFORM app (it writes subscriptions).
  */
 export async function processUddoktaPaySubscriptionSuccess(
   invoiceId: string,
@@ -457,7 +481,13 @@ export async function processUddoktaPaySubscriptionSuccess(
         ownerEmail: owner.email,
         ownerPhone: owner.phone,
         ownerName: owner.name,
-        user: { ip: ctx.ip, userAgent: ctx.userAgent, fbp: ctx.fbp, fbc: ctx.fbc },
+        // The browser's details were attached to the charge when the payer started it; the webhook itself has no browser.
+        user: {
+          ip: ctx.ip ?? verified.metadata?.ip ?? null,
+          userAgent: ctx.userAgent ?? verified.metadata?.ua ?? null,
+          fbp: ctx.fbp ?? verified.metadata?.fbp ?? null,
+          fbc: ctx.fbc ?? verified.metadata?.fbc ?? null,
+        },
       }),
       metadata: { tenantId, invoiceId },
       immediateDispatch: true,

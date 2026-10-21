@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
  * before it sends them back to us. Nothing in the request is trusted: the invoice is looked up at the gateway, and only a COMPLETED
  * answer from there activates anything. The same payment arriving here and on the return page is applied once.
  *
- * Set this URL as the webhook in the UddoktaPay panel: https://admin.biztrack.bd/api/webhooks/uddoktapay
- * (public path: the admin sign-in proxy skips /api/webhooks/).
+ * It lives on the PLATFORM app because only that app connects with the database role that may write subscriptions. Plan charges send
+ * this address to UddoktaPay themselves, so nothing has to be set in the UddoktaPay panel.
  */
 export async function POST(req: NextRequest) {
   const raw = await req.text();
