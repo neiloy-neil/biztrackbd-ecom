@@ -242,7 +242,7 @@ export function VerticalLandingLayout({
                   borderRadius: 12,
                   padding: "20px 22px",
                   border: "1.5px solid var(--business-border)",
-                  boxShadow: "0 4px 16px rgba(17, 121, 90, , 0.08)",
+                  boxShadow: "0 4px 16px rgba(17, 121, 90, 0.08)",
                   display: "flex",
                   flexDirection: "column",
                   gap: 12,

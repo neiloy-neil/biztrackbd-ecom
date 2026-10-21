@@ -426,7 +426,7 @@ export default function BusinessPage() {
               </div>
             </div>
 
-            <div className="card ledger-border" style={{ padding: "26px 22px", background: "#FFFFFF", border: "2px solid var(--business)", boxShadow: "0 8px 24px rgba(17, 121, 90, , 0.12)" }}>
+            <div className="card ledger-border" style={{ padding: "26px 22px", background: "#FFFFFF", border: "2px solid var(--business)", boxShadow: "0 8px 24px rgba(17, 121, 90, 0.12)" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <span className="status-stamp stamp-lead" style={{ background: "var(--business)", color: "#FFFFFF" }}>POPULAR · BUSINESS</span>
                 <span className="pill" style={{ fontSize: 11 }}>Most Picked</span>

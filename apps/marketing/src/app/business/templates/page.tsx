@@ -203,7 +203,7 @@ export default async function BusinessTemplatesPage() {
             justifyContent: "space-between",
             flexWrap: "wrap",
             gap: 24,
-            boxShadow: "0 10px 30px rgba(11, 77, 59, , 0.15)",
+            boxShadow: "0 10px 30px rgba(11, 77, 59, 0.15)",
           }}
         >
           <div style={{ maxWidth: 640 }}>

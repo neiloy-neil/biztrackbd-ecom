@@ -221,7 +221,7 @@ export default function BusinessPricingPage() {
                 flexDirection: "column",
                 justifyContent: "space-between",
                 position: "relative",
-                boxShadow: "0 10px 25px rgba(242, 169, 0, , 0.12)",
+                boxShadow: "0 10px 25px rgba(242, 169, 0, 0.12)",
               }}
             >
               <div

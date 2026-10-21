@@ -523,7 +523,7 @@ export function TemplateGallery({
                     {/* eslint-disable-next-line @next/next/no-img-element -- staff-uploaded preview on an external https host */}
                     <img src={t.previewDesktop} alt={`${t.name} template home page`} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
                     {t.previewMobile && (
-                      <div style={{ position: "absolute", right: 12, bottom: -8, width: "28%", height: "75%", borderRadius: 10, overflow: "hidden", border: "2px solid #FFFFFF", boxShadow: "0 6px 16px rgba(11, 77, 59, , 0.2)" }}>
+                      <div style={{ position: "absolute", right: 12, bottom: -8, width: "28%", height: "75%", borderRadius: 10, overflow: "hidden", border: "2px solid #FFFFFF", boxShadow: "0 6px 16px rgba(11, 77, 59, 0.2)" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={t.previewMobile} alt={`${t.name} mobile preview`} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
                       </div>
@@ -605,7 +605,7 @@ export function TemplateGallery({
                         borderRadius: 10,
                         overflow: "hidden",
                         border: "2px solid #FFFFFF",
-                        boxShadow: "0 6px 16px rgba(11, 77, 59, , 0.2)",
+                        boxShadow: "0 6px 16px rgba(11, 77, 59, 0.2)",
                       }}
                     >
                       <Image

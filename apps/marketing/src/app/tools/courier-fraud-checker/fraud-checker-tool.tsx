@@ -197,7 +197,7 @@ export function FraudCheckerTool({ initialRemaining = 5 }: FraudCheckerToolProps
               borderRadius: "12px",
               border: "none",
               cursor: isPending ? "not-allowed" : "pointer",
-              boxShadow: "0 4px 14px rgba(17, 121, 90, , 0.35)",
+              boxShadow: "0 4px 14px rgba(17, 121, 90, 0.35)",
               display: "flex",
               alignItems: "center",
               gap: "8px",
@@ -628,7 +628,7 @@ export function FraudCheckerTool({ initialRemaining = 5 }: FraudCheckerToolProps
               fontWeight: 800,
               fontSize: "16px",
               textDecoration: "none",
-              boxShadow: "0 4px 14px rgba(17, 121, 90, , 0.35)",
+              boxShadow: "0 4px 14px rgba(17, 121, 90, 0.35)",
             }}
           >
             আনলিমিটেড ফ্রড গার্ড পেতে রেজিস্টার করুন →

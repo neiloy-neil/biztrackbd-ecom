@@ -392,7 +392,7 @@ export function CompareView({
                 display: "inline-block",
                 padding: "3px 12px",
                 borderRadius: 20,
-                background: "rgba(17, 121, 90, , 0.2)",
+                background: "rgba(17, 121, 90, 0.2)",
                 color: "#8FD3B8",
                 fontSize: 12,
                 fontWeight: 700,

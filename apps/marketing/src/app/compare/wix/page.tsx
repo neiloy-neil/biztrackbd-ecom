@@ -276,7 +276,7 @@ export default function CompareWixPage() {
                   <span className="console-status-pill-success">NATIVE BDT • ZERO FRICTION</span>
                 </div>
 
-                <div style={{ borderRadius: 8, background: "rgba(11, 77, 59, 0.4)", border: "1px solid rgba(17, 121, 90, , 0.4)", padding: 12, fontSize: 12, color: "#C6DFD3" }}>
+                <div style={{ borderRadius: 8, background: "rgba(11, 77, 59, 0.4)", border: "1px solid rgba(17, 121, 90, 0.4)", padding: 12, fontSize: 12, color: "#C6DFD3" }}>
                   <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#8FD3B8", marginBottom: 4 }}>
                     <span>✓</span> Instant bKash QR Auto-Billing
                   </div>
@@ -426,7 +426,7 @@ export default function CompareWixPage() {
         <div className="compare-container">
           <div className="tco-savings-banner">
             <div>
-              <span style={{ display: "inline-block", padding: "3px 10px", borderRadius: 9999, background: "rgba(17, 121, 90, , 0.2)", border: "1px solid rgba(143, 211, 184, , 0.3)", color: "#8FD3B8", fontSize: 11.5, fontWeight: 800, marginBottom: 8 }}>
+              <span style={{ display: "inline-block", padding: "3px 10px", borderRadius: 9999, background: "rgba(17, 121, 90, 0.2)", border: "1px solid rgba(143, 211, 184, 0.3)", color: "#8FD3B8", fontSize: 11.5, fontWeight: 800, marginBottom: 8 }}>
                 ANNUAL COST REALITY
               </span>
               <h3 style={{ fontSize: "clamp(20px, 3vw, 26px)", fontWeight: 800, color: "#FFFFFF", margin: "6px 0 8px" }}>

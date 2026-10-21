@@ -443,7 +443,7 @@ export default function ProductArchitecturePage() {
                     borderRadius: 8,
                     fontSize: 14,
                     textDecoration: "none",
-                    boxShadow: "0 2px 8px rgba(17, 121, 90, , 0.2)",
+                    boxShadow: "0 2px 8px rgba(17, 121, 90, 0.2)",
                   }}
                 >
                   View Storefronts →
@@ -474,7 +474,7 @@ export default function ProductArchitecturePage() {
                 flexDirection: "column",
                 position: "relative",
                 borderTop: "4px solid var(--accent, #11795A)",
-                boxShadow: "0 10px 30px rgba(17, 121, 90, , 0.08)",
+                boxShadow: "0 10px 30px rgba(17, 121, 90, 0.08)",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
@@ -534,7 +534,7 @@ export default function ProductArchitecturePage() {
                     borderRadius: 8,
                     fontSize: 14,
                     textDecoration: "none",
-                    boxShadow: "0 2px 8px rgba(17, 121, 90, , 0.25)",
+                    boxShadow: "0 2px 8px rgba(17, 121, 90, 0.25)",
                   }}
                 >
                   View Business Sites →
@@ -624,7 +624,7 @@ export default function ProductArchitecturePage() {
                     borderRadius: 8,
                     fontSize: 14,
                     textDecoration: "none",
-                    boxShadow: "0 2px 8px rgba(17, 121, 90, , 0.2)",
+                    boxShadow: "0 2px 8px rgba(17, 121, 90, 0.2)",
                   }}
                 >
                   Configure Hybrid Mode →

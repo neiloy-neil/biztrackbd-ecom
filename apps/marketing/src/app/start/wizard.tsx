@@ -1185,7 +1185,7 @@ export function Wizard({
                 data-testid="create"
                 style={{
                   background: pending ? "#11795A" : "var(--brand)",
-                  boxShadow: "0 4px 14px rgba(17, 121, 90, , 0.35)",
+                  boxShadow: "0 4px 14px rgba(17, 121, 90, 0.35)",
                 }}
               >
                 {pending
