@@ -40,6 +40,8 @@ interface Props {
   initialGoogleConfig: PlatformGoogleConfigView;
   initialSeoConfig: PlatformSeoConfigView;
   initialContactConfig: PlatformContactConfigView;
+  /** Where UddoktaPay reports a plan payment, and where it sends the payer back. Built on the server. */
+  planPaymentUrls: { webhook: string; returnUrl: string };
 }
 
 type TabType = "ai" | "sms" | "couriers" | "payments" | "mail" | "fraud" | "google" | "seo" | "contact";
@@ -54,6 +56,7 @@ export function PlatformSettingsClient({
   initialGoogleConfig,
   initialSeoConfig,
   initialContactConfig,
+  planPaymentUrls,
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabType>("ai");
 
@@ -868,6 +871,29 @@ export function PlatformSettingsClient({
                 Automates merchant subscription renewals, recurring plan charges, and instant invoice settlements.
               </div>
             </div>
+
+            {(() => {
+              const urls = planPaymentUrls;
+              return (
+                <div style={{ padding: 14, border: "1px solid #E7E7F0", borderRadius: 10, background: "#FAFAFC" }} data-testid="plan-payment-urls">
+                  <div style={{ fontSize: 14, fontWeight: 700 }}>Plan payment addresses</div>
+                  <div style={{ fontSize: 12.5, color: "#6B6B8D", margin: "4px 0 10px" }}>
+                    Sent to UddoktaPay with every plan payment, so nothing has to be set in its panel. Paste them as the panel&apos;s default Webhook (IPN) and Redirect URLs only if you want a fallback.
+                  </div>
+                  {([["Webhook (IPN) URL", urls.webhook, "uddokta-webhook"], ["Redirect (return) URL", urls.returnUrl, "uddokta-return"]] as const).map(([label, value, id]) => (
+                    <div key={id} style={{ marginBottom: 10 }}>
+                      <div style={{ fontSize: 12.5, fontWeight: 600, marginBottom: 4 }}>{label}</div>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <input type="text" readOnly value={value} onFocus={(e) => e.currentTarget.select()} aria-label={label} style={{ flex: 1, padding: "8px 10px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 13, fontFamily: "monospace" }} />
+                        <button type="button" onClick={() => copyToClipboard(value, id)} style={{ padding: "8px 14px", border: "1px solid #D5D5E4", borderRadius: 8, background: "#fff", fontWeight: 600, cursor: "pointer" }}>
+                          {copiedField === id ? "Copied!" : "Copy"}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
 
             {uddoktaMasked && (
               <div style={{ padding: "8px 12px", background: "#F4F3FF", borderRadius: 8, fontSize: 13, color: "#5B4FE8", fontWeight: 600 }}>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { can, listAppStoreCatalog, listIntegrations, loadCredentials } from "@biztrackbd/core";
+import { can, listAppStoreCatalog, listIntegrations, loadCredentials, uddoktaPayUrls } from "@biztrackbd/core";
 import { withTenant } from "@biztrackbd/db";
 import { DemoLocked } from "@/components/demo-locked";
 import { trialHref } from "@/lib/demo";
@@ -127,6 +127,7 @@ export default async function Apps({
         webhookTokens={webhookTokens}
         origin={origin}
         storefrontOrigin={storefrontOrigin}
+        uddoktaStoreUrls={storefrontOrigin ? uddoktaPayUrls("store", storefrontOrigin) : null}
         storeSubdomain={tenant.subdomain}
         initialOpen={initialOpen}
       />

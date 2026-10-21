@@ -16,6 +16,7 @@ import {
   testCourierAction,
   saveSeoSuiteAction,
 } from "./actions";
+import { CopyButton } from "@/components/copy-button";
 
 export interface StoreSettingsData {
   whatsappNumber?: string | null;
@@ -60,6 +61,8 @@ interface Props {
   webhookTokens: Record<string, string>;
   origin: string;
   storefrontOrigin?: string;
+  /** Where UddoktaPay reports a customer's payment and sends them back. Built on the server from the store's own address. */
+  uddoktaStoreUrls?: { webhook: string; returnUrl: string } | null;
   storeSubdomain: string;
   initialOpen?: string;
 }
@@ -205,6 +208,7 @@ export function AppStoreClient({
   webhookTokens,
   origin,
   storefrontOrigin,
+  uddoktaStoreUrls,
   storeSubdomain,
   initialOpen,
 }: Props) {
@@ -1941,6 +1945,7 @@ export function AppStoreClient({
                 const row = getIntegration("UDDOKTAPAY", "LIVE");
 
                 return (
+                  <>
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
@@ -1969,10 +1974,11 @@ export function AppStoreClient({
 
                     <div>
                       <label className="label">Base URL (Optional)</label>
+                      <p className="muted" style={{ fontSize: 12.5, margin: "0 0 6px" }}>Your UddoktaPay panel address, for example https://pay.uddoktapay.com. No /api/checkout-v2 at the end.</p>
                       <input
                         type="text"
                         name="baseUrl"
-                        defaultValue={row?.config?.baseUrl ?? "https://pay.uddoktapay.com/api/checkout-v2"}
+                        defaultValue={row?.config?.baseUrl ?? "https://pay.uddoktapay.com"}
                         className="input"
                         style={{ width: "100%", fontFamily: "monospace", fontSize: 13 }}
                       />
@@ -1984,6 +1990,27 @@ export function AppStoreClient({
                       </button>
                     </div>
                   </form>
+                  {uddoktaStoreUrls && (() => {
+                    const urls = uddoktaStoreUrls;
+                    return (
+                      <div className="stack" style={{ gap: 10, marginTop: 16, paddingTop: 14, borderTop: "1px solid var(--line)" }} data-testid="uddoktapay-urls">
+                        <b>Your store&apos;s payment addresses</b>
+                        <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+                          We send these to UddoktaPay with every payment, so there is nothing you must set. If your UddoktaPay panel asks for a default Webhook (IPN) or Redirect URL, paste these.
+                        </p>
+                        {([["Webhook (IPN) URL", urls.webhook], ["Redirect (return) URL", urls.returnUrl]] as const).map(([label, value]) => (
+                          <div key={label}>
+                            <div style={{ fontSize: 12.5, fontWeight: 600, marginBottom: 4 }}>{label}</div>
+                            <div style={{ display: "flex", gap: 8 }}>
+                              <input className="input" readOnly value={value} onFocus={(e) => e.currentTarget.select()} aria-label={label} style={{ flex: 1, fontFamily: "monospace", fontSize: 12.5 }} />
+                              <CopyButton value={value} label={label} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                  </>
                 );
               })()}
 
