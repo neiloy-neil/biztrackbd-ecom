@@ -289,49 +289,70 @@ export async function saveTrackingConfig(
   },
 ): Promise<void> {
   assertCan(actor, "marketing", "edit");
-  const pixelId = input.pixelId?.trim() || null;
-  if (pixelId && !/^\d{8,20}$/.test(pixelId)) throw new ValidationError("A Meta Pixel ID is 8 to 20 digits. Copy it from Meta Events Manager.");
-  const ga4 = input.googleAnalyticsId?.trim() || null;
-  if (ga4 && !/^G-[A-Za-z0-9]+$/i.test(ga4)) throw new ValidationError("A Google Analytics 4 ID starts with G-, like G-ABC123XYZ.");
-  const gtm = input.googleTagManagerId?.trim() || null;
-  if (gtm && !/^GTM-[A-Za-z0-9]+$/i.test(gtm)) throw new ValidationError("A Google Tag Manager Container ID starts with GTM-, like GTM-ABC123X.");
-  const tiktok = input.tiktokPixelId?.trim() || null;
-  if (tiktok && !/^[A-Za-z0-9_-]{10,40}$/.test(tiktok)) throw new ValidationError("Enter a valid TikTok Pixel ID (10 to 40 characters).");
-  const ga4Secret = input.ga4ApiSecret?.trim() || null;
-  if (ga4Secret && !/^[A-Za-z0-9_-]{10,64}$/.test(ga4Secret)) throw new ValidationError("Enter a valid GA4 Measurement Protocol API Secret.");
-  const domainVerif = cleanVerification(input.metaDomainVerification);
-  const googleVerif = cleanVerification(input.googleSiteVerification);
-  const googleOAuthClientId = input.googleOAuthClientId?.trim() || null;
-  const googleOAuthClientSecret = input.googleOAuthClientSecret?.trim() || null;
-  const googleMerchantCenterId = input.googleMerchantCenterId?.trim() || null;
+  // Only the fields that were passed are changed. An empty string or null clears that one field; undefined leaves it alone.
+  const has = <K extends keyof typeof input>(k: K) => input[k] !== undefined;
+  const data: Record<string, string | null> = {};
+  const logged: Record<string, string | null> = {};
+
+  if (has("pixelId")) {
+    const v = input.pixelId?.trim() || null;
+    if (v && !/^\d{8,20}$/.test(v)) throw new ValidationError("A Meta Pixel ID is 8 to 20 digits. Copy it from Meta Events Manager.");
+    data.metaPixelId = v;
+    logged.pixelId = v;
+  }
+  if (has("googleAnalyticsId")) {
+    const v = input.googleAnalyticsId?.trim() || null;
+    if (v && !/^G-[A-Za-z0-9]+$/i.test(v)) throw new ValidationError("A Google Analytics 4 ID starts with G-, like G-ABC123XYZ.");
+    data.googleAnalyticsId = v;
+    logged.googleAnalyticsId = v;
+  }
+  if (has("googleTagManagerId")) {
+    const v = input.googleTagManagerId?.trim() || null;
+    if (v && !/^GTM-[A-Za-z0-9]+$/i.test(v)) throw new ValidationError("A Google Tag Manager Container ID starts with GTM-, like GTM-ABC123X.");
+    data.googleTagManagerId = v;
+    logged.googleTagManagerId = v;
+  }
+  if (has("tiktokPixelId")) {
+    const v = input.tiktokPixelId?.trim() || null;
+    if (v && !/^[A-Za-z0-9_-]{10,40}$/.test(v)) throw new ValidationError("Enter a valid TikTok Pixel ID (10 to 40 characters).");
+    data.tiktokPixelId = v;
+    logged.tiktokPixelId = v;
+  }
+  if (has("ga4ApiSecret")) {
+    const v = input.ga4ApiSecret?.trim() || null;
+    if (v && !/^[A-Za-z0-9_-]{10,64}$/.test(v)) throw new ValidationError("Enter a valid GA4 Measurement Protocol API Secret.");
+    data.ga4ApiSecret = v;
+    logged.ga4ApiSecret = v ? "[secret]" : null;
+  }
+  if (has("metaDomainVerification")) {
+    const v = cleanVerification(input.metaDomainVerification);
+    data.metaDomainVerification = v;
+    logged.metaDomainVerification = v;
+  }
+  if (has("googleSiteVerification")) {
+    const v = cleanVerification(input.googleSiteVerification);
+    data.googleSiteVerification = v;
+    logged.googleSiteVerification = v;
+  }
+  if (has("googleOAuthClientId")) {
+    const v = input.googleOAuthClientId?.trim() || null;
+    data.googleOAuthClientId = v;
+    logged.googleOAuthClientId = v;
+  }
+  if (has("googleOAuthClientSecret")) {
+    data.googleOAuthClientSecret = input.googleOAuthClientSecret?.trim() || null;
+  }
+  if (has("googleMerchantCenterId")) {
+    const v = input.googleMerchantCenterId?.trim() || null;
+    data.googleMerchantCenterId = v;
+    logged.googleMerchantCenterId = v;
+  }
+  if (Object.keys(data).length === 0) return;
 
   await withTenant(tenantId, async (tx) => {
-    const { count } = await tx.storeSettings.updateMany({
-      data: {
-        metaPixelId: pixelId,
-        googleAnalyticsId: ga4,
-        googleTagManagerId: gtm,
-        tiktokPixelId: tiktok,
-        ga4ApiSecret: ga4Secret,
-        metaDomainVerification: domainVerif,
-        googleSiteVerification: googleVerif,
-        googleOAuthClientId,
-        googleOAuthClientSecret,
-        googleMerchantCenterId,
-      },
-    });
+    const { count } = await tx.storeSettings.updateMany({ data });
     if (count === 0) throw new NotFoundError("Store settings");
-    await audit(tx, tenantId, actor, "tracking.config_saved", {
-      pixelId,
-      googleAnalyticsId: ga4,
-      googleTagManagerId: gtm,
-      tiktokPixelId: tiktok,
-      ga4ApiSecret: ga4Secret ? "[secret]" : null,
-      metaDomainVerification: domainVerif,
-      googleSiteVerification: googleVerif,
-      googleOAuthClientId,
-      googleMerchantCenterId,
-    });
+    await audit(tx, tenantId, actor, "tracking.config_saved", logged);
   });
 }
 
@@ -471,10 +492,10 @@ async function sendCapi(tenantId: string, pixelId: string, e: ServerEvent, testC
   }
 }
 
-async function remember(tenantId: string, r: { name: EventName; eventId: string; origin: "BROWSER" | "SERVER"; orderId?: string | null; status: string; payload?: object; detail?: string; httpStatus?: number | null }): Promise<boolean> {
+async function remember(tenantId: string, r: { provider?: "META" | "GA4"; name: EventName; eventId: string; origin: "BROWSER" | "SERVER"; orderId?: string | null; status: string; payload?: object; detail?: string; httpStatus?: number | null }): Promise<boolean> {
   try {
     await withTenant(tenantId, (tx) =>
-      tx.trackingEvent.create({ data: { tenantId, provider: "META", name: r.name, eventId: r.eventId, origin: r.origin, orderId: r.orderId ?? null, status: r.status, payload: (r.payload ?? {}) as Prisma.InputJsonValue, detail: r.detail ?? null, httpStatus: r.httpStatus ?? null } }),
+      tx.trackingEvent.create({ data: { tenantId, provider: r.provider ?? "META", name: r.name, eventId: r.eventId, origin: r.origin, orderId: r.orderId ?? null, status: r.status, payload: (r.payload ?? {}) as Prisma.InputJsonValue, detail: r.detail ?? null, httpStatus: r.httpStatus ?? null } }),
     );
     return true;
   } catch (e) {
@@ -653,6 +674,19 @@ export async function sendGa4ServerEvent(
     );
     if (!s?.googleAnalyticsId || !s.ga4ApiSecret) return { ok: false };
 
+    // Once per order and kind: the return page, the gateway webhook and a replay may all report the same payment.
+    const eventId = `ga4_${event.name}_${event.transactionId}`;
+    const isNew = await remember(tenantId, {
+      provider: "GA4",
+      name: "Purchase",
+      eventId,
+      origin: "SERVER",
+      orderId: event.transactionId,
+      status: "SENT",
+      payload: { kind: event.name, value: event.value, currency: event.currency ?? "BDT" },
+    });
+    if (!isNew) return { ok: true };
+
     const clientId = event.clientId || `bt_${event.transactionId.slice(-16)}`;
     const url = `https://www.google-analytics.com/mp/collect?measurement_id=${encodeURIComponent(s.googleAnalyticsId)}&api_secret=${encodeURIComponent(s.ga4ApiSecret)}`;
 
@@ -683,7 +717,10 @@ export async function sendGa4ServerEvent(
       signal: AbortSignal.timeout(5000),
     });
 
-    return { ok: res.status >= 200 && res.status < 300 };
+    const ok = res.status >= 200 && res.status < 300;
+    // A failed send must not block the next attempt (the webhook may still deliver it).
+    if (!ok) await withTenant(tenantId, (tx) => tx.trackingEvent.deleteMany({ where: { provider: "GA4", eventId, origin: "SERVER" } })).catch(() => undefined);
+    return { ok };
   } catch (err) {
     console.error("[tracking] GA4 server event failed", err instanceof Error ? err.name : "unknown");
     return { ok: false };
@@ -803,7 +840,7 @@ export async function getTrackingOverview(tenantId: string, actor: StaffActor, n
   const since = new Date(now.getTime() - 7 * 86_400_000);
   const config = await getTrackingConfig(tenantId, actor);
   return withTenant(tenantId, async (tx) => {
-    const rows = await tx.trackingEvent.findMany({ where: { createdAt: { gt: since } }, select: { name: true, eventId: true, origin: true, status: true } });
+    const rows = await tx.trackingEvent.findMany({ where: { provider: "META", createdAt: { gt: since } }, select: { name: true, eventId: true, origin: true, status: true } });
     const byName = new Map<string, { b: Set<string>; s: Set<string>; failed: number }>();
     for (const r of rows) {
       const e = byName.get(r.name) ?? { b: new Set(), s: new Set(), failed: 0 };

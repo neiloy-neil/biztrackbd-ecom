@@ -51,7 +51,7 @@ const GA4_EVENT_MAP: Record<string, string> = {
  */
 export function trackEvent(
   name: "PageView" | "ViewContent" | "AddToCart" | "InitiateCheckout" | "AddPaymentInfo" | "Purchase",
-  o: { contentIds?: string[]; numItems?: number; value?: number } = {},
+  o: { contentIds?: string[]; numItems?: number; value?: number; transactionId?: string } = {},
 ): void {
   if (typeof window === "undefined" || optedOut()) return;
   const eventId = `${name.toLowerCase()}_${uid()}`;
@@ -82,6 +82,8 @@ export function trackEvent(
       currency: "BDT",
       value: o.value ?? 0,
       items: o.contentIds?.map((id) => ({ item_id: id })) ?? [],
+      // Same id the server's Measurement Protocol purchase carries, so GA4 counts the order once.
+      ...(o.transactionId ? { transaction_id: o.transactionId } : {}),
     };
     try {
       window.gtag("event", gaEvent, gaData);
@@ -99,6 +101,7 @@ export function trackEvent(
           currency: "BDT",
           value: o.value ?? 0,
           items: o.contentIds?.map((id) => ({ item_id: id })) ?? [],
+          ...(o.transactionId ? { transaction_id: o.transactionId } : {}),
         },
       });
     } catch {
@@ -265,6 +268,7 @@ export function PurchaseTracker({ orderId, token }: { orderId: string; token?: s
         contentIds: r.contentIds,
         numItems: r.numItems,
         value: r.value,
+        transactionId: orderId,
       });
     });
   }, [orderId, token]);

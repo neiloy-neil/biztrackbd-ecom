@@ -6,7 +6,7 @@ import {
   DomainError, abandonedTabCounts, captureCheckout, cleanText, createOrder, createQuickOrder, displayName, getAbandonedMetrics, getReviewSummary, getTrackingOverview, listAbandoned, listPublicReviews,
   listReviews, logCallOutcome, purchaseEventId, recordBrowserPurchase, recoveryText, replyToReview, resolveRecovery, reviewTabCounts, reviewableItems, savePixelId, saveIntegration,
   sendRecoveryMessages, sendServerPurchase, sendTestEvent, setEventPublisher, setPixelFetchForTests, setReviewPublished, setReviewsAutoPublish, setSmsSender, submitReview, sweepRecoveryMessages,
-  trackBrowserEvent, transitionOrder, type SmsSender, type StaffActor,
+  trackBrowserEvent, transitionOrder, saveTrackingConfig, sendGa4ServerEvent, type SmsSender, type StaffActor,
 } from "../src";
 
 let owner: PrismaClient;
@@ -392,6 +392,62 @@ describe("the Pixel and server-side events", () => {
     expect((await owner.storeSettings.findFirstOrThrow({ where: { tenantId: s.f.tenantId } })).metaPixelId).toBe("123456789012345");
     await savePixelId(s.f.tenantId, s.owner, "");
     expect((await owner.storeSettings.findFirstOrThrow({ where: { tenantId: s.f.tenantId } })).metaPixelId).toBeNull();
+  });
+
+  it("saving one tracking field leaves the others alone, and an empty value clears only that field", async () => {
+    const s = await store("px-partial");
+    await saveTrackingConfig(s.f.tenantId, s.owner, {
+      pixelId: "123456789012345",
+      googleAnalyticsId: "G-ABC123XYZ",
+      googleTagManagerId: "GTM-ABC123X",
+      tiktokPixelId: "TT1234567890",
+      ga4ApiSecret: "secret_value_123",
+    });
+    const read = () => owner.storeSettings.findFirstOrThrow({ where: { tenantId: s.f.tenantId } });
+
+    await savePixelId(s.f.tenantId, s.owner, "999888777666555");
+    let row = await read();
+    expect(row).toMatchObject({ metaPixelId: "999888777666555", googleAnalyticsId: "G-ABC123XYZ", googleTagManagerId: "GTM-ABC123X", tiktokPixelId: "TT1234567890", ga4ApiSecret: "secret_value_123" });
+
+    await saveTrackingConfig(s.f.tenantId, s.owner, { googleTagManagerId: "" });
+    row = await read();
+    expect(row).toMatchObject({ metaPixelId: "999888777666555", googleAnalyticsId: "G-ABC123XYZ", googleTagManagerId: null, ga4ApiSecret: "secret_value_123" });
+
+    await saveTrackingConfig(s.f.tenantId, s.owner, {});
+    expect(await read()).toMatchObject({ metaPixelId: "999888777666555", googleAnalyticsId: "G-ABC123XYZ" });
+  });
+
+  it("reports a GA4 purchase once per order even when the return page and the webhook both try", async () => {
+    const s = await store("px-ga4");
+    await saveTrackingConfig(s.f.tenantId, s.owner, { googleAnalyticsId: "G-ABC123XYZ", ga4ApiSecret: "secret_value_123" });
+    const ga4Hits = () => meta.hits.filter((h) => h.url.includes("google-analytics.com"));
+    const purchase = { name: "purchase" as const, transactionId: "ord_ga4_1", value: 1500, items: [{ id: "sku1" }] };
+
+    expect((await sendGa4ServerEvent(s.f.tenantId, purchase)).ok).toBe(true);
+    expect((await sendGa4ServerEvent(s.f.tenantId, purchase)).ok).toBe(true);
+    expect(ga4Hits()).toHaveLength(1);
+    expect(ga4Hits()[0]!.body.events[0].params.transaction_id).toBe("ord_ga4_1");
+
+    // A refund for the same order is a different event and still goes out, once.
+    await sendGa4ServerEvent(s.f.tenantId, { ...purchase, name: "refund" });
+    await sendGa4ServerEvent(s.f.tenantId, { ...purchase, name: "refund" });
+    expect(ga4Hits()).toHaveLength(2);
+
+    // These bookkeeping rows are GA4's, so they never show up in the Meta dashboard counts.
+    const rows = await events(s.f.tenantId);
+    expect(rows.filter((r) => r.provider === "GA4")).toHaveLength(2);
+  });
+
+  it("a failed GA4 send does not block the retry", async () => {
+    const s = await store("px-ga4-retry");
+    await saveTrackingConfig(s.f.tenantId, s.owner, { googleAnalyticsId: "G-ABC123XYZ", ga4ApiSecret: "secret_value_123" });
+    const ev = { name: "purchase" as const, transactionId: "ord_ga4_2", value: 900 };
+
+    meta.respond = () => new Response("nope", { status: 500 });
+    expect((await sendGa4ServerEvent(s.f.tenantId, ev)).ok).toBe(false);
+    meta.respond = () => new Response(null, { status: 204 });
+    expect((await sendGa4ServerEvent(s.f.tenantId, ev)).ok).toBe(true);
+    expect(meta.hits.filter((h) => h.url.includes("google-analytics.com"))).toHaveLength(2);
   });
 
   it("without a Pixel nothing is recorded or sent", async () => {
