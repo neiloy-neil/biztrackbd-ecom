@@ -1,6 +1,7 @@
 import { getPlatformPrisma, type PrismaClient } from "@biztrackbd/db";
 import { ForbiddenError, ValidationError } from "../errors";
 import { normalizeUddoktaPayBaseUrl } from "../payments/uddoktapay";
+import { normalizeBdPhone } from "../phone";
 import { DEFAULT_FRAUD_CHECKER_ENDPOINT, clearFraudCheckerCache } from "../fraud/courier-api";
 import type { PlatformActor } from "./admin";
 
@@ -1321,5 +1322,131 @@ export async function savePlatformSeoConfig(
     },
   });
 
+  return { ok: true };
+}
+
+// ---- BizTrackBD's own contact details (marketing footer, contact page, search-engine data) --------------------
+
+export interface PlatformContactConfigView {
+  email: string;
+  /** International form, +8801XXXXXXXXX. */
+  phone: string;
+  /** International form, +8801XXXXXXXXX. */
+  whatsapp: string;
+  facebookUrl: string;
+  instagramUrl: string;
+  source: "DATABASE" | "DEFAULT";
+  updatedAt: Date | null;
+  updatedBy: string | null;
+}
+
+/** What the site shows until the platform owner saves something else. */
+export const PLATFORM_CONTACT_DEFAULTS = {
+  email: "biztrackbd@gmail.com",
+  phone: "+8801886675596",
+  whatsapp: "+8801886675596",
+  facebookUrl: "https://facebook.com/biztrackbd/",
+  instagramUrl: "https://www.instagram.com/biztrackbd/",
+} as const;
+
+const CONTACT_KEYS = {
+  email: "contact_email",
+  phone: "contact_phone",
+  whatsapp: "contact_whatsapp",
+  facebookUrl: "contact_facebook_url",
+  instagramUrl: "contact_instagram_url",
+} as const;
+
+export async function getPlatformContactConfig(deps?: Deps): Promise<PlatformContactConfigView> {
+  const fallback: PlatformContactConfigView = { ...PLATFORM_CONTACT_DEFAULTS, source: "DEFAULT", updatedAt: null, updatedBy: null };
+  try {
+    const db = dbOf(deps);
+    const rows = await db.platformConfig.findMany({ where: { key: { in: Object.values(CONTACT_KEYS) } } });
+    if (rows.length === 0) return fallback;
+    const map = new Map(rows.map((r: { key: string; value: string }) => [r.key, r.value.trim()]));
+    const latest = [...rows].sort((a: { updatedAt: Date }, b: { updatedAt: Date }) => b.updatedAt.getTime() - a.updatedAt.getTime())[0] as { updatedAt: Date; updatedBy: string | null };
+    return {
+      email: map.get(CONTACT_KEYS.email) || PLATFORM_CONTACT_DEFAULTS.email,
+      phone: map.get(CONTACT_KEYS.phone) || PLATFORM_CONTACT_DEFAULTS.phone,
+      whatsapp: map.get(CONTACT_KEYS.whatsapp) || PLATFORM_CONTACT_DEFAULTS.whatsapp,
+      facebookUrl: map.get(CONTACT_KEYS.facebookUrl) || PLATFORM_CONTACT_DEFAULTS.facebookUrl,
+      instagramUrl: map.get(CONTACT_KEYS.instagramUrl) || PLATFORM_CONTACT_DEFAULTS.instagramUrl,
+      source: "DATABASE",
+      updatedAt: latest.updatedAt,
+      updatedBy: latest.updatedBy,
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+const intlPhone = (input: string, label: string): string => {
+  try {
+    return `+88${normalizeBdPhone(input)}`;
+  } catch {
+    throw new ValidationError(`Enter a valid Bangladeshi mobile number for ${label}, like 01712345678`, { field: label });
+  }
+};
+
+function socialUrl(input: string, label: string, hosts: string[]): string {
+  let v = input.trim();
+  if (!/^https?:\/\//i.test(v)) v = `https://${v}`;
+  let u: URL;
+  try {
+    u = new URL(v);
+  } catch {
+    throw new ValidationError(`${label} must be a web address, like https://${hosts[0]}/yourpage`, { field: label });
+  }
+  const host = u.hostname.toLowerCase().replace(/^(www|m)\./, "");
+  if (u.protocol !== "https:" && u.protocol !== "http:") throw new ValidationError(`${label} must be a web address`, { field: label });
+  if (!hosts.includes(host)) throw new ValidationError(`${label} must be a ${hosts[0]} address`, { field: label });
+  u.protocol = "https:";
+  return u.toString();
+}
+
+/** Each field is optional: an empty string removes the saved value so the site falls back to the default. */
+export async function savePlatformContactConfig(
+  actor: PlatformActor,
+  input: { email?: string; phone?: string; whatsapp?: string; facebookUrl?: string; instagramUrl?: string },
+  deps?: Deps,
+): Promise<{ ok: true }> {
+  assertPlatformAdmin(actor);
+  const db = dbOf(deps);
+
+  const clean: Partial<Record<keyof typeof CONTACT_KEYS, string>> = {};
+  const norm = (k: keyof typeof CONTACT_KEYS, v: string | undefined, f: (s: string) => string) => {
+    if (v === undefined) return;
+    clean[k] = v.trim() ? f(v.trim()) : "";
+  };
+  norm("email", input.email, (v) => {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) || v.length > 120) throw new ValidationError("Enter a valid email address", { field: "email" });
+    return v.toLowerCase();
+  });
+  norm("phone", input.phone, (v) => intlPhone(v, "phone"));
+  norm("whatsapp", input.whatsapp, (v) => intlPhone(v, "WhatsApp"));
+  norm("facebookUrl", input.facebookUrl, (v) => socialUrl(v, "Facebook page", ["facebook.com", "fb.com"]));
+  norm("instagramUrl", input.instagramUrl, (v) => socialUrl(v, "Instagram", ["instagram.com"]));
+
+  for (const [k, value] of Object.entries(clean) as [keyof typeof CONTACT_KEYS, string][]) {
+    const key = CONTACT_KEYS[k];
+    if (value) {
+      await db.platformConfig.upsert({
+        where: { key },
+        create: { key, value, description: `BizTrackBD public contact: ${k}`, updatedBy: actor.email },
+        update: { value, updatedBy: actor.email },
+      });
+    } else {
+      await db.platformConfig.deleteMany({ where: { key } });
+    }
+  }
+
+  await db.platformAuditLog.create({
+    data: {
+      actorId: actor.id,
+      action: "PLATFORM_CONTACT_CONFIG_UPDATED",
+      details: { fields: Object.keys(clean) },
+      ipAddress: actor.ip ?? null,
+    },
+  });
   return { ok: true };
 }

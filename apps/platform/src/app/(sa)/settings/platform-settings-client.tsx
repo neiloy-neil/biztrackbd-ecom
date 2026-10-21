@@ -10,7 +10,9 @@ import type {
   PlatformFraudConfigView,
   PlatformGoogleConfigView,
   PlatformSeoConfigView,
+  PlatformContactConfigView,
 } from "@biztrackbd/core";
+import { ContactIcon, type ContactIconName } from "@biztrackbd/ui";
 import { FraudCheckerSettings } from "./fraud-checker-settings";
 import {
   savePlatformAiConfigAction,
@@ -25,6 +27,7 @@ import {
   savePlatformGoogleConfigAction,
   testPlatformGoogleConnectionAction,
   savePlatformSeoConfigAction,
+  savePlatformContactConfigAction,
 } from "./actions";
 
 interface Props {
@@ -36,9 +39,10 @@ interface Props {
   initialFraudConfig: PlatformFraudConfigView;
   initialGoogleConfig: PlatformGoogleConfigView;
   initialSeoConfig: PlatformSeoConfigView;
+  initialContactConfig: PlatformContactConfigView;
 }
 
-type TabType = "ai" | "sms" | "couriers" | "payments" | "mail" | "fraud" | "google" | "seo";
+type TabType = "ai" | "sms" | "couriers" | "payments" | "mail" | "fraud" | "google" | "seo" | "contact";
 
 export function PlatformSettingsClient({
   initialAiConfig,
@@ -49,8 +53,16 @@ export function PlatformSettingsClient({
   initialFraudConfig,
   initialGoogleConfig,
   initialSeoConfig,
+  initialContactConfig,
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabType>("ai");
+
+  // Public contact details (marketing footer and contact page)
+  const [contactEmail, setContactEmail] = useState(initialContactConfig.email);
+  const [contactPhone, setContactPhone] = useState(initialContactConfig.phone);
+  const [contactWhatsapp, setContactWhatsapp] = useState(initialContactConfig.whatsapp);
+  const [contactFacebook, setContactFacebook] = useState(initialContactConfig.facebookUrl);
+  const [contactInstagram, setContactInstagram] = useState(initialContactConfig.instagramUrl);
 
   // Platform SEO & Sitemaps State (biztrack.bd)
   const [seoTitle, setSeoTitle] = useState(initialSeoConfig.title || "");
@@ -355,6 +367,25 @@ export function PlatformSettingsClient({
     }
   }
 
+  async function handleSaveContact(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setNotice(null);
+    const res = await savePlatformContactConfigAction({
+      email: contactEmail,
+      phone: contactPhone,
+      whatsapp: contactWhatsapp,
+      facebookUrl: contactFacebook,
+      instagramUrl: contactInstagram,
+    });
+    setSaving(false);
+    if (res.ok) {
+      setNotice({ good: "Contact details saved. biztrack.bd shows them in the footer and on the contact page." });
+    } else {
+      setNotice({ bad: res.error });
+    }
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {/* Page Header */}
@@ -508,6 +539,23 @@ export function PlatformSettingsClient({
           }}
         >
           Platform SEO & Sitemaps
+        </button>
+        <button
+          type="button"
+          onClick={() => { setActiveTab("contact"); setNotice(null); }}
+          data-testid="tab-contact"
+          style={{
+            padding: "8px 16px",
+            border: "none",
+            borderBottom: activeTab === "contact" ? "3px solid #5B4FE8" : "3px solid transparent",
+            background: "none",
+            color: activeTab === "contact" ? "#5B4FE8" : "#4B4B73",
+            fontWeight: 700,
+            fontSize: 14,
+            cursor: "pointer",
+          }}
+        >
+          Contact &amp; Social
         </button>
       </div>
 
@@ -1453,6 +1501,61 @@ export function PlatformSettingsClient({
                 }}
               >
                 {saving ? "Saving…" : "Save Platform SEO Configuration"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+      {/* TAB 9: Public contact details (biztrack.bd) */}
+      {activeTab === "contact" && (
+        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: 24 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+            <div>
+              <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Contact &amp; Social (biztrack.bd)</h2>
+              <p style={{ color: "#4B4B73", margin: "4px 0 0 0", fontSize: 13.5 }}>
+                These appear in the website footer, on the contact page and in search-engine data. Clear a field and save to go back to the built-in default.
+              </p>
+            </div>
+            {initialContactConfig.updatedAt && (
+              <span style={{ fontSize: 12, color: "#64748B", background: "#F1F5F9", padding: "4px 8px", borderRadius: 6 }}>
+                Last updated {new Date(initialContactConfig.updatedAt).toLocaleDateString()} {initialContactConfig.updatedBy ? `by ${initialContactConfig.updatedBy}` : ""}
+              </span>
+            )}
+          </div>
+
+          <form onSubmit={handleSaveContact} style={{ display: "flex", flexDirection: "column", gap: 18, maxWidth: 640 }}>
+            {([
+              { icon: "email", label: "Public email", value: contactEmail, set: setContactEmail, placeholder: "biztrackbd@gmail.com", type: "email", testid: "contact-email" },
+              { icon: "phone", label: "Phone number", value: contactPhone, set: setContactPhone, placeholder: "+8801886675596", type: "tel", testid: "contact-phone" },
+              { icon: "whatsapp", label: "WhatsApp number", value: contactWhatsapp, set: setContactWhatsapp, placeholder: "+8801886675596", type: "tel", testid: "contact-whatsapp" },
+              { icon: "facebook", label: "Facebook page", value: contactFacebook, set: setContactFacebook, placeholder: "https://facebook.com/biztrackbd", type: "text", testid: "contact-facebook" },
+              { icon: "instagram", label: "Instagram", value: contactInstagram, set: setContactInstagram, placeholder: "https://www.instagram.com/biztrackbd/", type: "text", testid: "contact-instagram" },
+            ] as { icon: ContactIconName; label: string; value: string; set: (v: string) => void; placeholder: string; type: string; testid: string }[]).map((f) => (
+              <div key={f.testid}>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 700, color: "#1F1F38", marginBottom: 6 }}>
+                  <ContactIcon name={f.icon} size={16} />
+                  {f.label}
+                </label>
+                <input
+                  type={f.type}
+                  value={f.value}
+                  onChange={(e) => f.set(e.target.value)}
+                  placeholder={f.placeholder}
+                  data-testid={f.testid}
+                  style={{ width: "100%", padding: "10px 12px", border: "1px solid #D6D6E7", borderRadius: 8, fontSize: 14 }}
+                />
+              </div>
+            ))}
+            <p style={{ margin: 0, fontSize: 12, color: "#64748B" }}>
+              Phone and WhatsApp accept 01XXXXXXXXX or +8801XXXXXXXXX and are saved in international form. Facebook and Instagram must be addresses on those sites.
+            </p>
+            <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
+              <button
+                type="submit"
+                disabled={saving}
+                style={{ padding: "11px 24px", background: "#5B4FE8", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: "pointer" }}
+              >
+                {saving ? "Saving…" : "Save Contact Details"}
               </button>
             </div>
           </form>

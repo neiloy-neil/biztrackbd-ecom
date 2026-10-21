@@ -13,6 +13,7 @@ import {
   testPlatformCouriers,
   getPlatformUddoktaPayConfig,
   savePlatformUddoktaPayConfig,
+  savePlatformContactConfig,
   testPlatformUddoktaPay,
   getPlatformMailConfig,
   savePlatformMailConfig,
@@ -263,3 +264,22 @@ export async function savePlatformSeoConfigAction(input: {
   }
 }
 
+export async function savePlatformContactConfigAction(input: {
+  email?: string;
+  phone?: string;
+  whatsapp?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+}) {
+  try {
+    const s = await requireAction("settings", "edit");
+    await savePlatformContactConfig(s.actor, input);
+    revalidatePath("/settings");
+    return { ok: true as const };
+  } catch (err) {
+    if (err instanceof ForbiddenError) return { ok: false as const, error: "Access denied: Platform Owner or Support Lead role required." };
+    if (err instanceof DomainError) return { ok: false as const, error: err.message };
+    console.error("savePlatformContactConfigAction error", err);
+    return { ok: false as const, error: err instanceof Error ? err.message : "Failed to save contact details." };
+  }
+}

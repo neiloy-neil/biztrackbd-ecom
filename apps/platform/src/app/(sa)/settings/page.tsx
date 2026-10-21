@@ -9,6 +9,7 @@ import {
   getPlatformFraudConfig,
   getPlatformGoogleConfig,
   getPlatformSeoConfig,
+  getPlatformContactConfig,
 } from "@biztrackbd/core";
 import { PlatformSettingsClient } from "./platform-settings-client";
 
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
 export default async function PlatformSettingsPage() {
   await requireAccess("settings");
 
-  const [aiConfig, smsConfig, courierConfig, uddoktaConfig, mailConfig, fraudConfig, googleConfig, seoConfig] = await Promise.all([
+  const [aiConfig, smsConfig, courierConfig, uddoktaConfig, mailConfig, fraudConfig, googleConfig, seoConfig, contactConfig] = await Promise.all([
     getPlatformAiConfig(),
     getPlatformSmsConfig(),
     getPlatformCourierConfig(),
@@ -30,6 +31,7 @@ export default async function PlatformSettingsPage() {
     getPlatformFraudConfig(),
     getPlatformGoogleConfig(),
     getPlatformSeoConfig(),
+    getPlatformContactConfig(),
   ]);
 
   return (
@@ -42,6 +44,7 @@ export default async function PlatformSettingsPage() {
       initialFraudConfig={fraudConfig}
       initialGoogleConfig={googleConfig}
       initialSeoConfig={seoConfig}
+      initialContactConfig={contactConfig}
     />
   );
 }
