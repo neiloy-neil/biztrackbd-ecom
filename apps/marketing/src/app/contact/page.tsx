@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CONTACT } from "@/lib/contact";
 import Link from "next/link";
 import { ContactForm } from "./contact-form";
 
@@ -26,8 +27,8 @@ export const metadata: Metadata = {
     images: [`${siteUrl}/opengraph-image`],
   },
 };
-const whatsappNumber = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP ?? "+880 1711 000000";
-const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@biztrack.bd";
+const whatsappNumber = CONTACT.whatsappDisplay;
+const supportEmail = CONTACT.email;
 
 const contactJsonLd = {
   "@context": "https://schema.org",

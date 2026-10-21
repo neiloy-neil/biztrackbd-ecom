@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Baloo_Da_2, Hind_Siliguri } from "next/font/google";
 import Link from "next/link";
 import { BrandLockup } from "@/components/brand-logo";
+import { ContactIcon } from "@biztrackbd/ui";
+import { CONTACT, whatsappLink } from "@/lib/contact";
 import "./marketing.css";
 import "./site.css";
 
@@ -112,9 +114,14 @@ const globalJsonLd = {
         addressLocality: "Dhaka",
         addressCountry: "BD",
       },
+      email: CONTACT.email,
+      telephone: CONTACT.phoneTel,
+      sameAs: [CONTACT.facebook, CONTACT.instagram],
       contactPoint: {
         "@type": "ContactPoint",
         contactType: "Customer Support",
+        email: CONTACT.email,
+        telephone: CONTACT.phoneTel,
         availableLanguage: ["English", "Bengali"],
       },
     },
@@ -170,6 +177,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <p>
                   The Commerce and Business Operating Platform for Bangladesh. Sell products, verify payments, protect against fake COD returns, and capture high-value customer inquiries with 0% sales commission.
                 </p>
+                <div className="foot-social" aria-label="BizTrackBD on social media">
+                  <a href={CONTACT.facebook} target="_blank" rel="noopener noreferrer" aria-label="BizTrackBD on Facebook"><ContactIcon name="facebook" size={18} /></a>
+                  <a href={CONTACT.instagram} target="_blank" rel="noopener noreferrer" aria-label="BizTrackBD on Instagram"><ContactIcon name="instagram" size={18} /></a>
+                  <a href={whatsappLink()} target="_blank" rel="noopener noreferrer" aria-label="Chat with BizTrackBD on WhatsApp"><ContactIcon name="whatsapp" size={18} /></a>
+                  <a href={`mailto:${CONTACT.email}`} aria-label="Email BizTrackBD"><ContactIcon name="email" size={18} /></a>
+                </div>
                 <div className="foot-sister-badge">
                   A product &amp; sister concern of <strong>The Digital Dude</strong>
                 </div>
@@ -198,6 +211,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   <Link href="/couriers#redx" prefetch={false}>RedX Integration</Link>
                   <Link href="/couriers" prefetch={false}>COD Return Risk Shield</Link>
                 </nav>
+              </div>
+
+              <div className="foot-col foot-contact">
+                <h4>Get in touch</h4>
+                <ul aria-label="Contact details">
+                  <li><a href={`mailto:${CONTACT.email}`}><ContactIcon name="email" size={16} /><span>{CONTACT.email}</span></a></li>
+                  <li><a href={`tel:${CONTACT.phoneTel}`}><ContactIcon name="phone" size={16} /><span>{CONTACT.phoneDisplay}</span></a></li>
+                  <li><a href={whatsappLink()} target="_blank" rel="noopener noreferrer"><ContactIcon name="whatsapp" size={16} /><span>WhatsApp {CONTACT.whatsappDisplay}</span></a></li>
+                  <li><a href={CONTACT.facebook} target="_blank" rel="noopener noreferrer"><ContactIcon name="facebook" size={16} /><span>facebook.com/biztrackbd</span></a></li>
+                  <li><a href={CONTACT.instagram} target="_blank" rel="noopener noreferrer"><ContactIcon name="instagram" size={16} /><span>@biztrackbd</span></a></li>
+                </ul>
               </div>
 
               <div className="foot-col">

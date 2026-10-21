@@ -167,7 +167,7 @@ export default function MigrateShopifyPage() {
               Start Free Migration Trial
             </Link>
             <a
-              href="https://wa.me/8801700000000?text=Hi%2C%20I%20want%20help%20migrating%20my%20store%20from%20Shopify%20to%20BizTrackBD"
+              href="https://wa.me/8801886675596?text=Hi%2C%20I%20want%20help%20migrating%20my%20store%20from%20Shopify%20to%20BizTrackBD"
               target="_blank"
               rel="noopener noreferrer"
               className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-5 py-2.5 text-xs sm:text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--surface-subtle)] transition"
@@ -303,7 +303,7 @@ export default function MigrateShopifyPage() {
 
               <div className="shrink-0 flex flex-col gap-2">
                 <a
-                  href="https://wa.me/8801700000000?text=Hi%2C%20I%20want%20concierge%20migration%20from%20Shopify%20to%20BizTrackBD"
+                  href="https://wa.me/8801886675596?text=Hi%2C%20I%20want%20concierge%20migration%20from%20Shopify%20to%20BizTrackBD"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="rounded-lg bg-[var(--primary)] px-5 py-2.5 text-xs font-bold text-[var(--primary-foreground)] text-center shadow-xs hover:opacity-95 transition"

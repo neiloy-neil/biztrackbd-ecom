@@ -2465,3 +2465,18 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   border-color: #F6DE9A;
   box-shadow: 0 2px 8px rgba(148, 99, 0, 0.15);
 }
+
+/* Footer contact and social icons */
+.foot-social { display: flex; gap: 10px; margin-top: 16px; }
+.foot-social a {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08); color: #FFFFFF;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.foot-social a:hover { background: var(--marigold); color: var(--green-deep); }
+.foot-contact ul { font-size: 14px; color: #C6DFD3; list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.foot-contact li a { display: flex; align-items: center; gap: 10px; min-height: 36px; word-break: break-word; }
+.foot-contact li a { transition: color 0.15s ease; }
+.foot-contact li a:hover { color: #FFFFFF; }
+.foot-contact li a svg { flex: none; color: var(--marigold); }

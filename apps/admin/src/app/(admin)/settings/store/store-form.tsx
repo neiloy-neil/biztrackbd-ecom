@@ -2,8 +2,13 @@
 
 import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
-import { SaveBar } from "@biztrackbd/ui";
+import { ContactIcon, SaveBar, type ContactIconName } from "@biztrackbd/ui";
 import { saveStoreAction, type FormState } from "./actions";
+
+/** A field label with the same icon the store footer shows next to that link. */
+const IconLabel = ({ icon, children }: { icon: ContactIconName; children: React.ReactNode }) => (
+  <span className="label" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><ContactIcon name={icon} size={16} />{children}</span>
+);
 
 export interface StoreValues {
   storeName: string; storeNameBn: string; tagline: string; description: string; contactPhone: string; whatsappNumber: string; email: string; facebookUrl: string; instagramUrl: string;
@@ -76,14 +81,15 @@ export function StoreForm({ initial }: { initial: StoreValues }) {
 
       <section className="card" role="tabpanel" id="panel-contact" aria-labelledby="tab-contact" hidden={tab !== "contact"}>
         <h2>Contact and address</h2>
+        <p style={{ marginBottom: 12, fontSize: 13, color: "var(--ink-3)" }}>Whatever you fill in here appears in your store's footer with its icon. Leave a field empty to hide it.</p>
         <div className="row-2">
-          <label className="field"><span className="label">Customer phone</span><input className="input" name="contactPhone" inputMode="tel" defaultValue={initial.contactPhone} {...bad("customer phone")} data-testid="s-phone" /></label>
-          <label className="field"><span className="label">WhatsApp number</span><input className="input" name="whatsappNumber" inputMode="tel" defaultValue={initial.whatsappNumber} {...bad("WhatsApp number")} /></label>
+          <label className="field"><IconLabel icon="phone">Customer phone</IconLabel><input className="input" name="contactPhone" inputMode="tel" defaultValue={initial.contactPhone} {...bad("customer phone")} data-testid="s-phone" /></label>
+          <label className="field"><IconLabel icon="whatsapp">WhatsApp number</IconLabel><input className="input" name="whatsappNumber" inputMode="tel" defaultValue={initial.whatsappNumber} {...bad("WhatsApp number")} /></label>
         </div>
-        <label className="field"><span className="label">Email for customers</span><input className="input" name="email" type="email" defaultValue={initial.email} {...bad("email")} /></label>
+        <label className="field"><IconLabel icon="email">Email for customers</IconLabel><input className="input" name="email" type="email" defaultValue={initial.email} {...bad("email")} /></label>
         <div className="row-2">
-          <label className="field"><span className="label">Facebook page</span><input className="input" name="facebookUrl" defaultValue={initial.facebookUrl} placeholder="facebook.com/yourpage" {...bad("Facebook page")} /></label>
-          <label className="field"><span className="label">Instagram</span><input className="input" name="instagramUrl" defaultValue={initial.instagramUrl} {...bad("Instagram")} /></label>
+          <label className="field"><IconLabel icon="facebook">Facebook page</IconLabel><input className="input" name="facebookUrl" defaultValue={initial.facebookUrl} placeholder="facebook.com/yourpage" {...bad("Facebook page")} /></label>
+          <label className="field"><IconLabel icon="instagram">Instagram</IconLabel><input className="input" name="instagramUrl" defaultValue={initial.instagramUrl} placeholder="instagram.com/yourstore" {...bad("Instagram")} /></label>
         </div>
         <label className="field"><span className="label">Address shown in the footer</span><input className="input" name="addressLine" defaultValue={initial.addressLine} maxLength={200} /></label>
         <label className="field" style={{ marginBottom: 0 }}><span className="label">Pickup address (invoices and couriers)</span><input className="input" name="pickupAddress" defaultValue={initial.pickupAddress} maxLength={250} /></label>

@@ -62,10 +62,10 @@ export function MigrateAnalyzer() {
   }
 
   const whatsappHref = result
-    ? `https://wa.me/8801700000000?text=${encodeURIComponent(
+    ? `https://wa.me/8801886675596?text=${encodeURIComponent(
         `Hello BizTrackBD team! I inspected my store catalog on /migrate. I have ${result.totalProducts} products (${result.totalVariants} variants) currently on ${result.platform.toUpperCase()} and I would like your Dhaka migration team to assist with zero-downtime migration.`
       )}`
-    : `https://wa.me/8801700000000?text=${encodeURIComponent(
+    : `https://wa.me/8801886675596?text=${encodeURIComponent(
         "Hello BizTrackBD team! I would like help migrating my existing ecommerce store to BizTrackBD."
       )}`;
 

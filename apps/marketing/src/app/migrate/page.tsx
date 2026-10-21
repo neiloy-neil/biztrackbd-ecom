@@ -319,7 +319,7 @@ export default function MigratePage() {
               Have questions about your custom theme or order history?
             </p>
             <a
-              href="https://wa.me/8801700000000?text=Hello%20BizTrackBD%20team,%20I%20have%20questions%20about%20migrating%20my%20store."
+              href="https://wa.me/8801886675596?text=Hello%20BizTrackBD%20team,%20I%20have%20questions%20about%20migrating%20my%20store."
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-secondary"

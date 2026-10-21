@@ -11,6 +11,7 @@ export interface StoreInfo {
   tagline: string | null;
   contactPhone: string | null;
   whatsappNumber: string | null;
+  email: string | null;
   facebookUrl: string | null;
   instagramUrl: string | null;
   addressLine: string | null;
@@ -43,7 +44,7 @@ export async function getStoreInfo(tenantId: string): Promise<StoreInfo> {
     // A store that has not filled in its details yet still renders, under its subdomain.
     const t = await tx.tenant.findFirstOrThrow({ select: { name: true } });
     return {
-      storeName: t.name, tagline: null, contactPhone: null, whatsappNumber: null, facebookUrl: null, instagramUrl: null, addressLine: null,
+      storeName: t.name, tagline: null, contactPhone: null, whatsappNumber: null, email: null, facebookUrl: null, instagramUrl: null, addressLine: null,
       logoUrl: null, announcement: null, announcementBn: null, bkashNumber: null, bkashKind: "PERSONAL", nagadNumber: null, nagadKind: "PERSONAL",
       paymentNote: null, offlineMessage: null, ordersPaused: false,
       flashSaleActive: false, flashSaleEndsAt: null, flashSaleCoupon: null,

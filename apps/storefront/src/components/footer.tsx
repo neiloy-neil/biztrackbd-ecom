@@ -4,6 +4,27 @@ import { setLanguage } from "@/app/actions";
 import type { Lang, T } from "@/lib/i18n";
 import { linkLabel } from "./header";
 import { PlatformCredit } from "./platform-credit";
+import { ContactIcon } from "@biztrackbd/ui";
+
+/** A store keeps its WhatsApp number as typed (01XXXXXXXXX or with 880): wa.me wants the international digits. */
+const waHref = (n: string) => {
+  const d = n.replace(/\D/g, "");
+  return `https://wa.me/${d.startsWith("880") ? d : d.startsWith("0") ? `88${d}` : `880${d}`}`;
+};
+
+/** The store's contact and social links, each with its icon. Only what the owner filled in is shown. */
+function ContactLinks({ info, only }: { info: StoreInfo; only?: ("email" | "phone" | "whatsapp" | "facebook" | "instagram")[] }) {
+  const show = (k: "email" | "phone" | "whatsapp" | "facebook" | "instagram") => !only || only.includes(k);
+  return (
+    <>
+      {show("phone") && info.contactPhone && <a className="ficon" href={`tel:${info.contactPhone}`}><ContactIcon name="phone" size={16} /><span>{info.contactPhone}</span></a>}
+      {show("whatsapp") && info.whatsappNumber && <a className="ficon" href={waHref(info.whatsappNumber)} target="_blank" rel="noopener noreferrer"><ContactIcon name="whatsapp" size={16} /><span>WhatsApp</span></a>}
+      {show("email") && info.email && <a className="ficon" href={`mailto:${info.email}`}><ContactIcon name="email" size={16} /><span>{info.email}</span></a>}
+      {show("facebook") && info.facebookUrl && <a className="ficon" href={info.facebookUrl} target="_blank" rel="noopener noreferrer"><ContactIcon name="facebook" size={16} /><span>Facebook</span></a>}
+      {show("instagram") && info.instagramUrl && <a className="ficon" href={info.instagramUrl} target="_blank" rel="noopener noreferrer"><ContactIcon name="instagram" size={16} /><span>Instagram</span></a>}
+    </>
+  );
+}
 
 type Pages = { title: string; slug: string }[];
 
@@ -34,9 +55,7 @@ const Shop = ({ title, categories, t }: { title: string; categories: CategoryCar
 const Help = ({ title, info, t, pages, hasBlog, commerce = true }: { title: string; info: StoreInfo; t: T; pages: Pages; hasBlog: boolean; commerce?: boolean }) => (
   <div>
     <b>{title}</b>
-    {info.contactPhone && <a href={`tel:${info.contactPhone}`}>{t("contact")} {info.contactPhone}</a>}
-    {info.whatsappNumber && <a href={`https://wa.me/88${info.whatsappNumber}`} rel="noopener noreferrer">WhatsApp</a>}
-    {info.facebookUrl && <a href={info.facebookUrl} rel="noopener noreferrer">Facebook</a>}
+    <ContactLinks info={info} />
     {commerce && <Link href="/account">{t("account")}</Link>}
     <Link href="/contact">{t("contact")}</Link>
     {hasBlog && <Link href="/blog">{t("blog")}</Link>}
@@ -74,8 +93,7 @@ function Column({ c, info, categories, lang, t, pages, hasBlog }: { c: FooterCol
       return (
         <div>
           <b>{title || t("contact")}</b>
-          {info.contactPhone && <a href={`tel:${info.contactPhone}`}>{info.contactPhone}</a>}
-          {info.whatsappNumber && <a href={`https://wa.me/88${info.whatsappNumber}`} rel="noopener noreferrer">WhatsApp</a>}
+          <ContactLinks info={info} only={["phone", "whatsapp", "email"]} />
           {info.addressLine && <p style={{ fontSize: 14, lineHeight: 1.6, maxWidth: 300 }}>{info.addressLine}</p>}
         </div>
       );
@@ -83,9 +101,7 @@ function Column({ c, info, categories, lang, t, pages, hasBlog }: { c: FooterCol
       return (
         <div>
           <b>{title || (lang === "bn" ? "আমাদের অনুসরণ করুন" : "Follow us")}</b>
-          {info.facebookUrl && <a href={info.facebookUrl} rel="noopener noreferrer">Facebook</a>}
-          {info.instagramUrl && <a href={info.instagramUrl} rel="noopener noreferrer">Instagram</a>}
-          {info.whatsappNumber && <a href={`https://wa.me/88${info.whatsappNumber}`} rel="noopener noreferrer">WhatsApp</a>}
+          <ContactLinks info={info} only={["facebook", "instagram", "whatsapp"]} />
         </div>
       );
     case "payments":
