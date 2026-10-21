@@ -321,7 +321,7 @@ export function ChromeEditor(props: ChromeEditorProps) {
               <b>Someone else changed this while you were editing it.</b> Your changes are not saved yet.
               <div className="row" style={{ marginTop: 8 }}>
                 <button type="button" className="btn btn-secondary btn-sm" onClick={() => router.refresh()}>Load their version</button>
-                <button type="button" className="btn btn-primary btn-sm" onClick={() => keepMine(conflict.stamp)}>Keep mine</button>
+                <button type="button" className="btn btn-primary btn-sm" disabled={busy} onClick={() => keepMine(conflict.stamp)}>Keep mine</button>
               </div>
             </div>
           )}

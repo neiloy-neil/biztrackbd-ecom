@@ -16,6 +16,7 @@ import {
   sendOrderTrackingAction,
   sendOrderPaymentDetailsAction,
 } from "./actions";
+import { useBusyAction } from "@biztrackbd/ui";
 
 interface StaffUserItem {
   id: string;
@@ -411,7 +412,9 @@ export function WhatsAppDeskClient({
     }
   };
 
-  const handleDeleteSnippet = async (id: string) => {
+  const { busy: snippetBusy, run: runSnippet } = useBusyAction();
+
+  const handleDeleteSnippet = (id: string) => runSnippet(`delete-${id}`, async () => {
     if (!confirm("Are you sure you want to delete this snippet?")) return;
     try {
       await deleteSupportQuickReplyAction(id);
@@ -420,9 +423,9 @@ export function WhatsAppDeskClient({
     } catch (e: any) {
       alert(e.message || "Failed to delete snippet");
     }
-  };
+  });
 
-  const handleResetSnippets = async () => {
+  const handleResetSnippets = () => runSnippet("reset", async () => {
     if (!confirm("Reset all canned quick replies to default presets?")) return;
     try {
       const res = await resetSupportQuickRepliesAction();
@@ -430,7 +433,7 @@ export function WhatsAppDeskClient({
     } catch (e: any) {
       alert(e.message || "Failed to reset snippets");
     }
-  };
+  });
 
   return (
     <>
@@ -1414,6 +1417,7 @@ export function WhatsAppDeskClient({
                     type="button"
                     className="btn btn-secondary btn-sm"
                     onClick={handleResetSnippets}
+                disabled={snippetBusy !== null}
                   >
                     Reset to Bengali Presets
                   </button>
@@ -1473,6 +1477,7 @@ export function WhatsAppDeskClient({
                         className="btn btn-secondary btn-sm"
                         style={{ fontSize: 11, padding: "2px 8px", color: "#DC2626" }}
                         onClick={() => handleDeleteSnippet(qr.id)}
+                      disabled={snippetBusy !== null}
                       >
                         Delete
                       </button>

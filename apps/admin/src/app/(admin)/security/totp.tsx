@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { changePasswordAction, confirmTotpAction, removeTotpAction, startTotpAction, type TotpState } from "../../login/actions";
+import { useBusyAction } from "@biztrackbd/ui";
 
 const Msg = ({ s }: { s: TotpState }) => (
   <>
@@ -12,6 +13,7 @@ const Msg = ({ s }: { s: TotpState }) => (
 
 export function TotpPanel({ enabledFactorId }: { enabledFactorId: string | null }) {
   const [setup, setSetup] = useState<TotpState>({});
+  const { busy: startBusy, run: runStart } = useBusyAction();
   const [confirm, confirmAction, confirming] = useActionState<TotpState, FormData>(confirmTotpAction, {});
   const [remove, removeAction, removing] = useActionState<TotpState, FormData>(removeTotpAction, {});
 
@@ -32,7 +34,7 @@ export function TotpPanel({ enabledFactorId }: { enabledFactorId: string | null 
       <div className="stack">
         <Msg s={setup} />
         <p>Add a second step: a 6-digit code from an authenticator app (Google Authenticator, Authy, 1Password) each time you sign in.</p>
-        <div><button type="button" className="btn btn-primary" onClick={async () => setSetup(await startTotpAction())} data-testid="totp-start">Set up two-factor</button></div>
+        <div><button type="button" className="btn btn-primary" disabled={startBusy !== null} onClick={() => runStart("start", async () => setSetup(await startTotpAction()))} data-testid="totp-start">Set up two-factor</button></div>
       </div>
     );
   }

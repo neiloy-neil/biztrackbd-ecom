@@ -3441,7 +3441,7 @@ export function Builder(props: Props) {
               <b>Someone else changed this page while you were editing it.</b> Your changes are not saved yet.
               <div className="row" style={{ marginTop: 8 }}>
                 <button type="button" className="btn btn-secondary btn-sm" onClick={loadTheirs} data-testid="conflict-theirs">Load their version</button>
-                <button type="button" className="btn btn-primary btn-sm" onClick={() => keepMine(conflict.stamp)} data-testid="conflict-mine">Keep mine</button>
+                <button type="button" className="btn btn-primary btn-sm" disabled={busy} onClick={() => keepMine(conflict.stamp)} data-testid="conflict-mine">Keep mine</button>
               </div>
             </div>
           )}

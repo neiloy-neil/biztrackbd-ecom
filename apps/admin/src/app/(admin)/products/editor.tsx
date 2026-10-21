@@ -7,6 +7,7 @@ import { CameraIcon, PlusIcon } from "@/components/icons";
 import { taka } from "@/lib/format";
 import { createQuickCategoryAction, generateProductDescriptionAction, generateImageAltTagsAction, generateBarcodeAction, saveProductAction } from "./actions";
 import type { GeneratedProductListing, AiTonePreset } from "@biztrackbd/core";
+import { useBusyAction } from "@biztrackbd/ui";
 
 export interface VariantRow {
   id?: string;
@@ -121,6 +122,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
     setOptions(next);
     setP((cur) => ({ ...cur, variants: buildVariants(next, cur.variants, cur.basePrice) }));
   }
+  const { busy: barcodeBusy, run: runBarcode } = useBusyAction();
   const setVariant = (i: number, patch: Partial<VariantRow>) => setP((cur) => ({ ...cur, variants: cur.variants.map((v, j) => (j === i ? { ...v, ...patch } : v)) }));
 
   async function upload(files: FileList | null) {
@@ -336,10 +338,11 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                             type="button"
                             className="btn btn-secondary"
                             title="Auto-generate standard barcode"
-                            onClick={async () => {
+                            disabled={barcodeBusy !== null}
+                            onClick={() => runBarcode("barcode-0", async () => {
                               const res = await generateBarcodeAction();
                               if (res.ok) setVariant(0, { barcode: res.barcode });
-                            }}
+                            })}
                           >
                             Auto
                           </button>
@@ -402,7 +405,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                           }),
                         }));
                       }}>Auto-generate SKUs</button>
-                      <button type="button" className="btn btn-secondary btn-sm" onClick={async () => {
+                      <button type="button" className="btn btn-secondary btn-sm" disabled={barcodeBusy !== null} onClick={() => runBarcode("barcode-all", async () => {
                         const updated = await Promise.all(
                           p.variants.map(async (v) => {
                             if (v.barcode) return v;
@@ -411,7 +414,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                           })
                         );
                         setP((cur) => ({ ...cur, variants: updated }));
-                      }}>Auto-generate Barcodes</button>
+                      })}>Auto-generate Barcodes</button>
                     </div>
                   )}
 
@@ -463,10 +466,11 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                                   className="btn btn-secondary btn-sm"
                                   style={{ padding: "2px 5px", fontSize: 11 }}
                                   title="Auto-generate barcode"
-                                  onClick={async () => {
+                                  disabled={barcodeBusy !== null}
+                                  onClick={() => runBarcode(`barcode-${i}`, async () => {
                                     const res = await generateBarcodeAction();
                                     if (res.ok) setVariant(i, { barcode: res.barcode });
-                                  }}
+                                  })}
                                 >
                                   Auto
                                 </button>

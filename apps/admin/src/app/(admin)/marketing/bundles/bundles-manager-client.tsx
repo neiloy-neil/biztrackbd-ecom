@@ -12,6 +12,7 @@ import {
   updateOrderBumpAction,
   deleteOrderBumpAction,
 } from "./actions";
+import { useBusyAction } from "@biztrackbd/ui";
 
 interface ProductVariantOption {
   id: string;
@@ -269,13 +270,17 @@ export function BundlesManagerClient({
     router.refresh();
   }
 
-  async function handleDeleteBundle(id: string) {
-    if (!confirm("Are you sure you want to delete this bundle?")) return;
-    const res = await deleteBundleAction(id);
-    if (res.ok) {
-      setBundles((prev) => prev.filter((b) => b.id !== id));
-      router.refresh();
-    }
+  const { busy: delBusy, run: runDelete } = useBusyAction();
+
+  function handleDeleteBundle(id: string) {
+    return runDelete(`bundle-${id}`, async () => {
+      if (!confirm("Are you sure you want to delete this bundle?")) return;
+      const res = await deleteBundleAction(id);
+      if (res.ok) {
+        setBundles((prev) => prev.filter((b) => b.id !== id));
+        router.refresh();
+      }
+    });
   }
 
   function openCreateBump() {
@@ -364,13 +369,15 @@ export function BundlesManagerClient({
     router.refresh();
   }
 
-  async function handleDeleteBump(id: string) {
-    if (!confirm("Are you sure you want to delete this order bump?")) return;
-    const res = await deleteOrderBumpAction(id);
-    if (res.ok) {
-      setBumps((prev) => prev.filter((b) => b.id !== id));
-      router.refresh();
-    }
+  function handleDeleteBump(id: string) {
+    return runDelete(`bump-${id}`, async () => {
+      if (!confirm("Are you sure you want to delete this order bump?")) return;
+      const res = await deleteOrderBumpAction(id);
+      if (res.ok) {
+        setBumps((prev) => prev.filter((b) => b.id !== id));
+        router.refresh();
+      }
+    });
   }
 
   return (
@@ -637,6 +644,7 @@ export function BundlesManagerClient({
                               className="btn btn-secondary btn-sm"
                               style={{ color: "#ef4444" }}
                               onClick={() => handleDeleteBundle(b.id)}
+                  disabled={delBusy !== null}
                               data-testid={`delete-bundle-${b.id}`}
                             >
                               Delete
@@ -745,6 +753,7 @@ export function BundlesManagerClient({
                               className="btn btn-secondary btn-sm"
                               style={{ color: "#ef4444" }}
                               onClick={() => handleDeleteBump(b.id)}
+                  disabled={delBusy !== null}
                               data-testid={`delete-bump-${b.id}`}
                             >
                               Delete

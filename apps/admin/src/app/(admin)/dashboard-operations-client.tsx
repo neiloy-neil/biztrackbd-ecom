@@ -17,6 +17,7 @@ import {
   releaseDashboardOrderHoldAction,
 } from "./dashboard-actions";
 import { taka, prettyPhone } from "@/lib/format";
+import { useBusyAction } from "@biztrackbd/ui";
 
 interface ConnectedCourierItem {
   provider: string;
@@ -121,7 +122,9 @@ export function DashboardOperationsClient({
   };
 
   // Handle Hold / Release Order
-  const handleHoldOrder = async (orderId: string, orderNumber: string) => {
+  const { busy: opBusy, run: runOp } = useBusyAction();
+
+  const handleHoldOrder = (orderId: string, orderNumber: string) => runOp(`hold-${orderId}`, async () => {
     if (!canEdit) return;
     try {
       await holdDashboardOrderAction(orderId);
@@ -130,9 +133,9 @@ export function DashboardOperationsClient({
     } catch (e: any) {
       alert(e.message || "Failed to hold order");
     }
-  };
+  });
 
-  const handleReleaseOrder = async (orderId: string, orderNumber: string) => {
+  const handleReleaseOrder = (orderId: string, orderNumber: string) => runOp(`release-${orderId}`, async () => {
     if (!canEdit) return;
     try {
       await releaseDashboardOrderHoldAction(orderId);
@@ -141,7 +144,7 @@ export function DashboardOperationsClient({
     } catch (e: any) {
       alert(e.message || "Failed to approve order");
     }
-  };
+  });
 
   // Bulk Dispatch Checkbox Handlers
   const handleToggleSelectAll = () => {
@@ -499,6 +502,7 @@ export function DashboardOperationsClient({
                             <button
                               type="button"
                               onClick={() => handleReleaseOrder(item.id, item.orderNumber)}
+                              disabled={opBusy !== null}
                               className="btn btn-secondary btn-sm"
                               style={{ fontSize: 10.5, padding: "2px 8px" }}
                             >
@@ -508,6 +512,7 @@ export function DashboardOperationsClient({
                             <button
                               type="button"
                               onClick={() => handleHoldOrder(item.id, item.orderNumber)}
+                              disabled={opBusy !== null}
                               className="btn btn-secondary btn-sm"
                               style={{ fontSize: 10.5, padding: "2px 8px", color: "#B91C1C" }}
                             >

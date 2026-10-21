@@ -2,16 +2,18 @@
 
 import { useActionState, useState } from "react";
 import { confirmEnrollAction, startEnrollAction, type EnrollState } from "../login/actions";
+import { useBusyAction } from "@biztrackbd/ui";
 
 export function EnrollPanel() {
   const [setup, setSetup] = useState<EnrollState>({});
+  const { busy: startBusy, run: runStart } = useBusyAction();
   const [confirm, action, pending] = useActionState<EnrollState, FormData>(confirmEnrollAction, {});
   if (!setup.enrolled) {
     return (
       <div className="stack">
         {setup.error && <div className="notice bad" role="alert">{setup.error}</div>}
         <p>Platform access needs a second step: a 6-digit code from an authenticator app (Google Authenticator, Authy, 1Password) each time you sign in.</p>
-        <div><button type="button" className="btn btn-primary" onClick={async () => setSetup(await startEnrollAction())} data-testid="totp-start">Set up two-factor</button></div>
+        <div><button type="button" className="btn btn-primary" disabled={startBusy !== null} onClick={() => runStart("start", async () => setSetup(await startEnrollAction()))} data-testid="totp-start">Set up two-factor</button></div>
       </div>
     );
   }

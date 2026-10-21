@@ -175,6 +175,7 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
   }
 
   async function handleDeleteDrop(id: string) {
+    if (busy) return;
     if (!confirm("Are you sure you want to delete this drop campaign?")) return;
     setBusy(true);
     try {
@@ -190,6 +191,7 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
   }
 
   async function handleMarkStockReceived(drop: DropRow) {
+    if (busy) return;
     if (
       !confirm(
         `Mark stock arrived for "${drop.title}"?\n\nThis will automatically release fulfillment holds on all pre-orders for this drop so they can be dispatched via Steadfast/Pathao.`
@@ -427,6 +429,7 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
                             <button
                               type="button"
                               onClick={() => handleMarkStockReceived(drop)}
+                  disabled={busy}
                               className="btn btn-primary btn-sm"
                               style={{ fontSize: 12, background: "#059669", borderColor: "#059669" }}
                               title="Mark inventory arrived and release pre-order fulfillment holds"
@@ -447,6 +450,7 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
                           <button
                             type="button"
                             onClick={() => handleDeleteDrop(drop.id)}
+                  disabled={busy}
                             className="btn btn-secondary btn-sm"
                             style={{ fontSize: 12, color: "var(--danger)" }}
                           >
