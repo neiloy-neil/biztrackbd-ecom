@@ -5,6 +5,7 @@ import "./admin.css";
 import "@biztrackbd/ui/kit.css";
 import "./shell.css";
 import "./(admin)/menu/menu.css";
+import { DoubleSubmitGuard } from "@biztrackbd/ui";
 
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-jakarta", display: "swap" });
 const hind = Hind_Siliguri({ subsets: ["bengali", "latin"], weight: ["400", "500", "600", "700"], variable: "--font-hind", display: "swap" });
@@ -22,7 +23,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const choice = (await cookies()).get("bt_theme")?.value;
   return (
     <html lang={(await cookies()).get("bt_lang")?.value === "bn" ? "bn" : "en"} className={`${jakarta.variable} ${hind.variable}`} data-theme={choice === "light" || choice === "dark" ? choice : undefined} suppressHydrationWarning>
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <DoubleSubmitGuard />
+        {children}
+      </body>
     </html>
   );
 }

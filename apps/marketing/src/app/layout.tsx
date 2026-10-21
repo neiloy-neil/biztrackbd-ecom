@@ -140,6 +140,7 @@ const buildGlobalJsonLd = (CONTACT: Contact) => ({
 
 import { PlatformTracker } from "@/components/platform-tracker";
 import { SiteNavigation } from "@/components/site-navigation";
+import { DoubleSubmitGuard } from "@biztrackbd/ui";
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const CONTACT = await getContact();
@@ -158,6 +159,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body>
+        <DoubleSubmitGuard />
         <a className="skip-link" href="#main">Skip to main content</a>
         <PlatformTracker />
         <header className="site-head">

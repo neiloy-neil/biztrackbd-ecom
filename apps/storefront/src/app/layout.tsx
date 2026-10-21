@@ -6,6 +6,7 @@ import { findStore } from "@/lib/tenant";
 import "./kapor.css";
 import "./themes.css";
 import "./landing.css";
+import { DoubleSubmitGuard } from "@biztrackbd/ui";
 
 // Self-hosted by Next at build time: no request to Google when a customer opens the store.
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-jakarta", display: "swap" });
@@ -27,7 +28,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const [lang, themeId] = await Promise.all([getLang(store?.locale ?? "en"), store ? getActiveThemeId(store.id) : Promise.resolve("kapor" as const)]);
   return (
     <html lang={lang} className={`${jakarta.variable} ${hind.variable} ${playfair.variable} ${poppins.variable} ${notoSerifBn.variable} ${baloo.variable} ${notoSansBn.variable}`}>
-      <body data-store-theme={themeId}>{children}</body>
+      <body data-store-theme={themeId}>
+        <DoubleSubmitGuard />
+        {children}
+      </body>
     </html>
   );
 }
