@@ -62,6 +62,14 @@ export function normalizeMetaPhone(phone: string): string {
 
 export const hashPhone = (phone: string) => sha(normalizeMetaPhone(phone));
 export const hashEmail = (e: string) => sha(e.trim().toLowerCase());
+/** Meta wants names, cities and states lower-cased, trimmed and without spaces or punctuation before hashing. */
+const hashText = (v: string) => sha(v.toLowerCase().replace(/[\s\p{P}\p{S}]+/gu, ""));
+/** First word and the rest, for the first-name and last-name fields. */
+export function splitName(full: string | null | undefined): { firstName: string | null; lastName: string | null } {
+  const parts = (full ?? "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return { firstName: null, lastName: null };
+  return { firstName: parts[0] ?? null, lastName: parts.length > 1 ? parts.slice(1).join(" ") : null };
+}
 
 export const purchaseEventId = (orderId: string) => `purchase_${orderId}`;
 
@@ -429,6 +437,13 @@ export interface UserContext {
   userAgent?: string | null;
   fbp?: string | null;
   fbc?: string | null;
+  /** Sent hashed. Names and places as the customer gave them; the formatting Meta wants is applied below. */
+  firstName?: string | null;
+  lastName?: string | null;
+  city?: string | null;
+  state?: string | null;
+  /** Two-letter ISO code, for example bd. */
+  country?: string | null;
 }
 
 export interface ServerEvent {
@@ -451,6 +466,11 @@ export function capiBody(e: ServerEvent, testCode?: string) {
   if (u.phoneLocal) user_data.ph = [hashPhone(u.phoneLocal)];
   if (u.email) user_data.em = [hashEmail(u.email)];
   if (u.customerId) user_data.external_id = [sha(u.customerId)];
+  if (u.firstName?.trim()) user_data.fn = [hashText(u.firstName)];
+  if (u.lastName?.trim()) user_data.ln = [hashText(u.lastName)];
+  if (u.city?.trim()) user_data.ct = [hashText(u.city)];
+  if (u.state?.trim()) user_data.st = [hashText(u.state)];
+  if (u.country?.trim()) user_data.country = [hashText(u.country)];
   if (u.ip) user_data.client_ip_address = u.ip;
   if (u.userAgent) user_data.client_user_agent = u.userAgent.slice(0, 400);
   if (u.fbp && COOKIE.test(u.fbp)) user_data.fbp = u.fbp;
@@ -647,7 +667,7 @@ async function purchaseFacts(tenantId: string, orderId: string) {
   return withTenant(tenantId, async (tx) => {
     const o = await tx.order.findFirst({ where: { id: orderId }, include: { items: { select: { sku: true, variantId: true, quantity: true } } } });
     if (!o) return null;
-    return { total: Number(o.totalAmount), phoneLocal: o.customerPhone, email: o.customerEmail, customerId: o.customerId, ids: o.items.map((i) => i.variantId ?? i.sku ?? "").filter(Boolean), qty: o.items.reduce((n, i) => n + i.quantity, 0) };
+    return { total: Number(o.totalAmount), phoneLocal: o.customerPhone, email: o.customerEmail, customerId: o.customerId, customerName: o.customerName, city: o.shippingCity, district: o.shippingDistrict, ids: o.items.map((i) => i.variantId ?? i.sku ?? "").filter(Boolean), qty: o.items.reduce((n, i) => n + i.quantity, 0) };
   });
 }
 
@@ -752,7 +772,7 @@ export async function sendServerPurchase(tenantId: string, orderId: string, ctx:
     const eventId = purchaseEventId(orderId);
     const payload = { value: f.total, currency: "BDT", contentIds: f.ids, numItems: f.qty };
     if (!(await remember(tenantId, { name: "Purchase", eventId, origin: "SERVER", orderId, status: "SENT", payload }))) return { sent: false };
-    const r = await sendCapi(tenantId, pixelId, { name: "Purchase", eventId, time: new Date(), url: ctx.url, user: { phoneLocal: f.phoneLocal, email: f.email, customerId: f.customerId, ip: ctx.ip, userAgent: ctx.userAgent, fbp: ctx.fbp, fbc: ctx.fbc }, value: f.total, contentIds: f.ids, numItems: f.qty });
+    const r = await sendCapi(tenantId, pixelId, { name: "Purchase", eventId, time: new Date(), url: ctx.url, user: { phoneLocal: f.phoneLocal, email: f.email, customerId: f.customerId, ...splitName(f.customerName), city: f.city, state: f.district, country: "bd", ip: ctx.ip, userAgent: ctx.userAgent, fbp: ctx.fbp, fbc: ctx.fbc }, value: f.total, contentIds: f.ids, numItems: f.qty });
     if (!r.ok) {
       await withTenant(tenantId, (tx) => tx.trackingEvent.updateMany({ where: { eventId, origin: "SERVER" }, data: { status: "FAILED", detail: r.detail, httpStatus: r.httpStatus } }));
     }

@@ -306,6 +306,7 @@ export async function processBkashOrderSuccess(
   tenantId: string,
   paymentId: string,
   orderId: string,
+  ctx: { ip?: string | null; userAgent?: string | null; fbp?: string | null; fbc?: string | null; url?: string | null } = {},
 ): Promise<{ ok: boolean; orderId: string; orderNumber: string; trxId?: string; status: string }> {
   const cfg = await getStoreBkashConfig(tenantId);
   if (!cfg) {
@@ -367,7 +368,7 @@ export async function processBkashOrderSuccess(
   });
 
   // Report conversion tracking
-  sendServerPurchase(tenantId, orderId).catch(() => undefined);
+  sendServerPurchase(tenantId, orderId, ctx).catch(() => undefined);
 
   return {
     ok: true,

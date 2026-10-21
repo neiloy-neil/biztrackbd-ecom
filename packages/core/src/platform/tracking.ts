@@ -1,4 +1,4 @@
-import { getPixelFetch, hashEmail, hashPhone, type SendResult, type ServerEvent, capiBody } from "../growth/tracking";
+import { getPixelFetch, hashEmail, hashPhone, splitName, type SendResult, type ServerEvent, capiBody } from "../growth/tracking";
 import { getPlatformPrisma } from "@biztrackbd/db";
 
 /**
@@ -283,6 +283,7 @@ export interface PlatformPurchaseEventInput {
   paymentMethod?: string | null;
   ownerEmail?: string | null;
   ownerPhone?: string | null;
+  ownerName?: string | null;
   url?: string | null;
   user?: PlatformUserContext;
   consentGiven?: boolean | null;
@@ -314,6 +315,8 @@ export async function trackPlatformPurchaseCapi(input: PlatformPurchaseEventInpu
       phoneLocal: input.ownerPhone || input.user?.phoneLocal,
       email: input.ownerEmail || input.user?.email,
       customerId: input.tenantId,
+      ...splitName(input.ownerName),
+      country: "bd",
       ip: input.user?.ip,
       userAgent: input.user?.userAgent,
       fbp: input.user?.fbp,

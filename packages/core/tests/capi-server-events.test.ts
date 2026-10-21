@@ -12,6 +12,7 @@ import {
   trackPlatformBrowserEventCapi,
   trackPlatformPurchaseCapi,
   platformPurchaseEventId,
+  splitName,
 } from "../src";
 
 const sha = (s: string) => createHash("sha256").update(s).digest("hex");
@@ -236,5 +237,56 @@ describe("Meta Conversions API (CAPI) Server-Side Events (DATA-002)", () => {
     expect((await trackPlatformPurchaseCapi(base)).ok).toBe(false);
     delete process.env.PLATFORM_META_PURCHASE_EVENTS;
     expect(interceptedCalls).toHaveLength(0);
+  });
+  it("hashes first name, last name, city, state and country the way Meta formats them", () => {
+    const body = capiBody({
+      name: "Purchase",
+      eventId: "purchase_ord_1",
+      time: new Date(),
+      user: { firstName: " Mohammad ", lastName: "Abdur Rahim", city: "Cox's Bazar", state: "Chattogram", country: "BD", fbp: "fb.1.1700000000.123", fbc: "fb.1.1700000000.AbCdEf" },
+    } as ServerEvent);
+    const u = body.data[0]!.user_data as Record<string, unknown>;
+    expect(u.fn).toEqual([sha("mohammad")]);
+    expect(u.ln).toEqual([sha("abdurrahim")]);
+    expect(u.ct).toEqual([sha("coxsbazar")]);
+    expect(u.st).toEqual([sha("chattogram")]);
+    expect(u.country).toEqual([sha("bd")]);
+    expect(u.fbc).toBe("fb.1.1700000000.AbCdEf");
+    expect(JSON.stringify(body)).not.toMatch(/Mohammad|Rahim|Chattogram/);
+  });
+
+  it("splits a full name into first and last", () => {
+    expect(splitName("Tania Akter")).toEqual({ firstName: "Tania", lastName: "Akter" });
+    expect(splitName("Md. Abdur Rahim Khan")).toEqual({ firstName: "Md.", lastName: "Abdur Rahim Khan" });
+    expect(splitName("Rahim")).toEqual({ firstName: "Rahim", lastName: null });
+    expect(splitName("  ")).toEqual({ firstName: null, lastName: null });
+    expect(splitName(null)).toEqual({ firstName: null, lastName: null });
+  });
+
+  it("the plan Purchase carries the Pixel cookies, the owner's name and the country, all as Meta expects", async () => {
+    process.env.PLATFORM_META_PIXEL_ID = "987654321098765";
+    process.env.PLATFORM_META_CAPI_TOKEN = "EAABtest_token_secret";
+
+    await trackPlatformPurchaseCapi({
+      tenantId: "t_9",
+      invoiceId: "INV777",
+      plan: "PRO",
+      interval: "MONTHLY",
+      value: 1990,
+      ownerName: "Tania Akter",
+      ownerEmail: "tania@shop.bd",
+      ownerPhone: "01712345678",
+      user: { ip: "103.20.30.40", userAgent: "UA", fbp: "fb.1.1700000000.111", fbc: "fb.1.1700000000.fbclidvalue" },
+    });
+    const u = interceptedCalls[0]!.body.data[0].user_data;
+    expect(u.fbp).toBe("fb.1.1700000000.111");
+    expect(u.fbc).toBe("fb.1.1700000000.fbclidvalue");
+    expect(u.client_ip_address).toBe("103.20.30.40");
+    expect(u.client_user_agent).toBe("UA");
+    expect(u.fn).toEqual([sha("tania")]);
+    expect(u.ln).toEqual([sha("akter")]);
+    expect(u.country).toEqual([sha("bd")]);
+    expect(u.em).toHaveLength(1);
+    expect(u.ph).toHaveLength(1);
   });
 });

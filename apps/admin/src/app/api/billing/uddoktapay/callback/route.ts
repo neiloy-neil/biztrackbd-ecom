@@ -16,6 +16,9 @@ export async function GET(req: NextRequest) {
     const verified = await processUddoktaPaySubscriptionSuccess(invoiceId, {
       ip: req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null,
       userAgent: req.headers.get("user-agent"),
+      // The marketing Pixel sets these on the root domain, so the admin subdomain receives them too.
+      fbp: req.cookies.get("_fbp")?.value ?? null,
+      fbc: req.cookies.get("_fbc")?.value ?? null,
     });
     if (verified.ok) {
       return NextResponse.redirect(

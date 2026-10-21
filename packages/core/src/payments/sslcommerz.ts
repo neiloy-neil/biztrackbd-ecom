@@ -247,6 +247,7 @@ export async function verifySslCommerzPayment(opts: {
 export async function processSslCommerzOrderSuccess(
   tenantId: string,
   valId: string,
+  ctx: { ip?: string | null; userAgent?: string | null; fbp?: string | null; fbc?: string | null; url?: string | null } = {},
 ): Promise<{ ok: boolean; orderId: string; orderNumber: string; status: string }> {
   const cfg = await getStoreSslCommerzConfig(tenantId);
   if (!cfg) {
@@ -322,7 +323,7 @@ export async function processSslCommerzOrderSuccess(
   });
 
   // Report the server purchase event for accurate conversion tracking
-  sendServerPurchase(tenantId, orderId).catch(() => undefined);
+  sendServerPurchase(tenantId, orderId, ctx).catch(() => undefined);
 
   return { ok: true, orderId, orderNumber, status: "CONFIRMED" };
 }

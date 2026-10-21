@@ -227,6 +227,7 @@ export async function getStoreUddoktaPayConfig(tenantId: string): Promise<{
 export async function processUddoktaPayOrderSuccess(
   tenantId: string,
   invoiceId: string,
+  ctx: { ip?: string | null; userAgent?: string | null; fbp?: string | null; fbc?: string | null; url?: string | null } = {},
 ): Promise<{ ok: boolean; orderId: string; status: string }> {
   const cfg = await getStoreUddoktaPayConfig(tenantId);
   const verified = await verifyUddoktaPayPayment({
@@ -280,7 +281,7 @@ export async function processUddoktaPayOrderSuccess(
   });
 
   // Report the server purchase event for accurate tracking
-  sendServerPurchase(tenantId, orderId).catch(() => undefined);
+  sendServerPurchase(tenantId, orderId, ctx).catch(() => undefined);
 
   return { ok: true, orderId, status: "COMPLETED" };
 }
@@ -290,7 +291,7 @@ export async function processUddoktaPayOrderSuccess(
  */
 export async function processUddoktaPaySubscriptionSuccess(
   invoiceId: string,
-  ctx: { ip?: string | null; userAgent?: string | null } = {},
+  ctx: { ip?: string | null; userAgent?: string | null; fbp?: string | null; fbc?: string | null } = {},
 ): Promise<{ ok: boolean; tenantId: string; plan: string }> {
   const verified = await verifyUddoktaPayPayment({
     apiKey: DEFAULT_UDDOKTAPAY_API_KEY,
@@ -314,11 +315,11 @@ export async function processUddoktaPaySubscriptionSuccess(
 
   const db = getPlatformPrisma();
   let firstTimeSeen = false;
-  let owner: { email: string | null; phone: string | null } = { email: null, phone: null };
+  let owner: { email: string | null; phone: string | null; name: string | null } = { email: null, phone: null, name: null };
   await db.$transaction(async (tx) => {
     const tenant = await tx.tenant.findUnique({ where: { id: tenantId } });
     if (!tenant) throw new NotFoundError("Tenant");
-    owner = { email: tenant.ownerEmail, phone: tenant.ownerPhone };
+    owner = { email: tenant.ownerEmail, phone: tenant.ownerPhone, name: tenant.ownerName };
 
     const now = new Date();
     const periodEnd = new Date(now);
@@ -410,7 +411,8 @@ export async function processUddoktaPaySubscriptionSuccess(
         paymentMethod: verified.paymentMethod || null,
         ownerEmail: owner.email,
         ownerPhone: owner.phone,
-        user: { ip: ctx.ip, userAgent: ctx.userAgent },
+        ownerName: owner.name,
+        user: { ip: ctx.ip, userAgent: ctx.userAgent, fbp: ctx.fbp, fbc: ctx.fbc },
       }),
       metadata: { tenantId, invoiceId },
       immediateDispatch: true,

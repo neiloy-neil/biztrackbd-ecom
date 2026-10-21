@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { processSslCommerzOrderSuccess, signOrderAccess } from "@biztrackbd/core";
 import { findStore } from "@/lib/tenant";
 import { resolveStorefrontRequestOrigin } from "@/lib/origin";
+import { purchaseContext } from "@/lib/purchase-context";
 
 export const dynamic = "force-dynamic";
 
@@ -71,7 +72,7 @@ async function handleSslCommerzCallback(req: NextRequest) {
   }
 
   try {
-    const res = await processSslCommerzOrderSuccess(tenantId, valId);
+    const res = await processSslCommerzOrderSuccess(tenantId, valId, purchaseContext(req));
     const resolvedOrderId = res.orderId || orderId;
     if (res.ok && resolvedOrderId) {
       const token = signOrderAccess(tenantId, resolvedOrderId);

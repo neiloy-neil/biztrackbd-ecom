@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { processBkashOrderSuccess, signOrderAccess } from "@biztrackbd/core";
 import { findStore } from "@/lib/tenant";
 import { resolveStorefrontRequestOrigin } from "@/lib/origin";
+import { purchaseContext } from "@/lib/purchase-context";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +50,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const res = await processBkashOrderSuccess(tenantId, paymentId, orderId);
+    const res = await processBkashOrderSuccess(tenantId, paymentId, orderId, purchaseContext(req));
     if (res.ok) {
       return NextResponse.redirect(
         new URL(`/order/${orderId}?k=${encodeURIComponent(token)}&paid=1`, origin),
