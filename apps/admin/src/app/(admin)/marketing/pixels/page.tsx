@@ -165,12 +165,17 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
                 className="input"
                 name="ga4ApiSecret"
                 type="password"
-                defaultValue={c.ga4ApiSecret ?? ""}
-                placeholder="••••••••••••••••"
+                autoComplete="new-password"
+                placeholder={c.ga4ApiSecretSet ? "•••••••• saved (leave blank to keep)" : "Paste the secret"}
                 disabled={!canEdit}
                 data-testid="ga4-secret"
               />
-              <span className="hint">Admin &rarr; Data Streams &rarr; Measurement Protocol API secrets (enables server-side purchase tracking).</span>
+              <span className="hint">Admin &rarr; Data Streams &rarr; Measurement Protocol API secrets (enables server-side purchase tracking). It is stored encrypted and never shown again.</span>
+              {c.ga4ApiSecretSet && canEdit && (
+                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, marginTop: 6 }}>
+                  <input type="checkbox" name="removeGa4ApiSecret" /> Remove the saved secret
+                </label>
+              )}
             </label>
           </section>
 

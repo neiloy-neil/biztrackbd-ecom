@@ -60,6 +60,11 @@ export async function placeOrderAction(p: PlaceOrderPayload): Promise<PlaceOrder
     const cookieStore = await cookies();
     const affiliateRef = p.affiliateRef?.trim() || cookieStore.get("bt_aff_ref")?.value?.trim() || undefined;
 
+    // Refuse before an order exists: a store with no UddoktaPay keys of its own must not take this payment.
+    if (p.paymentMethod === "GATEWAY_UDDOKTAPAY" && !(await getStoreUddoktaPayConfig(store.id)).isCustom) {
+      return { ok: false, error: "Online payment is not available for this store right now. Please choose another way to pay." };
+    }
+
     const isAutomatedGateway =
       p.paymentMethod === "COD" ||
       p.paymentMethod === "GATEWAY_UDDOKTAPAY" ||
@@ -91,6 +96,7 @@ export async function placeOrderAction(p: PlaceOrderPayload): Promise<PlaceOrder
 
     if (p.paymentMethod === "GATEWAY_UDDOKTAPAY") {
       const cfg = await getStoreUddoktaPayConfig(store.id);
+      if (!cfg.isCustom) return { ok: false, error: "Online payment is not available for this store right now. Please choose another way to pay." };
       const charge = await createUddoktaPayCharge({
         apiKey: cfg.apiKey,
         baseUrl: cfg.baseUrl,

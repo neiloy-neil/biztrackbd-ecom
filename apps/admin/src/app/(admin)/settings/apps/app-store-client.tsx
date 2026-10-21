@@ -27,7 +27,9 @@ export interface StoreSettingsData {
   metaDomainVerification?: string | null;
   googleSiteVerification?: string | null;
   googleOAuthClientId?: string | null;
-  googleOAuthClientSecret?: string | null;
+  /** Never sent to the browser: the page replaces it with the flag below. */
+  googleOAuthClientSecret?: undefined;
+  googleOAuthClientSecretSet?: boolean;
   googleMerchantCenterId?: string | null;
   seoTitle?: string | null;
   seoKeywords?: string | null;

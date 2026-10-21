@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { DomainError, cancelPendingProof, createUddoktaPayCharge, getBillingOverview, submitPaymentProof, uddoktaPayUrls } from "@biztrackbd/core";
+import { DomainError, cancelPendingProof, createUddoktaPayCharge, getBillingOverview, submitPaymentProof, uddoktaPayUrls, getPlatformUddoktaPayCredentials } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 import { resolveAdminOrigin } from "@/lib/origin";
 
@@ -19,7 +19,12 @@ export async function initiateOnlineBillingAction(plan: string, interval: "MONTH
     const amount = interval === "YEARLY" ? chosen.priceYearly : chosen.priceMonthly;
     const origin = resolveAdminOrigin(await headers(), 3001);
 
+    const platform = await getPlatformUddoktaPayCredentials();
+    if (!platform) return { error: "Online payment is not available right now. Please pay by bKash or Nagad and submit your TrxID." };
+
     const charge = await createUddoktaPayCharge({
+      apiKey: platform.apiKey,
+      baseUrl: platform.baseUrl,
       fullName: s.actor.name || "Merchant",
       email: s.actor.email || "billing@biztrack.bd",
       amount,

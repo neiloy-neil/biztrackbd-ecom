@@ -36,7 +36,7 @@ export default async function Apps({
         metaDomainVerification: true,
         googleSiteVerification: true,
         googleOAuthClientId: true,
-        googleOAuthClientSecret: true,
+        googleOAuthClientSecret: true, // read here only to learn whether one is saved; it is never sent to the browser
         googleMerchantCenterId: true,
         seoTitle: true,
         seoKeywords: true,
@@ -65,6 +65,11 @@ export default async function Apps({
     const tn = await tx.tenant.findFirstOrThrow({ select: { subdomain: true, name: true, customDomain: true } });
     return [st as StoreSettingsData | null, tn] as const;
   });
+
+  // Secrets are write-only: the client learns whether one is saved, never the value.
+  const safeStoreSettings = storeSettings
+    ? { ...storeSettings, googleOAuthClientSecret: undefined, googleOAuthClientSecretSet: Boolean(storeSettings.googleOAuthClientSecret) }
+    : null;
 
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
   const proto = rootDomain.startsWith("localhost") ? "http" : "https";
@@ -122,7 +127,7 @@ export default async function Apps({
       <AppStoreClient
         overview={overview}
         canEdit={canEdit}
-        storeSettings={storeSettings}
+        storeSettings={safeStoreSettings}
         integrations={integrations}
         webhookTokens={webhookTokens}
         origin={origin}

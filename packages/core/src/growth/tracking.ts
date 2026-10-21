@@ -6,6 +6,7 @@ import { NotFoundError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
 import { loadCredentials } from "../vault/integrations";
 import { normalizeBdPhone } from "../phone";
+import { openField, sealField } from "../vault/field-secret";
 
 /**
  * Marketing pixels and server-side events (docs/07 section 17, docs/10, docs/56).
@@ -78,11 +79,12 @@ export interface TrackingConfig {
   googleAnalyticsId: string | null;
   googleTagManagerId: string | null;
   tiktokPixelId: string | null;
-  ga4ApiSecret: string | null;
+  /** The GA4 Measurement Protocol secret is write-only: only whether one is saved is ever returned. */
+  ga4ApiSecretSet: boolean;
   metaDomainVerification: string | null;
   googleSiteVerification: string | null;
   googleOAuthClientId: string | null;
-  googleOAuthClientSecret: string | null;
+  googleOAuthClientSecretSet: boolean;
   googleMerchantCenterId: string | null;
   capiConnected: boolean;
   capiMode: "TEST" | "LIVE" | null;
@@ -245,11 +247,11 @@ export async function getTrackingConfig(tenantId: string, actor: StaffActor): Pr
     googleAnalyticsId: sf.googleAnalyticsId,
     googleTagManagerId: sf.googleTagManagerId,
     tiktokPixelId: sf.tiktokPixelId,
-    ga4ApiSecret: s?.ga4ApiSecret ?? null,
+    ga4ApiSecretSet: Boolean(s?.ga4ApiSecret),
     metaDomainVerification: s?.metaDomainVerification ?? null,
     googleSiteVerification: s?.googleSiteVerification ?? null,
     googleOAuthClientId: s?.googleOAuthClientId ?? null,
-    googleOAuthClientSecret: s?.googleOAuthClientSecret ?? null,
+    googleOAuthClientSecretSet: Boolean(s?.googleOAuthClientSecret),
     googleMerchantCenterId: s?.googleMerchantCenterId ?? null,
     capiConnected: Boolean(row),
     capiMode: (row?.mode as "TEST" | "LIVE" | undefined) ?? null,
@@ -326,11 +328,15 @@ export async function saveTrackingConfig(
     data.tiktokPixelId = v;
     logged.tiktokPixelId = v;
   }
-  if (has("ga4ApiSecret")) {
-    const v = input.ga4ApiSecret?.trim() || null;
-    if (v && !/^[A-Za-z0-9_-]{10,64}$/.test(v)) throw new ValidationError("Enter a valid GA4 Measurement Protocol API Secret.");
-    data.ga4ApiSecret = v;
-    logged.ga4ApiSecret = v ? "[secret]" : null;
+  // The two secrets are write-only and stored encrypted. Blank or left out keeps what is saved; null removes it.
+  if (input.ga4ApiSecret === null) {
+    data.ga4ApiSecret = null;
+    logged.ga4ApiSecret = "[removed]";
+  } else if (input.ga4ApiSecret?.trim()) {
+    const v = input.ga4ApiSecret.trim();
+    if (!/^[A-Za-z0-9_-]{10,64}$/.test(v)) throw new ValidationError("Enter a valid GA4 Measurement Protocol API Secret.");
+    data.ga4ApiSecret = sealField(v, tenantId, "ga4ApiSecret");
+    logged.ga4ApiSecret = "[secret]";
   }
   if (has("metaDomainVerification")) {
     const v = cleanVerification(input.metaDomainVerification);
@@ -347,8 +353,12 @@ export async function saveTrackingConfig(
     data.googleOAuthClientId = v;
     logged.googleOAuthClientId = v;
   }
-  if (has("googleOAuthClientSecret")) {
-    data.googleOAuthClientSecret = input.googleOAuthClientSecret?.trim() || null;
+  if (input.googleOAuthClientSecret === null) {
+    data.googleOAuthClientSecret = null;
+    logged.googleOAuthClientSecret = "[removed]";
+  } else if (input.googleOAuthClientSecret?.trim()) {
+    data.googleOAuthClientSecret = sealField(input.googleOAuthClientSecret.trim(), tenantId, "googleOAuthClientSecret");
+    logged.googleOAuthClientSecret = "[secret]";
   }
   if (has("googleMerchantCenterId")) {
     const v = input.googleMerchantCenterId?.trim() || null;
@@ -692,7 +702,8 @@ export async function sendGa4ServerEvent(
         select: { googleAnalyticsId: true, ga4ApiSecret: true },
       }),
     );
-    if (!s?.googleAnalyticsId || !s.ga4ApiSecret) return { ok: false };
+    const apiSecret = openField(s?.ga4ApiSecret, tenantId, "ga4ApiSecret");
+    if (!s?.googleAnalyticsId || !apiSecret) return { ok: false };
 
     // Once per order and kind: the return page, the gateway webhook and a replay may all report the same payment.
     const eventId = `ga4_${event.name}_${event.transactionId}`;
@@ -708,7 +719,7 @@ export async function sendGa4ServerEvent(
     if (!isNew) return { ok: true };
 
     const clientId = event.clientId || `bt_${event.transactionId.slice(-16)}`;
-    const url = `https://www.google-analytics.com/mp/collect?measurement_id=${encodeURIComponent(s.googleAnalyticsId)}&api_secret=${encodeURIComponent(s.ga4ApiSecret)}`;
+    const url = `https://www.google-analytics.com/mp/collect?measurement_id=${encodeURIComponent(s.googleAnalyticsId)}&api_secret=${encodeURIComponent(apiSecret)}`;
 
     const body = {
       client_id: clientId,

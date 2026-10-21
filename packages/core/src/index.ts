@@ -171,7 +171,7 @@ export { createBrevoSender, emailSenderFromEnv, type EmailSender } from "./growt
 export { currentSmsSender } from "./customers/auth";
 export {
   createUddoktaPayCharge, verifyUddoktaPayPayment, getStoreUddoktaPayConfig, processUddoktaPayOrderSuccess, processUddoktaPaySubscriptionSuccess,
-  DEFAULT_UDDOKTAPAY_BASE_URL, DEFAULT_UDDOKTAPAY_API_KEY, setUddoktaPayFetchForTests, normalizeUddoktaPayBaseUrl, uddoktaPayUrls,
+  DEFAULT_UDDOKTAPAY_BASE_URL, DEFAULT_UDDOKTAPAY_API_KEY, setUddoktaPayFetchForTests, normalizeUddoktaPayBaseUrl, uddoktaPayUrls, getPlatformUddoktaPayCredentials,
   type UddoktaPayChargeRequest, type UddoktaPayChargeResponse, type UddoktaPayVerifyResponse,
 } from "./payments/uddoktapay";
 export {
@@ -501,4 +501,4 @@ export * from "./api-keys";
 
 // Analytics & Real-Time Performance Studio (ANALYTICS-001)
 export * from "./analytics";
-
+export { sealField, openField, isSealed } from "./vault/field-secret";

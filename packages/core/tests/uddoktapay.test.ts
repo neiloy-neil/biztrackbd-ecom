@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, afterEach } from "vitest";
+import { describe, expect, it, beforeAll, beforeEach, afterEach } from "vitest";
 import {
   createUddoktaPayCharge,
   verifyUddoktaPayPayment,
@@ -9,9 +9,15 @@ import {
   DEFAULT_UDDOKTAPAY_BASE_URL,
 } from "../src/payments/uddoktapay";
 import { withTenant } from "@biztrackbd/db";
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
+import { getStoreUddoktaPayConfig, saveIntegration, getPlatformUddoktaPayCredentials } from "../src";
+import { getPlatformPrisma } from "@biztrackbd/db";
 
 describe("UddoktaPay Automated Payment Engine", () => {
+  beforeAll(() => {
+    process.env.INTEGRATION_VAULT_SECRET = randomBytes(32).toString("hex");
+  });
+
   beforeEach(() => {
     setUddoktaPayFetchForTests(undefined);
   });
@@ -137,6 +143,9 @@ describe("UddoktaPay Automated Payment Engine", () => {
       );
     });
 
+    // The store has its own UddoktaPay keys; without them it has no online payment at all.
+    await saveIntegration(tenantId, { provider: "UDDOKTAPAY", mode: "LIVE", config: { baseUrl: "https://pay.example-store.test" }, secrets: { apiKey: "store-own-key-123" } });
+
     const res = await processUddoktaPayOrderSuccess(tenantId, "inv_9988");
     expect(res.ok).toBe(true);
     expect(res.orderId).toBe(orderId);
@@ -218,5 +227,36 @@ describe("UddoktaPay Automated Payment Engine", () => {
       expect(sub.currentPeriodStart.getTime()).toBe(before.currentPeriodStart.getTime());
       expect(await tx.paymentProof.count({ where: { tenantId, trxId: dynamicTrx } })).toBe(1);
     });
+  });
+  it("a store with no keys of its own gets no gateway: it never falls back to BizTrackBD's key", async () => {
+    const tenantId = `test_tenant_nokey_${randomUUID().slice(0, 8)}`;
+    await withTenant(tenantId, async (tx) => {
+      await tx.tenant.create({ data: { id: tenantId, name: "No Key Store", subdomain: `nk${randomUUID().slice(0, 8)}`, status: "ACTIVE", planTier: "PRO", trialEndsAt: new Date(Date.now() + 86400000) } });
+    });
+
+    const cfg = await getStoreUddoktaPayConfig(tenantId);
+    expect(cfg.isCustom).toBe(false);
+    expect(cfg.apiKey).toBe("");
+
+    let called = false;
+    setUddoktaPayFetchForTests(async () => {
+      called = true;
+      return new Response("{}", { status: 200 });
+    });
+    await expect(processUddoktaPayOrderSuccess(tenantId, "inv_x")).rejects.toThrow(/not set up for this store/i);
+    expect(called).toBe(false);
+  });
+
+  it("plan payments use the account saved in Platform Admin, and fall back to the environment only when nothing is saved", async () => {
+    const db = getPlatformPrisma();
+    await db.platformConfig.deleteMany({ where: { key: { in: ["uddoktapay_api_key", "uddoktapay_base_url"] } } });
+    const before = await getPlatformUddoktaPayCredentials();
+    expect(before === null || before.apiKey === DEFAULT_UDDOKTAPAY_API_KEY).toBe(true);
+
+    await db.platformConfig.create({ data: { key: "uddoktapay_api_key", value: "platform-saved-key-1", description: "test", updatedBy: "test" } });
+    await db.platformConfig.create({ data: { key: "uddoktapay_base_url", value: "https://biztrack.paymently.io", description: "test", updatedBy: "test" } });
+    expect(await getPlatformUddoktaPayCredentials()).toEqual({ apiKey: "platform-saved-key-1", baseUrl: "https://biztrack.paymently.io" });
+
+    await db.platformConfig.deleteMany({ where: { key: { in: ["uddoktapay_api_key", "uddoktapay_base_url"] } } });
   });
 });

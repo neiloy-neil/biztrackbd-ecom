@@ -25,11 +25,12 @@ export async function saveAllTrackingAction(form: FormData): Promise<void> {
       googleAnalyticsId: String(form.get("googleAnalyticsId") ?? ""),
       googleTagManagerId: String(form.get("googleTagManagerId") ?? ""),
       tiktokPixelId: String(form.get("tiktokPixelId") ?? ""),
-      ga4ApiSecret: String(form.get("ga4ApiSecret") ?? ""),
+      // Write-only: blank keeps the saved secret, the checkbox removes it.
+      ga4ApiSecret: form.get("removeGa4ApiSecret") ? null : String(form.get("ga4ApiSecret") ?? ""),
       metaDomainVerification: String(form.get("metaDomainVerification") ?? ""),
       googleSiteVerification: String(form.get("googleSiteVerification") ?? ""),
       googleOAuthClientId: String(form.get("googleOAuthClientId") ?? ""),
-      googleOAuthClientSecret: String(form.get("googleOAuthClientSecret") ?? ""),
+      googleOAuthClientSecret: form.get("removeGoogleOAuthClientSecret") ? null : String(form.get("googleOAuthClientSecret") ?? ""),
       googleMerchantCenterId: String(form.get("googleMerchantCenterId") ?? ""),
     });
   } catch (e) {

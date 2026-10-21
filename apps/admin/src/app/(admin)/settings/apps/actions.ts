@@ -119,15 +119,15 @@ export async function saveTrackingPixelsAction(input: {
   const s = await requireAction("marketing", "edit");
   try {
     await saveTrackingConfig(s.tenantId, s.actor, {
-      pixelId: input.metaPixelId ?? "",
-      googleAnalyticsId: input.googleAnalyticsId ?? "",
-      googleTagManagerId: input.googleTagManagerId ?? "",
-      tiktokPixelId: input.tiktokPixelId ?? "",
-      metaDomainVerification: input.metaDomainVerification ?? "",
-      googleSiteVerification: input.googleSiteVerification ?? "",
-      googleOAuthClientId: input.googleOAuthClientId ?? "",
-      googleOAuthClientSecret: input.googleOAuthClientSecret ?? "",
-      googleMerchantCenterId: input.googleMerchantCenterId ?? "",
+      pixelId: input.metaPixelId,
+      googleAnalyticsId: input.googleAnalyticsId,
+      googleTagManagerId: input.googleTagManagerId,
+      tiktokPixelId: input.tiktokPixelId,
+      metaDomainVerification: input.metaDomainVerification,
+      googleSiteVerification: input.googleSiteVerification,
+      googleOAuthClientId: input.googleOAuthClientId,
+      googleOAuthClientSecret: input.googleOAuthClientSecret,
+      googleMerchantCenterId: input.googleMerchantCenterId,
     });
 
     if (input.capiAccessToken?.trim()) {

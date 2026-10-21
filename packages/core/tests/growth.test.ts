@@ -6,7 +6,7 @@ import {
   DomainError, abandonedTabCounts, captureCheckout, cleanText, createOrder, createQuickOrder, displayName, getAbandonedMetrics, getReviewSummary, getTrackingOverview, listAbandoned, listPublicReviews,
   listReviews, logCallOutcome, purchaseEventId, recordBrowserPurchase, recoveryText, replyToReview, resolveRecovery, reviewTabCounts, reviewableItems, savePixelId, saveIntegration,
   sendRecoveryMessages, sendServerPurchase, sendTestEvent, setEventPublisher, setPixelFetchForTests, setReviewPublished, setReviewsAutoPublish, setSmsSender, submitReview, sweepRecoveryMessages,
-  trackBrowserEvent, transitionOrder, saveTrackingConfig, sendGa4ServerEvent, type SmsSender, type StaffActor,
+  trackBrowserEvent, transitionOrder, saveTrackingConfig, sendGa4ServerEvent, getTrackingConfig, type SmsSender, type StaffActor,
 } from "../src";
 
 let owner: PrismaClient;
@@ -407,14 +407,60 @@ describe("the Pixel and server-side events", () => {
 
     await savePixelId(s.f.tenantId, s.owner, "999888777666555");
     let row = await read();
-    expect(row).toMatchObject({ metaPixelId: "999888777666555", googleAnalyticsId: "G-ABC123XYZ", googleTagManagerId: "GTM-ABC123X", tiktokPixelId: "TT1234567890", ga4ApiSecret: "secret_value_123" });
+    expect(row).toMatchObject({ metaPixelId: "999888777666555", googleAnalyticsId: "G-ABC123XYZ", googleTagManagerId: "GTM-ABC123X", tiktokPixelId: "TT1234567890" });
+    const sealed = row.ga4ApiSecret;
+    expect(sealed).toMatch(/^enc:/);
+    expect(sealed).not.toContain("secret_value_123");
 
     await saveTrackingConfig(s.f.tenantId, s.owner, { googleTagManagerId: "" });
     row = await read();
-    expect(row).toMatchObject({ metaPixelId: "999888777666555", googleAnalyticsId: "G-ABC123XYZ", googleTagManagerId: null, ga4ApiSecret: "secret_value_123" });
+    expect(row).toMatchObject({ metaPixelId: "999888777666555", googleAnalyticsId: "G-ABC123XYZ", googleTagManagerId: null, ga4ApiSecret: sealed });
 
     await saveTrackingConfig(s.f.tenantId, s.owner, {});
     expect(await read()).toMatchObject({ metaPixelId: "999888777666555", googleAnalyticsId: "G-ABC123XYZ" });
+  });
+
+  it("the GA4 and Google OAuth secrets are stored encrypted, never returned, kept on a blank save and removable", async () => {
+    const s = await store("px-secrets");
+    const read = () => owner.storeSettings.findFirstOrThrow({ where: { tenantId: s.f.tenantId } });
+    await saveTrackingConfig(s.f.tenantId, s.owner, { googleAnalyticsId: "G-ABC123XYZ", ga4ApiSecret: "ga4_secret_value_1", googleOAuthClientSecret: "oauth-secret-value-1" });
+
+    const row = await read();
+    expect(row.ga4ApiSecret).toMatch(/^enc:/);
+    expect(row.googleOAuthClientSecret).toMatch(/^enc:/);
+    expect(JSON.stringify(row)).not.toContain("ga4_secret_value_1");
+    expect(JSON.stringify(row)).not.toContain("oauth-secret-value-1");
+
+    // What the admin screens receive carries only flags.
+    const cfg = await getTrackingConfig(s.f.tenantId, s.owner);
+    expect(cfg.ga4ApiSecretSet).toBe(true);
+    expect(cfg.googleOAuthClientSecretSet).toBe(true);
+    expect(JSON.stringify(cfg)).not.toMatch(/ga4_secret_value_1|oauth-secret-value-1|enc:/);
+
+    // A blank or missing secret on a later save keeps the stored one.
+    await saveTrackingConfig(s.f.tenantId, s.owner, { ga4ApiSecret: "", googleOAuthClientSecret: "", googleTagManagerId: "GTM-ABC123X" });
+    expect((await read()).ga4ApiSecret).toBe(row.ga4ApiSecret);
+
+    // The sender can still open it: a GA4 purchase reaches Google with the real secret.
+    await sendGa4ServerEvent(s.f.tenantId, { name: "purchase", transactionId: "ord_sec_1", value: 100 });
+    expect(meta.hits.some((h) => h.url.includes("google-analytics.com") && h.url.includes("api_secret=ga4_secret_value_1"))).toBe(true);
+
+    // null removes it.
+    await saveTrackingConfig(s.f.tenantId, s.owner, { ga4ApiSecret: null });
+    expect((await read()).ga4ApiSecret).toBeNull();
+    expect((await getTrackingConfig(s.f.tenantId, s.owner)).ga4ApiSecretSet).toBe(false);
+  });
+
+  it("a secret saved before encryption existed still works, and is sealed on the next save", async () => {
+    const s = await store("px-legacy");
+    await saveTrackingConfig(s.f.tenantId, s.owner, { googleAnalyticsId: "G-ABC123XYZ" });
+    await owner.storeSettings.updateMany({ where: { tenantId: s.f.tenantId }, data: { ga4ApiSecret: "legacy_plain_secret_1" } });
+
+    await sendGa4ServerEvent(s.f.tenantId, { name: "purchase", transactionId: "ord_legacy_1", value: 50 });
+    expect(meta.hits.some((h) => h.url.includes("api_secret=legacy_plain_secret_1"))).toBe(true);
+
+    await saveTrackingConfig(s.f.tenantId, s.owner, { ga4ApiSecret: "legacy_plain_secret_1" });
+    expect((await owner.storeSettings.findFirstOrThrow({ where: { tenantId: s.f.tenantId } })).ga4ApiSecret).toMatch(/^enc:/);
   });
 
   it("reports a GA4 purchase once per order even when the return page and the webhook both try", async () => {

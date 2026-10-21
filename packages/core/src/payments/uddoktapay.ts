@@ -229,11 +229,30 @@ export async function getStoreUddoktaPayConfig(tenantId: string): Promise<{
   } catch {
     // not configured in test mode
   }
+  // A store that has not saved its own UddoktaPay keys has no online payment. Never fall back to BizTrackBD's own key here: customers'
+  // money would land in BizTrackBD's account instead of the store's.
   return {
-    apiKey: DEFAULT_UDDOKTAPAY_API_KEY,
+    apiKey: "",
     baseUrl: DEFAULT_UDDOKTAPAY_BASE_URL,
     isCustom: false,
   };
+}
+
+/**
+ * BizTrackBD's own UddoktaPay account, used only for plan payments (never for a store's customers). Saved in Platform Admin ->
+ * Settings -> Payment Gateway; the UDDOKTAPAY_* environment variables are the fallback. Null when neither is set.
+ */
+export async function getPlatformUddoktaPayCredentials(): Promise<{ apiKey: string; baseUrl: string } | null> {
+  let rows: { key: string; value: string }[] = [];
+  try {
+    rows = await getPlatformPrisma().platformConfig.findMany({ where: { key: { in: ["uddoktapay_api_key", "uddoktapay_base_url"] } }, select: { key: true, value: true } });
+  } catch {
+    // The database being unreachable falls through to the environment.
+  }
+  const saved = new Map(rows.map((r) => [r.key, r.value.trim()]));
+  const apiKey = saved.get("uddoktapay_api_key") || DEFAULT_UDDOKTAPAY_API_KEY;
+  if (!apiKey) return null;
+  return { apiKey, baseUrl: saved.get("uddoktapay_base_url") || DEFAULT_UDDOKTAPAY_BASE_URL };
 }
 
 /**
@@ -245,6 +264,7 @@ export async function processUddoktaPayOrderSuccess(
   ctx: { ip?: string | null; userAgent?: string | null; fbp?: string | null; fbc?: string | null; url?: string | null } = {},
 ): Promise<{ ok: boolean; orderId: string; status: string }> {
   const cfg = await getStoreUddoktaPayConfig(tenantId);
+  if (!cfg.isCustom) throw new ValidationError("Online payment is not set up for this store");
   const verified = await verifyUddoktaPayPayment({
     apiKey: cfg.apiKey,
     baseUrl: cfg.baseUrl,
@@ -308,9 +328,11 @@ export async function processUddoktaPaySubscriptionSuccess(
   invoiceId: string,
   ctx: { ip?: string | null; userAgent?: string | null; fbp?: string | null; fbc?: string | null } = {},
 ): Promise<{ ok: boolean; tenantId: string; plan: string }> {
+  const platform = await getPlatformUddoktaPayCredentials();
+  if (!platform) throw new ValidationError("Online payment is not set up");
   const verified = await verifyUddoktaPayPayment({
-    apiKey: DEFAULT_UDDOKTAPAY_API_KEY,
-    baseUrl: DEFAULT_UDDOKTAPAY_BASE_URL,
+    apiKey: platform.apiKey,
+    baseUrl: platform.baseUrl,
     invoiceId,
   });
 
