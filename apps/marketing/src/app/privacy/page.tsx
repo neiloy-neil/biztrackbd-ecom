@@ -52,7 +52,8 @@ export default function Privacy() {
         <p>We use a small number of providers to run the service: hosting (Vercel), the database, sign-in and file storage (Supabase), email (Brevo) and text messages (sms.net.bd). They process data only to provide those services. Couriers a store connects (Steadfast, Pathao, RedX) receive the delivery details needed to collect and deliver a parcel.</p>
 
         <h2>Cookies</h2>
-        <p>We use cookies that keep you signed in and remember your language and cart. Stores may add their own advertising pixels (for example Meta); that is the store&apos;s choice and the store&apos;s responsibility to tell its customers.</p>
+        <p>On biztrack.bd we use analytics and advertising measurement (Meta and Google) to understand which pages and campaigns bring visitors to us. They set cookies and receive page and click events, plus a one-way scrambled form (hash) of an email or phone number when you submit a form or sign up. They do not run if your browser sends Do Not Track or Global Privacy Control. Meta, Google and your own browser settings let you block or delete these cookies at any time.</p>
+        <p>We also use cookies that keep you signed in and remember your language and cart. Stores may add their own advertising pixels (for example Meta); that is the store&apos;s choice and the store&apos;s responsibility to tell its customers.</p>
 
         <h2>How long we keep it</h2>
         <p>We keep a store&apos;s data while the account is open. If a plan is not paid the store goes offline and then locked, but the data is kept so the owner can pay and return, or download it. You can ask us to delete your account and your store&apos;s data and we will, apart from records we must keep for accounting or the law.</p>

@@ -69,16 +69,20 @@ export function trackFunnelEvent(name: "PageView" | "ViewContent" | "InitiateChe
   }
 }
 
-/** Check current consent state */
+/**
+ * Analytics runs by default (no cookie banner). It stays off for visitors who send Do Not Track or Global Privacy Control,
+ * and for anyone who declined under the earlier banner (their choice is still stored).
+ */
 export function getPlatformConsent(): "granted" | "denied" | "unset" {
   if (typeof window === "undefined") return "unset";
   try {
-    const stored = localStorage.getItem(CONSENT_STORAGE_KEY);
-    if (stored === "granted" || stored === "denied") return stored;
+    if (localStorage.getItem(CONSENT_STORAGE_KEY) === "denied") return "denied";
   } catch {
     /* ignore */
   }
-  return "unset";
+  const nav = navigator as Navigator & { globalPrivacyControl?: boolean };
+  if (navigator.doNotTrack === "1" || nav.globalPrivacyControl === true) return "denied";
+  return "granted";
 }
 
 /** Fires a conversion event on the BizTrackBD marketing website with consent, PII protection, and eventID deduplication */
@@ -138,21 +142,12 @@ export function PlatformTracker() {
   const path = usePathname();
   const first = useRef(true);
   const [consent, setConsent] = useState<"granted" | "denied" | "unset">("unset");
-  const [bannerVisible, setBannerVisible] = useState(false);
 
   useEffect(() => {
     // Initialize first-touch and last-touch attribution on mount
     initClientAttribution();
 
-    const current = getPlatformConsent();
-    setConsent(current);
-    if (current === "unset") {
-      setBannerVisible(true);
-    }
-
-    const onOpenSettings = () => setBannerVisible(true);
-    window.addEventListener("open-cookie-settings", onOpenSettings);
-    return () => window.removeEventListener("open-cookie-settings", onOpenSettings);
+    setConsent(getPlatformConsent());
   }, []);
 
   // One PageView per path, even if several triggers race (consent click, script ready, route change).
@@ -205,19 +200,9 @@ export function PlatformTracker() {
     return () => document.removeEventListener("click", onClick, true);
   }, [consent]);
 
-  const handleConsent = (decision: "granted" | "denied") => {
-    try {
-      localStorage.setItem(CONSENT_STORAGE_KEY, decision);
-    } catch {
-      /* ignore */
-    }
-    setConsent(decision);
-    setBannerVisible(false);
-  };
-
   return (
     <>
-      {/* Platform Meta Pixel - Only mounted after explicit affirmative consent */}
+      {/* Platform Meta Pixel - Mounted unless the visitor opted out (Do Not Track, Global Privacy Control) */}
       {consent === "granted" && PIXEL_ID && (
         <Script
           id="platform-meta-pixel"
@@ -228,7 +213,7 @@ export function PlatformTracker() {
         />
       )}
 
-      {/* Platform GA4 - Only mounted after explicit affirmative consent */}
+      {/* Platform GA4 - Mounted unless the visitor opted out (Do Not Track, Global Privacy Control) */}
       {consent === "granted" && GA4_ID && (
         <>
           <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA4_ID}`} strategy="afterInteractive" />
@@ -242,7 +227,7 @@ export function PlatformTracker() {
         </>
       )}
 
-      {/* Platform GTM - Only mounted after explicit affirmative consent */}
+      {/* Platform GTM - Mounted unless the visitor opted out (Do Not Track, Global Privacy Control) */}
       {consent === "granted" && GTM_ID && (
         <>
           <Script
@@ -261,63 +246,6 @@ export function PlatformTracker() {
             />
           </noscript>
         </>
-      )}
-
-      {/* Non-intrusive Cookie & Privacy Consent Banner */}
-      {bannerVisible && (
-        <aside
-          role="region"
-          aria-label="Cookie and Privacy Preferences"
-          style={{
-            position: "fixed",
-            bottom: 16,
-            left: 16,
-            right: 16,
-            maxWidth: 580,
-            zIndex: 9999,
-            background: "#FFFFFF",
-            border: "1.5px solid var(--line-strong)",
-            borderRadius: 14,
-            padding: "12px 14px",
-            boxShadow: "0 12px 36px rgba(11, 77, 59, 0.15)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-            <span style={{ fontSize: 18 }} aria-hidden="true">🛡️</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13.5, fontWeight: 700, color: "var(--ink)" }}>
-                Your Privacy &amp; Consent Choices
-              </div>
-              <p style={{ fontSize: 12.5, color: "var(--ink-2)", marginTop: 4, lineHeight: 1.5 }}>
-                Essential cookies keep the site secure and working. With your permission we also use anonymised analytics. We never sell your personal data or phone numbers.
-              </p>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm"
-                  onClick={() => handleConsent("granted")}
-                  style={{ minHeight: 34, padding: "6px 14px", fontSize: 12.5 }}
-                >
-                  Accept Analytics
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => handleConsent("denied")}
-                  style={{ minHeight: 34, padding: "6px 14px", fontSize: 12.5 }}
-                >
-                  Decline Non-Essential
-                </button>
-                <a
-                  href="/privacy"
-                  style={{ fontSize: 12, color: "var(--brand)", textDecoration: "underline", marginLeft: 4 }}
-                >
-                  Read Policy
-                </a>
-              </div>
-            </div>
-          </div>
-        </aside>
       )}
     </>
   );
