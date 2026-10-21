@@ -1,5 +1,6 @@
 import { getPlatformPrisma, type PrismaClient } from "@biztrackbd/db";
 import { ForbiddenError, ValidationError } from "../errors";
+import { normalizeUddoktaPayBaseUrl } from "../payments/uddoktapay";
 import { DEFAULT_FRAUD_CHECKER_ENDPOINT, clearFraudCheckerCache } from "../fraud/courier-api";
 import type { PlatformActor } from "./admin";
 
@@ -693,7 +694,7 @@ export async function savePlatformUddoktaPayConfig(
   const db = dbOf(deps);
 
   if (input.baseUrl !== undefined) {
-    const cleaned = input.baseUrl.trim();
+    const cleaned = input.baseUrl.trim() ? normalizeUddoktaPayBaseUrl(input.baseUrl) : "";
     if (cleaned) {
       await db.platformConfig.upsert({
         where: { key: "uddoktapay_base_url" },
@@ -750,16 +751,22 @@ export async function testPlatformUddoktaPay(
     db.platformConfig.findUnique({ where: { key: "uddoktapay_api_key" } }),
   ]);
 
-  const baseUrl = urlRow?.value?.trim() || process.env.UDDOKTAPAY_BASE_URL?.trim();
+  const rawBase = urlRow?.value?.trim() || process.env.UDDOKTAPAY_BASE_URL?.trim();
   const apiKey = keyRow?.value?.trim() || process.env.UDDOKTAPAY_API_KEY?.trim();
 
-  if (!baseUrl || !apiKey) {
+  if (!rawBase || !apiKey) {
     return { ok: false, latencyMs: 0, message: "UddoktaPay Base URL and API Key must both be configured." };
+  }
+  let baseUrl: string;
+  try {
+    baseUrl = normalizeUddoktaPayBaseUrl(rawBase);
+  } catch (err) {
+    return { ok: false, latencyMs: 0, message: err instanceof Error ? err.message : "Invalid UddoktaPay base URL." };
   }
 
   const start = Date.now();
   try {
-    const res = await fetch(`${baseUrl.replace(/\/+$/, "")}/api/checkout-v2`, {
+    const res = await fetch(`${baseUrl}/api/checkout-v2`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

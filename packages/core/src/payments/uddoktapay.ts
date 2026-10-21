@@ -55,13 +55,31 @@ export interface UddoktaPayVerifyResponse {
 }
 
 /**
+ * Accepts what people actually paste into settings: "biztrack.paymently.io", "https://x.io/", "https://x.io/api".
+ * Returns the origin-style base the endpoints are appended to ("https://x.io"), or throws if it is not a URL.
+ */
+export function normalizeUddoktaPayBaseUrl(raw: string): string {
+  let v = raw.trim();
+  if (!v) throw new ValidationError("UddoktaPay base URL is empty");
+  if (!/^https?:\/\//i.test(v)) v = `https://${v}`;
+  v = v.replace(/\/+$/, "").replace(/\/api$/i, "");
+  try {
+    const u = new URL(v);
+    if (!u.hostname.includes(".") && u.hostname !== "localhost") throw new Error("host");
+  } catch {
+    throw new ValidationError("UddoktaPay base URL is not a valid address, e.g. https://pay.example.com");
+  }
+  return v;
+}
+
+/**
  * Creates an UddoktaPay automated checkout charge.
  * POST {base_URL}/api/checkout-v2
  */
 export async function createUddoktaPayCharge(
   req: UddoktaPayChargeRequest,
 ): Promise<UddoktaPayChargeResponse> {
-  const baseUrl = (req.baseUrl || DEFAULT_UDDOKTAPAY_BASE_URL).replace(/\/$/, "");
+  const baseUrl = normalizeUddoktaPayBaseUrl(req.baseUrl || DEFAULT_UDDOKTAPAY_BASE_URL);
   const apiKey = req.apiKey || DEFAULT_UDDOKTAPAY_API_KEY;
   if (!apiKey) throw new ValidationError("Online payment is not set up for this store");
 
@@ -115,7 +133,7 @@ export async function verifyUddoktaPayPayment(opts: {
   baseUrl?: string;
   invoiceId: string;
 }): Promise<UddoktaPayVerifyResponse> {
-  const baseUrl = (opts.baseUrl || DEFAULT_UDDOKTAPAY_BASE_URL).replace(/\/$/, "");
+  const baseUrl = normalizeUddoktaPayBaseUrl(opts.baseUrl || DEFAULT_UDDOKTAPAY_BASE_URL);
   const apiKey = opts.apiKey || DEFAULT_UDDOKTAPAY_API_KEY;
   if (!apiKey) throw new ValidationError("Online payment is not set up for this store");
 
