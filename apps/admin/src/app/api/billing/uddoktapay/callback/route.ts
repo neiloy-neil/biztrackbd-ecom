@@ -13,7 +13,10 @@ export async function GET(req: NextRequest) {
 
   // Verify invoice with UddoktaPay gateway
   try {
-    const verified = await processUddoktaPaySubscriptionSuccess(invoiceId);
+    const verified = await processUddoktaPaySubscriptionSuccess(invoiceId, {
+      ip: req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null,
+      userAgent: req.headers.get("user-agent"),
+    });
     if (verified.ok) {
       return NextResponse.redirect(
         new URL(`/billing?success=1&plan=${encodeURIComponent(verified.plan)}`, origin),

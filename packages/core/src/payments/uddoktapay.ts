@@ -3,6 +3,7 @@ import { NotFoundError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
 import { sendServerPurchase } from "../growth/tracking";
 import { loadCredentials } from "../vault/integrations";
+import { enqueueNotificationJob } from "../messaging/queue";
 
 // The shared sandbox address and its public test key exist for development only. In production a store without its own keys must not be
 // offered online payment, or shoppers would be sent to a sandbox where any made-up transaction id marks the order paid.
@@ -289,6 +290,7 @@ export async function processUddoktaPayOrderSuccess(
  */
 export async function processUddoktaPaySubscriptionSuccess(
   invoiceId: string,
+  ctx: { ip?: string | null; userAgent?: string | null } = {},
 ): Promise<{ ok: boolean; tenantId: string; plan: string }> {
   const verified = await verifyUddoktaPayPayment({
     apiKey: DEFAULT_UDDOKTAPAY_API_KEY,
@@ -311,9 +313,12 @@ export async function processUddoktaPaySubscriptionSuccess(
   if (!tenantId) throw new ValidationError("Missing tenantId in subscription metadata");
 
   const db = getPlatformPrisma();
+  let firstTimeSeen = false;
+  let owner: { email: string | null; phone: string | null } = { email: null, phone: null };
   await db.$transaction(async (tx) => {
     const tenant = await tx.tenant.findUnique({ where: { id: tenantId } });
     if (!tenant) throw new NotFoundError("Tenant");
+    owner = { email: tenant.ownerEmail, phone: tenant.ownerPhone };
 
     const now = new Date();
     const periodEnd = new Date(now);
@@ -364,6 +369,7 @@ export async function processUddoktaPaySubscriptionSuccess(
     const trxId = verified.transactionId || invoiceId;
     const existingProof = await tx.paymentProof.findUnique({ where: { trxId } });
     if (!existingProof) {
+      firstTimeSeen = true;
       await tx.paymentProof.create({
         data: {
           tenantId,
@@ -387,6 +393,31 @@ export async function processUddoktaPaySubscriptionSuccess(
       data: { status: "ACTIVE" },
     });
   });
+
+  // Tell Meta once per payment (a refreshed callback page finds the proof already stored). Never blocks the customer.
+  if (firstTimeSeen) {
+    enqueueNotificationJob({
+      tenantId: "platform",
+      recipient: "META_CAPI",
+      channel: "META_CAPI",
+      event: "Purchase",
+      body: JSON.stringify({
+        tenantId,
+        invoiceId,
+        plan: planTier,
+        interval,
+        value: Number(verified.amount || 0),
+        paymentMethod: verified.paymentMethod || null,
+        ownerEmail: owner.email,
+        ownerPhone: owner.phone,
+        user: { ip: ctx.ip, userAgent: ctx.userAgent },
+      }),
+      metadata: { tenantId, invoiceId },
+      immediateDispatch: true,
+    }).catch((err) => {
+      console.warn("[uddoktapay] Meta Purchase dispatch warning:", err instanceof Error ? err.message : err);
+    });
+  }
 
   return { ok: true, tenantId, plan: planTier };
 }

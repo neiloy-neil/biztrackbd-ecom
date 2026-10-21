@@ -11,7 +11,9 @@ import {
 import {
   trackPlatformInquiryCapi,
   trackPlatformRegistrationCapi,
+  trackPlatformPurchaseCapi,
   type PlatformInquiryEventInput,
+  type PlatformPurchaseEventInput,
   type PlatformRegistrationEventInput,
 } from "../platform/tracking";
 
@@ -389,6 +391,8 @@ async function dispatchCapiJob(
       res = await trackPlatformRegistrationCapi(
         parsedPayload as unknown as PlatformRegistrationEventInput
       );
+    } else if (event === "Purchase") {
+      res = await trackPlatformPurchaseCapi(parsedPayload as unknown as PlatformPurchaseEventInput);
     } else {
       res = { ok: false, httpStatus: 400, detail: `Unsupported platform CAPI event: ${event}` };
     }

@@ -10,6 +10,8 @@ import {
   trackPlatformInquiryCapi,
   trackPlatformRegistrationCapi,
   trackPlatformBrowserEventCapi,
+  trackPlatformPurchaseCapi,
+  platformPurchaseEventId,
 } from "../src";
 
 const sha = (s: string) => createHash("sha256").update(s).digest("hex");
@@ -193,6 +195,46 @@ describe("Meta Conversions API (CAPI) Server-Side Events (DATA-002)", () => {
     const badName = await trackPlatformBrowserEventCapi({ name: "Purchase" as never, eventId: "ev_3", consentGiven: true });
     expect(noConsent.ok).toBe(false);
     expect(badName.ok).toBe(false);
+    expect(interceptedCalls).toHaveLength(0);
+  });
+  it("sends a plan Purchase with a per-invoice event id, BDT value and hashed owner details", async () => {
+    process.env.PLATFORM_META_PIXEL_ID = "987654321098765";
+    process.env.PLATFORM_META_CAPI_TOKEN = "EAABtest_token_secret";
+
+    const res = await trackPlatformPurchaseCapi({
+      tenantId: "t_1",
+      invoiceId: "INV123",
+      plan: "PRO",
+      interval: "MONTHLY",
+      value: 1990,
+      paymentMethod: "bkash",
+      ownerEmail: "Owner@Shop.bd",
+      ownerPhone: "01712345678",
+      user: { ip: "103.20.30.40", userAgent: "UA" },
+    });
+
+    expect(res.ok).toBe(true);
+    const ev = interceptedCalls[0]!.body.data[0];
+    expect(ev.event_name).toBe("Purchase");
+    expect(ev.event_id).toBe(platformPurchaseEventId("INV123"));
+    expect(ev.custom_data.value).toBe(1990);
+    expect(ev.custom_data.currency).toBe("BDT");
+    expect(ev.custom_data.plan).toBe("PRO");
+    expect(ev.user_data.em).toEqual([sha("owner@shop.bd")]);
+    expect(ev.user_data.ph).toEqual([sha("8801712345678")]);
+    expect(JSON.stringify(ev)).not.toContain("Owner@Shop.bd");
+  });
+
+  it("does not send a Purchase when switched off, without an amount, or when consent is false", async () => {
+    process.env.PLATFORM_META_PIXEL_ID = "987654321098765";
+    process.env.PLATFORM_META_CAPI_TOKEN = "EAABtest_token_secret";
+    const base = { tenantId: "t_1", invoiceId: "INV9", plan: "PRO", interval: "MONTHLY", value: 1990 };
+
+    expect((await trackPlatformPurchaseCapi({ ...base, value: 0 })).ok).toBe(false);
+    expect((await trackPlatformPurchaseCapi({ ...base, consentGiven: false })).ok).toBe(false);
+    process.env.PLATFORM_META_PURCHASE_EVENTS = "off";
+    expect((await trackPlatformPurchaseCapi(base)).ok).toBe(false);
+    delete process.env.PLATFORM_META_PURCHASE_EVENTS;
     expect(interceptedCalls).toHaveLength(0);
   });
 });

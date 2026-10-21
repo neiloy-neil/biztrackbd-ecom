@@ -272,6 +272,85 @@ export async function trackPlatformBrowserEventCapi(input: PlatformBrowserEventI
   }
 }
 
+export interface PlatformPurchaseEventInput {
+  tenantId: string;
+  /** The gateway's invoice id: the same payment always yields the same Meta event id. */
+  invoiceId: string;
+  plan: string;
+  interval: string;
+  /** Amount charged, in BDT. */
+  value: number;
+  paymentMethod?: string | null;
+  ownerEmail?: string | null;
+  ownerPhone?: string | null;
+  url?: string | null;
+  user?: PlatformUserContext;
+  consentGiven?: boolean | null;
+  testCode?: string | null;
+}
+
+export const platformPurchaseEventId = (invoiceId: string) => `purchase_sub_${invoiceId}`;
+
+/**
+ * Server-side Purchase for a plan payment that the gateway confirmed as COMPLETED.
+ * Set PLATFORM_META_PURCHASE_EVENTS=off to switch it off without a deploy of code.
+ */
+export async function trackPlatformPurchaseCapi(input: PlatformPurchaseEventInput): Promise<SendResult> {
+  const pixelId = getPlatformPixelId();
+  const token = getPlatformCapiToken();
+  if (!pixelId || !token) return { ok: false, httpStatus: null, detail: "Platform Meta Pixel or CAPI token is not configured" };
+  if ((process.env.PLATFORM_META_PURCHASE_EVENTS || "").toLowerCase() === "off") {
+    return { ok: false, httpStatus: null, detail: "Purchase events are switched off" };
+  }
+  if (input.consentGiven === false) return { ok: false, httpStatus: null, detail: "Consent not given" };
+  if (!Number.isFinite(input.value) || input.value <= 0) return { ok: false, httpStatus: null, detail: "No amount to report" };
+
+  const event: ServerEvent = {
+    name: "Purchase",
+    eventId: platformPurchaseEventId(input.invoiceId),
+    time: new Date(),
+    url: input.url || null,
+    user: {
+      phoneLocal: input.ownerPhone || input.user?.phoneLocal,
+      email: input.ownerEmail || input.user?.email,
+      customerId: input.tenantId,
+      ip: input.user?.ip,
+      userAgent: input.user?.userAgent,
+      fbp: input.user?.fbp,
+      fbc: input.user?.fbc,
+    },
+    value: input.value,
+    currency: "BDT",
+    contentIds: [input.plan],
+    contentType: "product",
+    numItems: 1,
+    customData: {
+      tenant_id: input.tenantId,
+      plan: input.plan,
+      billing_interval: input.interval,
+      invoice_id: input.invoiceId,
+      ...(input.paymentMethod ? { payment_method: input.paymentMethod } : {}),
+    },
+  };
+
+  try {
+    const res = await getPixelFetch()(`${graph()}/${pixelId}/events`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(capiBody(event, input.testCode || getPlatformTestEventCode() || undefined)),
+      signal: AbortSignal.timeout(5000),
+    });
+    const body = (await res.json().catch(() => ({}))) as { events_received?: number; error?: { message?: string } };
+    if (!res.ok) {
+      return { ok: false, httpStatus: res.status, detail: (body.error?.message ?? `Meta answered ${res.status}`).slice(0, 200).replace(token, "[token]") };
+    }
+    if (!body.events_received) return { ok: false, httpStatus: res.status, detail: "Meta did not accept the platform purchase event" };
+    return { ok: true, httpStatus: res.status };
+  } catch {
+    return { ok: false, httpStatus: null, detail: "Could not reach Meta Conversions API" };
+  }
+}
+
 export interface PlatformTrackingDiagnostics {
   pixelConfigured: boolean;
   pixelIdMasked: string | null;
