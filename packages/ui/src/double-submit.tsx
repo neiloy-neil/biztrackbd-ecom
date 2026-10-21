@@ -2,13 +2,9 @@
 
 import { useEffect } from "react";
 
-/** A second submit of the same form inside this window is ignored. Long enough to cover a slow server action, short enough that a real retry still works. */
-export const SUBMIT_LOCK_MS = 3000;
+import { SUBMIT_LOCK_MS, shouldBlockSubmit } from "./submit-lock";
 
-/** True when the same form was already submitted a moment ago. */
-export function shouldBlockSubmit(lastSubmitAt: number | undefined, now: number, lockMs: number = SUBMIT_LOCK_MS): boolean {
-  return lastSubmitAt !== undefined && now - lastSubmitAt < lockMs;
-}
+export { SUBMIT_LOCK_MS, shouldBlockSubmit };
 
 /**
  * Safety net for every action form on the page: if a visitor double-clicks, presses Enter twice, or taps again because nothing seemed to

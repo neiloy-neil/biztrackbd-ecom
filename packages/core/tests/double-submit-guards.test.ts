@@ -15,7 +15,7 @@ import {
   type PlatformActor,
   type StaffActor,
 } from "../src";
-import { SUBMIT_LOCK_MS, shouldBlockSubmit } from "../../ui/src/double-submit";
+import { SUBMIT_LOCK_MS, shouldBlockSubmit } from "../../ui/src/submit-lock";
 
 let owner: PrismaClient;
 let app: PrismaClient;
