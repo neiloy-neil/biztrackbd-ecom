@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Hind_Siliguri, Plus_Jakarta_Sans } from "next/font/google";
+import { Baloo_Da_2, Hind_Siliguri } from "next/font/google";
 import Link from "next/link";
+import { BrandLockup } from "@/components/brand-logo";
 import "./marketing.css";
 import "./site.css";
 
-const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-jakarta", display: "swap" });
-const hind = Hind_Siliguri({ subsets: ["bengali", "latin"], weight: ["400", "500", "600", "700"], variable: "--font-hind", display: "swap" });
+const baloo = Baloo_Da_2({ subsets: ["bengali", "latin"], weight: ["800"], variable: "--font-baloo", display: "swap" });
+const hind = Hind_Siliguri({ subsets: ["bengali", "latin"], weight: ["400", "600"], variable: "--font-hind", display: "swap" });
 
 import { getPlatformSeoConfig, getPlatformSiteVerificationCode } from "@biztrackbd/core";
 
@@ -60,7 +61,7 @@ export async function generateMetadata(): Promise<Metadata> {
         { url: "/favicon.ico", sizes: "32x32" },
       ],
       shortcut: "/favicon.ico",
-      apple: "/icon.svg",
+      apple: "/apple-touch-icon.png",
     },
     openGraph: {
       type: "website",
@@ -89,7 +90,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#FFFFFF" };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#0B4D3B" };
 
 const globalJsonLd = {
   "@context": "https://schema.org",
@@ -99,7 +100,7 @@ const globalJsonLd = {
       "@id": `${siteUrl}/#organization`,
       name: "BizTrackBD",
       url: siteUrl,
-      logo: `${siteUrl}/opengraph-image`,
+      logo: `${siteUrl}/logo.png`,
       description: "eCommerce store software and courier automation platform built for Bangladesh.",
       parentOrganization: {
         "@type": "Organization",
@@ -136,7 +137,7 @@ import { SiteNavigation } from "@/components/site-navigation";
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const googleVerification = await getPlatformSiteVerificationCode().catch(() => null);
   return (
-    <html lang="en" data-scroll-behavior="smooth" className={`${jakarta.variable} ${hind.variable}`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${baloo.variable} ${hind.variable}`}>
       <head>
         {googleVerification && (
           <meta name="google-site-verification" content={googleVerification} />
@@ -152,11 +153,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <header className="site-head">
           <div className="wrap row-between">
             <Link href="/" className="brand" prefetch={false}>
-              <svg width="30" height="30" viewBox="0 0 44 44" role="img" aria-label="BizTrackBD">
-                <rect width="44" height="44" rx="12" fill="#5B4FE8" />
-                <path d="M13 32V22M22 32V14M31 32V19" stroke="#fff" strokeWidth="4.4" strokeLinecap="round" />
-              </svg>
-              <span>BizTrack<span style={{ color: "#5B4FE8" }}>BD</span></span>
+              <BrandLockup />
             </Link>
 
             <SiteNavigation />
@@ -168,13 +165,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <div className="foot-cols">
               <div className="foot-brand-col">
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <svg width="30" height="30" viewBox="0 0 44 44" role="img" aria-label="BizTrackBD">
-                    <rect width="44" height="44" rx="12" fill="#5B4FE8" />
-                    <path d="M13 32V22M22 32V14M31 32V19" stroke="#fff" strokeWidth="4.4" strokeLinecap="round" />
-                  </svg>
-                  <div style={{ fontSize: 20, fontWeight: 700 }}>
-                    BizTrack<span style={{ color: "#A9A2FF" }}>BD</span>
-                  </div>
+                  <BrandLockup tone="dark" />
                 </div>
                 <p>
                   The Commerce and Business Operating Platform for Bangladesh. Sell products, verify payments, protect against fake COD returns, and capture high-value customer inquiries with 0% sales commission.
