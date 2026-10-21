@@ -80,6 +80,9 @@ describe("who can call each admin and platform action", () => {
       "apps/admin/src/app/demo/start/route.ts",
       "apps/admin/src/app/demo/exit/route.ts",
       "apps/admin/src/app/api/webhooks/whatsapp/route.ts",
+      // UddoktaPay's plan-payment webhook: called by the gateway, so there is no session. Nothing in the request is trusted: the invoice id is
+      // looked up at the gateway with BizTrackBD's own key and only a COMPLETED answer activates anything (a repeat is applied once).
+      "apps/admin/src/app/api/webhooks/uddoktapay/route.ts",
     ]);
     for (const f of routes.filter((r) => !PUBLIC_ROUTES.has(rel(r)))) {
       const text = readFileSync(f, "utf8");
@@ -87,6 +90,9 @@ describe("who can call each admin and platform action", () => {
       if (!guarded) open.push(rel(f));
     }
     expect(open).toEqual([]);
+    // The plan-payment webhook is only safe because it verifies the invoice with the gateway before doing anything.
+    expect(readFileSync(join(ROOT, "apps/admin/src/app/api/webhooks/uddoktapay/route.ts"), "utf8")).toMatch(/processUddoktaPaySubscriptionSuccess\(/);
+    expect(readFileSync(join(ROOT, "packages/core/src/payments/uddoktapay.ts"), "utf8")).toMatch(/status !== "COMPLETED"/);
     // The one public route that creates something must be the one that enforces the limits.
     expect(readFileSync(join(ROOT, "apps/admin/src/app/demo/start/route.ts"), "utf8")).toMatch(/createDemoSession\(/);
     expect(readFileSync(join(ROOT, "packages/core/src/demo/session.ts"), "utf8")).toMatch(/DemoLimitError[\s\S]*DemoBusyError/);
