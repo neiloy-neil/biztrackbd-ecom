@@ -309,4 +309,6 @@ Some specs in `docs/` describe later phases (a public REST API, an app marketpla
 
 No open-source licence has been chosen yet. The code is public so it can be read and reviewed; please ask before reusing it.
 
+<div align="center"><sub>Built by <a href="https://www.digitaldude.co.uk">The Digital Dude</a> · <a href="https://www.digitaldude.co.uk/work/biztrackbd-ecommerce-platform">Read the case study</a></sub></div>
+
 <div align="center"><sub>Made in Bangladesh, with Claude Code as a pair programmer.</sub></div>
