@@ -83,7 +83,7 @@ export const FALLBACK_PORTFOLIO_PLANS: PlanView[] = [
   },
   {
     tier: "PRO",
-    name: "Business",
+    name: "Business Pro",
     priceMonthly: 799,
     priceYearly: 7990,
     yearlyMonthsFree: 2,

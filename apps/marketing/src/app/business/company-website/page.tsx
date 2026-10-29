@@ -137,7 +137,7 @@ const FAQ: [string, string][] = [
   ],
   [
     "Can multiple partners or assistants access the lead inbox?",
-    "Yes. The Business plan includes 3 staff accounts, and Business Plus includes up to 8 staff accounts with role-based permissions.",
+    "Yes. Business Pro includes 3 staff accounts, and Business Plus includes up to 8 staff accounts with role-based permissions.",
   ],
   [
     "Can we add a blog or media release section?",

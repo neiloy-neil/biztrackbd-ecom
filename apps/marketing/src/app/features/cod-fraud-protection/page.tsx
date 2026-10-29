@@ -79,7 +79,7 @@ const schemaJsonLd = {
       operatingSystem: "Web, iOS, Android",
       offers: {
         "@type": "Offer",
-        price: "799",
+        price: "1499",
         priceCurrency: "BDT",
       },
       featureList: [

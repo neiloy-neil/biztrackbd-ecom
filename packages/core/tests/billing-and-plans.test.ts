@@ -78,7 +78,7 @@ describe("Billing & Subscription Plans Mode Alignment", () => {
 
       const pro = plans.find((p) => p.tier === "PRO");
       expect(pro).toBeDefined();
-      expect(pro?.name).toBe("Business");
+      expect(pro?.name).toBe("Business Pro");
       expect(pro?.priceMonthly).toBe(799);
       expect(pro?.priceYearly).toBe(7990);
       expect(pro?.yearlyMonthsFree).toBe(2);
