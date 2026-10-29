@@ -227,7 +227,7 @@ export function ModeArchitectureMatrix() {
               <span className="status-stamp stamp-paid" style={{ fontSize: 11, background: "#E3F1EA", color: "#0B4D3B", borderColor: "#C6DFD3" }}>
                 HYBRID MODE
               </span>
-              <span style={{ fontSize: 13, fontWeight: 700, color: "#11795A" }}>From ৳1,499/mo (Pro)</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: "#11795A" }}>From ৳799/mo (Pro)</span>
             </div>
             <h3 style={{ margin: "14px 0 6px", fontSize: 20, color: "var(--ink-ledger, #08382B)" }}>
               Inquiries + Full Commerce
