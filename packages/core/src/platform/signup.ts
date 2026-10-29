@@ -304,9 +304,10 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
     await publishEvent("store/created", { tenantId: id, subdomain: sub.label, plan: input.plan });
     await notifyOwner(id, "WELCOME", { trialEndsDate: result.trialEndsAt }, { dedupeKey: id });
 
-    // Dispatch Meta CAPI server-side CompleteRegistration event via durable outbox
+    // Meta CAPI CompleteRegistration. Awaited: on a serverless host the function can be frozen as soon as the page redirects, which would drop
+    // an event that is not finished (it has a 5 s limit and cannot fail the signup).
     if (input.consentGiven !== false) {
-      enqueueNotificationJob({
+      await enqueueNotificationJob({
         tenantId: "platform",
         recipient: "META_CAPI",
         channel: "META_CAPI",

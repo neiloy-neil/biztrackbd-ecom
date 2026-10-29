@@ -87,9 +87,9 @@ export async function submitPlatformInquiry(input: InquiryInput): Promise<Inquir
   const created = { id, name, phone, email, topic, message, status: "NEW" as const, notes: attributionNote, createdAt, updatedAt: createdAt };
   if (count === 0) return created;
 
-  // Dispatch Meta CAPI for platform inquiry if consent given
+  // Dispatch Meta CAPI for platform inquiry if consent given. Awaited so a serverless host cannot freeze the function before it finishes.
   if (input.consentGiven !== false) {
-    trackPlatformInquiryCapi({
+    await trackPlatformInquiryCapi({
       inquiryId: created.id,
       eventId: input.eventId || undefined,
       name,
