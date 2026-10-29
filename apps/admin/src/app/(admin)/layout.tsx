@@ -146,14 +146,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const s = await getSession();
   const role = s.user.role;
   const lang = asLang((await cookies()).get(LANG_COOKIE)?.value);
-  const [staff, settings, counts, announcements, activeModules, capabilities] = await Promise.all([
-    withTenant(s.tenantId, (tx) => tx.tenantUser.findMany({ where: { isActive: true }, orderBy: { createdAt: "asc" }, select: { email: true, name: true, role: true } })),
-    can(role, "design") ? getStoreSettings(s.tenantId, s.actor) : Promise.resolve(null),
-    shellCounts(s.tenantId, s.actor),
-    getActiveAnnouncementsForTenant(s.tenantId),
-    getTenantActiveModules(s.tenantId),
-    getTenantCapabilities(s.tenantId),
-  ]);
+  // Production deliberately uses a one-connection tenant pool. Starting several
+  // interactive RLS transactions together makes the losing calls hit Prisma P2028
+  // while the first transaction still owns that connection.
+  const staff = await withTenant(s.tenantId, (tx) => tx.tenantUser.findMany({ where: { isActive: true }, orderBy: { createdAt: "asc" }, select: { email: true, name: true, role: true } }));
+  const settings = can(role, "design") ? await getStoreSettings(s.tenantId, s.actor) : null;
+  const counts = await shellCounts(s.tenantId, s.actor);
+  const announcements = await getActiveAnnouncementsForTenant(s.tenantId);
+  const activeModules = await getTenantActiveModules(s.tenantId);
+  const capabilities = await getTenantCapabilities(s.tenantId);
   const storeName = settings?.storeName ?? s.tenantSubdomain;
   const check = counts.check;
   const a = s.access;

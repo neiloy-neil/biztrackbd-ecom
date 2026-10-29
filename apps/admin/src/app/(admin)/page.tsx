@@ -41,30 +41,33 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const range = Number(one(sp.range)) || 7;
   const hybridTab = one(sp.tab) || "store";
 
-  const [d, activeModules, connectedCouriers, modeMeta] = await Promise.all([
-    getDashboard(s.tenantId, s.actor, now, { range }),
-    getTenantActiveModules(s.tenantId),
-    listConnectedCouriers(s.tenantId),
-    getTenantModeAndVertical(s.tenantId),
-  ]);
+  // The Vercel admin app intentionally has DB_POOL_MAX=1. These helpers each
+  // open an interactive tenant transaction, so Promise.all can exhaust the only
+  // connection and fail the page with Prisma P2028.
+  const d = await getDashboard(s.tenantId, s.actor, now, { range });
+  const activeModules = await getTenantActiveModules(s.tenantId);
+  const connectedCouriers = await listConnectedCouriers(s.tenantId);
+  const modeMeta = await getTenantModeAndVertical(s.tenantId);
 
   const storeOrigin = storefrontOrigin(s.tenantSubdomain);
 
   // If Portfolio mode or Hybrid in Website tab, load lead and vertical metrics
   let portfolioData: any = null;
   if (modeMeta.siteMode === "PORTFOLIO" || modeMeta.siteMode === "HYBRID") {
-    const [leadsRes, bookingCount, pendingBookingsCount, downloadCount, contentItemCount, domainInfo, storeSettings] = await withTenant(
+    // listSiteLeads owns a tenant transaction. Finish it before opening the
+    // aggregate transaction below; nesting it deadlocks a one-connection pool.
+    const leadsRes = await listSiteLeads(s.tenantId, s.actor, { take: 8 });
+    const [bookingCount, pendingBookingsCount, downloadCount, contentItemCount, domainInfo, storeSettings] = await withTenant(
       s.tenantId,
       async (tx) => {
-        return Promise.all([
-          listSiteLeads(s.tenantId, s.actor, { take: 8 }),
-          tx.bookingRequest.count({ where: { tenantId: s.tenantId } }),
-          tx.bookingRequest.count({ where: { tenantId: s.tenantId, status: "REQUESTED" } }),
-          tx.siteDownload.count({ where: { tenantId: s.tenantId } }),
-          tx.siteContentItem.count({ where: { tenantId: s.tenantId } }),
-          tx.domain.findFirst({ where: { isPrimary: true }, select: { domain: true, verified: true } }),
-          tx.storeSettings.findFirst({ select: { whatsappNumber: true, contactPhone: true, storeName: true } }),
-        ]);
+        // A transaction has one connection; issue its queries in sequence.
+        const bookingCount = await tx.bookingRequest.count({ where: { tenantId: s.tenantId } });
+        const pendingBookingsCount = await tx.bookingRequest.count({ where: { tenantId: s.tenantId, status: "REQUESTED" } });
+        const downloadCount = await tx.siteDownload.count({ where: { tenantId: s.tenantId } });
+        const contentItemCount = await tx.siteContentItem.count({ where: { tenantId: s.tenantId } });
+        const domainInfo = await tx.domain.findFirst({ where: { isPrimary: true }, select: { domain: true, verified: true } });
+        const storeSettings = await tx.storeSettings.findFirst({ select: { whatsappNumber: true, contactPhone: true, storeName: true } });
+        return [bookingCount, pendingBookingsCount, downloadCount, contentItemCount, domainInfo, storeSettings] as const;
       }
     );
 
