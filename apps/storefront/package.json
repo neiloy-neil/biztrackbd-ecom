@@ -15,7 +15,7 @@
     "@biztrackbd/db": "workspace:*",
     "@biztrackbd/ui": "workspace:*",
     "@vercel/edge-config": "^1.5.1",
-    "next": "^16.4.0",
+    "next": "^16.4.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sharp": "0.35.5",
