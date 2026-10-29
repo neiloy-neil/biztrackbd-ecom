@@ -37,7 +37,8 @@ export async function withTenant<T>(
     },
     {
       timeout: options?.timeoutMs ?? 15_000,
-      maxWait: options?.maxWaitMs ?? 5_000,
+      // With a one-connection pool, a busy moment queues requests behind each other; wait for a turn rather than fail the page.
+      maxWait: options?.maxWaitMs ?? 15_000,
       ...(options?.isolationLevel ? { isolationLevel: options.isolationLevel } : {}),
     },
   );
