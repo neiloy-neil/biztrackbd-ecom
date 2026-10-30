@@ -7,6 +7,7 @@ import { SubmitButton } from "@/components/ui";
 import { dateOnly, taka } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
+import { PageHeader } from "@biztrackbd/ui";
 import { Meter, limitNote } from "@/lib/usage";
 import { cancelProofAction } from "./actions";
 import { PayForm } from "./pay-form";
@@ -36,7 +37,11 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
 
   return (
     <>
-      <div className="page-head"><h1>Plan and usage</h1></div>
+      <PageHeader
+        title="Plan & Billing"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Billing" }]}
+        sub={status}
+      />
       {one(sp.sent) && <div className="notice good" role="status" style={{ marginBottom: 12 }} data-testid="proof-sent">Thank you. We will check your payment and switch your plan on.</div>}
       {one(sp.cancelled) && <div className="notice good" role="status" style={{ marginBottom: 12 }}>Payment details removed. You can send them again.</div>}
       {one(sp.err) && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{one(sp.err)}</div>}
@@ -55,7 +60,7 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
                 color: b.siteMode === "PORTFOLIO" ? "#ea580c" : b.siteMode === "HYBRID" ? "#6366f1" : "#059669",
               }}
             >
-              {b.siteMode === "PORTFOLIO" ? "🏢 Business & Dining Plan" : b.siteMode === "HYBRID" ? "⚡ Hybrid Dual-Engine Plan" : "🛍️ Online Store Plan"}
+              {b.siteMode === "PORTFOLIO" ? "Business & Dining Plan" : b.siteMode === "HYBRID" ? "Hybrid Dual-Engine Plan" : "Online Store Plan"}
             </span>
           </div>
           <span className={`pill ${a.state === "ACTIVE" || a.state === "TRIAL" ? "ok" : a.state === "GRACE" ? "warn" : "bad"}`} data-testid="access-state">{ACCESS_LABELS[a.state]}</span>

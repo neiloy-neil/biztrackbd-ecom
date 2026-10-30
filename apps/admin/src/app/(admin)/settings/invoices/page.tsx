@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { can, getStoreSettings } from "@biztrackbd/core";
 import { requireAccess } from "@/lib/session";
+import { PageHeader } from "@biztrackbd/ui";
 import { InvoiceForm } from "./invoice-form";
 
 export const dynamic = "force-dynamic";
@@ -12,8 +13,11 @@ export default async function Invoices() {
   const canEdit = can(s.user.role, "design", "edit");
   return (
     <>
-      <div className="page-head"><h1>Invoices</h1></div>
-      <p className="page-sub">How your invoices, packing slips and courier labels look when you print them from an order.</p>
+      <PageHeader
+        title="Invoice & Packing Slip Layout"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Settings" }, { label: "Invoices" }]}
+        sub="How your invoices, packing slips and courier labels look when you print them from an order."
+      />
       {canEdit ? (
         <InvoiceForm initial={{ footer: st.invoiceFooter ?? "", showLogo: st.invoiceOptions.showLogo, showSku: st.invoiceOptions.showSku, showPricesOnSlip: st.invoiceOptions.showPricesOnSlip, paper: st.invoiceOptions.paper, hasLogo: Boolean(st.logoUrl) }} />
       ) : (

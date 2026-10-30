@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { getUserFromToken } from "@biztrackbd/core";
 import { AT, authMode } from "@/lib/auth";
 import { requireAccess } from "@/lib/session";
+import { PageHeader } from "@biztrackbd/ui";
 import { PasswordPanel, TotpPanel } from "./totp";
 
 export const dynamic = "force-dynamic";
@@ -16,8 +17,11 @@ export default async function Security() {
   const factor = user?.factors.find((f) => f.status === "verified") ?? null;
   return (
     <>
-      <div className="page-head"><h1>Sign-in and security</h1></div>
-      <p className="page-sub">Signed in as {s.user.email}.</p>
+      <PageHeader
+        title="Sign-in & Security"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Security" }]}
+        sub={`Signed in as ${s.user.email}.`}
+      />
       {dev ? (
         <div className="notice" role="note">Development sign-in is on, so there is nothing to set up here. Turn off DEV_AUTH to use real sign-in.</div>
       ) : (

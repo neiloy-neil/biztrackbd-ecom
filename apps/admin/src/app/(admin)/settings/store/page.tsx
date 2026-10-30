@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { can, getStoreSettings } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
+import { PageHeader } from "@biztrackbd/ui";
 import { requireAccess } from "@/lib/session";
 import { pauseAction } from "./actions";
 import { StoreForm } from "./store-form";

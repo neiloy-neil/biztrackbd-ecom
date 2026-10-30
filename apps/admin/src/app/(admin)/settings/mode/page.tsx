@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { can, validateModeTransitionDryRun, type SiteMode, type BusinessVertical } from "@biztrackbd/core";
 import { withTenant } from "@biztrackbd/db";
 import { requireAccess } from "@/lib/session";
+import { PageHeader } from "@biztrackbd/ui";
 import { ModeTransitionClient } from "./mode-transition-client";
 
 export const dynamic = "force-dynamic";
@@ -60,12 +61,11 @@ export default async function OperatingModePage({ searchParams }: PageProps) {
 
   return (
     <>
-      <div className="page-head">
-        <h1>Operating Mode &amp; Architecture</h1>
-      </div>
-      <p className="page-sub">
-        Configure whether your storefront operates as a service portfolio, clinic chamber, or dual-engine hybrid retail store.
-      </p>
+      <PageHeader
+        title="Operating Mode & Architecture"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Settings" }, { label: "Operating Mode" }]}
+        sub="Configure whether your storefront operates as a service portfolio, clinic chamber, or dual-engine hybrid retail store."
+      />
 
       <ModeTransitionClient
         tenant={{

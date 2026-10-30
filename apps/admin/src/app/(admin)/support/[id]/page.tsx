@@ -5,6 +5,7 @@ import { getTenantTicketDetail } from "@biztrackbd/core";
 import { getSession } from "@/lib/session";
 import { replyTicketAction } from "../actions";
 import { SubmitButton } from "@/components/ui";
+import { PageHeader } from "@biztrackbd/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Ticket Details" };

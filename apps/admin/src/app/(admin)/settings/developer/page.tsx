@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { can, listApiKeys, listApiRequestLogs } from "@biztrackbd/core";
 import { getBasePrisma } from "@biztrackbd/db";
 import { requireAccess } from "@/lib/session";
+import { PageHeader } from "@biztrackbd/ui";
 import { DeveloperHubClient } from "./developer-hub-client";
 
 export const dynamic = "force-dynamic";
@@ -34,12 +35,11 @@ export default async function DeveloperSettingsPage() {
 
   return (
     <>
-      <div className="page-head">
-        <h1>Developer Hub & REST API</h1>
-      </div>
-      <p className="page-sub">
-        Generate cryptographically secure API keys, inspect interactive cURL & JavaScript code documentation, and monitor live API traffic logs to connect external ERPs, POS systems, and custom integrations.
-      </p>
+      <PageHeader
+        title="Developer Hub & REST API"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Settings" }, { label: "Developer" }]}
+        sub="Generate cryptographically secure API keys, inspect interactive cURL & JavaScript code documentation, and monitor live API traffic logs to connect external ERPs, POS systems, and custom integrations."
+      />
 
       {!canEdit && (
         <div className="notice" style={{ marginBottom: 16 }}>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listAudit } from "@biztrackbd/core";
 import { requireAccess } from "@/lib/session";
+import { PageHeader } from "@biztrackbd/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -22,8 +23,11 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <h1 style={{ marginTop: 0 }}>Audit log</h1>
-      <p className="muted">Who changed what. Entries cannot be edited or deleted. Keys and passwords are never recorded.</p>
+      <PageHeader
+        title="Audit Log"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Settings" }, { label: "Audit Log" }]}
+        sub="Who changed what. Entries cannot be edited or deleted. Keys and passwords are never recorded."
+      />
       <p className="row">
         {FILTERS.map(([value, label]) => (
           <Link key={label} href={value ? `?area=${value}` : "?"} style={{ fontWeight: area === value ? 700 : 400 }}>{label}</Link>

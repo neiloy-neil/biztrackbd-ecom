@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { can, getMerchantWebhookOverview } from "@biztrackbd/core";
 import { requireAccess } from "@/lib/session";
+import { PageHeader } from "@biztrackbd/ui";
 import { WebhookForm } from "./webhook-form";
 
 export const dynamic = "force-dynamic";
@@ -15,13 +16,11 @@ export default async function WebhooksPage() {
 
   return (
     <>
-      <div className="page-head">
-        <h1>Webhook Integrations</h1>
-      </div>
-      <p className="page-sub">
-        Receive real-time signed HTTP POST payloads whenever critical business events occur in your store,
-        including order checkouts, parcel deliveries, quotation leads, and appointment bookings.
-      </p>
+      <PageHeader
+        title="Webhook Integrations"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Settings" }, { label: "Webhooks" }]}
+        sub="Receive real-time signed HTTP POST payloads whenever critical business events occur in your store, including order checkouts, parcel deliveries, quotation leads, and appointment bookings."
+      />
 
       {!canEdit && (
         <div className="notice" style={{ marginBottom: 16 }}>

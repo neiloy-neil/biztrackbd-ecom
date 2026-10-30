@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { can, getAppCatalogItem, isModuleOn } from "@biztrackbd/core";
 import { withTenant } from "@biztrackbd/db";
 import { SubmitButton } from "@/components/ui";
+import { PageHeader } from "@biztrackbd/ui";
 import { requireAccess } from "@/lib/session";
 import { setModuleAction } from "../actions";
 
@@ -39,11 +40,14 @@ export default async function AppDetailPage({
 
   return (
     <div className="stack" style={{ gap: 20 }}>
-      <div>
-        <Link href="/settings/apps" className="back" prefetch={false}>
-          ← Apps & Integrations
-        </Link>
-      </div>
+      <PageHeader
+        title={app.label}
+        crumbs={[
+          { label: "Settings", href: "/settings/apps" },
+          { label: "Apps", href: "/settings/apps" },
+          { label: app.label },
+        ]}
+      />
 
       {/* Header Banner */}
       <div

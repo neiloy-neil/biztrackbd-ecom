@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getAiSettings, getModuleStatus } from "@biztrackbd/core";
 import { requireAccess } from "@/lib/session";
+import { PageHeader } from "@biztrackbd/ui";
 import { AppDisabledNotice } from "@/components/app-disabled-notice";
 import { AiSettingsForm } from "./ai-settings-form";
 
@@ -16,12 +17,11 @@ export default async function AiSettingsPage() {
 
   return (
     <>
-      <div className="page-head">
-        <h1>Store Assistant &amp; Content Tools</h1>
-      </div>
-      <p className="page-sub">
-        Configure automated description generation, custom API keys, and storefront chat assistant options.
-      </p>
+      <PageHeader
+        title="Store Assistant & Content Tools"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Settings" }, { label: "Store Assistant" }]}
+        sub="Configure automated description generation, custom API keys, and storefront chat assistant options."
+      />
 
       <AiSettingsForm initial={aiSettings} />
     </>

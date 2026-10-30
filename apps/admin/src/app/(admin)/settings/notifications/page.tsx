@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { can, listMessageTemplates } from "@biztrackbd/core";
 import { requireAccess } from "@/lib/session";
+import { PageHeader } from "@biztrackbd/ui";
 import { MessageCard } from "./message-card";
 
 export const dynamic = "force-dynamic";

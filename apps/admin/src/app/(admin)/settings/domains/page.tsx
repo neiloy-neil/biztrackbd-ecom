@@ -3,6 +3,7 @@ import { trialHref } from "@/lib/demo";
 import type { Metadata } from "next";
 import { can, dnsInstruction, listDomains } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
+import { PageHeader } from "@biztrackbd/ui";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { addDomainAction, checkNowAction, makePrimaryAction, removeDomainAction } from "./actions";
