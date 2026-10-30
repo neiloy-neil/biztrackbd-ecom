@@ -56,6 +56,25 @@ export async function archiveProductAction(productId: string): Promise<void> {
   const s = await requireAction("products", "edit");
   await archiveProduct(s.tenantId, productId, s.actor);
   revalidatePath("/products");
+  revalidatePath("/inventory");
+  revalidatePath("/");
+}
+
+export async function restoreProductAction(productId: string): Promise<void> {
+  const s = await requireAction("products", "edit");
+  const { restoreProduct } = await import("@biztrackbd/core");
+  await restoreProduct(s.tenantId, productId, s.actor);
+  revalidatePath("/products");
+  revalidatePath("/inventory");
+  revalidatePath("/");
+}
+
+export async function deleteProductAction(productId: string): Promise<void> {
+  const s = await requireAction("products", "edit");
+  const { deleteProduct } = await import("@biztrackbd/core");
+  await deleteProduct(s.tenantId, productId, s.actor);
+  revalidatePath("/products");
+  revalidatePath("/inventory");
   revalidatePath("/");
 }
 

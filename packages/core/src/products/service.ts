@@ -80,11 +80,44 @@ export async function archiveProduct(tenantId: string, productId: string, actor?
 export async function restoreProduct(tenantId: string, productId: string, actor?: StaffActor): Promise<void> {
   if (actor) assertCan(actor, "products", "edit");
   await withTenant(tenantId, async (tx) => {
-    const p = await tx.product.findFirst({ where: { id: productId, deletedAt: { not: null } } });
+    const p = await tx.product.findFirst({ where: { id: productId, OR: [{ deletedAt: { not: null } }, { status: "ARCHIVED" }] } });
     if (!p) throw new NotFoundError("Product");
     await claimProductSlot(tx, tenantId);
     await tx.product.update({ where: { id: productId }, data: { deletedAt: null, status: "DRAFT" } });
     if (actor) await audit(tx, tenantId, actor, "product.restored", { productId });
+  });
+}
+
+/** Deletes product. If past orders reference this product, soft-deletes/archives to preserve order records. Otherwise permanently removes. */
+export async function deleteProduct(tenantId: string, productId: string, actor?: StaffActor): Promise<"deleted" | "archived"> {
+  if (actor) assertCan(actor, "products", "edit");
+  return withTenant(tenantId, async (tx) => {
+    const p = await tx.product.findFirst({ where: { id: productId }, include: { orderItems: { select: { id: true }, take: 1 } } });
+    if (!p) throw new NotFoundError("Product");
+    if (p.orderItems.length > 0) {
+      if (!p.deletedAt) {
+        await tx.product.update({ where: { id: productId }, data: { deletedAt: new Date(), status: "ARCHIVED" } });
+        await releaseProductSlot(tx, tenantId);
+      }
+      if (actor) await audit(tx, tenantId, actor, "product.archived_as_deleted", { productId });
+      return "archived";
+    }
+    if (!p.deletedAt) {
+      await releaseProductSlot(tx, tenantId);
+    }
+    const variantIds = (await tx.productVariant.findMany({ where: { productId }, select: { id: true } })).map((v) => v.id);
+    if (variantIds.length > 0) {
+      await tx.stockAdjustment.deleteMany({ where: { variantId: { in: variantIds } } });
+    }
+    await tx.productImage.deleteMany({ where: { productId } });
+    await tx.productVariant.deleteMany({ where: { productId } });
+    await tx.collectionProduct.deleteMany({ where: { productId } });
+    await tx.productBundleItem.deleteMany({ where: { productId } });
+    await tx.orderBump.deleteMany({ where: { productId } });
+    await tx.dropProduct.deleteMany({ where: { productId } });
+    await tx.product.delete({ where: { id: productId } });
+    if (actor) await audit(tx, tenantId, actor, "product.deleted", { productId });
+    return "deleted";
   });
 }
 

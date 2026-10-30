@@ -10,7 +10,7 @@ import { assertCan, type StaffActor } from "../permissions";
 import { sanitizeProductHtml } from "../storefront/html";
 import { headerKey, parseCsv, parseMoney } from "../finance/csv";
 
-export type ProductTab = "all" | "active" | "draft" | "out";
+export type ProductTab = "all" | "active" | "draft" | "out" | "archived";
 
 export interface AdminProductRow {
   id: string;
@@ -41,7 +41,10 @@ export async function listAdminProducts(
   const q = opts.q?.trim().slice(0, 60);
   const like = q?.replace(/[\\%_]/g, (c) => `\\${c}`);
   const tab = opts.tab ?? "all";
-  const base: Prisma.ProductWhereInput = { deletedAt: null, status: { not: "ARCHIVED" } };
+  const isArchived = tab === "archived";
+  const base: Prisma.ProductWhereInput = isArchived
+    ? { OR: [{ status: "ARCHIVED" }, { deletedAt: { not: null } }] }
+    : { deletedAt: null, status: { not: "ARCHIVED" } };
   const tabWhere: Prisma.ProductWhereInput =
     tab === "active" ? { status: "ACTIVE" } : tab === "draft" ? { status: "DRAFT" } : tab === "out" ? { status: "ACTIVE", variants: { none: { stockQuantity: { gt: 0 } } } } : {};
   const where: Prisma.ProductWhereInput = {
@@ -66,11 +69,14 @@ export async function listAdminProducts(
           WHERE oi."productId" = ANY(${ids}) AND o."createdAt" > now() - interval '30 days' AND o.status NOT IN ('CANCELLED', 'RETURNED', 'REFUNDED')
           GROUP BY oi."productId"`
       : [];
+    const activeBase: Prisma.ProductWhereInput = { deletedAt: null, status: { not: "ARCHIVED" } };
+    const archivedBase: Prisma.ProductWhereInput = { OR: [{ status: "ARCHIVED" }, { deletedAt: { not: null } }] };
     const counts = {
-      all: await tx.product.count({ where: base }),
-      active: await tx.product.count({ where: { ...base, status: "ACTIVE" } }),
-      draft: await tx.product.count({ where: { ...base, status: "DRAFT" } }),
-      out: await tx.product.count({ where: { ...base, status: "ACTIVE", variants: { none: { stockQuantity: { gt: 0 } } } } }),
+      all: await tx.product.count({ where: activeBase }),
+      active: await tx.product.count({ where: { ...activeBase, status: "ACTIVE" } }),
+      draft: await tx.product.count({ where: { ...activeBase, status: "DRAFT" } }),
+      out: await tx.product.count({ where: { ...activeBase, status: "ACTIVE", variants: { none: { stockQuantity: { gt: 0 } } } } }),
+      archived: await tx.product.count({ where: archivedBase }),
     };
     const categories = await tx.category.findMany({ orderBy: [{ sortOrder: "asc" }, { name: "asc" }], select: { id: true, name: true } });
 
@@ -364,7 +370,7 @@ export async function deleteCategory(tenantId: string, actor: StaffActor, catego
 }
 
 /** Publish, unpublish or archive many products at once. Ones that are already archived or missing are skipped. Returns how many changed. */
-export async function bulkProductAction(tenantId: string, actor: StaffActor, ids: string[], action: "publish" | "unpublish" | "archive"): Promise<{ done: number; skipped: number }> {
+export async function bulkProductAction(tenantId: string, actor: StaffActor, ids: string[], action: "publish" | "unpublish" | "archive" | "unarchive"): Promise<{ done: number; skipped: number }> {
   assertCan(actor, "products", "edit");
   const unique = [...new Set(ids)].slice(0, 200);
   if (action === "archive") {
@@ -374,6 +380,19 @@ export async function bulkProductAction(tenantId: string, actor: StaffActor, ids
       if (!before) continue;
       await archiveProduct(tenantId, id, actor);
       done++;
+    }
+    return { done, skipped: unique.length - done };
+  }
+  if (action === "unarchive") {
+    const { restoreProduct } = await import("../products/service");
+    let done = 0;
+    for (const id of unique) {
+      try {
+        await restoreProduct(tenantId, id, actor);
+        done++;
+      } catch {
+        // skipped if already active or limit exceeded
+      }
     }
     return { done, skipped: unique.length - done };
   }

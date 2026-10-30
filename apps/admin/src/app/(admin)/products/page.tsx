@@ -10,13 +10,15 @@ import { taka } from "@/lib/format";
 import { one, pageOf, qs } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { Meter, limitNote } from "@/lib/usage";
+import { ConfirmDelete } from "@/components/confirm-delete";
+import { restoreProductAction, deleteProductAction } from "./actions";
 import { bulkProductsAction } from "./bulk-actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Products" };
 
-const TABS: { key: ProductTab; label: string }[] = [{ key: "all", label: "All" }, { key: "active", label: "Active" }, { key: "draft", label: "Draft" }, { key: "out", label: "Out of stock" }];
-const VERBS: Record<string, string> = { publish: "published", unpublish: "moved to draft", archive: "archived" };
+const TABS: { key: ProductTab; label: string }[] = [{ key: "all", label: "All" }, { key: "active", label: "Active" }, { key: "draft", label: "Draft" }, { key: "out", label: "Out of stock" }, { key: "archived", label: "Archived" }];
+const VERBS: Record<string, string> = { publish: "published", unpublish: "moved to draft", archive: "archived", unarchive: "restored to draft" };
 
 function Thumb({ url, title, size = 44 }: { url: string | null; title: string; size?: number }) {
   // eslint-disable-next-line @next/next/no-img-element
@@ -43,7 +45,7 @@ export default async function Products({ searchParams }: { searchParams: Promise
   const here = `/products${qs(base)}`;
   const filtered = Boolean(q || categoryId || collectionId || tab !== "all");
   const note = limitNote("products", usage.products);
-  const done = msg?.match(/^(publish|unpublish|archive)-(\d+)-(\d+)$/);
+  const done = msg?.match(/^(publish|unpublish|archive|unarchive)-(\d+)-(\d+)$/);
 
   return (
     <>
@@ -89,9 +91,18 @@ export default async function Products({ searchParams }: { searchParams: Promise
           <input type="hidden" name="back" value={here} />
           {canEdit && (
             <BulkBar noun="product">
-              <SubmitButton formAction={bulkProductsAction.bind(null, "publish")} className="btn btn-secondary btn-sm" pending="Publishing…" data-testid="bulk-publish">Publish</SubmitButton>
-              <SubmitButton formAction={bulkProductsAction.bind(null, "unpublish")} className="btn btn-secondary btn-sm" pending="Saving…">Move to draft</SubmitButton>
-              <SubmitButton formAction={bulkProductsAction.bind(null, "archive")} className="btn btn-secondary btn-sm" pending="Archiving…" data-testid="bulk-archive">Archive</SubmitButton>
+              {tab === "archived" ? (
+                <>
+                  <SubmitButton formAction={bulkProductsAction.bind(null, "unarchive")} className="btn btn-primary btn-sm" pending="Restoring…" data-testid="bulk-unarchive">Restore selected to draft</SubmitButton>
+                  <SubmitButton formAction={bulkProductsAction.bind(null, "publish")} className="btn btn-secondary btn-sm" pending="Publishing…" data-testid="bulk-publish">Publish selected</SubmitButton>
+                </>
+              ) : (
+                <>
+                  <SubmitButton formAction={bulkProductsAction.bind(null, "publish")} className="btn btn-secondary btn-sm" pending="Publishing…" data-testid="bulk-publish">Publish</SubmitButton>
+                  <SubmitButton formAction={bulkProductsAction.bind(null, "unpublish")} className="btn btn-secondary btn-sm" pending="Saving…">Move to draft</SubmitButton>
+                  <SubmitButton formAction={bulkProductsAction.bind(null, "archive")} className="btn btn-secondary btn-sm" pending="Archiving…" data-testid="bulk-archive">Archive</SubmitButton>
+                </>
+              )}
             </BulkBar>
           )}
 
@@ -105,7 +116,7 @@ export default async function Products({ searchParams }: { searchParams: Promise
                     <b className="pcard-title">{p.title}</b>
                     <span className="num">{taka(p.price)}</span>
                   </Link>
-                  <div className="row" style={{ gap: 6 }}><span className={`pill ${p.status === "ACTIVE" ? "ok" : "grey"}`}>{p.status === "ACTIVE" ? "Active" : "Draft"}</span><StockPill p={p} /></div>
+                  <div className="row" style={{ gap: 6 }}><span className={`pill ${p.status === "ACTIVE" ? "ok" : p.status === "ARCHIVED" ? "warn" : "grey"}`}>{p.status === "ACTIVE" ? "Active" : p.status === "ARCHIVED" ? "Archived" : "Draft"}</span><StockPill p={p} /></div>
                 </div>
               ))}
             </div>
@@ -121,7 +132,7 @@ export default async function Products({ searchParams }: { searchParams: Promise
                         <span style={{ flex: 1, minWidth: 0 }}>
                           <b>{p.title}</b>
                           <span className="muted" style={{ fontSize: 13, display: "block" }}>{p.optionSummary}</span>
-                          <span className="row" style={{ marginTop: 6 }}><span className={`pill ${p.status === "ACTIVE" ? "ok" : "grey"}`}>{p.status === "ACTIVE" ? "Active" : "Draft"}</span><StockPill p={p} /></span>
+                          <span className="row" style={{ marginTop: 6 }}><span className={`pill ${p.status === "ACTIVE" ? "ok" : p.status === "ARCHIVED" ? "warn" : "grey"}`}>{p.status === "ACTIVE" ? "Active" : p.status === "ARCHIVED" ? "Archived" : "Draft"}</span><StockPill p={p} /></span>
                         </span>
                         <b className="num">{taka(p.price)}</b>
                       </Link>
@@ -131,7 +142,7 @@ export default async function Products({ searchParams }: { searchParams: Promise
               </div>
               <div className="table-scroll only-desktop">
                 <table className="table" data-testid="products-table">
-                  <thead><tr>{canEdit && <th style={{ width: 36 }}><span className="sr-only">Select</span></th>}<th>Product</th><th>Status</th><th>Stock</th><th>Category</th><th className="r">Price</th><th className="r">Sold (30d)</th></tr></thead>
+                  <thead><tr>{canEdit && <th style={{ width: 36 }}><span className="sr-only">Select</span></th>}<th>Product</th><th>Status</th><th>Stock</th><th>Category</th><th className="r">Price</th><th className="r">Sold (30d)</th>{tab === "archived" && <th className="r" style={{ width: 140 }}>Actions</th>}</tr></thead>
                   <tbody>
                     {list.rows.map((p) => (
                       <tr key={p.id} data-testid="product-row">
@@ -142,6 +153,14 @@ export default async function Products({ searchParams }: { searchParams: Promise
                         <td className="muted">{p.categoryName ?? "—"}</td>
                         <td className="r num">{taka(p.price)}</td>
                         <td className="r num">{p.sold30d}</td>
+                        {tab === "archived" && (
+                          <td className="r">
+                            <div className="row" style={{ justifyContent: "flex-end", gap: 6 }}>
+                              <form action={async () => { "use server"; await restoreProductAction(p.id); }}><SubmitButton className="btn btn-secondary btn-sm" pending="…">Restore</SubmitButton></form>
+                              <ConfirmDelete action={async () => { "use server"; await deleteProductAction(p.id); }} message={`Delete "${p.title}" permanently? Past order details remain preserved.`} label="Delete" testId="delete-product-btn" />
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>

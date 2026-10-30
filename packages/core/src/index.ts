@@ -10,7 +10,7 @@ export {
   saveIntegration, listIntegrations, loadCredentials, removeIntegration, recordVerification, rotateWebhookToken,
   resolveIntegrationByToken, reencryptTenantSecrets, type IntegrationView, type SaveIntegrationInput,
 } from "./vault/integrations";
-export { createProduct, archiveProduct, restoreProduct, getUsage, CreateProductInput } from "./products/service";
+export { createProduct, archiveProduct, restoreProduct, deleteProduct, getUsage, CreateProductInput } from "./products/service";
 export { claimStorage, releaseStorage, readUsage, reconcileProductCount, monthStart, productState, orderState, ORDER_THRESHOLDS, type UsageSummary, type MeterUsage, type UsageState, type PlanLimits } from "./limits/plan";
 export * from "./permissions";
 export { audit, listAudit, redact, type AuditQuery } from "./audit/service";
