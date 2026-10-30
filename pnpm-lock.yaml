@@ -183,6 +183,12 @@ importers:
       expo-linking:
         specifier: ~7.0.5
         version: 7.0.5(expo@52.0.49(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@expo/metro-runtime@4.0.1(react-native@0.76.7(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@19.3.0)(react@18.3.1)))(react-native@0.76.7(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@19.3.0)(react@18.3.1))(react@18.3.1))(react-native@0.76.7(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@19.3.0)(react@18.3.1))(react@18.3.1)
+      expo-modules-autolinking:
+        specifier: ~2.0.8
+        version: 2.0.8
+      expo-modules-core:
+        specifier: ~2.2.0
+        version: 2.2.3
       expo-router:
         specifier: ~4.0.17
         version: 4.0.22(43c0d1d4184775e737ef9b340684bfb8)
@@ -10053,7 +10059,7 @@ snapshots:
       '@expo/spawn-async': 1.8.0
       chalk: 4.1.2
       commander: 7.2.0
-      fast-glob: 3.3.1
+      fast-glob: 3.3.3
       find-up: 5.0.0
       fs-extra: 9.1.0
       require-from-string: 2.0.2
