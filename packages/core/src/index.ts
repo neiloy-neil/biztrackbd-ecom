@@ -32,7 +32,7 @@ export { sanitizeProductHtml } from "./storefront/html";
 export { createDraftOrder, listDraftOrders, cancelDraftOrder, draftLink, viewDraftOrder, placeDraftOrder, type DraftInput, type DraftRow, type DraftStatus, type DraftView } from "./admin/draft-orders";
 export { messageCustomer, ORDER_MESSAGE_MAX } from "./admin/order-messages";
 export { getEditableOrder, editOrderItems, type EditableOrder, type WantedLine } from "./admin/order-items";
-export { listOrders, orderTabCounts, setOrderTags, listOrderTags, setCallNote, bulkChangeStatus, ordersCsv, cleanTag, getOrderDetail, verifyPayment, rejectPayment, addOrderNote, updateShippingAddress, markPacked, shipManually, recordPrinted, type OrderTab, type OrderFilters, type OrderRow, type OrderDetail, type AddressEdit } from "./admin/orders";
+export { listOrders, orderTabCounts, setOrderTags, listOrderTags, setCallNote, bulkChangeStatus, ordersCsv, cleanTag, getOrderDetail, verifyPayment, rejectPayment, recordAdvancePayment, addOrderNote, updateShippingAddress, markPacked, shipManually, recordPrinted, type OrderTab, type OrderFilters, type OrderRow, type OrderDetail, type AddressEdit } from "./admin/orders";
 export { recordOrderEvent, type OrderEventType } from "./admin/order-events";
 export { DEMO_TEMPLATES, demoTemplate, type DemoTemplate, type DemoProduct, type DemoVariant } from "./demo/templates";
 export { resetDemoStore, DEMO_TEMPLATE_IDS, type DemoDeps, type DemoResult } from "./demo/seed";

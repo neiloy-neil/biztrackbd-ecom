@@ -8,7 +8,7 @@ import { dateTime, prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { CHANNEL, OrderPill, PaymentPill, methodName } from "@/lib/status";
-import { blockAction, bookAction, callNoteAction, messageAction, tagsAction, holdAction, noteAction, refreshCourierAction, refreshFraudAction, releaseHoldAction, returnedAction, shipAction, statusAction, verifyAction } from "./actions";
+import { blockAction, bookAction, callNoteAction, messageAction, tagsAction, holdAction, noteAction, recordAdvancePaymentAction, refreshCourierAction, refreshFraudAction, releaseHoldAction, returnedAction, shipAction, statusAction, verifyAction } from "./actions";
 import { AddressEditor, CopyButton, RejectForm } from "./forms";
 
 export const dynamic = "force-dynamic";
@@ -199,7 +199,48 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               {o.totals.referralDiscount > 0 && <div className="r"><span>Friend&apos;s first-order offer</span><span className="num">− {taka(o.totals.referralDiscount)}</span></div>}
               {o.totals.pointsDiscount > 0 && <div className="r"><span>Reward points ({o.totals.pointsUsed})</span><span className="num">− {taka(o.totals.pointsDiscount)}</span></div>}
               <div className="r grand"><span>Total</span><span className="num" data-testid="order-total">{taka(o.totals.total)}</span></div>
+              {(o.wholesale?.advancePaid ?? 0) > 0 && (
+                <>
+                  <div className="r" style={{ color: "var(--brand)" }}>
+                    <span>Advance Paid (অগ্রিম পরিশোধিত)</span>
+                    <span className="num">− {taka(o.wholesale?.advancePaid ?? 0)}</span>
+                  </div>
+                  <div className="r" style={{ fontWeight: 700, fontSize: "1.05em", color: "var(--text-ok, #15803d)" }}>
+                    <span>COD Payable at Door (কুরিয়ার আদায়)</span>
+                    <span className="num">{taka(o.wholesale?.balanceDue ?? o.totals.total)}</span>
+                  </div>
+                </>
+              )}
             </div>
+
+            {canEdit && o.status !== "CANCELLED" && o.status !== "REFUNDED" && o.paymentStatus !== "PAID" && (
+              <details style={{ marginTop: 12, padding: "10px 12px", border: "1px solid var(--line)", borderRadius: "var(--radius-md)", background: "var(--surface-muted)" }}>
+                <summary className="link" style={{ cursor: "pointer", fontWeight: 600 }}>Record Advance Delivery Charge (অগ্রিম ডেলিভারি চার্জ রেকর্ড)</summary>
+                <form action={recordAdvancePaymentAction.bind(null, o.id)} className="stack" style={{ marginTop: 10, gap: 8 }}>
+                  <p className="muted" style={{ margin: 0, fontSize: 13 }}>Taking 100-200 Tk advance via bKash/Nagad confirms customer intent and is automatically deducted from courier COD collection amount.</p>
+                  <div className="row" style={{ gap: 8 }}>
+                    <label className="field" style={{ flex: 1, minWidth: 120, marginBottom: 0 }}>
+                      <span className="label">Amount (BDT)</span>
+                      <input className="input" type="number" name="amount" defaultValue={150} min={1} max={o.wholesale?.balanceDue || o.totals.total} required />
+                    </label>
+                    <label className="field" style={{ flex: 1, minWidth: 140, marginBottom: 0 }}>
+                      <span className="label">Channel</span>
+                      <select className="select" name="method" defaultValue="MANUAL_BKASH">
+                        <option value="MANUAL_BKASH">bKash (বিকাশ)</option>
+                        <option value="MANUAL_NAGAD">Nagad (নগদ)</option>
+                        <option value="MANUAL_ROCKET">Rocket (রকেট)</option>
+                        <option value="BANK_TRANSFER">Bank Transfer</option>
+                      </select>
+                    </label>
+                  </div>
+                  <label className="field" style={{ marginBottom: 0 }}>
+                    <span className="label">Transaction ID / TrxID <span className="opt">(optional)</span></span>
+                    <input className="input" name="trxId" maxLength={60} placeholder="e.g. 9X7B8Q2" />
+                  </label>
+                  <SubmitButton className="btn btn-secondary btn-block" pending="Recording…">Save advance & update COD</SubmitButton>
+                </form>
+              </details>
+            )}
           </section>
 
           <section className="card">
@@ -391,9 +432,21 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
             <section className="card">
               <details>
                 <summary className="link" style={{ cursor: "pointer" }}>Cancel this order</summary>
-                <form action={statusAction.bind(null, o.id, "CANCELLED")} className="stack" style={{ marginTop: 12 }}>
-                  <label className="field" style={{ marginBottom: 0 }}><span className="label">Reason <span className="opt">(optional)</span></span><input className="input" name="reason" maxLength={150} placeholder="Customer asked to cancel" /></label>
-                  <p className="muted" style={{ fontSize: 13 }}>The items go back into stock.</p>
+                <form action={statusAction.bind(null, o.id, "CANCELLED")} className="stack" style={{ marginTop: 12, gap: 8 }}>
+                  <label className="field" style={{ marginBottom: 0 }}>
+                    <span className="label">Reason</span>
+                    <select className="select" name="reasonKey" defaultValue="Customer requested cancellation">
+                      <option value="Customer requested cancellation">Customer requested cancellation (গ্রাহক বাতিল করতে বলেছেন)</option>
+                      <option value="Customer unreachable / phone switched off">Customer unreachable / phone switched off (ফোন বন্ধ / রিসিভ করেননি)</option>
+                      <option value="Customer refused advance delivery charge">Customer refused advance delivery charge (অগ্রিম ডেলিভারি ফি দেননি)</option>
+                      <option value="High courier fraud risk / low delivery ratio">High courier return risk / low delivery ratio (কুরিয়ার রিটার্ন ঝুঁকি)</option>
+                      <option value="Duplicate or test order">Duplicate or test order (ডুপ্লিকেট / টেস্ট অর্ডার)</option>
+                      <option value="Item out of stock or damaged">Item out of stock or damaged (পণ্য স্টক শেষ)</option>
+                      <option value="Other">Other reason (অন্যান্য)</option>
+                    </select>
+                  </label>
+                  <input className="input" name="reasonNote" maxLength={150} placeholder="Additional note (optional)" aria-label="Additional note" />
+                  <p className="muted" style={{ fontSize: 13, margin: 0 }}>The items go back into stock.</p>
                   <SubmitButton className="btn btn-danger btn-block" pending="Cancelling…">Cancel order</SubmitButton>
                 </form>
               </details>

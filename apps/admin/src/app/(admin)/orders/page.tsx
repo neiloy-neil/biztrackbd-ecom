@@ -111,7 +111,14 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
                   </>
                 )}
                 <SubmitButton formAction={bulkConfirmAction} className="btn btn-secondary btn-sm" pending="Confirming…" data-testid="bulk-confirm">Confirm selected</SubmitButton>
-                <input className="input input-sm" name="reason" maxLength={150} placeholder="Reason, to cancel" aria-label="Reason for cancelling" style={{ maxWidth: 200 }} data-testid="bulk-reason" />
+                <select className="select input-sm" name="reason" style={{ maxWidth: 220 }} data-testid="bulk-reason">
+                  <option value="Customer requested cancellation">Customer requested</option>
+                  <option value="Customer unreachable / phone switched off">Phone unreachable / switched off</option>
+                  <option value="Customer refused advance delivery charge">Refused advance fee</option>
+                  <option value="High courier fraud risk / low delivery ratio">High courier return risk</option>
+                  <option value="Duplicate or test order">Duplicate / test order</option>
+                  <option value="Item out of stock or damaged">Out of stock</option>
+                </select>
                 <SubmitButton formAction={bulkCancelAction} className="btn btn-danger btn-sm" pending="Cancelling…" data-testid="bulk-cancel">Cancel selected</SubmitButton>
                 <button className="btn btn-secondary btn-sm" type="submit" formAction="/orders/print" formMethod="get" formTarget="_blank" name="doc" value="slip">Print packing slips</button>
                 <button className="btn btn-secondary btn-sm" type="submit" formAction="/orders/print" formMethod="get" formTarget="_blank" name="doc" value="invoice">Print invoices</button>

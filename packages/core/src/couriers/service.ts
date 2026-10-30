@@ -161,7 +161,10 @@ export async function bookCourier(tenantId: string, actor: StaffActor, orderId: 
         orderNumber: o.orderNumber, recipientName: o.customerName, recipientPhone: o.customerPhone,
         address: o.shippingAddress, district: o.shippingDistrict, area: o.shippingCity,
         // Already paid in advance means nothing to collect at the door.
-        codAmount: o.paymentMethod === "COD" && o.paymentStatus !== "PAID" ? Number(o.totalAmount) : 0,
+        // If advance payment was recorded, collect balanceDue instead of totalAmount.
+        codAmount: o.paymentMethod === "COD" && o.paymentStatus !== "PAID"
+          ? (Number(o.advancePaidAmount) > 0 ? Math.max(0, Number(o.balanceDue)) : Number(o.totalAmount))
+          : 0,
         weightGrams, itemCount: o.items.reduce((s, i) => s + i.quantity, 0), note: (opts.note ?? o.notes ?? "").trim() || undefined,
       },
     };

@@ -8,7 +8,7 @@ export const TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   PROCESSING: ["SHIPPED", "CANCELLED"],
   SHIPPED: ["DELIVERED", "RETURNED"],
   DELIVERED: ["RETURNED", "REFUNDED"],
-  CANCELLED: [],
+  CANCELLED: ["PENDING"],
   RETURNED: ["REFUNDED"],
   REFUNDED: [],
 };

@@ -9,7 +9,7 @@ import {
 import type { OrderStatus } from "@biztrackbd/db";
 import { requireAction } from "@/lib/session";
 
-const STATUS_TARGETS: OrderStatus[] = ["CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED", "REFUNDED"];
+const STATUS_TARGETS: OrderStatus[] = ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED", "REFUNDED"];
 
 function refresh(id: string) {
   revalidatePath(`/orders/${id}`);
@@ -38,12 +38,24 @@ export async function verifyAction(id: string): Promise<void> {
 export async function statusAction(id: string, to: string, form: FormData): Promise<void> {
   const s = await requireAction("orders", "edit");
   if (!STATUS_TARGETS.includes(to as OrderStatus)) redirect(`/orders/${id}?err=${encodeURIComponent("Unknown status")}`);
-  const reason = String(form.get("reason") ?? "").trim().slice(0, 150) || undefined;
+  const key = String(form.get("reasonKey") ?? "").trim();
+  const note = String(form.get("reasonNote") ?? "").trim();
+  const raw = String(form.get("reason") ?? "").trim();
+  const reason = (key && note ? `${key}: ${note}` : key || note || raw).slice(0, 150) || undefined;
   await run(id, () =>
     to === "PROCESSING"
       ? markPacked(s.tenantId, s.actor, [id]).then((r) => { if (r.skipped.length) throw new DomainError("CANNOT_PACK", "This order cannot be packed yet. Confirm it first.", 409); })
       : transitionOrder(s.tenantId, id, to as OrderStatus, { type: "MERCHANT", id: s.user.id, name: s.user.name }, reason),
   );
+}
+
+export async function recordAdvancePaymentAction(id: string, form: FormData): Promise<void> {
+  const s = await requireAction("orders", "edit");
+  const amount = Number(form.get("amount") ?? 0);
+  const method = String(form.get("method") ?? "MANUAL_BKASH") as "MANUAL_BKASH" | "MANUAL_NAGAD" | "MANUAL_ROCKET" | "BANK_TRANSFER";
+  const trxId = String(form.get("trxId") ?? "").trim().slice(0, 60) || undefined;
+  const { recordAdvancePayment } = await import("@biztrackbd/core");
+  await run(id, () => recordAdvancePayment(s.tenantId, s.actor, id, { amount, method, trxId }));
 }
 
 export async function shipAction(id: string, form: FormData): Promise<void> {

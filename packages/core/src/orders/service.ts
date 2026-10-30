@@ -486,6 +486,24 @@ export async function transitionOrder(tenantId: string, orderId: string, to: Ord
         const qty = restock.get(id)!;
         await tx.$executeRaw`UPDATE "ProductVariant" SET "stockQuantity" = "stockQuantity" + ${qty}, "updatedAt" = now() WHERE "id" = ${id}`;
       }
+    } else if (current.status === "CANCELLED" && to === "PENDING") {
+      // Reopening order: check stock availability and decrement
+      for (const i of order.items) {
+        if (i.variantId) {
+          const v = await tx.productVariant.findUnique({ where: { id: i.variantId }, select: { stockQuantity: true, title: true } });
+          if (v && v.stockQuantity < i.quantity) {
+            throw new ValidationError(`Cannot reopen order: "${v.title}" only has ${v.stockQuantity} in stock (needs ${i.quantity}).`);
+          }
+        }
+      }
+      for (const i of order.items) {
+        if (i.variantId) {
+          await tx.$executeRaw`UPDATE "ProductVariant" SET "stockQuantity" = "stockQuantity" - ${i.quantity}, "updatedAt" = now() WHERE "id" = ${i.variantId}`;
+        }
+      }
+      if (order.couponId) {
+        await tx.$executeRaw`UPDATE "Coupon" SET "usageCount" = "usageCount" + 1 WHERE "id" = ${order.couponId}`;
+      }
     }
     if (to === "CANCELLED" && order.couponId) {
       await tx.$executeRaw`UPDATE "Coupon" SET "usageCount" = GREATEST("usageCount" - 1, 0) WHERE "id" = ${order.couponId}`;
@@ -528,7 +546,9 @@ export async function transitionOrder(tenantId: string, orderId: string, to: Ord
       data: { tenantId, orderId, fromStatus: current.status, toStatus: to, actorType: actor.type, actorId: actor.id, reason },
     });
     await recordOrderEvent(tx, tenantId, orderId, {
-      type: "STATUS", message: `Order ${STATUS_WORDS[to]}${reason ? `: ${reason}` : ""}`,
+      type: "STATUS", message: current.status === "CANCELLED" && to === "PENDING"
+        ? (reason ? `Order reopened: ${reason}` : "Order reopened and restored to new")
+        : `Order ${STATUS_WORDS[to]}${reason ? `: ${reason}` : ""}`,
       actor: { id: actor.id, name: actor.name ?? (actor.type === "CUSTOMER" ? "Customer" : actor.type === "MERCHANT" ? "Staff" : "System") },
       data: { from: current.status, to },
     });

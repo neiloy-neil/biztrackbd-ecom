@@ -162,6 +162,7 @@ export interface OrderDetail {
   };
   items: { id: string; productId: string; slug: string | null; title: string; variantTitle: string | null; sku: string | null; unitPrice: number; quantity: number; total: number; imageUrl: string | null }[];
   events: { id: string; type: string; message: string; actorName: string | null; createdAt: Date }[];
+  cancellation?: { reason: string | null; createdAt: Date; actorId: string | null; actorType: string | null } | null;
   customer: { id: string | null; totalOrders: number; totalSpent: number; delivered: number; returned: number; cancelled: number; deliverySuccessPercent: number | null; isBlocked: boolean; since: Date | null } | null;
   nextStatuses: OrderStatus[];
   canEditAddress: boolean;
@@ -228,6 +229,13 @@ export async function getOrderDetail(tenantId: string, actor: StaffActor, orderI
         quantity: i.quantity, total: Number(i.totalPrice), imageUrl: i.variant?.imageUrl ?? i.product.images[0]?.url ?? null,
       })),
       events: events.map((e) => ({ id: e.id, type: e.type, message: e.message, actorName: e.actorName, createdAt: e.createdAt })),
+      cancellation: o.status === "CANCELLED"
+        ? await tx.orderStateLog.findFirst({
+            where: { orderId, toStatus: "CANCELLED" },
+            orderBy: { createdAt: "desc" },
+            select: { reason: true, createdAt: true, actorId: true, actorType: true },
+          })
+        : null,
       customer,
       nextStatuses: TRANSITIONS[o.status] ?? [],
       canEditAddress: ["PENDING", "CONFIRMED", "PROCESSING"].includes(o.status),
@@ -471,4 +479,54 @@ export async function ordersCsv(tenantId: string, actor: StaffActor, f: OrderFil
   }
   return out.join("\r\n");
 
+}
+
+
+/**
+ * Records an advance payment (e.g. advance delivery fee by bKash/Nagad).
+ * Updates advancePaidAmount and balanceDue, and logs payment event on order timeline.
+ */
+export async function recordAdvancePayment(
+  tenantId: string,
+  actor: StaffActor,
+  orderId: string,
+  input: { amount: number; method: "MANUAL_BKASH" | "MANUAL_NAGAD" | "MANUAL_ROCKET" | "BANK_TRANSFER"; trxId?: string; note?: string }
+): Promise<{ advancePaid: number; balanceDue: number }> {
+  assertCan(actor, "orders", "edit");
+  const amount = Number(input.amount);
+  if (isNaN(amount) || amount <= 0) throw new ValidationError("Enter a valid advance payment amount in BDT");
+
+  return withTenant(tenantId, async (tx) => {
+    await lockOrder(tx, orderId);
+    const o = await tx.order.findFirstOrThrow({ where: { id: orderId } });
+    if (o.status === "CANCELLED" || o.status === "REFUNDED") throw new ValidationError("Cannot record payment for a closed order");
+
+    const total = Number(o.totalAmount);
+    const currentAdvance = Number(o.advancePaidAmount);
+    const newAdvance = currentAdvance + amount;
+    if (newAdvance > total) throw new ValidationError(`Advance payment (${newAdvance} BDT) cannot exceed total order amount (${total} BDT)`);
+
+    const newBalance = Math.max(0, total - newAdvance);
+    const channelName = input.method.replace("MANUAL_", "");
+
+    await tx.order.update({
+      where: { id: orderId },
+      data: {
+        advancePaidAmount: newAdvance,
+        balanceDue: newBalance,
+        mfsTrxId: input.trxId ? input.trxId.trim() : o.mfsTrxId,
+        mfsVerifiedAt: new Date(),
+        mfsVerifiedBy: actor.userId,
+        paymentStatus: newBalance === 0 ? "PAID" : "PARTIALLY_PAID",
+      },
+    });
+
+    await recordOrderEvent(tx, tenantId, orderId, {
+      type: "PAYMENT_VERIFIED",
+      message: `Advance payment recorded: ${amount} ৳ via ${channelName}${input.trxId ? ` (TrxID: ${input.trxId.trim()})` : ""}. COD Balance Due: ${newBalance} ৳.`,
+      actor: { id: actor.userId, name: actorName(actor) },
+    });
+
+    return { advancePaid: newAdvance, balanceDue: newBalance };
+  });
 }
