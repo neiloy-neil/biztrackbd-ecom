@@ -164,4 +164,179 @@ A fully paid order is safe to ship, but cash on delivery is where returns happen
 
 Treat the screenshot as a courtesy and the TrxID as the proof. Have customers enter it at checkout, match it against your own wallet for the amount, the number and uniqueness, confirm in one tap, and reconcile once a day. You can see how it looks in the [live demo](/demo), or [start a free 14-day trial](/start) and take your first order this week. No card is needed.`,
   },
+  {
+    slug: "shopify-vs-local-platform-bangladesh",
+    title: "Shopify or a local platform for Bangladesh?",
+    description:
+      "Selling inside Bangladesh with COD, bKash and local couriers? Here are the four things to compare before you pick Shopify or a local store platform.",
+    ctaLabel: "See the full Shopify comparison",
+    ctaHref: "/compare/shopify",
+    body: `Shopify is one of the best-known store builders in the world, so it is natural to start there. But a platform built for global selling does not always fit a shop that sells inside Bangladesh, collects cash on delivery and ships with Steadfast or Pathao. The right choice depends on who your customers are and how they pay.
+
+This guide gives you four things to compare, in the order they usually matter, so you can decide with numbers from your own shop instead of guesses.
+
+## First, decide who you sell to
+
+If most of your customers are outside Bangladesh, pay with international cards and expect delivery by global carriers, Shopify's strengths line up with your needs. Global checkout, foreign currencies and overseas dropshipping apps are what it was built for.
+
+If most of your customers are inside Bangladesh, the picture changes. They pay with cash on delivery, bKash or Nagad, they give a division, district and area rather than a postal code, and your parcels travel with a local courier. Everything below is written for this second kind of seller.
+
+## Four things to compare
+
+![Four things to compare before choosing a store platform for Bangladesh: total monthly cost in taka, local payments, courier booking, and COD fraud protection](/blog/platform-compare-four.svg)
+
+### 1. The real monthly cost in taka
+
+Do not compare the headline plan price alone. Add up everything you will pay each month: the plan, any apps you need for Bangladesh, and any fee taken from each sale. Then convert it to taka.
+
+Shopify bills in US dollars, so you need an international card that can pay in dollars, and your card's limits and your bank's charges apply. Local platforms usually bill in taka and accept bKash or Nagad for the subscription. Also check whether the platform takes a percentage of every sale. A platform that charges 0% commission keeps more of each order, which matters more as you grow. BizTrackBD takes 0% of your sales and bills a flat monthly plan, shown on the [pricing page](/pricing). Check Shopify's own pricing page for its current plans, transaction fees and the payment options it supports in Bangladesh, because these change.
+
+### 2. How customers pay
+
+Ask a simple question: can a customer pay the way they actually pay today, without a workaround? For most Bangladeshi shops that means cash on delivery, bKash and Nagad. Look at whether the platform lets customers pay straight to your own wallet and enter a TrxID that you can confirm, or whether it expects a card gateway you would have to set up separately. Paying your own wallet means the money arrives immediately, with no payout delay. The [bKash and Nagad checkout](/features/bkash-nagad-cod) works this way, and [our TrxID guide](/blog/verify-bkash-nagad-trxid-orders) shows how to check each payment.
+
+### 3. How you book couriers
+
+Count how many steps it takes to get an order into a courier's system. Without an integration you copy the name, phone number, address and amount into the courier's website for every order, and typing mistakes there cause failed deliveries. Look for a platform that books pickups directly from the order with your own courier account, so you keep your own rates. See how that works in [booking Steadfast, Pathao and RedX from your orders](/blog/connect-steadfast-pathao-redx-courier-api).
+
+If you stay on a global platform, you may need extra apps for COD confirmation, courier booking and SMS. Each has its own subscription, usually priced in dollars, so add them to the cost in step one.
+
+### 4. Protection against refused COD parcels
+
+Cash on delivery is where Bangladeshi sellers lose money. Ask whether the platform shows you a customer's delivery history before you ship, and whether it can ask for an advance on risky orders. This feature is rare on global platforms and usually needs an add-on. Our guide to [stopping COD return fraud](/blog/stop-cod-return-fraud-bangladesh) explains the routine, and [COD fraud protection](/features/cod-fraud-protection) automates it.
+
+## Check the checkout your customers will see
+
+Open the platform's demo checkout on your phone, and fill it in as a customer from outside Dhaka would. Does it ask for a postal code your customer may not know? Can they pick their division, district and area from a list? Is the page quick on a mobile data connection? A checkout that confuses people loses orders you never see.
+
+## Moving is easier than it sounds
+
+Many sellers stay on a platform because switching feels risky. In practice, the main data is your product catalogue and photos. You can export your products as a CSV file from Shopify and import them into a local platform. The [Shopify migration guide](/migrate/shopify) shows each step, including how to keep your domain.
+
+## A simple way to decide
+
+Write down your last month's orders and answer three questions. How many were cash on delivery? How many came back? How much did you pay in fees and apps? If most orders are domestic and a good share are COD, a local platform with built-in payments, courier booking and fraud checks will likely save you both money and time. If you mainly export, stay with a global platform.
+
+Whichever you choose, test before you commit. You can try the [live demo](/demo), or [start a free 14-day trial](/start) with no card, and compare it against your current shop on real orders.`,
+  },
+  {
+    slug: "connect-steadfast-pathao-redx-courier-api",
+    title: "Connect Steadfast, Pathao and RedX to your store",
+    description:
+      "Stop copying orders into courier websites. Here is how to connect your courier accounts once and book pickups, labels and tracking from each order.",
+    ctaLabel: "See courier automation",
+    ctaHref: "/couriers",
+    body: `Every order you copy into a courier website by hand is a chance for a typo: a wrong phone digit, a misspelled area or the wrong amount to collect. Each mistake can become a failed delivery, and failed deliveries cost money. Connecting your courier accounts to your store once removes that copying step for good.
+
+This guide explains what a courier connection does, how to set one up for Steadfast, Pathao and RedX, and what to check before you book your first parcel.
+
+## What a courier connection does
+
+A courier connection lets your store talk to your own courier merchant account. When you confirm an order, you book the pickup from the order screen. The store sends the customer's name, phone number, address and cash to collect to the courier, and gets back a consignment number it saves on the order.
+
+![Four steps to automate courier booking: connect your keys once, check the order's risk, book the pickup from the order, then print the label and send the tracking SMS](/blog/courier-booking-flow.svg)
+
+Because you connect your own merchant account, you keep your own rates and your own relationship with the courier. The store only acts on your behalf.
+
+## Before you start
+
+You need a merchant account with each courier you want to use, and you need to be able to sign in to its merchant portal. You will also need your pickup location saved in that portal, because the courier needs to know where the rider collects the parcel.
+
+Treat your keys like passwords. Anyone who has them can book parcels on your account. Do not post them in chats, and never paste them into a website you do not trust. In BizTrackBD, keys are encrypted and are used only to request pickups for you.
+
+## Connect Steadfast
+
+Sign in to the Steadfast merchant portal and open its API or developer settings, where it shows an API key and a secret key. Copy both. In your store admin, open the courier settings, choose Steadfast and paste them in. Save, then book a test parcel to confirm the connection works. Steadfast is popular for deliveries outside Dhaka and for regular remittances of the cash it collects.
+
+## Connect Pathao
+
+Sign in to the Pathao merchant panel and generate your API credentials there. Paste them into the Pathao section of your store's courier settings, then choose your default store pickup location, such as the hub or address you ship from. Pathao is often preferred for fast deliveries inside Dhaka.
+
+## Connect RedX
+
+Sign in to your RedX merchant account and open Settings, then the developer section, and generate a production token. Paste it into the RedX section of your courier settings. RedX suits high-volume stores that ship nationwide.
+
+The exact menu names change as couriers update their portals, so if a name differs, look for the section that shows API keys or developer tokens. If you get stuck, our team can [help over WhatsApp](/contact) with screenshots.
+
+## Test with one parcel first
+
+Before you rely on a new connection, book one real parcel to a friend or to your own address. Check that the name, phone number, address and amount to collect appear correctly in the courier's portal, that the consignment number is saved on the order, and that the label prints at a readable size. A five-minute test saves you from discovering a wrong setting in the middle of a busy day, when a whole batch of parcels could go out with the wrong pickup location.
+
+## Check the order before you book
+
+Booking is fast, which is exactly why you should check first. Look at the customer's delivery history before you book a cash-on-delivery parcel. A number that has refused many parcels is a risk. For those orders, ask for a small advance by bKash or Nagad, or confirm by phone, before you ship. Our guide to [stopping COD return fraud](/blog/stop-cod-return-fraud-bangladesh) has the full routine, and [COD fraud protection](/features/cod-fraud-protection) shows the risk on the order itself.
+
+## Book, print and tell the customer
+
+Once the order is confirmed, book the pickup from the order screen. The store creates the consignment, and you can print a standard 4 by 6 inch label to stick on the parcel. Then send the customer a message with a tracking link so they know the parcel is on its way. Customers who know a parcel is coming are far more likely to be home and to have the cash ready, which raises your delivery rate.
+
+## Keep addresses clean
+
+Many failed deliveries come from vague addresses. A checkout that makes customers choose their division, district and area from a list sends the courier clean data and avoids most routing mistakes. Combine that with a quick phone confirmation for orders from outside the main cities.
+
+## Review your couriers every month
+
+Do not assume one courier is best forever. Once a month, compare how many parcels each courier delivered and returned, how quickly cash reached you, and how much each cost you. Many sellers use one courier for Dhaka and another for other districts. Because you hold your own accounts, you can change the default for different areas, and the [profit tools](/blog/calculate-profit-per-cod-order-bangladesh) show whether a courier's return rate is hurting your margin.
+
+## Ready to try it
+
+Connecting takes a few minutes per courier. [Start a free 14-day trial](/start) with no card, connect one courier, and book a test parcel so you know the flow before your next busy day.`,
+  },
+  {
+    slug: "calculate-profit-per-cod-order-bangladesh",
+    title: "How to calculate your real profit per COD order",
+    description:
+      "Sales are not profit. Learn to subtract product cost, courier fees, packaging, ads and returns to find what each COD order really earns you.",
+    ctaLabel: "See profit and COD reconciliation",
+    ctaHref: "/features/profit-cod-reconciliation",
+    body: `A busy week of orders feels like success, but busy is not the same as profitable. Many online sellers in Bangladesh only find out their real margin at the end of the month, when the cash in their hands is smaller than the sales they recorded. The gap is made of costs that never show up on the order list.
+
+This guide shows how to work out what each cash-on-delivery order really earns you, with a simple worked example, and how to use the result to decide what to sell, advertise and ship.
+
+## The formula
+
+True profit per order is what the customer pays minus everything it cost you to earn that sale.
+
+![The profit formula: sale price, minus product and packing cost, minus courier and ad cost, minus a share of return losses, equals true profit](/blog/profit-formula.svg)
+
+Written out, you start with the sale price and subtract your product cost, packaging, the courier fee, the advertising cost to get the order, and a share of what you lose on returned parcels. What is left is your true profit. The rest of this guide explains each part.
+
+## Step 1: Know your product cost
+
+Use what you actually paid per unit, including anything you paid to bring the stock to your shop such as transport. If you buy in bulk at different prices, use an average. Many sellers guess this number, and a guess that is off by a few percent can hide a loss. Put the cost of every product in one list, or import it as a spreadsheet, so it applies to every order automatically.
+
+## Step 2: Add packaging
+
+A box, polybag, tape, a seal and a printed label cost little per parcel, but they repeat on every order. Estimate the average per parcel and include it. If you use branded packaging, include that too.
+
+## Step 3: Add the courier fee
+
+Add the outbound delivery charge you pay the courier. For cash on delivery, remember that the courier may also charge a fee on the cash it collects, so check your agreement. Costs differ between couriers and between Dhaka and other districts, so use the figure for the usual route of that order.
+
+## Step 4: Add your ad cost per order
+
+If an order came from a paid ad, divide what you spent on the ad by the orders it produced to get the cost per order. This is the number that decides whether an ad is working. An ad with many clicks and a cost per order higher than your profit is losing money, however busy it looks.
+
+## Step 5: Share the cost of returns
+
+Returns are the hidden part. Every refused parcel costs you the courier fees both ways, plus the ad money you spent to win it. Spread that loss across your orders. If one in ten parcels returns, one tenth of your orders carry that loss, so a profit that looks fine on a delivered order can disappear once you include it. Our guide to [stopping COD return fraud](/blog/stop-cod-return-fraud-bangladesh) shows how to bring that rate down.
+
+## A worked example
+
+This is an illustration, not a benchmark. Suppose you sell a product for Tk 1,600. The product costs you Tk 800 and packaging adds Tk 30. The courier fee is Tk 130, and the ad cost per order is Tk 200. On paper that leaves Tk 440, which sounds healthy.
+
+Now include returns. Suppose one parcel in ten returns, and each return costs you about Tk 260 in courier fees both ways, which is Tk 26 per order when spread across all orders. Your true profit falls to about Tk 414. If your return rate is one in five, the share doubles to Tk 52, and true profit is about Tk 388. The same product can look very different depending on how many parcels come back.
+
+## Use the result to make decisions
+
+When you know the true profit of each product, three things get easier. You can see which products make real money and which only create packing work. You can set a maximum you are willing to pay for an order from ads, because you know your profit before advertising. And you can see which delivery areas or couriers return more parcels, and change how you ship to them.
+
+## Check that couriers paid you in full
+
+Profit on paper only becomes profit when the cash arrives. Couriers collect cash on your behalf and send it to you in batches. Match each settlement statement against your delivered parcels, and look for parcels that were delivered but not paid. This is tedious by hand, which is why [profit and COD reconciliation](/features/profit-cod-reconciliation) does the matching for you and flags anything missing.
+
+## Make it a routine
+
+Once a month, recalculate for your best-selling products, because costs and ad prices change. Keep your records clean and in one place. When your accountant or a partner asks for numbers, you can export them instead of rebuilding them. To try this on your own orders, [start a free 14-day trial](/start). No card is needed.`,
+  },
 ];
