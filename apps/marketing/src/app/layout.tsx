@@ -141,6 +141,7 @@ const buildGlobalJsonLd = (CONTACT: Contact) => ({
 });
 
 import { PlatformTracker } from "@/components/platform-tracker";
+import { NativeAnalyticsTracker } from "@/components/native-analytics-tracker";
 import { PostHogProvider } from "@/components/posthog-provider";
 import { SiteNavigation } from "@/components/site-navigation";
 import { DoubleSubmitGuard } from "@biztrackbd/ui";
@@ -166,6 +167,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <DoubleSubmitGuard />
         <a className="skip-link" href="#main">Skip to main content</a>
         <PlatformTracker />
+        <NativeAnalyticsTracker />
         <header className="site-head">
           <div className="wrap row-between">
             <Link href="/" className="brand" prefetch={false}>

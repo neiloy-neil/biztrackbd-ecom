@@ -3034,3 +3034,84 @@ model PlatformNotification {
 
   @@index([createdAt])
 }
+
+/// Visitor sessions on the platform and marketing site, capturing Facebook ad attribution and campaign parameters.
+model PlatformVisitorSession {
+  id                 String                 @id
+  fbclid             String?
+  fbp                String?
+  fbc                String?
+  utmSource          String?
+  utmMedium          String?
+  utmCampaign        String?
+  utmContent         String?
+  utmTerm            String?
+  referrer           String?
+  landingPage        String
+  exitPage           String?
+  device             String?                @default("desktop")
+  browser            String?
+  os                 String?
+  ipAddress          String?
+  convertedToSignup  Boolean                @default(false)
+  startedAt          DateTime               @default(now())
+  lastActiveAt       DateTime               @default(now())
+  durationSeconds    Int                    @default(0)
+
+  events             PlatformVisitorEvent[]
+  errors             PlatformClientError[]
+
+  @@index([startedAt])
+  @@index([utmCampaign])
+  @@index([utmSource])
+  @@index([fbclid])
+}
+
+/// Granular actions taken by a visitor (pageviews, clicks, CTA engagements, signup form steps).
+model PlatformVisitorEvent {
+  id         String                 @id @default(cuid())
+  sessionId  String
+  eventType  String                 // "PAGEVIEW" | "CLICK" | "CTA" | "SIGNUP"
+  pagePath   String
+  pageTitle  String?
+  targetText String?
+  targetHref String?
+  metadata   Json                   @default("{}")
+  createdAt  DateTime               @default(now())
+
+  session    PlatformVisitorSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+  @@index([eventType, createdAt])
+  @@index([pagePath])
+}
+
+enum PlatformClientErrorStatus {
+  NEW
+  RESOLVED
+  IGNORED
+}
+
+/// Client-side runtime crashes, uncaught exceptions, and frontend errors.
+model PlatformClientError {
+  id             String                    @id @default(cuid())
+  sessionId      String?
+  pageUrl        String
+  message        String                    @db.Text
+  stack          String?                   @db.Text
+  component      String?
+  browser        String?
+  os             String?
+  device         String?
+  status         PlatformClientErrorStatus @default(NEW)
+  count          Int                       @default(1)
+  metadata       Json                      @default("{}")
+  createdAt      DateTime                  @default(now())
+  lastOccurredAt DateTime                  @default(now())
+
+  session        PlatformVisitorSession?   @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([status, lastOccurredAt])
+  @@index([pageUrl])
+  @@index([createdAt])
+}

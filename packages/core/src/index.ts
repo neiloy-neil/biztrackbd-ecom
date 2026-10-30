@@ -510,4 +510,6 @@ export * from "./api-keys";
 
 // Analytics & Real-Time Performance Studio (ANALYTICS-001)
 export * from "./analytics";
+export * from "./platform/notify";
+export * from "./platform/native-analytics";
 export { sealField, openField, isSealed } from "./vault/field-secret";

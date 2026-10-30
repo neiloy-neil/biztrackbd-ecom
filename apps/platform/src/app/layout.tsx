@@ -4,6 +4,7 @@ import "./platform.css";
 import "@biztrackbd/ui/kit.css";
 import { DoubleSubmitGuard } from "@biztrackbd/ui";
 import { PostHogProvider } from "@/components/posthog-provider";
+import { NativeAnalyticsTracker } from "@/components/native-analytics-tracker";
 
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-jakarta", display: "swap" });
 const hind = Hind_Siliguri({ subsets: ["bengali", "latin"], weight: ["400", "500", "600", "700"], variable: "--font-hind", display: "swap" });
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <PostHogProvider>
           <DoubleSubmitGuard />
+          <NativeAnalyticsTracker />
           {children}
         </PostHogProvider>
       </body>
