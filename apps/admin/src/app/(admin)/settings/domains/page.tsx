@@ -62,13 +62,48 @@ export default async function Domains({ searchParams }: { searchParams: Promise<
 
               {!st.connected && (
                 <div className="card p-md mt-sm bg-subtle border" data-testid="dns-steps">
-                  <h2 className="text-sm font-bold mb-xs">Create this record where you bought the domain</h2>
-                  <div className="grid grid-2 gap-xs my-sm">
-                    <div><span className="muted text-xs">Type:</span> <b>{rec.kind}</b></div>
-                    <div><span className="muted text-xs">Name:</span> <b>{rec.name}</b></div>
-                    <div className="grid-col-all"><span className="muted text-xs">Value:</span> <b className="font-mono text-xs break-all" data-testid="dns-value">{rec.value}</b></div>
+                  <h3 className="text-sm font-bold mb-xs" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#F59E0B" }} />
+                    DNS Records to create at your domain registrar (Namecheap, GoDaddy, Cloudflare, etc.)
+                  </h3>
+                  <p className="muted text-xs mb-sm">
+                    Log in to where you bought <b>{d.domain}</b>, open <b>DNS Settings / Advanced DNS</b>, and add the record{rec.records.length > 1 ? "s" : ""} below:
+                  </p>
+
+                  <div className="table-wrap mb-sm" style={{ overflowX: "auto" }}>
+                    <table className="table border" style={{ width: "100%", fontSize: 13, background: "var(--surface)", borderCollapse: "collapse" }}>
+                      <thead>
+                        <tr>
+                          <th style={{ padding: "8px 12px", textAlign: "left", background: "var(--bg)", color: "var(--ink-2)", fontSize: 11.5, fontWeight: 700, textTransform: "uppercase" }}>Type</th>
+                          <th style={{ padding: "8px 12px", textAlign: "left", background: "var(--bg)", color: "var(--ink-2)", fontSize: 11.5, fontWeight: 700, textTransform: "uppercase" }}>Host / Name</th>
+                          <th style={{ padding: "8px 12px", textAlign: "left", background: "var(--bg)", color: "var(--ink-2)", fontSize: 11.5, fontWeight: 700, textTransform: "uppercase" }}>Value / Target</th>
+                          <th style={{ padding: "8px 12px", textAlign: "left", background: "var(--bg)", color: "var(--ink-2)", fontSize: 11.5, fontWeight: 700, textTransform: "uppercase" }}>TTL</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rec.records.map((r, i) => (
+                          <tr key={i} style={{ borderTop: "1px solid var(--line)" }}>
+                            <td style={{ padding: "10px 12px" }}>
+                              <span className="pill ok font-mono text-xs" style={{ fontWeight: 700 }}>{r.kind}</span>
+                            </td>
+                            <td style={{ padding: "10px 12px" }}>
+                              <code className="font-mono" style={{ fontWeight: 700, color: "var(--ink)" }}>{r.name}</code>
+                            </td>
+                            <td style={{ padding: "10px 12px" }}>
+                              <code className="font-mono break-all" style={{ fontWeight: 700, color: "var(--brand, #0B4D3B)" }} data-testid={i === 0 ? "dns-value" : undefined}>{r.value}</code>
+                              <span className="muted text-xs block mt-xs">{r.purpose}</span>
+                            </td>
+                            <td style={{ padding: "10px 12px" }} className="muted text-xs">Automatic / 5 min</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                  <ol className="pl-md stack gap-xs text-sm">{rec.steps.map((t, i) => <li key={i}>{t}</li>)}</ol>
+
+                  <h4 className="text-xs font-bold text-ink-2 uppercase tracking-wide mb-xs">Setup Instructions:</h4>
+                  <ol className="pl-md stack gap-xs text-sm" style={{ margin: 0 }}>
+                    {rec.steps.map((t, i) => <li key={i}>{t}</li>)}
+                  </ol>
                 </div>
               )}
 
@@ -86,11 +121,24 @@ export default async function Domains({ searchParams }: { searchParams: Promise<
 
       {canEdit && (
         <form action={addDomainAction} className="card stack mt-md" data-testid="domain-add">
-          <h2 className="text-base font-bold m-0">Add a domain</h2>
+          <h2 className="text-base font-bold m-0">Add a custom domain</h2>
           <div className="field m-0">
-            <label className="label" htmlFor="domain">Your domain</label>
-            <input id="domain" className="input font-mono" name="domain" required placeholder="yourshop.com" autoCapitalize="none" autoCorrect="off" spellCheck={false} inputMode="url" />
-            <div className="muted text-xs mt-xs">Only the name, without https:// or a slash. Custom domains come with the Growth plan and above.</div>
+            <label className="label" htmlFor="domain">Your domain name</label>
+            <input
+              id="domain"
+              className="input font-mono"
+              name="domain"
+              required
+              placeholder="example: yourshop.com or shop.yourbrand.com"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              inputMode="url"
+            />
+            <div className="muted text-xs mt-xs stack gap-xs">
+              <span>Enter only the domain name (without <code>https://</code>, <code>http://</code>, or slashes).</span>
+              <span>Adding your root domain (e.g. <code>yourshop.com</code>) enables both <code>yourshop.com</code> and <code>www.yourshop.com</code> with free automatic SSL.</span>
+            </div>
           </div>
           <div><SubmitButton className="btn btn-primary" pending="Adding…">Add domain</SubmitButton></div>
         </form>

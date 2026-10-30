@@ -95,11 +95,20 @@ export function vercelFromEnv(env = process.env): VercelDomainClient | null {
 }
 const client = () => vercel ?? vercelFromEnv();
 
+export interface DnsRecordItem {
+  kind: "A" | "CNAME";
+  name: string;
+  value: string;
+  purpose: string;
+}
+
 export interface DnsInstruction {
   kind: "A" | "CNAME";
   host: string;
   name: string;
   value: string;
+  isApex: boolean;
+  records: DnsRecordItem[];
   steps: string[];
 }
 
@@ -113,18 +122,45 @@ export function dnsInstruction(domain: string): DnsInstruction {
   const kind = apex ? "A" : "CNAME";
   const name = apex ? "@" : domain.split(".")[0]!;
   const value = apex ? aTarget() : cnameTarget();
-  const steps = [
-    "Sign in where you bought the domain (for example Namecheap, GoDaddy, or the Bangladeshi registrar you used).",
-    "Open the DNS settings for the domain.",
-    `Add a new ${kind} record. Name: ${name}. Value: ${value}.`,
-    "Delete any older A or CNAME record for the same name, so only one is left.",
-    "Save. It can take a few minutes, sometimes up to a few hours. We check by ourselves and this page updates.",
-  ];
+
+  const records: DnsRecordItem[] = [];
   if (apex) {
-    steps.push(`To also connect www.${domain}, add a CNAME record with Name: www and Value: cname.vercel-dns.com (or ${domain}).`);
+    records.push({
+      kind: "A",
+      name: "@",
+      value: aTarget(),
+      purpose: "Root domain address (e.g. " + domain + ")",
+    });
+    records.push({
+      kind: "CNAME",
+      name: "www",
+      value: "cname.vercel-dns.com",
+      purpose: "WWW prefix address (e.g. www." + domain + ")",
+    });
+  } else {
+    records.push({
+      kind: "CNAME",
+      name,
+      value: "cname.vercel-dns.com",
+      purpose: "Subdomain address (" + domain + ")",
+    });
   }
+
+  const steps = [
+    "Sign in to the provider where you bought the domain (e.g. Namecheap, GoDaddy, Cloudflare, or your local registrar).",
+    "Open the DNS Management / Advanced DNS settings for your domain.",
+    `Add the ${apex ? "two records" : "record"} shown in the table above.`,
+    "Delete any conflicting older A or CNAME records for the same Host name.",
+    "Click 'Check now'. Once DNS propagates (typically 2-15 minutes), SSL is provisioned automatically.",
+  ];
+
   return {
-    kind, host: domain, name, value,
+    kind,
+    host: domain,
+    name,
+    value,
+    isApex: apex,
+    records,
     steps,
   };
 }

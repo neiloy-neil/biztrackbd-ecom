@@ -211,7 +211,7 @@ export { templateChrome, BUILT_IN_CHROMES } from "./builder/template-chromes";
 export * from "./landing/offers";
 export * from "./landing/templates";
 export * from "./landing/stats";
-export { checkDomain, recheckDomain, sweepDomains, dnsInstruction, setDnsResolver, setVercelClient, vercelFromEnv, type DnsResolver, type VercelDomainClient, type DnsInstruction, type CheckOutcome, type SweepSummary } from "./domains/verify";
+export { checkDomain, recheckDomain, sweepDomains, dnsInstruction, setDnsResolver, setVercelClient, vercelFromEnv, type DnsResolver, type VercelDomainClient, type DnsInstruction, type DnsRecordItem, type CheckOutcome, type SweepSummary } from "./domains/verify";
 export { listPlatformDomains, checkPlatformDomain, type PlatformDomainRow, type DomainFilter } from "./platform/domains";
 
 // Phase 9: loyalty points, VIP tiers and referrals
