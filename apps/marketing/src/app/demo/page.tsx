@@ -9,7 +9,7 @@ const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002"
 export const metadata: Metadata = {
   title: "Live Product Demos & Operational Desks",
   description:
-    "Choose a BizTrackBD Commerce or Business demo. Preview the customer website or explore the owner dashboard with sample data.",
+    "Choose a BizTrackBD Commerce or Business demo. Preview the customer website or explore the owner dashboard with sample data. Try it live.",
   alternates: { canonical: `${siteUrl}/demo` },
   openGraph: {
     type: "website",

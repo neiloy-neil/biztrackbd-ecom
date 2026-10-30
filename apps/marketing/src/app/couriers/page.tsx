@@ -5,9 +5,9 @@ import { demoAdminUrl } from "@/lib/demo-admin";
 const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
 
 export const metadata: Metadata = {
-  title: "Courier Automation: Steadfast, Pathao & RedX Integration Guide",
+  title: "Steadfast, Pathao & RedX Courier Automation",
   description:
-    "Automate Steadfast, Pathao, and RedX pickups straight from each order. Check customer COD return rates, print thermal barcode labels, and track parcels across all 64 districts.",
+    "Book Steadfast, Pathao and RedX pickups from each order. Check COD return rates, print barcode labels and track parcels in all 64 districts.",
   keywords: [
     "steadfast courier api bangladesh",
     "pathao courier integration",

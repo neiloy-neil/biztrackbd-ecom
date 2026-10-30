@@ -13,7 +13,7 @@ const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002"
 export const metadata: Metadata = {
   title: "Online Store & Business Website Platform for Bangladesh",
   description:
-    "Launch your online store or business website in a day. Sell with bKash, Nagad, and Cash on Delivery. Book Pathao and Steadfast pickups straight from each order with 0% sales commission.",
+    "Launch your online store in a day. Sell with bKash, Nagad and COD, book Pathao and Steadfast pickups from each order, and keep 0% sales commission.",
   alternates: {
     canonical: siteUrl,
   },
@@ -420,6 +420,32 @@ export default async function Home() {
               <b>💬 Dhaka-based support</b>
               <p>Direct WhatsApp and phone assistance from specialists who understand local commerce logistics.</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Switching and comparison links */}
+      <section className="block">
+        <div className="wrap" style={{ textAlign: "center" }}>
+          <h2 style={{ margin: "0 auto 16px", fontSize: "clamp(26px, 4vw, 38px)", letterSpacing: "-1px" }}>
+            Already selling on another platform?
+          </h2>
+          <p style={{ maxWidth: 640, margin: "0 auto 20px", color: "var(--ink-2)" }}>
+            See how BizTrackBD compares, move your store without downtime, or screen a risky COD order for free.
+          </p>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+            <Link href="/compare/shopify" className="btn btn-secondary btn-sm" prefetch={false}>
+              BizTrackBD vs Shopify
+            </Link>
+            <Link href="/compare/woocommerce" className="btn btn-secondary btn-sm" prefetch={false}>
+              BizTrackBD vs WooCommerce
+            </Link>
+            <Link href="/migrate/shopify" className="btn btn-secondary btn-sm" prefetch={false}>
+              Migrate from Shopify
+            </Link>
+            <Link href="/tools/courier-fraud-checker" className="btn btn-secondary btn-sm" prefetch={false}>
+              Free courier fraud checker
+            </Link>
           </div>
         </div>
       </section>

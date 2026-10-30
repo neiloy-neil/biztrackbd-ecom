@@ -255,6 +255,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   <Link href="/security" prefetch={false}>Security Architecture</Link>
                   <Link href="/data-ownership" prefetch={false}>Zero Lock-In Charter</Link>
                   <Link href="/demo" prefetch={false}>Live Sandbox Demos</Link>
+                  <Link href="/blog" prefetch={false}>Guides</Link>
+                  <Link href="/about" prefetch={false}>About</Link>
                   <Link href="/contact" prefetch={false}>Contact Support</Link>
                   <Link href="/privacy" prefetch={false}>Privacy Policy</Link>
                   <Link href="/terms" prefetch={false}>Terms of Service</Link>

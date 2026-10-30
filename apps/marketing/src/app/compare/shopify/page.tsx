@@ -7,10 +7,10 @@ const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002"
 
 export const metadata: Metadata = {
   title: {
-    absolute: "BizTrackBD vs Shopify in Bangladesh: An Honest Comparison (Oct 2026)",
+    absolute: "BizTrackBD vs Shopify in Bangladesh: Honest Comparison",
   },
   description:
-    "An honest, vendor-neutral comparison of BizTrackBD vs Shopify for Bangladesh eCommerce. Compare dollar credit card hurdles, 2% transaction cuts, native bKash checkout, Steadfast/Pathao courier booking, and true Taka costs.",
+    "Honest BizTrackBD vs Shopify comparison for Bangladesh: card hurdles, 2% transaction fees, native bKash checkout, courier booking and true Taka costs.",
   alternates: {
     canonical: `${siteUrl}/compare/shopify`,
   },

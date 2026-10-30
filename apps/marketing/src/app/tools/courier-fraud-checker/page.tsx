@@ -7,9 +7,9 @@ import { demoAdminUrl } from "@/lib/demo-admin";
 const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
 
 export const metadata: Metadata = {
-  title: "ফ্রি কুরিয়ার ফ্রড চেকার | Multi-Courier Fraud Screening Bangladesh",
+  title: "ফ্রি কুরিয়ার ফ্রড চেকার (Steadfast, Pathao, RedX)",
   description:
-    "বাংলাদেশের অনলাইন মার্চেন্টদের জন্য ইনস্ট্যান্ট ক্যাশ-অন-ডেলিভারি (সিওডি) ঝুঁকি যাচাই ইঞ্জিন। Steadfast, Pathao, RedX, CarryBee ও Paperfly থেকে মাত্র ১টি ক্লিকে গ্রাহকের অতীত ডেলিভারি হিস্ট্রি যাচাই করুন। ১০০% ফ্রি অনলাইন স্ক্রিনিং টুল।",
+    "Steadfast, Pathao, RedX, CarryBee ও Paperfly থেকে এক ক্লিকে গ্রাহকের ডেলিভারি হিস্ট্রি যাচাই করুন। ১০০% ফ্রি COD ঝুঁকি চেকার, এখনই ব্যবহার করুন।",
   keywords: [
     "কুরিয়ার ফ্রড চেকার",
     "courier fraud checker bangladesh",

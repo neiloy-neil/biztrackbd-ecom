@@ -4,9 +4,9 @@ import Link from "next/link";
 import { demoAdminUrl } from "@/lib/demo-admin";
 
 export const metadata: Metadata = {
-  title: "How to Migrate from Shopify to BizTrackBD with Zero Downtime (Oct 2026)",
+  title: "Migrate from Shopify to BizTrackBD, No Downtime",
   description:
-    "A complete, step-by-step playbook to switch your Bangladeshi eCommerce store from Shopify to BizTrackBD. Keep your domain, product photos, and variants while eliminating USD fees, 2% commissions, and courier copy-pasting.",
+    "Move your Bangladeshi store from Shopify to BizTrackBD step by step. Keep your domain, photos and variants; drop USD fees and 2% commissions.",
   alternates: {
     canonical: "https://biztrack.bd/migrate/shopify",
   },

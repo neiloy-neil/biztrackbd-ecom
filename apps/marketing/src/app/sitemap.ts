@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import sitemapDates from "@/lib/sitemap-dates.json";
+import { BLOG_POSTS } from "@/lib/blog";
 
 const origin = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
 const dates = sitemapDates as Record<string, string>;
@@ -210,6 +211,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.85,
     },
+    {
+      url: `${origin}/about`,
+      lastModified: getModifiedDate("/about"),
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
+      url: `${origin}/blog`,
+      lastModified: new Date(BLOG_POSTS[0]?.published ?? FALLBACK_DATE),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    ...BLOG_POSTS.map((post) => ({
+      url: `${origin}/blog/${post.slug}`,
+      lastModified: new Date(post.published),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })),
     {
       url: `${origin}/contact`,
       lastModified: getModifiedDate("/contact"),

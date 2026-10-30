@@ -8,7 +8,7 @@ const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002"
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Pricing Plans: Transparent Taka Pricing with 0% Commission",
+  title: "Pricing in Taka with 0% Commission",
   description:
     "Honest monthly plans in Bangladeshi Taka. 14 days free trial, no credit card required, 0% commission on your sales. Pay via bKash or Nagad.",
   alternates: {
@@ -18,13 +18,13 @@ export const metadata: Metadata = {
     type: "website",
     url: `${siteUrl}/pricing`,
     siteName: "BizTrackBD",
-    title: "Transparent Pricing Plans: 0% Commission in Bangladeshi Taka",
+    title: "Pricing in Taka with 0% Commission",
     description: "Flat BDT monthly plans for Commerce and Business. 14-day free trial, pay via bKash or Nagad.",
     images: [{ url: `${siteUrl}/opengraph-image`, width: 1200, height: 630, alt: "BizTrackBD Pricing" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Transparent Pricing Plans: 0% Commission in Bangladeshi Taka",
+    title: "Pricing in Taka with 0% Commission",
     description: "No dollar card needed. 0% sales commission, flat monthly pricing in Taka.",
     images: [`${siteUrl}/opengraph-image`],
   },

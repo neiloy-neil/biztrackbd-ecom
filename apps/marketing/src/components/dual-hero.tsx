@@ -121,7 +121,7 @@ export function DualHero({
         <p className="lead" style={{ maxWidth: 740, margin: "18px auto 0", color: "var(--ink-2)", fontSize: "clamp(16px, 2vw, 19px)", lineHeight: 1.6 }}>
           {mode === "commerce" ? (
             <>
-              Ecommerce software for Bangladesh bringing your online store, direct bKash/Nagad payment checks, COD return fraud shield, and 1-click Pathao &amp; Steadfast dispatches into one calm operating desk.
+              Online store builder for Bangladesh bringing your online store, direct bKash/Nagad payment checks, COD return fraud shield, and 1-click Pathao &amp; Steadfast dispatches into one calm operating desk.
             </>
           ) : (
             <>

@@ -5,8 +5,8 @@ import { demoAdminUrl } from "@/lib/demo-admin";
 const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
 
 export const metadata: Metadata = {
-  title: "Features: Built for the realities of Bangladesh eCommerce",
-  description: "Combat COD returns, automate Pathao and Steadfast pickups, accept bKash and Nagad with zero commission, and run your shop from your phone.",
+  title: "Features Built for Bangladesh eCommerce",
+  description: "Cut COD returns, automate Pathao and Steadfast pickups, accept bKash and Nagad at 0% commission, and run your shop from your phone. Try free.",
   alternates: {
     canonical: `${siteUrl}/features`,
   },

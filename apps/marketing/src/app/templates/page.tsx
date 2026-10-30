@@ -11,7 +11,7 @@ export const revalidate = 300;
 export const metadata: Metadata = {
   title: "eCommerce Store & Business Website Templates",
   description:
-    "Explore responsive templates for Bangladeshi businesses. Complete with bKash checkout, size guides, spec tables, and mobile-optimized carts.",
+    "Responsive templates for Bangladeshi businesses with bKash checkout, size guides, spec tables and mobile carts. Preview a template free.",
   alternates: {
     canonical: `${siteUrl}/templates`,
   },
