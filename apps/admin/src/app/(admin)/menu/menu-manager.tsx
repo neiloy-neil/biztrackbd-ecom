@@ -187,7 +187,7 @@ export function MenuManager({
           onClick={() => setActiveMainTab("dishes")}
           className={`menu-tab-btn ${activeMainTab === "dishes" ? "active" : ""}`}
         >
-          <span>🍽️</span> Menu Categories & Dishes
+          <span>Menu Categories & Dishes</span>
           <span className="menu-counter-chip">{totalDishes}</span>
         </button>
         <button
@@ -195,7 +195,7 @@ export function MenuManager({
           onClick={() => setActiveMainTab("qr-studio")}
           className={`menu-tab-btn ${activeMainTab === "qr-studio" ? "active" : ""}`}
         >
-          <span>📱</span> Table QR Studio
+          <span>Table QR Studio</span>
           <span className="menu-counter-chip" style={{ background: "rgba(5, 150, 105, 0.12)", color: "#059669" }}>
             Print & Stands
           </span>
@@ -788,7 +788,7 @@ export function MenuManager({
                   className="menu-btn-secondary"
                   style={{ padding: "8px 12px", fontSize: "0.8rem", textAlign: "center" }}
                 >
-                  🖨️ Download SVG
+                  Download SVG
                 </button>
               </div>
               <div style={{ textAlign: "center", paddingTop: 4 }}>
@@ -800,7 +800,7 @@ export function MenuManager({
                   }}
                   style={{ background: "none", border: "none", color: "#059669", fontSize: "0.82rem", fontWeight: 600, cursor: "pointer" }}
                 >
-                  📋 Copy Menu Link
+                  Copy Menu Link
                 </button>
               </div>
             </div>

@@ -103,12 +103,11 @@ export default async function Apps({
 
   return (
     <>
-      <div className="page-head">
-        <h1>Apps & Integrations</h1>
-      </div>
-      <p className="page-sub">
-        Unified marketplace and integration hub. Activate couriers, track ad conversions, set up your product feed, and configure customer loyalty without leaving the page.
-      </p>
+      <PageHeader
+        title="Apps & Integrations"
+        crumbs={[{ label: "Settings", href: "/settings/store" }, { label: "Apps & Integrations" }]}
+        sub="Unified marketplace and integration hub. Activate couriers, track ad conversions, set up your product feed, and configure customer loyalty without leaving the page."
+      />
 
       {err && (
         <div className="notice bad" role="alert" style={{ marginBottom: 16 }} data-testid="apps-error">

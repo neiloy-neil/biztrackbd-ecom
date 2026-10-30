@@ -654,7 +654,7 @@ export function LeadsManager({
           >
             {filteredLeads.length === 0 ? (
               <div style={{ padding: "48px 24px", textAlign: "center", color: "#64748b" }}>
-                <div style={{ fontSize: "2rem", marginBottom: 8 }}>📬</div>
+                <div style={{ fontSize: "1.2rem", marginBottom: 8, color: "var(--ink-3)" }}><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
                 <div style={{ fontWeight: 700, color: "#0f172a", marginBottom: 4 }}>No inquiries found</div>
                 <div style={{ fontSize: "0.84rem" }}>Try adjusting your filters or search terms.</div>
               </div>
@@ -766,7 +766,7 @@ export function LeadsManager({
                       <span>Ref: #LD-{item.id.slice(-6)}</span>
                       {assignedStaff ? (
                         <span style={{ color: "#0369a1", fontWeight: 600 }}>
-                          👤 {assignedStaff.name}
+                          {assignedStaff.name}
                         </span>
                       ) : (
                         <span style={{ color: "#94a3b8" }}>Unassigned</span>
@@ -921,7 +921,7 @@ export function LeadsManager({
                 }}
               >
                 <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "#475569", marginRight: 4 }}>
-                  ⚡ Quick Action:
+                  Quick Action:
                 </span>
 
                 {selectedLead.phone && (
@@ -951,7 +951,7 @@ export function LeadsManager({
                       boxShadow: "0 2px 4px rgba(37, 211, 102, 0.2)",
                     }}
                   >
-                    <span>💬</span> Open WhatsApp Chat
+                    Open WhatsApp Chat
                   </a>
                 )}
 
@@ -979,7 +979,7 @@ export function LeadsManager({
                       textDecoration: "none",
                     }}
                   >
-                    <span>📞</span> Call ({selectedLead.phone})
+                    Call ({selectedLead.phone})
                   </a>
                 )}
 
@@ -1051,7 +1051,7 @@ export function LeadsManager({
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                     <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "#5B21B6", display: "flex", alignItems: "center", gap: 6 }}>
-                      🗓️ Reservation & Appointment Details
+                      Reservation & Appointment Details
                     </span>
                     <span
                       style={{
@@ -1140,7 +1140,7 @@ export function LeadsManager({
                   }}
                 >
                   <span style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, color: "#6B7280", marginBottom: 6 }}>
-                    💬 Customer Inquiry Note:
+                    Customer Inquiry Note:
                   </span>
                   <div style={{ fontSize: "0.92rem", color: "#1F2937", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
                     {selectedLead.message}
@@ -1163,7 +1163,7 @@ export function LeadsManager({
                     border: "1px dashed #CBD5E1",
                   }}
                 >
-                  <span style={{ fontWeight: 700, color: "#475569" }}>📈 Marketing Attribution:</span>
+                  <span style={{ fontWeight: 700, color: "#475569" }}>Marketing Attribution:</span>
                   {selectedLead.utmSource && <span>Source: <strong>{selectedLead.utmSource}</strong></span>}
                   {selectedLead.utmMedium && <span>Medium: <strong>{selectedLead.utmMedium}</strong></span>}
                   {selectedLead.utmCampaign && <span>Campaign: <strong>{selectedLead.utmCampaign}</strong></span>}

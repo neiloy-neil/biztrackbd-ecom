@@ -133,7 +133,7 @@ export default async function TrackingHealth({
 
       {/* Interactive Meta Test Tool */}
       <section className="card" style={{ padding: 20, marginBottom: 24, background: "#F8FAFC", border: "1.5px solid #E2E8F0" }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, margin: "0 0 6px" }}>⚡ Real-Time Meta Test Event Dispatcher</h3>
+        <h3 style={{ fontSize: 15, fontWeight: 700, margin: "0 0 6px" }}>Real-Time Meta Test Event Dispatcher</h3>
         <p style={{ fontSize: 13, color: "var(--ink-2)", margin: "0 0 14px", maxWidth: 680 }}>
           Open your <b>Meta Events Manager &rarr; Test Events</b> tab in Facebook Business Manager. Copy the test code (e.g. <code>TEST12345</code>) and paste it below to send a live server test ping.
         </p>
@@ -156,14 +156,14 @@ export default async function TrackingHealth({
       <section className="card" style={{ padding: 20, marginBottom: 24, background: "#FFFFFF", border: "1.5px solid #E2E8F0" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 12 }}>
           <div>
-            <h3 style={{ fontSize: 15, fontWeight: 700, margin: "0 0 4px" }}>📬 Asynchronous Event Outbox &amp; Webhook Queue</h3>
+            <h3 style={{ fontSize: 15, fontWeight: 700, margin: "0 0 4px" }}>Asynchronous Event Outbox &amp; Webhook Queue</h3>
             <p style={{ fontSize: 13, color: "var(--ink-2)", margin: 0, maxWidth: 640 }}>
               Durable background queue for SMS, Meta Conversions API (CAPI), and outbound webhooks. Automatically retries transient failures with exponential backoff (+1m, +5m, +15m).
             </p>
           </div>
           <form action={sweepOutboxAction}>
             <SubmitButton className="btn btn-secondary btn-sm" pending="Sweeping Queue…">
-              🔄 Sweep Due Jobs Now
+              Sweep Due Jobs Now
             </SubmitButton>
           </form>
         </div>

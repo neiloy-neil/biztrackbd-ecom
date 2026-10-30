@@ -114,21 +114,21 @@ export function DeveloperHubClient({
           className={`btn ${activeTab === "keys" ? "btn-primary" : "btn-secondary"}`}
           onClick={() => setActiveTab("keys")}
         >
-          🔑 API Keys &amp; Credentials ({keys.length})
+          API Keys &amp; Credentials ({keys.length})
         </button>
         <button
           type="button"
           className={`btn ${activeTab === "docs" ? "btn-primary" : "btn-secondary"}`}
           onClick={() => setActiveTab("docs")}
         >
-          📘 Interactive Docs &amp; Code Explorer
+          Interactive Docs &amp; Code Explorer
         </button>
         <button
           type="button"
           className={`btn ${activeTab === "logs" ? "btn-primary" : "btn-secondary"}`}
           onClick={() => setActiveTab("logs")}
         >
-          ⚡ Traffic Audit Logs ({logs.length})
+          Traffic Audit Logs ({logs.length})
         </button>
       </div>
 

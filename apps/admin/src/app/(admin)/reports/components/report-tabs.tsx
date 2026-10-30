@@ -6,7 +6,7 @@ export interface ReportTabsProps {
 }
 
 const TABS: { id: ReportTabsProps["currentTab"]; href: string; label: string }[] = [
-  { id: "realtime", href: "/reports/realtime", label: "⚡ Real-Time Studio" },
+  { id: "realtime", href: "/reports/realtime", label: "Real-Time Studio" },
   { id: "sales", href: "/reports", label: "Overview & Sales" },
   { id: "products", href: "/reports/products", label: "Products & Stock" },
   { id: "couriers", href: "/reports/couriers", label: "Couriers & Delivery" },

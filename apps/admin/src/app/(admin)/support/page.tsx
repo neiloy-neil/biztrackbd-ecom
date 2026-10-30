@@ -22,12 +22,11 @@ export default async function MerchantSupportPage({
 
   return (
     <div className="stack" style={{ gap: 24, maxWidth: 920 }}>
-      <div className="page-head">
-        <h1>Help & Support</h1>
-      </div>
-      <p className="page-sub">
-        Get assistance from the BizTrackBD technical team with custom domains, couriers, payment gateways, and theme configurations.
-      </p>
+      <PageHeader
+        title="Help & Support"
+        crumbs={[{ label: "Settings", href: "/settings/store" }, { label: "Help & Support" }]}
+        sub="Get assistance from the BizTrackBD technical team with custom domains, couriers, payment gateways, and theme configurations."
+      />
 
       {err && (
         <div className="notice bad" role="alert">

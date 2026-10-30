@@ -37,8 +37,11 @@ export default async function Domains({ searchParams }: { searchParams: Promise<
   return (
     <>
       <DomainWatcher pendingIds={canEdit ? pending : []} />
-      <div className="page-head"><h1>Domains</h1></div>
-      <p className="page-sub">Your store is always at <b>{s.tenantSubdomain}.{root}</b>. Add your own domain, like yourshop.com, and customers will see that instead.</p>
+      <PageHeader
+        title="Domains"
+        crumbs={[{ label: "Settings", href: "/settings/store" }, { label: "Domains" }]}
+        sub={<>Your store is always at <b>{s.tenantSubdomain}.{root}</b>. Add your own domain, like yourshop.com, and customers will see that instead.</>}
+      />
       {err && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{err}</div>}
       {done && DONE[done] && <div className="notice good" role="status" style={{ marginBottom: 12 }}>{DONE[done]}</div>}
 

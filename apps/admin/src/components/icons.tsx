@@ -23,3 +23,10 @@ export const ChevronIcon = (p: P) => <svg {...base} {...p}><path d="M6 9l6 6 6-6
 export const StoreIcon = (p: P) => <svg {...base} {...p}><path d="M4 9l1.5-5h13L20 9M4 9v11h16V9M4 9a2.7 2.7 0 005.3 0 2.7 2.7 0 005.4 0A2.7 2.7 0 0020 9M10 20v-6h4v6" /></svg>;
 export const PuzzleIcon = (p: P) => <svg {...base} {...p}><path d="M10 4a2 2 0 114 0v1h4a1 1 0 011 1v4h-1a2 2 0 100 4h1v4a1 1 0 01-1 1h-4v-1a2 2 0 10-4 0v1H6a1 1 0 01-1-1v-4h1a2 2 0 100-4H5V6a1 1 0 011-1h4z" /></svg>;
 export const MegaphoneIcon = (p: P) => <svg {...base} {...p}><path d="M3 11v3a1 1 0 001 1h2l3 5h2l-1.5-5H12l8 4V6l-8 4H4a1 1 0 00-1 1z" /></svg>;
+
+export const UtensilsIcon = (p: P) => <svg {...base} {...p}><path d="M18 2v6a3 3 0 0 1-3 3 3 3 0 0 1-3-3V2M15 2v20M6 2v20M3 2v6a3 3 0 0 0 6 0V2" /></svg>;
+export const BuildingIcon = (p: P) => <svg {...base} {...p}><rect x="4" y="2" width="16" height="20" rx="2" /><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01" /></svg>;
+export const BriefcaseIcon = (p: P) => <svg {...base} {...p}><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>;
+export const ClinicIcon = (p: P) => <svg {...base} {...p}><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>;
+export const GlobeIcon = (p: P) => <svg {...base} {...p}><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></svg>;
+export const PaletteIcon = (p: P) => <svg {...base} {...p}><circle cx="13.5" cy="6.5" r=".5" /><circle cx="17.5" cy="10.5" r=".5" /><circle cx="8.5" cy="7.5" r=".5" /><circle cx="6.5" cy="12.5" r=".5" /><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.5 17.5 2 12 2z" /></svg>;

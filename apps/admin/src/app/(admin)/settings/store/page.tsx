@@ -15,8 +15,11 @@ export default async function StoreDetails() {
   const canEdit = can(s.user.role, "design", "edit");
   return (
     <>
-      <div className="page-head"><h1>Store details</h1></div>
-      <p className="page-sub">This information appears on invoices, emails and your store footer.</p>
+      <PageHeader
+        title="Store details"
+        crumbs={[{ label: "Settings", href: "/settings/store" }, { label: "Store details" }]}
+        sub="This information appears on invoices, emails and your store footer."
+      />
       {canEdit ? (
         <>
           <StoreForm initial={{

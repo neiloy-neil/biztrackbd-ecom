@@ -26,8 +26,12 @@ export default async function Shipping({ searchParams }: { searchParams: Promise
 
   return (
     <>
-      <div className="page-head"><h1>Delivery charges</h1><div className="actions">{canEdit && <Link href="/settings/shipping?new=1" className="btn btn-primary" prefetch={false} data-testid="new-zone">Add zone</Link>}</div></div>
-      <p className="page-sub">Set what customers pay for delivery. The right charge is picked from their district at checkout.</p>
+      <PageHeader
+        title="Delivery charges"
+        crumbs={[{ label: "Settings", href: "/settings/store" }, { label: "Shipping" }]}
+        sub="Set what customers pay for delivery. The right charge is picked from their district at checkout."
+        actions={canEdit && <Link href="/settings/shipping?new=1" className="btn btn-primary" prefetch={false} data-testid="new-zone">Add zone</Link>}
+      />
       {one(sp.saved) && <div className="notice good" role="status" style={{ marginBottom: 12 }}>Zone saved.</div>}
       {one(sp.deleted) && <div className="notice good" role="status" style={{ marginBottom: 12 }}>Zone deleted.</div>}
       {one(sp.rates) && <div className="notice good" role="status" style={{ marginBottom: 12 }}>Courier charges saved.</div>}

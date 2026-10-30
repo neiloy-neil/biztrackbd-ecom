@@ -253,7 +253,7 @@ export function DownloadsManager({ initialDownloads, storeOrigin }: Props) {
             borderRadius: 8,
           }}
         >
-          <div style={{ fontSize: "2rem", marginBottom: 12 }}>📥</div>
+          <div style={{ fontSize: "1.2rem", marginBottom: 12, color: "var(--ink-3)" }}><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
           <h3 style={{ margin: "0 0 6px", fontSize: "1.1rem" }}>No downloadable assets found</h3>
           <p className="muted" style={{ margin: "0 0 16px", fontSize: "0.9rem" }}>
             Add your company brochure, specialist CV, or restaurant menu PDF for visitors to download.
@@ -289,7 +289,7 @@ export function DownloadsManager({ initialDownloads, storeOrigin }: Props) {
                         {it.labelBn && <span className="muted" style={{ marginLeft: 6, fontWeight: 400 }}>({it.labelBn})</span>}
                       </div>
                       <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: 2 }}>
-                        <span>📄 {it.fileName}</span>
+                        <span>{it.fileName}</span>
                         <span style={{ marginLeft: 8 }}>({formatBytes(it.fileSize)})</span>
                       </div>
                     </td>
@@ -322,7 +322,7 @@ export function DownloadsManager({ initialDownloads, storeOrigin }: Props) {
                             border: "1px solid #ddd6fe",
                           }}
                         >
-                          🔒 Lead Magnet (Gated)
+                          Lead Magnet (Gated)
                         </span>
                       ) : (
                         <span
@@ -336,7 +336,7 @@ export function DownloadsManager({ initialDownloads, storeOrigin }: Props) {
                             color: "#15803d",
                           }}
                         >
-                          ⚡ Direct 1-Click
+                          Direct 1-Click
                         </span>
                       )}
                     </td>
@@ -585,7 +585,7 @@ export function DownloadsManager({ initialDownloads, storeOrigin }: Props) {
                     />
                     <div>
                       <div style={{ fontWeight: 600, fontSize: "0.88rem", color: "#166534" }}>
-                        ⚡ Direct 1-Click Download
+                        Direct 1-Click Download
                       </div>
                       <div className="muted" style={{ fontSize: "0.8rem", marginTop: 2 }}>
                         Visitors can download the document immediately without providing contact info. Best for public menus and basic brochures.
@@ -603,7 +603,7 @@ export function DownloadsManager({ initialDownloads, storeOrigin }: Props) {
                     />
                     <div>
                       <div style={{ fontWeight: 600, fontSize: "0.88rem", color: "#6b21a8" }}>
-                        🔒 Require Visitor Contact Before Download (Lead Magnet Mode)
+                        Require Visitor Contact Before Download (Lead Magnet Mode)
                       </div>
                       <div className="muted" style={{ fontSize: "0.8rem", marginTop: 2 }}>
                         A clean modal asks for visitor Name and Phone/Email before delivering the file. Saves a verified lead to your Lead Inbox for instant WhatsApp follow-up.

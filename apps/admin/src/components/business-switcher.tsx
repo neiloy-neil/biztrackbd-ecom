@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useTransition } from "react";
 import type { BusinessAccountSummary } from "@biztrackbd/core";
 import { switchBusinessAction, createBusinessAction, type CreateBusinessState } from "@/app/(admin)/business-actions";
-import { ChevronIcon, PlusIcon } from "./icons";
+import { ChevronIcon, PlusIcon, StoreIcon, UtensilsIcon, ClinicIcon, BuildingIcon, BriefcaseIcon, CustomersIcon, PaletteIcon, GlobeIcon } from "./icons";
 import { SubmitButton } from "@/components/ui";
 
 export interface BusinessSwitcherProps {
@@ -17,7 +17,7 @@ export interface BusinessSwitcherProps {
 }
 
 interface VerticalInfo {
-  icon: string;
+  icon: React.ReactNode;
   label: string;
   labelBn: string;
   color: string;
@@ -28,22 +28,22 @@ function getVerticalInfo(siteMode: string, vertical?: string | null): VerticalIn
   if (siteMode === "PORTFOLIO") {
     switch (vertical) {
       case "RESTAURANT":
-        return { icon: "🍽️", label: "Restaurant", labelBn: "রেস্তোরাঁ", color: "#fb923c", bg: "rgba(249,115,22,0.12)" };
+        return { icon: <UtensilsIcon width={16} height={16} />, label: "Restaurant", labelBn: "রেস্তোরাঁ", color: "#fb923c", bg: "rgba(249,115,22,0.12)" };
       case "DOCTOR_CLINIC":
-        return { icon: "🏥", label: "Healthcare", labelBn: "ক্লিনিক", color: "#22d3ee", bg: "rgba(6,182,212,0.12)" };
+        return { icon: <ClinicIcon width={16} height={16} />, label: "Healthcare", labelBn: "ক্লিনিক", color: "#22d3ee", bg: "rgba(6,182,212,0.12)" };
       case "BUSINESS_COMPANY":
-        return { icon: "🏢", label: "Company", labelBn: "কোম্পানি", color: "#a5b4fc", bg: "rgba(99,102,241,0.12)" };
+        return { icon: <BuildingIcon width={16} height={16} />, label: "Company", labelBn: "কোম্পানি", color: "#a5b4fc", bg: "rgba(99,102,241,0.12)" };
       case "SERVICE_PROVIDER":
-        return { icon: "💼", label: "Services", labelBn: "সেবা", color: "#93c5fd", bg: "rgba(59,130,246,0.12)" };
+        return { icon: <BriefcaseIcon width={16} height={16} />, label: "Services", labelBn: "সেবা", color: "#93c5fd", bg: "rgba(59,130,246,0.12)" };
       case "PUBLIC_FIGURE":
-        return { icon: "🎤", label: "Public Figure", labelBn: "পাবলিক ফিগার", color: "#f472b6", bg: "rgba(236,72,153,0.12)" };
+        return { icon: <CustomersIcon width={16} height={16} />, label: "Public Figure", labelBn: "পাবলিক ফিগার", color: "#f472b6", bg: "rgba(236,72,153,0.12)" };
       case "PERSONAL_PORTFOLIO":
-        return { icon: "🎨", label: "Portfolio", labelBn: "পোর্টফোলিও", color: "#c4b5fd", bg: "rgba(139,92,246,0.12)" };
+        return { icon: <PaletteIcon width={16} height={16} />, label: "Portfolio", labelBn: "পোর্টফোলিও", color: "#c4b5fd", bg: "rgba(139,92,246,0.12)" };
       default:
-        return { icon: "🌐", label: "Business Website", labelBn: "ওয়েবসাইট", color: "#cbd5e1", bg: "rgba(100,116,139,0.12)" };
+        return { icon: <GlobeIcon width={16} height={16} />, label: "Business Website", labelBn: "ওয়েবসাইট", color: "#cbd5e1", bg: "rgba(100,116,139,0.12)" };
     }
   }
-  return { icon: "🛍️", label: "Ecommerce Store", labelBn: "ই-কমার্স শপ", color: "#34d399", bg: "rgba(16,185,129,0.12)" };
+  return { icon: <StoreIcon width={16} height={16} />, label: "Ecommerce Store", labelBn: "ই-কমার্স শপ", color: "#34d399", bg: "rgba(16,185,129,0.12)" };
 }
 
 export function BusinessSwitcher({
@@ -461,7 +461,7 @@ type VerticalChoice = {
   id: string;
   siteMode: "ECOMMERCE" | "PORTFOLIO";
   vertical: string | null;
-  icon: string;
+  icon: React.ReactNode;
   title: string;
   titleBn: string;
   desc: string;
@@ -473,7 +473,7 @@ const VERTICAL_OPTIONS: VerticalChoice[] = [
     id: "ecommerce",
     siteMode: "ECOMMERCE",
     vertical: null,
-    icon: "🛍️",
+    icon: <StoreIcon width={24} height={24} />,
     title: "Ecommerce Store",
     titleBn: "অনলাইন রিটেল শপ",
     desc: "Physical products, cart & checkout, bKash/Nagad, and courier home delivery.",
@@ -483,7 +483,7 @@ const VERTICAL_OPTIONS: VerticalChoice[] = [
     id: "restaurant",
     siteMode: "PORTFOLIO",
     vertical: "RESTAURANT",
-    icon: "🍽️",
+    icon: <UtensilsIcon width={24} height={24} />,
     title: "Restaurant & Dining",
     titleBn: "রেস্তোরাঁ ও ক্যাফে",
     desc: "Digital QR table ordering, kitchen print tickets (KOT), and visual food menu.",
@@ -493,7 +493,7 @@ const VERTICAL_OPTIONS: VerticalChoice[] = [
     id: "services",
     siteMode: "PORTFOLIO",
     vertical: "SERVICE_PROVIDER",
-    icon: "💼",
+    icon: <BriefcaseIcon width={24} height={24} />,
     title: "Services & Agency",
     titleBn: "সার্ভিস ও এজেন্সি",
     desc: "Service packages, client inquiries, quote leads, and appointment bookings.",
@@ -503,7 +503,7 @@ const VERTICAL_OPTIONS: VerticalChoice[] = [
     id: "healthcare",
     siteMode: "PORTFOLIO",
     vertical: "DOCTOR_CLINIC",
-    icon: "🏥",
+    icon: <ClinicIcon width={24} height={24} />,
     title: "Clinic & Healthcare",
     titleBn: "ক্লিনিক ও ডাক্তার চেম্বার",
     desc: "Doctor profiles, treatments, consultation bookings, and clinic location.",
@@ -643,7 +643,7 @@ function AddBusinessModal({ lang, rootDomain, onClose }: AddBusinessModalProps) 
               border: "1px solid rgba(239,68,68,0.25)",
             }}
           >
-            ⚠️ {error}
+            <span className="pill bad" style={{ marginRight: 6 }}>Error</span> {error}
           </div>
         )}
 

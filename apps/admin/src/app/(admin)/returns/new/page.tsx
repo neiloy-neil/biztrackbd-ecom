@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { RETURN_REASONS, exchangeOptions, getOrderDetail, returnableItems } from "@biztrackbd/core";
+import { PageHeader } from "@biztrackbd/ui";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { NewReturnForm } from "./form";
@@ -21,9 +21,15 @@ export default async function NewReturn({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <Link href={`/orders/${orderId}`} className="back" prefetch={false}>← {order.orderNumber}</Link>
-      <div className="page-head"><h1>Start a return</h1></div>
-      <p className="page-sub">{order.customerName} · order {order.orderNumber}</p>
+      <PageHeader
+        title="Start a return"
+        crumbs={[
+          { label: "Orders", href: "/orders" },
+          { label: order.orderNumber, href: `/orders/${orderId}` },
+          { label: "Start a return" },
+        ]}
+        sub={`${order.customerName} · order ${order.orderNumber}`}
+      />
       {!eligible ? (
         <div className="notice bad" role="alert">Only a delivered order can have a return.</div>
       ) : items.every((i) => i.left === 0) ? (

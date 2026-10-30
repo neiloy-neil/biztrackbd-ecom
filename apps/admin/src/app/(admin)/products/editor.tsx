@@ -840,10 +840,10 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                 {/* Tab Switcher */}
                 <div style={{ display: "flex", gap: 6, background: "#F1F5F9", padding: 4, borderRadius: 10 }}>
                   {[
-                    { id: "listing", label: "🏷️ Product Copy", badge: null },
-                    { id: "seo", label: "🔍 Google SERP Card", badge: "Live" },
-                    { id: "social", label: "📣 Social & WhatsApp", badge: "2 Channels" },
-                    { id: "alts", label: `🖼️ Alt-Tags (${aiGeneratedData.imageAltTexts?.length || p.images.length})`, badge: null },
+                    { id: "listing", label: "Product Copy", badge: null },
+                    { id: "seo", label: "Google SERP Card", badge: "Live" },
+                    { id: "social", label: "Social & WhatsApp", badge: "2 Channels" },
+                    { id: "alts", label: `Alt-Tags (${aiGeneratedData.imageAltTexts?.length || p.images.length})`, badge: null },
                   ].map((t) => (
                     <button
                       key={t.id}
@@ -984,7 +984,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                               setTimeout(() => setCopiedField(null), 2000);
                             }}
                           >
-                            {copiedField === "fb" ? "Copied!" : "📋 Copy Post"}
+                            {copiedField === "fb" ? "Copied!" : "Copy Post"}
                           </button>
                         </div>
                         <div style={{ fontSize: 12.5, whiteSpace: "pre-wrap", maxHeight: 180, overflowY: "auto", background: "#fff", padding: 10, borderRadius: 6, border: "1px solid #E2E8F0" }}>
@@ -1005,7 +1005,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                               setTimeout(() => setCopiedField(null), 2000);
                             }}
                           >
-                            {copiedField === "wa" ? "Copied!" : "📋 Copy WhatsApp"}
+                            {copiedField === "wa" ? "Copied!" : "Copy WhatsApp"}
                           </button>
                         </div>
                         <div style={{ fontSize: 12.5, whiteSpace: "pre-wrap", maxHeight: 180, overflowY: "auto", background: "#DCF8C6", padding: 10, borderRadius: 8, border: "1px solid #BBF7D0", color: "#064E3B" }}>

@@ -16,8 +16,11 @@ export default async function Notifications() {
 
   return (
     <>
-      <div className="page-head"><h1>Customer messages</h1></div>
-      <p className="page-sub">The SMS your customers get about their order. Each one is off until you turn it on. Every message uses one SMS credit from your plan.</p>
+      <PageHeader
+        title="Customer messages"
+        crumbs={[{ label: "Settings", href: "/settings/store" }, { label: "Notifications" }]}
+        sub="The SMS your customers get about their order. Each one is off until you turn it on. Every message uses one SMS credit from your plan."
+      />
       <div className="notice" style={{ marginBottom: 14 }} data-testid="sms-credits">
         {smsCredits.limit == null ? `${smsCredits.used} SMS sent this month. Your plan has no SMS limit.` : `${smsCredits.used} of ${smsCredits.limit} SMS credits used this month.`}
       </div>

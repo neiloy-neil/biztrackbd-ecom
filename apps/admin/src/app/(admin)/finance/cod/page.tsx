@@ -339,7 +339,7 @@ export default async function CodRecon({
                 className="btn btn-secondary btn-sm"
                 title="Download CSV of all flagged discrepancies formatted for courier managers"
               >
-                📥 Download Dispute Sheet (CSV)
+                Download Dispute Sheet (CSV)
               </a>
               {canEdit && (
                 <form action={batchAcceptAction} style={{ display: "inline-block" }}>
@@ -462,7 +462,7 @@ export default async function CodRecon({
                       {p.verifiedAt ? (
                         <div>
                           <span className="pill ok" style={{ fontSize: 11 }}>
-                            Bank Verified ✅
+                            Bank Verified
                           </span>
                           <div style={{ fontSize: 11.5, marginTop: 3 }}>
                             Ref: <code>{p.bankTxnRef}</code>
@@ -507,7 +507,7 @@ export default async function CodRecon({
                         className="btn btn-secondary btn-sm"
                         title="Download double-entry journal voucher CSV for Tally or QuickBooks"
                       >
-                        📄 Journal CSV
+                        Journal CSV
                       </a>
                     </td>
                   </tr>
@@ -566,7 +566,7 @@ export default async function CodRecon({
             <div style={{ marginTop: 8 }}>
               <form action={syncNowAction}>
                 <SubmitButton className="btn btn-secondary" pending="Syncing couriers…">
-                  🔄 Trigger Courier Status Sweep Now
+                  Trigger Courier Status Sweep
                 </SubmitButton>
               </form>
             </div>

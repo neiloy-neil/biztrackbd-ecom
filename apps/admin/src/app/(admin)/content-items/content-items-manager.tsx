@@ -601,7 +601,7 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
                             )}
                             {it.kind === "EVENT" && (data.startDate || data.location || data.isVirtual) && (
                               <span style={{ marginLeft: 8, color: "#059669", fontWeight: 500 }}>
-                                {data.startDate ? `📅 ${data.startDate}` : ""}{data.isVirtual ? " (Virtual)" : data.location ? ` · 📍 ${data.location}` : ""}
+                                {data.startDate ? data.startDate : ""}{data.isVirtual ? " (Virtual)" : data.location ? ` · ${data.location}` : ""}
                               </span>
                             )}
                           </div>
