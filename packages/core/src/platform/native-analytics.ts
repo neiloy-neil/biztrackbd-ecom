@@ -116,10 +116,32 @@ export async function recordVisitorEvent(data: VisitorEventPayload): Promise<voi
   });
 }
 
+export const IGNORABLE_CLIENT_ERROR_PATTERNS = [
+  /Java object is gone/i,
+  /^Script error\.?$/i,
+  /ResizeObserver loop/i,
+  /Non-Error promise rejection/i,
+  /chrome-extension:\/\//i,
+  /moz-extension:\/\//i,
+  /safari-extension:\/\//i,
+  /ChunkLoadError/i,
+  /Loading chunk .* failed/i,
+  /NetworkError when attempting to fetch resource/i,
+];
+
+export function isIgnorableClientError(message: string, stack?: string | null): boolean {
+  if (!message) return true;
+  return IGNORABLE_CLIENT_ERROR_PATTERNS.some((p) => p.test(message) || (stack ? p.test(stack) : false));
+}
+
 /** Record or increment a client runtime error */
 export async function recordClientError(data: ClientErrorPayload): Promise<void> {
-  const db = getBasePrisma();
   const normalizedMsg = data.message.trim().slice(0, 1000);
+  if (isIgnorableClientError(normalizedMsg, data.stack)) {
+    // Silently drop known third-party browser/webview noise (e.g. Android Meta in-app browser teardown)
+    return;
+  }
+  const db = getBasePrisma();
   const now = new Date();
 
   // Deduplicate errors occurring on the same page with the same message in the last 24h
@@ -267,6 +289,7 @@ export async function getAnalyticsDashboardData(): Promise<{
       take: 15,
     }),
     db.platformClientError.findMany({
+      where: { status: "NEW" },
       orderBy: { lastOccurredAt: "desc" },
       take: 50,
       select: {
@@ -338,4 +361,22 @@ export async function updateErrorStatus(errorId: string, status: "NEW" | "RESOLV
     where: { id: errorId },
     data: { status },
   });
+}
+
+/** Clean up known client noise errors that were previously recorded */
+export async function purgeKnownNoiseErrors(): Promise<number> {
+  const db = getPlatformPrisma();
+  const res = await db.platformClientError.updateMany({
+    where: {
+      status: "NEW",
+      OR: [
+        { message: { contains: "Java object is gone", mode: "insensitive" } },
+        { message: { contains: "Script error", mode: "insensitive" } },
+        { message: { contains: "ResizeObserver loop", mode: "insensitive" } },
+        { message: { contains: "Non-Error promise rejection", mode: "insensitive" } },
+      ],
+    },
+    data: { status: "IGNORED" },
+  });
+  return res.count;
 }

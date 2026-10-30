@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getAnalyticsDashboardData } from "@biztrackbd/core";
 import { requireAccess } from "@/lib/session";
-import { resolveErrorAction } from "./actions";
+import { purgeNoiseAction, resolveErrorAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Ad Analytics, Traffic & Error Diagnostics" };
@@ -222,8 +222,15 @@ export default async function AnalyticsPage({
       {/* Tab 3: Error Logs & Diagnostics */}
       {tab === "errors" && (
         <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-          <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--line)", fontWeight: 700 }}>
-            Client-Side Exceptions &amp; Runtime Errors
+          <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--line)", fontWeight: 700, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>Client-Side Exceptions &amp; Runtime Errors</span>
+            {recentErrors.length > 0 && (
+              <form action={purgeNoiseAction}>
+                <button type="submit" className="btn btn-secondary btn-sm" style={{ fontSize: 12 }}>
+                  Dismiss In-App Browser Noise
+                </button>
+              </form>
+            )}
           </div>
           {recentErrors.length === 0 ? (
             <div style={{ padding: 36, textAlign: "center", color: "var(--success, #059669)", fontSize: 14, fontWeight: 600 }}>

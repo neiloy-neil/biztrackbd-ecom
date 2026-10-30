@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { updateErrorStatus } from "@biztrackbd/core";
+import { purgeKnownNoiseErrors, updateErrorStatus } from "@biztrackbd/core";
 
 export async function resolveErrorAction(formData: FormData) {
   const errorId = String(formData.get("errorId") || "");
@@ -9,5 +9,10 @@ export async function resolveErrorAction(formData: FormData) {
   if (!errorId) return;
 
   await updateErrorStatus(errorId, status);
+  revalidatePath("/analytics");
+}
+
+export async function purgeNoiseAction() {
+  await purgeKnownNoiseErrors();
   revalidatePath("/analytics");
 }

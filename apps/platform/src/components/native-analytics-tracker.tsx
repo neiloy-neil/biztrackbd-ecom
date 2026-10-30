@@ -44,6 +44,24 @@ function sendBeacon(url: string, data: Record<string, unknown>) {
   }
 }
 
+const IGNORABLE_ERROR_PATTERNS = [
+  /Java object is gone/i,
+  /^Script error\.?$/i,
+  /ResizeObserver loop/i,
+  /Non-Error promise rejection/i,
+  /chrome-extension:\/\//i,
+  /moz-extension:\/\//i,
+  /safari-extension:\/\//i,
+  /ChunkLoadError/i,
+  /Loading chunk .* failed/i,
+  /NetworkError when attempting to fetch resource/i,
+];
+
+function isIgnorableClientError(message: string, stack?: string | null): boolean {
+  if (!message) return true;
+  return IGNORABLE_ERROR_PATTERNS.some((p) => p.test(message) || (stack ? p.test(stack) : false));
+}
+
 export function NativeAnalyticsTracker() {
   const pathname = usePathname();
   const initialized = useRef(false);
@@ -78,11 +96,15 @@ export function NativeAnalyticsTracker() {
 
       // 2. Global Error Capture
       const handleError = (evt: ErrorEvent) => {
+        const msg = evt.message || "Unknown client error";
+        const stack = evt.error?.stack || null;
+        if (isIgnorableClientError(msg, stack)) return;
+
         sendBeacon("/api/track/error", {
           sessionId,
           pageUrl: window.location.href,
-          message: evt.message || "Unknown client error",
-          stack: evt.error?.stack || null,
+          message: msg,
+          stack,
           browser,
           os,
           device,
@@ -91,11 +113,14 @@ export function NativeAnalyticsTracker() {
 
       const handleRejection = (evt: PromiseRejectionEvent) => {
         const msg = evt.reason instanceof Error ? evt.reason.message : String(evt.reason);
+        const stack = evt.reason instanceof Error ? evt.reason.stack : null;
+        if (isIgnorableClientError(msg, stack)) return;
+
         sendBeacon("/api/track/error", {
           sessionId,
           pageUrl: window.location.href,
           message: "Unhandled Promise Rejection: " + msg,
-          stack: evt.reason instanceof Error ? evt.reason.stack : null,
+          stack,
           browser,
           os,
           device,
