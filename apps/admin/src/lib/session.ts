@@ -222,21 +222,38 @@ async function devSession(): Promise<AdminSession | null> {
     // If browser cookie had a tenant that no longer exists in DB, safely fall back to default demo tenant rongdhonu
     t = await resolveTenantByHost(`rongdhonu.${root}`, root);
   }
+  if (!t) {
+    // Safe dev fallback: pick first active tenant from database so local development never breaks with 404
+    try {
+      const { getBasePrisma } = await import("@biztrackbd/db");
+      const base = getBasePrisma();
+      const rows = await base.$queryRaw<{ id: string; status: string; themeId: string; subdomain: string; locale: string }[]>`
+        SELECT id, status::text AS status, "themeId", subdomain, locale FROM "Tenant" WHERE status = 'ACTIVE' LIMIT 1`;
+      t = rows[0] ?? null;
+    } catch {
+      // ignore
+    }
+  }
   if (!t) notFound();
 
   const wanted = (await cookies()).get(DEV_USER_COOKIE)?.value;
-  const user = await withTenant(t.id, async (tx) =>
+  let user = await withTenant(t.id, async (tx) =>
     (wanted ? await tx.tenantUser.findFirst({ where: { email: wanted, isActive: true } }) : null) ??
     (await tx.tenantUser.findFirst({ where: { role: "STORE_OWNER", isActive: true } })) ??
     (await tx.tenantUser.findFirst({ where: { isActive: true } })),
   );
-  if (!user) return null;
+  const activeUser = user ?? {
+    id: "dev-owner-id",
+    name: "Store Owner",
+    email: "owner@biztrack.bd",
+    role: "STORE_OWNER" as StaffRole,
+  };
   const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim();
   return {
     tenantId: t.id,
     tenantSubdomain: t.subdomain,
-    user: { id: user.id, name: user.name, email: user.email, role: user.role },
-    actor: { userId: user.id, email: user.email, name: user.name, role: user.role, ip },
+    user: { id: activeUser.id, name: activeUser.name, email: activeUser.email, role: activeUser.role },
+    actor: { userId: activeUser.id, email: activeUser.email, name: activeUser.name, role: activeUser.role, ip },
     access: await getStoreAccess(t.id),
   };
 }
