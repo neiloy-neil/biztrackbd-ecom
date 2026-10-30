@@ -1,4 +1,6 @@
 import { getBasePrisma, getPlatformPrisma } from "@biztrackbd/db";
+import { resolveReportRange, type ResolvedReportRange } from "../admin/reports-shared";
+import { addDays, dhakaDate, STORE_TZ } from "../admin/dashboard";
 
 export interface VisitorSessionPayload {
   sessionId: string;
@@ -280,13 +282,29 @@ export async function markSessionConverted(
 
 // ---- Query functions for Platform Admin (/analytics) ----------------------------------------------------
 
+export interface AnalyticsFilters {
+  range?: string | null;
+  from?: string | null;
+  to?: string | null;
+  campaign?: string | null;
+  device?: string | null;
+}
+
 export interface AnalyticsSummary {
   totalVisitors: number;
   totalPageviews: number;
   fbAdVisitors: number;
   totalSignups: number;
   conversionRate: number;
+  activeNow: number;
   activeErrors: number;
+}
+
+export interface CreativeAttributionRow {
+  creative: string;
+  visitors: number;
+  signups: number;
+  conversionRate: number;
 }
 
 export interface CampaignAttributionRow {
@@ -295,7 +313,23 @@ export interface CampaignAttributionRow {
   visitors: number;
   signups: number;
   conversionRate: number;
+  creatives: CreativeAttributionRow[];
   lastActive: Date;
+}
+
+export interface ConversionFunnel {
+  visitors: number;
+  wizardStarted: number;
+  completedSignup: number;
+  visitorToWizardRate: number;
+  wizardToSignupRate: number;
+  overallConversionRate: number;
+}
+
+export interface TrendDataPoint {
+  label: string;
+  visitors: number;
+  signups: number;
 }
 
 export interface RecentVisitorRow {
@@ -312,8 +346,10 @@ export interface RecentVisitorRow {
   startedAt: Date;
 }
 
-export async function getAnalyticsDashboardData(): Promise<{
+export interface AnalyticsDashboardResult {
   summary: AnalyticsSummary;
+  funnel: ConversionFunnel;
+  trend: TrendDataPoint[];
   campaigns: CampaignAttributionRow[];
   recentVisitors: RecentVisitorRow[];
   topPages: { path: string; views: number }[];
@@ -327,9 +363,61 @@ export async function getAnalyticsDashboardData(): Promise<{
     lastOccurredAt: Date;
     status: string;
   }[];
-}> {
+  activeRange: {
+    presetKey: string;
+    from: string;
+    to: string;
+    label: string;
+    days: number;
+  };
+  activeFilters: {
+    campaign?: string | null;
+    device?: string | null;
+  };
+}
+
+export async function getAnalyticsDashboardData(filters?: AnalyticsFilters): Promise<AnalyticsDashboardResult> {
   const db = getPlatformPrisma();
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  let resolvedRange: ResolvedReportRange;
+  try {
+    resolvedRange = resolveReportRange({
+      range: filters?.range || "30",
+      from: filters?.from,
+      to: filters?.to,
+    });
+  } catch {
+    resolvedRange = resolveReportRange({ range: "30" });
+  }
+
+  const startDate = new Date(`${resolvedRange.from}T00:00:00+06:00`);
+  const endDate = new Date(`${resolvedRange.to}T23:59:59.999+06:00`);
+
+  const cleanCampaign = filters?.campaign?.trim() || null;
+  const cleanDevice = filters?.device?.trim() || null;
+
+  const sessionWhere: any = {
+    startedAt: { gte: startDate, lte: endDate },
+  };
+  if (cleanCampaign) {
+    sessionWhere.utmCampaign = cleanCampaign;
+  }
+  if (cleanDevice) {
+    sessionWhere.device = cleanDevice;
+  }
+
+  const eventWhere: any = {
+    eventType: "PAGEVIEW",
+    createdAt: { gte: startDate, lte: endDate },
+  };
+  if (cleanCampaign || cleanDevice) {
+    eventWhere.session = {
+      ...(cleanCampaign ? { utmCampaign: cleanCampaign } : {}),
+      ...(cleanDevice ? { device: cleanDevice } : {}),
+    };
+  }
+
+  const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
 
   const [
     totalVisitors,
@@ -337,32 +425,38 @@ export async function getAnalyticsDashboardData(): Promise<{
     fbAdVisitors,
     convertedSessionCount,
     actualRealTenantsCount,
+    activeNow,
     activeErrors,
     campaignRows,
     recentSessions,
     topPageviews,
     errorRows,
+    sessionsForTrend,
+    wizardStartedCount,
   ] = await Promise.all([
-    db.platformVisitorSession.count({ where: { startedAt: { gte: thirtyDaysAgo } } }),
-    db.platformVisitorEvent.count({ where: { eventType: "PAGEVIEW", createdAt: { gte: thirtyDaysAgo } } }),
+    db.platformVisitorSession.count({ where: sessionWhere }),
+    db.platformVisitorEvent.count({ where: eventWhere }),
     db.platformVisitorSession.count({
       where: {
-        startedAt: { gte: thirtyDaysAgo },
+        ...sessionWhere,
         OR: [{ fbclid: { not: null } }, { utmSource: { in: ["fb", "facebook", "meta", "fb_ads", "ig", "instagram"] } }],
       },
     }),
-    db.platformVisitorSession.count({ where: { convertedToSignup: true, startedAt: { gte: thirtyDaysAgo } } }),
-    db.tenant.count({ where: { isDemo: false, createdAt: { gte: thirtyDaysAgo } } }),
+    db.platformVisitorSession.count({ where: { ...sessionWhere, convertedToSignup: true } }),
+    (!cleanCampaign && !cleanDevice)
+      ? db.tenant.count({ where: { isDemo: false, createdAt: { gte: startDate, lte: endDate } } })
+      : Promise.resolve(0),
+    db.platformVisitorSession.count({ where: { lastActiveAt: { gte: fifteenMinutesAgo } } }),
     db.platformClientError.count({ where: { status: "NEW" } }),
     db.platformVisitorSession.groupBy({
       by: ["utmCampaign", "utmSource"],
-      where: { startedAt: { gte: thirtyDaysAgo }, utmCampaign: { not: null } },
+      where: { ...sessionWhere, utmCampaign: { not: null } },
       _count: { id: true },
       orderBy: { _count: { id: "desc" } },
       take: 20,
     }),
     db.platformVisitorSession.findMany({
-      where: { startedAt: { gte: thirtyDaysAgo } },
+      where: sessionWhere,
       orderBy: { startedAt: "desc" },
       take: 50,
       include: {
@@ -371,7 +465,7 @@ export async function getAnalyticsDashboardData(): Promise<{
     }),
     db.platformVisitorEvent.groupBy({
       by: ["pagePath"],
-      where: { eventType: "PAGEVIEW", createdAt: { gte: thirtyDaysAgo } },
+      where: eventWhere,
       _count: { id: true },
       orderBy: { _count: { id: "desc" } },
       take: 15,
@@ -391,22 +485,75 @@ export async function getAnalyticsDashboardData(): Promise<{
         status: true,
       },
     }),
+    db.platformVisitorSession.findMany({
+      where: sessionWhere,
+      select: { startedAt: true, convertedToSignup: true },
+    }),
+    db.platformVisitorSession.count({
+      where: {
+        ...sessionWhere,
+        OR: [
+          { landingPage: { contains: "/start" } },
+          { events: { some: { pagePath: { contains: "/start" } } } },
+          { convertedToSignup: true },
+        ],
+      },
+    }),
   ]);
 
   const campaigns: CampaignAttributionRow[] = await Promise.all(
     campaignRows.map(async (c) => {
       const campName = c.utmCampaign || "Direct / Unknown";
       const signups = await db.platformVisitorSession.count({
-        where: { utmCampaign: c.utmCampaign, convertedToSignup: true },
+        where: {
+          ...sessionWhere,
+          utmCampaign: c.utmCampaign,
+          convertedToSignup: true,
+        },
       });
       const visitors = c._count.id;
       const rate = visitors > 0 ? Math.round((signups / visitors) * 1000) / 10 : 0;
+
+      // Group by creative (utmContent)
+      const creativeGroups = await db.platformVisitorSession.groupBy({
+        by: ["utmContent"],
+        where: {
+          ...sessionWhere,
+          utmCampaign: c.utmCampaign,
+        },
+        _count: { id: true },
+        orderBy: { _count: { id: "desc" } },
+        take: 10,
+      });
+
+      const creatives: CreativeAttributionRow[] = await Promise.all(
+        creativeGroups.map(async (cr) => {
+          const crSignups = await db.platformVisitorSession.count({
+            where: {
+              ...sessionWhere,
+              utmCampaign: c.utmCampaign,
+              utmContent: cr.utmContent,
+              convertedToSignup: true,
+            },
+          });
+          const crVisitors = cr._count.id;
+          const crRate = crVisitors > 0 ? Math.round((crSignups / crVisitors) * 1000) / 10 : 0;
+          return {
+            creative: cr.utmContent || "Default / Unspecified",
+            visitors: crVisitors,
+            signups: crSignups,
+            conversionRate: crRate,
+          };
+        })
+      );
+
       return {
         campaign: campName,
         source: c.utmSource || "Meta Ads",
         visitors,
         signups,
         conversionRate: rate,
+        creatives,
         lastActive: new Date(),
       };
     })
@@ -415,6 +562,75 @@ export async function getAnalyticsDashboardData(): Promise<{
   const totalSignups = Math.max(convertedSessionCount, actualRealTenantsCount);
   const conversionRate = totalVisitors > 0 ? Math.round((totalSignups / totalVisitors) * 1000) / 10 : 0;
 
+  const visitorToWizardRate = totalVisitors > 0 ? Math.round((wizardStartedCount / totalVisitors) * 1000) / 10 : 0;
+  const wizardToSignupRate = wizardStartedCount > 0 ? Math.round((totalSignups / wizardStartedCount) * 1000) / 10 : 0;
+
+  const funnel: ConversionFunnel = {
+    visitors: totalVisitors,
+    wizardStarted: wizardStartedCount,
+    completedSignup: totalSignups,
+    visitorToWizardRate,
+    wizardToSignupRate,
+    overallConversionRate: conversionRate,
+  };
+
+  let trend: TrendDataPoint[] = [];
+  if (resolvedRange.days === 1) {
+    const hourMap = new Map<number, { visitors: number; signups: number }>();
+    for (let h = 0; h < 24; h++) {
+      hourMap.set(h, { visitors: 0, signups: 0 });
+    }
+    for (const s of sessionsForTrend) {
+      const hStr = new Intl.DateTimeFormat("en-GB", {
+        timeZone: STORE_TZ,
+        hour: "2-digit",
+        hourCycle: "h23",
+      }).format(s.startedAt);
+      const h = parseInt(hStr, 10);
+      const bucket = hourMap.get(h);
+      if (bucket) {
+        bucket.visitors += 1;
+        if (s.convertedToSignup) bucket.signups += 1;
+      }
+    }
+    trend = Array.from({ length: 24 }, (_, h) => {
+      const b = hourMap.get(h)!;
+      return {
+        label: `${h.toString().padStart(2, "0")}:00`,
+        visitors: b.visitors,
+        signups: b.signups,
+      };
+    });
+  } else {
+    const dateMap = new Map<string, { visitors: number; signups: number }>();
+    let curr = resolvedRange.from;
+    while (curr <= resolvedRange.to) {
+      dateMap.set(curr, { visitors: 0, signups: 0 });
+      curr = addDays(curr, 1);
+    }
+    for (const s of sessionsForTrend) {
+      const dStr = dhakaDate(s.startedAt);
+      const bucket = dateMap.get(dStr);
+      if (bucket) {
+        bucket.visitors += 1;
+        if (s.convertedToSignup) bucket.signups += 1;
+      }
+    }
+    trend = Array.from(dateMap.entries()).map(([dateStr, b]) => {
+      const dObj = new Date(`${dateStr}T12:00:00Z`);
+      const label = new Intl.DateTimeFormat("en-GB", {
+        day: "numeric",
+        month: "short",
+        timeZone: "UTC",
+      }).format(dObj);
+      return {
+        label,
+        visitors: b.visitors,
+        signups: b.signups,
+      };
+    });
+  }
+
   return {
     summary: {
       totalVisitors,
@@ -422,8 +638,11 @@ export async function getAnalyticsDashboardData(): Promise<{
       fbAdVisitors,
       totalSignups,
       conversionRate,
+      activeNow,
       activeErrors,
     },
+    funnel,
+    trend,
     campaigns,
     recentVisitors: recentSessions.map((s) => ({
       id: s.id,
@@ -440,6 +659,17 @@ export async function getAnalyticsDashboardData(): Promise<{
     })),
     topPages: topPageviews.map((p) => ({ path: p.pagePath, views: p._count.id })),
     recentErrors: errorRows,
+    activeRange: {
+      presetKey: resolvedRange.presetKey,
+      from: resolvedRange.from,
+      to: resolvedRange.to,
+      label: resolvedRange.label,
+      days: resolvedRange.days,
+    },
+    activeFilters: {
+      campaign: cleanCampaign,
+      device: cleanDevice,
+    },
   };
 }
 
