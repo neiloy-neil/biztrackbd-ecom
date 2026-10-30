@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@biztrackbd/ui";
 import { withTenant } from "@biztrackbd/db";
 import { requireAccess } from "@/lib/session";
 import { AiStudioClient } from "./ai-studio-client";
@@ -31,24 +32,16 @@ export default async function AiStudioPage() {
 
   return (
     <>
-      <div className="page-head">
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-            <Link href="/marketing" className="link muted" style={{ fontSize: 13 }}>
-              ← Marketing
-            </Link>
-          </div>
-          <h1 style={{ margin: 0 }}>Marketing Content Studio</h1>
-          <p className="muted" style={{ margin: "4px 0 0", fontSize: 13.5 }}>
-            Create social ad posts, WhatsApp broadcasts, SMS promotional copy, and banner slogans in Bangla or English.
-          </p>
-        </div>
-        <div className="actions">
+      <PageHeader
+        title="Marketing Content Studio"
+        crumbs={[{ label: "Marketing", href: "/marketing" }, { label: "Content Studio" }]}
+        sub="Create social ad posts, WhatsApp broadcasts, SMS promotional copy, and banner slogans in Bangla or English."
+        actions={
           <Link href="/settings/ai" className="btn btn-secondary btn-sm">
-            Assistant Settings &amp; Quota
+            Assistant Settings & Quota
           </Link>
-        </div>
-      </div>
+        }
+      />
 
       <AiStudioClient products={products} />
     </>

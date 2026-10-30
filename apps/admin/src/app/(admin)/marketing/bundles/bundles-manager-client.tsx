@@ -12,7 +12,7 @@ import {
   updateOrderBumpAction,
   deleteOrderBumpAction,
 } from "./actions";
-import { useBusyAction } from "@biztrackbd/ui";
+import { useBusyAction, PageHeader } from "@biztrackbd/ui";
 
 interface ProductVariantOption {
   id: string;
@@ -382,42 +382,36 @@ export function BundlesManagerClient({
 
   return (
     <div>
-      {/* Top Header */}
-      <div className="page-head" style={{ marginBottom: 16 }}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>Bundles & 1-Click Checkout Upsells</h1>
-            <span className="pill green" style={{ fontSize: 11, padding: "2px 8px", fontWeight: 700 }}>
-              AOV Booster
-            </span>
-          </div>
-          <p className="muted" style={{ margin: "4px 0 0", fontSize: 13.5 }}>
-            Increase average order value with combo packages, frequently bought together deals, and 1-click checkout order bumps.
-          </p>
-        </div>
-        <div className="actions">
-          {canEdit && tab === "bundles" && (
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={openCreateBundle}
-              data-testid="create-bundle-btn"
-            >
-              + Create Product Bundle
-            </button>
-          )}
-          {canEdit && tab === "bumps" && (
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={openCreateBump}
-              data-testid="create-bump-btn"
-            >
-              + Create Order Bump
-            </button>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        title="Bundles & 1-Click Checkout Upsells"
+        crumbs={[{ label: "Marketing", href: "/marketing" }, { label: "Bundles & Bumps" }]}
+        badge={<span className="pill green">AOV Booster</span>}
+        sub="Increase average order value with combo packages, frequently bought together deals, and 1-click checkout order bumps."
+        actions={
+          <>
+            {canEdit && tab === "bundles" && (
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={openCreateBundle}
+                data-testid="create-bundle-btn"
+              >
+                + Create Product Bundle
+              </button>
+            )}
+            {canEdit && tab === "bumps" && (
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={openCreateBump}
+                data-testid="create-bump-btn"
+              >
+                + Create Order Bump
+              </button>
+            )}
+          </>
+        }
+      />
 
       {/* Starter Plan Gating Banner */}
       {isStarter && (

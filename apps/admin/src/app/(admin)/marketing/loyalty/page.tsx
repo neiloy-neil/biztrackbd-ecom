@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { can, getLoyaltyOverview, getLoyaltySettings } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
+import { PageHeader } from "@biztrackbd/ui";
 import { prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
@@ -32,8 +33,11 @@ export default async function Loyalty({ searchParams }: { searchParams: Promise<
 
   return (
     <>
-      <div className="page-head"><h1>Loyalty and referrals</h1></div>
-      <p className="page-sub">Customers earn points on delivered orders, move up VIP levels, and bring friends. Points unlock only when the parcel is delivered, so a returned order earns nothing.</p>
+      <PageHeader
+        title="Loyalty & Referrals"
+        crumbs={[{ label: "Marketing", href: "/marketing" }, { label: "Loyalty" }]}
+        sub="Customers earn points on delivered orders, move up VIP levels, and bring friends. Points unlock only when the parcel is delivered, so a returned order earns nothing."
+      />
       {err && <div className="notice bad" role="alert" style={{ marginBottom: 12 }} data-testid="loyalty-error">{err}</div>}
       {done && DONE[done] && <div className="notice good" role="status" style={{ marginBottom: 12 }}>{DONE[done]}</div>}
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@biztrackbd/ui";
 import { can, getTrackingOverview } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
 import { dateTime } from "@/lib/format";
@@ -36,15 +37,16 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
 
   return (
     <>
-      <div className="page-head">
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink-3, #6B6B8D)" }}>Marketing</div>
-          <h1 style={{ margin: "2px 0 4px" }}>Pixels and conversion tracking</h1>
-        </div>
-      </div>
-      <p className="page-sub" style={{ maxWidth: 760, marginBottom: 20 }}>
-        Send visits and purchases to Facebook and Google so your ads find real buyers. We send events from the browser and from our server, and remove duplicates automatically.
-      </p>
+      <PageHeader
+        title="Pixels & Conversion Tracking"
+        crumbs={[{ label: "Marketing", href: "/marketing" }, { label: "Pixels" }]}
+        sub="Send visits and purchases to Facebook and Google so your ads find real buyers. We send events from the browser and from our server, and remove duplicates automatically."
+        actions={
+          <Link href="/marketing/pixels/health" className="btn btn-secondary btn-sm">
+            CAPI Diagnostics
+          </Link>
+        }
+      />
 
       {err && <div className="notice bad" role="alert" style={{ marginBottom: 16 }} data-testid="pixel-error">{err}</div>}
       {done && (

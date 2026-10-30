@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { PageHeader } from "@biztrackbd/ui";
 import {
   createAffiliatePartnerAction,
   updateAffiliatePartnerAction,
@@ -100,19 +101,13 @@ export function AffiliatesClient({
 
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", paddingBottom: 40 }}>
-      {/* Page Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, gap: 16 }}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700 }}>Affiliate & Influencer Hub</h1>
-            <span className="pill green">Live Telemetry</span>
-          </div>
-          <p className="muted" style={{ margin: "4px 0 0", fontSize: 13.5 }}>
-            Manage affiliate partners, referral links, coupon attribution, and bKash/Nagad commission payouts.
-          </p>
-        </div>
-        <div style={{ display: "flex", gap: 10 }}>
-          {canEdit && (
+      <PageHeader
+        title="Affiliate & Influencer Hub"
+        crumbs={[{ label: "Marketing", href: "/marketing" }, { label: "Affiliates" }]}
+        badge={<span className="pill green">Live Telemetry</span>}
+        sub="Manage affiliate partners, referral links, coupon attribution, and bKash/Nagad commission payouts."
+        actions={
+          canEdit ? (
             <button
               onClick={() => {
                 setFormState({ ok: true });
@@ -122,9 +117,9 @@ export function AffiliatesClient({
             >
               + Add Partner
             </button>
-          )}
-        </div>
-      </div>
+          ) : undefined
+        }
+      />
 
       {/* KPI Summary Cards */}
       <div className="grid grid-4" style={{ marginBottom: 24 }}>

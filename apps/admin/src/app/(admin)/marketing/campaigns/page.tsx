@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@biztrackbd/ui";
 import {
   can,
   listCampaigns,
@@ -55,36 +56,24 @@ export default async function CampaignsPage({
 
   return (
     <>
-      <Link href="/marketing" className="back" prefetch={false}>← Marketing</Link>
-      <div className="page-head" style={{ marginBottom: 16 }}>
-        <div>
-          <h1 style={{ margin: 0, display: "flex", alignItems: "center", gap: 10 }}>
-            <span>Broadcast Campaigns</span>
-            <span
-              className="pill"
-              style={{
-                fontSize: 12,
-                background: waConfig.status === "CONNECTED" ? "rgba(16, 185, 129, 0.1)" : "rgba(245, 158, 11, 0.1)",
-                color: waConfig.status === "CONNECTED" ? "#065F46" : "#B45309",
-                border: `1px solid ${waConfig.status === "CONNECTED" ? "#10B981" : "#F59E0B"}`,
-              }}
-            >
-              {waConfig.status === "CONNECTED" ? "WhatsApp Ready" : "WhatsApp Offline"}
-            </span>
-          </h1>
-          <p className="muted" style={{ margin: "4px 0 0", fontSize: 13.5 }}>
-            Targeted promotional broadcasts across WhatsApp, SMS, and Email with anti-ban pacing and automated cart recovery.
-          </p>
-        </div>
-        <div className="actions">
-          {canEdit && (
+      <PageHeader
+        title="Broadcast Campaigns"
+        crumbs={[{ label: "Marketing", href: "/marketing" }, { label: "Campaigns" }]}
+        badge={
+          <span className={`pill ${waConfig.status === "CONNECTED" ? "ok" : "warn"}`}>
+            {waConfig.status === "CONNECTED" ? "WhatsApp Ready" : "WhatsApp Offline"}
+          </span>
+        }
+        sub="Targeted promotional broadcasts across WhatsApp, SMS, and Email with anti-ban pacing and automated cart recovery."
+        actions={
+          canEdit ? (
             <NewCampaignModal
               isWhatsAppConnected={waConfig.status === "CONNECTED"}
               whatsAppNumber={waConfig.phoneNumber}
             />
-          )}
-        </div>
-      </div>
+          ) : undefined
+        }
+      />
 
       {err && <div className="notice bad" role="alert" style={{ marginBottom: 16 }}>{err}</div>}
       {ok === "sent" && <div className="notice good" role="status" style={{ marginBottom: 16 }}>Broadcast campaign dispatched successfully!</div>}

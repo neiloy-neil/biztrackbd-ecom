@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@biztrackbd/ui";
 import { getTrackingOverview, getOutboxStats } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
 import { dateTime } from "@/lib/format";
@@ -57,20 +58,16 @@ export default async function TrackingHealth({
 
   return (
     <>
-      <div className="page-head" style={{ marginBottom: 12 }}>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink-3, #6B6B8D)" }}>Marketing</div>
-          <h1 style={{ margin: "2px 0 4px" }}>Tracking Health & Event Quality Diagnostics</h1>
-        </div>
-        <div>
+      <PageHeader
+        title="Tracking Health & Event Quality Diagnostics"
+        crumbs={[{ label: "Marketing", href: "/marketing" }, { label: "Pixels", href: "/marketing/pixels" }, { label: "Health" }]}
+        sub="Verify that your Meta Pixel and Conversions API (CAPI) are communicating properly. BizTrackBD pairs every browser event with a matching server event using the same event_id, deduplicating them at Meta to bypass ad-blockers and prevent double counting."
+        actions={
           <Link href="/marketing/pixels" className="btn btn-secondary btn-sm">
-            ⚙️ Edit Pixel & CAPI Settings
+            Edit Pixel & CAPI Settings
           </Link>
-        </div>
-      </div>
-      <p className="page-sub" style={{ maxWidth: 780, marginBottom: 20 }}>
-        Verify that your Meta Pixel and Conversions API (CAPI) are communicating properly. BizTrackBD pairs every browser event with a matching server event using the same <code>event_id</code>, deduplicating them at Meta to bypass ad-blockers and prevent double counting.
-      </p>
+        }
+      />
 
       {err && <div className="notice bad" role="alert" style={{ marginBottom: 16 }}>{err}</div>}
       {done && (

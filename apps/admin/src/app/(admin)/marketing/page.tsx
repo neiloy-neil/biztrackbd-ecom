@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@biztrackbd/ui";
 import { can, getMarketingOverview } from "@biztrackbd/core";
 import { friendlyDate, taka } from "@/lib/format";
 import { requireAccess } from "@/lib/session";
@@ -22,31 +23,30 @@ export default async function MarketingOverviewPage() {
 
   return (
     <>
-      <div className="page-head">
-        <div>
-          <h1 style={{ margin: 0 }}>Marketing Command Center</h1>
-          <p className="muted" style={{ margin: "4px 0 0", fontSize: 13.5 }}>
-            Promotions, ad tracking, broadcast campaigns, and customer retention.
-          </p>
-        </div>
-        <div className="actions">
-          {canEdit && (
-            <Link href="/marketing/ai" className="btn btn-secondary" prefetch={false}>
-              Content Studio
-            </Link>
-          )}
-          {canEdit && (
-            <Link href="/marketing/campaigns" className="btn btn-primary" prefetch={false} data-testid="new-campaign-btn">
-              New Campaign
-            </Link>
-          )}
-          {canEdit && (
-            <Link href="/marketing/coupons?new=1" className="btn btn-secondary" prefetch={false}>
-              Create Discount
-            </Link>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        title="Marketing Command Center"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Marketing" }]}
+        sub="Promotions, ad tracking, broadcast campaigns, and customer retention."
+        actions={
+          <>
+            {canEdit && (
+              <Link href="/marketing/ai" className="btn btn-secondary" prefetch={false}>
+                Content Studio
+              </Link>
+            )}
+            {canEdit && (
+              <Link href="/marketing/campaigns" className="btn btn-primary" prefetch={false} data-testid="new-campaign-btn">
+                New Campaign
+              </Link>
+            )}
+            {canEdit && (
+              <Link href="/marketing/coupons?new=1" className="btn btn-secondary" prefetch={false}>
+                Create Discount
+              </Link>
+            )}
+          </>
+        }
+      />
 
       {/* Top Metric Cards */}
       <div className="grid grid-4" style={{ marginBottom: 20 }}>

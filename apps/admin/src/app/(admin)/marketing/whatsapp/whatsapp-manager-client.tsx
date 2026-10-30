@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { PageHeader } from "@biztrackbd/ui";
 import { useRouter } from "next/navigation";
 import type {
   WhatsAppConfigView,
@@ -481,11 +482,11 @@ export function WhatsAppManagerClient({
         </div>
       )}
 
-      {/* Page Header */}
-      <div className="page-head" style={{ marginBottom: 16 }}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>WhatsApp Commerce & Notifications</h1>
+      <PageHeader
+        title="WhatsApp Commerce & Notifications"
+        crumbs={[{ label: "Marketing", href: "/marketing" }, { label: "WhatsApp" }]}
+        badge={
+          <>
             <span
               className={`pill ${
                 config.status === "CONNECTED"
@@ -494,7 +495,6 @@ export function WhatsAppManagerClient({
                   ? "warn"
                   : "grey"
               }`}
-              style={{ fontSize: 11, fontWeight: 700, padding: "3px 8px" }}
             >
               {config.status === "CONNECTED"
                 ? "CONNECTED"
@@ -504,21 +504,18 @@ export function WhatsAppManagerClient({
             </span>
             <span
               className={`pill ${gatewayActive ? "ok" : "grey"}`}
-              style={{ fontSize: 11, fontWeight: 700, padding: "3px 8px" }}
               title={
                 gatewayActive
                   ? "WhatsApp Gateway service is active on port 5055"
                   : "WhatsApp Gateway is idle."
               }
             >
-              {gatewayActive ? "GATEWAY ACTIVE (5055)" : "GATEWAY IDLE"}
+              {gatewayActive ? "GATEWAY ACTIVE" : "GATEWAY IDLE"}
             </span>
-          </div>
-          <p className="muted" style={{ margin: "4px 0 0", fontSize: 13.5 }}>
-            Automated COD confirmation, delivery tracking alerts, cart recovery, and customer support.
-          </p>
-        </div>
-      </div>
+          </>
+        }
+        sub="Automated COD confirmation, delivery tracking alerts, cart recovery, and customer support."
+      />
 
       {/* Navigation Tabs */}
       <div

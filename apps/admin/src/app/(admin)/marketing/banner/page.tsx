@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@biztrackbd/ui";
 import { can, getBannerSettings, getModuleStatus } from "@biztrackbd/core";
 import { withTenant } from "@biztrackbd/db";
 import { requireAccess } from "@/lib/session";
@@ -38,40 +39,16 @@ export default async function MarketingBannerPage() {
 
   return (
     <>
-      <div
-        className="page-head"
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 12,
-          marginBottom: 20,
-        }}
-      >
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-            <Link
-              href="/marketing"
-              className="muted"
-              style={{ textDecoration: "none", fontSize: 13 }}
-            >
-              Marketing
-            </Link>
-            <span className="muted">/</span>
-            <span style={{ fontSize: 13, fontWeight: 600 }}>Banner & Flash Sale</span>
-          </div>
-          <h1 style={{ margin: 0 }}>Promotional Banner & Flash Sale</h1>
-          <p className="page-sub" style={{ margin: "4px 0 0" }}>
-            Control top-of-store announcements, high-urgency countdown timers, and 1-click coupon codes.
-          </p>
-        </div>
-        <div style={{ display: "flex", gap: 10 }}>
+      <PageHeader
+        title="Promotional Banner & Flash Sale"
+        crumbs={[{ label: "Marketing", href: "/marketing" }, { label: "Banner & Flash Sale" }]}
+        sub="Control top-of-store announcements, high-urgency countdown timers, and 1-click coupon codes."
+        actions={
           <Link href="/marketing/coupons" className="btn btn-secondary">
             Discount Coupons &rarr;
           </Link>
-        </div>
-      </div>
+        }
+      />
 
       <BannerForm
         initialSettings={bannerSettings}

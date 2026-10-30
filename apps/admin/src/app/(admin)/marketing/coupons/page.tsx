@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { can, listCoupons, type CouponStatus } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
+import { PageHeader } from "@biztrackbd/ui";
 import { dateOnly, isoDay, taka } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
@@ -25,7 +26,11 @@ export default async function Coupons({ searchParams }: { searchParams: Promise<
 
   return (
     <>
-      <div className="page-head"><h1>Discounts and coupons</h1><div className="actions">{canEdit && <Link href="/marketing/coupons?new=1" className="btn btn-primary" prefetch={false} data-testid="new-coupon">Create discount</Link>}</div></div>
+      <PageHeader
+        title="Discounts & Coupons"
+        crumbs={[{ label: "Marketing", href: "/marketing" }, { label: "Coupons" }]}
+        actions={canEdit ? <Link href="/marketing/coupons?new=1" className="btn btn-primary" prefetch={false} data-testid="new-coupon">Create discount</Link> : undefined}
+      />
       {one(sp.saved) && <div className="notice good" role="status" style={{ marginBottom: 12 }}>Coupon saved.</div>}
       {one(sp.deleted) && <div className="notice good" role="status" style={{ marginBottom: 12 }}>Coupon deleted.</div>}
       {one(sp.disabled) && <div className="notice info" role="status" style={{ marginBottom: 12 }}>That coupon has been used, so it was switched off instead of deleted. Past orders keep their reference.</div>}

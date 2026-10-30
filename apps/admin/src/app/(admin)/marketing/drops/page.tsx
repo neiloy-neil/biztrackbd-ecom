@@ -1,6 +1,7 @@
 import { requireAccess } from "@/lib/session";
 import { withTenant } from "@biztrackbd/db";
 import { listDrops } from "@biztrackbd/core";
+import { PageHeader } from "@biztrackbd/ui";
 import { DropsManagerClient } from "./drops-manager-client";
 
 export const metadata = {
@@ -38,14 +39,12 @@ export default async function DropsPage() {
   ]);
 
   return (
-    <div className="stack" style={{ maxWidth: 1200, margin: "0 auto", paddingBottom: 40 }}>
-      <div>
-        <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Limited Drops & Pre-Orders</h1>
-        <p className="page-sub" style={{ margin: "4px 0 0" }}>
-          Launch timed exclusive drops, collect buyer waitlists, and secure pre-orders with partial advance deposits.
-        </p>
-      </div>
-
+    <div className="stack">
+      <PageHeader
+        title="Limited Drops & Pre-Orders"
+        crumbs={[{ label: "Marketing", href: "/marketing" }, { label: "Limited Drops" }]}
+        sub="Launch timed exclusive drops, collect buyer waitlists, and secure pre-orders with partial advance deposits."
+      />
       <DropsManagerClient
         initialDrops={drops as any}
         availableProducts={products}

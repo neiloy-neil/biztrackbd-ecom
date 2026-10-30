@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@biztrackbd/ui";
 import { can, listMessageTemplates, getModuleStatus } from "@biztrackbd/core";
 import { requireAccess } from "@/lib/session";
 import { AppDisabledNotice } from "@/components/app-disabled-notice";
@@ -42,39 +43,16 @@ export default async function MarketingNotificationsPage() {
 
   return (
     <>
-      <div
-        className="page-head"
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 12,
-        }}
-      >
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-            <Link
-              href="/marketing"
-              className="muted"
-              style={{ textDecoration: "none", fontSize: 13 }}
-            >
-              Marketing
-            </Link>
-            <span className="muted">/</span>
-            <span style={{ fontSize: 13, fontWeight: 600 }}>Notifications</span>
-          </div>
-          <h1 style={{ margin: 0 }}>Automated Notifications</h1>
-          <p className="page-sub" style={{ margin: "4px 0 0" }}>
-            Trigger real-time transactional SMS and WhatsApp alerts to buyers as their order progresses.
-          </p>
-        </div>
-        <div style={{ display: "flex", gap: 10 }}>
+      <PageHeader
+        title="Automated Notifications"
+        crumbs={[{ label: "Marketing", href: "/marketing" }, { label: "Notifications" }]}
+        sub="Trigger real-time transactional SMS and WhatsApp alerts to buyers as their order progresses."
+        actions={
           <Link href="/marketing/campaigns" className="btn btn-secondary">
             Broadcast Campaigns &rarr;
           </Link>
-        </div>
-      </div>
+        }
+      />
 
       {/* SMS Credits Status Card */}
       <div
