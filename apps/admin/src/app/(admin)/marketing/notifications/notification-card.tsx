@@ -76,51 +76,33 @@ export function NotificationCard({
   }
 
   return (
-    <form action={action} className="card" style={{ padding: 20 }}>
+    <form action={action} className="card p-md">
       <input type="hidden" name="body_en" value={bodies.en} />
       <input type="hidden" name="body_bn" value={bodies.bn} />
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          marginBottom: 16,
-          flexWrap: "wrap",
-          gap: 12,
-        }}
-      >
+      <div className="flex-between items-start mb-md flex-wrap gap-md">
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>
+          <div className="row items-center gap-sm">
+            <h3 className="font-bold text-base m-0">
               {template.label}
             </h3>
             {enabled ? (
-              <span className="pill green" style={{ fontSize: 11 }}>Active</span>
+              <span className="pill ok text-xs">Active</span>
             ) : (
-              <span className="pill grey" style={{ fontSize: 11 }}>Disabled</span>
+              <span className="pill grey text-xs">Disabled</span>
             )}
           </div>
-          <p className="muted" style={{ margin: "4px 0 0", fontSize: 13 }}>
+          <p className="muted text-sm mt-xs m-0">
             {template.when}
           </p>
         </div>
 
         {template.alwaysOn ? (
-          <span className="pill blue" style={{ fontSize: 12 }}>
+          <span className="pill info text-xs">
             Always Active (Cart Recovery)
           </span>
         ) : (
-          <label
-            className="check"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              cursor: canEdit ? "pointer" : "default",
-              fontWeight: 600,
-            }}
-          >
+          <label className="row items-center gap-sm pointer font-semibold text-sm">
             <input
               type="checkbox"
               name="enabled"
@@ -133,24 +115,10 @@ export function NotificationCard({
         )}
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-          gap: 18,
-          marginBottom: 16,
-        }}
-      >
+      <div className="grid-280 mb-md">
         {/* Editor Side */}
         <div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 8,
-            }}
-          >
+          <div className="flex-between items-center mb-xs">
             <Segmented<MessageLocale>
               label="Language"
               value={lang}
@@ -160,7 +128,7 @@ export function NotificationCard({
                 { value: "bn", label: "বাংলা" },
               ]}
             />
-            <span className="muted" style={{ fontSize: 12 }}>
+            <span className="muted text-xs">
               Default: {LANG_NAME[template.sendsIn]}
             </span>
           </div>
@@ -171,7 +139,7 @@ export function NotificationCard({
           <textarea
             ref={textareaRef}
             id={id}
-            className="textarea"
+            className="textarea w-full text-sm leading-relaxed"
             rows={4}
             value={currentBody}
             disabled={!canEdit}
@@ -180,43 +148,20 @@ export function NotificationCard({
             onChange={(e) =>
               setBodies((b) => ({ ...b, [lang]: e.target.value }))
             }
-            style={{
-              width: "100%",
-              fontFamily: "inherit",
-              fontSize: 13.5,
-              lineHeight: 1.5,
-              padding: 10,
-              borderRadius: 8,
-              border: "1px solid var(--border)",
-            }}
           />
 
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 6,
-              marginTop: 8,
-              alignItems: "center",
-            }}
-          >
-            <span className="muted" style={{ fontSize: 11, fontWeight: 600 }}>
+          <div className="row flex-wrap gap-xs mt-xs items-center">
+            <span className="muted text-xs font-semibold">
               Insert Tag:
             </span>
             {template.vars.map((v) => (
               <button
                 key={v}
                 type="button"
-                className="chip"
+                className="chip text-xs pointer"
                 disabled={!canEdit}
                 onClick={() => insertVar(v)}
                 title={VAR_HELP[v].label}
-                style={{
-                  fontSize: 11,
-                  padding: "3px 8px",
-                  borderRadius: 6,
-                  cursor: "pointer",
-                }}
               >
                 {`{${v}}`}
               </button>
@@ -225,65 +170,26 @@ export function NotificationCard({
         </div>
 
         {/* Live Preview Side */}
-        <div
-          style={{
-            background: "var(--bg-subtle, #f8fafc)",
-            border: "1px solid var(--border)",
-            borderRadius: 8,
-            padding: 14,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-          }}
-        >
+        <div className="bg-subtle border rounded-md p-md flex-col-between">
           <div>
-            <div
-              style={{
-                fontSize: 11,
-                fontWeight: 700,
-                color: "var(--muted)",
-                letterSpacing: "0.05em",
-                marginBottom: 8,
-                textTransform: "uppercase",
-              }}
-            >
+            <div className="text-xs font-bold text-ink-3 uppercase tracking-wider mb-xs">
               Customer Phone Screen Preview
             </div>
             <div
-              style={{
-                background: "#ffffff",
-                border: "1px solid var(--border)",
-                borderRadius: 12,
-                padding: "12px 14px",
-                fontSize: 13,
-                lineHeight: 1.45,
-                color: "#1e293b",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-word",
-              }}
+              className="p-md rounded-md bg-surface border text-sm leading-relaxed text-ink shadow-sm whitespace-pre-wrap break-word"
               lang={lang === "bn" ? "bn" : "en"}
             >
               {preview || "…"}
             </div>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginTop: 10,
-              fontSize: 12,
-              color: "var(--muted)",
-            }}
-          >
+          <div className="flex-between items-center mt-sm text-xs text-ink-3">
             <span>
               <strong>{parts.chars}</strong> chars &bull;{" "}
               <strong>{parts.parts}</strong> SMS {parts.parts === 1 ? "credit" : "credits"}
             </span>
             {parts.unicode && (
-              <span className="pill orange" style={{ fontSize: 10 }}>
+              <span className="pill warn text-xs">
                 Bangla Unicode (70 chars/credit)
               </span>
             )}
@@ -292,18 +198,18 @@ export function NotificationCard({
       </div>
 
       {state.error && (
-        <div className="notice bad" style={{ marginBottom: 12 }}>
+        <div className="notice bad mb-sm">
           {state.error}
         </div>
       )}
       {state.ok && !dirty && (
-        <div className="notice good" style={{ marginBottom: 12 }}>
+        <div className="notice good mb-sm">
           Template saved successfully.
         </div>
       )}
 
       {canEdit && (
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+        <div className="row gap-sm items-center">
           <button
             className="btn btn-primary"
             type="submit"

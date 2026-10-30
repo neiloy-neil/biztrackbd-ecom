@@ -484,67 +484,31 @@ export function BundlesManagerClient({
       </div>
 
       {/* Responsive Tab Bar */}
-      <div style={{ display: "flex", gap: 8, borderBottom: "1px solid var(--border, #e5e7eb)", marginBottom: 20, overflowX: "auto", maxWidth: "100%" }}>
+      <div className="tab-strip mb-md">
         <button
           type="button"
           onClick={() => setTab("bundles")}
-          style={{
-            padding: "10px 18px",
-            fontSize: 14,
-            fontWeight: tab === "bundles" ? 700 : 500,
-            color: tab === "bundles" ? "var(--brand, #059669)" : "var(--ink-2, #6b7280)",
-            borderBottom: tab === "bundles" ? "2px solid var(--brand, #059669)" : "2px solid transparent",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}
+          className={`tab-item ${tab === "bundles" ? "active" : ""}`}
           data-testid="tab-bundles"
         >
           Product Bundles & Combos
-          <span className="pill grey" style={{ fontSize: 11, padding: "1px 6px" }}>{bundles.length}</span>
+          <span className="tab-badge">{bundles.length}</span>
         </button>
 
         <button
           type="button"
           onClick={() => setTab("bumps")}
-          style={{
-            padding: "10px 18px",
-            fontSize: 14,
-            fontWeight: tab === "bumps" ? 700 : 500,
-            color: tab === "bumps" ? "var(--brand, #059669)" : "var(--ink-2, #6b7280)",
-            borderBottom: tab === "bumps" ? "2px solid var(--brand, #059669)" : "2px solid transparent",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}
+          className={`tab-item ${tab === "bumps" ? "active" : ""}`}
           data-testid="tab-bumps"
         >
           Checkout Order Bumps
-          <span className="pill grey" style={{ fontSize: 11, padding: "1px 6px" }}>{bumps.length}</span>
+          <span className="tab-badge">{bumps.length}</span>
         </button>
 
         <button
           type="button"
           onClick={() => setTab("analytics")}
-          style={{
-            padding: "10px 18px",
-            fontSize: 14,
-            fontWeight: tab === "analytics" ? 700 : 500,
-            color: tab === "analytics" ? "var(--brand, #059669)" : "var(--ink-2, #6b7280)",
-            borderBottom: tab === "analytics" ? "2px solid var(--brand, #059669)" : "2px solid transparent",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}
+          className={`tab-item ${tab === "analytics" ? "active" : ""}`}
           data-testid="tab-analytics"
         >
           AOV & Conversion Analytics
@@ -834,40 +798,23 @@ export function BundlesManagerClient({
       {/* Modal Drawer: Create / Edit Product Bundle */}
       {bundleModalOpen && (
         <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.45)",
-            backdropFilter: "blur(2px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-            padding: 16,
-          }}
+          role="dialog"
+          aria-modal="true"
+          className="modal-backdrop"
           onClick={() => setBundleModalOpen(false)}
         >
           <div
-            className="card"
-            style={{
-              width: "100%",
-              maxWidth: 620,
-              maxHeight: "90vh",
-              overflowY: "auto",
-              padding: 24,
-              borderRadius: 14,
-              boxShadow: "0 20px 40px rgba(0, 0, 0, 0.2)",
-            }}
+            className="card modal-card max-w-640"
             onClick={(e) => e.stopPropagation()}
             data-testid="bundle-modal"
           >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
+            <div className="modal-head">
+              <h2>
                 {editingBundle ? "Edit Product Bundle" : "Create Product Bundle"}
               </h2>
               <button
                 type="button"
-                className="btn btn-ghost btn-sm"
+                className="btn btn-secondary btn-sm btn-close-sm"
                 onClick={() => setBundleModalOpen(false)}
               >
                 ✕
@@ -1137,40 +1084,23 @@ export function BundlesManagerClient({
       {/* Modal Drawer: Create / Edit 1-Click Order Bump */}
       {bumpModalOpen && (
         <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.45)",
-            backdropFilter: "blur(2px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-            padding: 16,
-          }}
+          role="dialog"
+          aria-modal="true"
+          className="modal-backdrop"
           onClick={() => setBumpModalOpen(false)}
         >
           <div
-            className="card"
-            style={{
-              width: "100%",
-              maxWidth: 720,
-              maxHeight: "90vh",
-              overflowY: "auto",
-              padding: 24,
-              borderRadius: 14,
-              boxShadow: "0 20px 40px rgba(0, 0, 0, 0.2)",
-            }}
+            className="card modal-card max-w-640"
             onClick={(e) => e.stopPropagation()}
             data-testid="bump-modal"
           >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
+            <div className="modal-head">
+              <h2>
                 {editingBump ? "Edit 1-Click Order Bump" : "Create 1-Click Order Bump"}
               </h2>
               <button
                 type="button"
-                className="btn btn-ghost btn-sm"
+                className="btn btn-secondary btn-sm btn-close-sm"
                 onClick={() => setBumpModalOpen(false)}
               >
                 ✕

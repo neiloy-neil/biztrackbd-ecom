@@ -435,49 +435,25 @@ export function WhatsAppManagerClient({
     <div style={{ maxWidth: 1100, margin: "0 auto", paddingBottom: 60 }}>
       {/* Top Banner / Plan Alert */}
       {!isProOrHigher && (
-        <div
-          className="notice info"
-          style={{
-            marginBottom: 20,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)",
-            border: "1px solid #93C5FD",
-            color: "#1E40AF",
-            padding: "14px 18px",
-            borderRadius: 10,
-          }}
-        >
+        <div className="notice info mb-md flex-between items-center gap-md">
           <div>
-            <div style={{ fontWeight: 700, fontSize: 14.5 }}>
+            <div className="font-bold text-sm">
               Direct WhatsApp Links Active
             </div>
-            <div style={{ fontSize: 13, marginTop: 2, color: "#1E3A8A" }}>
+            <div className="text-xs mt-xs text-ink-2">
               Your Starter plan includes unlimited 1-tap <code>wa.me</code> links on all orders.
               Upgrade to <b>Pro</b> or <b>Business</b> to unlock automated 2-way bot confirmation,
               background linked device sending, and automatic cart recovery.
             </div>
           </div>
-          <Link href="/billing" className="btn btn-primary btn-sm" style={{ whiteSpace: "nowrap" }}>
+          <Link href="/billing" className="btn btn-primary btn-sm shrink-0">
             Upgrade to Pro →
           </Link>
         </div>
       )}
 
       {isTrialActive && (
-        <div
-          className="notice ok"
-          style={{
-            marginBottom: 20,
-            background: "#ECFDF5",
-            border: "1px solid #6EE7B7",
-            color: "#065F46",
-            padding: "10px 16px",
-            borderRadius: 8,
-            fontSize: 13,
-          }}
-        >
+        <div className="notice good mb-md">
           <b>14-Day Free Trial Active:</b> Full Pro Automated WhatsApp features are unlocked for your store.
         </div>
       )}
@@ -518,46 +494,34 @@ export function WhatsAppManagerClient({
       />
 
       {/* Navigation Tabs */}
-      <div
-        className="tabs"
-        style={{
-          display: "flex",
-          gap: 10,
-          borderBottom: "1px solid var(--line, #E2E8F0)",
-          marginBottom: 24,
-        }}
-      >
+      <div className="tab-strip mb-md">
         <button
           type="button"
           onClick={() => setTab("connection")}
-          className={`btn btn-sm ${tab === "connection" ? "btn-primary" : "btn-secondary"}`}
-          style={{ borderRadius: "8px 8px 0 0", borderBottom: tab === "connection" ? "none" : undefined }}
+          className={`tab-item ${tab === "connection" ? "active" : ""}`}
         >
-          Linked Device & Connection
+          Linked Device &amp; Connection
         </button>
         <button
           type="button"
           onClick={() => setTab("automations")}
-          className={`btn btn-sm ${tab === "automations" ? "btn-primary" : "btn-secondary"}`}
-          style={{ borderRadius: "8px 8px 0 0" }}
+          className={`tab-item ${tab === "automations" ? "active" : ""}`}
         >
-          Templates & Automations
+          Templates &amp; Automations
         </button>
         <button
           type="button"
           onClick={() => setTab("telemetry")}
-          className={`btn btn-sm ${tab === "telemetry" ? "btn-primary" : "btn-secondary"}`}
-          style={{ borderRadius: "8px 8px 0 0" }}
+          className={`tab-item ${tab === "telemetry" ? "active" : ""}`}
         >
-          Delivery Logs ({totalLogs})
+          Delivery Logs <span className="tab-badge">{totalLogs}</span>
         </button>
         <button
           type="button"
           onClick={() => setTab("broadcasts")}
-          className={`btn btn-sm ${tab === "broadcasts" ? "btn-primary" : "btn-secondary"}`}
-          style={{ borderRadius: "8px 8px 0 0" }}
+          className={`tab-item ${tab === "broadcasts" ? "active" : ""}`}
         >
-          Broadcasts ({campaigns.length})
+          Broadcasts <span className="tab-badge">{campaigns.length}</span>
         </button>
       </div>
 

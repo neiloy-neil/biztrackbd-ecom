@@ -48,9 +48,9 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
         }
       />
 
-      {err && <div className="notice bad" role="alert" style={{ marginBottom: 16 }} data-testid="pixel-error">{err}</div>}
+      {err && <div className="notice bad mb-md" role="alert" data-testid="pixel-error">{err}</div>}
       {done && (
-        <div className="notice good" role="status" style={{ marginBottom: 16 }}>
+        <div className="notice good mb-md" role="status">
           {done === "saved"
             ? "Tracking IDs saved successfully."
             : done === "fb_connected"
@@ -60,25 +60,26 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
       )}
 
       {/* Main Unified Tracking Form */}
-      <form action={saveAllTrackingAction} className="stack" style={{ gap: 20 }}>
+      <form action={saveAllTrackingAction} className="stack gap-lg">
         {/* Facebook Pixel & CAPI Card matching AdmPixels.dc.html */}
-        <section className="card" data-testid="meta-pixel-card" style={{ padding: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap", marginBottom: 20 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 10, background: "#1877F2", color: "#fff", fontWeight: 800, fontSize: 22, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              f
-            </div>
-            <div style={{ flexGrow: 1 }}>
-              <div style={{ fontSize: 16, fontWeight: 700 }}>Facebook Pixel and Conversions API</div>
-              <div style={{ fontSize: 13, color: "var(--ink-2, #4B4B73)", marginTop: 2 }}>
-                {c.pixelId ? `Pixel ID ${c.pixelId}` : "Not configured yet"} · {c.capiConnected ? "Server CAPI Active" : "Browser only"}
+        <section className="card p-lg" data-testid="meta-pixel-card">
+          <div className="flex-between items-center gap-md flex-wrap mb-md">
+            <div className="row items-center gap-md">
+              <div className="provider-icon-lg provider-fb">
+                f
+              </div>
+              <div>
+                <div className="font-bold text-base">Facebook Pixel and Conversions API</div>
+                <div className="text-sm text-ink-2 mt-xs">
+                  {c.pixelId ? `Pixel ID ${c.pixelId}` : "Not configured yet"} · {c.capiConnected ? "Server CAPI Active" : "Browser only"}
+                </div>
               </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div className="row items-center gap-sm">
               {canEdit && (
                 <a
                   href="/api/auth/facebook/connect"
-                  className="btn btn-secondary"
-                  style={{ fontSize: 12.5, padding: "5px 12px", textDecoration: "none" }}
+                  className="btn btn-secondary btn-sm"
                   data-testid="meta-oauth-btn"
                 >
                   1-Click Connect
@@ -90,8 +91,8 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 18, borderTop: "1px solid var(--line, #E7E7F0)", paddingTop: 18 }}>
-            <label className="field" style={{ marginBottom: 0 }}>
+          <div className="grid-280 pt-md border-top">
+            <label className="field m-0">
               <span className="label">Pixel ID</span>
               <input
                 className="input"
@@ -105,20 +106,20 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
               <span className="hint">Find it in Meta Events Manager &rarr; Data Sources.</span>
             </label>
 
-            <div className="field" style={{ marginBottom: 0 }}>
+            <div className="field m-0">
               <span className="label">Conversions API Access Token</span>
-              <div style={{ display: "flex", height: 40, border: "1px solid var(--border-color, #D5D5E4)", borderRadius: 8, padding: "0 12px", alignItems: "center", background: "var(--bg-subtle, #FAFAFC)", fontSize: 14 }}>
-                <span style={{ flexGrow: 1, letterSpacing: 2, color: "var(--ink-2, #4B4B73)" }}>
+              <div className="token-box">
+                <span className="flex-1 font-mono text-ink-2">
                   {c.capiConnected ? "••••••••••••••token" : "No token saved"}
                 </span>
-                <Link href="/settings/apps?open=meta_pixel_capi" className="link" style={{ fontSize: 13, fontWeight: 700 }} prefetch={false}>
+                <Link href="/settings/apps?open=meta_pixel_capi" className="link text-sm font-bold" prefetch={false}>
                   {c.capiConnected ? "Configure" : "Add Token"}
                 </Link>
               </div>
               <span className="hint">Saved in encrypted vault. Server events bypass ad-blockers.</span>
             </div>
 
-            <label className="field" style={{ marginBottom: 0, gridColumn: "1 / -1" }}>
+            <label className="field m-0 grid-col-all">
               <span className="label">Meta Domain Verification (Optional)</span>
               <input
                 className="input"
@@ -134,22 +135,22 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
         </section>
 
         {/* Google & TikTok Grid matching AdmPixels.dc.html */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 18 }}>
+        <div className="grid-300">
           {/* Google Analytics 4 */}
-          <section className="card" data-testid="ga4-card" style={{ padding: 20 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: "#F9AB00", color: "#fff", fontWeight: 800, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <section className="card p-md" data-testid="ga4-card">
+            <div className="row items-center gap-md mb-md">
+              <div className="provider-icon provider-ga4">
                 GA4
               </div>
-              <div style={{ flexGrow: 1 }}>
-                <div style={{ fontSize: 15, fontWeight: 700 }}>Google Analytics 4</div>
-                <div style={{ fontSize: 12.5, color: "var(--ink-3, #6B6B8D)" }}>Measurement ID &amp; Server Protocol</div>
+              <div className="flex-1">
+                <div className="font-bold text-base">Google Analytics 4</div>
+                <div className="text-xs text-ink-3">Measurement ID &amp; Server Protocol</div>
               </div>
               <span className={`pill ${c.googleAnalyticsId ? "ok" : "grey"}`}>
                 {c.googleAnalyticsId ? "Active" : "Off"}
               </span>
             </div>
-            <label className="field" style={{ marginBottom: 12 }}>
+            <label className="field mb-md">
               <span className="label">Measurement ID</span>
               <input
                 className="input"
@@ -161,7 +162,7 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
               />
               <span className="hint">Google Analytics &rarr; Admin &rarr; Data Streams.</span>
             </label>
-            <label className="field" style={{ marginBottom: 0 }}>
+            <label className="field m-0">
               <span className="label">Measurement Protocol API Secret</span>
               <input
                 className="input"
@@ -174,7 +175,7 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
               />
               <span className="hint">Admin &rarr; Data Streams &rarr; Measurement Protocol API secrets (enables server-side purchase tracking). It is stored encrypted and never shown again.</span>
               {c.ga4ApiSecretSet && canEdit && (
-                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, marginTop: 6 }}>
+                <label className="row items-center gap-sm text-sm mt-xs">
                   <input type="checkbox" name="removeGa4ApiSecret" /> Remove the saved secret
                 </label>
               )}
@@ -182,20 +183,20 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
           </section>
 
           {/* Google Tag Manager */}
-          <section className="card" data-testid="gtm-card" style={{ padding: 20 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: "#246FDB", color: "#fff", fontWeight: 800, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <section className="card p-md" data-testid="gtm-card">
+            <div className="row items-center gap-md mb-md">
+              <div className="provider-icon provider-gtm">
                 GTM
               </div>
-              <div style={{ flexGrow: 1 }}>
-                <div style={{ fontSize: 15, fontWeight: 700 }}>Google Tag Manager</div>
-                <div style={{ fontSize: 12.5, color: "var(--ink-3, #6B6B8D)" }}>Container ID (Head + Body)</div>
+              <div className="flex-1">
+                <div className="font-bold text-base">Google Tag Manager</div>
+                <div className="text-xs text-ink-3">Container ID (Head + Body)</div>
               </div>
               <span className={`pill ${c.googleTagManagerId ? "ok" : "grey"}`}>
                 {c.googleTagManagerId ? "Active" : "Off"}
               </span>
             </div>
-            <label className="field" style={{ marginBottom: 0 }}>
+            <label className="field m-0">
               <span className="label">Container ID</span>
               <input
                 className="input"
@@ -210,20 +211,20 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
           </section>
 
           {/* TikTok Pixel */}
-          <section className="card" data-testid="tiktok-card" style={{ padding: 20 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: "#111111", color: "#fff", fontWeight: 800, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <section className="card p-md" data-testid="tiktok-card">
+            <div className="row items-center gap-md mb-md">
+              <div className="provider-icon provider-tiktok">
                 TikTok
               </div>
-              <div style={{ flexGrow: 1 }}>
-                <div style={{ fontSize: 15, fontWeight: 700 }}>TikTok Pixel</div>
-                <div style={{ fontSize: 12.5, color: "var(--ink-3, #6B6B8D)" }}>TikTok Events API ID</div>
+              <div className="flex-1">
+                <div className="font-bold text-base">TikTok Pixel</div>
+                <div className="text-xs text-ink-3">TikTok Events API ID</div>
               </div>
               <span className={`pill ${c.tiktokPixelId ? "ok" : "grey"}`}>
                 {c.tiktokPixelId ? "Active" : "Off"}
               </span>
             </div>
-            <label className="field" style={{ marginBottom: 0 }}>
+            <label className="field m-0">
               <span className="label">Pixel Code</span>
               <input
                 className="input"
@@ -239,17 +240,19 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
         </div>
 
         {/* Google Search Console & Merchant Center */}
-        <section className="card" data-testid="google-cloud-suite-card" style={{ padding: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap", marginBottom: 20 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 10, background: "#4285F4", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
-              </svg>
-            </div>
-            <div style={{ flexGrow: 1 }}>
-              <div style={{ fontSize: 16, fontWeight: 700 }}>Google Search Console &amp; Merchant Center</div>
-              <div style={{ fontSize: 13, color: "var(--ink-2, #4B4B73)", marginTop: 2 }}>
-                Site ownership verification, Google Shopping Merchant Center account, and dynamic product feeds.
+        <section className="card p-lg" data-testid="google-cloud-suite-card">
+          <div className="flex-between items-center gap-md flex-wrap mb-md">
+            <div className="row items-center gap-md">
+              <div className="provider-icon-lg provider-google">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+                </svg>
+              </div>
+              <div>
+                <div className="font-bold text-base">Google Search Console &amp; Merchant Center</div>
+                <div className="text-sm text-ink-2 mt-xs">
+                  Site ownership verification, Google Shopping Merchant Center account, and dynamic product feeds.
+                </div>
               </div>
             </div>
             <span className={`pill ${c.googleSiteVerification || c.googleMerchantCenterId ? "ok" : "grey"}`}>
@@ -257,9 +260,9 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
             </span>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 18, borderTop: "1px solid var(--line, #E7E7F0)", paddingTop: 18 }}>
+          <div className="grid-280 pt-md border-top">
             {/* Search Console Site Verification */}
-            <label className="field" style={{ marginBottom: 0, gridColumn: "1 / -1" }}>
+            <label className="field m-0 grid-col-all">
               <span className="label">Google Search Console Verification Token / Meta Tag</span>
               <input
                 className="input"
@@ -276,7 +279,7 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
             </label>
 
             {/* Google Merchant Center ID */}
-            <label className="field" style={{ marginBottom: 0, gridColumn: "1 / -1" }}>
+            <label className="field m-0 grid-col-all">
               <span className="label">Google Merchant Center Account ID</span>
               <input
                 className="input"
@@ -293,9 +296,9 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
         </section>
 
         {/* Dynamic Product Catalog Feed Card for Facebook & Google */}
-        <section className="card" data-testid="catalog-feed-card" style={{ padding: 22 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 10, background: "#10B981", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <section className="card p-lg" data-testid="catalog-feed-card">
+          <div className="row items-center gap-md mb-md">
+            <div className="provider-icon provider-catalog">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
                 <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
@@ -304,31 +307,29 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
               </svg>
             </div>
             <div>
-              <div style={{ fontSize: 15, fontWeight: 700 }}>Dynamic Product Catalog Feed</div>
-              <div style={{ fontSize: 12.5, color: "var(--ink-3, #6B6B8D)" }}>Real-time XML product feed for Facebook Dynamic Retargeting &amp; Google Shopping</div>
+              <div className="font-bold text-base">Dynamic Product Catalog Feed</div>
+              <div className="text-xs text-ink-3">Real-time XML product feed for Facebook Dynamic Retargeting &amp; Google Shopping</div>
             </div>
           </div>
-          <p className="muted" style={{ fontSize: 13, marginBottom: 14 }}>
+          <p className="muted text-sm mb-md">
             Sync your products automatically with Meta Commerce Manager and Google Merchant Center. Always reflects real-time stock and prices.
           </p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
+          <div className="grid-280">
             <div>
-              <span className="label" style={{ fontSize: 12.5, fontWeight: 600 }}>Meta (Facebook / Instagram) Catalog Feed URL</span>
+              <span className="label text-xs font-semibold">Meta (Facebook / Instagram) Catalog Feed URL</span>
               <input
-                className="input"
+                className="input input-mono mt-xs"
                 readOnly
                 value={`${storefrontOrigin(s.tenantSubdomain)}/api/feed/facebook.xml`}
-                style={{ fontSize: 12.5, background: "var(--bg-subtle, #FAFAFC)", fontFamily: "monospace", marginTop: 4 }}
               />
               <span className="hint">Meta Commerce Manager &rarr; Catalogs &rarr; Data Sources &rarr; Data Feed.</span>
             </div>
             <div>
-              <span className="label" style={{ fontSize: 12.5, fontWeight: 600 }}>Google Merchant Center Feed URL</span>
+              <span className="label text-xs font-semibold">Google Merchant Center Feed URL</span>
               <input
-                className="input"
+                className="input input-mono mt-xs"
                 readOnly
                 value={`${storefrontOrigin(s.tenantSubdomain)}/api/feed/google.xml`}
-                style={{ fontSize: 12.5, background: "var(--bg-subtle, #FAFAFC)", fontFamily: "monospace", marginTop: 4 }}
               />
               <span className="hint">Google Merchant Center &rarr; Products &rarr; Feeds &rarr; Primary Feed.</span>
             </div>
@@ -336,7 +337,7 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
         </section>
 
         {canEdit && (
-          <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
+          <div className="row gap-md mt-xs">
             <SubmitButton className="btn btn-primary" pending="Saving…">Save Tracking IDs</SubmitButton>
           </div>
         )}
@@ -344,41 +345,41 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
 
       {/* Test Event Section */}
       {canEdit && c.pixelId && c.capiConnected && (
-        <section className="card" style={{ marginTop: 20, padding: 20 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 6 }}>Meta Conversions API Test Utility</h3>
-          <p className="muted" style={{ fontSize: 13.5, marginBottom: 14 }}>
+        <section className="card p-md mt-lg">
+          <h3 className="font-bold text-base mb-xs">Meta Conversions API Test Utility</h3>
+          <p className="muted text-sm mb-md">
             Enter the test event code from Meta Events Manager &rarr; Test events tab (e.g. <code>TEST12345</code>) to confirm server event delivery.
           </p>
-          <form action={testEventAction} className="row" style={{ flexWrap: "wrap", gap: 10 }}>
-            <input className="input" name="code" placeholder="Test code, like TEST12345" aria-label="Test event code" style={{ maxWidth: 280 }} required />
+          <form action={testEventAction} className="row gap-sm flex-wrap items-center">
+            <input className="input max-w-280" name="code" placeholder="Test code, like TEST12345" aria-label="Test event code" required />
             <SubmitButton className="btn btn-secondary" pending="Sending…">Send Test Event via Graph API</SubmitButton>
           </form>
         </section>
       )}
 
       {/* Advisory Banner matching AdmPixels.dc.html:41 */}
-      <div style={{ background: "#FDF3E3", borderRadius: 12, padding: "14px 18px", display: "flex", gap: 12, alignItems: "flex-start", marginTop: 20 }}>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B45309" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: "0 0 20px", marginTop: 1 }}>
+      <div className="advisory-box advisory-box-amber mt-lg">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B45309" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0 mt-xs">
           <path d="M12 3l10 18H2L12 3zM12 10v5M12 18v.01" />
         </svg>
-        <div style={{ fontSize: 13.5, lineHeight: 1.55, color: "#4B4B73" }}>
-          <b style={{ color: "#B45309" }}>Bangladeshi Phone Match Optimization:</b> Because local shoppers rarely use email at checkout, BizTrackBD automatically normalizes and hashes customer mobile numbers (<code>+8801...</code>) for Meta Conversions API and Google Enhanced Conversions, delivering an Event Quality Score (EMQ) above 8.5/10.
+        <div>
+          <b className="text-warning">Bangladeshi Phone Match Optimization:</b> Because local shoppers rarely use email at checkout, BizTrackBD automatically normalizes and hashes customer mobile numbers (<code>+8801...</code>) for Meta Conversions API and Google Enhanced Conversions, delivering an Event Quality Score (EMQ) above 8.5/10.
         </div>
       </div>
 
       {/* 7-Day Live Deduplication Table matching AdmPixels.dc.html:33-40 */}
-      <section style={{ marginTop: 24 }}>
-        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-          <div style={{ padding: "18px 24px", display: "flex", alignItems: "center", borderBottom: "1px solid var(--line, #E7E7F0)" }}>
-            <div style={{ fontSize: 15, fontWeight: 700, flexGrow: 1 }}>Events from your store (last 7 days)</div>
-            <div style={{ fontSize: 13, color: "var(--ink-2, #4B4B73)" }}>
-              Match quality <b style={{ color: "#15803D" }}>Good (Server Deduplicated)</b>
+      <section className="mt-lg">
+        <div className="card p-0 overflow-hidden">
+          <div className="p-md flex-between items-center border-bottom">
+            <div className="font-bold text-base flex-1">Events from your store (last 7 days)</div>
+            <div className="text-sm text-ink-2">
+              Match quality <b className="text-success">Good (Server Deduplicated)</b>
             </div>
           </div>
           {!c.pixelId ? (
-            <div className="empty" style={{ padding: 32 }}>Save your Pixel ID above to start counting store events.</div>
+            <div className="empty p-xl">Save your Pixel ID above to start counting store events.</div>
           ) : (
-            <table className="table" data-testid="event-stats" style={{ margin: 0 }}>
+            <table className="table m-0" data-testid="event-stats">
               <thead>
                 <tr>
                   <th>Event</th>
@@ -391,7 +392,7 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
               <tbody>
                 {o.stats.map((e) => (
                   <tr key={e.name} data-event={e.name}>
-                    <td style={{ fontWeight: 600 }}>{LABEL[e.name] ?? e.name}</td>
+                    <td className="font-semibold">{LABEL[e.name] ?? e.name}</td>
                     <td className="r num">{e.browser}</td>
                     <td className="r num">{e.server}</td>
                     <td className="r num">{e.deduped > 0 ? <span className="pill ok">{e.deduped} counted once</span> : e.browser + e.server > 0 ? "—" : "—"}</td>
@@ -407,7 +408,7 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
           )}
         </div>
         {c.pixelId && total === 0 && (
-          <p className="muted" style={{ marginTop: 10, fontSize: 13 }}>
+          <p className="muted mt-sm text-sm">
             No events recorded in the last 7 days. Open your storefront and view a product to fire your first event.
           </p>
         )}
@@ -415,8 +416,8 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
 
       {/* Recent Raw Events Log */}
       {o.recent.length > 0 && (
-        <section style={{ marginTop: 24 }}>
-          <h2 style={{ fontSize: 16, marginBottom: 10 }}>Latest Raw Events</h2>
+        <section className="mt-lg">
+          <h2 className="text-base font-bold mb-sm">Latest Raw Events</h2>
           <table className="table" data-testid="recent-events">
             <thead>
               <tr>
@@ -434,7 +435,7 @@ export default async function Pixels({ searchParams }: { searchParams: Promise<R
                   <td>{e.origin === "BROWSER" ? "Browser Pixel" : "Server CAPI"}</td>
                   <td>
                     {e.status === "FAILED" ? (
-                      <span className="err" style={{ margin: 0 }}>{e.detail ?? "Failed"}</span>
+                      <span className="err m-0">{e.detail ?? "Failed"}</span>
                     ) : (
                       <span className="pill ok">Sent</span>
                     )}

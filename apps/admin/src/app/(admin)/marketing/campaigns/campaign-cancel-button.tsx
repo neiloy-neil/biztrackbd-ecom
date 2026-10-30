@@ -21,13 +21,7 @@ export function CampaignCancelButton({ campaignId }: { campaignId: string }) {
       type="button"
       onClick={handleCancel}
       disabled={isPending}
-      className="btn btn-sm btn-secondary"
-      style={{
-        padding: "2px 8px",
-        fontSize: 11,
-        color: "#DC2626",
-        borderColor: "#FCA5A5",
-      }}
+      className="btn btn-sm btn-danger"
       title="Cancel scheduled broadcast"
     >
       {isPending ? "Cancelling…" : "Cancel"}

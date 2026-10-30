@@ -31,9 +31,9 @@ export default async function Coupons({ searchParams }: { searchParams: Promise<
         crumbs={[{ label: "Marketing", href: "/marketing" }, { label: "Coupons" }]}
         actions={canEdit ? <Link href="/marketing/coupons?new=1" className="btn btn-primary" prefetch={false} data-testid="new-coupon">Create discount</Link> : undefined}
       />
-      {one(sp.saved) && <div className="notice good" role="status" style={{ marginBottom: 12 }}>Coupon saved.</div>}
-      {one(sp.deleted) && <div className="notice good" role="status" style={{ marginBottom: 12 }}>Coupon deleted.</div>}
-      {one(sp.disabled) && <div className="notice info" role="status" style={{ marginBottom: 12 }}>That coupon has been used, so it was switched off instead of deleted. Past orders keep their reference.</div>}
+      {one(sp.saved) && <div className="notice good mb-md" role="status">Coupon saved.</div>}
+      {one(sp.deleted) && <div className="notice good mb-md" role="status">Coupon deleted.</div>}
+      {one(sp.disabled) && <div className="notice info mb-md" role="status">That coupon has been used, so it was switched off instead of deleted. Past orders keep their reference.</div>}
 
       <div className="split">
         <div className="col">
@@ -44,8 +44,8 @@ export default async function Coupons({ searchParams }: { searchParams: Promise<
                   <div key={c.id} className="list-card" data-testid="coupon-row">
                     <div className="top"><b>{c.code}</b><span className={`pill ${STATUS[c.status][1]}`}>{STATUS[c.status][0]}</span></div>
                     <div>{describe(c)}{c.minOrderValue ? ` · orders over ${taka(c.minOrderValue)}` : ""}</div>
-                    <div className="muted" style={{ fontSize: 13 }}>Used {c.usageCount}{c.usageLimit ? ` of ${c.usageLimit}` : ""} · {c.expiresAt ? `until ${dateOnly(c.expiresAt)}` : "no end date"}</div>
-                    {canEdit && <div className="row" style={{ marginTop: 8 }}><Link href={`/marketing/coupons?edit=${c.id}`} className="btn btn-secondary btn-sm" prefetch={false}>Edit</Link></div>}
+                    <div className="muted text-sm">Used {c.usageCount}{c.usageLimit ? ` of ${c.usageLimit}` : ""} · {c.expiresAt ? `until ${dateOnly(c.expiresAt)}` : "no end date"}</div>
+                    {canEdit && <div className="row mt-sm"><Link href={`/marketing/coupons?edit=${c.id}`} className="btn btn-secondary btn-sm" prefetch={false}>Edit</Link></div>}
                   </div>
                 ))}
               </div>
@@ -54,15 +54,15 @@ export default async function Coupons({ searchParams }: { searchParams: Promise<
                 <tbody>
                   {list.map((c) => (
                     <tr key={c.id} data-testid="coupon-row">
-                      <td><b>{c.code}</b><div className="muted" style={{ fontSize: 12.5 }}>{c.expiresAt ? `Until ${dateOnly(c.expiresAt)}` : "No end date"}</div></td>
-                      <td>{describe(c)}<div className="muted" style={{ fontSize: 12.5 }}>{c.minOrderValue ? `Orders over ${taka(c.minOrderValue)}` : "Any order"}</div></td>
+                      <td><b>{c.code}</b><div className="muted text-xs">{c.expiresAt ? `Until ${dateOnly(c.expiresAt)}` : "No end date"}</div></td>
+                      <td>{describe(c)}<div className="muted text-xs">{c.minOrderValue ? `Orders over ${taka(c.minOrderValue)}` : "Any order"}</div></td>
                       <td className="r num">{c.usageCount}{c.usageLimit ? ` / ${c.usageLimit}` : ""}</td>
                       <td><span className={`pill ${STATUS[c.status][1]}`}>{STATUS[c.status][0]}</span></td>
                       {canEdit && (
                         <td>
-                          <div className="row" style={{ flexWrap: "nowrap" }}>
+                          <div className="row nowrap">
                             <Link href={`/marketing/coupons?edit=${c.id}`} className="link" prefetch={false}>Edit</Link>
-                            <form action={toggleCouponAction.bind(null, c.id, !c.isActive)}><SubmitButton className="link" pending="…" style={{ border: 0, background: "none", cursor: "pointer", padding: 0 }}>{c.isActive ? "Turn off" : "Turn on"}</SubmitButton></form>
+                            <form action={toggleCouponAction.bind(null, c.id, !c.isActive)}><SubmitButton className="link border-none bg-none cursor-pointer p-0" pending="…">{c.isActive ? "Turn off" : "Turn on"}</SubmitButton></form>
                           </div>
                         </td>
                       )}
@@ -83,7 +83,7 @@ export default async function Coupons({ searchParams }: { searchParams: Promise<
               />
               {editing && (
                 <form action={deleteCouponAction.bind(null, editing.id)} className="card">
-                  <p className="muted" style={{ marginBottom: 10 }}>{editing.usageCount > 0 ? "This coupon has been used, so it will be switched off, not deleted." : "This coupon has not been used and will be deleted."}</p>
+                  <p className="muted mb-sm">{editing.usageCount > 0 ? "This coupon has been used, so it will be switched off, not deleted." : "This coupon has not been used and will be deleted."}</p>
                   <SubmitButton className="btn btn-danger" pending="…">{editing.usageCount > 0 ? "Switch off" : "Delete coupon"}</SubmitButton>
                 </form>
               )}

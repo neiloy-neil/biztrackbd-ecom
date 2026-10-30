@@ -75,12 +75,12 @@ export default async function CampaignsPage({
         }
       />
 
-      {err && <div className="notice bad" role="alert" style={{ marginBottom: 16 }}>{err}</div>}
-      {ok === "sent" && <div className="notice good" role="status" style={{ marginBottom: 16 }}>Broadcast campaign dispatched successfully!</div>}
-      {ok === "scheduled" && <div className="notice good" role="status" style={{ marginBottom: 16 }}>Broadcast campaign scheduled successfully!</div>}
+      {err && <div className="notice bad mb-md" role="alert">{err}</div>}
+      {ok === "sent" && <div className="notice good mb-md" role="status">Broadcast campaign dispatched successfully!</div>}
+      {ok === "scheduled" && <div className="notice good mb-md" role="status">Broadcast campaign scheduled successfully!</div>}
 
       {/* 4-Stat KPI Grid */}
-      <div className="grid grid-4" style={{ marginBottom: 20 }}>
+      <div className="grid grid-4 mb-md">
         <div className="stat">
           <div className="k">Total Campaigns</div>
           <div className="v num">{campaigns.length}</div>
@@ -91,7 +91,7 @@ export default async function CampaignsPage({
         </div>
         <div className="stat">
           <div className="k">WhatsApp Blasts</div>
-          <div className="v num" style={{ color: "#059669" }}>{waCampaignsCount}</div>
+          <div className="v num text-success">{waCampaignsCount}</div>
         </div>
         <div className="stat">
           <div className="k">SMS Credits Used</div>
@@ -100,31 +100,31 @@ export default async function CampaignsPage({
       </div>
 
       {/* Channel Filter Tabs */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 16, borderBottom: "1px solid var(--line, #E2E8F0)", paddingBottom: 8 }}>
+      <div className="tab-strip mb-md">
         <Link
           href="/marketing/campaigns"
-          className={`btn btn-sm ${!channelFilter ? "btn-primary" : "btn-secondary"}`}
+          className={`tab-item ${!channelFilter ? "active" : ""}`}
           prefetch={false}
         >
           All Channels
         </Link>
         <Link
           href="/marketing/campaigns?channel=WHATSAPP"
-          className={`btn btn-sm ${channelFilter === "WHATSAPP" ? "btn-primary" : "btn-secondary"}`}
+          className={`tab-item ${channelFilter === "WHATSAPP" ? "active" : ""}`}
           prefetch={false}
         >
           WhatsApp
         </Link>
         <Link
           href="/marketing/campaigns?channel=SMS"
-          className={`btn btn-sm ${channelFilter === "SMS" ? "btn-primary" : "btn-secondary"}`}
+          className={`tab-item ${channelFilter === "SMS" ? "active" : ""}`}
           prefetch={false}
         >
           SMS
         </Link>
         <Link
           href="/marketing/campaigns?channel=EMAIL"
-          className={`btn btn-sm ${channelFilter === "EMAIL" ? "btn-primary" : "btn-secondary"}`}
+          className={`tab-item ${channelFilter === "EMAIL" ? "active" : ""}`}
           prefetch={false}
         >
           Email
@@ -133,17 +133,17 @@ export default async function CampaignsPage({
 
       <section className="card">
         <div className="card-head">
-          <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Campaign History ({campaigns.length})</h2>
+          <h2 className="text-base font-bold m-0">Campaign History ({campaigns.length})</h2>
         </div>
 
         {campaigns.length === 0 ? (
-          <div className="empty" style={{ padding: "36px 16px", textAlign: "center" }}>
-            <p className="muted" style={{ margin: 0, fontSize: 14 }}>
+          <div className="empty p-xl text-center">
+            <p className="muted text-sm m-0">
               No broadcast campaigns found. Click <b>+ New Broadcast</b> to launch your first promotional blast.
             </p>
           </div>
         ) : (
-          <div style={{ overflowX: "auto" }}>
+          <div className="table-wrap">
             <table className="table">
               <thead>
                 <tr>
@@ -166,53 +166,26 @@ export default async function CampaignsPage({
                   return (
                     <tr key={c.id}>
                       <td>
-                        <div style={{ fontWeight: 600 }}>{c.name}</div>
-                        {c.subject && <div className="muted" style={{ fontSize: 11.5 }}>Subject: {c.subject}</div>}
+                        <div className="font-semibold">{c.name}</div>
+                        {c.subject && <div className="muted text-xs">Subject: {c.subject}</div>}
                         {c.couponCode && (
-                          <span
-                            style={{
-                              fontSize: 10.5,
-                              background: "rgba(99, 102, 241, 0.1)",
-                              color: "#4338CA",
-                              padding: "1px 5px",
-                              borderRadius: 4,
-                              fontWeight: 600,
-                              display: "inline-block",
-                              marginTop: 2,
-                            }}
-                          >
+                          <span className="pill info text-xs mt-xs">
                             Code: {c.couponCode}
                           </span>
                         )}
                       </td>
                       <td>
-                        <span
-                          className="pill"
-                          style={{
-                            fontSize: 11,
-                            fontWeight: 600,
-                            background: isWhatsApp
-                              ? "rgba(16, 185, 129, 0.15)"
-                              : isSms
-                              ? "rgba(2, 132, 199, 0.15)"
-                              : "rgba(100, 116, 139, 0.15)",
-                            color: isWhatsApp
-                              ? "#047857"
-                              : isSms
-                              ? "#0369A1"
-                              : "#334155",
-                          }}
-                        >
+                        <span className={`pill ${isWhatsApp ? "ok" : isSms ? "info" : "grey"}`}>
                           {isWhatsApp ? "WhatsApp" : isSms ? "SMS" : "Email"}
                         </span>
                       </td>
-                      <td className="muted" style={{ fontSize: 12.5 }}>
+                      <td className="muted text-sm">
                         {c.targetSegment === "ABANDONED_CART" ? "Abandoned Cart" : c.targetSegment}
                       </td>
-                      <td className="r num" style={{ fontSize: 13 }}>
+                      <td className="r num text-sm">
                         <b>{c.sentCount > 0 ? c.sentCount : c.recipientsCount}</b> / {c.recipientsCount}
                         {c.failedCount > 0 && (
-                          <div style={{ fontSize: 11, color: "#DC2626" }}>({c.failedCount} failed)</div>
+                          <div className="text-xs text-error">({c.failedCount} failed)</div>
                         )}
                       </td>
                       <td className="r num">{c.creditsUsed.toLocaleString()}</td>
@@ -227,24 +200,23 @@ export default async function CampaignsPage({
                               ? "bad"
                               : "info"
                           }`}
-                          style={{ fontSize: 11, fontWeight: 600 }}
                         >
                           {c.status}
                         </span>
                         {isScheduled && c.scheduledFor && (
-                          <div className="muted" style={{ fontSize: 10.5, marginTop: 2 }}>
+                          <div className="muted text-xs mt-xs">
                             {friendlyDate(c.scheduledFor)}
                           </div>
                         )}
                       </td>
-                      <td className="muted" style={{ fontSize: 12.5 }}>
+                      <td className="muted text-sm">
                         {friendlyDate(c.sentAt || c.createdAt)}
                       </td>
                       <td className="r">
                         {isScheduled && canEdit ? (
                           <CampaignCancelButton campaignId={c.id} />
                         ) : (
-                          <span className="muted" style={{ fontSize: 11 }}>—</span>
+                          <span className="muted text-xs">—</span>
                         )}
                       </td>
                     </tr>

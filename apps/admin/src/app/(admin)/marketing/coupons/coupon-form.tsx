@@ -18,8 +18,8 @@ export function CouponForm({ id, initial }: { id: string | null; initial: Coupon
     <form action={action} className="card" data-testid="coupon-form">
       <h2>{id ? "Edit coupon" : "New coupon"}</h2>
       <label className="field"><span className="label">Code</span>
-        <div className="row" style={{ flexWrap: "nowrap" }}>
-          <input className="input" name="code" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} required maxLength={20} style={{ textTransform: "uppercase" }} data-testid="c-code" {...err("code")} />
+        <div className="row nowrap">
+          <input className="input uppercase" name="code" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} required maxLength={20} data-testid="c-code" {...err("code")} />
           <button type="button" className="btn btn-secondary" onClick={() => setCode(randomCode())}>Generate</button>
         </div>
       </label>
@@ -40,7 +40,7 @@ export function CouponForm({ id, initial }: { id: string | null; initial: Coupon
         <label className="field"><span className="label">Ends <span className="opt">(optional)</span></span><input className="input" type="date" name="expiresAt" defaultValue={initial.expiresAt} {...err("expiresAt")} /></label>
       </div>
       {state.error && <div className="err" role="alert" data-testid="coupon-error">{state.error}</div>}
-      <div className="row" style={{ marginTop: 10 }}>
+      <div className="row mt-sm">
         <SubmitButton className="btn btn-primary" pending="Saving…">Save coupon</SubmitButton>
         <Link href="/marketing/coupons" className="btn btn-secondary" prefetch={false}>Cancel</Link>
       </div>

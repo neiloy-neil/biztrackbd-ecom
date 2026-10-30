@@ -51,46 +51,28 @@ export function BannerForm({
   }
 
   return (
-    <form action={action} style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+    <form action={action} className="stack gap-lg">
       {state.error && <div className="notice bad">{state.error}</div>}
       {state.ok && <div className="notice good">Banner & Flash Sale settings saved successfully.</div>}
 
       {/* Live Storefront Simulation */}
-      <div className="card" style={{ padding: 20 }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 12,
-            flexWrap: "wrap",
-            gap: 8,
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--muted)" }}>
+      <div className="card p-md">
+        <div className="flex-between items-center mb-md flex-wrap gap-sm">
+          <div className="row items-center gap-sm">
+            <span className="text-xs font-bold text-ink-3 uppercase tracking-wider">
               Live Storefront Header Simulation
             </span>
             {flashSaleActive && (
-              <span className="pill orange" style={{ fontSize: 11 }}>
+              <span className="pill warn text-xs">
                 Flash Sale Active
               </span>
             )}
           </div>
-          <div style={{ display: "flex", gap: 6 }}>
+          <div className="row gap-xs">
             <button
               type="button"
               className={`chip ${previewLang === "en" ? "active" : ""}`}
               onClick={() => setPreviewLang("en")}
-              style={{
-                fontSize: 12,
-                padding: "2px 8px",
-                borderRadius: 4,
-                background: previewLang === "en" ? "#2563eb" : "#f1f5f9",
-                color: previewLang === "en" ? "#fff" : "#334155",
-                border: "none",
-                cursor: "pointer",
-              }}
             >
               English Preview
             </button>
@@ -98,15 +80,6 @@ export function BannerForm({
               type="button"
               className={`chip ${previewLang === "bn" ? "active" : ""}`}
               onClick={() => setPreviewLang("bn")}
-              style={{
-                fontSize: 12,
-                padding: "2px 8px",
-                borderRadius: 4,
-                background: previewLang === "bn" ? "#2563eb" : "#f1f5f9",
-                color: previewLang === "bn" ? "#fff" : "#334155",
-                border: "none",
-                cursor: "pointer",
-              }}
             >
               বাংলা প্রিভিউ
             </button>
@@ -114,71 +87,26 @@ export function BannerForm({
         </div>
 
         {/* Mock Storefront Header Container */}
-        <div
-          style={{
-            border: "1px solid var(--border)",
-            borderRadius: 10,
-            overflow: "hidden",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-          }}
-        >
+        <div className="storefront-sim">
           {/* Top Announcement Bar */}
-          <div
-            style={{
-              background: flashSaleActive
-                ? "linear-gradient(90deg, #dc2626 0%, #b91c1c 100%)"
-                : "#0f172a",
-              color: "#ffffff",
-              padding: "10px 16px",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              flexWrap: "wrap",
-              gap: 12,
-              fontSize: 13,
-              fontWeight: 500,
-              textAlign: "center",
-              transition: "all 0.3s ease",
-            }}
-          >
+          <div className={`sim-bar ${flashSaleActive ? "sim-bar-flash" : "sim-bar-normal"}`}>
             <span>{activeText}</span>
 
             {flashSaleActive && (
-              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                <span
-                  style={{
-                    background: "rgba(255,255,255,0.18)",
-                    padding: "2px 8px",
-                    borderRadius: 4,
-                    fontSize: 12,
-                    fontFamily: "monospace",
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  ⏳ Ends in 05h : 42m : 19s
+              <div className="row items-center gap-sm flex-wrap">
+                <span className="pill info font-mono text-xs">
+                  Ends in 05h : 42m : 19s
                 </span>
 
                 {flashSaleCoupon && (
                   <button
                     type="button"
                     onClick={handleCopy}
-                    style={{
-                      background: "#ffffff",
-                      color: "#b91c1c",
-                      border: "none",
-                      borderRadius: 4,
-                      padding: "2px 8px",
-                      fontSize: 11.5,
-                      fontWeight: 700,
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4,
-                    }}
+                    className="btn btn-secondary btn-sm"
                     title="Click to copy coupon code"
                   >
                     <span>{flashSaleCoupon}</span>
-                    <span style={{ fontSize: 10, opacity: 0.8 }}>
+                    <span className="text-xs opacity-75">
                       {copied ? "✓ Copied" : "[Copy]"}
                     </span>
                   </button>
@@ -188,34 +116,17 @@ export function BannerForm({
           </div>
 
           {/* Simulated Store Navigation */}
-          <div
-            style={{
-              background: "#ffffff",
-              padding: "12px 18px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              borderBottom: "1px solid #f1f5f9",
-            }}
-          >
-            <div style={{ fontWeight: 800, fontSize: 17, color: "#0f172a" }}>
+          <div className="sim-nav">
+            <div className="font-bold text-base text-ink">
               {storeName}
             </div>
-            <div
-              style={{
-                display: "flex",
-                gap: 16,
-                fontSize: 13,
-                color: "#64748b",
-                fontWeight: 500,
-              }}
-            >
+            <div className="row gap-md text-sm text-ink-3 font-medium">
               <span>Home</span>
               <span>Catalog</span>
               <span>Flash Deals</span>
               <span>Contact</span>
             </div>
-            <div style={{ display: "flex", gap: 12, color: "#64748b", fontSize: 13 }}>
+            <div className="row gap-md text-sm text-ink-3">
               <span>Search</span>
               <span>Cart (0)</span>
             </div>
@@ -224,24 +135,18 @@ export function BannerForm({
       </div>
 
       {/* Editor Controls */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: 20,
-        }}
-      >
+      <div className="grid-320">
         {/* Banner Texts */}
-        <div className="card" style={{ padding: 20 }}>
-          <h3 style={{ margin: "0 0 12px", fontSize: 16 }}>Announcement Bar Text</h3>
-          <p className="muted" style={{ margin: "0 0 16px", fontSize: 13 }}>
+        <div className="card p-md">
+          <h3 className="font-bold text-base mb-xs">Announcement Bar Text</h3>
+          <p className="muted text-sm mb-md">
             Displays at the very top of every page across your customer storefront.
           </p>
 
-          <div style={{ marginBottom: 14 }}>
+          <div className="mb-md">
             <label
               htmlFor="announcement"
-              style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 6 }}
+              className="label font-semibold mb-xs"
             >
               English Announcement Text
             </label>
@@ -249,20 +154,19 @@ export function BannerForm({
               id="announcement"
               name="announcement"
               type="text"
-              className="input"
+              className="input w-full"
               value={announcement}
               disabled={!canEdit}
               maxLength={300}
               placeholder="e.g. Grand Eid Sale: Flat 20% OFF sitewide! Use code EID20"
               onChange={(e) => setAnnouncement(e.target.value)}
-              style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid var(--border)" }}
             />
           </div>
 
           <div>
             <label
               htmlFor="announcementBn"
-              style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 6 }}
+              className="label font-semibold mb-xs"
             >
               Bangla Announcement Text (বাংলা টেক্সট)
             </label>
@@ -270,35 +174,25 @@ export function BannerForm({
               id="announcementBn"
               name="announcementBn"
               type="text"
-              className="input"
+              className="input w-full"
               value={announcementBn}
               disabled={!canEdit}
               maxLength={300}
               placeholder="যেমন: বিশেষ ঈদ অফার: সব অর্ডারে ফ্রি ডেলিভারি!"
               onChange={(e) => setAnnouncementBn(e.target.value)}
-              style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid var(--border)" }}
             />
           </div>
         </div>
 
         {/* Flash Sale Controls */}
-        <div className="card" style={{ padding: 20 }}>
-          <h3 style={{ margin: "0 0 12px", fontSize: 16 }}>Flash Sale Countdown & Coupon</h3>
-          <p className="muted" style={{ margin: "0 0 16px", fontSize: 13 }}>
+        <div className="card p-md">
+          <h3 className="font-bold text-base mb-xs">Flash Sale Countdown & Coupon</h3>
+          <p className="muted text-sm mb-md">
             Adds high-urgency red styling, live ticking countdown, and 1-click coupon copy badge.
           </p>
 
-          <div style={{ marginBottom: 16 }}>
-            <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                cursor: canEdit ? "pointer" : "default",
-                fontWeight: 600,
-                fontSize: 14,
-              }}
-            >
+          <div className="mb-md">
+            <label className="row items-center gap-sm pointer font-semibold text-sm">
               <input
                 type="checkbox"
                 name="flashSaleActive"
@@ -310,10 +204,10 @@ export function BannerForm({
             </label>
           </div>
 
-          <div style={{ marginBottom: 14 }}>
+          <div className="mb-md">
             <label
               htmlFor="flashSaleEndsAt"
-              style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 6 }}
+              className="label font-semibold mb-xs"
             >
               Countdown End Time
             </label>
@@ -321,18 +215,17 @@ export function BannerForm({
               id="flashSaleEndsAt"
               name="flashSaleEndsAt"
               type="datetime-local"
-              className="input"
+              className="input w-full"
               value={flashSaleEndsAt}
               disabled={!canEdit || !flashSaleActive}
               onChange={(e) => setFlashSaleEndsAt(e.target.value)}
-              style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid var(--border)" }}
             />
           </div>
 
           <div>
             <label
               htmlFor="flashSaleCoupon"
-              style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 6 }}
+              className="label font-semibold mb-xs"
             >
               Quick Copy Promo Code
             </label>
@@ -340,26 +233,24 @@ export function BannerForm({
               id="flashSaleCoupon"
               name="flashSaleCoupon"
               type="text"
-              className="input"
+              className="input font-mono uppercase w-full"
               value={flashSaleCoupon}
               disabled={!canEdit || !flashSaleActive}
               maxLength={40}
               placeholder="e.g. FLASH20"
               onChange={(e) => setFlashSaleCoupon(e.target.value.toUpperCase())}
-              style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid var(--border)", textTransform: "uppercase" }}
             />
           </div>
         </div>
       </div>
 
       {canEdit && (
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+        <div className="row gap-md items-center mt-xs">
           <button
             type="submit"
             className="btn btn-primary"
             disabled={pending}
             aria-busy={pending}
-            style={{ padding: "10px 24px", fontSize: 14, fontWeight: 600 }}
           >
             {pending ? "Saving Changes..." : "Save Banner & Flash Sale"}
           </button>

@@ -90,11 +90,11 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
   };
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", alignItems: "start" }}>
+    <div className="grid grid-2 gap-lg items-start">
       {/* Left Column: Input Controls */}
       <div className="card stack">
         {/* Tab Switcher */}
-        <div style={{ display: "flex", gap: "6px", background: "#F1F5F9", padding: "4px", borderRadius: "10px" }}>
+        <div className="pill-switcher mb-md">
           {[
             { id: "social", label: "Facebook / Instagram" },
             { id: "whatsapp", label: "WhatsApp Broadcast" },
@@ -108,18 +108,7 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
                 setTab(t.id as any);
                 setErrorMsg(null);
               }}
-              style={{
-                flex: 1,
-                padding: "8px 10px",
-                fontSize: "12.5px",
-                fontWeight: 600,
-                borderRadius: "8px",
-                border: "none",
-                background: tab === t.id ? "#FFFFFF" : "transparent",
-                color: tab === t.id ? "#1E293B" : "#64748B",
-                boxShadow: tab === t.id ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-                cursor: "pointer",
-              }}
+              className={`pill-switcher-btn ${tab === t.id ? "active" : ""}`}
             >
               {t.label}
             </button>
@@ -176,9 +165,9 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
             <span className="label">Coupon Code</span>
             <input
               type="text"
-              className="input"
+              className="input font-mono"
               value={couponCode}
-              onChange={(e) => setCouponCode(e.target.value)}
+              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
               placeholder="e.g. EID20, FLASH100"
             />
           </label>
@@ -187,7 +176,7 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
         <label className="field">
           <span className="label">Key Selling Highlights</span>
           <textarea
-            className="input"
+            className="textarea"
             rows={2}
             value={keyPoints}
             onChange={(e) => setKeyPoints(e.target.value)}
@@ -198,7 +187,7 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
         <label className="field">
           <span className="label">Custom Brand Voice / Store Policies <span className="opt">(optional)</span></span>
           <textarea
-            className="input"
+            className="textarea"
             rows={2}
             value={customBrandVoice}
             onChange={(e) => setCustomBrandVoice(e.target.value)}
@@ -227,8 +216,7 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
           type="button"
           onClick={handleGenerate}
           disabled={isPending}
-          className="btn btn-primary"
-          style={{ width: "100%", justifyContent: "center" }}
+          className="btn btn-primary w-full"
         >
           {isPending ? "Generating Content…" : "Generate Content"}
         </button>
@@ -236,8 +224,8 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
 
       {/* Right Column: Output Previews & 1-Click Copy */}
       <div className="card stack">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #E2E8F0", paddingBottom: 10 }}>
-          <h2 style={{ fontSize: 16, margin: 0 }}>Generated Marketing Copy</h2>
+        <div className="flex-between items-center border-bottom pb-sm mb-md">
+          <h2 className="text-base font-bold m-0">Generated Marketing Copy</h2>
           <span className="pill info">Content Generator</span>
         </div>
 
@@ -245,10 +233,10 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
         {tab === "social" && (
           <div>
             {socialResult ? (
-              <div className="stack" style={{ gap: 14 }}>
+              <div className="stack gap-md">
                 <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#475569" }}>Bengali Facebook Caption</span>
+                  <div className="flex-between items-center mb-xs">
+                    <span className="text-xs font-bold text-ink-3">Bengali Facebook Caption</span>
                     <button
                       type="button"
                       className="btn btn-secondary btn-sm"
@@ -257,25 +245,14 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
                       {copiedField === "soc_bn" ? "✓ Copied" : "Copy"}
                     </button>
                   </div>
-                  <pre
-                    style={{
-                      background: "#F8FAFC",
-                      border: "1px solid #E2E8F0",
-                      padding: "12px",
-                      borderRadius: 8,
-                      fontSize: 13.5,
-                      whiteSpace: "pre-wrap",
-                      fontFamily: "inherit",
-                      lineHeight: 1.5,
-                    }}
-                  >
+                  <pre className="p-md rounded-md border bg-subtle text-sm whitespace-pre-wrap font-sans leading-relaxed">
                     {socialResult.captionBn}
                   </pre>
                 </div>
 
                 <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#475569" }}>English Version</span>
+                  <div className="flex-between items-center mb-xs">
+                    <span className="text-xs font-bold text-ink-3">English Version</span>
                     <button
                       type="button"
                       className="btn btn-secondary btn-sm"
@@ -284,28 +261,18 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
                       {copiedField === "soc_en" ? "✓ Copied" : "Copy"}
                     </button>
                   </div>
-                  <pre
-                    style={{
-                      background: "#F8FAFC",
-                      border: "1px solid #E2E8F0",
-                      padding: "12px",
-                      borderRadius: 8,
-                      fontSize: 13,
-                      whiteSpace: "pre-wrap",
-                      fontFamily: "inherit",
-                    }}
-                  >
+                  <pre className="p-md rounded-md border bg-subtle text-sm whitespace-pre-wrap font-sans">
                     {socialResult.captionEn}
                   </pre>
                 </div>
 
                 <div>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#475569", display: "block", marginBottom: 6 }}>
+                  <span className="text-xs font-bold text-ink-3 block mb-xs">
                     Suggested Hashtags
                   </span>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  <div className="row gap-xs flex-wrap">
                     {socialResult.hashtags.map((h, i) => (
-                      <span key={i} className="pill ok" style={{ cursor: "pointer" }} onClick={() => handleCopy(h, `h_${i}`)}>
+                      <span key={i} className="pill ok pointer" onClick={() => handleCopy(h, `h_${i}`)}>
                         {h} {copiedField === `h_${i}` ? "✓" : ""}
                       </span>
                     ))}
@@ -313,7 +280,7 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
                 </div>
               </div>
             ) : (
-              <div className="card empty" style={{ border: "none" }}>
+              <div className="card empty border-none">
                 Select a product or topic on the left and click <strong>Generate Content</strong>.
               </div>
             )}
@@ -324,17 +291,17 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
         {tab === "whatsapp" && (
           <div>
             {whatsAppResult ? (
-              <div className="stack" style={{ gap: 14 }}>
+              <div className="stack gap-md">
                 {whatsAppResult.headline && (
-                  <div style={{ padding: "8px 12px", background: "#FEF9C3", borderRadius: 8, fontSize: 13, border: "1px solid #FEF08A", fontWeight: 700, color: "#854D0E" }}>
+                  <div className="p-sm rounded-md text-sm border font-bold bg-warning-subtle text-warning">
                     {whatsAppResult.headline}
                   </div>
                 )}
 
                 <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#15803D" }}>Bengali WhatsApp Broadcast</span>
-                    <div style={{ display: "flex", gap: 6 }}>
+                  <div className="flex-between items-center mb-xs">
+                    <span className="text-xs font-bold text-success">Bengali WhatsApp Broadcast</span>
+                    <div className="row gap-xs">
                       <button
                         type="button"
                         className="btn btn-secondary btn-sm"
@@ -346,33 +313,20 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
                         href={`https://wa.me/?text=${encodeURIComponent(whatsAppResult.messageBn)}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="btn btn-secondary btn-sm"
-                        style={{ color: "#15803D", borderColor: "#86EFAC" }}
+                        className="btn btn-secondary btn-sm text-success"
                       >
-                        💬 Web Share
+                        Web Share
                       </a>
                     </div>
                   </div>
-                  <pre
-                    style={{
-                      background: "#DCF8C6",
-                      border: "1px solid #BBF7D0",
-                      padding: "12px",
-                      borderRadius: "8px",
-                      fontSize: "13px",
-                      whiteSpace: "pre-wrap",
-                      fontFamily: "inherit",
-                      lineHeight: "1.5",
-                      color: "#064E3B",
-                    }}
-                  >
+                  <pre className="p-md rounded-md border text-sm whitespace-pre-wrap font-sans leading-relaxed bg-success-subtle text-success">
                     {whatsAppResult.messageBn}
                   </pre>
                 </div>
 
                 <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#475569" }}>English WhatsApp Version</span>
+                  <div className="flex-between items-center mb-xs">
+                    <span className="text-xs font-bold text-ink-3">English WhatsApp Version</span>
                     <button
                       type="button"
                       className="btn btn-secondary btn-sm"
@@ -381,30 +335,19 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
                       {copiedField === "wa_en" ? "✓ Copied" : "Copy"}
                     </button>
                   </div>
-                  <pre
-                    style={{
-                      background: "#F8FAFC",
-                      border: "1px solid #E2E8F0",
-                      padding: "12px",
-                      borderRadius: "8px",
-                      fontSize: "13px",
-                      whiteSpace: "pre-wrap",
-                      fontFamily: "inherit",
-                      lineHeight: "1.5",
-                    }}
-                  >
+                  <pre className="p-md rounded-md border bg-subtle text-sm whitespace-pre-wrap font-sans leading-relaxed">
                     {whatsAppResult.messageEn}
                   </pre>
                 </div>
 
                 {whatsAppResult.quickReplySuggestions?.length > 0 && (
                   <div>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#475569", display: "block", marginBottom: 6 }}>
+                    <span className="text-xs font-bold text-ink-3 block mb-xs">
                       Suggested Quick Replies
                     </span>
-                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    <div className="row gap-xs flex-wrap">
                       {whatsAppResult.quickReplySuggestions.map((qr, i) => (
-                        <span key={i} className="pill ok" style={{ cursor: "pointer" }} onClick={() => handleCopy(qr, `qr_${i}`)}>
+                        <span key={i} className="pill ok pointer" onClick={() => handleCopy(qr, `qr_${i}`)}>
                           {qr} {copiedField === `qr_${i}` ? "✓" : ""}
                         </span>
                       ))}
@@ -413,7 +356,7 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
                 )}
               </div>
             ) : (
-              <div className="card empty" style={{ border: "none" }}>
+              <div className="card empty border-none">
                 Select a product or topic on the left and click <strong>Generate Content</strong> to create ready-to-broadcast WhatsApp scripts.
               </div>
             )}
@@ -424,10 +367,10 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
         {tab === "sms" && (
           <div>
             {smsResult ? (
-              <div className="stack" style={{ gap: 14 }}>
+              <div className="stack gap-md">
                 <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#475569" }}>
+                  <div className="flex-between items-center mb-xs">
+                    <span className="text-xs font-bold text-ink-3">
                       English Single-Part SMS ({smsResult.englishSms.length}/160 chars)
                     </span>
                     <button
@@ -438,17 +381,17 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
                       {copiedField === "sms_en" ? "✓ Copied" : "Copy"}
                     </button>
                   </div>
-                  <div style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", padding: "12px", borderRadius: 8, fontSize: 13.5 }}>
+                  <div className="p-md rounded-md border text-sm bg-success-subtle">
                     {smsResult.englishSms}
                   </div>
-                  <div style={{ fontSize: 11.5, color: "#166534", marginTop: 4 }}>
+                  <div className="text-xs text-success mt-xs">
                     ✓ 1 SMS Part (Standard GSM-7 rate: lowest cost)
                   </div>
                 </div>
 
                 <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#475569" }}>
+                  <div className="flex-between items-center mb-xs">
+                    <span className="text-xs font-bold text-ink-3">
                       Bangla Unicode SMS ({smsResult.banglaSms.length}/70 chars)
                     </span>
                     <button
@@ -459,43 +402,42 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
                       {copiedField === "sms_bn" ? "✓ Copied" : "Copy"}
                     </button>
                   </div>
-                  <div style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", padding: "12px", borderRadius: 8, fontSize: 13.5 }}>
+                  <div className="p-md rounded-md border text-sm bg-subtle">
                     {smsResult.banglaSms}
                   </div>
-                  <div style={{ fontSize: 11.5, color: "#475569", marginTop: 4 }}>
+                  <div className="text-xs text-ink-3 mt-xs">
                     ✓ 1 SMS Part (Unicode single part)
                   </div>
                 </div>
 
-                <div style={{ marginTop: 12 }}>
+                <div className="mt-md">
                   <Link
                     href={`/marketing/campaigns?draftBody=${encodeURIComponent(smsResult.englishSms)}`}
-                    className="btn btn-primary btn-sm"
-                    style={{ width: "100%", justifyContent: "center" }}
+                    className="btn btn-primary btn-sm w-full"
                   >
                     Use in Broadcast Campaign →
                   </Link>
                 </div>
               </div>
             ) : (
-              <div className="card empty" style={{ border: "none" }}>
+              <div className="card empty border-none">
                 Generate high-converting single-message SMS campaigns tailored for Bangladeshi telecommunications.
               </div>
             )}
           </div>
         )}
 
-        {/* Tab 3: Banner Slogans */}
+        {/* Tab 4: Banner Slogans */}
         {tab === "banner" && (
           <div>
             {bannerResult ? (
-              <div className="stack" style={{ gap: 14 }}>
+              <div className="stack gap-md">
                 <div>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#475569", display: "block", marginBottom: 4 }}>
+                  <span className="text-xs font-bold text-ink-3 block mb-xs">
                     Bengali Banner Headline
                   </span>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#F8FAFC", padding: "10px 14px", borderRadius: 8, border: "1px solid #E2E8F0" }}>
-                    <strong style={{ fontSize: 15 }}>{bannerResult.headlineBn}</strong>
+                  <div className="flex-between items-center p-md rounded-md border bg-subtle">
+                    <strong className="text-base">{bannerResult.headlineBn}</strong>
                     <button
                       type="button"
                       className="btn btn-secondary btn-sm"
@@ -507,11 +449,11 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
                 </div>
 
                 <div>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#475569", display: "block", marginBottom: 4 }}>
+                  <span className="text-xs font-bold text-ink-3 block mb-xs">
                     Bengali Sub-Headline
                   </span>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#F8FAFC", padding: "10px 14px", borderRadius: 8, border: "1px solid #E2E8F0" }}>
-                    <span style={{ fontSize: 13.5 }}>{bannerResult.subheadlineBn}</span>
+                  <div className="flex-between items-center p-md rounded-md border bg-subtle">
+                    <span className="text-sm">{bannerResult.subheadlineBn}</span>
                     <button
                       type="button"
                       className="btn btn-secondary btn-sm"
@@ -522,18 +464,17 @@ export function AiStudioClient({ products }: { products: ProductOption[] }) {
                   </div>
                 </div>
 
-                <div style={{ marginTop: 12 }}>
+                <div className="mt-md">
                   <Link
                     href={`/marketing/banner?headline=${encodeURIComponent(bannerResult.headlineBn)}`}
-                    className="btn btn-primary btn-sm"
-                    style={{ width: "100%", justifyContent: "center" }}
+                    className="btn btn-primary btn-sm w-full"
                   >
                     Apply to Storefront Announcement Banner →
                   </Link>
                 </div>
               </div>
             ) : (
-              <div className="card empty" style={{ border: "none" }}>
+              <div className="card empty border-none">
                 Generate attention-grabbing promotional slogans for your store hero banners and top bars.
               </div>
             )}

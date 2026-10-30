@@ -55,38 +55,21 @@ export default async function MarketingNotificationsPage() {
       />
 
       {/* SMS Credits Status Card */}
-      <div
-        className="card"
-        style={{
-          padding: "16px 20px",
-          marginBottom: 24,
-          background: "linear-gradient(135deg, rgba(37,99,235,0.04) 0%, rgba(79,70,229,0.06) 100%)",
-          border: "1px solid rgba(37,99,235,0.15)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 12,
-            marginBottom: 10,
-          }}
-        >
+      <div className="card p-md mb-lg bg-subtle border">
+        <div className="flex-between items-center flex-wrap gap-md mb-sm">
           <div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: "#1d4ed8", textTransform: "uppercase" }}>
+            <div className="text-xs font-bold text-primary uppercase">
               Monthly SMS Balance
             </div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: "#0f172a" }}>
+            <div className="text-xl font-bold text-ink">
               {smsCredits.limit == null
                 ? `${smsCredits.used} SMS sent (Unlimited Tier)`
                 : `${smsCredits.used.toLocaleString()} / ${smsCredits.limit.toLocaleString()} credits used`}
             </div>
           </div>
           {smsCredits.limit != null && (
-            <div style={{ textAlign: "right" }}>
-              <span className={`pill ${percentUsed > 85 ? "orange" : "green"}`}>
+            <div className="text-right">
+              <span className={`pill ${percentUsed > 85 ? "warn" : "ok"}`}>
                 {Math.max(0, smsCredits.limit - smsCredits.used).toLocaleString()} credits remaining
               </span>
             </div>
@@ -94,44 +77,31 @@ export default async function MarketingNotificationsPage() {
         </div>
 
         {smsCredits.limit != null && (
-          <div
-            style={{
-              width: "100%",
-              height: 6,
-              background: "#e2e8f0",
-              borderRadius: 3,
-              overflow: "hidden",
-            }}
-          >
+          <div className="meter-track">
             <div
-              style={{
-                width: `${percentUsed}%`,
-                height: "100%",
-                background: percentUsed > 85 ? "#f59e0b" : "#2563eb",
-                borderRadius: 3,
-                transition: "width 0.3s ease",
-              }}
+              className={`meter-fill ${percentUsed > 85 ? "bg-warning" : "bg-primary"}`}
+              style={{ width: `${percentUsed}%` }}
             />
           </div>
         )}
       </div>
 
       {!canEdit && (
-        <div className="notice" style={{ marginBottom: 16 }}>
+        <div className="notice mb-md">
           You have view-only access to automated notification templates.
         </div>
       )}
 
       {/* Order Progression Alerts */}
-      <div style={{ marginBottom: 28 }}>
-        <h2 style={{ fontSize: 17, fontWeight: 700, marginBottom: 6 }}>
+      <div className="mb-lg">
+        <h2 className="text-base font-bold mb-xs">
           Order Lifecycle Alerts
         </h2>
-        <p className="muted" style={{ fontSize: 13.5, margin: "0 0 14px" }}>
+        <p className="muted text-sm m-0 mb-md">
           Sent instantly to customer phones when their order status changes in BizTrack.
         </p>
 
-        <div className="stack" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <div className="stack gap-md">
           {orderMessages.map((t) => (
             <NotificationCard
               key={t.event}
@@ -144,15 +114,15 @@ export default async function MarketingNotificationsPage() {
       </div>
 
       {/* Abandoned Cart Recovery Alerts */}
-      <div style={{ marginBottom: 28 }}>
-        <h2 style={{ fontSize: 17, fontWeight: 700, marginBottom: 6 }}>
+      <div className="mb-lg">
+        <h2 className="text-base font-bold mb-xs">
           Abandoned Checkout Recovery
         </h2>
-        <p className="muted" style={{ fontSize: 13.5, margin: "0 0 14px" }}>
+        <p className="muted text-sm m-0 mb-md">
           Sent when a prospective shopper abandons their cart with an auto-generated 1-click recovery link.
         </p>
 
-        <div className="stack" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <div className="stack gap-md">
           {recoveryMessages.map((t) => (
             <NotificationCard
               key={t.event}

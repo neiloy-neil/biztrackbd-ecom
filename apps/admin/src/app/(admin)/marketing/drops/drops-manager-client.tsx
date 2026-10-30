@@ -55,7 +55,7 @@ interface Props {
   storeDomain?: string;
 }
 
-export function DropsManagerClient({ initialDrops, availableProducts, storeDomain }: Props) {
+export function DropsManagerClient({ initialDrops, availableProducts }: Props) {
   const [drops, setDrops] = useState<DropRow[]>(initialDrops);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingDrop, setEditingDrop] = useState<DropRow | null>(null);
@@ -252,50 +252,50 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
     <div>
       {/* Top Banner Notice */}
       {success && (
-        <div className="notice good" style={{ marginBottom: 16 }}>
+        <div className="notice good mb-md flex-between items-center">
           <span>{success}</span>
-          <button type="button" onClick={() => setSuccess(null)} style={{ float: "right", background: "none", border: "none", cursor: "pointer" }}>✕</button>
+          <button type="button" onClick={() => setSuccess(null)} className="btn-close-sm">✕</button>
         </div>
       )}
 
       {/* KPI Metric Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 14, marginBottom: 20 }}>
-        <div className="card" style={{ padding: "16px 20px" }}>
-          <div className="muted" style={{ fontSize: 13, fontWeight: 600 }}>Active Drops</div>
-          <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4 }}>{liveCount}</div>
-          <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>{drops.length} total scheduled / ended</div>
+      <div className="grid grid-4 mb-md">
+        <div className="stat">
+          <div className="k">Active Drops</div>
+          <div className="v num">{liveCount}</div>
+          <div className="muted text-xs mt-xs">{drops.length} total scheduled / ended</div>
         </div>
 
-        <div className="card" style={{ padding: "16px 20px" }}>
-          <div className="muted" style={{ fontSize: 13, fontWeight: 600 }}>Waitlist Subscribers</div>
-          <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, color: "#2563EB" }}>{totalSubscribers}</div>
-          <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>Interested prospective buyers</div>
+        <div className="stat">
+          <div className="k">Waitlist Subscribers</div>
+          <div className="v num text-primary">{totalSubscribers}</div>
+          <div className="muted text-xs mt-xs">Interested prospective buyers</div>
         </div>
 
-        <div className="card" style={{ padding: "16px 20px" }}>
-          <div className="muted" style={{ fontSize: 13, fontWeight: 600 }}>Units Claimed</div>
-          <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, color: "#059669" }}>{totalClaimed}</div>
-          <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>Pre-orders placed across drops</div>
+        <div className="stat">
+          <div className="k">Units Claimed</div>
+          <div className="v num text-success">{totalClaimed}</div>
+          <div className="muted text-xs mt-xs">Pre-orders placed across drops</div>
         </div>
 
-        <div className="card" style={{ padding: "16px 20px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <button type="button" onClick={openCreateModal} className="btn btn-primary" style={{ width: "100%", fontWeight: 600 }}>
+        <div className="card p-md flex-col-center">
+          <button type="button" onClick={openCreateModal} className="btn btn-primary w-full">
             + Create Limited Drop
           </button>
         </div>
       </div>
 
       {/* Drops Table / List */}
-      <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-        <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Drop Campaigns ({drops.length})</h2>
-          <span className="muted" style={{ fontSize: 13 }}>Timed countdowns, pre-orders & deposit safeguards</span>
+      <div className="card p-0 overflow-hidden">
+        <div className="p-md border-bottom flex-between items-center">
+          <h2 className="text-base font-bold m-0">Drop Campaigns ({drops.length})</h2>
+          <span className="muted text-sm">Timed countdowns, pre-orders &amp; deposit safeguards</span>
         </div>
 
         {drops.length === 0 ? (
-          <div style={{ padding: "48px 24px", textAlign: "center", color: "var(--ink-2)" }}>
-            <div style={{ fontSize: 16, fontWeight: 600 }}>No limited drops created yet.</div>
-            <p className="muted" style={{ fontSize: 13.5, maxWidth: 440, margin: "6px auto 16px" }}>
+          <div className="empty p-xl text-center">
+            <div className="text-base font-semibold">No limited drops created yet.</div>
+            <p className="muted text-sm max-w-460 m-auto mt-xs mb-md">
               Launch limited-edition products with teaser countdown clocks, buyer waitlists, and advance deposit pre-orders.
             </p>
             <button type="button" onClick={openCreateModal} className="btn btn-primary btn-sm">
@@ -303,17 +303,17 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
             </button>
           </div>
         ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table className="table" style={{ width: "100%", margin: 0 }}>
+          <div className="table-wrap">
+            <table className="table m-0">
               <thead>
                 <tr>
-                  <th>Drop Title & Link</th>
+                  <th>Drop Title &amp; Link</th>
                   <th>Mode</th>
                   <th>Status</th>
                   <th>Timeline</th>
                   <th>Deposit Terms</th>
-                  <th>Allocation & Claimed</th>
-                  <th style={{ textAlign: "right" }}>Actions</th>
+                  <th>Allocation &amp; Claimed</th>
+                  <th className="r">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -332,94 +332,76 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
                   return (
                     <tr key={drop.id}>
                       <td>
-                        <div style={{ fontWeight: 600, fontSize: 14 }}>{drop.title}</div>
-                        <div style={{ fontSize: 12, marginTop: 2 }}>
+                        <div className="font-semibold">{drop.title}</div>
+                        <div className="text-xs mt-xs">
                           <span className="muted">Slug: </span>
                           <a
                             href={`/drops/${drop.slug}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="link"
-                            style={{ fontSize: 12 }}
+                            className="link text-xs"
                           >
                             /drops/{drop.slug} ↗
                           </a>
                         </div>
-                        <div className="muted" style={{ fontSize: 11.5, marginTop: 2 }}>
+                        <div className="muted text-xs mt-xs">
                           {drop.products.length} {drop.products.length === 1 ? "Product" : "Products"} attached
                         </div>
                       </td>
 
                       <td>
-                        <span
-                          className="pill"
-                          style={{
-                            background: drop.mode === "LIVE_PREORDER" ? "rgba(16, 185, 129, 0.1)" : "rgba(59, 130, 246, 0.1)",
-                            color: drop.mode === "LIVE_PREORDER" ? "#059669" : "#2563EB",
-                            fontSize: 11.5,
-                          }}
-                        >
+                        <span className={`pill ${drop.mode === "LIVE_PREORDER" ? "ok" : "info"}`}>
                           {drop.mode === "LIVE_PREORDER" ? "Live Pre-Order" : "Teaser Waitlist"}
                         </span>
                       </td>
 
                       <td>
-                        <span
-                          className="pill"
-                          style={{
-                            background: isLive
-                              ? "rgba(16, 185, 129, 0.15)"
-                              : isScheduled
-                              ? "rgba(245, 158, 11, 0.15)"
-                              : "rgba(156, 163, 175, 0.15)",
-                            color: isLive ? "#047857" : isScheduled ? "#B45309" : "#4B5563",
-                            fontSize: 11.5,
-                            fontWeight: 700,
-                          }}
-                        >
+                        <span className={`pill ${isLive ? "ok" : isScheduled ? "warn" : isEnded ? "grey" : "info"}`}>
                           {isLive ? "LIVE NOW" : isScheduled ? "SCHEDULED" : isEnded ? "ENDED" : drop.status}
                         </span>
                       </td>
 
-                      <td style={{ fontSize: 12.5 }}>
+                      <td className="text-sm">
                         <div><b>Starts:</b> {new Date(drop.startsAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</div>
                         {drop.endsAt && (
-                          <div className="muted" style={{ marginTop: 2 }}>
+                          <div className="muted mt-xs">
                             <b>Ends:</b> {new Date(drop.endsAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
                           </div>
                         )}
                         {drop.estimatedShipDate && (
-                          <div style={{ color: "#059669", marginTop: 2 }}>
+                          <div className="text-success mt-xs">
                             <b>Dispatches:</b> ~{new Date(drop.estimatedShipDate).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
                           </div>
                         )}
                       </td>
 
                       <td>
-                        <span className="pill grey" style={{ fontSize: 12, fontWeight: 600 }}>
+                        <span className="pill grey text-xs font-semibold">
                           {depositLabel}
                         </span>
                       </td>
 
-                      <td style={{ minWidth: 150 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
+                      <td className="min-w-160">
+                        <div className="flex-between text-xs mb-xs">
                           <span>Claimed: <b>{drop.claimedUnits}</b></span>
                           {drop.allocationCap && <span>Cap: {drop.allocationCap}</span>}
                         </div>
                         {capPct !== null && (
-                          <div className="meter" style={{ height: 6, background: "var(--line)" }}>
-                            <i style={{ width: `${capPct}%`, background: capPct >= 90 ? "#DC2626" : "#059669" }} />
+                          <div className="meter-track">
+                            <div
+                              className={`meter-fill ${capPct >= 90 ? "bg-error" : "bg-success"}`}
+                              style={{ width: `${capPct}%` }}
+                            />
                           </div>
                         )}
                       </td>
 
-                      <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-                        <div style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
+                      <td className="r nowrap">
+                        <div className="row gap-xs items-center justify-end">
                           <button
                             type="button"
                             onClick={() => handleOpenWaitlist(drop)}
                             className="btn btn-secondary btn-sm"
-                            style={{ fontSize: 12 }}
                             title="View waitlist subscribers"
                           >
                             Waitlist ({drop.subscriberCount})
@@ -429,9 +411,8 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
                             <button
                               type="button"
                               onClick={() => handleMarkStockReceived(drop)}
-                  disabled={busy}
+                              disabled={busy}
                               className="btn btn-primary btn-sm"
-                              style={{ fontSize: 12, background: "#059669", borderColor: "#059669" }}
                               title="Mark inventory arrived and release pre-order fulfillment holds"
                             >
                               Stock Arrived
@@ -442,7 +423,6 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
                             type="button"
                             onClick={() => openEditModal(drop)}
                             className="btn btn-secondary btn-sm"
-                            style={{ fontSize: 12 }}
                           >
                             Edit
                           </button>
@@ -450,9 +430,8 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
                           <button
                             type="button"
                             onClick={() => handleDeleteDrop(drop.id)}
-                  disabled={busy}
-                            className="btn btn-secondary btn-sm"
-                            style={{ fontSize: 12, color: "var(--danger)" }}
+                            disabled={busy}
+                            className="btn btn-secondary btn-sm text-error"
                           >
                             ✕
                           </button>
@@ -473,50 +452,31 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
           role="dialog"
           aria-modal="true"
           className="modal-backdrop"
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(15, 23, 42, 0.55)",
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 16,
-            backdropFilter: "blur(4px)",
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setModalOpen(false);
           }}
         >
-          <div
-            className="card"
-            style={{
-              width: "100%",
-              maxWidth: 620,
-              maxHeight: "90vh",
-              overflowY: "auto",
-              boxShadow: "0 20px 25px -5px rgba(0,0,0,0.2)",
-              padding: 24,
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
+          <div className="card modal-card max-w-640">
+            <div className="modal-head">
+              <h3 className="m-0 text-base font-bold">
                 {editingDrop ? "Edit Drop Campaign" : "New Limited Drop / Pre-Order"}
               </h3>
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="btn btn-secondary btn-sm"
-                style={{ padding: "2px 8px" }}
+                className="btn btn-secondary btn-sm btn-close-sm"
               >
                 ✕
               </button>
             </div>
 
             {error && (
-              <div className="notice bad" style={{ marginBottom: 14 }}>
+              <div className="notice bad mb-md">
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleSaveDrop} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <form onSubmit={handleSaveDrop} className="stack gap-md">
               <div>
                 <label className="label">Drop Title *</label>
                 <input
@@ -529,12 +489,12 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
                 />
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div className="grid grid-2 gap-md">
                 <div>
                   <label className="label">Custom URL Slug (optional)</label>
                   <input
                     type="text"
-                    className="input"
+                    className="input font-mono"
                     value={slug}
                     onChange={(e) => setSlug(e.target.value)}
                     placeholder="e.g. eid-silk-drop"
@@ -557,7 +517,7 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
               <div>
                 <label className="label">Description / Campaign Notes</label>
                 <textarea
-                  className="input"
+                  className="textarea"
                   rows={2}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -568,14 +528,14 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
               {/* Products Selector */}
               <div>
                 <label className="label">Select Products for this Drop *</label>
-                <div style={{ maxHeight: 130, overflowY: "auto", border: "1px solid var(--line)", borderRadius: 6, padding: 8 }}>
+                <div className="table-scroll-280 border rounded-md p-sm bg-subtle">
                   {availableProducts.length === 0 ? (
-                    <div className="muted" style={{ fontSize: 13 }}>No products available in catalog.</div>
+                    <div className="muted text-sm">No products available in catalog.</div>
                   ) : (
                     availableProducts.map((p) => {
                       const checked = selectedProductIds.includes(p.id);
                       return (
-                        <label key={p.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0", fontSize: 13, cursor: "pointer" }}>
+                        <label key={p.id} className="row items-center gap-sm p-xs text-sm pointer">
                           <input
                             type="checkbox"
                             checked={checked}
@@ -593,9 +553,9 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
               </div>
 
               {/* Timing */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div className="grid grid-2 gap-md">
                 <div>
-                  <label className="label">Drop Start Date & Time *</label>
+                  <label className="label">Drop Start Date &amp; Time *</label>
                   <input
                     type="datetime-local"
                     className="input"
@@ -616,7 +576,7 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
                 </div>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div className="grid grid-2 gap-md">
                 <div>
                   <label className="label">Estimated Dispatch Date</label>
                   <input
@@ -625,7 +585,7 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
                     value={estimatedShipDate}
                     onChange={(e) => setEstimatedShipDate(e.target.value)}
                   />
-                  <div className="muted" style={{ fontSize: 11.5, marginTop: 2 }}>Displayed on product page and checkout</div>
+                  <div className="muted text-xs mt-xs">Displayed on product page and checkout</div>
                 </div>
 
                 <div>
@@ -642,9 +602,9 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
               </div>
 
               {/* Deposit Terms */}
-              <div style={{ padding: 12, background: "var(--bg-subtle, #F8FAFC)", borderRadius: 8, border: "1px solid var(--line)" }}>
-                <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 8 }}>Advance Deposit Safeguard</div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div className="p-md bg-subtle rounded-md border">
+                <div className="font-semibold text-sm mb-sm">Advance Deposit Safeguard</div>
+                <div className="grid grid-2 gap-md">
                   <div>
                     <label className="label">Deposit Requirement</label>
                     <select
@@ -673,7 +633,7 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
                     </div>
                   )}
                 </div>
-                <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+                <div className="muted text-xs mt-xs">
                   {depositType === "FIXED"
                     ? `Customers pay ৳${depositValue} online via bKash/Nagad at checkout; the remaining balance is collected via COD upon delivery.`
                     : depositType === "PERCENTAGE"
@@ -684,7 +644,7 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
                 </div>
               </div>
 
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 10 }}>
+              <div className="row justify-end gap-sm mt-sm">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
@@ -712,60 +672,41 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
           role="dialog"
           aria-modal="true"
           className="modal-backdrop"
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(15, 23, 42, 0.55)",
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 16,
-            backdropFilter: "blur(4px)",
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setWaitlistOpen(false);
           }}
         >
-          <div
-            className="card"
-            style={{
-              width: "100%",
-              maxWidth: 580,
-              maxHeight: "85vh",
-              overflowY: "auto",
-              boxShadow: "0 20px 25px -5px rgba(0,0,0,0.2)",
-              padding: 24,
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+          <div className="card modal-card max-w-640">
+            <div className="modal-head">
               <div>
-                <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>
+                <h3 className="m-0 text-base font-bold">
                   Waitlist Subscribers
                 </h3>
-                <div className="muted" style={{ fontSize: 13, marginTop: 2 }}>
+                <div className="muted text-sm mt-xs">
                   {activeWaitlistDrop.title} ({waitlistSubscribers.length} total)
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setWaitlistOpen(false)}
-                className="btn btn-secondary btn-sm"
-                style={{ padding: "2px 8px" }}
+                className="btn btn-secondary btn-sm btn-close-sm"
               >
                 ✕
               </button>
             </div>
 
             {waitlistLoading ? (
-              <div style={{ padding: "30px 0", textAlign: "center" }} className="muted">
+              <div className="p-xl text-center muted">
                 Loading waitlist subscribers…
               </div>
             ) : waitlistSubscribers.length === 0 ? (
-              <div style={{ padding: "30px 0", textAlign: "center" }} className="muted">
+              <div className="p-xl text-center muted">
                 No waitlist subscribers recorded yet for this drop.
               </div>
             ) : (
               <div>
-                <div style={{ maxHeight: 280, overflowY: "auto", border: "1px solid var(--line)", borderRadius: 6, marginBottom: 16 }}>
-                  <table className="table" style={{ width: "100%", margin: 0, fontSize: 12.5 }}>
+                <div className="table-scroll-280 border rounded-md mb-md">
+                  <table className="table m-0 text-sm">
                     <thead>
                       <tr>
                         <th>Mobile Number</th>
@@ -777,14 +718,14 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
                     <tbody>
                       {waitlistSubscribers.map((s) => (
                         <tr key={s.id}>
-                          <td style={{ fontWeight: 600 }}>{s.phone}</td>
+                          <td className="font-semibold">{s.phone}</td>
                           <td>{s.name || "—"}</td>
                           <td className="muted">{new Date(s.createdAt).toLocaleDateString("en-GB")}</td>
                           <td>
                             {s.notifiedAt ? (
-                              <span className="pill green" style={{ fontSize: 11 }}>Notified</span>
+                              <span className="pill ok text-xs">Notified</span>
                             ) : (
-                              <span className="pill grey" style={{ fontSize: 11 }}>Pending</span>
+                              <span className="pill grey text-xs">Pending</span>
                             )}
                           </td>
                         </tr>
@@ -793,8 +734,8 @@ export function DropsManagerClient({ initialDrops, availableProducts, storeDomai
                   </table>
                 </div>
 
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span className="muted" style={{ fontSize: 12 }}>
+                <div className="flex-between items-center">
+                  <span className="muted text-xs">
                     Alert sends direct SMS and WhatsApp links to launch.
                   </span>
                   <button
