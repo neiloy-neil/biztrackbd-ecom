@@ -302,3 +302,34 @@ div.tabs[role="tablist"] { display: flex; border-bottom: 1px solid var(--line); 
 .frame-wrap iframe { width: 100%; height: 70vh; min-height: 480px; border: 0; display: block; }
 .crop-dialog { border: 1px solid var(--line); border-radius: 14px; padding: 18px; width: min(460px, calc(100vw - 24px)); }
 .crop-dialog::backdrop { background: rgba(0, 0, 0, .45); }
+
+/* ---- Dashboard Specific Refinements ---- */
+.dash-quick-strip { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 12px 16px; margin-bottom: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg, 14px); box-shadow: var(--shadow-card); }
+.dash-quick-strip-label { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.05em; }
+.dash-quick-strip-label .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand); flex-shrink: 0; }
+.dash-quick-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+.funnel-card { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: var(--radius, 10px); background: var(--bg); border: 1px solid var(--line); text-decoration: none; transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; }
+.funnel-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); border-color: var(--line-2); }
+.funnel-card.unverified { background: var(--warning-bg); border-color: color-mix(in srgb, var(--warning) 30%, transparent); }
+.funnel-card.unverified .funnel-step-label { color: var(--warning); }
+.funnel-card.topack { background: var(--info-bg); border-color: color-mix(in srgb, var(--info) 30%, transparent); }
+.funnel-card.topack .funnel-step-label { color: var(--info); }
+.funnel-card.intransit { background: var(--tint); border-color: color-mix(in srgb, var(--brand) 30%, transparent); }
+.funnel-card.intransit .funnel-step-label { color: var(--brand); }
+.funnel-card.delivered { background: var(--success-bg); border-color: color-mix(in srgb, var(--success) 30%, transparent); }
+.funnel-card.delivered .funnel-step-label { color: var(--success); }
+.funnel-card.returns { background: var(--danger-bg); border-color: color-mix(in srgb, var(--danger) 30%, transparent); }
+.funnel-card.returns .funnel-step-label { color: var(--danger-ink, var(--danger)); }
+
+.funnel-card-header { display: flex; justify-content: space-between; align-items: center; }
+.funnel-step-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.funnel-count { font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.funnel-sub { font-size: 11.5px; color: var(--ink-3); }
+.funnel-amt { font-size: 12.5px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink-2); margin-top: 2px; }
+
+.ledger-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 10px; }
+.ledger-stat-card { padding: 12px 14px; background: var(--bg); border-radius: var(--radius, 10px); border: 1px solid var(--line); }
+.ledger-stat-card .lbl { font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--ink-3); letter-spacing: 0.03em; }
+.ledger-stat-card .amt { font-size: 17px; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.ledger-stat-card .desc { font-size: 11.5px; color: var(--ink-3); margin-top: 2px; }

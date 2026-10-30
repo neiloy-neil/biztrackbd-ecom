@@ -163,12 +163,12 @@ export function PortfolioCommandCenter({
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: "1.1rem" }}>🚀</span>
+            <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: percentComplete === 100 ? "var(--success)" : "var(--brand)" }} />
             <span style={{ fontWeight: 700, fontSize: "0.95rem", color: "var(--ink, #0f172a)" }}>
               Activation Checklist ({completedCount} of {checklistItems.length} Complete)
             </span>
           </div>
-          <span style={{ fontWeight: 800, fontSize: "0.9rem", color: percentComplete === 100 ? "#16a34a" : "#4f46e5" }}>
+          <span style={{ fontWeight: 800, fontSize: "0.9rem", color: percentComplete === 100 ? "var(--success)" : "var(--brand)" }}>
             {percentComplete}%
           </span>
         </div>

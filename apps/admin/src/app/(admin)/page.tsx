@@ -6,6 +6,7 @@ import {
   type SetupStep,
 } from "@biztrackbd/core";
 import { withTenant } from "@biztrackbd/db";
+import { PageHeader } from "@biztrackbd/ui";
 import { BoltIcon, BoxIcon, PlusIcon, SearchIcon, TagIcon } from "@/components/icons";
 import { friendlyDate, taka } from "@/lib/format";
 import { demoTick } from "@/lib/demo";
@@ -90,23 +91,25 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   if (modeMeta.siteMode === "PORTFOLIO") {
     return (
       <>
-        <div className="page-head">
-          <div style={{ flex: 1 }}>
-            <h1 style={{ flex: "none" }}>{greeting(now)}, {s.user.name.split(" ")[0]}</h1>
-            <p className="muted" style={{ marginTop: 2 }}>
+        <PageHeader
+          title={`${greeting(now)}, ${s.user.name.split(" ")[0]}`}
+          sub={
+            <>
               {new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Dhaka", weekday: "long", day: "numeric", month: "long" }).format(now)}
               {portfolioData.unreadLeads > 0 ? ` · ${portfolioData.unreadLeads} new inquiries waiting` : ""}
-            </p>
-          </div>
-          <div className="actions">
-            <Link href="/services" className="btn btn-secondary" prefetch={false}>
-              <PlusIcon width={18} height={18} /> Add service
-            </Link>
-            <Link href="/leads" className="btn btn-primary" prefetch={false}>
-              Inquiry inbox
-            </Link>
-          </div>
-        </div>
+            </>
+          }
+          actions={
+            <>
+              <Link href="/services" className="btn btn-secondary" prefetch={false}>
+                <PlusIcon width={18} height={18} /> Add service
+              </Link>
+              <Link href="/leads" className="btn btn-primary" prefetch={false}>
+                Inquiry inbox
+              </Link>
+            </>
+          }
+        />
 
         <PortfolioCommandCenter
           siteMode={modeMeta.siteMode}
@@ -146,44 +149,50 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <div className="page-head">
-        <div style={{ flex: 1 }}>
-          <h1 style={{ flex: "none" }}>{greeting(now)}, {s.user.name.split(" ")[0]}</h1>
-          <p className="muted" style={{ marginTop: 2 }}>
+      <PageHeader
+        title={`${greeting(now)}, ${s.user.name.split(" ")[0]}`}
+        sub={
+          <>
             {today}
             {d.toPack.count > 0 ? ` · ${d.toPack.count} ${d.toPack.count === 1 ? "order needs" : "orders need"} packing` : ""}
             {d.funnel.unverified.count > 0 ? ` · ${d.funnel.unverified.count} payment checks waiting` : ""}
-          </p>
-        </div>
-        <div className="actions">
-          {can(s.user.role, "products", "edit") && (
-            <Link href="/products/new" className="btn btn-secondary" prefetch={false}>
-              <PlusIcon width={18} height={18} /> Add product
-            </Link>
-          )}
-          {can(s.user.role, "orders", "edit") && (
-            <Link href="/orders/new" className="btn btn-primary" prefetch={false}>
-              New order
-            </Link>
-          )}
-        </div>
-      </div>
+          </>
+        }
+        actions={
+          <>
+            {can(s.user.role, "products", "edit") && (
+              <Link href="/products/new" className="btn btn-secondary" prefetch={false}>
+                <PlusIcon width={18} height={18} /> Add product
+              </Link>
+            )}
+            {can(s.user.role, "orders", "edit") && (
+              <Link href="/orders/new" className="btn btn-primary" prefetch={false}>
+                New order
+              </Link>
+            )}
+          </>
+        }
+      />
 
       {modeMeta.siteMode === "HYBRID" && (
         <div className="segmented-tabs" style={{ display: "flex", gap: 8, marginBottom: 16 }}>
           <Link
             href="/?tab=store"
             className={`btn btn-sm ${hybridTab === "store" ? "btn-primary" : "btn-secondary"}`}
+            style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
             prefetch={false}
           >
-            🛍️ Store Operations & Courier Dispatch
+            <BoxIcon width={16} height={16} />
+            <span>Store Operations & Courier Dispatch</span>
           </Link>
           <Link
             href="/?tab=website"
             className={`btn btn-sm ${hybridTab === "website" ? "btn-primary" : "btn-secondary"}`}
+            style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
             prefetch={false}
           >
-            📊 Website Performance & Leads {portfolioData?.unreadLeads > 0 ? `(${portfolioData.unreadLeads})` : ""}
+            <BoltIcon width={16} height={16} />
+            <span>Website Performance & Leads {portfolioData?.unreadLeads > 0 ? `(${portfolioData.unreadLeads})` : ""}</span>
           </Link>
         </div>
       )}
@@ -215,91 +224,83 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           )}
 
       {/* Top Quick Command Strip */}
-      <div className="card" style={{ padding: "10px 14px", marginBottom: 16, background: "var(--surface)", border: "1px solid var(--line)" }} data-testid="quick-command-strip">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5, fontWeight: 700, color: "var(--ink-2)", textTransform: "uppercase", letterSpacing: "0.03em" }}>
-            <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "var(--brand)" }} />
-            <span>Power Tools</span>
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-            <Link
-              href="/pos"
-              className="btn btn-sm btn-secondary"
-              style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600 }}
-              prefetch={false}
-              data-testid="dock-pos"
-            >
-              <BoltIcon width={15} height={15} style={{ color: "var(--brand)" }} />
-              <span>POS Register</span>
-              {activeModules["pos_barcode"] && (
-                <span className="pill good" style={{ padding: "1px 6px", fontSize: 10 }}>ACTIVE</span>
-              )}
-            </Link>
-            <Link
-              href="/orders/ship"
-              className="btn btn-sm btn-secondary"
-              style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600 }}
-              prefetch={false}
-              data-testid="dock-courier"
-            >
-              <BoxIcon width={15} height={15} style={{ color: "var(--info)" }} />
-              <span>Courier Dispatch</span>
-              {d.toPack.count > 0 && (
-                <span className="pill warn" style={{ padding: "1px 6px", fontSize: 10 }}>{d.toPack.count}</span>
-              )}
-            </Link>
-            <Link
-              href="/products/barcodes"
-              className="btn btn-sm btn-secondary"
-              style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600 }}
-              prefetch={false}
-              data-testid="dock-barcodes"
-            >
-              <SearchIcon width={15} height={15} />
-              <span>Barcode Studio</span>
-            </Link>
-            <Link
-              href="/fraud?tab=check"
-              className="btn btn-sm btn-secondary"
-              style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600 }}
-              prefetch={false}
-              data-testid="dock-fraud"
-            >
-              <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: "#0284C7" }} aria-hidden="true">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
-              <span>Fraud Check</span>
-            </Link>
-            <Link
-              href="/marketing/ai"
-              className="btn btn-sm btn-secondary"
-              style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600 }}
-              prefetch={false}
-              data-testid="dock-ai"
-            >
-              <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: "#8B5CF6" }} aria-hidden="true">
-                <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
-              </svg>
-              <span>Content Studio</span>
-            </Link>
-            {can(s.user.role, "orders", "edit") && (
-              <Link
-                href="/orders/new"
-                className="btn btn-sm btn-primary"
-                style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600 }}
-                prefetch={false}
-                data-testid="dock-quick-order"
-              >
-                <PlusIcon width={15} height={15} />
-                <span>Quick Order</span>
-              </Link>
+      <div className="dash-quick-strip" data-testid="quick-command-strip">
+        <div className="dash-quick-strip-label">
+          <span className="dot" aria-hidden />
+          <span>Power Tools</span>
+        </div>
+        <div className="dash-quick-actions">
+          <Link
+            href="/pos"
+            className="btn btn-sm btn-secondary"
+            prefetch={false}
+            data-testid="dock-pos"
+          >
+            <BoltIcon width={15} height={15} style={{ color: "var(--brand)" }} />
+            <span>POS Register</span>
+            {activeModules["pos_barcode"] && (
+              <span className="pill good" style={{ padding: "1px 6px", fontSize: 10 }}>ACTIVE</span>
             )}
-          </div>
+          </Link>
+          <Link
+            href="/orders/ship"
+            className="btn btn-sm btn-secondary"
+            prefetch={false}
+            data-testid="dock-courier"
+          >
+            <BoxIcon width={15} height={15} style={{ color: "var(--info)" }} />
+            <span>Courier Dispatch</span>
+            {d.toPack.count > 0 && (
+              <span className="pill warn" style={{ padding: "1px 6px", fontSize: 10 }}>{d.toPack.count}</span>
+            )}
+          </Link>
+          <Link
+            href="/products/barcodes"
+            className="btn btn-sm btn-secondary"
+            prefetch={false}
+            data-testid="dock-barcodes"
+          >
+            <SearchIcon width={15} height={15} />
+            <span>Barcode Studio</span>
+          </Link>
+          <Link
+            href="/fraud?tab=check"
+            className="btn btn-sm btn-secondary"
+            prefetch={false}
+            data-testid="dock-fraud"
+          >
+            <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: "var(--info)" }} aria-hidden="true">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <span>Fraud Check</span>
+          </Link>
+          <Link
+            href="/marketing/ai"
+            className="btn btn-sm btn-secondary"
+            prefetch={false}
+            data-testid="dock-ai"
+          >
+            <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: "var(--brand)" }} aria-hidden="true">
+              <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
+            </svg>
+            <span>Content Studio</span>
+          </Link>
+          {can(s.user.role, "orders", "edit") && (
+            <Link
+              href="/orders/new"
+              className="btn btn-sm btn-primary"
+              prefetch={false}
+              data-testid="dock-quick-order"
+            >
+              <PlusIcon width={15} height={15} />
+              <span>Quick Order</span>
+            </Link>
+          )}
         </div>
       </div>
 
       {/* Real-time Interactive Fulfillment Funnel Ribbon */}
-      <section className="card" style={{ padding: 14, marginBottom: 16 }} aria-label="Fulfillment Pipeline Funnel" data-testid="fulfillment-funnel">
+      <section className="card" style={{ padding: 16, marginBottom: 16 }} aria-label="Fulfillment Pipeline Funnel" data-testid="fulfillment-funnel">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <h2 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>Fulfillment Pipeline</h2>
@@ -312,112 +313,72 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 8 }}>
           <Link
             href="/orders/check"
-            style={{
-              padding: "10px 12px",
-              borderRadius: "var(--radius)",
-              background: d.funnel.unverified.count > 0 ? "var(--warning-bg)" : "var(--bg)",
-              border: `1px solid ${d.funnel.unverified.count > 0 ? "var(--warning)" : "var(--line)"}`,
-              display: "flex",
-              flexDirection: "column",
-              gap: 4,
-            }}
+            className="funnel-card unverified"
             prefetch={false}
             data-testid="funnel-unverified"
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--warning)" }}>1. Unverified</span>
-              <span className="num" style={{ fontSize: 15, fontWeight: 800 }}>{d.funnel.unverified.count}</span>
+            <div className="funnel-card-header">
+              <span className="funnel-step-label">1. Unverified</span>
+              <span className="funnel-count num">{d.funnel.unverified.count}</span>
             </div>
-            <div className="muted" style={{ fontSize: 11 }}>bKash / Nagad TrxID</div>
-            <div className="num" style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-2)" }}>{taka(d.funnel.unverified.amount)}</div>
+            <div className="funnel-sub">bKash / Nagad TrxID</div>
+            <div className="funnel-amt num">{taka(d.funnel.unverified.amount)}</div>
           </Link>
 
           <Link
             href="/orders/ship"
-            style={{
-              padding: "10px 12px",
-              borderRadius: "var(--radius)",
-              background: d.funnel.toPack.count > 0 ? "var(--info-bg)" : "var(--bg)",
-              border: `1px solid ${d.funnel.toPack.count > 0 ? "var(--info)" : "var(--line)"}`,
-              display: "flex",
-              flexDirection: "column",
-              gap: 4,
-            }}
+            className="funnel-card topack"
             prefetch={false}
             data-testid="funnel-topack"
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--info)" }}>2. To Pack</span>
-              <span className="num" style={{ fontSize: 15, fontWeight: 800 }}>{d.funnel.toPack.count}</span>
+            <div className="funnel-card-header">
+              <span className="funnel-step-label">2. To Pack</span>
+              <span className="funnel-count num">{d.funnel.toPack.count}</span>
             </div>
-            <div className="muted" style={{ fontSize: 11 }}>Confirmed in Store</div>
-            <div className="num" style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-2)" }}>{taka(d.funnel.toPack.amount)}</div>
+            <div className="funnel-sub">Confirmed in Store</div>
+            <div className="funnel-amt num">{taka(d.funnel.toPack.amount)}</div>
           </Link>
 
           <Link
             href="/orders?status=SHIPPED"
-            style={{
-              padding: "10px 12px",
-              borderRadius: "var(--radius)",
-              background: d.funnel.inTransit.count > 0 ? "var(--tint)" : "var(--bg)",
-              border: `1px solid ${d.funnel.inTransit.count > 0 ? "var(--brand)" : "var(--line)"}`,
-              display: "flex",
-              flexDirection: "column",
-              gap: 4,
-            }}
+            className="funnel-card intransit"
             prefetch={false}
             data-testid="funnel-intransit"
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--brand)" }}>3. In Transit</span>
-              <span className="num" style={{ fontSize: 15, fontWeight: 800 }}>{d.funnel.inTransit.count}</span>
+            <div className="funnel-card-header">
+              <span className="funnel-step-label">3. In Transit</span>
+              <span className="funnel-count num">{d.funnel.inTransit.count}</span>
             </div>
-            <div className="muted" style={{ fontSize: 11 }}>With Courier Riders</div>
-            <div className="num" style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-2)" }}>{taka(d.funnel.inTransit.amount)}</div>
+            <div className="funnel-sub">With Courier Riders</div>
+            <div className="funnel-amt num">{taka(d.funnel.inTransit.amount)}</div>
           </Link>
 
           <Link
             href="/orders?status=DELIVERED"
-            style={{
-              padding: "10px 12px",
-              borderRadius: "var(--radius)",
-              background: "var(--success-bg)",
-              border: "1px solid var(--line)",
-              display: "flex",
-              flexDirection: "column",
-              gap: 4,
-            }}
+            className="funnel-card delivered"
             prefetch={false}
             data-testid="funnel-delivered"
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--success)" }}>4. Delivered</span>
-              <span className="num" style={{ fontSize: 15, fontWeight: 800 }}>{d.funnel.delivered.count}</span>
+            <div className="funnel-card-header">
+              <span className="funnel-step-label">4. Delivered</span>
+              <span className="funnel-count num">{d.funnel.delivered.count}</span>
             </div>
-            <div className="muted" style={{ fontSize: 11 }}>Successfully Handed</div>
-            <div className="num" style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-2)" }}>{taka(d.funnel.delivered.amount)}</div>
+            <div className="funnel-sub">Successfully Handed</div>
+            <div className="funnel-amt num">{taka(d.funnel.delivered.amount)}</div>
           </Link>
 
           <Link
             href="/returns"
-            style={{
-              padding: "10px 12px",
-              borderRadius: "var(--radius)",
-              background: d.funnel.returns.count > 0 ? "var(--danger-bg)" : "var(--bg)",
-              border: `1px solid ${d.funnel.returns.count > 0 ? "var(--danger)" : "var(--line)"}`,
-              display: "flex",
-              flexDirection: "column",
-              gap: 4,
-            }}
+            className="funnel-card returns"
             prefetch={false}
             data-testid="funnel-returns"
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--danger)" }}>5. Returns</span>
-              <span className="num" style={{ fontSize: 15, fontWeight: 800 }}>{d.funnel.returns.count}</span>
+            <div className="funnel-card-header">
+              <span className="funnel-step-label">5. Returns</span>
+              <span className="funnel-count num">{d.funnel.returns.count}</span>
             </div>
-            <div className="muted" style={{ fontSize: 11 }}>Cancelled / Returned</div>
-            <div className="num" style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-2)" }}>{taka(d.funnel.returns.amount)}</div>
+            <div className="funnel-sub">Cancelled / Returned</div>
+            <div className="funnel-amt num">{taka(d.funnel.returns.amount)}</div>
           </Link>
         </div>
       </section>
@@ -520,26 +481,26 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                 Reconciliation & payouts →
               </Link>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10, marginTop: 4 }}>
-              <div style={{ padding: "12px", background: "var(--bg)", borderRadius: "var(--radius)", border: "1px solid var(--line)" }}>
-                <div className="muted" style={{ fontSize: 11, textTransform: "uppercase", fontWeight: 700 }}>In Transit (Riders)</div>
-                <div className="num" style={{ fontSize: 17, fontWeight: 800, marginTop: 4, color: "var(--brand)" }}>{taka(d.codLedger.inTransitAmount)}</div>
-                <div className="muted" style={{ fontSize: 11.5, marginTop: 2 }}>{d.codLedger.inTransitOrders} parcels on delivery</div>
+            <div className="ledger-grid">
+              <div className="ledger-stat-card">
+                <div className="lbl">In Transit (Riders)</div>
+                <div className="amt" style={{ color: "var(--brand)" }}>{taka(d.codLedger.inTransitAmount)}</div>
+                <div className="desc">{d.codLedger.inTransitOrders} parcels on delivery</div>
               </div>
-              <div style={{ padding: "12px", background: "var(--bg)", borderRadius: "var(--radius)", border: "1px solid var(--line)" }}>
-                <div className="muted" style={{ fontSize: 11, textTransform: "uppercase", fontWeight: 700 }}>Awaiting Payout</div>
-                <div className="num" style={{ fontSize: 17, fontWeight: 800, marginTop: 4, color: "var(--warning)" }}>{taka(d.codLedger.awaitingPayoutAmount)}</div>
-                <div className="muted" style={{ fontSize: 11.5, marginTop: 2 }}>{d.codLedger.awaitingPayoutOrders} delivered, courier holding</div>
+              <div className="ledger-stat-card">
+                <div className="lbl">Awaiting Payout</div>
+                <div className="amt" style={{ color: "var(--warning)" }}>{taka(d.codLedger.awaitingPayoutAmount)}</div>
+                <div className="desc">{d.codLedger.awaitingPayoutOrders} delivered, courier holding</div>
               </div>
-              <div style={{ padding: "12px", background: "var(--bg)", borderRadius: "var(--radius)", border: "1px solid var(--line)" }}>
-                <div className="muted" style={{ fontSize: 11, textTransform: "uppercase", fontWeight: 700 }}>Settled Payouts</div>
-                <div className="num" style={{ fontSize: 17, fontWeight: 800, marginTop: 4, color: "var(--success)" }}>{taka(d.codLedger.settledAmount)}</div>
-                <div className="muted" style={{ fontSize: 11.5, marginTop: 2 }}>{d.codLedger.settledOrders} cleared to bank</div>
+              <div className="ledger-stat-card">
+                <div className="lbl">Settled Payouts</div>
+                <div className="amt" style={{ color: "var(--success)" }}>{taka(d.codLedger.settledAmount)}</div>
+                <div className="desc">{d.codLedger.settledOrders} cleared to bank</div>
               </div>
-              <div style={{ padding: "12px", background: "var(--bg)", borderRadius: "var(--radius)", border: "1px solid var(--line)" }}>
-                <div className="muted" style={{ fontSize: 11, textTransform: "uppercase", fontWeight: 700 }}>Direct MFS</div>
-                <div className="num" style={{ fontSize: 17, fontWeight: 800, marginTop: 4, color: "var(--info)" }}>{taka(d.codLedger.directMfsAmount)}</div>
-                <div className="muted" style={{ fontSize: 11.5, marginTop: 2 }}>{d.codLedger.directMfsOrders} bKash/Nagad direct</div>
+              <div className="ledger-stat-card">
+                <div className="lbl">Direct MFS</div>
+                <div className="amt" style={{ color: "var(--info)" }}>{taka(d.codLedger.directMfsAmount)}</div>
+                <div className="desc">{d.codLedger.directMfsOrders} bKash/Nagad direct</div>
               </div>
             </div>
           </section>

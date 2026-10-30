@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ROLE_LABELS, can, type Area } from "@biztrackbd/core";
+import { PageHeader } from "@biztrackbd/ui";
 import { InstallApp } from "@/components/pwa";
 import { requireAccess } from "@/lib/session";
 import { ThemeSwitch } from "../theme-switch";
@@ -42,8 +43,10 @@ export default async function More() {
   const s = await requireAccess("orders");
   return (
     <>
-      <div className="page-head"><h1>More</h1></div>
-      <div className="card" style={{ marginBottom: 14 }}><b>{s.user.name}</b><div className="muted">{ROLE_LABELS[s.user.role]} · {s.tenantSubdomain}</div></div>
+      <PageHeader
+        title="More"
+        sub={`${s.user.name} · ${ROLE_LABELS[s.user.role]} (${s.tenantSubdomain})`}
+      />
       <nav className="card menu-list" aria-label="More" style={{ padding: "0 12px" }} data-testid="more-menu">
         {ITEMS.filter((i) => can(s.user.role, i.area)).map((i) => <Link key={i.href} href={i.href} prefetch={false}>{i.label}</Link>)}
       </nav>
