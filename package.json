@@ -25,7 +25,8 @@
     "e2e:real": "pnpm --filter @biztrackbd/admin exec playwright test -c playwright.real.config.ts",
     "e2e": "pnpm e2e:admin && pnpm e2e:storefront",
     "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build && pnpm check:size && pnpm audit --prod",
-    "verify:full": "pnpm verify && pnpm audit:rls && pnpm e2e"
+    "verify:full": "pnpm verify && pnpm audit:rls && pnpm e2e",
+    "turbo-ignore": "npx turbo-ignore"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
