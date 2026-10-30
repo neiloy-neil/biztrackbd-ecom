@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { getOverview, getPlatformHealthMatrix } from "@biztrackbd/core";
+import { getOverview } from "@biztrackbd/core";
 import { getPlatformMobileSession } from "@/lib/mobile-auth";
+import { getCachedPlatformHealthMatrix } from "@/lib/cached-health";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ export async function GET(req: Request) {
   try {
     const [overview, health] = await Promise.all([
       getOverview(session.actor),
-      getPlatformHealthMatrix().catch(() => null),
+      getCachedPlatformHealthMatrix().catch(() => null),
     ]);
 
     return NextResponse.json({
