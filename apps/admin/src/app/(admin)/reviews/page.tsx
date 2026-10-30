@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { can, getModuleStatus, listReviews, reviewTabCounts, reviewsAutoPublish, type ReviewTab } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
+import { PageHeader } from "@biztrackbd/ui";
 import { AppDisabledNotice } from "@/components/app-disabled-notice";
 import { dateOnly, prettyPhone } from "@/lib/format";
 import { one } from "@/lib/query";
@@ -39,8 +40,11 @@ export default async function Reviews({ searchParams }: { searchParams: Promise<
 
   return (
     <>
-      <div className="page-head"><h1>Reviews</h1></div>
-      <p className="page-sub">Only customers whose order was delivered can review a product. Read each one, then publish or hide it.</p>
+      <PageHeader
+        title="Reviews"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Reviews" }]}
+        sub="Only customers whose order was delivered can review a product. Read each one, then publish or hide it."
+      />
       <nav className="tabs" aria-label="Status">
         {TABS.map((t) => <Link key={t.key} href={`/reviews?tab=${t.key}`} aria-current={t.key === tab ? "page" : undefined} prefetch={false}>{t.label}<span className={`n${t.alert && counts[t.key] > 0 ? " alert" : ""}`}>{counts[t.key]}</span></Link>)}
       </nav>

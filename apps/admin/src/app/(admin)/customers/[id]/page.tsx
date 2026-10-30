@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { can, getCustomerDetail } from "@biztrackbd/core";
+import { PageHeader } from "@biztrackbd/ui";
 import { SubmitButton } from "@/components/ui";
 import { dateOnly, friendlyDate, prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
@@ -57,39 +58,43 @@ export default async function CustomerPage({
 
   return (
     <>
-      <Link href="/customers" className="back" prefetch={false}>← Customers</Link>
-      <div className="page-head">
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <h1 style={{ margin: 0 }}>{c.name}</h1>
-          {c.isVip && <span className="pill info">VIP</span>}
-          {c.isBlocked && <span className="pill bad">Blocked</span>}
-          {c.loyalty && (
-            <span className="pill" style={{ background: "#F1F5F9", color: "#334155", fontWeight: 700, fontSize: 11.5 }}>
-              {c.loyalty.tier}
-            </span>
-          )}
-        </div>
-        <div className="actions">
-          {canEdit && !c.isBlocked && (
-            <SendSmsModal
-              customerId={c.id}
-              customerName={c.name}
-              customerPhone={c.phone}
-            />
-          )}
-          <a className="btn btn-secondary btn-sm" href={`tel:${c.phone}`}>Call</a>
-          <a className="btn btn-secondary btn-sm" href={`https://wa.me/88${c.phone}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
-          {can(s.user.role, "orders", "edit") && !c.isBlocked && (
-            <Link href={`/orders/new?customerId=${c.id}`} className="btn btn-primary btn-sm" prefetch={false}>
-              Create order
-            </Link>
-          )}
-        </div>
-      </div>
-      <p className="muted" style={{ margin: "-6px 0 14px" }}>
-        Customer since {dateOnly(c.since)}
-        {c.address ? ` · ${c.address.area}, ${c.address.district}` : ""}
-      </p>
+      <PageHeader
+        title={c.name}
+        crumbs={[
+          { label: "Customers", href: "/customers" },
+          { label: c.name },
+        ]}
+        badge={
+          <>
+            {c.isVip && <span className="pill info">VIP</span>}
+            {c.isBlocked && <span className="pill bad">Blocked</span>}
+            {c.loyalty && (
+              <span className="pill" style={{ background: "#F1F5F9", color: "#334155", fontWeight: 700, fontSize: 11.5 }}>
+                {c.loyalty.tier}
+              </span>
+            )}
+          </>
+        }
+        sub={`Customer since ${dateOnly(c.since)}${c.address ? ` · ${c.address.area}, ${c.address.district}` : ""}`}
+        actions={
+          <>
+            {canEdit && !c.isBlocked && (
+              <SendSmsModal
+                customerId={c.id}
+                customerName={c.name}
+                customerPhone={c.phone}
+              />
+            )}
+            <a className="btn btn-secondary btn-sm" href={`tel:${c.phone}`}>Call</a>
+            <a className="btn btn-secondary btn-sm" href={`https://wa.me/88${c.phone}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            {can(s.user.role, "orders", "edit") && !c.isBlocked && (
+              <Link href={`/orders/new?customerId=${c.id}`} className="btn btn-primary btn-sm" prefetch={false}>
+                Create order
+              </Link>
+            )}
+          </>
+        }
+      />
 
       {err && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{err}</div>}
       {okMessage && <div className="notice good" role="status" style={{ marginBottom: 12 }}>{okMessage}</div>}

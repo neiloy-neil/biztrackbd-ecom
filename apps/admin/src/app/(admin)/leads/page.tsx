@@ -14,13 +14,11 @@ export default async function LeadsPage() {
   ]);
 
   return (
-    <div style={{ maxWidth: 1440, margin: "0 auto", padding: "24px 20px" }}>
-      <LeadsManager
-        initialLeads={items as any}
-        staffMembers={staffMembers}
-        initialTotal={total}
-        initialUnreadCount={unreadCount}
-      />
-    </div>
+    <LeadsManager
+      initialLeads={items as any}
+      staffMembers={staffMembers}
+      initialTotal={total}
+      initialUnreadCount={unreadCount}
+    />
   );
 }

@@ -47,14 +47,11 @@ export default async function Inbox({
 
     return (
       <>
-        <div className="page-head" style={{ marginBottom: 16 }}>
-          <div>
-            <h1 style={{ margin: 0 }}>Customer Support Desk</h1>
-            <p className="muted" style={{ margin: "4px 0 0", fontSize: 13.5 }}>
-              Omnichannel customer communications: Live WhatsApp conversations and store contact messages.
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title="Customer Support Desk"
+          crumbs={[{ label: "Home", href: "/" }, { label: "Inbox" }]}
+          sub="Omnichannel customer communications: Live WhatsApp conversations and store contact messages."
+        />
 
         {/* Channel Navigation Switcher */}
         <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
@@ -117,14 +114,11 @@ export default async function Inbox({
 
   return (
     <>
-      <div className="page-head" style={{ marginBottom: 16 }}>
-        <div>
-          <h1 style={{ margin: 0 }}>Customer Support Desk</h1>
-          <p className="muted" style={{ margin: "4px 0 0", fontSize: 13.5 }}>
-            Messages from the contact form on your store. You answer by SMS to the number the customer gave.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Customer Support Desk"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Inbox" }]}
+        sub="Messages from the contact form on your store. You answer by SMS to the number the customer gave."
+      />
 
       {/* Channel Navigation Switcher */}
       <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>

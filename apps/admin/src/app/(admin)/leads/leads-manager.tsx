@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useTransition, useEffect, useMemo } from "react";
+import { PageHeader } from "@biztrackbd/ui";
 import {
   updateBookingStatusAction,
   updateLeadStatusAction,
@@ -408,62 +409,21 @@ export function LeadsManager({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      {/* Top Header & Export */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 12,
-        }}
-      >
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <h1 style={{ fontSize: "1.75rem", fontWeight: 800, margin: 0, color: "var(--text, #0f172a)" }}>
-              Leads & Inquiries Workspace
-            </h1>
-            {counts.NEW > 0 && (
-              <span
-                style={{
-                  background: "#F59E0B",
-                  color: "#FFFFFF",
-                  fontSize: "0.8rem",
-                  fontWeight: 700,
-                  padding: "2px 10px",
-                  borderRadius: 9999,
-                }}
-              >
-                {counts.NEW} Unread
-              </span>
-            )}
-          </div>
-          <p style={{ fontSize: "0.9rem", color: "var(--muted, #64748b)", margin: "4px 0 0" }}>
-            Real-time multi-channel inquiry triage, customer follow-up desk, and staff assignment timeline.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleExportCSV}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "9px 16px",
-            background: "#ffffff",
-            color: "var(--text, #0f172a)",
-            border: "1px solid var(--border, #cbd5e1)",
-            borderRadius: 8,
-            fontSize: "0.88rem",
-            fontWeight: 600,
-            cursor: "pointer",
-            boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-          }}
-        >
-          <span>📥</span> Export CSV ({filteredLeads.length})
-        </button>
-      </div>
+      <PageHeader
+        title="Leads & Inquiries"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Leads" }]}
+        badge={counts.NEW > 0 ? <span className="pill warn">{counts.NEW} Unread</span> : undefined}
+        sub="Real-time multi-channel inquiry triage, customer follow-up desk, and staff assignment timeline."
+        actions={
+          <button
+            type="button"
+            onClick={handleExportCSV}
+            className="btn btn-secondary btn-sm"
+          >
+            Export CSV ({filteredLeads.length})
+          </button>
+        }
+      />
 
       {/* Status Filter Tabs */}
       <div

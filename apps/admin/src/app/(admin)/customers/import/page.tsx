@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { CUSTOMER_IMPORT_MAX_ROWS } from "@biztrackbd/core";
+import { PageHeader } from "@biztrackbd/ui";
 import { requireAccess } from "@/lib/session";
 import { ImportForm } from "./import-form";
 
@@ -11,8 +11,13 @@ export default async function ImportCustomers() {
   await requireAccess("customers", "edit");
   return (
     <>
-      <Link href="/customers" className="back" prefetch={false}>← Customers</Link>
-      <div className="page-head"><h1>Import customers</h1></div>
+      <PageHeader
+        title="Import customers"
+        crumbs={[
+          { label: "Customers", href: "/customers" },
+          { label: "Import" },
+        ]}
+      />
       <div className="card stack" style={{ maxWidth: 740 }}>
         <p style={{ margin: 0, lineHeight: 1.6 }}>
           Bring in the customers you already have from a spreadsheet or a Shopify customer export. Each one is matched by mobile number, so nobody is added twice, and a customer who is already in your store is left as they are.

@@ -4,6 +4,7 @@ import { can, listCustomers, type CustomerSegment } from "@biztrackbd/core";
 import { CustomerQuickButton, CustomerQuickHost } from "@/components/customer-quick-view";
 import { LiveSearch } from "@/components/live-filters";
 import { Pager, Tabs } from "@/components/ui";
+import { PageHeader } from "@biztrackbd/ui";
 import { friendlyDate, prettyPhone, taka } from "@/lib/format";
 import { one, pageOf, qs } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
@@ -32,14 +33,17 @@ export default async function Customers({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <div className="page-head">
-        <h1>Customers</h1>
-        <div className="actions">
-          {can(s.user.role, "customers", "edit") && <AddCustomerModal />}
-          {can(s.user.role, "customers", "edit") && <Link href="/customers/import" className="btn btn-secondary" prefetch={false} data-testid="import-customers">Import</Link>}
-          <a className="btn btn-secondary" href="/customers/export" download>Export CSV</a>
-        </div>
-      </div>
+      <PageHeader
+        title="Customers"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Customers" }]}
+        actions={
+          <>
+            {can(s.user.role, "customers", "edit") && <AddCustomerModal />}
+            {can(s.user.role, "customers", "edit") && <Link href="/customers/import" className="btn btn-secondary" prefetch={false} data-testid="import-customers">Import</Link>}
+            <a className="btn btn-secondary" href="/customers/export" download>Export CSV</a>
+          </>
+        }
+      />
       {err && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{err}</div>}
       {ok && <div className="notice good" role="status" style={{ marginBottom: 12 }}>Saved.</div>}
 
