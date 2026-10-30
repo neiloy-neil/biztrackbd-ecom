@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { DomainError, bulkProductAction, importProductsCsv } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 
-const ACTIONS = new Set(["publish", "unpublish", "archive", "unarchive"]);
+const ACTIONS = new Set(["publish", "unpublish", "archive", "unarchive", "delete"]);
 
 /** Publish, unpublish or archive the ticked products. Returns to the list with a short result in the address. */
 export async function bulkProductsAction(action: string, form: FormData): Promise<void> {
@@ -15,7 +15,7 @@ export async function bulkProductsAction(action: string, form: FormData): Promis
   const safeBack = back.startsWith("/products") ? back : "/products";
   const sep = safeBack.includes("?") ? "&" : "?";
   if (ids.length === 0 || !ACTIONS.has(action)) redirect(`${safeBack}${sep}msg=none`);
-  const r = await bulkProductAction(s.tenantId, s.actor, ids, action as "publish" | "unpublish" | "archive" | "unarchive");
+  const r = await bulkProductAction(s.tenantId, s.actor, ids, action as "publish" | "unpublish" | "archive" | "unarchive" | "delete");
   revalidatePath("/products");
   revalidatePath("/inventory");
   revalidatePath("/");

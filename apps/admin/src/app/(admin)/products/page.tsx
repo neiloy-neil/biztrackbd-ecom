@@ -18,7 +18,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Products" };
 
 const TABS: { key: ProductTab; label: string }[] = [{ key: "all", label: "All" }, { key: "active", label: "Active" }, { key: "draft", label: "Draft" }, { key: "out", label: "Out of stock" }, { key: "archived", label: "Archived" }];
-const VERBS: Record<string, string> = { publish: "published", unpublish: "moved to draft", archive: "archived", unarchive: "restored to draft" };
+const VERBS: Record<string, string> = { publish: "published", unpublish: "moved to draft", archive: "archived", unarchive: "restored to draft", delete: "deleted" };
 
 function Thumb({ url, title, size = 44 }: { url: string | null; title: string; size?: number }) {
   // eslint-disable-next-line @next/next/no-img-element
@@ -45,7 +45,7 @@ export default async function Products({ searchParams }: { searchParams: Promise
   const here = `/products${qs(base)}`;
   const filtered = Boolean(q || categoryId || collectionId || tab !== "all");
   const note = limitNote("products", usage.products);
-  const done = msg?.match(/^(publish|unpublish|archive|unarchive)-(\d+)-(\d+)$/);
+  const done = msg?.match(/^(publish|unpublish|archive|unarchive|delete)-(\d+)-(\d+)$/);
 
   return (
     <>
@@ -95,12 +95,14 @@ export default async function Products({ searchParams }: { searchParams: Promise
                 <>
                   <SubmitButton formAction={bulkProductsAction.bind(null, "unarchive")} className="btn btn-primary btn-sm" pending="Restoring…" data-testid="bulk-unarchive">Restore selected to draft</SubmitButton>
                   <SubmitButton formAction={bulkProductsAction.bind(null, "publish")} className="btn btn-secondary btn-sm" pending="Publishing…" data-testid="bulk-publish">Publish selected</SubmitButton>
+                  <SubmitButton formAction={bulkProductsAction.bind(null, "delete")} className="btn btn-danger btn-sm" pending="Deleting…" data-testid="bulk-delete">Delete selected</SubmitButton>
                 </>
               ) : (
                 <>
                   <SubmitButton formAction={bulkProductsAction.bind(null, "publish")} className="btn btn-secondary btn-sm" pending="Publishing…" data-testid="bulk-publish">Publish</SubmitButton>
                   <SubmitButton formAction={bulkProductsAction.bind(null, "unpublish")} className="btn btn-secondary btn-sm" pending="Saving…">Move to draft</SubmitButton>
                   <SubmitButton formAction={bulkProductsAction.bind(null, "archive")} className="btn btn-secondary btn-sm" pending="Archiving…" data-testid="bulk-archive">Archive</SubmitButton>
+                  <SubmitButton formAction={bulkProductsAction.bind(null, "delete")} className="btn btn-danger btn-sm" pending="Deleting…" data-testid="bulk-delete">Delete selected</SubmitButton>
                 </>
               )}
             </BulkBar>

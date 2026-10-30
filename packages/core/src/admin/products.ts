@@ -370,7 +370,7 @@ export async function deleteCategory(tenantId: string, actor: StaffActor, catego
 }
 
 /** Publish, unpublish or archive many products at once. Ones that are already archived or missing are skipped. Returns how many changed. */
-export async function bulkProductAction(tenantId: string, actor: StaffActor, ids: string[], action: "publish" | "unpublish" | "archive" | "unarchive"): Promise<{ done: number; skipped: number }> {
+export async function bulkProductAction(tenantId: string, actor: StaffActor, ids: string[], action: "publish" | "unpublish" | "archive" | "unarchive" | "delete"): Promise<{ done: number; skipped: number }> {
   assertCan(actor, "products", "edit");
   const unique = [...new Set(ids)].slice(0, 200);
   if (action === "archive") {
@@ -380,6 +380,19 @@ export async function bulkProductAction(tenantId: string, actor: StaffActor, ids
       if (!before) continue;
       await archiveProduct(tenantId, id, actor);
       done++;
+    }
+    return { done, skipped: unique.length - done };
+  }
+  if (action === "delete") {
+    const { deleteProduct } = await import("../products/service");
+    let done = 0;
+    for (const id of unique) {
+      try {
+        await deleteProduct(tenantId, id, actor);
+        done++;
+      } catch {
+        // skipped
+      }
     }
     return { done, skipped: unique.length - done };
   }
