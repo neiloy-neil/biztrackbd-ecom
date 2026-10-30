@@ -5,7 +5,7 @@ import { SubmitButton } from "@/components/ui";
 import { dateTime } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
-import { checkDomainAction } from "./actions";
+import { checkDomainAction, forceConnectDomainAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Domains" };
@@ -45,7 +45,12 @@ export default async function Domains({ searchParams }: { searchParams: Promise<
                 <dt>Certificate</dt><dd>{r.sslStatus}</dd>
                 {r.dnsNote && !r.connected && (<><dt>What we see</dt><dd>{r.dnsNote}</dd></>)}
               </dl>
-              {!r.connected && <form action={checkDomainAction.bind(null, r.id)} style={{ marginTop: 10 }}><SubmitButton className="btn btn-secondary" pending="Checking…">Check now</SubmitButton></form>}
+              {!r.connected && (
+                <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                  <form action={checkDomainAction.bind(null, r.id)}><SubmitButton className="btn btn-secondary" pending="Checking…">Check now</SubmitButton></form>
+                  <form action={forceConnectDomainAction.bind(null, r.id)}><SubmitButton className="btn btn-primary" pending="Connecting…">Verify &amp; Connect</SubmitButton></form>
+                </div>
+              )}
             </section>
           ))}
         </div>

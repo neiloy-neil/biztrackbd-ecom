@@ -113,15 +113,19 @@ export function dnsInstruction(domain: string): DnsInstruction {
   const kind = apex ? "A" : "CNAME";
   const name = apex ? "@" : domain.split(".")[0]!;
   const value = apex ? aTarget() : cnameTarget();
+  const steps = [
+    "Sign in where you bought the domain (for example Namecheap, GoDaddy, or the Bangladeshi registrar you used).",
+    "Open the DNS settings for the domain.",
+    `Add a new ${kind} record. Name: ${name}. Value: ${value}.`,
+    "Delete any older A or CNAME record for the same name, so only one is left.",
+    "Save. It can take a few minutes, sometimes up to a few hours. We check by ourselves and this page updates.",
+  ];
+  if (apex) {
+    steps.push(`To also connect www.${domain}, add a CNAME record with Name: www and Value: cname.vercel-dns.com (or ${domain}).`);
+  }
   return {
     kind, host: domain, name, value,
-    steps: [
-      "Sign in where you bought the domain (for example Namecheap, GoDaddy, or the Bangladeshi registrar you used).",
-      "Open the DNS settings for the domain.",
-      `Add a new ${kind} record. Name: ${name}. Value: ${value}.`,
-      "Delete any older A or CNAME record for the same name, so only one is left.",
-      "Save. It can take a few minutes, sometimes up to a few hours. We check by ourselves and this page updates.",
-    ],
+    steps,
   };
 }
 
@@ -129,10 +133,47 @@ export type CheckOutcome = { dnsStatus: "waiting" | "wrong_record" | "found" | "
 
 const safe = async <T>(p: Promise<T[]>): Promise<T[]> => p.catch(() => []);
 
+async function dohResolve(domain: string, type: "A" | "CNAME"): Promise<string[]> {
+  try {
+    const res = await fetch(`https://dns.google/resolve?name=${encodeURIComponent(domain)}&type=${type}`, {
+      headers: { Accept: "application/dns-json" },
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) return [];
+    const json = (await res.json()) as any;
+    if (Array.isArray(json.Answer)) {
+      return json.Answer.map((ans: any) => String(ans.data || "").trim().replace(/\.$/, "")).filter(Boolean);
+    }
+  } catch {}
+  return [];
+}
+
+async function probeLiveHttps(domain: string): Promise<{ live: boolean; serverIsVercel: boolean }> {
+  try {
+    const probe = await fetch(`https://${domain}`, {
+      method: "HEAD",
+      redirect: "manual",
+      signal: AbortSignal.timeout(6000),
+    });
+    const server = (probe.headers.get("server") || "").toLowerCase();
+    const isVercel = server.includes("vercel") || Boolean(probe.headers.get("x-vercel-id"));
+    const validHttp = probe.status >= 200 && probe.status < 400;
+    return { live: validHttp || isVercel, serverIsVercel: isVercel };
+  } catch {
+    return { live: false, serverIsVercel: false };
+  }
+}
+
 async function inspectDns(domain: string): Promise<{ ok: boolean; seen: string[] }> {
   const want = dnsInstruction(domain);
   const r = resolver !== systemResolver ? resolver : devFileResolver() ?? systemResolver;
-  const [a, cname] = await Promise.all([safe(r.resolve4(domain)), safe(r.resolveCname(domain))]);
+  let [a, cname] = await Promise.all([safe(r.resolve4(domain)), safe(r.resolveCname(domain))]);
+  if (a.length === 0 && cname.length === 0 && r === systemResolver) {
+    // Fallback to DNS-over-HTTPS in environments where direct OS UDP port 53 lookup is unavailable
+    const [dohA, dohCname] = await Promise.all([dohResolve(domain, "A"), dohResolve(domain, "CNAME")]);
+    a = dohA;
+    cname = dohCname;
+  }
   const seen = [...cname.map((c) => c.toLowerCase().replace(/\.$/, "")), ...a];
   // A subdomain may also be pointed with an A record straight at us, and an apex may be flattened to an address.
   const ok = want.kind === "CNAME" ? cname.some((c) => c.toLowerCase().replace(/\.$/, "") === want.value) || a.includes(aTarget()) : a.includes(aTarget());
@@ -151,7 +192,7 @@ export async function checkDomain(tenantId: string, host: string): Promise<Check
 
   let dnsStatus: CheckOutcome["dnsStatus"] = row.dnsStatus as CheckOutcome["dnsStatus"];
   let note: string | null = row.dnsNote;
-  const ssl = row.sslStatus as CheckOutcome["ssl"];
+  let ssl = row.sslStatus as CheckOutcome["ssl"];
   const want = dnsInstruction(domain);
 
   const seen = await inspectDns(domain);
@@ -165,28 +206,63 @@ export async function checkDomain(tenantId: string, host: string): Promise<Check
     return { dnsStatus, note, ssl, connected: false };
   }
 
-  // The record is right. Ask Vercel to serve the name; it issues the certificate by itself.
+  // The DNS record is in place.
+  // Check if live HTTPS is already answering (certificate already issued by Vercel or edge)
+  const probe = await probeLiveHttps(domain);
+
+  // Ask Vercel to serve the name; it issues the certificate by itself.
   const v = client();
   if (!v) {
+    if (probe.live || probe.serverIsVercel) {
+      await confirmDomainVerified(tenantId, domain);
+      await withTenant(tenantId, async (tx) => {
+        await tx.domain.update({
+          where: { id: row.id },
+          data: { verified: true, dnsStatus: "verified", sslStatus: "issued", dnsNote: null, lastCheckedAt: new Date() },
+        });
+        if (row.sslStatus !== "issued") {
+          await audit(tx, tenantId, { userId: "system", email: "system@biztrackbd" }, "domain.ssl_issued", { domain });
+        }
+      });
+      return { dnsStatus: "verified", note: null, ssl: "issued", connected: true };
+    }
+
     await withTenant(tenantId, (tx) => tx.domain.update({ where: { id: row.id }, data: { dnsStatus: "found", dnsNote: "Your record is correct. We are getting the certificate ready.", lastCheckedAt: new Date() } }));
     return { dnsStatus: "found", note: "Your record is correct. We are getting the certificate ready.", ssl, connected: false };
   }
+
   try {
     await v.add(domain);
     const st = await v.status(domain);
-    if (st.configured) {
+    const isSslReady = st.ssl === "issued" || probe.live;
+    if (st.configured || probe.live) {
       await confirmDomainVerified(tenantId, domain);
       await withTenant(tenantId, async (tx) => {
-        await tx.domain.update({ where: { id: row.id }, data: { sslStatus: st.ssl === "issued" ? "issued" : "pending", lastCheckedAt: new Date() } });
-        if (row.sslStatus !== "issued" && st.ssl === "issued") await audit(tx, tenantId, { userId: "system", email: "system@biztrackbd" }, "domain.ssl_issued", { domain });
+        await tx.domain.update({
+          where: { id: row.id },
+          data: { verified: true, dnsStatus: "verified", sslStatus: isSslReady ? "issued" : "pending", dnsNote: null, lastCheckedAt: new Date() },
+        });
+        if (row.sslStatus !== "issued" && isSslReady) {
+          await audit(tx, tenantId, { userId: "system", email: "system@biztrackbd" }, "domain.ssl_issued", { domain });
+        }
       });
-      return { dnsStatus: "verified", note: null, ssl: st.ssl === "issued" ? "issued" : "pending", connected: st.ssl === "issued" };
+      return { dnsStatus: "verified", note: null, ssl: isSslReady ? "issued" : "pending", connected: isSslReady };
     }
     note = "Your record is correct. We are getting the certificate ready, this usually takes a few minutes.";
     await withTenant(tenantId, (tx) => tx.domain.update({ where: { id: row.id }, data: { dnsStatus: "found", dnsNote: note, lastCheckedAt: new Date() } }));
     return { dnsStatus: "found", note, ssl, connected: false };
   } catch (e) {
     console.error("[domains] vercel step failed", e instanceof Error ? e.message : "unknown");
+    if (probe.live || probe.serverIsVercel) {
+      await confirmDomainVerified(tenantId, domain);
+      await withTenant(tenantId, async (tx) => {
+        await tx.domain.update({
+          where: { id: row.id },
+          data: { verified: true, dnsStatus: "verified", sslStatus: "issued", dnsNote: null, lastCheckedAt: new Date() },
+        });
+      });
+      return { dnsStatus: "verified", note: null, ssl: "issued", connected: true };
+    }
     note = "Your record is correct. We hit a problem finishing the setup and will try again shortly.";
     await withTenant(tenantId, (tx) => tx.domain.update({ where: { id: row.id }, data: { dnsStatus: "found", dnsNote: note, lastCheckedAt: new Date() } }));
     return { dnsStatus: "found", note, ssl, connected: false };
