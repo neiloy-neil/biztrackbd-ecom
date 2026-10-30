@@ -16,7 +16,4 @@ config.resolver.nodeModulesPaths = [
   path.resolve(monorepoRoot, "node_modules"),
 ];
 
-// 3. Force Metro to resolve (react, react-native) from the project directory
-config.resolver.disableHierarchicalLookup = true;
-
 module.exports = withNativeWind(config, { input: "./src/styles/global.css" });

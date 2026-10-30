@@ -14,6 +14,7 @@
     "@biztrackbd/core": "workspace:*",
     "@biztrackbd/db": "workspace:*",
     "@biztrackbd/ui": "workspace:*",
+    "@expo/metro-runtime": "~4.0.1",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@tanstack/react-query": "^5.66.0",
     "expo": "~52.0.30",
