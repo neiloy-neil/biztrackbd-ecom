@@ -148,7 +148,26 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
             </div>
 
             <table className="table only-desktop" data-testid="orders-table">
-              <thead><tr>{canEdit && <th style={{ width: 36 }}><span className="sr-only">Select</span></th>}<th>Order</th><th>Date</th><th>Customer</th><th>Payment</th><th>Fulfilment</th><th>Source</th><th className="r">Total</th></tr></thead>
+              <thead><tr>{canEdit && (
+                    <th style={{ width: 36 }}>
+                      <input
+                        type="checkbox"
+                        aria-label="Select all orders"
+                        onChange={(e) => {
+                          const form = e.currentTarget.closest("form");
+                          if (!form) return;
+                          const boxes = form.querySelectorAll<HTMLInputElement>("input[type=\"checkbox\"][name=\"ids\"]");
+                          boxes.forEach((b) => {
+                            if (b.offsetParent !== null && b.checked !== e.currentTarget.checked) {
+                              b.checked = e.currentTarget.checked;
+                              b.dispatchEvent(new Event("change", { bubbles: true }));
+                            }
+                          });
+                        }}
+                        style={{ width: 18, height: 18, cursor: "pointer" }}
+                      />
+                    </th>
+                  )}<th>Order</th><th>Date</th><th>Customer</th><th>Payment</th><th>Fulfilment</th><th>Source</th><th className="r">Total</th></tr></thead>
               <tbody>
                 {list.rows.map((o) => (
                   <tr key={o.id} data-testid="order-row">

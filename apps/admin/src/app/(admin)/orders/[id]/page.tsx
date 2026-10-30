@@ -145,6 +145,18 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
         }
       />
       {err && <div className="notice bad" role="alert" style={{ marginBottom: 14 }} data-testid="order-error">{err}</div>}
+      {o.status === "CANCELLED" && (
+        <div className="notice warn" style={{ marginBottom: 14 }} data-testid="cancelled-banner">
+          <div className="row" style={{ justifyContent: "space-between", alignItems: "center", width: "100%", gap: 12, flexWrap: "wrap" }}>
+            <span>This order is <b>CANCELLED</b>{o.cancellation?.reason ? `: ${o.cancellation.reason}` : ""}. Items were returned to inventory stock.</span>
+            {canEdit && (
+              <form action={statusAction.bind(null, o.id, "PENDING")}>
+                <SubmitButton className="btn btn-primary btn-sm" pending="Reopening…">Reopen Order</SubmitButton>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
       {o.callNote && <div className="notice info" style={{ marginBottom: 14 }} data-testid="call-note-banner"><b>Call note:</b> {o.callNote}</div>}
 
       <div className="split">
@@ -429,9 +441,9 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
           </section>
 
           {canCancel && (
-            <section className="card">
+            <section className="card" data-testid="cancel-order-card">
               <details>
-                <summary className="link" style={{ cursor: "pointer" }}>Cancel this order</summary>
+                <summary className="link" style={{ cursor: "pointer", fontWeight: 600 }}>Cancel this order (অর্ডার বাতিল করুন)</summary>
                 <form action={statusAction.bind(null, o.id, "CANCELLED")} className="stack" style={{ marginTop: 12, gap: 8 }}>
                   <label className="field" style={{ marginBottom: 0 }}>
                     <span className="label">Reason</span>
@@ -450,6 +462,23 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
                   <SubmitButton className="btn btn-danger btn-block" pending="Cancelling…">Cancel order</SubmitButton>
                 </form>
               </details>
+            </section>
+          )}
+          {canEdit && o.status === "CANCELLED" && (
+            <section className="card" style={{ border: "1px solid var(--line)" }} data-testid="reopen-order-section">
+              <div className="card-head">
+                <div>
+                  <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>Order Cancelled</h3>
+                  <p className="muted" style={{ margin: "4px 0 0", fontSize: 13 }}>
+                    Items were returned to stock. If the customer reconfirmed, you can restore this order back to active.
+                  </p>
+                </div>
+              </div>
+              <form action={statusAction.bind(null, o.id, "PENDING")} style={{ marginTop: 12 }}>
+                <SubmitButton className="btn btn-primary btn-block" pending="Restoring order…">
+                  Reopen Order (অর্ডার পুনরায় চালু করুন)
+                </SubmitButton>
+              </form>
             </section>
           )}
           {canEdit && o.status === "DELIVERED" && (

@@ -74,7 +74,7 @@ export default async function EditProduct({ params, searchParams }: { params: Pr
                 <b>Archive Product</b>
                 <p className="muted" style={{ margin: "2px 0 0", fontSize: 13 }}>Removes from your online store and inventory counts. Can be unarchived anytime.</p>
               </div>
-              <form action={async () => { "use server"; await archiveProductAction(id); const { redirect } = await import("next/navigation"); redirect("/products"); }}>
+              <form action={async () => { "use server"; await archiveProductAction(id); const { redirect } = await import("next/navigation"); redirect("/products?tab=archived&msg=archive-1-0"); }}>
                 <SubmitButton className="btn btn-secondary btn-sm" pending="Archiving…">Archive product</SubmitButton>
               </form>
             </div>
@@ -95,7 +95,7 @@ export default async function EditProduct({ params, searchParams }: { params: Pr
               <b style={{ color: "var(--text-bad, #b91c1c)" }}>Permanent Deletion</b>
               <p className="muted" style={{ margin: "2px 0 0", fontSize: 13 }}>If no orders exist for this product, it will be deleted permanently. Past order data is always preserved.</p>
             </div>
-            <ConfirmDelete action={async () => { "use server"; await deleteProductAction(id); const { redirect } = await import("next/navigation"); redirect("/products"); }} message={`Permanently delete "${p.title}"? If past orders reference this product, it will remain archived to protect records; otherwise it will be removed permanently.`} label="Delete product" testId="delete-product-btn" />
+            <ConfirmDelete action={async () => { "use server"; await deleteProductAction(id); const { redirect } = await import("next/navigation"); redirect("/products?msg=delete-1-0"); }} message={`Permanently delete "${p.title}"? This cannot be undone. Past customer invoices and orders remain preserved.`} label="Delete product" testId="delete-product-btn" />
           </div>
         </div>
       </section>

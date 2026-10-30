@@ -119,6 +119,12 @@ export default async function Products({ searchParams }: { searchParams: Promise
                     <span className="num">{taka(p.price)}</span>
                   </Link>
                   <div className="row" style={{ gap: 6 }}><span className={`pill ${p.status === "ACTIVE" ? "ok" : p.status === "ARCHIVED" ? "warn" : "grey"}`}>{p.status === "ACTIVE" ? "Active" : p.status === "ARCHIVED" ? "Archived" : "Draft"}</span><StockPill p={p} /></div>
+                  {canEdit && (
+                    <div className="row" style={{ justifyContent: "flex-end", gap: 6, marginTop: 8, paddingTop: 6, borderTop: "1px solid var(--line)" }}>
+                      <Link href={`/products/${p.id}`} className="btn btn-secondary btn-sm" style={{ height: 26, fontSize: 11.5 }} prefetch={false}>Edit</Link>
+                      <ConfirmDelete action={async () => { "use server"; await deleteProductAction(p.id); }} message={`Delete "${p.title}"?`} label="Delete" testId="delete-product-btn" />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -139,12 +145,46 @@ export default async function Products({ searchParams }: { searchParams: Promise
                         <b className="num">{taka(p.price)}</b>
                       </Link>
                     </div>
+                    {canEdit && (
+                      <div className="row" style={{ justifyContent: "flex-end", gap: 6, marginTop: 8, paddingTop: 8, borderTop: "1px dashed var(--line)" }}>
+                        {tab === "archived" ? (
+                          <>
+                            <form action={async () => { "use server"; await restoreProductAction(p.id); }}><SubmitButton className="btn btn-secondary btn-sm" pending="…">Restore</SubmitButton></form>
+                            <ConfirmDelete action={async () => { "use server"; await deleteProductAction(p.id); }} message={`Delete "${p.title}" permanently? Past order details remain preserved.`} label="Delete" testId="delete-product-btn" />
+                          </>
+                        ) : (
+                          <>
+                            <Link href={`/products/${p.id}`} className="btn btn-secondary btn-sm" prefetch={false}>Edit</Link>
+                            <ConfirmDelete action={async () => { "use server"; await deleteProductAction(p.id); }} message={`Delete "${p.title}"?`} label="Delete" testId="delete-product-btn" />
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
               <div className="table-scroll only-desktop">
                 <table className="table" data-testid="products-table">
-                  <thead><tr>{canEdit && <th style={{ width: 36 }}><span className="sr-only">Select</span></th>}<th>Product</th><th>Status</th><th>Stock</th><th>Category</th><th className="r">Price</th><th className="r">Sold (30d)</th>{tab === "archived" && <th className="r" style={{ width: 140 }}>Actions</th>}</tr></thead>
+                  <thead><tr>{canEdit && (
+                      <th style={{ width: 36 }}>
+                        <input
+                          type="checkbox"
+                          aria-label="Select all products"
+                          onChange={(e) => {
+                            const form = e.currentTarget.closest("form");
+                            if (!form) return;
+                            const boxes = form.querySelectorAll<HTMLInputElement>("input[type=\"checkbox\"][name=\"ids\"]");
+                            boxes.forEach((b) => {
+                              if (b.offsetParent !== null && b.checked !== e.currentTarget.checked) {
+                                b.checked = e.currentTarget.checked;
+                                b.dispatchEvent(new Event("change", { bubbles: true }));
+                              }
+                            });
+                          }}
+                          style={{ width: 18, height: 18, cursor: "pointer" }}
+                        />
+                      </th>
+                    )}<th>Product</th><th>Status</th><th>Stock</th><th>Category</th><th className="r">Price</th><th className="r">Sold (30d)</th><th className="r" style={{ width: 140 }}>Actions</th></tr></thead>
                   <tbody>
                     {list.rows.map((p) => (
                       <tr key={p.id} data-testid="product-row">
@@ -155,14 +195,21 @@ export default async function Products({ searchParams }: { searchParams: Promise
                         <td className="muted">{p.categoryName ?? "—"}</td>
                         <td className="r num">{taka(p.price)}</td>
                         <td className="r num">{p.sold30d}</td>
-                        {tab === "archived" && (
-                          <td className="r">
-                            <div className="row" style={{ justifyContent: "flex-end", gap: 6 }}>
-                              <form action={async () => { "use server"; await restoreProductAction(p.id); }}><SubmitButton className="btn btn-secondary btn-sm" pending="…">Restore</SubmitButton></form>
-                              <ConfirmDelete action={async () => { "use server"; await deleteProductAction(p.id); }} message={`Delete "${p.title}" permanently? Past order details remain preserved.`} label="Delete" testId="delete-product-btn" />
-                            </div>
-                          </td>
-                        )}
+                        <td className="r">
+                          <div className="row" style={{ justifyContent: "flex-end", gap: 6 }}>
+                            {tab === "archived" ? (
+                              <>
+                                <form action={async () => { "use server"; await restoreProductAction(p.id); }}><SubmitButton className="btn btn-secondary btn-sm" pending="…">Restore</SubmitButton></form>
+                                <ConfirmDelete action={async () => { "use server"; await deleteProductAction(p.id); }} message={`Delete "${p.title}" permanently? Past order details remain preserved.`} label="Delete" testId="delete-product-btn" />
+                              </>
+                            ) : (
+                              <>
+                                <Link href={`/products/${p.id}`} className="btn btn-secondary btn-sm" prefetch={false}>Edit</Link>
+                                <ConfirmDelete action={async () => { "use server"; await deleteProductAction(p.id); }} message={`Delete "${p.title}"?`} label="Delete" testId="delete-product-btn" />
+                              </>
+                            )}
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
