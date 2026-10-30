@@ -33,6 +33,12 @@ export const THEMES = STORE_THEMES.map(({ id, name, blurb }) => ({ id, name, blu
   live: true;
 }[];
 
+/**
+ * Ad-tracking values (Meta click ids, UTM tags, the page the visitor came from) are measurement, not signup details, so an over-long one is
+ * cut to size instead of failing the signup. Meta's click cookie (fbc) carries a click id that can run past 150 characters.
+ */
+const tracking = (max: number) => z.string().transform((v) => v.slice(0, max)).optional().nullable();
+
 export const SignupInput = z.object({
   ownerName: z.string().trim().min(2, "Enter your name").max(80),
   email: z.string().trim().toLowerCase().email("Enter a valid email address").max(120),
@@ -56,15 +62,15 @@ export const SignupInput = z.object({
     "SERVICE_PROVIDER",
     "PERSONAL_PORTFOLIO",
   ]).optional().nullable(),
-  eventId: z.string().max(100).optional().nullable(),
-  ip: z.string().max(100).optional().nullable(),
-  userAgent: z.string().max(400).optional().nullable(),
-  fbp: z.string().max(100).optional().nullable(),
-  fbc: z.string().max(150).optional().nullable(),
-  utmSource: z.string().max(100).optional().nullable(),
-  utmMedium: z.string().max(100).optional().nullable(),
-  utmCampaign: z.string().max(100).optional().nullable(),
-  referrer: z.string().max(400).optional().nullable(),
+  eventId: tracking(100),
+  ip: tracking(100),
+  userAgent: tracking(400),
+  fbp: tracking(100),
+  fbc: tracking(500),
+  utmSource: tracking(100),
+  utmMedium: tracking(100),
+  utmCampaign: tracking(100),
+  referrer: tracking(400),
   consentGiven: z.boolean().optional().nullable(),
 });
 export type SignupInput = z.input<typeof SignupInput>;

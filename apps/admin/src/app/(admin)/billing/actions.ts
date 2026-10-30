@@ -38,7 +38,7 @@ export async function initiateOnlineBillingAction(plan: string, interval: "MONTH
         type: "subscription",
         // The webhook that activates the plan has no browser, so the Pixel details travel with the charge for the Purchase event.
         ...(jar.get("_fbp")?.value ? { fbp: jar.get("_fbp")!.value.slice(0, 100) } : {}),
-        ...(jar.get("_fbc")?.value ? { fbc: jar.get("_fbc")!.value.slice(0, 150) } : {}),
+        ...(jar.get("_fbc")?.value ? { fbc: jar.get("_fbc")!.value.slice(0, 500) } : {}),
         ...(h.get("x-forwarded-for") ? { ip: h.get("x-forwarded-for")!.split(",")[0]!.trim().slice(0, 64) } : {}),
         ...(h.get("user-agent") ? { ua: h.get("user-agent")!.slice(0, 300) } : {}),
       },

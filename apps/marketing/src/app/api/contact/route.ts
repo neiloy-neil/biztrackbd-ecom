@@ -140,7 +140,7 @@ export async function POST(req: Request) {
     const userAgent = req.headers.get("user-agent") || null;
     const eventId = typeof json.eventId === "string" ? json.eventId.trim().slice(0, 100) : null;
     const fbp = typeof json.fbp === "string" ? json.fbp.trim().slice(0, 100) : null;
-    const fbc = typeof json.fbc === "string" ? json.fbc.trim().slice(0, 150) : null;
+    const fbc = typeof json.fbc === "string" ? json.fbc.trim().slice(0, 500) : null;
     const utmSource = typeof json.utmSource === "string" ? json.utmSource.trim().slice(0, 100) : null;
     const utmMedium = typeof json.utmMedium === "string" ? json.utmMedium.trim().slice(0, 100) : null;
     const utmCampaign = typeof json.utmCampaign === "string" ? json.utmCampaign.trim().slice(0, 100) : null;
