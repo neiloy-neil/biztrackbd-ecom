@@ -30,8 +30,32 @@ export async function GET(req: Request) {
       orderTabCounts(session.tenantId, session.actor),
     ]);
 
+    const mappedOrders = result.rows.map((r: any) => {
+      const totalNum = Number(r.totalAmount ?? r.total ?? 0);
+      return {
+        id: r.id,
+        orderNumber: r.orderNumber,
+        customerName: r.customerName || "Customer",
+        customerPhone: r.customerPhone || "",
+        city: r.area || r.district || "Dhaka",
+        address: [r.area, r.district].filter(Boolean).join(", ") || "",
+        total: totalNum,
+        totalAmount: totalNum,
+        paymentMethod: r.paymentMethod || "COD",
+        paymentStatus: r.paymentStatus || "UNPAID",
+        status: r.status || "PROCESSING",
+        courierName: r.courierProvider || null,
+        trackingCode: r.trackingCode || null,
+        itemsCount: r.itemCount ?? 1,
+        itemCount: r.itemCount ?? 1,
+        createdAt: r.createdAt ? (typeof r.createdAt === "string" ? r.createdAt : r.createdAt.toISOString()) : new Date().toISOString(),
+        riskLevel: r.fraudRiskLevel || "LOW",
+        trustScore: r.fraudTrustScore ?? 85,
+      };
+    });
+
     return NextResponse.json({
-      orders: result.rows,
+      orders: mappedOrders,
       total: result.total,
       page: result.page,
       pageSize: result.pageSize,
