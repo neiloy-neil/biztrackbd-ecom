@@ -208,8 +208,9 @@ async function probeLiveHttps(domain: string): Promise<{ live: boolean; serverIs
     });
     const server = (probe.headers.get("server") || "").toLowerCase();
     const isVercel = server.includes("vercel") || Boolean(probe.headers.get("x-vercel-id"));
+    const isNotFound = probe.status === 404 || Boolean(probe.headers.get("x-vercel-error"));
     const validHttp = probe.status >= 200 && probe.status < 400;
-    return { live: validHttp || isVercel, serverIsVercel: isVercel };
+    return { live: validHttp && !isNotFound, serverIsVercel: isVercel };
   } catch {
     return { live: false, serverIsVercel: false };
   }

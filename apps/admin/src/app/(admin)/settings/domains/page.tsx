@@ -109,7 +109,7 @@ export default async function Domains({ searchParams }: { searchParams: Promise<
 
               {canEdit && (
                 <div className="row gap-xs mt-md">
-                  {!st.connected && <form action={checkNowAction.bind(null, d.id)}><SubmitButton className="btn btn-secondary btn-sm" pending="Checking…" data-testid="check-now">Check now</SubmitButton></form>}
+                  <form action={checkNowAction.bind(null, d.id)}><SubmitButton className="btn btn-secondary btn-sm" pending="Checking…" data-testid="check-now">{st.connected ? "Re-sync" : "Check now"}</SubmitButton></form>
                   {d.verified && !d.isPrimary && <form action={makePrimaryAction.bind(null, d.id)}><SubmitButton className="btn btn-secondary btn-sm" pending="…">Make this the main address</SubmitButton></form>}
                   <form action={removeDomainAction.bind(null, d.id)}><SubmitButton className="btn btn-secondary btn-sm" pending="Removing…" aria-label={`Remove ${d.domain}`}>Remove</SubmitButton></form>
                 </div>
