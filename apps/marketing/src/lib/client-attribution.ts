@@ -84,16 +84,58 @@ export function getAttributionForPayload(): {
   const first = parseAttributionCookie(firstRaw);
 
   const best = last || first;
-  const fbp = readCookie("_fbp") || best?.fbp || null;
-  const fbc = readCookie("_fbc") || best?.fbc || null;
+  let fbp = readCookie("_fbp") || best?.fbp || null;
+  let fbc = readCookie("_fbc") || best?.fbc || null;
+  let utmSource = best?.utmSource || null;
+  let utmMedium = best?.utmMedium || null;
+  let utmCampaign = best?.utmCampaign || null;
+  let utmTerm = best?.utmTerm || null;
+  let utmContent = best?.utmContent || null;
+  let referrer = best?.referrer || (document.referrer || null);
+
+  // Immediate fallback: read current URL search params directly (e.g. if cookies were blocked or haven't written)
+  try {
+    const sp = new URLSearchParams(window.location.search);
+    if (!utmCampaign && sp.get("utm_campaign")) utmCampaign = sp.get("utm_campaign");
+    if (!utmSource && sp.get("utm_source")) utmSource = sp.get("utm_source");
+    if (!utmMedium && sp.get("utm_medium")) utmMedium = sp.get("utm_medium");
+    if (!utmTerm && sp.get("utm_term")) utmTerm = sp.get("utm_term");
+    if (!utmContent && sp.get("utm_content")) utmContent = sp.get("utm_content");
+    const fbclid = sp.get("fbclid");
+    if (fbclid && !fbc) {
+      fbc = `fb.1.${Date.now()}.${fbclid}`;
+      if (!utmSource) utmSource = "meta";
+      if (!utmMedium) utmMedium = "paid_social";
+      if (!utmCampaign) utmCampaign = "trial14";
+    }
+  } catch {}
+
+  // Cache fallback to sessionStorage
+  const STORAGE_KEY = "bt_attr_fallback_v1";
+  try {
+    if (!utmCampaign || !utmSource) {
+      const cached = window.sessionStorage.getItem(STORAGE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (!utmCampaign && parsed.utmCampaign) utmCampaign = parsed.utmCampaign;
+        if (!utmSource && parsed.utmSource) utmSource = parsed.utmSource;
+        if (!utmMedium && parsed.utmMedium) utmMedium = parsed.utmMedium;
+        if (!utmContent && parsed.utmContent) utmContent = parsed.utmContent;
+        if (!fbc && parsed.fbc) fbc = parsed.fbc;
+        if (!fbp && parsed.fbp) fbp = parsed.fbp;
+      }
+    } else {
+      window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ utmCampaign, utmSource, utmMedium, utmContent, fbc, fbp }));
+    }
+  } catch {}
 
   return {
-    utmSource: best?.utmSource || null,
-    utmMedium: best?.utmMedium || null,
-    utmCampaign: best?.utmCampaign || null,
-    utmTerm: best?.utmTerm || null,
-    utmContent: best?.utmContent || null,
-    referrer: best?.referrer || null,
+    utmSource,
+    utmMedium,
+    utmCampaign,
+    utmTerm,
+    utmContent,
+    referrer,
     fbp,
     fbc,
   };

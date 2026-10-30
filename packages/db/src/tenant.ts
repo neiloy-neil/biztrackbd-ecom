@@ -36,8 +36,8 @@ export async function withTenant<T>(
       return fn(tx);
     },
     {
-      timeout: options?.timeoutMs ?? 15_000,
-      maxWait: options?.maxWaitMs ?? 5_000,
+      timeout: options?.timeoutMs ?? (process.env.NODE_ENV === "development" ? 60_000 : 30_000),
+      maxWait: options?.maxWaitMs ?? (process.env.NODE_ENV === "development" ? 30_000 : 10_000),
       ...(options?.isolationLevel ? { isolationLevel: options.isolationLevel } : {}),
     },
   );

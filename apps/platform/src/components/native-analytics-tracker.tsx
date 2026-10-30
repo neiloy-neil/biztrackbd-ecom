@@ -43,15 +43,25 @@ function parseDevice(): { device: string; browser: string; os: string } {
 function sendBeacon(url: string, data: Record<string, unknown>) {
   if (typeof window === "undefined") return;
   const json = JSON.stringify(data);
-  if (navigator.sendBeacon) {
-    navigator.sendBeacon(url, json);
-  } else {
-    fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: json, keepalive: true }).catch(() => undefined);
+  if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+    try {
+      const blob = new Blob([json], { type: "application/json" });
+      const sent = navigator.sendBeacon(url, blob);
+      if (sent) return;
+    } catch {}
   }
+  fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: json,
+    keepalive: true,
+  }).catch(() => undefined);
 }
 
 const IGNORABLE_ERROR_PATTERNS = [
   /Java object is gone/i,
+  /Error invoking postMessage/i,
+  /postMessage.*Java/i,
   /^Script error\.?$/i,
   /ResizeObserver loop/i,
   /Non-Error promise rejection/i,
@@ -61,6 +71,8 @@ const IGNORABLE_ERROR_PATTERNS = [
   /ChunkLoadError/i,
   /Loading chunk .* failed/i,
   /NetworkError when attempting to fetch resource/i,
+  /fb_xd_fragment/i,
+  /fbclid/i,
 ];
 
 function isIgnorableClientError(message: string, stack?: string | null): boolean {

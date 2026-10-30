@@ -12,6 +12,7 @@ import { pageOf, one, qs } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { deleteProductAction, restoreProductAction } from "./actions";
 import { ConfirmDelete } from "@/components/confirm-delete";
+import { ActionButton } from "@/components/action-button";
 import { bulkProductsAction } from "./bulk-actions";
 
 export const dynamic = "force-dynamic";
@@ -156,7 +157,7 @@ export default async function Products({ searchParams }: { searchParams: Promise
                       <div className="row flex-end gap-sm mt-sm pt-sm border-top-dashed">
                         {tab === "archived" ? (
                           <>
-                            <form action={async () => { "use server"; await restoreProductAction(p.id); }}><SubmitButton className="btn btn-secondary btn-sm" pending="…">Restore</SubmitButton></form>
+                            <ActionButton action={async () => { "use server"; await restoreProductAction(p.id); }} label="Restore" pending="…" />
                             <ConfirmDelete action={async () => { "use server"; await deleteProductAction(p.id); }} message={`Delete "${p.title}" permanently? Past order details remain preserved.`} label="Delete" testId="delete-product-btn" />
                           </>
                         ) : (
@@ -191,7 +192,7 @@ export default async function Products({ searchParams }: { searchParams: Promise
                           <div className="row flex-end gap-sm">
                             {tab === "archived" ? (
                               <>
-                                <form action={async () => { "use server"; await restoreProductAction(p.id); }}><SubmitButton className="btn btn-secondary btn-sm" pending="…">Restore</SubmitButton></form>
+                                <ActionButton action={async () => { "use server"; await restoreProductAction(p.id); }} label="Restore" pending="…" />
                                 <ConfirmDelete action={async () => { "use server"; await deleteProductAction(p.id); }} message={`Delete "${p.title}" permanently? Past order details remain preserved.`} label="Delete" testId="delete-product-btn" />
                               </>
                             ) : (

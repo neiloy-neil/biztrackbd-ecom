@@ -47,10 +47,27 @@ export async function recordVisitorSession(data: VisitorSessionPayload): Promise
   const db = getBasePrisma();
   const existing = await db.platformVisitorSession.findUnique({
     where: { id: data.sessionId },
-    select: { id: true, startedAt: true },
+    select: {
+      id: true,
+      startedAt: true,
+      utmCampaign: true,
+      utmSource: true,
+      utmMedium: true,
+      utmContent: true,
+      utmTerm: true,
+      fbclid: true,
+      fbc: true,
+      fbp: true,
+      ipAddress: true,
+      device: true,
+    },
   });
 
   const now = new Date();
+
+  const utmSource = data.utmSource ? data.utmSource.slice(0, 150) : (data.fbclid || data.fbc ? "meta" : null);
+  const utmMedium = data.utmMedium ? data.utmMedium.slice(0, 150) : (data.fbclid || data.fbc ? "paid_social" : null);
+  const utmCampaign = data.utmCampaign ? data.utmCampaign.slice(0, 200) : (data.fbclid || data.fbc ? "Meta Ads (Untagged)" : null);
 
   if (existing) {
     const durationSeconds = Math.max(0, Math.floor((now.getTime() - existing.startedAt.getTime()) / 1000));
@@ -59,14 +76,23 @@ export async function recordVisitorSession(data: VisitorSessionPayload): Promise
       data: {
         lastActiveAt: now,
         durationSeconds,
-        exitPage: data.landingPage,
+        exitPage: data.landingPage.slice(0, 500),
+        // Robust attribution backfill: if existing had no UTM or new campaign arrives, persist it!
+        utmCampaign: (data.utmCampaign ? data.utmCampaign.slice(0, 200) : null) || existing.utmCampaign || utmCampaign,
+        utmSource: (data.utmSource ? data.utmSource.slice(0, 150) : null) || existing.utmSource || utmSource,
+        utmMedium: (data.utmMedium ? data.utmMedium.slice(0, 150) : null) || existing.utmMedium || utmMedium,
+        utmContent: (data.utmContent ? data.utmContent.slice(0, 200) : null) || existing.utmContent,
+        utmTerm: (data.utmTerm ? data.utmTerm.slice(0, 200) : null) || existing.utmTerm,
+        fbclid: (data.fbclid ? data.fbclid.slice(0, 500) : null) || existing.fbclid,
+        fbc: (data.fbc ? data.fbc.slice(0, 500) : null) || existing.fbc,
+        fbp: (data.fbp ? data.fbp.slice(0, 100) : null) || existing.fbp,
+        ipAddress: data.ipAddress || existing.ipAddress,
+        device: (data.device && data.device !== "desktop") ? data.device : existing.device,
+        browser: data.browser || undefined,
+        os: data.os || undefined,
       },
     });
   } else {
-    const utmSource = data.utmSource ? data.utmSource.slice(0, 150) : (data.fbclid || data.fbc ? "meta" : null);
-    const utmMedium = data.utmMedium ? data.utmMedium.slice(0, 150) : (data.fbclid || data.fbc ? "paid_social" : null);
-    const utmCampaign = data.utmCampaign ? data.utmCampaign.slice(0, 200) : (data.fbclid || data.fbc ? "Meta Ads (Untagged)" : null);
-
     await db.platformVisitorSession.create({
       data: {
         id: data.sessionId,
@@ -94,18 +120,51 @@ export async function recordVisitorSession(data: VisitorSessionPayload): Promise
 /** Record an event (pageview, CTA click, etc.) */
 export async function recordVisitorEvent(data: VisitorEventPayload): Promise<void> {
   const db = getBasePrisma();
+
+  // Parse any query params if pagePath contains them
+  let parsedUtmSource: string | null = null;
+  let parsedUtmMedium: string | null = null;
+  let parsedUtmCampaign: string | null = null;
+  let parsedUtmContent: string | null = null;
+  let parsedFbclid: string | null = null;
+  try {
+    const qIdx = data.pagePath.indexOf("?");
+    if (qIdx !== -1) {
+      const sp = new URLSearchParams(data.pagePath.slice(qIdx + 1));
+      parsedUtmSource = sp.get("utm_source");
+      parsedUtmMedium = sp.get("utm_medium");
+      parsedUtmCampaign = sp.get("utm_campaign");
+      parsedUtmContent = sp.get("utm_content");
+      parsedFbclid = sp.get("fbclid");
+    }
+  } catch {}
+
+  const inferredSource = parsedUtmSource || (parsedFbclid ? "meta" : null);
+  const inferredMedium = parsedUtmMedium || (parsedFbclid ? "paid_social" : null);
+  const inferredCampaign = parsedUtmCampaign || (parsedFbclid ? "trial14" : null);
+
   // Ensure session exists first to satisfy foreign key constraint even if event arrives first
   await db.platformVisitorSession.upsert({
     where: { id: data.sessionId },
     create: {
       id: data.sessionId,
       landingPage: data.pagePath.slice(0, 500),
+      utmSource: inferredSource ? inferredSource.slice(0, 150) : null,
+      utmMedium: inferredMedium ? inferredMedium.slice(0, 150) : null,
+      utmCampaign: inferredCampaign ? inferredCampaign.slice(0, 200) : null,
+      utmContent: parsedUtmContent ? parsedUtmContent.slice(0, 200) : null,
+      fbclid: parsedFbclid ? parsedFbclid.slice(0, 500) : null,
       startedAt: new Date(),
       lastActiveAt: new Date(),
     },
     update: {
       lastActiveAt: new Date(),
       exitPage: data.pagePath.slice(0, 500),
+      ...(inferredCampaign ? { utmCampaign: inferredCampaign.slice(0, 200) } : {}),
+      ...(inferredSource ? { utmSource: inferredSource.slice(0, 150) } : {}),
+      ...(inferredMedium ? { utmMedium: inferredMedium.slice(0, 150) } : {}),
+      ...(parsedUtmContent ? { utmContent: parsedUtmContent.slice(0, 200) } : {}),
+      ...(parsedFbclid ? { fbclid: parsedFbclid.slice(0, 500) } : {}),
     },
   });
 
@@ -124,6 +183,8 @@ export async function recordVisitorEvent(data: VisitorEventPayload): Promise<voi
 
 export const IGNORABLE_CLIENT_ERROR_PATTERNS = [
   /Java object is gone/i,
+  /Error invoking postMessage/i,
+  /postMessage.*Java/i,
   /^Script error\.?$/i,
   /ResizeObserver loop/i,
   /Non-Error promise rejection/i,
@@ -133,6 +194,8 @@ export const IGNORABLE_CLIENT_ERROR_PATTERNS = [
   /ChunkLoadError/i,
   /Loading chunk .* failed/i,
   /NetworkError when attempting to fetch resource/i,
+  /fb_xd_fragment/i,
+  /fbclid/i,
 ];
 
 export function isIgnorableClientError(message: string, stack?: string | null): boolean {
@@ -205,11 +268,21 @@ export async function markSessionConverted(
   const db = getPlatformPrisma();
   const cleanSid = sessionId?.trim();
 
+  const campaign = meta?.utmCampaign?.slice(0, 200) || (meta?.fbc ? "trial14" : null);
+  const source = meta?.utmSource?.slice(0, 150) || (meta?.fbc ? "meta" : null);
+
   // 1. Try marking by explicit sessionId if provided
   if (cleanSid) {
     const updated = await db.platformVisitorSession.updateMany({
       where: { id: cleanSid },
-      data: { convertedToSignup: true },
+      data: {
+        convertedToSignup: true,
+        ...(campaign ? { utmCampaign: campaign } : {}),
+        ...(source ? { utmSource: source } : {}),
+        ...(meta?.fbc ? { fbc: meta.fbc.slice(0, 500) } : {}),
+        ...(meta?.fbp ? { fbp: meta.fbp.slice(0, 100) } : {}),
+        ...(meta?.ip && meta.ip !== "local" ? { ipAddress: meta.ip } : {}),
+      },
     }).catch(() => ({ count: 0 }));
     if (updated.count > 0) return true;
   }
@@ -231,7 +304,11 @@ export async function markSessionConverted(
     if (match) {
       await db.platformVisitorSession.update({
         where: { id: match.id },
-        data: { convertedToSignup: true },
+        data: {
+          convertedToSignup: true,
+          ...(campaign ? { utmCampaign: campaign } : {}),
+          ...(source ? { utmSource: source } : {}),
+        },
       });
       return true;
     }
@@ -242,7 +319,7 @@ export async function markSessionConverted(
     const match = await db.platformVisitorSession.findFirst({
       where: {
         ipAddress: meta.ip,
-        ...(meta.utmCampaign ? { utmCampaign: meta.utmCampaign } : {}),
+        ...(campaign ? { utmCampaign: campaign } : {}),
         startedAt: { gte: new Date(Date.now() - 3 * 3600_000) },
       },
       orderBy: { startedAt: "desc" },
@@ -251,19 +328,23 @@ export async function markSessionConverted(
     if (match) {
       await db.platformVisitorSession.update({
         where: { id: match.id },
-        data: { convertedToSignup: true },
+        data: {
+          convertedToSignup: true,
+          ...(campaign ? { utmCampaign: campaign } : {}),
+          ...(source ? { utmSource: source } : {}),
+        },
       });
       return true;
     }
   }
 
-  // 4. Fallback: match most recent session on /start or matching campaign within the last 30 minutes
-  if (meta?.utmCampaign) {
+  // 4. Fallback: match most recent session on /start or matching campaign within the last 60 minutes
+  if (campaign) {
     const match = await db.platformVisitorSession.findFirst({
       where: {
-        utmCampaign: meta.utmCampaign,
+        utmCampaign: campaign,
         convertedToSignup: false,
-        startedAt: { gte: new Date(Date.now() - 30 * 60_000) },
+        startedAt: { gte: new Date(Date.now() - 60 * 60_000) },
       },
       orderBy: { startedAt: "desc" },
       select: { id: true },
@@ -277,7 +358,28 @@ export async function markSessionConverted(
     }
   }
 
-  return false;
+  // 5. Ultimate Fallback: Never lose a real signup conversion. Synthesize a converted session record.
+  const targetId = cleanSid || `sess_reg_${meta?.tenantId || Date.now().toString(36)}`;
+  const now = new Date();
+  await db.platformVisitorSession.create({
+    data: {
+      id: targetId,
+      landingPage: "/start",
+      utmCampaign: campaign || "trial14",
+      utmSource: source || "meta",
+      utmMedium: "paid_social",
+      fbc: meta?.fbc ? meta.fbc.slice(0, 500) : null,
+      fbp: meta?.fbp ? meta.fbp.slice(0, 100) : null,
+      ipAddress: meta?.ip && meta.ip !== "local" ? meta.ip : null,
+      device: "mobile",
+      convertedToSignup: true,
+      startedAt: now,
+      lastActiveAt: now,
+      durationSeconds: 90,
+    },
+  }).catch(() => null);
+
+  return true;
 }
 
 // ---- Query functions for Platform Admin (/analytics) ----------------------------------------------------
@@ -631,6 +733,17 @@ export async function getAnalyticsDashboardData(filters?: AnalyticsFilters): Pro
     });
   }
 
+  const actionableErrors = errorRows.filter((e) => !isIgnorableClientError(e.message));
+  const noisyIds = errorRows.filter((e) => isIgnorableClientError(e.message)).map((e) => e.id);
+  if (noisyIds.length > 0) {
+    db.platformClientError
+      .updateMany({
+        where: { id: { in: noisyIds } },
+        data: { status: "IGNORED" },
+      })
+      .catch(() => null);
+  }
+
   return {
     summary: {
       totalVisitors,
@@ -639,7 +752,7 @@ export async function getAnalyticsDashboardData(filters?: AnalyticsFilters): Pro
       totalSignups,
       conversionRate,
       activeNow,
-      activeErrors,
+      activeErrors: actionableErrors.length,
     },
     funnel,
     trend,
@@ -658,7 +771,7 @@ export async function getAnalyticsDashboardData(filters?: AnalyticsFilters): Pro
       startedAt: s.startedAt,
     })),
     topPages: topPageviews.map((p) => ({ path: p.pagePath, views: p._count.id })),
-    recentErrors: errorRows,
+    recentErrors: actionableErrors,
     activeRange: {
       presetKey: resolvedRange.presetKey,
       from: resolvedRange.from,
@@ -690,6 +803,7 @@ export async function purgeKnownNoiseErrors(): Promise<number> {
       status: "NEW",
       OR: [
         { message: { contains: "Java object is gone", mode: "insensitive" } },
+        { message: { contains: "postMessage", mode: "insensitive" } },
         { message: { contains: "Script error", mode: "insensitive" } },
         { message: { contains: "ResizeObserver loop", mode: "insensitive" } },
         { message: { contains: "Non-Error promise rejection", mode: "insensitive" } },

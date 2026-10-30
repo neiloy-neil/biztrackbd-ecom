@@ -1,12 +1,39 @@
 "use client";
 
-import { SubmitButton } from "./ui";
+import { useTransition } from "react";
 
-/** A delete button that asks first. Deleting a page cannot be undone, and a live page's address stops working at once. */
-export function ConfirmDelete({ action, message, label = "Delete", testId }: { action: () => Promise<void>; message: string; label?: string; testId?: string }) {
+/** A delete button that asks first. Executes a server action directly without an enclosing <form> to prevent invalid nested forms. */
+export function ConfirmDelete({
+  action,
+  message,
+  label = "Delete",
+  testId,
+  className = "btn btn-secondary btn-sm",
+}: {
+  action: () => Promise<void>;
+  message: string;
+  label?: string;
+  testId?: string;
+  className?: string;
+}) {
+  const [isPending, startTransition] = useTransition();
+
   return (
-    <form action={action} onSubmit={(e) => { if (!window.confirm(message)) e.preventDefault(); }}>
-      <SubmitButton className="btn btn-secondary btn-sm" pending="Deleting…" data-testid={testId}>{label}</SubmitButton>
-    </form>
+    <button
+      type="button"
+      className={className}
+      disabled={isPending}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!window.confirm(message)) return;
+        startTransition(async () => {
+          await action();
+        });
+      }}
+      data-testid={testId}
+    >
+      {isPending ? "Deleting…" : label}
+    </button>
   );
 }

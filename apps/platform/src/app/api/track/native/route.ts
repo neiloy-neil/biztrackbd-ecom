@@ -3,7 +3,13 @@ import { recordVisitorSession, recordVisitorEvent, type VisitorSessionPayload, t
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    let body: any;
+    try {
+      body = await req.json();
+    } catch {
+      const text = await req.text();
+      body = JSON.parse(text);
+    }
     const forwardedFor = req.headers.get("x-forwarded-for");
     const ip = forwardedFor ? forwardedFor.split(",")[0]?.trim() || null : null;
 
