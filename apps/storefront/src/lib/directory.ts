@@ -8,7 +8,9 @@ let directory: CachedDirectory | undefined;
 
 export function getDirectory(): CachedDirectory {
   if (directory) return directory;
-  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+  const root =
+    process.env.NEXT_PUBLIC_ROOT_DOMAIN ??
+    (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000");
   const sources: HostDirectory[] = [];
 
   if (process.env.EDGE_CONFIG) {

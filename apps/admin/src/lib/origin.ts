@@ -18,7 +18,9 @@ export function resolveAdminOrigin(
   // 2. Extract host and proto from headers
   const fwdHost = headersList.get("x-forwarded-host");
   const directHost = headersList.get("host");
-  const rawHost = (fwdHost || directHost || `localhost:${fallbackPort}`).split(",")[0]!.trim();
+  const defaultHost =
+    process.env.NODE_ENV === "production" ? "admin.biztrack.bd" : `localhost:${fallbackPort}`;
+  const rawHost = (fwdHost || directHost || defaultHost).split(",")[0]!.trim();
   const fwdProto = headersList.get("x-forwarded-proto");
   const fwdPort = headersList.get("x-forwarded-port");
 

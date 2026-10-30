@@ -214,8 +214,10 @@ export function recoveryText(locale: string, p: { name: string | null; storeName
 
 function storeOrigin(subdomain: string, primaryDomain: string | null): string {
   if (primaryDomain) return `https://${primaryDomain}`;
-  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
-  return `${root.startsWith("localhost") ? "http" : "https"}://${subdomain}.${root}`;
+  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+  if (root && !root.startsWith("localhost")) return `https://${subdomain}.${root}`;
+  if (process.env.NODE_ENV === "production") return `https://${subdomain}.biztrack.bd`;
+  return `http://${subdomain}.${root || "localhost:3000"}`;
 }
 
 /** Takes one SMS credit from this month's allowance. False when the plan's allowance is used up. Atomic, so two sweeps cannot overspend. */

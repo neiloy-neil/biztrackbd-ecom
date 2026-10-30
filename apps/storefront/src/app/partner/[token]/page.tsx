@@ -18,7 +18,9 @@ export default async function PartnerPortalPage(props: { params: Promise<{ token
   }
 
   const headerList = await headers();
-  const host = headerList.get("host") || "localhost:3000";
+  const host =
+    headerList.get("host") ||
+    (process.env.NODE_ENV === "production" ? `${store.subdomain}.biztrack.bd` : "localhost:3000");
   const proto = headerList.get("x-forwarded-proto") || (host.startsWith("localhost") ? "http" : "https");
   const origin = await storeOriginFor(store.id).catch(() => `${proto}://${host}`);
 

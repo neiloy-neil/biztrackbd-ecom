@@ -30,7 +30,7 @@ function escapeXml(unsafe: string): string {
  */
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000");
   const proto = rootDomain.startsWith("localhost") ? "http" : "https";
 
   let tenantId: string | null = null;

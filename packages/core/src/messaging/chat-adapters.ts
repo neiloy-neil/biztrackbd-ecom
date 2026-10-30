@@ -159,6 +159,16 @@ export function getSampleEventData(event: WebhookEventKey | "ping"): Record<stri
   }
 }
 
+function defaultAdminOrigin(): string {
+  const envAdmin = process.env.ADMIN_ORIGIN || process.env.NEXT_PUBLIC_ADMIN_URL;
+  if (envAdmin) return envAdmin.replace(/\/+$/, "");
+  if (process.env.NODE_ENV === "production") {
+    const root = (process.env.NEXT_PUBLIC_ROOT_DOMAIN || "biztrack.bd").replace(/:\d+$/, "");
+    return `https://admin.${root}`;
+  }
+  return "http://localhost:3001";
+}
+
 /**
  * Formats a Discord rich embed payload matching Discord Webhook API specifications.
  * Uses color-coded status strips, inline fields, and direct admin action links.
@@ -166,7 +176,7 @@ export function getSampleEventData(event: WebhookEventKey | "ping"): Record<stri
 export function formatDiscordWebhookPayload(
   event: WebhookEventKey | "ping",
   data: Record<string, unknown>,
-  adminOrigin: string = "http://localhost:3001"
+  adminOrigin: string = defaultAdminOrigin()
 ): { content: string; embeds: object[] } {
   const baseAdmin = adminOrigin.replace(/\/+$/, "");
 
@@ -382,7 +392,7 @@ export function formatDiscordWebhookPayload(
 export function formatSlackWebhookPayload(
   event: WebhookEventKey | "ping",
   data: Record<string, unknown>,
-  adminOrigin: string = "http://localhost:3001"
+  adminOrigin: string = defaultAdminOrigin()
 ): { text: string; blocks: object[] } {
   const baseAdmin = adminOrigin.replace(/\/+$/, "");
 
@@ -652,7 +662,7 @@ export function formatTelegramWebhookPayload(
   targetUrl: string,
   event: WebhookEventKey | "ping",
   data: Record<string, unknown>,
-  adminOrigin: string = "http://localhost:3001"
+  adminOrigin: string = defaultAdminOrigin()
 ): { url: string; body: { chat_id: string; text: string; parse_mode: "Markdown" } } {
   const baseAdmin = adminOrigin.replace(/\/+$/, "");
 
@@ -804,7 +814,7 @@ export function adaptWebhookPayload(
   targetUrl: string,
   event: WebhookEventKey | "ping",
   rawPayload: Record<string, unknown>,
-  adminOrigin: string = "http://localhost:3001",
+  adminOrigin: string = defaultAdminOrigin(),
   forcedAdapter?: WebhookAdapterType
 ): ChatAdapterResult {
   const adapter = forcedAdapter && forcedAdapter !== "generic" ? forcedAdapter : detectWebhookAdapter(targetUrl);

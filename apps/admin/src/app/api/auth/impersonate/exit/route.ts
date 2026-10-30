@@ -11,7 +11,14 @@ async function handleExit(req: NextRequest) {
   const verified = current ? verifyImpersonationSessionCookie(current) : null;
   jar.delete(IMPERSONATION_COOKIE);
 
-  const platformUrl = process.env.NEXT_PUBLIC_PLATFORM_URL || "http://localhost:3002";
+  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+  const platformUrl =
+    process.env.NEXT_PUBLIC_PLATFORM_URL ||
+    (root && !root.includes("localhost")
+      ? `https://platform.${root}`
+      : process.env.NODE_ENV === "production"
+      ? "https://platform.biztrack.bd"
+      : "http://localhost:3003");
   const target = verified ? `${platformUrl}/tenants/${verified.tenantId}` : `${platformUrl}/tenants`;
   return NextResponse.redirect(target);
 }

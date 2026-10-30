@@ -22,7 +22,10 @@ export async function inviteAction(_prev: InviteState, form: FormData): Promise<
     // The invite is emailed, and the link is still shown once so the owner can send it another way (for example on WhatsApp).
     const role = String(form.get("role") ?? "");
     const sent = await emailStaffInvite(s.tenantId, { to: email.trim().toLowerCase(), roleLabel: ROLE_LABELS[role as keyof typeof ROLE_LABELS] ?? role, inviterName: s.user.name, token: r.token, expiresAt: r.expiresAt });
-    const origin = process.env.ADMIN_ORIGIN ?? "http://localhost:3001";
+    const origin =
+      process.env.ADMIN_ORIGIN ||
+      process.env.NEXT_PUBLIC_ADMIN_URL ||
+      (process.env.NODE_ENV === "production" ? "https://admin.biztrack.bd" : "http://localhost:3001");
     return { link: `${origin}/join/${r.token}`, email, emailed: sent === "sent" };
   } catch (e) {
     if (e instanceof DomainError) return { error: e.message };

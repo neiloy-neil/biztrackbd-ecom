@@ -2,7 +2,9 @@ import type { MetadataRoute } from "next";
 import sitemapDates from "@/lib/sitemap-dates.json";
 import { getBlogPosts } from "@/lib/blog";
 
-const origin = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
+const origin =
+  process.env.NEXT_PUBLIC_MARKETING_URL ??
+  (process.env.NODE_ENV === "production" ? "https://biztrack.bd" : "http://localhost:3002");
 const dates = sitemapDates as Record<string, string>;
 const FALLBACK_DATE = new Date("2026-10-17T00:00:00.000Z");
 

@@ -12,7 +12,9 @@ const hind = Hind_Siliguri({ subsets: ["bengali", "latin"], weight: ["400", "600
 
 import { getPlatformSeoConfig, getPlatformSiteVerificationCode } from "@biztrackbd/core";
 
-const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
+const siteUrl =
+  process.env.NEXT_PUBLIC_MARKETING_URL ??
+  (process.env.NODE_ENV === "production" ? "https://biztrack.bd" : "http://localhost:3002");
 
 // Pages are cached and rebuilt in the background every 5 minutes, so SEO and contact settings saved in Platform Admin show up within that
 // time. Pages that read the request (search parameters) or set their own force-dynamic stay dynamic.

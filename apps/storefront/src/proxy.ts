@@ -25,7 +25,9 @@ export async function proxy(req: NextRequest): Promise<NextResponse> {
     });
   }
 
-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+  const rootDomain =
+    process.env.NEXT_PUBLIC_ROOT_DOMAIN ??
+    (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000");
   const cleanRoot = rootDomain.toLowerCase().replace(/:\d+$/, "");
   const hostHeader = req.headers.get("host");
   const host = normalizeHost(hostHeader);

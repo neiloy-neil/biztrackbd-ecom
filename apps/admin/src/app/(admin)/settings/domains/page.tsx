@@ -31,7 +31,7 @@ export default async function Domains({ searchParams }: { searchParams: Promise<
   const err = one(sp.err);
   const done = one(sp.done);
   const pending = rows.filter((r) => !statusOf(r).connected).map((r) => r.id);
-  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000");
 
   return (
     <>

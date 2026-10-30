@@ -691,6 +691,15 @@ export async function recordWebhookDeliveryLog(
   return entry;
 }
 
+function defaultAdminOrigin(): string {
+  if (process.env.ADMIN_ORIGIN) return process.env.ADMIN_ORIGIN.replace(/\/$/, "");
+  if (process.env.NEXT_PUBLIC_ADMIN_URL) return process.env.NEXT_PUBLIC_ADMIN_URL.replace(/\/$/, "");
+  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+  if (root && !root.startsWith("localhost")) return `https://admin.${root}`;
+  if (process.env.NODE_ENV === "production") return "https://admin.biztrack.bd";
+  return "http://localhost:3001";
+}
+
 /**
  * Dispatches a live test webhook ping to the merchant's configured endpoint.
  * Supports selecting a specific subscription, target business event, and admin origin for deep links.
@@ -745,7 +754,7 @@ export async function sendTestWebhookPing(
     };
   }
 
-  const adminOrigin = options?.adminOrigin || "http://localhost:3001";
+  const adminOrigin = options?.adminOrigin || defaultAdminOrigin();
   const adapted = adaptWebhookPayload(
     targetSub.targetUrl,
     eventType,
@@ -787,8 +796,9 @@ export async function emitMerchantWebhookEvent(
   tenantId: string,
   event: WebhookEventKey,
   payload: Record<string, unknown>,
-  adminOrigin: string = "http://localhost:3001"
+  adminOrigin?: string
 ): Promise<void> {
+  const resolvedAdminOrigin = adminOrigin || defaultAdminOrigin();
   let subs: WebhookSubscriptionView[] = [];
   const useDb = await isWebhookDbAllowed();
 
@@ -832,7 +842,7 @@ export async function emitMerchantWebhookEvent(
       data: payload,
     };
 
-    const adapted = adaptWebhookPayload(sub.targetUrl, event, envelope, adminOrigin, sub.adapter);
+    const adapted = adaptWebhookPayload(sub.targetUrl, event, envelope, resolvedAdminOrigin, sub.adapter);
 
     await enqueueNotificationJob({
       tenantId,

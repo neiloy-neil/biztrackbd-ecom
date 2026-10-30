@@ -29,7 +29,9 @@ async function pushRouting(tenantId: string, removed: string[] = []): Promise<vo
   }
 }
 
-const rootDomain = () => process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+const rootDomain = () =>
+  process.env.NEXT_PUBLIC_ROOT_DOMAIN ??
+  (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000");
 
 async function lockTenant(tx: TenantTx, tenantId: string) {
   await tx.$queryRaw`SELECT "id" FROM "Tenant" WHERE "id" = ${tenantId} FOR UPDATE`;

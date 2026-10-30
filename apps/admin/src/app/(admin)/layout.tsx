@@ -246,7 +246,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               currentTenantId={s.tenantId}
               currentSubdomain={s.tenantSubdomain}
               storeName={storeName}
-              rootDomain={process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000"}
+              rootDomain={process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000")}
               lang={lang}
               compact
             />
@@ -262,7 +262,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             currentTenantId={s.tenantId}
             currentSubdomain={s.tenantSubdomain}
             storeName={storeName}
-            rootDomain={process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000"}
+            rootDomain={process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000")}
             lang={lang}
           />
           <SideNav groups={groups} />

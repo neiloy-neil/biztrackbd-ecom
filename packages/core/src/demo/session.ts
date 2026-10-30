@@ -29,7 +29,9 @@ export class DemoLimitError extends DomainError {
   constructor() { super("DEMO_LIMIT", "You have started a few demos already. Please use one of them, or try again in an hour.", 429); }
 }
 
-const rootDomain = () => process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+const rootDomain = () =>
+  process.env.NEXT_PUBLIC_ROOT_DOMAIN ??
+  (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000");
 const FAR_FUTURE = new Date("2100-01-01T00:00:00Z");
 const PHONE = "01700000000";
 

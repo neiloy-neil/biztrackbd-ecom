@@ -80,7 +80,9 @@ export async function syncTenantRouting(
   opts: { removed?: string[]; env?: EdgeConfigEnv; fetchImpl?: typeof fetch } = {},
 ) {
   const env = opts.env ?? process.env;
-  const root = env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+  const root =
+    env.NEXT_PUBLIC_ROOT_DOMAIN ??
+    (env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000");
   const upsert = await buildTenantRoutes(tenantId, root);
   const remove = (opts.removed ?? []).flatMap((d) => [d, `www.${d}`]).filter((h) => !(h in upsert));
   return pushRoutes({ upsert, remove }, env, opts.fetchImpl);

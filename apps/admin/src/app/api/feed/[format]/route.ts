@@ -19,7 +19,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ form
   const { format } = await params;
   if (!FEEDS.includes(format)) return new NextResponse(`Supported feeds: ${FEEDS.join(", ")}`, { status: 404 });
 
-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+  const rootDomain =
+    process.env.NEXT_PUBLIC_ROOT_DOMAIN ??
+    (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000");
   const named = (req.nextUrl.searchParams.get("store") ?? req.nextUrl.searchParams.get("subdomain"))?.trim().toLowerCase();
   let tenantId: string | null = null;
   if (named) {

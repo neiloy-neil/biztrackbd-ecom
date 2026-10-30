@@ -191,7 +191,9 @@ export async function resetBusinessDemoStore(
   const manifest = BUSINESS_TEMPLATES.find((bt) => bt.id === t.id) ?? getBusinessTemplateByVertical(t.vertical);
   if (!manifest) throw new Error(`No manifest for business template: ${t.id}`);
 
-  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+  const root =
+    process.env.NEXT_PUBLIC_ROOT_DOMAIN ??
+    (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000");
   const cleanRoot = root.replace(/:\d+$/, "");
   const base = getBasePrisma();
 

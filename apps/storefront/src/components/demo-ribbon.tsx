@@ -19,7 +19,9 @@ export function DemoRibbon({
   const bn = lang === "bn";
   const bizTemplate = vertical ? getBusinessTemplateByVertical(vertical as BusinessVertical) : undefined;
   const theme = themeDefinition(themeId);
-  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+  const root =
+    process.env.NEXT_PUBLIC_ROOT_DOMAIN ??
+    (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000");
 
   const startUrl = bizTemplate
     ? root.includes("localhost")

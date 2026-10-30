@@ -17,7 +17,9 @@ export function resolveStorefrontOrigin(
 
   const fwdHost = headersList.get("x-forwarded-host");
   const directHost = headersList.get("host");
-  let rawHost = (fwdHost || directHost || `localhost:${fallbackPort}`).split(",")[0]!.trim();
+  const defaultHost =
+    process.env.NODE_ENV === "production" ? "biztrack.bd" : `localhost:${fallbackPort}`;
+  let rawHost = (fwdHost || directHost || defaultHost).split(",")[0]!.trim();
   // A forwarded host that lost its port (seen with <store>.localhost) while the direct host still has it: keep the port the visitor used.
   if (!rawHost.includes(":") && directHost && directHost.includes(":") && directHost.split(":")[0] === rawHost) rawHost = directHost;
   const fwdProto = headersList.get("x-forwarded-proto");

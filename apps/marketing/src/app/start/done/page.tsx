@@ -11,10 +11,14 @@ export default async function Done({ searchParams }: { searchParams: Promise<Rec
   const store = one(sp.store);
   // Only a label we would have created is shown or linked: this page cannot be used to put another address in front of someone.
   if (!store || !/^[a-z0-9-]{3,40}$/.test(store)) notFound();
-  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+  const root =
+    process.env.NEXT_PUBLIC_ROOT_DOMAIN ??
+    (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000");
   const proto = root.startsWith("localhost") ? "http" : "https";
   const storeUrl = `${proto}://${store}.${root}`;
-  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? "http://localhost:3001";
+  const adminUrl =
+    process.env.NEXT_PUBLIC_ADMIN_URL ??
+    (process.env.NODE_ENV === "production" ? "https://admin.biztrack.bd" : "http://localhost:3001");
   const token = one(sp.token);
   const email = one(sp.email);
   const autoLoginUrl = token

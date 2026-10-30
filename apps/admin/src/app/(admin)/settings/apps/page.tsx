@@ -71,14 +71,19 @@ export default async function Apps({
     ? { ...storeSettings, googleOAuthClientSecret: undefined, googleOAuthClientSecretSet: Boolean(storeSettings.googleOAuthClientSecret) }
     : null;
 
-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+  const rootDomain =
+    process.env.NEXT_PUBLIC_ROOT_DOMAIN ??
+    (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000");
   const proto = rootDomain.startsWith("localhost") ? "http" : "https";
   const storefrontOrigin = tenant.customDomain
     ? `https://${tenant.customDomain}`
     : `${proto}://${tenant.subdomain}.${rootDomain}`;
 
   const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+  const host =
+    h.get("x-forwarded-host") ??
+    h.get("host") ??
+    (process.env.NODE_ENV === "production" ? "admin.biztrack.bd" : "localhost:3001");
   const origin = `${h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https")}://${host}`;
 
   // Fetch webhook tokens for couriers safely

@@ -51,7 +51,7 @@ export function BusinessSwitcher({
   currentTenantId,
   currentSubdomain,
   storeName,
-  rootDomain = "localhost:3000",
+  rootDomain = process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000",
   lang = "en",
   compact = false,
 }: BusinessSwitcherProps) {

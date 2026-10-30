@@ -97,7 +97,7 @@ export function uddoktaPayPlanUrls(adminOrigin: string, platformOrigin: string):
 
 /** platform.<root domain> in production, localhost:3003 in development. */
 export function platformOriginFor(rootDomain: string | undefined): string {
-  const root = (rootDomain || "localhost:3000").trim();
+  const root = (rootDomain || (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000")).trim();
   return root.startsWith("localhost") ? "http://localhost:3003" : `https://platform.${root}`;
 }
 

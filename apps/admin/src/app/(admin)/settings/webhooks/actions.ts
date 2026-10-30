@@ -136,7 +136,11 @@ export async function sendTestWebhookPingAction(options?: {
     const result = await sendTestWebhookPing(s.tenantId, s.actor, {
       subscriptionId: options?.subscriptionId,
       event: options?.event,
-      adminOrigin: process.env.NEXT_PUBLIC_ADMIN_ORIGIN || "http://localhost:3001",
+      adminOrigin:
+        process.env.ADMIN_ORIGIN ||
+        process.env.NEXT_PUBLIC_ADMIN_URL ||
+        process.env.NEXT_PUBLIC_ADMIN_ORIGIN ||
+        (process.env.NODE_ENV === "production" ? "https://admin.biztrack.bd" : "http://localhost:3001"),
     });
     revalidatePath("/settings/webhooks");
     return {

@@ -279,7 +279,16 @@ export async function replyPlatformTicket(
   // A reply the store should see (not an internal note) is also emailed to the owner, so they do not have to keep checking.
   const replied = box.replied;
   if (replied && !isInternal) {
-    const admin = (process.env.ADMIN_ORIGIN || process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3001").replace(/\/$/, "");
+    const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+    const admin = (
+      process.env.ADMIN_ORIGIN ||
+      process.env.NEXT_PUBLIC_ADMIN_URL ||
+      (root && !root.startsWith("localhost")
+        ? `https://admin.${root}`
+        : process.env.NODE_ENV === "production"
+        ? "https://admin.biztrack.bd"
+        : "http://localhost:3001")
+    ).replace(/\/$/, "");
     await notifyOwner(replied.tenantId, "TICKET_REPLY", { ticketCode: replied.code ?? undefined, excerpt: body.length > 400 ? `${body.slice(0, 400)}...` : body, ticketUrl: `${admin}/support/${replied.id}` }, { dedupeKey: message.id });
   }
 

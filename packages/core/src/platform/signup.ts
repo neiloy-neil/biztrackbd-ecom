@@ -344,7 +344,9 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
 
     // Tell staff (feed and email). Awaited with a short limit and never fails the signup.
     const fromAd = Boolean(input.fbc) || /face?book|meta|\bfb\b|\big\b|instagram/i.test(input.utmSource ?? "");
-    const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+    const root =
+      process.env.NEXT_PUBLIC_ROOT_DOMAIN ??
+      (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000");
     await notifyPlatform({
       kind: "SIGNUP",
       title: `New signup: ${input.storeName}`,

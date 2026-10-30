@@ -103,8 +103,10 @@ export async function resetMessageTemplate(tenantId: string, actor: StaffActor, 
 
 function storeOrigin(subdomain: string, primaryDomain: string | null): string {
   if (primaryDomain) return `https://${primaryDomain}`;
-  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
-  return `${root.startsWith("localhost") ? "http" : "https"}://${subdomain}.${root}`;
+  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+  if (root && !root.startsWith("localhost")) return `https://${subdomain}.${root}`;
+  if (process.env.NODE_ENV === "production") return `https://${subdomain}.biztrack.bd`;
+  return `http://${subdomain}.${root || "localhost:3000"}`;
 }
 
 const takaText = (n: number) => `৳ ${Math.round(n).toLocaleString("en-IN")}`;

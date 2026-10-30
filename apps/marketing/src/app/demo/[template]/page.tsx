@@ -9,7 +9,9 @@ export default async function DemoRedirectPage({ params }: { params: Promise<{ t
   const host = ecomDemo?.host || bizDemo?.host;
   if (!host) notFound();
 
-  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+  const root =
+    process.env.NEXT_PUBLIC_ROOT_DOMAIN ??
+    (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000");
   const url = root.includes("localhost")
     ? `http://${host}.localhost:3000`
     : `https://${host}.${root}`;

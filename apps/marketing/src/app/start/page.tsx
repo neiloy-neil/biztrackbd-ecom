@@ -115,7 +115,9 @@ export default async function Start({
   else if (initialVertical === "PUBLIC_FIGURE") defaultTheme = "public-profile";
 
   const initialTheme = offered.find((t) => t.id === (kept?.template || wantedTemplate || defaultTheme) && t.live)?.id ?? defaultTheme ?? offered[0]?.id ?? "kapor";
-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+  const rootDomain =
+    process.env.NEXT_PUBLIC_ROOT_DOMAIN ??
+    (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000");
 
   return (
     <Wizard

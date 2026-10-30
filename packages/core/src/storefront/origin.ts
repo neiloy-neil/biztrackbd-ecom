@@ -8,6 +8,8 @@ export async function storeOriginFor(tenantId: string): Promise<string> {
     return { subdomain: tenant.subdomain, domain: domain?.domain ?? null };
   });
   if (t.domain) return `https://${t.domain}`;
-  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
-  return `${root.startsWith("localhost") ? "http" : "https"}://${t.subdomain}.${root}`;
+  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+  if (root && !root.startsWith("localhost")) return `https://${t.subdomain}.${root}`;
+  if (process.env.NODE_ENV === "production") return `https://${t.subdomain}.biztrack.bd`;
+  return `http://${t.subdomain}.${root || "localhost:3000"}`;
 }

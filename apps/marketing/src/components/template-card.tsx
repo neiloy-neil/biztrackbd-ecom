@@ -16,7 +16,9 @@ export function demoUrl(host: string): string {
   if (process.env.NEXT_PUBLIC_DEMO_URL_FORMAT === "path") {
     return `/demo/${host}`;
   }
-  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+  const root =
+    process.env.NEXT_PUBLIC_ROOT_DOMAIN ??
+    (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000");
   return `${root.includes("localhost") ? "http" : "https"}://${host}.${root}`;
 }
 

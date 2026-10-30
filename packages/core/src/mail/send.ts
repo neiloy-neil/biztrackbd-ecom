@@ -29,10 +29,19 @@ export function setCodeHooks(h: { issue?: (email: string) => Promise<string | nu
 
 export type MailSendResult = "sent" | "duplicate" | "skipped" | "failed";
 
-const adminOrigin = () => (process.env.ADMIN_ORIGIN || process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3001").replace(/\/$/, "");
+const adminOrigin = () => {
+  if (process.env.ADMIN_ORIGIN) return process.env.ADMIN_ORIGIN.replace(/\/$/, "");
+  if (process.env.NEXT_PUBLIC_ADMIN_URL) return process.env.NEXT_PUBLIC_ADMIN_URL.replace(/\/$/, "");
+  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+  if (root && !root.startsWith("localhost")) return `https://admin.${root}`;
+  if (process.env.NODE_ENV === "production") return "https://admin.biztrack.bd";
+  return "http://localhost:3001";
+};
 const storeOrigin = (sub: string) => {
-  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
-  return `${root.startsWith("localhost") ? "http" : "https"}://${sub}.${root}`;
+  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+  if (root && !root.startsWith("localhost")) return `https://${sub}.${root}`;
+  if (process.env.NODE_ENV === "production") return `https://${sub}.biztrack.bd`;
+  return `http://${sub}.${root || "localhost:3000"}`;
 };
 
 export function formatMailDate(d: Date, lang: MailLang): string {

@@ -12,7 +12,9 @@ import { WORKSHOP_PREFIX } from "./template-studio";
 export const TEMPLATE_PREVIEW_BUCKET = "template-previews";
 const ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-const rootDomain = () => process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+const rootDomain = () =>
+  process.env.NEXT_PUBLIC_ROOT_DOMAIN ??
+  (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000");
 export const storeUrl = (subdomain: string) => `${rootDomain().includes("localhost") ? "http" : "https"}://${subdomain}.${rootDomain()}`;
 
 /** Where the pictures of this template must be stored: our own storage bucket, or any https address when no storage is configured (development). */

@@ -20,7 +20,9 @@ function checkRateLimit(ip: string): boolean {
 
 const ALLOWED_DATA_KEYS = new Set(["page_path", "content_name", "content_category", "cta_target", "cta_text", "site_mode"]);
 const EVENT_ID = /^[A-Za-z0-9_-]{6,64}$/;
-const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
+const siteUrl =
+  process.env.NEXT_PUBLIC_MARKETING_URL ??
+  (process.env.NODE_ENV === "production" ? "https://biztrack.bd" : "http://localhost:3002");
 
 export async function POST(req: Request) {
   if (!(req.headers.get("content-type") || "").toLowerCase().includes("application/json")) {

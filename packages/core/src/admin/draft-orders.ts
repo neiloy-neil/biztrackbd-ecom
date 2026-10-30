@@ -114,8 +114,10 @@ export async function draftLink(tenantId: string, code: string): Promise<string>
     return { subdomain: tenant.subdomain, domain: domain?.domain ?? null };
   });
   if (t.domain) return `https://${t.domain}/draft/${code}`;
-  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
-  return `${root.startsWith("localhost") ? "http" : "https"}://${t.subdomain}.${root}/draft/${code}`;
+  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+  if (root && !root.startsWith("localhost")) return `https://${t.subdomain}.${root}/draft/${code}`;
+  if (process.env.NODE_ENV === "production") return `https://${t.subdomain}.biztrack.bd/draft/${code}`;
+  return `http://${t.subdomain}.${root || "localhost:3000"}/draft/${code}`;
 }
 
 export async function cancelDraftOrder(tenantId: string, actor: StaffActor, id: string): Promise<void> {

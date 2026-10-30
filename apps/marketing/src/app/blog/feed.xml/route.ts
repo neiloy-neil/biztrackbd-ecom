@@ -1,6 +1,8 @@
 import { coverUrlFor, getBlogPosts, plainText } from "@/lib/blog";
 
-const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
+const siteUrl =
+  process.env.NEXT_PUBLIC_MARKETING_URL ??
+  (process.env.NODE_ENV === "production" ? "https://biztrack.bd" : "http://localhost:3002");
 
 export const revalidate = 3600;
 
