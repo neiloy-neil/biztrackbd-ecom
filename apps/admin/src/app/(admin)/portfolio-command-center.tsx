@@ -222,7 +222,7 @@ export function PortfolioCommandCenter({
             <span className="muted" style={{ fontSize: "0.78rem", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>
               Total Inquiries
             </span>
-            <span style={{ fontSize: "1.2rem" }}>📬</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--brand)" }}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           </div>
           <div style={{ fontSize: "1.85rem", fontWeight: 800, marginTop: 6, color: "var(--ink, #0f172a)" }}>
             {totalLeads}
@@ -237,7 +237,7 @@ export function PortfolioCommandCenter({
             <span className="muted" style={{ fontSize: "0.78rem", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>
               Appointments / Bookings
             </span>
-            <span style={{ fontSize: "1.2rem" }}>📅</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#2563eb" }}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           </div>
           <div style={{ fontSize: "1.85rem", fontWeight: 800, marginTop: 6, color: "#2563eb" }}>
             {totalBookings}
@@ -252,7 +252,7 @@ export function PortfolioCommandCenter({
             <span className="muted" style={{ fontSize: "0.78rem", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>
               Downloads Delivered
             </span>
-            <span style={{ fontSize: "1.2rem" }}>📥</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#16a34a" }}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           </div>
           <div style={{ fontSize: "1.85rem", fontWeight: 800, marginTop: 6, color: "#16a34a" }}>
             {totalDownloads}
@@ -267,7 +267,7 @@ export function PortfolioCommandCenter({
             <span className="muted" style={{ fontSize: "0.78rem", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>
               Content Entities
             </span>
-            <span style={{ fontSize: "1.2rem" }}>⚡</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#7c3aed" }}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           </div>
           <div style={{ fontSize: "1.85rem", fontWeight: 800, marginTop: 6, color: "#7c3aed" }}>
             {totalContentItems}
@@ -402,7 +402,7 @@ export function PortfolioCommandCenter({
                                 gap: 4,
                               }}
                             >
-                              <span>💬</span> WhatsApp
+                              WhatsApp
                             </a>
                           ) : (
                             <span className="muted" style={{ fontSize: "0.75rem" }}>—</span>
@@ -421,7 +421,7 @@ export function PortfolioCommandCenter({
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div className="card" style={{ padding: 18, border: "1px solid var(--border, #e2e8f0)", borderRadius: 10 }}>
             <h3 style={{ margin: "0 0 12px", fontSize: "0.95rem", fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
-              <span>🩺</span> System &amp; Integration Health
+              System &amp; Integration Health
             </h3>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 12, fontSize: "0.85rem" }}>
@@ -472,32 +472,32 @@ export function PortfolioCommandCenter({
           {/* Quick Shortcuts */}
           <div className="card" style={{ padding: 18, border: "1px solid var(--border, #e2e8f0)", borderRadius: 10 }}>
             <h3 style={{ margin: "0 0 10px", fontSize: "0.95rem", fontWeight: 700 }}>
-              ⚡ Operational Shortcuts
+              Operational Shortcuts
             </h3>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: "0.85rem", display: "flex", flexDirection: "column", gap: 8 }}>
               <li>
                 <Link href={vertical === "RESTAURANT" ? "/menu" : "/services"} className="link" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
-                  <span>➕</span> Add {vertical === "RESTAURANT" ? "Menu Items" : "Services & Pricing"}
+                  Add {vertical === "RESTAURANT" ? "Menu Items" : "Services & Pricing"}
                 </Link>
               </li>
               <li>
                 <Link href="/leads" className="link" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
-                  <span>📋</span> Open Leads Operational Desk
+                  Open Leads Operational Desk
                 </Link>
               </li>
               <li>
                 <Link href="/builder" className="link" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
-                  <span>🎨</span> Edit Website Layout &amp; Theme
+                  Edit Website Layout &amp; Theme
                 </Link>
               </li>
               <li>
                 <Link href="/settings/import" className="link" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
-                  <span>🪄</span> Smart Content Import Assistant
+                  Smart Content Import Assistant
                 </Link>
               </li>
               <li>
                 <Link href="/settings/domains" className="link" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
-                  <span>🌐</span> Domain &amp; DNS Settings
+                  Domain &amp; DNS Settings
                 </Link>
               </li>
             </ul>

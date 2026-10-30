@@ -9,52 +9,124 @@ import { ThemeSwitch } from "../theme-switch";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "More" };
 
-const ITEMS: { href: string; label: string; area: Area }[] = [
-  { href: "/orders/new", label: "Quick order", area: "orders" },
-  { href: "/inventory", label: "Inventory", area: "products" },
-  { href: "/marketing/bundles", label: "Bundles and upsells", area: "marketing" },
-  { href: "/marketing/whatsapp", label: "WhatsApp Automation", area: "marketing" },
-  { href: "/marketing/coupons", label: "Discounts and coupons", area: "marketing" },
-  { href: "/abandoned", label: "Abandoned checkouts", area: "customers" },
-  { href: "/reviews", label: "Reviews", area: "marketing" },
-  { href: "/marketing/loyalty", label: "Loyalty and referrals", area: "marketing" },
-  { href: "/marketing/pixels", label: "Pixels and tracking", area: "marketing" },
-  { href: "/returns", label: "Returns and exchanges", area: "orders" },
-  { href: "/fraud", label: "Fraud check", area: "orders" },
-  { href: "/reports", label: "Reports", area: "reports" },
-  { href: "/finance/cod", label: "COD payouts", area: "reports" },
-  { href: "/finance/profit", label: "Profit and loss", area: "reports" },
-  { href: "/design", label: "Store design", area: "design" },
-  { href: "/landing", label: "Landing pages", area: "design" },
-  { href: "/content", label: "Pages and blog", area: "design" },
-  { href: "/settings/store", label: "Store details", area: "design" },
-  { href: "/settings/domains", label: "Domains", area: "billing" },
-  { href: "/settings/payments", label: "Payments", area: "billing" },
-  { href: "/settings/shipping", label: "Delivery charges", area: "orders" },
-  { href: "/settings/apps", label: "Apps and Integrations", area: "billing" },
-  { href: "/settings/staff", label: "Team", area: "team" },
-  { href: "/settings/audit", label: "Audit log", area: "team" },
-  { href: "/security", label: "Sign-in and security", area: "orders" },
-  { href: "/billing", label: "Plan and usage", area: "billing" },
+interface MoreSection {
+  title: string;
+  items: { href: string; label: string; area: Area; note?: string }[];
+}
+
+const SECTIONS: MoreSection[] = [
+  {
+    title: "Operations & Fulfillment",
+    items: [
+      { href: "/orders/new", label: "Quick Order Desk", area: "orders", note: "Phone order entry" },
+      { href: "/inventory", label: "Inventory & Stock", area: "products", note: "Stock adjustments & alerts" },
+      { href: "/returns", label: "Returns & Exchanges", area: "orders", note: "Customer return slips" },
+      { href: "/fraud", label: "Fraud Check Radar", area: "orders", note: "Courier trust ratio" },
+    ],
+  },
+  {
+    title: "Marketing & Growth",
+    items: [
+      { href: "/marketing/coupons", label: "Discounts & Coupons", area: "marketing", note: "Promo codes" },
+      { href: "/marketing/bundles", label: "Bundles & Upsells", area: "marketing", note: "Order bumps" },
+      { href: "/marketing/whatsapp", label: "WhatsApp Automation", area: "marketing", note: "Order confirmation bots" },
+      { href: "/marketing/loyalty", label: "Loyalty & Referrals", area: "marketing", note: "VIP points" },
+      { href: "/marketing/pixels", label: "Pixels & Tracking", area: "marketing", note: "Meta CAPI & GA4" },
+      { href: "/reviews", label: "Customer Reviews", area: "marketing", note: "Social proof" },
+      { href: "/abandoned", label: "Abandoned Checkouts", area: "customers", note: "Recover lost carts" },
+    ],
+  },
+  {
+    title: "Analytics & Finance",
+    items: [
+      { href: "/reports", label: "Business Reports", area: "reports", note: "Sales, products & couriers" },
+      { href: "/finance/cod", label: "COD Payouts & Claims", area: "reports", note: "Courier reconciliation" },
+      { href: "/finance/profit", label: "Profit & Loss", area: "reports", note: "Net margins & COGS" },
+    ],
+  },
+  {
+    title: "Online Store & Content",
+    items: [
+      { href: "/design", label: "Store Design & Theme", area: "design", note: "Custom branding" },
+      { href: "/landing", label: "Landing Pages", area: "design", note: "Single-product funnels" },
+      { href: "/content", label: "Pages & Blog Articles", area: "design", note: "SEO content" },
+    ],
+  },
+  {
+    title: "Settings & System",
+    items: [
+      { href: "/settings/store", label: "Store Details & Policies", area: "design", note: "Name, phone & logo" },
+      { href: "/settings/shipping", label: "Delivery Charges & Zones", area: "orders", note: "Inside / Outside Dhaka" },
+      { href: "/settings/payments", label: "Payment Gateways & MFS", area: "billing", note: "bKash, Nagad, COD" },
+      { href: "/settings/apps", label: "Apps & Integrations", area: "billing", note: "Steadfast, Pathao, RedX" },
+      { href: "/settings/domains", label: "Custom Domains", area: "billing", note: "DNS & SSL setup" },
+      { href: "/settings/staff", label: "Team & Permissions", area: "team", note: "Staff access roles" },
+      { href: "/settings/audit", label: "Audit Log", area: "team", note: "Security activity log" },
+      { href: "/security", label: "Sign-in & Security", area: "orders", note: "Passwords & 2FA" },
+      { href: "/billing", label: "Plan & Usage", area: "billing", note: "Subscription tier" },
+    ],
+  },
 ];
 
-/** The phone's menu for everything that does not fit in the bottom tabs. On a desktop the sidebar has all of this. */
+/** The phone menu for everything that does not fit in the bottom tabs. */
 export default async function More() {
   const s = await requireAccess("orders");
+
   return (
-    <>
+    <div className="stack" style={{ gap: 16 }}>
       <PageHeader
         title="More"
         sub={`${s.user.name} · ${ROLE_LABELS[s.user.role]} (${s.tenantSubdomain})`}
       />
-      <nav className="card menu-list" aria-label="More" style={{ padding: "0 12px" }} data-testid="more-menu">
-        {ITEMS.filter((i) => can(s.user.role, i.area)).map((i) => <Link key={i.href} href={i.href} prefetch={false}>{i.label}</Link>)}
-      </nav>
-      <section className="card" style={{ marginTop: 14 }}><ThemeSwitch /></section>
-      <section className="card" style={{ marginTop: 14 }}>
-        <h2>Use it like an app</h2>
+
+      {SECTIONS.map((sec, idx) => {
+        const visibleItems = sec.items.filter((i) => can(s.user.role, i.area));
+        if (visibleItems.length === 0) return null;
+
+        return (
+          <section key={idx} className="card" style={{ padding: "14px 16px" }}>
+            <h3 style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-3)", textTransform: "uppercase", letterSpacing: 0.5, margin: "0 0 10px" }}>
+              {sec.title}
+            </h3>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {visibleItems.map((item, i) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  prefetch={false}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "10px 0",
+                    borderBottom: i < visibleItems.length - 1 ? "1px solid var(--line)" : "none",
+                    color: "var(--ink)",
+                    textDecoration: "none",
+                  }}
+                >
+                  <span style={{ fontWeight: 600, fontSize: 14 }}>{item.label}</span>
+                  {item.note && <span style={{ fontSize: 12, color: "var(--ink-3)" }}>{item.note}</span>}
+                </Link>
+              ))}
+            </div>
+          </section>
+        );
+      })}
+
+      <section className="card" style={{ padding: "14px 16px" }}>
+        <h3 style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-3)", textTransform: "uppercase", letterSpacing: 0.5, margin: "0 0 10px" }}>
+          Appearance
+        </h3>
+        <ThemeSwitch />
+      </section>
+
+      <section className="card" style={{ padding: "14px 16px" }}>
+        <h3 style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-3)", textTransform: "uppercase", letterSpacing: 0.5, margin: "0 0 10px" }}>
+          Mobile Experience
+        </h3>
+        <p className="muted" style={{ margin: "0 0 12px", fontSize: 13 }}>Install BizTrackBD on your home screen for rapid 1-tap merchant access.</p>
         <InstallApp />
       </section>
-    </>
+    </div>
   );
 }

@@ -31,3 +31,4 @@ export { Drawer, ToastProvider, useToast, SaveBar, Segmented } from "./interacti
 export { ContactIcon, CONTACT_LABELS, type ContactIconName } from "./contact-icons";
 export { DoubleSubmitGuard, shouldBlockSubmit, SUBMIT_LOCK_MS } from "./double-submit";
 export { useBusyAction } from "./use-busy-action";
+export { DataTable, type ColumnDef, type DataTableProps } from "./data-table";

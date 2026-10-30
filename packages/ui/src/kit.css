@@ -150,3 +150,16 @@
 .filter-search-box input { width: 100%; min-height: 38px; padding-left: 32px; padding-right: 12px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--bg); font-size: 13.5px; }
 .filter-search-box svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--ink-3); pointer-events: none; }
 .filter-chips-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+/* ---- Standardized Data Table & Mobile Cards */
+.data-table-container { width: 100%; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table tr.selected-row { background: var(--tint); }
+.data-table-mobile { display: flex; flex-direction: column; gap: 10px; }
+.data-table-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md, 10px); padding: 14px; position: relative; box-shadow: var(--shadow-sm); }
+.data-table-card.selected { border-color: var(--brand); background: var(--tint); }
+.data-table-card-checkbox { position: absolute; top: 12px; right: 12px; }
+.data-table-card-body { display: flex; flex-direction: column; gap: 8px; }
+.data-table-card-field { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13.5px; }
+.data-table-card-label { color: var(--ink-3); font-weight: 500; font-size: 12.5px; }
+.data-table-card-value { font-weight: 600; text-align: right; }
