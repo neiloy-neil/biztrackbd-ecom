@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { can, getUsage, listAdminProducts, type AdminProductRow, type ProductTab } from "@biztrackbd/core";
-import { BulkBar } from "@/components/bulk";
+import { BulkBar, SelectAllCheckbox } from "@/components/bulk";
 import { LiveSearch, SelectFilter } from "@/components/live-filters";
 import { PlusIcon } from "@/components/icons";
 import { Pager, SubmitButton, Tabs } from "@/components/ui";
@@ -62,7 +62,14 @@ export default async function Products({ searchParams }: { searchParams: Promise
         }
       />
 
-      {done && <div className="notice good" role="status" style={{ marginBottom: 12 }} data-testid="bulk-msg">{done[2]} {Number(done[2]) === 1 ? "product" : "products"} {VERBS[done[1]!]}.{Number(done[3]) ? ` ${done[3]} skipped (already ${done[1] === "publish" ? "active" : "that way"}).` : ""}</div>}
+      {done && (
+        <div className="notice good" role="status" style={{ marginBottom: 12 }} data-testid="bulk-msg">
+          <b>{done[2]} {Number(done[2]) === 1 ? "product" : "products"} {VERBS[done[1]!]}.</b>
+          {done[1] === "archive" && <span> Products moved to this Archived tab. They are hidden from your store and active stock.</span>}
+          {done[1] === "delete" && <span> Products permanently removed. Existing orders preserve full item details.</span>}
+          {Number(done[3]) ? ` ${done[3]} skipped.` : ""}
+        </div>
+      )}
       {msg === "none" && <div className="notice" role="status" style={{ marginBottom: 12 }}>Select at least one product first.</div>}
 
       <Tabs tabs={TABS.map((t) => ({ href: `/products${qs({ ...base, tab: t.key === "all" ? undefined : t.key })}`, label: t.label, count: list.counts[t.key], current: t.key === tab }))} />
@@ -167,22 +174,7 @@ export default async function Products({ searchParams }: { searchParams: Promise
                 <table className="table" data-testid="products-table">
                   <thead><tr>{canEdit && (
                       <th style={{ width: 36 }}>
-                        <input
-                          type="checkbox"
-                          aria-label="Select all products"
-                          onChange={(e) => {
-                            const form = e.currentTarget.closest("form");
-                            if (!form) return;
-                            const boxes = form.querySelectorAll<HTMLInputElement>("input[type=\"checkbox\"][name=\"ids\"]");
-                            boxes.forEach((b) => {
-                              if (b.offsetParent !== null && b.checked !== e.currentTarget.checked) {
-                                b.checked = e.currentTarget.checked;
-                                b.dispatchEvent(new Event("change", { bubbles: true }));
-                              }
-                            });
-                          }}
-                          style={{ width: 18, height: 18, cursor: "pointer" }}
-                        />
+                        <SelectAllCheckbox label="Select all products" />
                       </th>
                     )}<th>Product</th><th>Status</th><th>Stock</th><th>Category</th><th className="r">Price</th><th className="r">Sold (30d)</th><th className="r" style={{ width: 140 }}>Actions</th></tr></thead>
                   <tbody>

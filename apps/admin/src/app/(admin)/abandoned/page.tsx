@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { abandonedTabCounts, can, getAbandonedMetrics, getStoreSettings, listAbandoned, type AbandonedRow, type AbandonedTab } from "@biztrackbd/core";
+import { abandonedTabCounts, buildWhatsAppCustomLink, can, getAbandonedMetrics, getStoreSettings, listAbandoned, type AbandonedRow, type AbandonedTab } from "@biztrackbd/core";
 import { PageHeader } from "@biztrackbd/ui";
 import { SubmitButton } from "@/components/ui";
 import { friendlyDate, prettyPhone, taka } from "@/lib/format";
@@ -49,8 +49,17 @@ function Card({ r, tab, canEdit, canOrder, storeName }: { r: AbandonedRow; tab: 
 
       {open && (
         <div className="stack" style={{ marginTop: 12 }}>
-          <div className="row">
+          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
             <a className="btn btn-primary" href={`tel:${r.phone}`}>Call {prettyPhone(r.phone)}</a>
+            <a
+              className="btn btn-whatsapp"
+              href={buildWhatsAppCustomLink(r.phone, sc.bn)}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="abandoned-wa-btn"
+            >
+              WhatsApp
+            </a>
             {canOrder && <Link href={`/orders/new?abandoned=${r.id}`} className="btn btn-secondary" prefetch={false} data-testid="make-order">Make this an order</Link>}
           </div>
           <details>

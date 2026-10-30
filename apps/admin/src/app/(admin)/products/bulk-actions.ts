@@ -19,6 +19,12 @@ export async function bulkProductsAction(action: string, form: FormData): Promis
   revalidatePath("/products");
   revalidatePath("/inventory");
   revalidatePath("/");
+  if (action === "archive") {
+    redirect(`/products?tab=archived&msg=archive-${r.done}-${r.skipped}`);
+  }
+  if (action === "unarchive") {
+    redirect(`/products?tab=draft&msg=unarchive-${r.done}-${r.skipped}`);
+  }
   redirect(`${safeBack}${sep}msg=${action}-${r.done}-${r.skipped}`);
 }
 

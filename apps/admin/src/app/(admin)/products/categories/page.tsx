@@ -3,6 +3,7 @@ import Link from "next/link";
 import { can, listCategoriesAdmin } from "@biztrackbd/core";
 import { PageHeader } from "@biztrackbd/ui";
 import { SubmitButton } from "@/components/ui";
+import { ConfirmDelete } from "@/components/confirm-delete";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { deleteCategoryAction, saveCategoryAction } from "./actions";
@@ -54,7 +55,7 @@ export default async function Categories({ searchParams }: { searchParams: Promi
                     {canEdit && (
                       <div className="row" style={{ gap: 8, flexWrap: "nowrap" }}>
                         <Link href={`/products/categories?edit=${c.id}`} className="btn btn-secondary btn-sm" prefetch={false}>Edit</Link>
-                        <form action={deleteCategoryAction.bind(null, c.id)}><SubmitButton className="btn btn-secondary btn-sm" pending="…" aria-label={`Delete ${c.name}`}>Delete</SubmitButton></form>
+                        <ConfirmDelete action={async () => { "use server"; await deleteCategoryAction(c.id); }} message={`Delete category "${c.name}"? Products inside will be kept as uncategorized.`} label="Delete" />
                       </div>
                     )}
                   </div>

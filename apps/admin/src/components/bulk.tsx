@@ -49,3 +49,78 @@ export function BulkBar({ noun = "order", children }: { noun?: string; children:
     </>
   );
 }
+
+/**
+ * Head checkbox that selects / deselects all row checkboxes in the containing <form>.
+ * Safe to render in Server Component tables because it is a Client Component.
+ */
+export function SelectAllCheckbox({
+  label = "Select all",
+  className,
+  style,
+}: {
+  label?: string;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const form = el.closest("form");
+    if (!form) return;
+
+    const sync = () => {
+      const visible = [...form.querySelectorAll<HTMLInputElement>('input[type="checkbox"][name="ids"]')].filter(
+        (b) => b.offsetParent !== null
+      );
+      const picked = visible.filter((b) => b.checked).length;
+      if (visible.length === 0 || picked === 0) {
+        el.checked = false;
+        el.indeterminate = false;
+      } else if (picked === visible.length) {
+        el.checked = true;
+        el.indeterminate = false;
+      } else {
+        el.checked = false;
+        el.indeterminate = true;
+      }
+    };
+
+    sync();
+    form.addEventListener("change", sync);
+    window.addEventListener("resize", sync);
+    return () => {
+      form.removeEventListener("change", sync);
+      window.removeEventListener("resize", sync);
+    };
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const el = e.currentTarget;
+    const form = el.closest("form");
+    if (!form) return;
+    const visible = [...form.querySelectorAll<HTMLInputElement>('input[type="checkbox"][name="ids"]')].filter(
+      (b) => b.offsetParent !== null
+    );
+    const on = el.checked;
+    for (const b of visible) {
+      if (b.checked !== on) {
+        b.checked = on;
+        b.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    }
+  };
+
+  return (
+    <input
+      ref={ref}
+      type="checkbox"
+      aria-label={label}
+      onChange={handleChange}
+      className={className}
+      style={{ width: 18, height: 18, cursor: "pointer", ...style }}
+    />
+  );
+}

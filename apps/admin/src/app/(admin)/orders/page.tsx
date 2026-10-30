@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BD_GEO, addDays, can, listConnectedCouriers, listOrderTags, listOrders, orderTabCounts, type OrderTab } from "@biztrackbd/core";
 import { PageHeader } from "@biztrackbd/ui";
-import { BulkBar } from "@/components/bulk";
+import { BulkBar, SelectAllCheckbox } from "@/components/bulk";
 import { ChipFilter, LiveSearch, SelectFilter } from "@/components/live-filters";
 import { QuickViewButton, QuickViewHost } from "@/components/quick-view";
 import { Pager, SubmitButton, Tabs } from "@/components/ui";
@@ -150,22 +150,7 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
             <table className="table only-desktop" data-testid="orders-table">
               <thead><tr>{canEdit && (
                     <th style={{ width: 36 }}>
-                      <input
-                        type="checkbox"
-                        aria-label="Select all orders"
-                        onChange={(e) => {
-                          const form = e.currentTarget.closest("form");
-                          if (!form) return;
-                          const boxes = form.querySelectorAll<HTMLInputElement>("input[type=\"checkbox\"][name=\"ids\"]");
-                          boxes.forEach((b) => {
-                            if (b.offsetParent !== null && b.checked !== e.currentTarget.checked) {
-                              b.checked = e.currentTarget.checked;
-                              b.dispatchEvent(new Event("change", { bubbles: true }));
-                            }
-                          });
-                        }}
-                        style={{ width: 18, height: 18, cursor: "pointer" }}
-                      />
+                      <SelectAllCheckbox label="Select all orders" />
                     </th>
                   )}<th>Order</th><th>Date</th><th>Customer</th><th>Payment</th><th>Fulfilment</th><th>Source</th><th className="r">Total</th></tr></thead>
               <tbody>
