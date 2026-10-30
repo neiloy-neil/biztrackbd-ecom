@@ -291,9 +291,10 @@ export async function placeLandingOrder(tenantId: string, slug: string, input: L
     paymentMethod: "COD",
     channel: "LANDING_PAGE",
     clientHash: input.clientHash,
-    utmSource: input.utmSource ?? `landing:${slug}`.slice(0, 100),
-    utmCampaign: input.utmCampaign,
-    utmMedium: input.utmMedium,
+    // Ad tools can send long campaign names; the order only keeps 100 characters, and a long tag must never fail a customer's order.
+    utmSource: (input.utmSource ?? `landing:${slug}`).slice(0, 100),
+    utmCampaign: input.utmCampaign?.slice(0, 100),
+    utmMedium: input.utmMedium?.slice(0, 100),
     landingPageId: landing.id,
     affiliateRef: input.affiliateRef,
   });

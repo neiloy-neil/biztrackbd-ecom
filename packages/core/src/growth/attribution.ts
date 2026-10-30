@@ -13,7 +13,9 @@ export const ATTR_FIRST_COOKIE = "bt_attr_first";
 export const ATTR_LAST_COOKIE = "bt_attr_last";
 export const ATTR_COOKIE_MAX_AGE_SECONDS = 30 * 24 * 60 * 60; // 30 days
 
-const COOKIE_ID_REGEX = /^[A-Za-z0-9._-]{1,200}$/;
+// Meta's click cookie is "fb.1.<time>.<fbclid>" and a click id can be long, so allow room; a value that does not fit is dropped, never cut.
+const COOKIE_ID_REGEX = /^[A-Za-z0-9._-]{1,400}$/;
+const CLICK_ID_MAX = 300;
 
 export interface AttributionPayload {
   utmSource?: string | null;
@@ -47,8 +49,8 @@ export const AttributionSchema = z.object({
   landingPath: z.string().max(250).optional().nullable(),
   fbc: z.string().regex(COOKIE_ID_REGEX).optional().nullable(),
   fbp: z.string().regex(COOKIE_ID_REGEX).optional().nullable(),
-  gclid: z.string().max(200).optional().nullable(),
-  fbclid: z.string().max(200).optional().nullable(),
+  gclid: z.string().max(CLICK_ID_MAX).optional().nullable(),
+  fbclid: z.string().max(CLICK_ID_MAX).optional().nullable(),
   capturedAt: z.string(),
 });
 
@@ -61,7 +63,7 @@ function sanitizeString(str?: string | null, max = 250): string | null {
 /** Formats an fbclid query parameter into standard Meta _fbc cookie format: `fb.1.<creation_time>.<fbclid>` */
 export function formatFbc(fbclid?: string | null, timestampMs = Date.now()): string | null {
   if (!fbclid) return null;
-  const clean = sanitizeString(fbclid, 150);
+  const clean = sanitizeString(fbclid, CLICK_ID_MAX);
   if (!clean || !COOKIE_ID_REGEX.test(clean)) return null;
   return `fb.1.${timestampMs}.${clean}`;
 }
@@ -93,8 +95,8 @@ export function parseAttributionFromParams(
   const utmCampaign = sanitizeString(getParam("utm_campaign"), 100);
   const utmTerm = sanitizeString(getParam("utm_term"), 100);
   const utmContent = sanitizeString(getParam("utm_content"), 100);
-  const fbclid = sanitizeString(getParam("fbclid"), 150);
-  const gclid = sanitizeString(getParam("gclid"), 150);
+  const fbclid = sanitizeString(getParam("fbclid"), CLICK_ID_MAX);
+  const gclid = sanitizeString(getParam("gclid"), CLICK_ID_MAX);
 
   const rawReferrer = sanitizeString(options?.referrer, 500);
   let referrer: string | null = null;
