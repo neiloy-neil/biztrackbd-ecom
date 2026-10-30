@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import sitemapDates from "@/lib/sitemap-dates.json";
-import { BLOG_POSTS } from "@/lib/blog";
+import { getBlogPosts } from "@/lib/blog";
 
 const origin = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
 const dates = sitemapDates as Record<string, string>;
@@ -11,7 +11,10 @@ function getModifiedDate(path: string): Date {
   return iso ? new Date(iso) : FALLBACK_DATE;
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const revalidate = 3600;
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const blogPosts = await getBlogPosts();
   return [
     {
       url: `${origin}/`,
@@ -219,13 +222,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${origin}/blog`,
-      lastModified: new Date(BLOG_POSTS[0]?.published ?? FALLBACK_DATE),
+      lastModified: blogPosts[0]?.updatedAt ?? FALLBACK_DATE,
       changeFrequency: "weekly",
       priority: 0.8,
     },
-    ...BLOG_POSTS.map((post) => ({
+    ...blogPosts.map((post) => ({
       url: `${origin}/blog/${post.slug}`,
-      lastModified: new Date(post.published),
+      lastModified: post.updatedAt,
       changeFrequency: "monthly" as const,
       priority: 0.7,
     })),

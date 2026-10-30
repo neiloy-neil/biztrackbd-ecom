@@ -8,7 +8,8 @@ let report: RlsReport;
 // PlatformConfig: migration 060 lets the marketing site read ONLY the public keys (contact details, SEO text) through a row policy; every
 // secret row stays hidden (the core test "reads only the public settings, never a secret" proves it with real rows).
 // PublicToolUsage: the free courier fraud checker's per-visitor counter, written and read by the marketing site.
-const PLATFORM_READABLE = ["Plan", "Announcement", "Template", "Tenant", "PlatformConfig", "PublicToolUsage"];
+// PlatformBlogPost: guides written in Platform Admin; the marketing site reads only published, due rows (row-level security hides drafts).
+const PLATFORM_READABLE = ["Plan", "Announcement", "Template", "Tenant", "PlatformConfig", "PublicToolUsage", "PlatformBlogPost"];
 const urls = testUrls();
 
 beforeAll(async () => {

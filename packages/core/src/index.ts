@@ -141,6 +141,11 @@ export {
   type AnnouncementAudience, type AnnouncementAudienceType, type CreateAnnouncementInput, type AnnouncementView,
 } from "./platform/announcements";
 export {
+  listBlogPosts, getBlogPostForEdit, saveBlogPost, deleteBlogPost, listPublishedBlogPosts, getPublishedBlogPost,
+  type BlogPostView, type BlogPostInput, type BlogPostStatus, type PublicBlogPost,
+} from "./platform/blog";
+export { STARTER_BLOG_POSTS, type StarterBlogPost } from "./platform/blog-starters";
+export {
   createImpersonationTicket, verifyImpersonationTicket, createImpersonationSessionCookie, verifyImpersonationSessionCookie,
   createOnboardingPassTicket, verifyOnboardingPassTicket,
   type ImpersonationTicketPayload, type ImpersonationSessionPayload, type OnboardingPassPayload,

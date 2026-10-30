@@ -2977,4 +2977,36 @@ model NotificationJob {
   @@index([tenantId, createdAt])
 }
 
+enum PlatformBlogStatus {
+  DRAFT
+  PUBLISHED
+}
 
+/// A guide on the marketing site (biztrack.bd/blog), written in Platform Admin. Not the same as BlogPost, which belongs to a store.
+/// The body is plain text: blank lines split paragraphs, a line starting with "## " is a heading. The marketing site shows only
+/// PUBLISHED rows whose publishedAt has passed.
+model PlatformBlogPost {
+  id          String             @id @default(cuid())
+  slug        String             @unique
+  title       String
+  description String
+  body        String             @db.Text
+  ctaLabel    String?
+  ctaHref     String?
+  /// Overrides the title in Google and social cards (the site adds ' | BizTrackBD').
+  seoTitle    String?
+  /// Overrides the description in Google and social cards.
+  seoDescription String?
+  /// https address or /path. When empty the site draws a cover from the title.
+  coverImage  String?
+  coverAlt    String?
+  noindex     Boolean            @default(false)
+  status      PlatformBlogStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdBy   String
+  updatedBy   String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([status, publishedAt])
+}

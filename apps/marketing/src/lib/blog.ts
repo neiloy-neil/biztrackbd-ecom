@@ -1,88 +1,102 @@
-export type BlogSection = { heading: string; body: string[] };
+import { cache } from "react";
+import { STARTER_BLOG_POSTS, listPublishedBlogPosts, type PublicBlogPost } from "@biztrackbd/core";
 
-export type BlogPost = {
-  slug: string;
-  title: string;
-  description: string;
-  published: string;
-  intro: string;
-  sections: BlogSection[];
-  cta: { label: string; href: string };
-};
+export type BlogPost = PublicBlogPost;
 
-export const BLOG_POSTS: BlogPost[] = [
-  {
-    slug: "stop-cod-return-fraud-bangladesh",
-    title: "How to stop COD return fraud in Bangladesh",
-    description:
-      "Refused cash-on-delivery parcels cost you the courier fee and the return trip. Here is a practical way to screen COD orders before you ship.",
-    published: "2026-10-30",
-    intro:
-      "Cash on delivery is how most Bangladeshi customers prefer to pay, and it is also how sellers lose money. A parcel that is refused at the door still costs you the delivery charge, the return charge and the days the stock was out of reach.",
-    sections: [
-      {
-        heading: "Why COD orders get refused",
-        body: [
-          "Some refusals are honest: the customer changed their mind, was not home or could not gather the cash. Others are deliberate, such as prank orders, competitors placing fake orders, or repeat buyers who refuse every parcel.",
-          "Either way the seller pays. Sellers who book couriers by hand rarely notice a pattern until the returns pile up.",
-        ],
-      },
-      {
-        heading: "Check the customer's delivery history before you ship",
-        body: [
-          "Couriers such as Steadfast, Pathao and RedX keep a record of how many parcels a phone number received, returned or refused. A number with many refusals and few deliveries is a risk, even if this is its first order with you.",
-          "Checking that history before you book the pickup takes seconds and is the single most effective screen. You can try it with the free courier fraud checker, or have it run automatically on every order.",
-        ],
-      },
-      {
-        heading: "Ask for a small advance on risky orders",
-        body: [
-          "For orders that look risky, ask for a small bKash or Nagad payment up front. A customer who has paid part of the price is far less likely to refuse the parcel, and the advance covers your courier cost if they do.",
-          "Keep the request polite and consistent so genuine customers do not feel singled out.",
-        ],
-      },
-      {
-        heading: "Confirm by phone, then keep a record",
-        body: [
-          "A short call or WhatsApp message to confirm the address and order removes most accidental refusals. Note the outcome against the order so repeat offenders are easy to spot later.",
-        ],
-      },
-    ],
-    cta: { label: "Try the free courier fraud checker", href: "/tools/courier-fraud-checker" },
-  },
-  {
-    slug: "verify-bkash-nagad-trxid-orders",
-    title: "Verify bKash and Nagad TrxID payments on orders",
-    description:
-      "Customers say they have paid and send a screenshot. Matching the TrxID against the order is faster and safer than scrolling through screenshots.",
-    published: "2026-10-30",
-    intro:
-      "When customers pay a seller's personal or merchant bKash or Nagad number, the proof is a TrxID. Sellers who run their shop from Facebook messages end up comparing screenshots with their wallet by hand, which is slow and easy to get wrong.",
-    sections: [
-      {
-        heading: "What a TrxID tells you",
-        body: [
-          "Every bKash and Nagad payment has a unique transaction ID. If the TrxID a customer gives you appears in your wallet history for the right amount, the payment is real. If it does not, do not confirm the order.",
-        ],
-      },
-      {
-        heading: "Common mistakes",
-        body: [
-          "Screenshots can be edited, so never confirm an order from an image alone. Also watch for a TrxID that was already used on another order, and for payments that are for a different amount than the order total.",
-        ],
-      },
-      {
-        heading: "Put the TrxID next to the order",
-        body: [
-          "The cleanest approach is to have the customer enter the TrxID at checkout so it is stored on the order. You then compare one field against your wallet statement and confirm the order, with a record of who confirmed it and when.",
-          "Because the money goes straight to your own wallet, there is no payout delay and no platform commission on your sales.",
-        ],
-      },
-    ],
-    cta: { label: "See bKash and Nagad checkout", href: "/features/bkash-nagad-cod" },
-  },
-];
+const STARTED = new Date("2026-10-30T00:00:00.000Z");
 
-export function getPost(slug: string): BlogPost | undefined {
-  return BLOG_POSTS.find((p) => p.slug === slug);
+/**
+ * The starter guides are also saved in the database, where staff edit them. This copy only shows when the database has no published
+ * post or cannot be read, so the blog is never empty.
+ */
+const FALLBACK_POSTS: BlogPost[] = STARTER_BLOG_POSTS.map((p) => ({
+  ...p,
+  seoTitle: null,
+  seoDescription: null,
+  coverImage: null,
+  coverAlt: null,
+  noindex: false,
+  publishedAt: STARTED,
+  updatedAt: STARTED,
+}));
+
+/** Every published post, including ones hidden from Google, newest first; the starter guides if there are none. Cached per request. */
+const getAllPosts = cache(async (): Promise<BlogPost[]> => {
+  const posts = await listPublishedBlogPosts();
+  return posts.length > 0 ? posts : FALLBACK_POSTS;
+});
+
+/** The posts the site lists, links to and puts in its sitemap and feed: everything except guides marked noindex. */
+export const getBlogPosts = cache(async (): Promise<BlogPost[]> => (await getAllPosts()).filter((p) => !p.noindex));
+
+/** One guide by link name. A noindex guide still opens by its link; it is just not listed or promoted. */
+export async function getBlogPost(slug: string): Promise<BlogPost | undefined> {
+  return (await getAllPosts()).find((p) => p.slug === slug);
 }
+
+/** The picture for a guide: the one staff uploaded, or the cover the site draws from its title. Always an absolute address. */
+export function coverUrlFor(post: BlogPost, siteUrl: string): string {
+  if (!post.coverImage) return `${siteUrl}/blog/${post.slug}/opengraph-image`;
+  return post.coverImage.startsWith("/") ? `${siteUrl}${post.coverImage}` : post.coverImage;
+}
+
+/** Other guides to link from the bottom of a post: internal links that keep readers and crawlers moving. */
+export async function getRelatedPosts(slug: string, limit = 3): Promise<BlogPost[]> {
+  return (await getBlogPosts()).filter((p) => p.slug !== slug).slice(0, limit);
+}
+
+export type InlineNode = { kind: "text"; text: string } | { kind: "link"; text: string; href: string };
+export type BlogBlock =
+  | { kind: "h2"; text: string }
+  | { kind: "h3"; text: string }
+  | { kind: "p"; nodes: InlineNode[] }
+  | { kind: "img"; alt: string; src: string };
+
+/** Only site links and https links are allowed in an article. Anything else stays as plain text. */
+const safeHref = (href: string) => (href.startsWith("/") && !href.startsWith("//")) || /^https:\/\/\S+$/i.test(href);
+
+/** Splits a paragraph into text and [label](link) pieces. Nothing is treated as HTML. */
+export function parseInline(text: string): InlineNode[] {
+  const nodes: InlineNode[] = [];
+  const re = /\[([^\]\n]+)\]\(([^)\s]+)\)/g;
+  let last = 0;
+  for (let m = re.exec(text); m; m = re.exec(text)) {
+    if (!safeHref(m[2] ?? "")) continue;
+    if (m.index > last) nodes.push({ kind: "text", text: text.slice(last, m.index) });
+    nodes.push({ kind: "link", text: m[1] ?? "", href: m[2] ?? "" });
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) nodes.push({ kind: "text", text: text.slice(last) });
+  return nodes;
+}
+
+/** Plain text to blocks: a blank line ends a paragraph, "## " and "### " start headings, a line that is only ![alt](src) is a picture. */
+export function parseBlogBody(body: string): BlogBlock[] {
+  return body
+    .replace(/\r\n/g, "\n")
+    .split(/\n{2,}/)
+    .map((chunk) => chunk.trim())
+    .filter(Boolean)
+    .map((chunk): BlogBlock => {
+      if (chunk.startsWith("## ")) return { kind: "h2", text: chunk.slice(3).trim() };
+      if (chunk.startsWith("### ")) return { kind: "h3", text: chunk.slice(4).trim() };
+      const img = chunk.match(/^!\[([^\]\n]*)\]\(([^)\s]+)\)$/);
+      if (img && safeHref(img[2] ?? "")) return { kind: "img", alt: img[1] ?? "", src: img[2] ?? "" };
+      return { kind: "p", nodes: parseInline(chunk) };
+    });
+}
+
+/** The article as plain words, for counting and for the structured data. */
+export function plainText(body: string): string {
+  return body
+    .replace(/!\[[^\]\n]*\]\([^)\s]+\)\n*/g, "")
+    .replace(/\[([^\]\n]+)\]\([^)\s]+\)/g, "$1")
+    .replace(/^#{2,3} /gm, "");
+}
+
+export function wordCount(body: string): number {
+  return plainText(body).split(/\s+/).filter(Boolean).length;
+}
+
+/** About 200 words a minute, never below one. */
+export const readingMinutes = (body: string) => Math.max(1, Math.round(wordCount(body) / 200));

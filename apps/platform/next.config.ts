@@ -21,8 +21,8 @@ const securityHeaders = (frameAncestors: string) => [
 
 const config: NextConfig = {
   outputFileTracingRoot: resolve(process.cwd(), "../../"),
-  transpilePackages: ["@biztrackbd/core", "@biztrackbd/db", "@biztrackbd/ui"],
-  serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg", "pg"],
+  transpilePackages: ["@biztrackbd/core", "@biztrackbd/db", "@biztrackbd/ui", "@biztrackbd/media"],
+  serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg", "pg", "sharp"],
   async headers() {
     return [{ source: "/:path*", headers: [...securityHeaders("'none'"), { key: "X-Frame-Options", value: "DENY" }] }];
   },

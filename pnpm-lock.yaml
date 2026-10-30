@@ -147,6 +147,9 @@ importers:
       '@biztrackbd/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@biztrackbd/media':
+        specifier: workspace:*
+        version: link:../../packages/media
       '@biztrackbd/ui':
         specifier: workspace:*
         version: link:../../packages/ui
