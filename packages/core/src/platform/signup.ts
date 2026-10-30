@@ -22,6 +22,7 @@ import { seedBusinessDemoStore } from "../demo/business-seed";
 import { trackPlatformRegistrationCapi } from "./tracking";
 import { enqueueNotificationJob } from "../messaging/queue";
 import { notifyPlatform } from "./notify";
+import { notifyPlatformTenantSignup } from "../notifications/push-service";
 import { markSessionConverted } from "./native-analytics";
 
 const EXTERNAL_AUTH = "EXTERNAL_AUTH";
@@ -375,6 +376,21 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
         ["Referrer", input.referrer],
       ],
       link: { label: "Open the new store", url: `${root.startsWith("localhost") ? "http" : "https"}://${result.subdomain}.${root}` },
+    });
+
+    // Send instant push notification to Platform Super Admins on mobile
+    await notifyPlatformTenantSignup({
+      tenantId: id,
+      subdomain: sub.label,
+      storeName: input.storeName,
+      ownerName: input.ownerName,
+      ownerEmail: input.email,
+      ownerPhone: phone,
+      plan: input.plan,
+      category: input.category,
+      cameFrom: fromAd ? "Facebook / Instagram ad" : input.utmSource || (input.referrer ? "Referral" : "Direct or unknown"),
+    }).catch((err) => {
+      console.warn("[signup] notifyPlatformTenantSignup failed:", err);
     });
 
     const { ownerId: _o, ...out } = result;

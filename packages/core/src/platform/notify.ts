@@ -2,6 +2,7 @@ import { getBasePrisma, getPlatformPrisma, type PrismaClient } from "@biztrackbd
 import { emailSenderFromEnv, type EmailSender } from "../growth/email";
 import { NotFoundError, ValidationError } from "../errors";
 import { assertPlatformCan, type PlatformActor } from "./admin";
+import { notifyPlatformSuperAdmins } from "../notifications/push-service";
 
 /**
  * Staff notifications (new signup, contact inquiry, payment proof, support ticket). Each event is written to a feed in Platform Admin and
@@ -57,6 +58,23 @@ async function run(input: NotifyInput, deps?: Deps): Promise<void> {
   const { subject, text, html, rows } = render(input);
 
   await db.$queryRaw`SELECT platform_notify_record(${input.kind}, ${input.title}, ${text}, ${JSON.stringify({ rows, link: input.link ?? null })}::jsonb)`;
+
+  // Dispatch push notification to Platform Admin mobile app
+  if (input.kind === "PAYMENT_PROOF") {
+    notifyPlatformSuperAdmins({
+      type: "PAYMENT_APPROVAL",
+      title: "💳 নতুন পেমেন্ট ভেরিফিকেশন প্রুফ",
+      body: input.title,
+      data: { kind: input.kind },
+    }).catch(() => {});
+  } else if (input.kind === "TICKET") {
+    notifyPlatformSuperAdmins({
+      type: "SUPPORT_TICKET",
+      title: "🎫 নতুন সাপোর্ট টিকিট",
+      body: input.title,
+      data: { kind: input.kind },
+    }).catch(() => {});
+  }
 
   const sender = deps?.sender !== undefined ? deps.sender : emailSenderFromEnv();
   if (!sender) {

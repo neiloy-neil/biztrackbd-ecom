@@ -186,15 +186,25 @@ export async function notifyStorePaymentVerification(
   await sendExpoPush(messages);
 }
 
-/**
- * Dispatches high-priority alerts to Platform Super Admins (subscription payment waiting, critical incidents).
- */
-export async function notifyPlatformSuperAdmins(event: {
-  type: "PAYMENT_APPROVAL" | "CRITICAL_INCIDENT";
+export type PlatformPushEventType =
+  | "TENANT_SIGNUP"
+  | "PAYMENT_APPROVAL"
+  | "SUBSCRIPTION_APPROVAL"
+  | "CRITICAL_INCIDENT"
+  | "SUPPORT_TICKET";
+
+export interface PlatformPushEvent {
+  type: PlatformPushEventType;
   title: string;
   body: string;
+  channelId?: string;
   data?: Record<string, unknown>;
-}): Promise<void> {
+}
+
+/**
+ * Dispatches high-priority alerts to Platform Super Admins (tenant signups, subscription payment waiting, critical incidents).
+ */
+export async function notifyPlatformSuperAdmins(event: PlatformPushEvent): Promise<void> {
   const db = getPlatformPrisma();
 
   const devices = await db.mobileDeviceToken.findMany({
@@ -206,13 +216,21 @@ export async function notifyPlatformSuperAdmins(event: {
 
   if (devices.length === 0) return;
 
+  const channelId =
+    event.channelId ||
+    (event.type === "CRITICAL_INCIDENT"
+      ? "platform-critical-alerts"
+      : event.type === "TENANT_SIGNUP"
+      ? "platform-signups"
+      : "platform-approvals");
+
   const messages: ExpoPushMessage[] = devices.map((d) => ({
     to: d.pushToken,
     title: event.title,
     body: event.body,
     sound: "default",
     priority: "high",
-    channelId: "platform-alerts",
+    channelId,
     data: {
       type: event.type,
       ...(event.data || {}),
@@ -220,4 +238,36 @@ export async function notifyPlatformSuperAdmins(event: {
   }));
 
   await sendExpoPush(messages);
+}
+
+/**
+ * Dispatches instant notification to Platform Super Admins when a new merchant / store signs up.
+ */
+export async function notifyPlatformTenantSignup(tenant: {
+  tenantId: string;
+  subdomain: string;
+  storeName: string;
+  ownerName: string;
+  ownerEmail: string;
+  ownerPhone: string;
+  plan: string;
+  category?: string;
+  cameFrom?: string;
+}): Promise<void> {
+  await notifyPlatformSuperAdmins({
+    type: "TENANT_SIGNUP",
+    title: `🏪 নতুন স্টোর সাইনআপ: ${tenant.storeName}`,
+    body: `${tenant.ownerName} (${tenant.ownerPhone}) • ${tenant.subdomain}.biztrack.bd • প্ল্যান: ${tenant.plan}`,
+    channelId: "platform-signups",
+    data: {
+      type: "TENANT_SIGNUP",
+      tenantId: tenant.tenantId,
+      subdomain: tenant.subdomain,
+      storeName: tenant.storeName,
+      ownerName: tenant.ownerName,
+      ownerPhone: tenant.ownerPhone,
+      ownerEmail: tenant.ownerEmail,
+      plan: tenant.plan,
+    },
+  });
 }
