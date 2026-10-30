@@ -88,6 +88,21 @@ export async function recordVisitorSession(data: VisitorSessionPayload): Promise
 /** Record an event (pageview, CTA click, etc.) */
 export async function recordVisitorEvent(data: VisitorEventPayload): Promise<void> {
   const db = getBasePrisma();
+  // Ensure session exists first to satisfy foreign key constraint even if event arrives first
+  await db.platformVisitorSession.upsert({
+    where: { id: data.sessionId },
+    create: {
+      id: data.sessionId,
+      landingPage: data.pagePath.slice(0, 500),
+      startedAt: new Date(),
+      lastActiveAt: new Date(),
+    },
+    update: {
+      lastActiveAt: new Date(),
+      exitPage: data.pagePath.slice(0, 500),
+    },
+  });
+
   await db.platformVisitorEvent.create({
     data: {
       sessionId: data.sessionId,
