@@ -45,44 +45,22 @@ export function SendSmsModal({
           role="dialog"
           aria-modal="true"
           className="modal-backdrop"
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(15, 23, 42, 0.45)",
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 16,
-            backdropFilter: "blur(4px)",
-          }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setOpen(false);
           }}
         >
-          <div
-            className="card"
-            style={{
-              width: "100%",
-              maxWidth: 480,
-              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
-              borderRadius: 12,
-              padding: "22px 24px",
-              background: "#fff",
-              border: "1px solid var(--line, #E2E8F0)",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-              <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Direct SMS to {customerName}</h2>
-              <button type="button" onClick={() => setOpen(false)} className="btn btn-secondary btn-sm" style={{ padding: "4px 8px" }}>✕</button>
+          <div className="card modal-card">
+            <div className="modal-head">
+              <h2>Direct SMS to {customerName}</h2>
+              <button type="button" onClick={() => setOpen(false)} className="btn btn-secondary btn-sm btn-close-sm">✕</button>
             </div>
 
-            <p className="muted" style={{ fontSize: 13, margin: "-6px 0 14px" }}>
+            <p className="muted text-sm my-xs">
               Sending to: <b className="num">{customerPhone}</b>
             </p>
 
             <form action={sendCustomerSmsAction.bind(null, customerId)} className="stack">
-              <label className="field" style={{ marginBottom: 4 }}>
+              <label className="field mb-xs">
                 <span className="label">Message</span>
                 <textarea
                   name="message"
@@ -97,14 +75,14 @@ export function SendSmsModal({
                 />
               </label>
 
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, color: "var(--text-muted, #64748B)" }}>
+              <div className="flex-between text-xs text-muted">
                 <span>
                   {message.length} characters · {parts} {parts === 1 ? "SMS part" : "SMS parts"} {isNonAscii ? "(Bangla/Unicode)" : "(Standard)"}
                 </span>
                 <span>Uses {parts || 1} SMS credit</span>
               </div>
 
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 14 }}>
+              <div className="flex-end gap-sm mt-md">
                 <button type="button" onClick={() => setOpen(false)} className="btn btn-secondary">
                   Cancel
                 </button>
@@ -146,50 +124,27 @@ export function AdjustCreditModal({
           role="dialog"
           aria-modal="true"
           className="modal-backdrop"
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(15, 23, 42, 0.45)",
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 16,
-            backdropFilter: "blur(4px)",
-          }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setOpen(false);
           }}
         >
-          <div
-            className="card"
-            style={{
-              width: "100%",
-              maxWidth: 440,
-              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
-              borderRadius: 12,
-              padding: "22px 24px",
-              background: "#fff",
-              border: "1px solid var(--line, #E2E8F0)",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-              <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Adjust Store Credit</h2>
-              <button type="button" onClick={() => setOpen(false)} className="btn btn-secondary btn-sm" style={{ padding: "4px 8px" }}>✕</button>
+          <div className="card modal-card modal-card-sm">
+            <div className="modal-head">
+              <h2>Adjust Store Credit</h2>
+              <button type="button" onClick={() => setOpen(false)} className="btn btn-secondary btn-sm btn-close-sm">✕</button>
             </div>
 
-            <div style={{ background: "var(--bg-subtle, #F8FAFC)", padding: "10px 14px", borderRadius: 8, marginBottom: 14 }}>
-              <div style={{ fontSize: 12.5, color: "var(--text-muted, #64748B)" }}>Current Store Credit Balance</div>
-              <div className="num" style={{ fontSize: 20, fontWeight: 700 }}>{taka(currentCredit)}</div>
+            <div className="card-subtle mb-md">
+              <div className="text-xs text-muted">Current Store Credit Balance</div>
+              <div className="num num-lg">{taka(currentCredit)}</div>
             </div>
 
             <form action={adjustCreditAction.bind(null, customerId)} className="stack">
-              <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
+              <div className="grid grid-2 gap-sm mb-md">
                 <button
                   type="button"
                   onClick={() => setDirection("add")}
                   className={`btn ${direction === "add" ? "btn-primary" : "btn-secondary"}`}
-                  style={{ flex: 1 }}
                 >
                   + Add Credit
                 </button>
@@ -197,7 +152,6 @@ export function AdjustCreditModal({
                   type="button"
                   onClick={() => setDirection("deduct")}
                   className={`btn ${direction === "deduct" ? "btn-danger" : "btn-secondary"}`}
-                  style={{ flex: 1 }}
                 >
                   − Deduct Credit
                 </button>
@@ -229,7 +183,7 @@ export function AdjustCreditModal({
                 />
               </label>
 
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 14 }}>
+              <div className="flex-end gap-sm mt-md">
                 <button type="button" onClick={() => setOpen(false)} className="btn btn-secondary">
                   Cancel
                 </button>
@@ -271,50 +225,27 @@ export function AdjustPointsModal({
           role="dialog"
           aria-modal="true"
           className="modal-backdrop"
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(15, 23, 42, 0.45)",
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 16,
-            backdropFilter: "blur(4px)",
-          }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setOpen(false);
           }}
         >
-          <div
-            className="card"
-            style={{
-              width: "100%",
-              maxWidth: 440,
-              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
-              borderRadius: 12,
-              padding: "22px 24px",
-              background: "#fff",
-              border: "1px solid var(--line, #E2E8F0)",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-              <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Adjust Loyalty Points</h2>
-              <button type="button" onClick={() => setOpen(false)} className="btn btn-secondary btn-sm" style={{ padding: "4px 8px" }}>✕</button>
+          <div className="card modal-card modal-card-sm">
+            <div className="modal-head">
+              <h2>Adjust Loyalty Points</h2>
+              <button type="button" onClick={() => setOpen(false)} className="btn btn-secondary btn-sm btn-close-sm">✕</button>
             </div>
 
-            <div style={{ background: "var(--bg-subtle, #F8FAFC)", padding: "10px 14px", borderRadius: 8, marginBottom: 14 }}>
-              <div style={{ fontSize: 12.5, color: "var(--text-muted, #64748B)" }}>Current Available Points</div>
-              <div className="num" style={{ fontSize: 20, fontWeight: 700 }}>{currentPoints} pts</div>
+            <div className="card-subtle mb-md">
+              <div className="text-xs text-muted">Current Available Points</div>
+              <div className="num num-lg">{currentPoints} pts</div>
             </div>
 
             <form action={adjustPointsAction.bind(null, customerId)} className="stack">
-              <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
+              <div className="grid grid-2 gap-sm mb-md">
                 <button
                   type="button"
                   onClick={() => setDirection("add")}
                   className={`btn ${direction === "add" ? "btn-primary" : "btn-secondary"}`}
-                  style={{ flex: 1 }}
                 >
                   + Add Points
                 </button>
@@ -322,7 +253,6 @@ export function AdjustPointsModal({
                   type="button"
                   onClick={() => setDirection("deduct")}
                   className={`btn ${direction === "deduct" ? "btn-danger" : "btn-secondary"}`}
-                  style={{ flex: 1 }}
                 >
                   − Deduct Points
                 </button>
@@ -354,7 +284,7 @@ export function AdjustPointsModal({
                 />
               </label>
 
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 14 }}>
+              <div className="flex-end gap-sm mt-md">
                 <button type="button" onClick={() => setOpen(false)} className="btn btn-secondary">
                   Cancel
                 </button>
@@ -399,42 +329,20 @@ export function AddressModal({
           role="dialog"
           aria-modal="true"
           className="modal-backdrop"
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(15, 23, 42, 0.45)",
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 16,
-            backdropFilter: "blur(4px)",
-          }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setOpen(false);
           }}
         >
-          <div
-            className="card"
-            style={{
-              width: "100%",
-              maxWidth: 480,
-              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
-              borderRadius: 12,
-              padding: "22px 24px",
-              background: "#fff",
-              border: "1px solid var(--line, #E2E8F0)",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-              <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>{address ? "Edit Address" : "Add Shipping Address"}</h2>
-              <button type="button" onClick={() => setOpen(false)} className="btn btn-secondary btn-sm" style={{ padding: "4px 8px" }}>✕</button>
+          <div className="card modal-card">
+            <div className="modal-head">
+              <h2>{address ? "Edit Address" : "Add Shipping Address"}</h2>
+              <button type="button" onClick={() => setOpen(false)} className="btn btn-secondary btn-sm btn-close-sm">✕</button>
             </div>
 
             <form action={saveAddressAction.bind(null, customerId)} className="stack">
               {address && <input type="hidden" name="addressId" value={address.id} />}
 
-              <div className="grid grid-2" style={{ gap: 12 }}>
+              <div className="grid grid-2 gap-md">
                 <label className="field">
                   <span className="label">Label</span>
                   <select name="label" className="input" defaultValue={address?.label ?? "Home"}>
@@ -459,7 +367,7 @@ export function AddressModal({
                 </label>
               </div>
 
-              <div className="grid grid-2" style={{ gap: 12 }}>
+              <div className="grid grid-2 gap-md">
                 <label className="field">
                   <span className="label">District *</span>
                   <select name="district" className="input" defaultValue={address?.district ?? districts[0]?.name}>
@@ -491,7 +399,7 @@ export function AddressModal({
                 />
               </label>
 
-              <label style={{ display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 13.5 }}>
+              <label className="check-label text-sm">
                 <input
                   type="checkbox"
                   name="isDefault"
@@ -500,7 +408,7 @@ export function AddressModal({
                 Set as default shipping address
               </label>
 
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 14 }}>
+              <div className="flex-end gap-sm mt-md">
                 <button type="button" onClick={() => setOpen(false)} className="btn btn-secondary">
                   Cancel
                 </button>
@@ -524,11 +432,10 @@ export function DeleteAddressButton({
   addressId: string;
 }) {
   return (
-    <form action={deleteAddressAction.bind(null, customerId, addressId)} style={{ display: "inline" }}>
+    <form action={deleteAddressAction.bind(null, customerId, addressId)} className="d-inline">
       <SubmitButton
         pending="Working…"
-        className="link"
-        style={{ color: "var(--danger, #DC2626)", fontSize: 12, cursor: "pointer", background: "none", border: "none", padding: 0 }}
+        className="link text-danger text-xs cursor-pointer p-0 border-none"
         onClick={(e) => {
           if (!confirm("Are you sure you want to remove this address?")) e.preventDefault();
         }}

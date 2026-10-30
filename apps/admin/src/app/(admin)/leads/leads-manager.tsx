@@ -67,22 +67,22 @@ interface LeadsManagerProps {
 
 const STATUS_CONFIG: Record<
   SiteLeadStatus,
-  { label: string; bg: string; text: string; border: string; dot: string }
+  { label: string; pillClass: string; dotClass: string }
 > = {
-  NEW: { label: "New", bg: "#FEF3C7", text: "#92400E", border: "#FDE68A", dot: "#D97706" },
-  CONTACTED: { label: "Contacted", bg: "#E0F2FE", text: "#0369A1", border: "#BAE6FD", dot: "#0284C7" },
-  QUALIFIED: { label: "Qualified", bg: "#EEF2FF", text: "#4338CA", border: "#C7D2FE", dot: "#4F46E5" },
-  WON: { label: "Won / Confirmed", bg: "#DCFCE7", text: "#15803D", border: "#BBF7D0", dot: "#16A34A" },
-  CLOSED: { label: "Closed", bg: "#F1F5F9", text: "#475569", border: "#CBD5E1", dot: "#64748b" },
-  SPAM: { label: "Spam", bg: "#FFE4E6", text: "#9F1239", border: "#FECDD3", dot: "#E11D48" },
+  NEW: { label: "New", pillClass: "pill warn", dotClass: "lead-dot-unread" },
+  CONTACTED: { label: "Contacted", pillClass: "pill info", dotClass: "" },
+  QUALIFIED: { label: "Qualified", pillClass: "pill info", dotClass: "" },
+  WON: { label: "Won / Confirmed", pillClass: "pill good", dotClass: "" },
+  CLOSED: { label: "Closed", pillClass: "pill", dotClass: "" },
+  SPAM: { label: "Spam", pillClass: "pill bad", dotClass: "" },
 };
 
-const TYPE_CONFIG: Record<SiteLeadType, { label: string; badgeBg: string; badgeColor: string }> = {
-  CONTACT: { label: "Contact", badgeBg: "#F1F5F9", badgeColor: "#334155" },
-  QUOTE: { label: "Quote", badgeBg: "#FEF9C3", badgeColor: "#854D0E" },
-  RESERVATION: { label: "Reservation", badgeBg: "#EDE9FE", badgeColor: "#6D28D9" },
-  APPOINTMENT: { label: "Appointment", badgeBg: "#E0E7FF", badgeColor: "#3730A3" },
-  MEDIA_BOOKING: { label: "Media / Session", badgeBg: "#FCE7F3", badgeColor: "#9D174D" },
+const TYPE_CONFIG: Record<SiteLeadType, { label: string }> = {
+  CONTACT: { label: "Contact" },
+  QUOTE: { label: "Quote" },
+  RESERVATION: { label: "Reservation" },
+  APPOINTMENT: { label: "Appointment" },
+  MEDIA_BOOKING: { label: "Media / Session" },
 };
 
 function formatRelativeTime(dateInput: Date | string): string {
@@ -408,7 +408,7 @@ export function LeadsManager({
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+    <div className="stack gap-md">
       <PageHeader
         title="Leads & Inquiries"
         crumbs={[{ label: "Home", href: "/" }, { label: "Leads" }]}
@@ -426,15 +426,7 @@ export function LeadsManager({
       />
 
       {/* Status Filter Tabs */}
-      <div
-        style={{
-          display: "flex",
-          gap: 6,
-          overflowX: "auto",
-          paddingBottom: 4,
-          borderBottom: "1px solid var(--border, #e2e8f0)",
-        }}
-      >
+      <div className="tab-strip">
         {[
           { key: "ALL", label: "All Inquiries", count: counts.ALL },
           { key: "NEW", label: "New / Unread", count: counts.NEW },
@@ -450,33 +442,10 @@ export function LeadsManager({
               key={tab.key}
               type="button"
               onClick={() => setStatusTab(tab.key)}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "8px 14px",
-                border: "none",
-                borderBottom: isActive ? "2px solid #0f172a" : "2px solid transparent",
-                background: "transparent",
-                color: isActive ? "#0f172a" : "#64748b",
-                fontWeight: isActive ? 700 : 500,
-                fontSize: "0.88rem",
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-                transition: "all 0.15s ease",
-              }}
+              className={`tab-item ${isActive ? "active" : ""}`}
             >
               <span>{tab.label}</span>
-              <span
-                style={{
-                  fontSize: "0.75rem",
-                  padding: "1px 7px",
-                  borderRadius: 9999,
-                  background: isActive ? "#0f172a" : "#f1f5f9",
-                  color: isActive ? "#ffffff" : "#475569",
-                  fontWeight: 600,
-                }}
-              >
+              <span className="tab-badge">
                 {tab.count}
               </span>
             </button>
@@ -485,34 +454,15 @@ export function LeadsManager({
       </div>
 
       {/* Secondary Controls Bar: Type, Assignee, Search */}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          padding: "12px 16px",
-          background: "var(--bg-card, #ffffff)",
-          border: "1px solid var(--border, #e2e8f0)",
-          borderRadius: 10,
-        }}
-      >
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10 }}>
+      <div className="card-panel-muted flex-between flex-wrap gap-sm">
+        <div className="flex-center-y flex-wrap gap-sm">
           {/* Type Filter */}
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ fontSize: "0.82rem", color: "#64748b", fontWeight: 600 }}>Type:</span>
+          <div className="flex-center-y gap-xs">
+            <span className="text-xs text-muted text-bold">Type:</span>
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              style={{
-                padding: "6px 10px",
-                borderRadius: 6,
-                border: "1px solid var(--border, #cbd5e1)",
-                fontSize: "0.84rem",
-                background: "#ffffff",
-                cursor: "pointer",
-              }}
+              className="input text-sm py-xs"
             >
               <option value="ALL">All Types</option>
               <option value="CONTACT">Contact Forms</option>
@@ -523,19 +473,12 @@ export function LeadsManager({
           </div>
 
           {/* Assignee Filter */}
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ fontSize: "0.82rem", color: "#64748b", fontWeight: 600 }}>Assignee:</span>
+          <div className="flex-center-y gap-xs">
+            <span className="text-xs text-muted text-bold">Assignee:</span>
             <select
               value={assigneeFilter}
               onChange={(e) => setAssigneeFilter(e.target.value)}
-              style={{
-                padding: "6px 10px",
-                borderRadius: 6,
-                border: "1px solid var(--border, #cbd5e1)",
-                fontSize: "0.84rem",
-                background: "#ffffff",
-                cursor: "pointer",
-              }}
+              className="input text-sm py-xs"
             >
               <option value="ALL">All Staff</option>
               <option value="UNASSIGNED">Unassigned</option>
@@ -555,16 +498,7 @@ export function LeadsManager({
                 setAssigneeFilter("ALL");
                 setSearch("");
               }}
-              style={{
-                padding: "5px 10px",
-                background: "#f1f5f9",
-                border: "none",
-                borderRadius: 6,
-                fontSize: "0.78rem",
-                color: "#475569",
-                cursor: "pointer",
-                fontWeight: 600,
-              }}
+              className="btn btn-secondary btn-xs"
             >
               ✕ Reset Filters
             </button>
@@ -572,91 +506,47 @@ export function LeadsManager({
         </div>
 
         {/* Search Input */}
-        <div style={{ position: "relative", minWidth: 260 }}>
+        <div className="search-box-wrap">
           <input
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search name, phone, service, note..."
-            style={{
-              width: "100%",
-              padding: "7px 12px 7px 32px",
-              borderRadius: 6,
-              border: "1px solid var(--border, #cbd5e1)",
-              fontSize: "0.84rem",
-              boxSizing: "border-box",
-            }}
+            className="search-box-input"
           />
-          <span
-            style={{
-              position: "absolute",
-              left: 10,
-              top: "50%",
-              transform: "translateY(-50%)",
-              fontSize: "0.85rem",
-              color: "#94a3b8",
-              pointerEvents: "none",
-            }}
-          >
-            🔍
+          <span className="search-box-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
           </span>
         </div>
       </div>
 
       {/* Main Split-Pane Workspace */}
-      <div
-        className="leads-split"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(340px, 420px) 1fr",
-          gap: 18,
-          alignItems: "start",
-          minHeight: 640,
-        }}
-      >
+      <div className="leads-split">
         {/* Left Column: Inquiry Master List */}
-        <div
-          style={{
-            background: "var(--bg-card, #ffffff)",
-            border: "1px solid var(--border, #e2e8f0)",
-            borderRadius: 12,
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-          }}
-        >
-          <div
-            style={{
-              padding: "12px 16px",
-              borderBottom: "1px solid var(--border, #f1f5f9)",
-              background: "#fafbfc",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: "0.03em" }}>
+        <div className="leads-panel">
+          <div className="flex-between py-xs px-sm border-bottom">
+            <span className="text-xs text-bold text-muted uppercase tracking-wide">
               Inquiries ({filteredLeads.length})
             </span>
-            <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
+            <span className="text-xs text-muted">
               Sorted by newest
             </span>
           </div>
 
-          <div
-            style={{
-              maxHeight: "calc(100vh - 280px)",
-              overflowY: "auto",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
+          <div className="leads-scroll">
             {filteredLeads.length === 0 ? (
-              <div style={{ padding: "48px 24px", textAlign: "center", color: "#64748b" }}>
-                <div style={{ fontSize: "1.2rem", marginBottom: 8, color: "var(--ink-3)" }}><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
-                <div style={{ fontWeight: 700, color: "#0f172a", marginBottom: 4 }}>No inquiries found</div>
-                <div style={{ fontSize: "0.84rem" }}>Try adjusting your filters or search terms.</div>
+              <div className="empty-state">
+                <div className="text-muted mb-xs">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                    <polyline points="22,6 12,13 2,6"/>
+                  </svg>
+                </div>
+                <div className="text-bold text-base mb-xs">No inquiries found</div>
+                <div className="text-sm text-muted">Try adjusting your filters or search terms.</div>
               </div>
             ) : (
               filteredLeads.map((item) => {
@@ -675,101 +565,52 @@ export function LeadsManager({
                   <div
                     key={item.id}
                     onClick={() => setSelectedLeadId(item.id)}
-                    style={{
-                      padding: "14px 16px",
-                      borderBottom: "1px solid var(--border, #f1f5f9)",
-                      borderLeft: isSelected
-                        ? "4px solid #0f172a"
-                        : item.status === "NEW"
-                        ? "4px solid #F59E0B"
-                        : "4px solid transparent",
-                      background: isSelected ? "#F8FAFC" : "#ffffff",
-                      cursor: "pointer",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 6,
-                      transition: "background 0.15s ease",
-                    }}
+                    className={`leads-item ${isSelected ? "active" : item.status === "NEW" ? "unread" : ""}`}
                   >
                     {/* Top Row: Badges & Relative Time */}
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <div className="flex-between flex-center-y">
+                      <div className="flex-center-y gap-xs">
                         {item.status === "NEW" && (
-                          <span
-                            style={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: "50%",
-                              background: "#F59E0B",
-                              display: "inline-block",
-                            }}
-                          />
+                          <span className="lead-dot-unread" />
                         )}
-                        <span
-                          style={{
-                            fontSize: "0.72rem",
-                            fontWeight: 700,
-                            padding: "2px 6px",
-                            borderRadius: 4,
-                            background: typeCfg.badgeBg,
-                            color: typeCfg.badgeColor,
-                          }}
-                        >
+                        <span className="pill text-xs">
                           {typeCfg.label}
                         </span>
-                        <span
-                          style={{
-                            fontSize: "0.72rem",
-                            fontWeight: 700,
-                            padding: "2px 6px",
-                            borderRadius: 4,
-                            background: statusCfg.bg,
-                            color: statusCfg.text,
-                          }}
-                        >
+                        <span className={`${statusCfg.pillClass} text-xs`}>
                           {statusCfg.label}
                         </span>
                       </div>
-                      <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
+                      <span className="text-xs text-muted">
                         {formatRelativeTime(item.createdAt)}
                       </span>
                     </div>
 
                     {/* Customer Name & Phone */}
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                      <span style={{ fontWeight: 700, fontSize: "0.94rem", color: isSelected ? "#0f172a" : "#1e293b" }}>
+                    <div className="flex-between">
+                      <span className="text-bold text-sm">
                         {item.name}
                       </span>
                       {item.phone && (
-                        <span style={{ fontSize: "0.8rem", color: "#64748b", fontFamily: "monospace" }}>
+                        <span className="font-mono text-xs text-muted">
                           {item.phone}
                         </span>
                       )}
                     </div>
 
                     {/* Excerpt Summary */}
-                    <p
-                      style={{
-                        margin: 0,
-                        fontSize: "0.82rem",
-                        color: "#475569",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                    <p className="m-0 text-sm text-muted text-ellipsis">
                       {summaryText}
                     </p>
 
                     {/* Assigned staff footer */}
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.75rem", color: "#94a3b8", marginTop: 2 }}>
+                    <div className="flex-between text-xs text-muted mt-xs">
                       <span>Ref: #LD-{item.id.slice(-6)}</span>
                       {assignedStaff ? (
-                        <span style={{ color: "#0369a1", fontWeight: 600 }}>
+                        <span className="text-brand text-bold">
                           {assignedStaff.name}
                         </span>
                       ) : (
-                        <span style={{ color: "#94a3b8" }}>Unassigned</span>
+                        <span>Unassigned</span>
                       )}
                     </div>
                   </div>
@@ -780,55 +621,25 @@ export function LeadsManager({
         </div>
 
         {/* Right Column: Selected Lead Operational Desk */}
-        <div
-          style={{
-            background: "var(--bg-card, #ffffff)",
-            border: "1px solid var(--border, #e2e8f0)",
-            borderRadius: 12,
-            padding: 24,
-            display: "flex",
-            flexDirection: "column",
-            gap: 20,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-          }}
-        >
+        <div className="leads-desk">
           {selectedLead ? (
             <>
               {/* Detail Header & Desk Controls */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  flexWrap: "wrap",
-                  gap: 16,
-                  paddingBottom: 16,
-                  borderBottom: "1px solid var(--border, #e2e8f0)",
-                }}
-              >
+              <div className="flex-between flex-wrap gap-md border-bottom pb-sm">
                 <div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                    <span
-                      style={{
-                        fontSize: "0.8rem",
-                        fontWeight: 700,
-                        padding: "3px 8px",
-                        borderRadius: 6,
-                        background: TYPE_CONFIG[selectedLead.type]?.badgeBg || "#F1F5F9",
-                        color: TYPE_CONFIG[selectedLead.type]?.badgeColor || "#334155",
-                      }}
-                    >
+                  <div className="flex-center-y flex-wrap gap-sm">
+                    <span className="pill text-bold text-xs">
                       {selectedLead.type}
                     </span>
-                    <h2 style={{ fontSize: "1.35rem", fontWeight: 800, margin: 0, color: "#0f172a" }}>
+                    <h2 className="m-0 text-lg text-bold">
                       {selectedLead.name}
                     </h2>
-                    <span style={{ fontSize: "0.82rem", color: "#64748b", fontFamily: "monospace" }}>
+                    <span className="font-mono text-xs text-muted">
                       #LD-{selectedLead.id.slice(-6)}
                     </span>
                   </div>
 
-                  <div style={{ fontSize: "0.82rem", color: "#64748b", marginTop: 4 }}>
+                  <div className="text-xs text-muted mt-xs">
                     Submitted on {formatDhakaDateTime(selectedLead.createdAt)}
                     {selectedLead.sourcePage && (
                       <span> • Source Page: <code>{selectedLead.sourcePage}</code></span>
@@ -837,10 +648,10 @@ export function LeadsManager({
                 </div>
 
                 {/* Status & Assignment Quick Triage Pickers */}
-                <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                <div className="flex-center-y flex-wrap gap-sm">
                   {/* Status Dropdown */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                    <label style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>
+                  <div className="stack gap-xs">
+                    <label className="text-xs text-bold text-muted uppercase">
                       Status
                     </label>
                     <select
@@ -853,16 +664,7 @@ export function LeadsManager({
                           selectedLead.bookingRequest?.id
                         )
                       }
-                      style={{
-                        padding: "6px 12px",
-                        borderRadius: 6,
-                        border: `1px solid ${STATUS_CONFIG[selectedLead.status]?.border || "#cbd5e1"}`,
-                        background: STATUS_CONFIG[selectedLead.status]?.bg || "#ffffff",
-                        color: STATUS_CONFIG[selectedLead.status]?.text || "#0f172a",
-                        fontWeight: 700,
-                        fontSize: "0.84rem",
-                        cursor: "pointer",
-                      }}
+                      className="input text-sm text-bold py-xs cursor-pointer"
                     >
                       <option value="NEW">New</option>
                       <option value="CONTACTED">Contacted</option>
@@ -874,8 +676,8 @@ export function LeadsManager({
                   </div>
 
                   {/* Staff Assignee Dropdown */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                    <label style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>
+                  <div className="stack gap-xs">
+                    <label className="text-xs text-bold text-muted uppercase">
                       Assigned Staff
                     </label>
                     <select
@@ -887,14 +689,7 @@ export function LeadsManager({
                           e.target.value ? e.target.value : null
                         )
                       }
-                      style={{
-                        padding: "6px 12px",
-                        borderRadius: 6,
-                        border: "1px solid var(--border, #cbd5e1)",
-                        fontSize: "0.84rem",
-                        background: "#ffffff",
-                        cursor: "pointer",
-                      }}
+                      className="input text-sm py-xs cursor-pointer"
                     >
                       <option value="">Unassigned</option>
                       {staffMembers.map((staff) => (
@@ -908,19 +703,8 @@ export function LeadsManager({
               </div>
 
               {/* Action Desk Launchers: WhatsApp, Call, Quick Confirm */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  flexWrap: "wrap",
-                  gap: 10,
-                  padding: "12px 16px",
-                  background: "#F8FAFC",
-                  borderRadius: 8,
-                  border: "1px solid #E2E8F0",
-                }}
-              >
-                <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "#475569", marginRight: 4 }}>
+              <div className="desk-actions-bar">
+                <span className="text-xs text-bold text-muted">
                   Quick Action:
                 </span>
 
@@ -930,26 +714,13 @@ export function LeadsManager({
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => {
-                      // Log WhatsApp launch interaction
                       addLeadActivityNoteAction(
                         selectedLead.id,
                         "WhatsApp conversation initiated via 1-tap launcher",
                         "WHATSAPP_CLICKED"
                       );
                     }}
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 6,
-                      padding: "8px 14px",
-                      borderRadius: 6,
-                      background: "#25D366",
-                      color: "#FFFFFF",
-                      fontSize: "0.84rem",
-                      fontWeight: 700,
-                      textDecoration: "none",
-                      boxShadow: "0 2px 4px rgba(37, 211, 102, 0.2)",
-                    }}
+                    className="btn btn-whatsapp btn-sm"
                   >
                     Open WhatsApp Chat
                   </a>
@@ -965,19 +736,7 @@ export function LeadsManager({
                         "CALL_LOGGED"
                       );
                     }}
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 6,
-                      padding: "8px 14px",
-                      borderRadius: 6,
-                      background: "#FFFFFF",
-                      border: "1px solid #CBD5E1",
-                      color: "#0F172A",
-                      fontSize: "0.84rem",
-                      fontWeight: 600,
-                      textDecoration: "none",
-                    }}
+                    className="btn btn-secondary btn-sm"
                   >
                     Call ({selectedLead.phone})
                   </a>
@@ -994,19 +753,7 @@ export function LeadsManager({
                         selectedLead.bookingRequest?.id
                       )
                     }
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 6,
-                      padding: "8px 14px",
-                      borderRadius: 6,
-                      background: "#16A34A",
-                      color: "#FFFFFF",
-                      border: "none",
-                      fontSize: "0.84rem",
-                      fontWeight: 700,
-                      cursor: "pointer",
-                    }}
+                    className="btn btn-primary btn-sm"
                   >
                     <span>✓</span> Confirm Reservation
                   </button>
@@ -1023,16 +770,7 @@ export function LeadsManager({
                         selectedLead.bookingRequest?.id
                       )
                     }
-                    style={{
-                      padding: "8px 12px",
-                      borderRadius: 6,
-                      background: "#FFFFFF",
-                      border: "1px solid #BAE6FD",
-                      color: "#0369A1",
-                      fontSize: "0.84rem",
-                      fontWeight: 600,
-                      cursor: "pointer",
-                    }}
+                    className="btn btn-secondary btn-sm"
                   >
                     Mark Contacted
                   </button>
@@ -1041,53 +779,20 @@ export function LeadsManager({
 
               {/* Booking Request Detail Box if applicable */}
               {selectedLead.bookingRequest && (
-                <div
-                  style={{
-                    background: "#F5F3FF",
-                    border: "1px solid #DDD6FE",
-                    borderRadius: 10,
-                    padding: 16,
-                  }}
-                >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                    <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "#5B21B6", display: "flex", alignItems: "center", gap: 6 }}>
+                <div className="booking-detail-card">
+                  <div className="flex-between mb-sm">
+                    <span className="text-bold text-sm text-brand">
                       Reservation & Appointment Details
                     </span>
-                    <span
-                      style={{
-                        padding: "2px 8px",
-                        borderRadius: 9999,
-                        fontSize: "0.75rem",
-                        fontWeight: 700,
-                        background:
-                          selectedLead.bookingRequest.status === "CONFIRMED"
-                            ? "#DCFCE7"
-                            : selectedLead.bookingRequest.status === "DECLINED"
-                            ? "#FEE2E2"
-                            : "#FEF3C7",
-                        color:
-                          selectedLead.bookingRequest.status === "CONFIRMED"
-                            ? "#15803D"
-                            : selectedLead.bookingRequest.status === "DECLINED"
-                            ? "#B91C1C"
-                            : "#92400E",
-                      }}
-                    >
+                    <span className="pill info text-xs">
                       {selectedLead.bookingRequest.status}
                     </span>
                   </div>
 
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-                      gap: 12,
-                      fontSize: "0.85rem",
-                    }}
-                  >
+                  <div className="grid grid-2 gap-sm text-sm">
                     {selectedLead.bookingRequest.serviceName && (
                       <div>
-                        <span style={{ color: "#6D28D9", display: "block", fontSize: "0.75rem", fontWeight: 600 }}>
+                        <span className="d-block text-xs text-muted">
                           Service / Item
                         </span>
                         <strong>{selectedLead.bookingRequest.serviceName}</strong>
@@ -1095,7 +800,7 @@ export function LeadsManager({
                     )}
                     {selectedLead.bookingRequest.providerName && (
                       <div>
-                        <span style={{ color: "#6D28D9", display: "block", fontSize: "0.75rem", fontWeight: 600 }}>
+                        <span className="d-block text-xs text-muted">
                           Chamber / Specialist
                         </span>
                         <strong>{selectedLead.bookingRequest.providerName}</strong>
@@ -1103,7 +808,7 @@ export function LeadsManager({
                     )}
                     {selectedLead.bookingRequest.requestedDate && (
                       <div>
-                        <span style={{ color: "#6D28D9", display: "block", fontSize: "0.75rem", fontWeight: 600 }}>
+                        <span className="d-block text-xs text-muted">
                           Requested Date
                         </span>
                         <strong>{new Date(selectedLead.bookingRequest.requestedDate).toLocaleDateString("en-GB")}</strong>
@@ -1111,7 +816,7 @@ export function LeadsManager({
                     )}
                     {selectedLead.bookingRequest.requestedTime && (
                       <div>
-                        <span style={{ color: "#6D28D9", display: "block", fontSize: "0.75rem", fontWeight: 600 }}>
+                        <span className="d-block text-xs text-muted">
                           Preferred Time
                         </span>
                         <strong>{selectedLead.bookingRequest.requestedTime}</strong>
@@ -1119,7 +824,7 @@ export function LeadsManager({
                     )}
                     {selectedLead.bookingRequest.partySize && (
                       <div>
-                        <span style={{ color: "#6D28D9", display: "block", fontSize: "0.75rem", fontWeight: 600 }}>
+                        <span className="d-block text-xs text-muted">
                           Party / Guests
                         </span>
                         <strong>{selectedLead.bookingRequest.partySize} Persons</strong>
@@ -1131,18 +836,11 @@ export function LeadsManager({
 
               {/* Customer Message & Context */}
               {selectedLead.message && (
-                <div
-                  style={{
-                    background: "#FAFAFA",
-                    border: "1px solid #E5E7EB",
-                    borderRadius: 8,
-                    padding: "12px 16px",
-                  }}
-                >
-                  <span style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, color: "#6B7280", marginBottom: 6 }}>
+                <div className="card-panel-muted">
+                  <span className="d-block text-xs text-bold text-muted mb-xs">
                     Customer Inquiry Note:
                   </span>
-                  <div style={{ fontSize: "0.92rem", color: "#1F2937", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
+                  <div className="text-sm pre-wrap">
                     {selectedLead.message}
                   </div>
                 </div>
@@ -1150,20 +848,8 @@ export function LeadsManager({
 
               {/* Attribution & Marketing Origin Metadata */}
               {(selectedLead.utmSource || selectedLead.utmCampaign || selectedLead.referrer) && (
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: 12,
-                    fontSize: "0.78rem",
-                    color: "#64748B",
-                    padding: "10px 14px",
-                    background: "#F8FAFC",
-                    borderRadius: 6,
-                    border: "1px dashed #CBD5E1",
-                  }}
-                >
-                  <span style={{ fontWeight: 700, color: "#475569" }}>Marketing Attribution:</span>
+                <div className="attribution-card">
+                  <span className="text-bold">Marketing Attribution:</span>
                   {selectedLead.utmSource && <span>Source: <strong>{selectedLead.utmSource}</strong></span>}
                   {selectedLead.utmMedium && <span>Medium: <strong>{selectedLead.utmMedium}</strong></span>}
                   {selectedLead.utmCampaign && <span>Campaign: <strong>{selectedLead.utmCampaign}</strong></span>}
@@ -1172,45 +858,22 @@ export function LeadsManager({
               )}
 
               {/* Chronological SiteLeadActivity Timeline */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 8 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <h3 style={{ fontSize: "1rem", fontWeight: 700, margin: 0, color: "#0F172A", display: "flex", alignItems: "center", gap: 8 }}>
-                    <span>📜</span> Activity & Audit Timeline
+              <div className="stack gap-sm mt-xs">
+                <div className="flex-between">
+                  <h3 className="text-base text-bold m-0 flex-center-y gap-xs">
+                    Activity & Audit Timeline
                   </h3>
                   {isLoadingActivities && (
-                    <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>Loading history…</span>
+                    <span className="text-xs text-muted">Loading history…</span>
                   )}
                 </div>
 
                 {/* Timeline List */}
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 10,
-                    paddingLeft: 12,
-                    borderLeft: "2px solid #E2E8F0",
-                    marginLeft: 6,
-                  }}
-                >
+                <div className="stack gap-sm border-left pl-md ml-xs">
                   {/* Origin event */}
-                  <div style={{ position: "relative", fontSize: "0.82rem" }}>
-                    <div
-                      style={{
-                        position: "absolute",
-                        left: -19,
-                        top: 2,
-                        width: 10,
-                        height: 10,
-                        borderRadius: "50%",
-                        background: "#0F172A",
-                        border: "2px solid #FFFFFF",
-                      }}
-                    />
-                    <div style={{ display: "flex", justifyContent: "space-between", color: "#64748B" }}>
-                      <span>Lead captured from Web Form ({selectedLead.sourcePage || "/"})</span>
-                      <span>{formatDhakaDateTime(selectedLead.createdAt)}</span>
-                    </div>
+                  <div className="flex-between text-xs text-muted">
+                    <span>Lead captured from Web Form ({selectedLead.sourcePage || "/"})</span>
+                    <span>{formatDhakaDateTime(selectedLead.createdAt)}</span>
                   </div>
 
                   {/* Render Activities */}
@@ -1218,54 +881,25 @@ export function LeadsManager({
                     const isNote = act.activityType === "NOTE_ADDED";
                     const isWa = act.activityType === "WHATSAPP_CLICKED";
                     const isCall = act.activityType === "CALL_LOGGED";
-                    const isAssign = act.activityType === "ASSIGNED";
 
-                    let icon = "📝";
-                    let dotColor = "#3B82F6";
-                    if (isWa) {
-                      icon = "💬";
-                      dotColor = "#25D366";
-                    } else if (isCall) {
-                      icon = "📞";
-                      dotColor = "#F59E0B";
-                    } else if (isAssign) {
-                      icon = "👤";
-                      dotColor = "#8B5CF6";
-                    }
+                    const badgeType = isNote ? "staff" : isWa ? "sms" : isCall ? "review" : "order";
+                    const typeLabel = isNote ? "NOTE" : isWa ? "WA" : isCall ? "CALL" : "LOG";
 
                     return (
-                      <div key={act.id} style={{ position: "relative", fontSize: "0.84rem" }}>
-                        <div
-                          style={{
-                            position: "absolute",
-                            left: -19,
-                            top: 4,
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            background: dotColor,
-                            border: "2px solid #FFFFFF",
-                          }}
-                        />
-                        <div
-                          style={{
-                            background: isNote ? "#FFFBEB" : "#F8FAFC",
-                            border: `1px solid ${isNote ? "#FDE68A" : "#E2E8F0"}`,
-                            borderRadius: 6,
-                            padding: "8px 12px",
-                          }}
-                        >
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                            <span style={{ fontWeight: 700, color: isNote ? "#92400E" : "#334155", display: "flex", alignItems: "center", gap: 6 }}>
-                              <span>{icon}</span> {act.actorName || "Staff"}
+                      <div key={act.id} className="card-panel-muted">
+                        <div className="flex-between mb-xs">
+                          <span className="text-bold text-sm flex-center-y gap-xs">
+                            <span className={`timeline-badge timeline-badge-${badgeType}`}>
+                              {typeLabel}
                             </span>
-                            <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
-                              {formatDhakaDateTime(act.createdAt)}
-                            </span>
-                          </div>
-                          <div style={{ color: "#1E293B", lineHeight: 1.4, whiteSpace: "pre-wrap" }}>
-                            {act.note}
-                          </div>
+                            {act.actorName || "Staff"}
+                          </span>
+                          <span className="text-xs text-muted">
+                            {formatDhakaDateTime(act.createdAt)}
+                          </span>
+                        </div>
+                        <div className="text-sm pre-wrap">
+                          {act.note}
                         </div>
                       </div>
                     );
@@ -1275,31 +909,16 @@ export function LeadsManager({
                 {/* Add Internal Follow-up Note Box */}
                 <form
                   onSubmit={handleAddActivityNote}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 10,
-                    background: "#FAFAFA",
-                    border: "1px solid #E2E8F0",
-                    borderRadius: 8,
-                    padding: 12,
-                    marginTop: 6,
-                  }}
+                  className="card-panel-muted stack gap-sm mt-xs"
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "#475569" }}>
-                      ✍️ Log Interaction or Internal Note:
+                  <div className="flex-between">
+                    <span className="text-xs text-bold text-muted">
+                      Log Interaction or Internal Note:
                     </span>
                     <select
                       value={newNoteType}
                       onChange={(e) => setNewNoteType(e.target.value as LeadActivityType)}
-                      style={{
-                        padding: "4px 8px",
-                        borderRadius: 6,
-                        border: "1px solid #CBD5E1",
-                        fontSize: "0.78rem",
-                        background: "#FFFFFF",
-                      }}
+                      className="input text-xs py-xs"
                     >
                       <option value="NOTE_ADDED">Internal Note</option>
                       <option value="CALL_LOGGED">Phone Call Note</option>
@@ -1312,33 +931,14 @@ export function LeadsManager({
                     onChange={(e) => setNewNoteText(e.target.value)}
                     placeholder="E.g. Called customer at 3:15 PM, confirmed party of 4 at window table, sent banquet menu..."
                     rows={2}
-                    style={{
-                      width: "100%",
-                      padding: "8px 10px",
-                      borderRadius: 6,
-                      border: "1px solid #CBD5E1",
-                      fontSize: "0.85rem",
-                      resize: "vertical",
-                      fontFamily: "inherit",
-                      boxSizing: "border-box",
-                    }}
+                    className="textarea text-sm"
                   />
 
-                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <div className="flex-end">
                     <button
                       type="submit"
                       disabled={isPending || !newNoteText.trim()}
-                      style={{
-                        padding: "6px 14px",
-                        borderRadius: 6,
-                        background: "#0F172A",
-                        color: "#FFFFFF",
-                        border: "none",
-                        fontSize: "0.82rem",
-                        fontWeight: 600,
-                        cursor: newNoteText.trim() ? "pointer" : "not-allowed",
-                        opacity: newNoteText.trim() ? 1 : 0.6,
-                      }}
+                      className="btn btn-primary btn-sm"
                     >
                       {isPending ? "Posting…" : "Post to Timeline"}
                     </button>
@@ -1347,12 +947,16 @@ export function LeadsManager({
               </div>
             </>
           ) : (
-            <div style={{ padding: 64, textAlign: "center", color: "#64748B" }}>
-              <div style={{ fontSize: "2.5rem", marginBottom: 12 }}>👉</div>
-              <h3 style={{ fontSize: "1.1rem", fontWeight: 700, margin: "0 0 6px", color: "#0F172A" }}>
+            <div className="desk-empty">
+              <div className="text-muted mb-md">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+              </div>
+              <h3 className="text-lg text-bold mb-xs">
                 Select an inquiry
               </h3>
-              <p style={{ fontSize: "0.9rem", margin: 0 }}>
+              <p className="text-sm m-0">
                 Choose any inquiry or booking request from the left list to view customer contact details, reservation specifics, and the staff activity timeline.
               </p>
             </div>

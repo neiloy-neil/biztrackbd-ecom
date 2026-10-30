@@ -44,10 +44,10 @@ export default async function Customers({ searchParams }: { searchParams: Promis
           </>
         }
       />
-      {err && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{err}</div>}
-      {ok && <div className="notice good" role="status" style={{ marginBottom: 12 }}>Saved.</div>}
+      {err && <div className="notice bad mb-md" role="alert">{err}</div>}
+      {ok && <div className="notice good mb-md" role="status">Saved.</div>}
 
-      <div className="grid grid-4" style={{ marginBottom: 14 }}>
+      <div className="grid grid-4 mb-md">
         <div className="stat"><div className="k">All customers</div><div className="v num">{list.summary.all}</div></div>
         <div className="stat"><div className="k">New this month</div><div className="v num">{list.summary.newThisMonth}</div></div>
         <div className="stat"><div className="k">Repeat customers</div><div className="v num">{list.summary.repeatPercent}%</div></div>
@@ -66,12 +66,12 @@ export default async function Customers({ searchParams }: { searchParams: Promis
           <div className="only-mobile">
             {list.rows.map((c) => (
               <div key={c.id} className="list-card" data-testid="customer-row">
-                <Link href={`/customers/${c.id}`} prefetch={false} style={{ display: "block" }}>
+                <Link href={`/customers/${c.id}`} prefetch={false} className="d-block">
                 <div className="top"><b>{c.name}</b>{c.isVip && <span className="pill info">VIP</span>}{c.isBlocked && <span className="pill bad">Blocked</span>}</div>
-                <div className="muted num" style={{ fontSize: 13 }}>{prettyPhone(c.phone)}{c.area ? ` · ${c.area}` : ""}</div>
-                <div className="muted" style={{ fontSize: 13, marginTop: 4 }}>{c.orders} {c.orders === 1 ? "order" : "orders"} · {taka(c.spent)}{c.lastOrderAt ? ` · ${friendlyDate(c.lastOrderAt)}` : ""}</div>
+                <div className="muted num text-sm">{prettyPhone(c.phone)}{c.area ? ` · ${c.area}` : ""}</div>
+                <div className="muted text-sm mt-xs">{c.orders} {c.orders === 1 ? "order" : "orders"} · {taka(c.spent)}{c.lastOrderAt ? ` · ${friendlyDate(c.lastOrderAt)}` : ""}</div>
                 </Link>
-                <div style={{ marginTop: 8 }}><CustomerQuickButton id={c.id} label={c.name} /></div>
+                <div className="mt-sm"><CustomerQuickButton id={c.id} label={c.name} /></div>
               </div>
             ))}
           </div>
@@ -80,9 +80,9 @@ export default async function Customers({ searchParams }: { searchParams: Promis
             <tbody>
               {list.rows.map((c) => (
                 <tr key={c.id} data-testid="customer-row">
-                  <td><Link href={`/customers/${c.id}`} className="row" style={{ flexWrap: "nowrap" }} prefetch={false}>
-                    <span className="thumb" style={{ borderRadius: "50%", width: 36, height: 36, fontWeight: 700 }}>{initials(c.name)}</span>
-                    <span><b>{c.name}</b>{c.isVip && <> <span className="pill info">VIP</span></>}{c.isBlocked && <> <span className="pill bad">Blocked</span></>}<br /><span className="muted" style={{ fontSize: 12.5 }}>{c.email ?? ""}</span></span></Link></td>
+                  <td><Link href={`/customers/${c.id}`} className="row nowrap" prefetch={false}>
+                    <span className="thumb avatar-sm">{initials(c.name)}</span>
+                    <span><b>{c.name}</b>{c.isVip && <> <span className="pill info">VIP</span></>}{c.isBlocked && <> <span className="pill bad">Blocked</span></>}<br /><span className="muted text-xs">{c.email ?? ""}</span></span></Link></td>
                   <td className="num">{prettyPhone(c.phone)}</td><td className="muted">{c.area ?? "—"}</td>
                   <td className="r num">{c.orders}</td><td className="r num">{taka(c.spent)}</td><td className="muted">{c.lastOrderAt ? friendlyDate(c.lastOrderAt) : "—"}</td>
                   <td><CustomerQuickButton id={c.id} label={c.name} /></td>

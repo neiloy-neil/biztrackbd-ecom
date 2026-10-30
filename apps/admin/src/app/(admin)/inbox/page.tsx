@@ -54,18 +54,16 @@ export default async function Inbox({
         />
 
         {/* Channel Navigation Switcher */}
-        <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+        <div className="tab-strip mb-md">
           <Link
             href="/inbox?channel=whatsapp"
-            className="btn btn-primary btn-sm"
-            style={{ borderRadius: 8 }}
+            className="tab-item active"
           >
             WhatsApp Live Desk ({waData.total})
           </Link>
           <Link
             href="/inbox?channel=web"
-            className="btn btn-secondary btn-sm"
-            style={{ borderRadius: 8 }}
+            className="tab-item"
           >
             Store Contact Form
           </Link>
@@ -121,35 +119,33 @@ export default async function Inbox({
       />
 
       {/* Channel Navigation Switcher */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+      <div className="tab-strip mb-md">
         <Link
           href="/inbox?channel=whatsapp"
-          className="btn btn-secondary btn-sm"
-          style={{ borderRadius: 8 }}
+          className="tab-item"
         >
           WhatsApp Live Desk
         </Link>
         <Link
           href="/inbox?channel=web"
-          className="btn btn-primary btn-sm"
-          style={{ borderRadius: 8 }}
+          className="tab-item active"
         >
           Store Contact Form
         </Link>
       </div>
 
       {one(sp.replied) && (
-        <div className="notice good" role="status" style={{ marginBottom: 12 }} data-testid="inbox-replied">
+        <div className="notice good mb-md" role="status" data-testid="inbox-replied">
           Reply sent.
         </div>
       )}
       {one(sp.closed) && (
-        <div className="notice good" role="status" style={{ marginBottom: 12 }}>
+        <div className="notice good mb-md" role="status">
           Closed.
         </div>
       )}
       {err && (
-        <div className="notice bad" role="alert" style={{ marginBottom: 12 }} data-testid="inbox-error">
+        <div className="notice bad mb-md" role="alert" data-testid="inbox-error">
           {err}
         </div>
       )}
@@ -174,7 +170,7 @@ export default async function Inbox({
         <div className="stack" data-testid="inbox-list">
           {list.rows.map((m) => (
             <article key={m.id} className="card" data-testid="inbox-row">
-              <div className="row" style={{ justifyContent: "space-between" }}>
+              <div className="row flex-between">
                 <div>
                   <b>{m.name}</b>{" "}
                   <a className="link num" href={`tel:${m.phone}`}>
@@ -182,20 +178,20 @@ export default async function Inbox({
                   </a>
                   {m.email && <span className="muted"> · {m.email}</span>}
                 </div>
-                <span className="muted" style={{ fontSize: 13 }}>
+                <span className="muted text-sm">
                   {dateTime(m.createdAt)}
                 </span>
               </div>
-              <p style={{ whiteSpace: "pre-wrap", margin: "8px 0" }}>{m.message}</p>
+              <p className="pre-wrap my-xs">{m.message}</p>
               {m.replyText && (
                 <div className="notice info">
                   <b>{m.repliedBy ?? "Reply"}:</b> {m.replyText}
                 </div>
               )}
               {canEdit && (m.status === "NEW" || m.status === "READ") && (
-                <div className="stack" style={{ marginTop: 10 }}>
+                <div className="stack mt-sm">
                   <form action={replyAction.bind(null, m.id)} className="stack">
-                    <label className="field" style={{ marginBottom: 0 }}>
+                    <label className="field mb-0">
                       <span className="label">Reply by SMS</span>
                       <textarea
                         className="textarea"

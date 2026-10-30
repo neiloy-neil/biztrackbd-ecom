@@ -56,6 +56,15 @@ export default async function CustomerPage({
       ? "Saved successfully."
       : null;
 
+  const deliveryClass =
+    c.stats.deliverySuccessPercent == null
+      ? ""
+      : c.stats.deliverySuccessPercent >= 80
+      ? "stat-success"
+      : c.stats.deliverySuccessPercent >= 60
+      ? "stat-warn"
+      : "stat-danger";
+
   return (
     <>
       <PageHeader
@@ -69,7 +78,7 @@ export default async function CustomerPage({
             {c.isVip && <span className="pill info">VIP</span>}
             {c.isBlocked && <span className="pill bad">Blocked</span>}
             {c.loyalty && (
-              <span className="pill" style={{ background: "#F1F5F9", color: "#334155", fontWeight: 700, fontSize: 11.5 }}>
+              <span className="pill text-bold text-xs">
                 {c.loyalty.tier}
               </span>
             )}
@@ -96,10 +105,10 @@ export default async function CustomerPage({
         }
       />
 
-      {err && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{err}</div>}
-      {okMessage && <div className="notice good" role="status" style={{ marginBottom: 12 }}>{okMessage}</div>}
+      {err && <div className="notice bad mb-md" role="alert">{err}</div>}
+      {okMessage && <div className="notice good mb-md" role="status">{okMessage}</div>}
 
-      <div className="grid grid-4" style={{ marginBottom: 14 }}>
+      <div className="grid grid-4 mb-md">
         <div className="stat">
           <div className="k">Total spent</div>
           <div className="v num">{taka(c.stats.totalSpent)}</div>
@@ -114,19 +123,7 @@ export default async function CustomerPage({
         </div>
         <div className="stat">
           <div className="k">Delivery success</div>
-          <div
-            className="v num"
-            style={{
-              color:
-                c.stats.deliverySuccessPercent == null
-                  ? undefined
-                  : c.stats.deliverySuccessPercent >= 80
-                  ? "#16A34A"
-                  : c.stats.deliverySuccessPercent >= 60
-                  ? "#D97706"
-                  : "#DC2626",
-            }}
-          >
+          <div className={`v num ${deliveryClass}`}>
             {c.stats.deliverySuccessPercent == null ? "—" : `${c.stats.deliverySuccessPercent}%`}
           </div>
         </div>
@@ -145,15 +142,14 @@ export default async function CustomerPage({
                 <Link
                   key={o.id}
                   href={`/orders/${o.id}`}
-                  className="row"
-                  style={{ padding: "10px 0", borderBottom: "1px solid var(--line, #E2E8F0)", flexWrap: "nowrap" }}
+                  className="row border-bottom nowrap py-xs"
                   prefetch={false}
                   data-testid="customer-order"
                 >
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="flex-1 min-w-0">
                     <b>{o.orderNumber}</b>{" "}
-                    <span className="muted" style={{ fontSize: 12.5 }}>{friendlyDate(o.createdAt)}</span>
-                    <div className="muted" style={{ fontSize: 13, textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                    <span className="muted text-xs">{friendlyDate(o.createdAt)}</span>
+                    <div className="muted text-sm text-ellipsis">
                       {o.summary}
                     </div>
                   </div>
@@ -175,48 +171,42 @@ export default async function CustomerPage({
         <div className="col stack">
           {/* Contact & Address Book */}
           <section className="card">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <h2 style={{ margin: 0 }}>Contact & Addresses</h2>
+            <div className="flex-between mb-md">
+              <h2 className="m-0">Contact & Addresses</h2>
               {canEdit && <AddressModal customerId={c.id} triggerLabel="+ Add" />}
             </div>
-            <div className="num" style={{ fontWeight: 600 }}>{prettyPhone(c.phone)}</div>
-            {c.email && <div className="muted" style={{ fontSize: 13, marginTop: 2 }}>{c.email}</div>}
+            <div className="num text-bold">{prettyPhone(c.phone)}</div>
+            {c.email && <div className="muted text-sm mt-xs">{c.email}</div>}
 
-            <div style={{ marginTop: 14, borderTop: "1px solid var(--line, #E2E8F0)", paddingTop: 10 }}>
-              <div style={{ fontSize: 12.5, fontWeight: 700, color: "var(--text-muted, #64748B)", marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>
+            <div className="border-top pt-sm mt-md">
+              <div className="text-xs text-bold text-muted uppercase tracking-wide mb-xs">
                 Saved Addresses ({c.addresses.length})
               </div>
               {c.addresses.length === 0 ? (
-                <p className="muted" style={{ fontSize: 13 }}>
+                <p className="muted text-sm">
                   {c.address ? `${c.address.line}, ${c.address.area}, ${c.address.district}` : "No addresses recorded."}
                 </p>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <div className="stack gap-sm">
                   {c.addresses.map((a) => (
                     <div
                       key={a.id}
-                      style={{
-                        padding: "8px 10px",
-                        background: a.isDefault ? "var(--bg-subtle, #F8FAFC)" : "#fff",
-                        border: "1px solid var(--line, #E2E8F0)",
-                        borderRadius: 6,
-                        fontSize: 13,
-                      }}
+                      className={`card-subtle ${a.isDefault ? "active" : ""}`}
                     >
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                          <span style={{ fontWeight: 600, fontSize: 12 }}>{a.label}</span>
-                          {a.isDefault && <span className="pill info" style={{ fontSize: 10, padding: "1px 6px" }}>Default</span>}
+                      <div className="flex-between mb-xs">
+                        <div className="flex-center-y gap-xs">
+                          <span className="text-bold text-xs">{a.label}</span>
+                          {a.isDefault && <span className="pill info text-xs">Default</span>}
                         </div>
                         {canEdit && (
-                          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                          <div className="flex-center-y gap-sm">
                             <AddressModal customerId={c.id} address={a} triggerLabel="Edit" />
                             <DeleteAddressButton customerId={c.id} addressId={a.id} />
                           </div>
                         )}
                       </div>
-                      <div style={{ color: "var(--text, #1E293B)", lineHeight: 1.4 }}>{a.address}</div>
-                      <div className="muted" style={{ fontSize: 12 }}>
+                      <div className="text-sm">{a.address}</div>
+                      <div className="muted text-xs">
                         {a.upazila ? `${a.upazila}, ` : ""}{a.district}, {a.division}
                       </div>
                     </div>
@@ -229,24 +219,24 @@ export default async function CustomerPage({
           {/* Credit & Loyalty Card */}
           <section className="card">
             <h2>Credit & Loyalty</h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div className="stack gap-md">
+              <div className="flex-between">
                 <div>
-                  <div className="muted" style={{ fontSize: 13 }}>Store Credit</div>
-                  <div className="num" style={{ fontSize: 20, fontWeight: 700 }}>{taka(c.storeCredit)}</div>
+                  <div className="muted text-sm">Store Credit</div>
+                  <div className="num num-lg">{taka(c.storeCredit)}</div>
                 </div>
                 {canEdit && <AdjustCreditModal customerId={c.id} currentCredit={c.storeCredit} />}
               </div>
 
-              <div style={{ borderTop: "1px solid var(--line, #E2E8F0)", paddingTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div className="border-top pt-sm flex-between">
                 <div>
-                  <div className="muted" style={{ fontSize: 13 }}>Loyalty Points</div>
-                  <div className="num" style={{ fontSize: 20, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
+                  <div className="muted text-sm">Loyalty Points</div>
+                  <div className="num num-lg flex-center-y gap-xs">
                     {c.loyalty?.availablePoints ?? 0}
-                    <span style={{ fontSize: 13, fontWeight: 500, color: "var(--text-muted, #64748B)" }}>pts</span>
+                    <span className="text-sm text-muted text-normal">pts</span>
                   </div>
                   {c.loyalty && (
-                    <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>
+                    <div className="muted text-xs mt-xs">
                       Lifetime: {c.loyalty.lifetimePoints} · Tier: {c.loyalty.tier}
                     </div>
                   )}
@@ -275,11 +265,11 @@ export default async function CustomerPage({
                 </label>
 
                 {/* Birthday Selector */}
-                <div style={{ borderTop: "1px solid var(--line, #E2E8F0)", paddingTop: 10, marginTop: 4 }}>
-                  <div style={{ fontSize: 12.5, fontWeight: 600, marginBottom: 6 }}>Birthday <span className="opt">(rewards)</span></div>
-                  <div className="grid grid-2" style={{ gap: 10 }}>
-                    <label className="field" style={{ marginBottom: 0 }}>
-                      <span className="label" style={{ fontSize: 11.5 }}>Month</span>
+                <div className="border-top pt-sm mt-xs">
+                  <div className="text-xs text-bold mb-xs">Birthday <span className="opt">(rewards)</span></div>
+                  <div className="grid grid-2 gap-sm">
+                    <label className="field mb-0">
+                      <span className="label text-xs">Month</span>
                       <select name="birthMonth" className="input" defaultValue={c.birthMonth ?? ""}>
                         <option value="">None</option>
                         {MONTHS.map((m, idx) => (
@@ -287,8 +277,8 @@ export default async function CustomerPage({
                         ))}
                       </select>
                     </label>
-                    <label className="field" style={{ marginBottom: 0 }}>
-                      <span className="label" style={{ fontSize: 11.5 }}>Day</span>
+                    <label className="field mb-0">
+                      <span className="label text-xs">Day</span>
                       <input
                         name="birthDay"
                         className="input num"
@@ -303,21 +293,21 @@ export default async function CustomerPage({
                 </div>
 
                 {/* Marketing Consents */}
-                <div style={{ borderTop: "1px solid var(--line, #E2E8F0)", paddingTop: 10, marginTop: 4 }}>
-                  <div style={{ fontSize: 12.5, fontWeight: 600, marginBottom: 6 }}>Marketing Preferences</div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13 }}>
-                    <label style={{ display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                <div className="border-top pt-sm mt-xs">
+                  <div className="text-xs text-bold mb-xs">Marketing Preferences</div>
+                  <div className="stack gap-xs text-sm">
+                    <label className="check-label">
                       <input type="checkbox" name="smsConsent" defaultChecked={c.smsConsent} />
                       Agreed to receive SMS offers
                     </label>
-                    <label style={{ display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                    <label className="check-label">
                       <input type="checkbox" name="emailConsent" defaultChecked={c.emailConsent} />
                       Agreed to receive email offers
                     </label>
                   </div>
                 </div>
 
-                <label className="field" style={{ marginTop: 4 }}>
+                <label className="field mt-xs">
                   <span className="label">Private note</span>
                   <textarea className="textarea" name="notes" defaultValue={c.notes ?? ""} maxLength={1000} placeholder="Prefers a call before delivery" />
                 </label>
@@ -332,20 +322,20 @@ export default async function CustomerPage({
               <h2>Blocked List</h2>
               {c.isBlocked ? (
                 <form action={blockAction.bind(null, c.id, false)} className="stack">
-                  <p className="muted" style={{ fontSize: 13 }}>
+                  <p className="muted text-sm">
                     Blocked{c.blockReason ? `: ${c.blockReason}` : ""}. New orders from this number are automatically refused.
                   </p>
                   <SubmitButton className="btn btn-secondary btn-block" pending="Saving…">Unblock this customer</SubmitButton>
                 </form>
               ) : (
                 <details>
-                  <summary className="link" style={{ cursor: "pointer", fontSize: 13.5 }}>Add to blocked list</summary>
-                  <form action={blockAction.bind(null, c.id, true)} className="stack" style={{ marginTop: 12 }}>
-                    <label className="field" style={{ marginBottom: 0 }}>
+                  <summary className="link cursor-pointer text-sm">Add to blocked list</summary>
+                  <form action={blockAction.bind(null, c.id, true)} className="stack mt-md">
+                    <label className="field mb-0">
                       <span className="label">Reason <span className="opt">(only your team sees this)</span></span>
                       <input className="input" name="reason" maxLength={200} placeholder="Refused parcels repeatedly" />
                     </label>
-                    <p className="muted" style={{ fontSize: 13 }}>Stops new orders. The customer is not told why.</p>
+                    <p className="muted text-sm">Stops new orders. The customer is not told why.</p>
                     <SubmitButton className="btn btn-danger btn-block" pending="Saving…">Block this number</SubmitButton>
                   </form>
                 </details>

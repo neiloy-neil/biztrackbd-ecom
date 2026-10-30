@@ -21,7 +21,7 @@ export default async function MerchantSupportPage({
   const err = typeof sp.err === "string" ? sp.err : null;
 
   return (
-    <div className="stack" style={{ gap: 24, maxWidth: 920 }}>
+    <div className="stack gap-xl max-w-920">
       <PageHeader
         title="Help & Support"
         crumbs={[{ label: "Settings", href: "/settings/store" }, { label: "Help & Support" }]}
@@ -29,16 +29,16 @@ export default async function MerchantSupportPage({
       />
 
       {err && (
-        <div className="notice bad" role="alert">
+        <div className="notice bad mb-md" role="alert">
           {err}
         </div>
       )}
 
       {/* Compose Ticket Card */}
-      <form action={createTicketAction} className="card stack" style={{ gap: 16 }}>
-        <div style={{ fontSize: 16, fontWeight: 700 }}>Open a new ticket</div>
+      <form action={createTicketAction} className="card stack gap-lg">
+        <div className="text-base text-bold">Open a new ticket</div>
 
-        <label className="field" style={{ marginBottom: 0 }}>
+        <label className="field mb-0">
           <span className="label">Subject</span>
           <input
             name="subject"
@@ -48,8 +48,8 @@ export default async function MerchantSupportPage({
           />
         </label>
 
-        <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-          <label className="field" style={{ flex: 1, marginBottom: 0 }}>
+        <div className="flex-center-y flex-wrap gap-lg">
+          <label className="field flex-1 min-w-0 mb-0">
             <span className="label">Priority</span>
             <select name="priority" className="select" defaultValue="NORMAL">
               <option value="LOW">Low (general inquiry)</option>
@@ -59,50 +59,49 @@ export default async function MerchantSupportPage({
           </label>
         </div>
 
-        <label className="field" style={{ marginBottom: 0 }}>
+        <label className="field mb-0">
           <span className="label">Message</span>
           <textarea
             name="message"
-            className="input"
+            className="textarea"
             rows={4}
             placeholder="Describe what you need help with. Include any error messages or registrar details..."
             required
-            style={{ padding: 12, lineHeight: 1.55 }}
           />
         </label>
 
         <div>
-          <SubmitButton className="btn btn-primary" style={{ height: 40, padding: "0 20px" }} pending="Working…">
+          <SubmitButton className="btn btn-primary" pending="Working…">
             Submit ticket
           </SubmitButton>
         </div>
       </form>
 
       {/* Existing Tickets List */}
-      <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-        <div style={{ padding: "16px 20px", fontSize: 15, fontWeight: 700, borderBottom: "1px solid var(--line)" }}>
+      <div className="card p-0">
+        <div className="py-sm px-md text-bold border-bottom">
           Your tickets ({tickets.length})
         </div>
 
         {tickets.length === 0 ? (
-          <div style={{ padding: 36, textAlign: "center", color: "var(--ink-3)", fontSize: 13.5 }}>
+          <div className="empty-state text-sm">
             You haven&apos;t opened any support tickets yet.
           </div>
         ) : (
           tickets.map((t) => {
-            let statusLabel = "Open";
-            let statusBg = "var(--tint)";
-            let statusColor = "var(--brand)";
+            const statusLabel =
+              t.status === "WAITING_ON_TENANT"
+                ? "Awaiting your reply"
+                : t.status === "SOLVED"
+                ? "Solved"
+                : "Open";
 
-            if (t.status === "WAITING_ON_TENANT") {
-              statusLabel = "Awaiting your reply";
-              statusBg = "var(--warning-bg)";
-              statusColor = "var(--warning)";
-            } else if (t.status === "SOLVED") {
-              statusLabel = "Solved";
-              statusBg = "var(--success-bg)";
-              statusColor = "var(--success)";
-            }
+            const pillClass =
+              t.status === "WAITING_ON_TENANT"
+                ? "pill warn"
+                : t.status === "SOLVED"
+                ? "pill good"
+                : "pill info";
 
             const dateStr = t.updatedAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
@@ -110,36 +109,19 @@ export default async function MerchantSupportPage({
               <Link
                 key={t.id}
                 href={`/support/${t.id}`}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 14,
-                  padding: "16px 20px",
-                  borderBottom: "1px solid var(--line)",
-                  color: "inherit",
-                }}
+                className="flex-center-y gap-md py-sm px-md border-bottom link-block"
               >
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-3)" }}>{t.code}</span>
-                    <b style={{ fontSize: 14.5 }}>{t.subject}</b>
+                <div className="flex-1 min-w-0">
+                  <div className="flex-center-y gap-sm">
+                    <span className="text-xs text-bold text-muted">{t.code}</span>
+                    <b className="text-base">{t.subject}</b>
                   </div>
-                  <div style={{ fontSize: 12.5, color: "var(--ink-3)", marginTop: 3 }}>
+                  <div className="text-xs text-muted mt-xs">
                     Updated {dateStr}
                   </div>
                 </div>
 
-                <span
-                  style={{
-                    padding: "3px 10px",
-                    borderRadius: 11,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    background: statusBg,
-                    color: statusColor,
-                    flex: "none",
-                  }}
-                >
+                <span className={pillClass}>
                   {statusLabel}
                 </span>
               </Link>

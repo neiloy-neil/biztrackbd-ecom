@@ -5,7 +5,6 @@ import { getTenantTicketDetail } from "@biztrackbd/core";
 import { getSession } from "@/lib/session";
 import { replyTicketAction } from "../actions";
 import { SubmitButton } from "@/components/ui";
-import { PageHeader } from "@biztrackbd/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Ticket Details" };
@@ -27,22 +26,22 @@ export default async function MerchantTicketDetailPage({
   const err = typeof sp.err === "string" ? sp.err : null;
   const created = sp.created === "1";
 
-  let statusLabel = "Open";
-  let statusBg = "var(--tint)";
-  let statusColor = "var(--brand)";
+  const statusLabel =
+    ticket.status === "WAITING_ON_TENANT"
+      ? "Awaiting your reply"
+      : ticket.status === "SOLVED"
+      ? "Solved"
+      : "Open";
 
-  if (ticket.status === "WAITING_ON_TENANT") {
-    statusLabel = "Awaiting your reply";
-    statusBg = "var(--warning-bg)";
-    statusColor = "var(--warning)";
-  } else if (ticket.status === "SOLVED") {
-    statusLabel = "Solved";
-    statusBg = "var(--success-bg)";
-    statusColor = "var(--success)";
-  }
+  const pillClass =
+    ticket.status === "WAITING_ON_TENANT"
+      ? "pill warn"
+      : ticket.status === "SOLVED"
+      ? "pill good"
+      : "pill info";
 
   return (
-    <div className="stack" style={{ gap: 20, maxWidth: 860 }}>
+    <div className="stack gap-lg max-w-860">
       <div>
         <Link href="/support" className="back">
           ← Back to tickets
@@ -50,41 +49,32 @@ export default async function MerchantTicketDetailPage({
       </div>
 
       {created && (
-        <div className="notice good" role="status">
+        <div className="notice good mb-md" role="status">
           Support ticket submitted successfully. Our team will review it shortly.
         </div>
       )}
 
       {err && (
-        <div className="notice bad" role="alert">
+        <div className="notice bad mb-md" role="alert">
           {err}
         </div>
       )}
 
       {/* Ticket Header Card */}
-      <div className="card" style={{ padding: "20px 24px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-          <div style={{ flex: 1, minWidth: 260 }}>
-            <div style={{ fontSize: 13, color: "var(--ink-3)", fontWeight: 700 }}>{ticket.code}</div>
-            <h1 style={{ fontSize: 20, fontWeight: 700, marginTop: 2 }}>{ticket.subject}</h1>
+      <div className="card">
+        <div className="flex-between flex-wrap gap-md">
+          <div className="flex-1 min-w-0">
+            <div className="text-xs text-muted text-bold">{ticket.code}</div>
+            <h1 className="text-lg text-bold mt-xs">{ticket.subject}</h1>
           </div>
-          <span
-            style={{
-              padding: "4px 12px",
-              borderRadius: 12,
-              fontSize: 12.5,
-              fontWeight: 600,
-              background: statusBg,
-              color: statusColor,
-            }}
-          >
+          <span className={pillClass}>
             {statusLabel}
           </span>
         </div>
       </div>
 
       {/* Message Feed */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div className="stack gap-md">
         {ticket.messages.map((m) => {
           const isPlatform = m.authorType === "PLATFORM";
           const isSystem = m.authorType === "SYSTEM";
@@ -95,17 +85,9 @@ export default async function MerchantTicketDetailPage({
             return (
               <div
                 key={m.id}
-                style={{
-                  background: "#FDF3E3",
-                  border: "1px solid #F0DDB8",
-                  borderRadius: 10,
-                  padding: "12px 16px",
-                  fontSize: 13,
-                  lineHeight: 1.55,
-                  color: "var(--ink-2)",
-                }}
+                className="card-panel-warn text-sm pre-wrap"
               >
-                <b style={{ color: "#B45309" }}>System note:</b> {m.body}
+                <b className="text-warning">System note:</b> {m.body}
               </div>
             );
           }
@@ -113,28 +95,18 @@ export default async function MerchantTicketDetailPage({
           return (
             <div
               key={m.id}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: isPlatform ? "flex-start" : "flex-end",
-              }}
+              className={isPlatform ? "chat-align-start" : "chat-align-end"}
             >
               <div
-                style={{
-                  maxWidth: 620,
-                  borderRadius: 12,
-                  padding: "16px 18px",
-                  background: isPlatform ? "#F4F3FF" : "#fff",
-                  border: isPlatform ? "1px solid #D9D5FA" : "1px solid var(--line)",
-                }}
+                className={isPlatform ? "chat-bubble-platform" : "chat-bubble-tenant"}
               >
-                <div style={{ fontSize: 12, color: "var(--ink-3)", marginBottom: 6 }}>
-                  <b style={{ color: isPlatform ? "var(--brand)" : "var(--ink)" }}>
+                <div className="text-xs text-muted mb-xs">
+                  <b className={isPlatform ? "text-brand" : ""}>
                     {isPlatform ? "BizTrackBD Support" : "You"}
                   </b>{" "}
                   · {dateStr}, {timeStr}
                 </div>
-                <div style={{ fontSize: 14, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
+                <div className="text-sm pre-wrap">
                   {m.body}
                 </div>
               </div>
@@ -145,25 +117,24 @@ export default async function MerchantTicketDetailPage({
 
       {/* Reply Card */}
       {ticket.status !== "SOLVED" ? (
-        <form action={replyTicketAction} className="card stack" style={{ gap: 14, marginTop: 8 }}>
+        <form action={replyTicketAction} className="card stack gap-md mt-xs">
           <input type="hidden" name="ticketId" value={ticket.id} />
-          <div style={{ fontSize: 15, fontWeight: 700 }}>Reply to ticket</div>
+          <div className="text-base text-bold">Reply to ticket</div>
           <textarea
             name="message"
-            className="input"
+            className="textarea"
             rows={3}
             placeholder="Type your response here..."
             required
-            style={{ padding: 12, lineHeight: 1.55 }}
           />
           <div>
-            <SubmitButton className="btn btn-primary" style={{ height: 38, padding: "0 18px" }} pending="Working…">
+            <SubmitButton className="btn btn-primary" pending="Working…">
               Send reply
             </SubmitButton>
           </div>
         </form>
       ) : (
-        <div style={{ padding: 18, background: "var(--bg)", borderRadius: 10, textAlign: "center", fontSize: 13.5, color: "var(--ink-3)" }}>
+        <div className="card-panel-muted text-center text-sm text-muted">
           This ticket has been marked as solved. If you need further assistance, please open a new ticket.
         </div>
       )}
