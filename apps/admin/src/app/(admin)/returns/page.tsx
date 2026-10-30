@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { can, exchangeOptions, getModuleStatus, getReturnMetrics, listReturns, returnTabCounts, type ReturnRow, type ReturnTab } from "@biztrackbd/core";
+import { PageHeader } from "@biztrackbd/ui";
 import { SubmitButton } from "@/components/ui";
 import { AppDisabledNotice } from "@/components/app-disabled-notice";
 import { dateOnly, prettyPhone, taka } from "@/lib/format";
@@ -138,7 +139,12 @@ export default async function Returns({ searchParams }: { searchParams: Promise<
 
   return (
     <>
-      <div className="page-head"><h1>Returns</h1><div className="actions"><p className="muted" style={{ margin: 0, fontSize: 13 }}>Start one from a delivered order.</p></div></div>
+      <PageHeader
+        crumbs={[{ label: "Home", href: "/" }, { label: "Returns" }]}
+        title="Returns"
+        sub="Customer returns, exchanges and reverse courier tracking."
+        actions={<p className="muted" style={{ margin: 0, fontSize: 13 }}>Start one from a delivered order.</p>}
+      />
       <div className="grid grid-4" data-testid="return-stats">
         <div className="stat"><div className="k">Waiting for you</div><div className="v num">{metrics.waiting}</div></div>
         <div className="stat"><div className="k">Parcels coming back</div><div className="v num">{metrics.comingBack}</div></div>

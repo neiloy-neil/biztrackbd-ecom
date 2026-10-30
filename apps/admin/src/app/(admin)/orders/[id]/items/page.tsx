@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getEditableOrder, getOrderDetail } from "@biztrackbd/core";
+import { PageHeader } from "@biztrackbd/ui";
 import { requireAccess } from "@/lib/session";
 import { ItemsEditor } from "./items-editor";
 
@@ -15,8 +15,11 @@ export default async function ChangeItems({ params }: { params: Promise<{ id: st
   if (!o || !e) notFound();
   return (
     <>
-      <Link href={`/orders/${id}`} className="back" prefetch={false}>← {o.orderNumber}</Link>
-      <div className="page-head"><h1 data-testid="items-title">Change items on {o.orderNumber}</h1></div>
+      <PageHeader
+        crumbs={[{ label: "Orders", href: "/orders" }, { label: o.orderNumber, href: `/orders/${id}` }, { label: "Change items" }]}
+        title={<span data-testid="items-title">Change items on {o.orderNumber}</span>}
+        sub="Add or remove items, or adjust quantities on open orders."
+      />
       {!e.editable ? (
         <div className="notice bad" role="alert" data-testid="items-locked">{e.reason}</div>
       ) : (

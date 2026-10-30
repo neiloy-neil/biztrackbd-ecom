@@ -169,6 +169,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .btn-secondary:hover { background: var(--bg); }
 .btn-danger { background: var(--surface); border-color: color-mix(in srgb, var(--danger) 45%, white); color: var(--danger); }
 .btn-success { background: var(--success-solid); color: #fff; }
+.btn-whatsapp { background: #25D366; color: #fff; border-color: #25D366; }
+.btn-whatsapp:hover { background: #20BD5A; border-color: #20BD5A; }
 .btn-block { width: 100%; }
 .btn-lg { min-height: 52px; font-size: 15.5px; }
 .btn-sm { min-height: 40px; padding: 0 12px; font-size: 13.5px; }

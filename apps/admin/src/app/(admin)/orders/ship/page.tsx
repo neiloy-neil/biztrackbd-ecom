@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { can, getOrderDetail, listConnectedCouriers, listOrders } from "@biztrackbd/core";
+import { PageHeader } from "@biztrackbd/ui";
 import { CopyButton } from "@/components/copy-button";
 import { SubmitButton } from "@/components/ui";
 import { prettyPhone, taka } from "@/lib/format";
@@ -37,8 +38,11 @@ export default async function ShipDesk({ searchParams }: { searchParams: Promise
 
   return (
     <div className="desk" data-testid="ship-desk">
-      <Link href="/orders?tab=to_pack" className="back" prefetch={false}>← All orders</Link>
-      <h1 className="desk-title">Book couriers</h1>
+      <PageHeader
+        crumbs={[{ label: "Orders", href: "/orders?tab=to_pack" }, { label: "Book couriers" }]}
+        title="Book couriers"
+        sub="Dispatch ready parcels to courier riders one-by-one."
+      />
       {kind === "booked" && <div className="notice good" role="status" data-testid="ship-done">Booked {num}. Tracking code <b className="mono">{tracking}</b>.</div>}
       {kind === "shipped" && <div className="notice good" role="status" data-testid="ship-done">{num} is marked as shipped.</div>}
       {err && <div className="notice bad" role="alert" data-testid="ship-error">{err}</div>}

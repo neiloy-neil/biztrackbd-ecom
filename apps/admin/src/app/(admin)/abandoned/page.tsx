@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { abandonedTabCounts, can, getAbandonedMetrics, getStoreSettings, listAbandoned, type AbandonedRow, type AbandonedTab } from "@biztrackbd/core";
+import { PageHeader } from "@biztrackbd/ui";
 import { SubmitButton } from "@/components/ui";
 import { friendlyDate, prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
@@ -58,14 +59,13 @@ function Card({ r, tab, canEdit, canOrder, storeName }: { r: AbandonedRow; tab: 
             <p className="muted" style={{ marginTop: 6 }}>{sc.en}</p>
           </details>
           {canEdit && (
-            <form action={outcomeAction.bind(null, r.id, tab)} className="stack" data-testid="outcome-form">
-              <div className="row" style={{ flexWrap: "nowrap" }}>
-                <select className="select" name="outcome" aria-label="What happened" defaultValue="NO_ANSWER">
-                  <option value="WILL_ORDER">Will order</option><option value="NO_ANSWER">No answer</option><option value="NOT_INTERESTED">Not interested</option>
-                </select>
-                <input className="input" name="note" maxLength={200} placeholder="Note (optional)" aria-label="Call note" />
-              </div>
-              <SubmitButton className="btn btn-secondary" pending="Saving…">Log the call</SubmitButton>
+            <form action={outcomeAction.bind(null, r.id, tab)} className="row" style={{ marginTop: 6 }}>
+              <select className="select" name="outcome" defaultValue="WILL_ORDER" aria-label="Outcome of the call">
+                <option value="WILL_ORDER">Customer said they will order</option>
+                <option value="NO_ANSWER">No answer / phone switched off</option>
+                <option value="NOT_INTERESTED">Not interested / cancelled mind</option>
+              </select>
+              <SubmitButton className="btn btn-secondary btn-sm" pending="Saving…">Save</SubmitButton>
             </form>
           )}
         </div>
@@ -85,8 +85,11 @@ export default async function Abandoned({ searchParams }: { searchParams: Promis
   const err = one(sp.err);
   return (
     <>
-      <div className="page-head"><h1>Abandoned checkouts</h1></div>
-      <p className="page-sub">Customers who typed their number at checkout and did not order. They get one SMS after 30 minutes. Call the ones worth the most first.</p>
+      <PageHeader
+        crumbs={[{ label: "Home", href: "/" }, { label: "Abandoned checkouts" }]}
+        title="Abandoned checkouts"
+        sub="Customers who typed their number at checkout and did not complete their order. Call high-value carts first."
+      />
       <div className="grid grid-4" data-testid="abandoned-stats">
         <div className="stat"><div className="k">Dropped carts, 7 days</div><div className="v num" data-testid="stat-dropped">{m.dropped7d}</div></div>
         <div className="stat"><div className="k">Value left behind</div><div className="v num">{taka(m.valueLeftBehind)}</div></div>

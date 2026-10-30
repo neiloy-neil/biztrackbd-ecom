@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { TRUST_LABELS, can, getFraudOverview, listBlocked, listFlaggedOrders, lookupPhone, DomainError, type PhoneLookup } from "@biztrackbd/core";
+import { PageHeader } from "@biztrackbd/ui";
 import { SubmitButton } from "@/components/ui";
 import { dateOnly, prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
@@ -158,8 +159,11 @@ export default async function Fraud({ searchParams }: { searchParams: Promise<Re
 
   return (
     <>
-      <div className="page-head"><h1>Fraud check</h1></div>
-      <p className="page-sub">Cash on delivery orders from numbers with a poor delivery record wait here until you have called the customer.</p>
+      <PageHeader
+        crumbs={[{ label: "Home", href: "/" }, { label: "Fraud check" }]}
+        title="Fraud check"
+        sub="Screen risky COD buyer numbers, check delivery histories across Bangladesh, and manage blocked numbers."
+      />
 
       <div className="grid grid-4" data-testid="fraud-stats">
         <div className="stat"><div className="k">Held for review</div><div className="v num" data-testid="stat-held">{overview.held}</div></div>

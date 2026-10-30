@@ -24,9 +24,12 @@ export default async function Drafts({ searchParams }: { searchParams: Promise<R
   const err = one(sp.err);
   return (
     <>
-      <Link href="/orders" className="back" prefetch={false}>← Orders</Link>
-      <PageHeader title="Draft orders" actions={canEdit ? <Link href="/orders/new" className="btn btn-primary" prefetch={false}>New order</Link> : undefined} />
-      <p className="page-sub">Set up an order on the quick desk, save it as a draft and send the customer the link. They check it and place it themselves.</p>
+      <PageHeader
+        crumbs={[{ label: "Orders", href: "/orders" }, { label: "Draft orders" }]}
+        title="Draft orders"
+        sub="Set up an order on the quick desk, save it as a draft and send the customer the link. They check it and place it themselves."
+        actions={canEdit ? <Link href="/orders/new" className="btn btn-primary" prefetch={false}>New order</Link> : undefined}
+      />
       {err && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{err}</div>}
       {rows.length === 0 ? (
         <div className="card empty" data-testid="drafts-empty">No drafts yet. On the quick desk, choose &quot;Save as a draft and get a link&quot;.</div>

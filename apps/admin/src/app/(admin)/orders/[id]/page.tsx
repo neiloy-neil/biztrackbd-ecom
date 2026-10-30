@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { COURIER_STATUS_LABELS, can, getCourierRates, getOrderDetail, listConnectedCouriers, listOrderTags, getStoreSettings, buildWhatsAppOrderLink, type OrderDetail } from "@biztrackbd/core";
+import { PageHeader } from "@biztrackbd/ui";
 import { SubmitButton } from "@/components/ui";
 import { dateTime, prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
@@ -86,57 +87,63 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
 
   return (
     <div className={step ? "has-sticky" : undefined}>
-      <Link href="/orders" className="back" prefetch={false}>← Orders</Link>
-      <div className="page-head">
-        <h1 data-testid="order-title">{o.orderNumber}</h1>
-        <div className="row"><PaymentPill method={o.paymentMethod} status={o.paymentStatus} /><OrderPill status={o.status} /></div>
-        <div className="actions">
-          {o.status === "PENDING" && (
-            <a
-              href={waConfirmLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-sm"
-              style={{ background: "#25D366", color: "#FFF", borderColor: "#25D366", fontWeight: 600 }}
-              data-testid="wa-confirm-btn"
-            >
-              WhatsApp Confirm
-            </a>
-          )}
-          {o.status === "SHIPPED" && (
-            <a
-              href={waShippingLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-sm"
-              style={{ background: "#25D366", color: "#FFF", borderColor: "#25D366", fontWeight: 600 }}
-              data-testid="wa-tracking-btn"
-            >
-              Send Tracking
-            </a>
-          )}
-          {(o.status === "CONFIRMED" || o.status === "PROCESSING") && (
-            <a
-              href={waCashReminderLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-sm"
-              style={{ background: "#25D366", color: "#FFF", borderColor: "#25D366", fontWeight: 600 }}
-              data-testid="wa-cash-btn"
-            >
-              Cash Reminder
-            </a>
-          )}
-          <Link href={`/orders/print?ids=${o.id}&doc=invoice`} target="_blank" className="btn btn-secondary btn-sm" prefetch={false}>Print invoice</Link>
-          <Link href={`/orders/print?ids=${o.id}&doc=slip`} target="_blank" className="btn btn-secondary btn-sm" prefetch={false}>Packing slip</Link>
-          {o.channel === "TABLE_ORDER" && (
-            <Link href={`/orders/print?ids=${o.id}&doc=kitchen_slip&size=thermal`} target="_blank" className="btn btn-secondary btn-sm" prefetch={false} data-testid="print-kot-btn">
-              👨‍🍳 Kitchen slip (KOT)
-            </Link>
-          )}
-        </div>
-      </div>
-      <p className="muted" style={{ margin: "-6px 0 14px", fontSize: 13.5 }}>{dateTime(o.createdAt)} · {CHANNEL[o.channel] ?? o.channel}</p>
+      <PageHeader
+        crumbs={[{ label: "Orders", href: "/orders" }, { label: o.orderNumber }]}
+        title={
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <span data-testid="order-title">{o.orderNumber}</span>
+            <div className="row" style={{ gap: 6 }}>
+              <PaymentPill method={o.paymentMethod} status={o.paymentStatus} />
+              <OrderPill status={o.status} />
+            </div>
+          </div>
+        }
+        sub={`${dateTime(o.createdAt)} · ${CHANNEL[o.channel] ?? o.channel}`}
+        actions={
+          <>
+            {o.status === "PENDING" && (
+              <a
+                href={waConfirmLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-whatsapp btn-sm"
+                data-testid="wa-confirm-btn"
+              >
+                WhatsApp Confirm
+              </a>
+            )}
+            {o.status === "SHIPPED" && (
+              <a
+                href={waShippingLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-whatsapp btn-sm"
+                data-testid="wa-tracking-btn"
+              >
+                Send Tracking
+              </a>
+            )}
+            {(o.status === "CONFIRMED" || o.status === "PROCESSING") && (
+              <a
+                href={waCashReminderLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-whatsapp btn-sm"
+                data-testid="wa-cash-btn"
+              >
+                Cash Reminder
+              </a>
+            )}
+            <Link href={`/orders/print?ids=${o.id}&doc=invoice`} target="_blank" className="btn btn-secondary btn-sm" prefetch={false}>Print invoice</Link>
+            <Link href={`/orders/print?ids=${o.id}&doc=slip`} target="_blank" className="btn btn-secondary btn-sm" prefetch={false}>Packing slip</Link>
+            {o.channel === "TABLE_ORDER" && (
+              <Link href={`/orders/print?ids=${o.id}&doc=kitchen_slip&size=thermal`} target="_blank" className="btn btn-secondary btn-sm" prefetch={false} data-testid="print-kot-btn">
+                Kitchen slip (KOT)
+              </Link>
+            )}
+          </>
+        }
+      />
       {err && <div className="notice bad" role="alert" style={{ marginBottom: 14 }} data-testid="order-error">{err}</div>}
       {o.callNote && <div className="notice info" style={{ marginBottom: 14 }} data-testid="call-note-banner"><b>Call note:</b> {o.callNote}</div>}
 

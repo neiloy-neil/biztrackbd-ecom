@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Quote } from "@biztrackbd/core";
 import { BD_GEO } from "@biztrackbd/core/geo";
 import { SubmitButton } from "@/components/ui";
+import { PageHeader } from "@biztrackbd/ui";
 import { taka } from "@/lib/format";
 import {
   createDeskDraftAction, createDeskOrderAction, deskQuoteAction, lookupCustomerAction, parseMessageAction, searchProductsAction,
@@ -192,11 +193,12 @@ export function QuickOrderDesk({ prefill }: { prefill?: Prefill }) {
 
   return (
     <div onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); void create(true); } }} data-testid="quick-desk">
-      <div className="page-head">
-        <h1>Quick order desk</h1>
-        <div className="actions"><span className="pill grey num" aria-label="Time on this order">{Math.floor(secs / 60)}:{String(secs % 60).padStart(2, "0")}</span></div>
-      </div>
-      <p className="page-sub">For orders that arrive on Messenger, WhatsApp, Instagram or the phone. Aim for 15 seconds.</p>
+      <PageHeader
+        crumbs={[{ label: "Orders", href: "/orders" }, { label: "Quick order" }]}
+        title="Quick order desk"
+        sub="For orders that arrive on Messenger, WhatsApp, Instagram or phone. Aim for 15 seconds."
+        actions={<span className="pill grey num" aria-label="Time on this order">{Math.floor(secs / 60)}:{String(secs % 60).padStart(2, "0")}</span>}
+      />
 
       <div className="split">
         <div className="col stack">

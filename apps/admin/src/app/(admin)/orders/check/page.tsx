@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { can, getOrderDetail, listOrders } from "@biztrackbd/core";
+import { PageHeader } from "@biztrackbd/ui";
 import { CopyButton } from "@/components/copy-button";
 import { SubmitButton } from "@/components/ui";
 import { friendlyDate, prettyPhone, taka } from "@/lib/format";
@@ -35,8 +36,11 @@ export default async function CheckPayments({ searchParams }: { searchParams: Pr
 
   return (
     <div className="desk" data-testid="check-desk">
-      <Link href="/orders?tab=check" className="back" prefetch={false}>← All orders</Link>
-      <h1 className="desk-title">Check payments</h1>
+      <PageHeader
+        crumbs={[{ label: "Orders", href: "/orders?tab=check" }, { label: "Check payments" }]}
+        title="Check payments"
+        sub="Verify incoming bKash & Nagad TrxIDs one-by-one."
+      />
       {kind === "confirmed" && <div className="notice good" role="status" data-testid="check-done">Payment confirmed for {num}.</div>}
       {kind === "rejected" && <div className="notice" role="status" data-testid="check-done">Marked as not received for {num}. The order stays open.</div>}
       {err && <div className="notice bad" role="alert" data-testid="check-error">{err}</div>}
