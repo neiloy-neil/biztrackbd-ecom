@@ -3,6 +3,7 @@ import { getPlatformPrisma } from "@biztrackbd/db";
 import { assertPlatformCan, type PlatformActor } from "./admin";
 import { ValidationError } from "../errors";
 import { trackPlatformInquiryCapi } from "./tracking";
+import { notifyPlatform } from "./notify";
 
 /** The same sender and message inside this window counts as one inquiry. */
 const DUPLICATE_WINDOW_MS = 10 * 60 * 1000;
@@ -86,6 +87,19 @@ export async function submitPlatformInquiry(input: InquiryInput): Promise<Inquir
   });
   const created = { id, name, phone, email, topic, message, status: "NEW" as const, notes: attributionNote, createdAt, updatedAt: createdAt };
   if (count === 0) return created;
+
+  await notifyPlatform({
+    kind: "INQUIRY",
+    title: `Contact inquiry: ${name} (${topic})`,
+    lines: [
+      ["Name", name],
+      ["Phone", phone],
+      ["Email", email],
+      ["Topic", topic],
+      ["Message", message.slice(0, 400)],
+      ["Came from", [input.utmSource, input.utmCampaign].filter(Boolean).join(" / ") || null],
+    ],
+  });
 
   // Dispatch Meta CAPI for platform inquiry if consent given. Awaited so a serverless host cannot freeze the function before it finishes.
   if (input.consentGiven !== false) {

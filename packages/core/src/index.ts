@@ -141,6 +141,10 @@ export {
   type AnnouncementAudience, type AnnouncementAudienceType, type CreateAnnouncementInput, type AnnouncementView,
 } from "./platform/announcements";
 export {
+  NOTIFY_KINDS, NOTIFY_LABELS, notifyPlatform, listNotifyRecipients, listNotifications, saveNotifyRecipient, removeNotifyRecipient, sendNotifyTest,
+  type NotifyKind, type NotifyInput, type NotifyRecipientView, type NotificationView,
+} from "./platform/notify";
+export {
   listBlogPosts, getBlogPostForEdit, saveBlogPost, deleteBlogPost, listPublishedBlogPosts, getPublishedBlogPost,
   type BlogPostView, type BlogPostInput, type BlogPostStatus, type PublicBlogPost,
 } from "./platform/blog";

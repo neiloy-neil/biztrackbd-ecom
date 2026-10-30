@@ -3,6 +3,7 @@ import { getPlatformPrisma, withTenant, type PrismaClient } from "@biztrackbd/db
 import { assertPlatformCan, type PlatformActor } from "./admin";
 import { assertCan, type StaffActor } from "../permissions";
 import { NotFoundError, ValidationError } from "../errors";
+import { notifyPlatform } from "./notify";
 
 export type TicketStatusType = "OPEN" | "WAITING_ON_TENANT" | "SOLVED";
 export type TicketPriority = "LOW" | "NORMAL" | "HIGH";
@@ -374,11 +375,16 @@ export async function createTenantTicket(
   const priority = input.priority ?? "NORMAL";
   const code = `T-${Math.floor(1000 + Math.random() * 9000)}`;
 
-  return withTenant(tenantId, async (tx) => {
+  let fresh = false;
+  let storeName: string | null = null;
+  let storePlan: string | null = null;
+  const created = await withTenant(tenantId, async (tx) => {
     const tenant = await tx.tenant.findUnique({
       where: { id: tenantId },
-      select: { planTier: true, customDomain: true },
+      select: { planTier: true, customDomain: true, name: true },
     });
+    storeName = tenant?.name ?? null;
+    storePlan = tenant?.planTier ?? null;
 
     // The same person opening the same subject again within two minutes is a double submit, not a second ticket.
     const recent = await tx.supportTicket.findFirst({
@@ -424,8 +430,24 @@ export async function createTenantTicket(
       });
     }
 
+    fresh = true;
     return { id: ticket.id, code: ticket.code };
   });
+
+  if (fresh) {
+    await notifyPlatform({
+      kind: "TICKET",
+      title: `Support ticket ${created.code}: ${subject}`,
+      lines: [
+        ["Store", storeName],
+        ["Plan", storePlan],
+        ["Priority", priority],
+        ["Subject", subject],
+        ["Message", message.slice(0, 400)],
+      ],
+    });
+  }
+  return created;
 }
 
 export async function replyTenantTicket(

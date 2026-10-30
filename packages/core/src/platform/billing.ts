@@ -7,6 +7,7 @@ import { readUsage, type UsageSummary } from "../limits/plan";
 import { assertCan, type StaffActor } from "../permissions";
 import { normalizeBdPhone } from "../phone";
 import { accessState, type Access } from "./lifecycle";
+import { notifyPlatform } from "./notify";
 
 /** What a store sees of its own subscription (AdmBilling, AdmLimit, AdmReadOnly). Everything here is read with the store's own context. */
 
@@ -244,7 +245,7 @@ export async function submitPaymentProof(tenantId: string, actor: StaffActor, ra
   const amount = input.interval === "YEARLY" ? plan.priceYearly : plan.priceMonthly;
 
   try {
-    return await withTenant(tenantId, async (tx) => {
+    const proof = await withTenant(tenantId, async (tx) => {
       if (await tx.paymentProof.findFirst({ where: { status: "PENDING" } })) {
         throw new ValidationError("You already have a payment waiting to be checked. We will confirm it soon.");
       }
@@ -254,6 +255,21 @@ export async function submitPaymentProof(tenantId: string, actor: StaffActor, ra
       await audit(tx, tenantId, actor, "billing.proof_submitted", { plan: input.plan, interval: input.interval, amount, provider: input.provider, trxId: input.trxId });
       return toProof(row);
     });
+    const store = await withTenant(tenantId, (tx) => tx.tenant.findFirst({ select: { name: true, subdomain: true, ownerPhone: true } })).catch(() => null);
+    await notifyPlatform({
+      kind: "PAYMENT_PROOF",
+      title: `Payment proof: ${store?.name ?? "a store"} (${input.plan}, ${input.provider})`,
+      lines: [
+        ["Store", store?.name],
+        ["Plan", `${input.plan} (${input.interval})`],
+        ["Amount", String(amount)],
+        ["Provider", input.provider],
+        ["TrxID", input.trxId],
+        ["Sender number", sender],
+        ["Owner phone", store?.ownerPhone],
+      ],
+    });
+    return proof;
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
       // Same message whether the TrxID is ours or another store's: it must not reveal who paid.

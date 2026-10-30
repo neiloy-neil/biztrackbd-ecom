@@ -21,6 +21,7 @@ import { getBusinessTemplateByVertical } from "../site/templates/manifests";
 import { seedBusinessDemoStore } from "../demo/business-seed";
 import { trackPlatformRegistrationCapi } from "./tracking";
 import { enqueueNotificationJob } from "../messaging/queue";
+import { notifyPlatform } from "./notify";
 
 const EXTERNAL_AUTH = "EXTERNAL_AUTH";
 const MAX_STORES_PER_EMAIL = 3;
@@ -340,6 +341,25 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
         console.warn("[signup] Platform Outbox CAPI dispatch warning:", err instanceof Error ? err.message : err);
       });
     }
+
+    // Tell staff (feed and email). Awaited with a short limit and never fails the signup.
+    const fromAd = Boolean(input.fbc) || /face?book|meta|\bfb\b|\big\b|instagram/i.test(input.utmSource ?? "");
+    const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+    await notifyPlatform({
+      kind: "SIGNUP",
+      title: `New signup: ${input.storeName}`,
+      lines: [
+        ["Name", input.ownerName],
+        ["Email", input.email],
+        ["Phone", phone],
+        ["Store", input.storeName],
+        ["Plan", input.plan],
+        ["Came from", fromAd ? "Facebook / Instagram ad" : input.utmSource || (input.referrer ? "Referral" : "Direct or unknown")],
+        ["Campaign", input.utmCampaign],
+        ["Referrer", input.referrer],
+      ],
+      link: { label: "Open the new store", url: `${root.startsWith("localhost") ? "http" : "https"}://${result.subdomain}.${root}` },
+    });
 
     const { ownerId: _o, ...out } = result;
     return { ...out, keptPage };
