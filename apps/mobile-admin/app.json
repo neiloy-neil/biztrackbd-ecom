@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "BizTrack Store Manager",
+    "slug": "biztrackbd-store-manager",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "biztrackadmin",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#5B4FE8"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "bd.biztrack.storemanager"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#5B4FE8"
+      },
+      "package": "bd.biztrack.storemanager"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "8bab2268-290c-461b-95ce-fcaa520a7ebb"
+      }
+    },
+    "owner": "toshiro.neil"
+  }
+}
