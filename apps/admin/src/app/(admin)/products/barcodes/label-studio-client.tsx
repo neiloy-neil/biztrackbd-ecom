@@ -237,24 +237,23 @@ export function BarcodeLabelStudioClient({ initialItems, storeName }: Props) {
         />
 
         {statusMessage && (
-          <div className="notice good" style={{ marginBottom: 16 }}>
+          <div className="notice good mb-lg">
             {statusMessage}
           </div>
         )}
 
-        <div className="split" style={{ alignItems: "flex-start" }}>
+        <div className="split flex-start">
           {/* Left Column: Product Selection */}
-          <div className="col stack" style={{ flex: 1.2 }}>
+          <div className="col stack flex-1">
             <section className="card">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
+              <div className="flex-between gap-lg flex-wrap mb-md">
                 <input
-                  className="input"
-                  style={{ maxWidth: 300 }}
+                  className="input max-w-300"
                   placeholder="Search products, SKU, or barcode..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <div className="row gap-sm flex-wrap">
                   <button type="button" className="btn btn-secondary btn-sm" onClick={handleSelectAll}>
                     Select All
                   </button>
@@ -276,16 +275,16 @@ export function BarcodeLabelStudioClient({ initialItems, storeName }: Props) {
                 </div>
               </div>
 
-              <div style={{ maxHeight: 520, overflowY: "auto", border: "1px solid var(--line-2, #e5e7eb)", borderRadius: 8 }}>
-                <table className="table" style={{ margin: 0 }}>
+              <div className="table-scroll-520">
+                <table className="table m-0">
                   <thead>
                     <tr>
-                      <th style={{ width: 36 }}></th>
+                      <th className="col-checkbox"></th>
                       <th>Product / Variant</th>
                       <th>Barcode</th>
                       <th>Price</th>
                       <th>Stock</th>
-                      <th style={{ width: 100 }}>Print Qty</th>
+                      <th className="col-actions">Print Qty</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -295,9 +294,9 @@ export function BarcodeLabelStudioClient({ initialItems, storeName }: Props) {
                       return (
                         <tr
                           key={item.variantId}
-                          style={{ background: isSelected ? "rgba(99, 102, 241, 0.05)" : "transparent" }}
+                          className={isSelected ? "card-panel-info" : undefined}
                         >
-                          <td>
+                          <td className="col-checkbox">
                             <input
                               type="checkbox"
                               checked={isSelected}
@@ -306,23 +305,23 @@ export function BarcodeLabelStudioClient({ initialItems, storeName }: Props) {
                             />
                           </td>
                           <td>
-                            <strong>{item.productTitle}</strong>
+                            <strong className="text-bold">{item.productTitle}</strong>
                             {item.variantTitle && (
-                              <div style={{ fontSize: 12, color: "var(--ink-2, #6b7280)" }}>
+                              <div className="text-muted text-xs">
                                 {item.variantTitle}
                               </div>
                             )}
                             {item.sku && (
-                              <span style={{ fontSize: 11, fontFamily: "monospace", color: "#6b7280" }}>
+                              <span className="text-xs font-mono text-muted d-block">
                                 SKU: {item.sku}
                               </span>
                             )}
                           </td>
                           <td>
                             {item.barcode ? (
-                              <span style={{ fontFamily: "monospace", fontWeight: 600 }}>{item.barcode}</span>
+                              <span className="font-mono text-medium">{item.barcode}</span>
                             ) : (
-                              <span className="pill grey" style={{ fontSize: 11 }}>No Barcode</span>
+                              <span className="pill grey text-xs">No Barcode</span>
                             )}
                           </td>
                           <td>{taka(item.price)}</td>
@@ -330,8 +329,7 @@ export function BarcodeLabelStudioClient({ initialItems, storeName }: Props) {
                           <td>
                             <input
                               type="number"
-                              className="input input-sm"
-                              style={{ width: 70, textAlign: "center" }}
+                              className="input input-sm w-70 text-center"
                               min={0}
                               max={500}
                               value={printQty}
@@ -349,7 +347,7 @@ export function BarcodeLabelStudioClient({ initialItems, storeName }: Props) {
           </div>
 
           {/* Right Column: Settings & Live Preview */}
-          <div className="col stack" style={{ flex: 1 }}>
+          <div className="col stack flex-1">
             {/* Format Settings */}
             <section className="card">
               <h2>Label & Printer Settings</h2>
@@ -366,7 +364,7 @@ export function BarcodeLabelStudioClient({ initialItems, storeName }: Props) {
                 </select>
               </label>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 8 }}>
+              <div className="grid-2 mt-sm">
                 <label className="check">
                   <input
                     type="checkbox"
@@ -404,30 +402,19 @@ export function BarcodeLabelStudioClient({ initialItems, storeName }: Props) {
 
             {/* Live On-Screen Preview */}
             <section className="card">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <div className="flex-between mb-md">
                 <h2>Live Sticker Preview</h2>
-                <span className="muted" style={{ fontSize: 13 }}>
+                <span className="muted text-sm">
                   Showing {Math.min(labelsToPrint.length, 6)} of {labelsToPrint.length}
                 </span>
               </div>
 
               {labelsToPrint.length === 0 ? (
-                <div style={{ padding: "32px 16px", textAlign: "center", color: "var(--ink-2, #6b7280)", border: "1px dashed var(--line-2, #d1d5db)", borderRadius: 8 }}>
+                <div className="preview-well">
                   Select one or more products on the left with quantities to preview printable labels.
                 </div>
               ) : (
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: format === "SHEET_A4_24" ? "repeat(2, 1fr)" : "repeat(2, 1fr)",
-                    gap: 12,
-                    maxHeight: 460,
-                    overflowY: "auto",
-                    padding: 8,
-                    background: "#f3f4f6",
-                    borderRadius: 8,
-                  }}
-                >
+                <div className="preview-labels-grid">
                   {labelsToPrint.slice(0, 6).map(({ item, svg }, idx) => (
                     <div
                       key={idx}

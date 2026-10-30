@@ -51,10 +51,10 @@ export default async function EditProduct({ params, searchParams }: { params: Pr
           </a>
         }
       />
-      {one(sp.saved) && <div className="notice good" role="status" style={{ marginBottom: 14 }} data-testid="saved">Saved.</div>}
+      {one(sp.saved) && <div className="notice good mb-md" role="status" data-testid="saved">Saved.</div>}
       {p.status === "ARCHIVED" && (
-        <div className="notice warn" style={{ marginBottom: 14 }}>
-          <div className="row" style={{ justifyContent: "space-between", alignItems: "center", width: "100%", gap: 12 }}>
+        <div className="notice warn mb-md">
+          <div className="row flex-between gap-lg">
             <span>This product is currently <b>archived</b>. It is hidden from your store and active inventory.</span>
             <form action={async () => { "use server"; await restoreProductAction(id); const { redirect } = await import("next/navigation"); redirect(`/products/${id}?saved=1`); }}>
               <SubmitButton className="btn btn-primary btn-sm" pending="Restoring…">Restore product to draft</SubmitButton>
@@ -63,26 +63,26 @@ export default async function EditProduct({ params, searchParams }: { params: Pr
         </div>
       )}
       <ProductEditor key={`${p.id}-${one(sp.saved) ?? ""}`} initial={initial} categories={categories.map((c) => ({ id: c.id, name: c.name, parentId: c.parentId }))} canPublish />
-      <section className="card" style={{ marginTop: 14 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 8px" }}>Product Lifecycle & Danger Zone</h3>
-        <p className="muted" style={{ margin: "0 0 16px" }}>Archive to hide this product safely from customers and stock lists, or permanently remove it if it has no sales history.</p>
+      <section className="card mt-md">
+        <h3 className="text-lg text-bold mb-xs">Product Lifecycle & Danger Zone</h3>
+        <p className="muted mb-md">Archive to hide this product safely from customers and stock lists, or permanently remove it if it has no sales history.</p>
         
-        <div className="stack" style={{ gap: 14 }}>
+        <div className="stack gap-lg">
           {p.status !== "ARCHIVED" ? (
-            <div className="row" style={{ justifyContent: "space-between", alignItems: "center", padding: "10px 14px", border: "1px solid var(--line)", borderRadius: "var(--radius-md)", background: "var(--surface-muted)" }}>
+            <div className="card-panel-muted flex-between">
               <div>
                 <b>Archive Product</b>
-                <p className="muted" style={{ margin: "2px 0 0", fontSize: 13 }}>Removes from your online store and inventory counts. Can be unarchived anytime.</p>
+                <p className="muted text-sm mt-xs">Removes from your online store and inventory counts. Can be unarchived anytime.</p>
               </div>
               <form action={async () => { "use server"; await archiveProductAction(id); const { redirect } = await import("next/navigation"); redirect("/products?tab=archived&msg=archive-1-0"); }}>
                 <SubmitButton className="btn btn-secondary btn-sm" pending="Archiving…">Archive product</SubmitButton>
               </form>
             </div>
           ) : (
-            <div className="row" style={{ justifyContent: "space-between", alignItems: "center", padding: "10px 14px", border: "1px solid var(--line)", borderRadius: "var(--radius-md)", background: "var(--surface-muted)" }}>
+            <div className="card-panel-muted flex-between">
               <div>
                 <b>Restore Product</b>
-                <p className="muted" style={{ margin: "2px 0 0", fontSize: 13 }}>Restores this product to draft status so you can edit and republish it.</p>
+                <p className="muted text-sm mt-xs">Restores this product to draft status so you can edit and republish it.</p>
               </div>
               <form action={async () => { "use server"; await restoreProductAction(id); const { redirect } = await import("next/navigation"); redirect(`/products/${id}?saved=1`); }}>
                 <SubmitButton className="btn btn-primary btn-sm" pending="Restoring…">Restore to draft</SubmitButton>
@@ -90,10 +90,10 @@ export default async function EditProduct({ params, searchParams }: { params: Pr
             </div>
           )}
 
-          <div className="row" style={{ justifyContent: "space-between", alignItems: "center", padding: "10px 14px", border: "1px solid var(--border-bad, #fca5a5)", borderRadius: "var(--radius-md)", background: "var(--surface-bad-subtle, #fef2f2)" }}>
+          <div className="card-panel-danger flex-between">
             <div>
-              <b style={{ color: "var(--text-bad, #b91c1c)" }}>Permanent Deletion</b>
-              <p className="muted" style={{ margin: "2px 0 0", fontSize: 13 }}>If no orders exist for this product, it will be deleted permanently. Past order data is always preserved.</p>
+              <b className="text-danger">Permanent Deletion</b>
+              <p className="muted text-sm mt-xs">If no orders exist for this product, it will be deleted permanently. Past order data is always preserved.</p>
             </div>
             <ConfirmDelete action={async () => { "use server"; await deleteProductAction(id); const { redirect } = await import("next/navigation"); redirect("/products?msg=delete-1-0"); }} message={`Permanently delete "${p.title}"? This cannot be undone. Past customer invoices and orders remain preserved.`} label="Delete product" testId="delete-product-btn" />
           </div>

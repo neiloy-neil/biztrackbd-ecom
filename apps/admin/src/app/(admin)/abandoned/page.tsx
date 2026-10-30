@@ -34,22 +34,22 @@ function Card({ r, tab, canEdit, canOrder, storeName }: { r: AbandonedRow; tab: 
   return (
     <section className="card" data-testid="abandoned-card" data-status={r.status}>
       <div className="card-head">
-        <h2>{r.name ?? "Unknown name"} <span className="num muted" style={{ fontWeight: 400, fontSize: 14 }}>{prettyPhone(r.phone)}</span></h2>
+        <h2>{r.name ?? "Unknown name"} <span className="num muted text-normal text-sm">{prettyPhone(r.phone)}</span></h2>
         <b className="num" data-testid="cart-value">{taka(r.total)}</b>
       </div>
-      <p className="muted" style={{ margin: "-4px 0 8px", fontSize: 13.5 }}>
+      <p className="muted text-sm mt-xs mb-sm">
         Left {minutes < 60 ? `${minutes} min ago` : friendlyDate(r.lastEventAt)}{r.district ? ` · ${r.district}` : ""}{r.callAttempts ? ` · ${r.callAttempts} ${r.callAttempts === 1 ? "call" : "calls"}` : ""}{r.smsStatus ? ` · ${SMS[r.smsStatus] ?? r.smsStatus}` : ""}
       </p>
-      <ul style={{ margin: "0 0 10px", paddingLeft: 18 }}>
+      <ul className="list-bullet">
         {r.lines.map((l) => <li key={l.variantId}>{l.title}{l.variantTitle && l.variantTitle.toLowerCase() !== "default" ? ` (${l.variantTitle})` : ""} × {l.quantity}</li>)}
       </ul>
-      {r.outcome && <p style={{ fontSize: 13.5 }}>Last call: <b>{OUTCOME[r.outcome] ?? r.outcome}</b></p>}
-      {r.notes && <pre className="muted" style={{ whiteSpace: "pre-wrap", fontFamily: "inherit", fontSize: 13, margin: "6px 0 0" }}>{r.notes}</pre>}
-      {r.status === "RECOVERED" && r.recoveredOrderId && <p style={{ marginTop: 8 }}><Link href={`/orders/${r.recoveredOrderId}`} className="link" prefetch={false}>Open the order</Link></p>}
+      {r.outcome && <p className="text-sm">Last call: <b>{OUTCOME[r.outcome] ?? r.outcome}</b></p>}
+      {r.notes && <pre className="muted pre-wrap font-inherit text-xs mt-xs">{r.notes}</pre>}
+      {r.status === "RECOVERED" && r.recoveredOrderId && <p className="mt-sm"><Link href={`/orders/${r.recoveredOrderId}`} className="link" prefetch={false}>Open the order</Link></p>}
 
       {open && (
-        <div className="stack" style={{ marginTop: 12 }}>
-          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+        <div className="stack mt-md">
+          <div className="row gap-sm flex-wrap">
             <a className="btn btn-primary" href={`tel:${r.phone}`}>Call {prettyPhone(r.phone)}</a>
             <a
               className="btn btn-whatsapp"
@@ -63,12 +63,12 @@ function Card({ r, tab, canEdit, canOrder, storeName }: { r: AbandonedRow; tab: 
             {canOrder && <Link href={`/orders/new?abandoned=${r.id}`} className="btn btn-secondary" prefetch={false} data-testid="make-order">Make this an order</Link>}
           </div>
           <details>
-            <summary className="link" style={{ cursor: "pointer" }}>Suggested call script</summary>
-            <p lang="bn" style={{ marginTop: 8 }}>{sc.bn}</p>
-            <p className="muted" style={{ marginTop: 6 }}>{sc.en}</p>
+            <summary className="link cursor-pointer">Suggested call script</summary>
+            <p lang="bn" className="mt-sm">{sc.bn}</p>
+            <p className="muted mt-xs">{sc.en}</p>
           </details>
           {canEdit && (
-            <form action={outcomeAction.bind(null, r.id, tab)} className="row" style={{ marginTop: 6 }}>
+            <form action={outcomeAction.bind(null, r.id, tab)} className="row mt-xs">
               <select className="select" name="outcome" defaultValue="WILL_ORDER" aria-label="Outcome of the call">
                 <option value="WILL_ORDER">Customer said they will order</option>
                 <option value="NO_ANSWER">No answer / phone switched off</option>
@@ -89,7 +89,7 @@ export default async function Abandoned({ searchParams }: { searchParams: Promis
   const tab = (TABS.find((t) => t.key === one(sp.tab))?.key ?? "to_call") as AbandonedTab;
   const canEdit = can(s.user.role, "customers", "edit");
   const canOrder = can(s.user.role, "orders", "edit");
-  const [rows, counts, m, settings] = await Promise.all([listAbandoned(s.tenantId, s.actor, tab), abandonedTabCounts(s.tenantId, s.actor), getAbandonedMetrics(s.tenantId, s.actor), getStoreSettings(s.tenantId, s.actor).catch(() => null)]);
+  const [rows, counts, m, settings] = await Promise.all([listAbandoned(s.tenantId, s.actor), abandonedTabCounts(s.tenantId, s.actor), getAbandonedMetrics(s.tenantId, s.actor), getStoreSettings(s.tenantId, s.actor).catch(() => null)]);
   const storeName = settings?.storeName ?? s.tenantSubdomain;
   const err = one(sp.err);
   return (
@@ -105,11 +105,11 @@ export default async function Abandoned({ searchParams }: { searchParams: Promis
         <div className="stat"><div className="k">Recovery rate</div><div className="v num">{m.recoveryRatePercent == null ? "—" : `${m.recoveryRatePercent}%`}</div></div>
         <div className="stat"><div className="k">Recovered sales</div><div className="v num">{taka(m.recoveredRevenue)}</div></div>
       </div>
-      <nav className="tabs" aria-label="Stage" style={{ marginTop: 14 }}>
+      <nav className="tabs mt-md" aria-label="Stage">
         {TABS.map((t) => <Link key={t.key} href={`/abandoned?tab=${t.key}`} aria-current={t.key === tab ? "page" : undefined} prefetch={false}>{t.label}<span className={`n${t.alert && counts[t.key] > 0 ? " alert" : ""}`}>{counts[t.key]}</span></Link>)}
       </nav>
-      {err && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{err}</div>}
-      {one(sp.done) && <div className="notice good" role="status" style={{ marginBottom: 12 }}>Call logged.</div>}
+      {err && <div className="notice bad mb-md" role="alert">{err}</div>}
+      {one(sp.done) && <div className="notice good mb-md" role="status">Call logged.</div>}
       {rows.length === 0 ? <div className="card empty" data-testid="abandoned-empty">{tab === "to_call" ? "Nobody waiting. Every checkout was finished." : "Nothing here."}</div> : <div className="stack">{rows.map((r) => <Card key={r.id} r={r} tab={tab} canEdit={canEdit} canOrder={canOrder} storeName={storeName} />)}</div>}
     </>
   );

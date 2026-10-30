@@ -90,9 +90,9 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
       <PageHeader
         crumbs={[{ label: "Orders", href: "/orders" }, { label: o.orderNumber }]}
         title={
-          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <div className="row gap-md flex-wrap">
             <span data-testid="order-title">{o.orderNumber}</span>
-            <div className="row" style={{ gap: 6 }}>
+            <div className="row gap-sm">
               <PaymentPill method={o.paymentMethod} status={o.paymentStatus} />
               <OrderPill status={o.status} />
             </div>
@@ -144,10 +144,10 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
           </>
         }
       />
-      {err && <div className="notice bad" role="alert" style={{ marginBottom: 14 }} data-testid="order-error">{err}</div>}
+      {err && <div className="notice bad mb-md" role="alert" data-testid="order-error">{err}</div>}
       {o.status === "CANCELLED" && (
-        <div className="notice warn" style={{ marginBottom: 14 }} data-testid="cancelled-banner">
-          <div className="row" style={{ justifyContent: "space-between", alignItems: "center", width: "100%", gap: 12, flexWrap: "wrap" }}>
+        <div className="notice warn mb-md" data-testid="cancelled-banner">
+          <div className="row flex-between gap-lg flex-wrap">
             <span>This order is <b>CANCELLED</b>{o.cancellation?.reason ? `: ${o.cancellation.reason}` : ""}. Items were returned to inventory stock.</span>
             {canEdit && (
               <form action={statusAction.bind(null, o.id, "PENDING")}>
@@ -157,7 +157,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
           </div>
         </div>
       )}
-      {o.callNote && <div className="notice info" style={{ marginBottom: 14 }} data-testid="call-note-banner"><b>Call note:</b> {o.callNote}</div>}
+      {o.callNote && <div className="notice info mb-md" data-testid="call-note-banner"><b>Call note:</b> {o.callNote}</div>}
 
       <div className="split">
         <div className="col stack">
@@ -171,38 +171,38 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               {o.mfs.verifiedAt && (<><dt>Confirmed</dt><dd>{dateTime(o.mfs.verifiedAt)}</dd></>)}
             </dl>
             {isMfs && o.mfs.trxId && o.paymentStatus === "PENDING_VERIFICATION" && (
-              <div className="stack" style={{ marginTop: 12 }}>
+              <div className="stack mt-md">
                 <div className="row"><CopyButton text={o.mfs.trxId} label="Copy TrxID" /></div>
                 <div className="notice info">Open your {methodName(o.paymentMethod)} app and find this TrxID for {taka(o.totals.total)} before you confirm.</div>
                 {o.trxReuse.length > 0 && <div className="notice bad" role="alert">This TrxID is also on {o.trxReuse.map((r) => r.orderNumber).join(", ")}. Check carefully.</div>}
               </div>
             )}
             {canEdit && o.paymentStatus === "PENDING_VERIFICATION" && (
-              <div className="stack only-desktop" style={{ marginTop: 14 }}>
+              <div className="stack only-desktop mt-md">
                 <form action={verifyAction.bind(null, o.id)}><SubmitButton className="btn btn-success btn-block btn-lg" pending="Confirming…">I received it. Mark as paid</SubmitButton></form>
                 <RejectForm orderId={o.id} />
               </div>
             )}
             {canEdit && o.paymentStatus === "PENDING_VERIFICATION" && (
-              <div className="only-mobile" style={{ marginTop: 14 }}><RejectForm orderId={o.id} /></div>
+              <div className="only-mobile mt-md"><RejectForm orderId={o.id} /></div>
             )}
-            {!isMfs && o.paymentStatus === "UNPAID" && <p className="muted" style={{ marginTop: 10, fontSize: 13.5 }}>Customer pays the courier when it arrives.</p>}
+            {!isMfs && o.paymentStatus === "UNPAID" && <p className="muted text-sm mt-sm">Customer pays the courier when it arrives.</p>}
           </section>
 
           <section className="card" data-testid="items-card">
             <div className="card-head"><h2>Items ({o.items.reduce((n, i) => n + i.quantity, 0)})</h2>{canEdit && ["PENDING", "CONFIRMED", "PROCESSING"].includes(o.status) && <Link href={`/orders/${o.id}/items`} className="link" prefetch={false} data-testid="change-items">Change items</Link>}</div>
             {o.items.map((i) => (
-              <div key={i.id} className="row" style={{ padding: "8px 0", flexWrap: "nowrap", alignItems: "flex-start" }}>
-                <span className="thumb">{i.imageUrl ? /* eslint-disable-line @next/next/no-img-element */ <img src={i.imageUrl} alt="" width={44} height={44} style={{ objectFit: "cover" }} /> : "·"}</span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 600 }}>{i.title}</div>
-                  <div className="muted" style={{ fontSize: 13 }}>{[i.variantTitle && i.variantTitle.toLowerCase() !== "default" ? i.variantTitle : null, i.sku ? `SKU ${i.sku}` : null].filter(Boolean).join(" · ")}</div>
-                  <div className="muted num" style={{ fontSize: 13 }}>{taka(i.unitPrice)} × {i.quantity}</div>
+              <div key={i.id} className="row py-xs nowrap flex-start">
+                <span className="thumb">{i.imageUrl ? /* eslint-disable-line @next/next/no-img-element */ <img src={i.imageUrl} alt="" width={44} height={44} className="thumb-img" /> : "·"}</span>
+                <div className="flex-1">
+                  <div className="text-medium">{i.title}</div>
+                  <div className="muted text-sm">{[i.variantTitle && i.variantTitle.toLowerCase() !== "default" ? i.variantTitle : null, i.sku ? `SKU ${i.sku}` : null].filter(Boolean).join(" · ")}</div>
+                  <div className="muted num text-sm">{taka(i.unitPrice)} × {i.quantity}</div>
                 </div>
                 <b className="num">{taka(i.total)}</b>
               </div>
             ))}
-            <div className="totals" style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid var(--line)" }}>
+            <div className="totals mt-sm pt-sm border-top">
               <div className="r"><span>Subtotal</span><span className="num">{taka(o.totals.subtotal)}</span></div>
               <div className="r"><span>Delivery ({o.address.zone})</span><span className="num">{taka(o.totals.delivery)}</span></div>
               {o.totals.codFee > 0 && <div className="r"><span>Cash on delivery fee</span><span className="num">{taka(o.totals.codFee)}</span></div>}
@@ -213,11 +213,11 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               <div className="r grand"><span>Total</span><span className="num" data-testid="order-total">{taka(o.totals.total)}</span></div>
               {(o.wholesale?.advancePaid ?? 0) > 0 && (
                 <>
-                  <div className="r" style={{ color: "var(--brand)" }}>
+                  <div className="r text-brand">
                     <span>Advance Paid (অগ্রিম পরিশোধিত)</span>
                     <span className="num">− {taka(o.wholesale?.advancePaid ?? 0)}</span>
                   </div>
-                  <div className="r" style={{ fontWeight: 700, fontSize: "1.05em", color: "var(--text-ok, #15803d)" }}>
+                  <div className="r text-bold text-success">
                     <span>COD Payable at Door (কুরিয়ার আদায়)</span>
                     <span className="num">{taka(o.wholesale?.balanceDue ?? o.totals.total)}</span>
                   </div>
@@ -226,16 +226,16 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
             </div>
 
             {canEdit && o.status !== "CANCELLED" && o.status !== "REFUNDED" && o.paymentStatus !== "PAID" && (
-              <details style={{ marginTop: 12, padding: "10px 12px", border: "1px solid var(--line)", borderRadius: "var(--radius-md)", background: "var(--surface-muted)" }}>
-                <summary className="link" style={{ cursor: "pointer", fontWeight: 600 }}>Record Advance Delivery Charge (অগ্রিম ডেলিভারি চার্জ রেকর্ড)</summary>
-                <form action={recordAdvancePaymentAction.bind(null, o.id)} className="stack" style={{ marginTop: 10, gap: 8 }}>
-                  <p className="muted" style={{ margin: 0, fontSize: 13 }}>Taking 100-200 Tk advance via bKash/Nagad confirms customer intent and is automatically deducted from courier COD collection amount.</p>
-                  <div className="row" style={{ gap: 8 }}>
-                    <label className="field" style={{ flex: 1, minWidth: 120, marginBottom: 0 }}>
+              <details className="card-panel-muted mt-md">
+                <summary className="link cursor-pointer text-medium">Record Advance Delivery Charge (অগ্রিম ডেলিভারি চার্জ রেকর্ড)</summary>
+                <form action={recordAdvancePaymentAction.bind(null, o.id)} className="stack gap-md mt-sm">
+                  <p className="muted m-0 text-sm">Taking 100-200 Tk advance via bKash/Nagad confirms customer intent and is automatically deducted from courier COD collection amount.</p>
+                  <div className="row gap-md">
+                    <label className="field flex-1 mb-0">
                       <span className="label">Amount (BDT)</span>
                       <input className="input" type="number" name="amount" defaultValue={150} min={1} max={o.wholesale?.balanceDue || o.totals.total} required />
                     </label>
-                    <label className="field" style={{ flex: 1, minWidth: 140, marginBottom: 0 }}>
+                    <label className="field flex-1 mb-0">
                       <span className="label">Channel</span>
                       <select className="select" name="method" defaultValue="MANUAL_BKASH">
                         <option value="MANUAL_BKASH">bKash (বিকাশ)</option>
@@ -245,7 +245,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
                       </select>
                     </label>
                   </div>
-                  <label className="field" style={{ marginBottom: 0 }}>
+                  <label className="field mb-0">
                     <span className="label">Transaction ID / TrxID <span className="opt">(optional)</span></span>
                     <input className="input" name="trxId" maxLength={60} placeholder="e.g. 9X7B8Q2" />
                   </label>
@@ -266,7 +266,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               ))}
             </ul>
             {canEdit && (
-              <form action={noteAction.bind(null, o.id)} className="row" style={{ marginTop: 6, flexWrap: "nowrap" }}>
+              <form action={noteAction.bind(null, o.id)} className="row gap-sm mt-xs nowrap">
                 <input className="input" name="note" placeholder="Add a private note for your team" maxLength={500} aria-label="Private note" required />
                 <SubmitButton className="btn btn-secondary" pending="…">Post</SubmitButton>
               </form>
@@ -278,7 +278,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
           <section className="card" data-testid="risk-card">
             <div className="card-head">
               <h2>Delivery trust</h2>
-              <div className="row" style={{ gap: 6 }}>
+              <div className="row gap-sm">
                 {o.risk.firstTime && o.risk.flags.length === 0 ? <span className="pill grey">First-time buyer</span> : <span className={`pill ${o.risk.level === "HIGH" ? "bad" : o.risk.level === "MEDIUM" ? "warn" : "ok"}`} data-testid="risk-level">{o.risk.level === "HIGH" ? "High risk" : o.risk.level === "MEDIUM" ? "Medium risk" : "Trusted"} · {o.risk.score}</span>}
                 {canEdit && (
                   <form action={refreshFraudAction.bind(null, o.id)}>
@@ -300,48 +300,48 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               <dd data-testid="risk-network">{trust.level === "NEW" ? "No parcels sent to this number yet" : `${trust.delivered} delivered, ${trust.failed} came back${trust.refused ? ` (${trust.refused} refused in the last 60 days)` : ""}${trust.stores > 1 ? `, ${trust.stores} stores` : ""}`}</dd>
               <dt>In your store</dt><dd>{o.risk.lookup.here.orders} {o.risk.lookup.here.orders === 1 ? "order" : "orders"}, {o.risk.lookup.here.delivered} delivered, {o.risk.lookup.here.returned} returned</dd>
             </dl>
-            {o.risk.flags.length > 0 && <ul style={{ margin: "10px 0 0", paddingLeft: 18 }} data-testid="risk-flags">{o.risk.flags.map((f) => <li key={f.code}>{f.label}</li>)}</ul>}
-            {open && <p className="muted" style={{ marginTop: 10, fontSize: 13.5 }}>{o.risk.level === "HIGH" ? "Pause booking. Call the customer and ask for ৳100 in advance by bKash." : o.risk.level === "MEDIUM" ? "Call the customer before you pack this." : "Safe to pack and ship."}</p>}
+            {o.risk.flags.length > 0 && <ul className="risk-flags-list" data-testid="risk-flags">{o.risk.flags.map((f) => <li key={f.code}>{f.label}</li>)}</ul>}
+            {open && <p className="muted text-sm mt-sm">{o.risk.level === "HIGH" ? "Pause booking. Call the customer and ask for ৳100 in advance by bKash." : o.risk.level === "MEDIUM" ? "Call the customer before you pack this." : "Safe to pack and ship."}</p>}
             {held && canEdit && (
-              <form action={releaseHoldAction.bind(null, o.id)} className="stack" style={{ marginTop: 10 }} data-testid="release-hold">
+              <form action={releaseHoldAction.bind(null, o.id)} className="stack mt-sm" data-testid="release-hold">
                 <div className="notice bad" role="status">Held for review. A courier cannot be booked until you release it.</div>
                 <input className="input" name="note" maxLength={150} placeholder="What did the customer say? (optional)" aria-label="Note" />
                 <SubmitButton className="btn btn-primary btn-block" pending="Releasing…">I called them. Release the hold</SubmitButton>
               </form>
             )}
-            {held && !canEdit && <div className="notice bad" role="status" style={{ marginTop: 10 }}>Held for review.</div>}
+            {held && !canEdit && <div className="notice bad mt-sm" role="status">Held for review.</div>}
             {!held && canEdit && open && o.risk.level !== "LOW" && (
-              <form action={holdAction.bind(null, o.id)} style={{ marginTop: 10 }}><SubmitButton className="btn btn-secondary btn-sm" pending="Holding…">Hold for review</SubmitButton></form>
+              <form action={holdAction.bind(null, o.id)} className="mt-sm"><SubmitButton className="btn btn-secondary btn-sm" pending="Holding…">Hold for review</SubmitButton></form>
             )}
             {canEdit && can(s.user.role, "customers", "edit") && !o.risk.lookup.blocked && (o.risk.level !== "LOW" || o.risk.refusedAtDoor) && (
-              <details style={{ marginTop: 10 }}>
-                <summary className="link" style={{ cursor: "pointer" }}>Block this number</summary>
-                <form action={blockAction.bind(null, o.id, o.customerPhone)} className="stack" style={{ marginTop: 10 }}>
+              <details className="mt-sm">
+                <summary className="link cursor-pointer">Block this number</summary>
+                <form action={blockAction.bind(null, o.id, o.customerPhone)} className="stack mt-sm">
                   <input className="input" name="reason" required minLength={3} maxLength={150} placeholder="Why? For example: refused 3 parcels" aria-label="Reason" />
                   <SubmitButton className="btn btn-danger btn-block" pending="Blocking…">Block from ordering in your store</SubmitButton>
                 </form>
               </details>
             )}
-            {o.risk.lookup.blocked && <p className="muted" style={{ marginTop: 10 }}>This number is blocked in your store.</p>}
+            {o.risk.lookup.blocked && <p className="muted mt-sm">This number is blocked in your store.</p>}
           </section>
 
           <section className="card" data-testid="customer-card">
             <div className="card-head"><h2>Customer</h2>{o.customer?.isBlocked && <span className="pill bad">Blocked</span>}</div>
-            <div style={{ fontWeight: 700 }}>{o.customerName}</div>
-            <div className="row" style={{ marginTop: 4 }}>
+            <div className="text-bold">{o.customerName}</div>
+            <div className="row gap-md mt-xs">
               <a className="link num" href={`tel:${o.customerPhone}`}>{prettyPhone(o.customerPhone)}</a>
-              <a className="link" href={waConfirmLink} target="_blank" rel="noopener noreferrer" style={{ color: "#16A34A", fontWeight: 600 }}>WhatsApp Chat</a>
+              <a className="link text-success text-medium" href={waConfirmLink} target="_blank" rel="noopener noreferrer">WhatsApp Chat</a>
             </div>
-            {o.customerEmail && <div className="muted" style={{ fontSize: 13.5 }}>{o.customerEmail}</div>}
+            {o.customerEmail && <div className="muted text-sm">{o.customerEmail}</div>}
             {o.customer && (
-              <dl className="kv" style={{ marginTop: 12 }}>
+              <dl className="kv mt-md">
                 <dt>Orders</dt><dd>{o.customer.totalOrders}</dd>
                 <dt>Delivered</dt><dd>{o.customer.delivered}{o.customer.deliverySuccessPercent != null ? ` (${o.customer.deliverySuccessPercent}% of finished orders)` : ""}</dd>
                 <dt>Returned</dt><dd>{o.customer.returned}</dd>
                 <dt>Spent</dt><dd className="num">{taka(o.customer.totalSpent)}</dd>
               </dl>
             )}
-            {o.customer?.id && can(s.user.role, "customers") && <p style={{ marginTop: 10 }}><Link href={`/customers/${o.customer.id}`} className="link" prefetch={false}>Open customer</Link></p>}
+            {o.customer?.id && can(s.user.role, "customers") && <p className="mt-sm"><Link href={`/customers/${o.customer.id}`} className="link" prefetch={false}>Open customer</Link></p>}
           </section>
 
           <section className="card" data-testid="labels-card">
@@ -349,7 +349,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
             {canEdit ? (
               <div className="stack">
                 <form action={tagsAction.bind(null, o.id)} className="stack">
-                  <label className="field" style={{ marginBottom: 0 }}>
+                  <label className="field mb-0">
                     <span className="label">Labels <span className="opt">(separate with commas)</span></span>
                     <input className="input" name="tags" list="known-labels" defaultValue={o.tags.join(", ")} maxLength={200} placeholder="gift, call first" data-testid="labels-input" />
                   </label>
@@ -357,7 +357,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
                   <SubmitButton className="btn btn-secondary btn-sm" pending="Saving…">Save labels</SubmitButton>
                 </form>
                 <form action={callNoteAction.bind(null, o.id)} className="stack">
-                  <label className="field" style={{ marginBottom: 0 }}>
+                  <label className="field mb-0">
                     <span className="label">Call note <span className="opt">(shown to whoever packs it)</span></span>
                     <textarea className="textarea" name="callNote" defaultValue={o.callNote ?? ""} maxLength={500} rows={2} placeholder="Said deliver after 6pm" data-testid="call-note-input" />
                   </label>
@@ -365,7 +365,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
                 </form>
               </div>
             ) : (
-              <p className="muted" style={{ margin: 0 }}>{o.tags.length ? o.tags.join(", ") : "No labels."}</p>
+              <p className="muted m-0">{o.tags.length ? o.tags.join(", ") : "No labels."}</p>
             )}
           </section>
 
@@ -373,7 +373,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
             <section className="card" data-testid="message-card">
               <div className="card-head"><h2>Message the customer</h2></div>
               <form action={messageAction.bind(null, o.id)} className="stack">
-                <label className="field" style={{ marginBottom: 0 }}>
+                <label className="field mb-0">
                   <span className="label">SMS to {prettyPhone(o.customerPhone)} <span className="opt">(uses one SMS credit; their reply comes to your own phone)</span></span>
                   <textarea className="textarea" name="text" rows={2} maxLength={200} required placeholder={`Your parcel goes out tomorrow. Please keep ${taka(o.totals.total)} ready.`} data-testid="message-text" />
                 </label>
@@ -386,12 +386,12 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
             <div className="card-head"><h2>Delivery</h2></div>
             <div>{o.address.line}</div>
             <div className="muted">{o.address.area}, {o.address.district} · {o.address.division}</div>
-            {o.notes && <div className="notice info" style={{ marginTop: 10 }}>Customer note: {o.notes}</div>}
-            {canEdit && o.canEditAddress && <div style={{ marginTop: 10 }}><AddressEditor orderId={o.id} value={{ name: o.customerName, line: o.address.line, area: o.address.area, district: o.address.district, division: o.address.division }} /></div>}
+            {o.notes && <div className="notice info mt-sm">Customer note: {o.notes}</div>}
+            {canEdit && o.canEditAddress && <div className="mt-sm"><AddressEditor orderId={o.id} value={{ name: o.customerName, line: o.address.line, area: o.address.area, district: o.address.district, division: o.address.division }} /></div>}
           </section>
 
           <section className="card" id="courier-card" data-testid="courier-card">
-            <div className="card-head"><h2>Courier</h2>{o.courier.status && <span className={`pill ${o.courier.status === "DELIVERED" ? "ok" : o.courier.status === "HOLD" ? "warn" : o.courier.status === "RETURNED" || o.courier.status === "REFUSED" ? "bad" : "info"}`} data-testid="courier-status">{COURIER_STATUS_LABELS[o.courier.status]}</span>}</div>
+            <div className="card-head"><h2>Courier</h2>{o.courier.status && <span className={`pill ${o.courier.status === "DELIVERED" ? "ok" : o.courier.status === "HOLD" ? "warn" : "bad"}`} data-testid="courier-status">{COURIER_STATUS_LABELS[o.courier.status]}</span>}</div>
             {o.courier.provider && (
               <dl className="kv">
                 <dt>Courier</dt><dd>{courierName(o.courier.provider)}</dd>
@@ -402,37 +402,37 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               </dl>
             )}
             {o.courier.consignmentId && o.status === "SHIPPED" && (
-              <form action={refreshCourierAction.bind(null, o.id)} style={{ marginTop: 10 }}><SubmitButton className="btn btn-secondary btn-sm" pending="Checking…">Check status now</SubmitButton></form>
+              <form action={refreshCourierAction.bind(null, o.id)} className="mt-sm"><SubmitButton className="btn btn-secondary btn-sm" pending="Checking…">Check status now</SubmitButton></form>
             )}
             {canBook && couriers.length > 0 && (
-              <form action={bookAction.bind(null, o.id)} className="stack" style={{ marginTop: 4 }} data-testid="book-form">
-                <fieldset className="field" style={{ border: 0, padding: 0, margin: 0 }}>
+              <form action={bookAction.bind(null, o.id)} className="stack mt-xs" data-testid="book-form">
+                <fieldset className="field border-none p-0 m-0">
                   <legend className="label">Book with</legend>
                   <div className="chips">
                     {couriers.map((c) => (
-                      <label key={c.provider} className="chip" style={{ cursor: "pointer" }}>
+                      <label key={c.provider} className="chip cursor-pointer">
                         <input type="radio" name="provider" value={c.provider} defaultChecked={c.provider === preferred} required /> {c.label}{c.mode === "TEST" ? " (test)" : ""}
                       </label>
                     ))}
                   </div>
                 </fieldset>
                 <div className="row-2">
-                  <label className="field" style={{ marginBottom: 0 }}><span className="label">Weight (kg)</span><input className="input" name="weight" type="number" inputMode="decimal" step="0.1" min="0.1" max="30" defaultValue="0.5" /></label>
-                  <label className="field" style={{ marginBottom: 0 }}><span className="label">Note to courier <span className="opt">(optional)</span></span><input className="input" name="note" maxLength={150} defaultValue={o.notes ?? ""} /></label>
+                  <label className="field mb-0"><span className="label">Weight (kg)</span><input className="input" name="weight" type="number" inputMode="decimal" step="0.1" min="0.1" max="30" defaultValue="0.5" /></label>
+                  <label className="field mb-0"><span className="label">Note to courier <span className="opt">(optional)</span></span><input className="input" name="note" maxLength={150} defaultValue={o.notes ?? ""} /></label>
                 </div>
-                <p className="muted" style={{ fontSize: 13 }}>{o.paymentMethod === "COD" && o.paymentStatus !== "PAID" ? `The courier will collect ${taka(o.totals.total)}.` : "Already paid. The courier collects nothing."}</p>
+                <p className="muted text-sm">{o.paymentMethod === "COD" && o.paymentStatus !== "PAID" ? `The courier will collect ${taka(o.totals.total)}.` : "Already paid. The courier collects nothing."}</p>
                 <SubmitButton className="btn btn-primary btn-block btn-lg" pending="Booking…" disabled={held}>Book courier</SubmitButton>
                 {held && <p className="err" role="alert">Release the hold above before booking.</p>}
               </form>
             )}
             {canBook && couriers.length === 0 && (
-              <div className="notice info" style={{ marginTop: 4 }}>Connect Steadfast, Pathao or RedX with your own keys to book parcels from here. <Link href="/settings/apps?open=steadfast_courier" className="link" prefetch={false}>Add courier keys</Link></div>
+              <div className="notice info mt-xs">Connect Steadfast, Pathao or RedX with your own keys to book parcels from here. <Link href="/settings/apps?open=steadfast_courier" className="link" prefetch={false}>Add courier keys</Link></div>
             )}
             {canBook && (
-              <details style={{ marginTop: 12 }} data-testid="manual-ship">
-                <summary className="link" style={{ cursor: "pointer" }}>Deliver it yourself, or book outside this app</summary>
-                <form action={shipAction.bind(null, o.id)} className="stack" style={{ marginTop: 10 }}>
-                  <label className="field" style={{ marginBottom: 0 }}><span className="label">Tracking code <span className="opt">(optional)</span></span><input className="input" name="tracking" maxLength={60} /></label>
+              <details className="mt-md" data-testid="manual-ship">
+                <summary className="link cursor-pointer">Deliver it yourself, or book outside this app</summary>
+                <form action={shipAction.bind(null, o.id)} className="stack mt-sm">
+                  <label className="field mb-0"><span className="label">Tracking code <span className="opt">(optional)</span></span><input className="input" name="tracking" maxLength={60} /></label>
                   <SubmitButton className="btn btn-secondary btn-block" pending="Saving…">Hand over and mark shipped</SubmitButton>
                 </form>
               </details>
@@ -443,9 +443,9 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
           {canCancel && (
             <section className="card" data-testid="cancel-order-card">
               <details>
-                <summary className="link" style={{ cursor: "pointer", fontWeight: 600 }}>Cancel this order (অর্ডার বাতিল করুন)</summary>
-                <form action={statusAction.bind(null, o.id, "CANCELLED")} className="stack" style={{ marginTop: 12, gap: 8 }}>
-                  <label className="field" style={{ marginBottom: 0 }}>
+                <summary className="link cursor-pointer text-medium">Cancel this order (অর্ডার বাতিল করুন)</summary>
+                <form action={statusAction.bind(null, o.id, "CANCELLED")} className="stack gap-md mt-md">
+                  <label className="field mb-0">
                     <span className="label">Reason</span>
                     <select className="select" name="reasonKey" defaultValue="Customer requested cancellation">
                       <option value="Customer requested cancellation">Customer requested cancellation (গ্রাহক বাতিল করতে বলেছেন)</option>
@@ -458,23 +458,23 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
                     </select>
                   </label>
                   <input className="input" name="reasonNote" maxLength={150} placeholder="Additional note (optional)" aria-label="Additional note" />
-                  <p className="muted" style={{ fontSize: 13, margin: 0 }}>The items go back into stock.</p>
+                  <p className="muted text-sm m-0">The items go back into stock.</p>
                   <SubmitButton className="btn btn-danger btn-block" pending="Cancelling…">Cancel order</SubmitButton>
                 </form>
               </details>
             </section>
           )}
           {canEdit && o.status === "CANCELLED" && (
-            <section className="card" style={{ border: "1px solid var(--line)" }} data-testid="reopen-order-section">
+            <section className="card card-panel-muted" data-testid="reopen-order-section">
               <div className="card-head">
                 <div>
-                  <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>Order Cancelled</h3>
-                  <p className="muted" style={{ margin: "4px 0 0", fontSize: 13 }}>
+                  <h3 className="m-0 text-base text-bold">Order Cancelled</h3>
+                  <p className="muted text-sm mt-xs">
                     Items were returned to stock. If the customer reconfirmed, you can restore this order back to active.
                   </p>
                 </div>
               </div>
-              <form action={statusAction.bind(null, o.id, "PENDING")} style={{ marginTop: 12 }}>
+              <form action={statusAction.bind(null, o.id, "PENDING")} className="mt-md">
                 <SubmitButton className="btn btn-primary btn-block" pending="Restoring order…">
                   Reopen Order (অর্ডার পুনরায় চালু করুন)
                 </SubmitButton>
@@ -489,10 +489,10 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               <div className="row">
                 {o.status === "SHIPPED" && <form action={statusAction.bind(null, o.id, "DELIVERED")}><SubmitButton className="btn btn-secondary">Mark delivered</SubmitButton></form>}
               </div>
-              <details style={{ marginTop: 10 }}>
-                <summary className="link" style={{ cursor: "pointer" }}>The parcel came back</summary>
-                <form action={returnedAction.bind(null, o.id)} className="stack" style={{ marginTop: 10 }} data-testid="returned-form">
-                  <label className="row" style={{ flexWrap: "nowrap", gap: 8 }}><input type="checkbox" name="refused" style={{ width: 20, height: 20 }} /> The customer refused it at the door</label>
+              <details className="mt-sm">
+                <summary className="link cursor-pointer">The parcel came back</summary>
+                <form action={returnedAction.bind(null, o.id)} className="stack mt-sm" data-testid="returned-form">
+                  <label className="row nowrap gap-md"><input type="checkbox" name="refused" className="pick-checkbox-mobile" /> The customer refused it at the door</label>
                   <input className="input" name="reason" maxLength={150} placeholder="What happened? (optional)" aria-label="What happened" />
                   <SubmitButton className="btn btn-danger btn-block" pending="Saving…">Mark returned. Items go back in stock</SubmitButton>
                 </form>
@@ -504,11 +504,11 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
 
       {step && (
         <div className="sticky-actions" data-testid="next-step">
-          {step === "verify" && <form action={verifyAction.bind(null, o.id)} className="only-mobile" style={{ flex: 1 }}><SubmitButton className="btn btn-success btn-block btn-lg" pending="Confirming…">I received it. Mark as paid</SubmitButton></form>}
-          {step === "confirm" && <form action={statusAction.bind(null, o.id, "CONFIRMED")} style={{ flex: 1 }}><SubmitButton className="btn btn-primary btn-block btn-lg" pending="Confirming…">Confirm order</SubmitButton></form>}
-          {step === "pack" && <form action={statusAction.bind(null, o.id, "PROCESSING")} style={{ flex: 1 }}><SubmitButton className="btn btn-primary btn-block btn-lg" pending="Saving…">Mark as packed</SubmitButton></form>}
+          {step === "verify" && <form action={verifyAction.bind(null, o.id)} className="only-mobile flex-1"><SubmitButton className="btn btn-success btn-block btn-lg" pending="Confirming…">I received it. Mark as paid</SubmitButton></form>}
+          {step === "confirm" && <form action={statusAction.bind(null, o.id, "CONFIRMED")} className="flex-1"><SubmitButton className="btn btn-primary btn-block btn-lg" pending="Confirming…">Confirm order</SubmitButton></form>}
+          {step === "pack" && <form action={statusAction.bind(null, o.id, "PROCESSING")} className="flex-1"><SubmitButton className="btn btn-primary btn-block btn-lg" pending="Saving…">Mark as packed</SubmitButton></form>}
           {step === "ship" && <a href="#courier-card" className="btn btn-primary btn-block btn-lg only-mobile">Book courier or ship</a>}
-          {step === "deliver" && <form action={statusAction.bind(null, o.id, "DELIVERED")} style={{ flex: 1 }}><SubmitButton className="btn btn-primary btn-block btn-lg" pending="Saving…">Mark delivered</SubmitButton></form>}
+          {step === "deliver" && <form action={statusAction.bind(null, o.id, "DELIVERED")} className="flex-1"><SubmitButton className="btn btn-primary btn-block btn-lg" pending="Saving…">Mark delivered</SubmitButton></form>}
         </div>
       )}
     </div>

@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { can, getUsage, listAdminProducts, type AdminProductRow, type ProductTab } from "@biztrackbd/core";
+import { PageHeader } from "@biztrackbd/ui";
 import { BulkBar, SelectAllCheckbox } from "@/components/bulk";
 import { LiveSearch, SelectFilter } from "@/components/live-filters";
 import { PlusIcon } from "@/components/icons";
 import { Pager, SubmitButton, Tabs } from "@/components/ui";
-import { PageHeader } from "@biztrackbd/ui";
 import { taka } from "@/lib/format";
-import { one, pageOf, qs } from "@/lib/query";
+import { limitNote, Meter } from "@/lib/usage";
+import { pageOf, one, qs } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
-import { Meter, limitNote } from "@/lib/usage";
+import { deleteProductAction, restoreProductAction } from "./actions";
 import { ConfirmDelete } from "@/components/confirm-delete";
-import { restoreProductAction, deleteProductAction } from "./actions";
 import { bulkProductsAction } from "./bulk-actions";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +22,7 @@ const VERBS: Record<string, string> = { publish: "published", unpublish: "moved 
 
 function Thumb({ url, title, size = 44 }: { url: string | null; title: string; size?: number }) {
   // eslint-disable-next-line @next/next/no-img-element
-  return <span className="thumb" style={size === 44 ? undefined : { width: size, height: size }}>{url ? <img src={url} alt="" width={size} height={size} style={{ objectFit: "cover", width: "100%", height: "100%" }} /> : title.slice(0, 1).toUpperCase()}</span>;
+  return <span className="thumb" style={size === 44 ? undefined : { width: size, height: size }}>{url ? <img src={url} alt="" width={size} height={size} className="thumb-img" /> : title.slice(0, 1).toUpperCase()}</span>;
 }
 
 function StockPill({ p }: { p: AdminProductRow }) {
@@ -63,14 +63,14 @@ export default async function Products({ searchParams }: { searchParams: Promise
       />
 
       {done && (
-        <div className="notice good" role="status" style={{ marginBottom: 12 }} data-testid="bulk-msg">
+        <div className="notice good mb-md" role="status" data-testid="bulk-msg">
           <b>{done[2]} {Number(done[2]) === 1 ? "product" : "products"} {VERBS[done[1]!]}.</b>
           {done[1] === "archive" && <span> Products moved to this Archived tab. They are hidden from your store and active stock.</span>}
           {done[1] === "delete" && <span> Products permanently removed. Existing orders preserve full item details.</span>}
           {Number(done[3]) ? ` ${done[3]} skipped.` : ""}
         </div>
       )}
-      {msg === "none" && <div className="notice" role="status" style={{ marginBottom: 12 }}>Select at least one product first.</div>}
+      {msg === "none" && <div className="notice mb-md" role="status">Select at least one product first.</div>}
 
       <Tabs tabs={TABS.map((t) => ({ href: `/products${qs({ ...base, tab: t.key === "all" ? undefined : t.key })}`, label: t.label, count: list.counts[t.key], current: t.key === tab }))} />
 
@@ -91,7 +91,7 @@ export default async function Products({ searchParams }: { searchParams: Promise
       {list.rows.length === 0 ? (
         <div className="card empty" data-testid="products-empty">
           {filtered ? "No products match. Try clearing the filters." : "You have no products yet."}
-          {canEdit && !filtered && <p style={{ marginTop: 12 }}><Link href="/products/new" className="btn btn-primary" prefetch={false}>Add your first product</Link> <Link href="/products/import" className="btn btn-secondary" prefetch={false}>or import a CSV</Link></p>}
+          {canEdit && !filtered && <p className="mt-md"><Link href="/products/new" className="btn btn-primary" prefetch={false}>Add your first product</Link> <Link href="/products/import" className="btn btn-secondary" prefetch={false}>or import a CSV</Link></p>}
         </div>
       ) : (
         <form>
@@ -125,10 +125,10 @@ export default async function Products({ searchParams }: { searchParams: Promise
                     <b className="pcard-title">{p.title}</b>
                     <span className="num">{taka(p.price)}</span>
                   </Link>
-                  <div className="row" style={{ gap: 6 }}><span className={`pill ${p.status === "ACTIVE" ? "ok" : p.status === "ARCHIVED" ? "warn" : "grey"}`}>{p.status === "ACTIVE" ? "Active" : p.status === "ARCHIVED" ? "Archived" : "Draft"}</span><StockPill p={p} /></div>
+                  <div className="row gap-sm"><span className={`pill ${p.status === "ACTIVE" ? "ok" : p.status === "ARCHIVED" ? "warn" : "grey"}`}>{p.status === "ACTIVE" ? "Active" : p.status === "ARCHIVED" ? "Archived" : "Draft"}</span><StockPill p={p} /></div>
                   {canEdit && (
-                    <div className="row" style={{ justifyContent: "flex-end", gap: 6, marginTop: 8, paddingTop: 6, borderTop: "1px solid var(--line)" }}>
-                      <Link href={`/products/${p.id}`} className="btn btn-secondary btn-sm" style={{ height: 26, fontSize: 11.5 }} prefetch={false}>Edit</Link>
+                    <div className="row flex-end gap-sm mt-sm pt-xs border-top">
+                      <Link href={`/products/${p.id}`} className="btn btn-secondary btn-xs" prefetch={false}>Edit</Link>
                       <ConfirmDelete action={async () => { "use server"; await deleteProductAction(p.id); }} message={`Delete "${p.title}"?`} label="Delete" testId="delete-product-btn" />
                     </div>
                   )}
@@ -140,20 +140,20 @@ export default async function Products({ searchParams }: { searchParams: Promise
               <div className="only-mobile">
                 {list.rows.map((p) => (
                   <div key={p.id} className="list-card" data-testid="product-row">
-                    <div className="row" style={{ flexWrap: "nowrap", alignItems: "flex-start" }}>
-                      {canEdit && <input type="checkbox" name="ids" value={p.id} aria-label={`Select ${p.title}`} style={{ width: 20, height: 20, marginTop: 12 }} />}
-                      <Link href={`/products/${p.id}`} className="row" style={{ flex: 1, minWidth: 0, flexWrap: "nowrap", alignItems: "flex-start" }} prefetch={false}>
+                    <div className="row nowrap flex-start">
+                      {canEdit && <input type="checkbox" name="ids" value={p.id} aria-label={`Select ${p.title}`} className="pick-checkbox-mobile" />}
+                      <Link href={`/products/${p.id}`} className="row flex-1 nowrap flex-start" prefetch={false}>
                         <Thumb url={p.imageUrl} title={p.title} />
-                        <span style={{ flex: 1, minWidth: 0 }}>
+                        <span className="flex-1">
                           <b>{p.title}</b>
-                          <span className="muted" style={{ fontSize: 13, display: "block" }}>{p.optionSummary}</span>
-                          <span className="row" style={{ marginTop: 6 }}><span className={`pill ${p.status === "ACTIVE" ? "ok" : p.status === "ARCHIVED" ? "warn" : "grey"}`}>{p.status === "ACTIVE" ? "Active" : p.status === "ARCHIVED" ? "Archived" : "Draft"}</span><StockPill p={p} /></span>
+                          <span className="muted text-sm d-block">{p.optionSummary}</span>
+                          <span className="row gap-sm mt-xs"><span className={`pill ${p.status === "ACTIVE" ? "ok" : p.status === "ARCHIVED" ? "warn" : "grey"}`}>{p.status === "ACTIVE" ? "Active" : p.status === "ARCHIVED" ? "Archived" : "Draft"}</span><StockPill p={p} /></span>
                         </span>
                         <b className="num">{taka(p.price)}</b>
                       </Link>
                     </div>
                     {canEdit && (
-                      <div className="row" style={{ justifyContent: "flex-end", gap: 6, marginTop: 8, paddingTop: 8, borderTop: "1px dashed var(--line)" }}>
+                      <div className="row flex-end gap-sm mt-sm pt-sm border-top-dashed">
                         {tab === "archived" ? (
                           <>
                             <form action={async () => { "use server"; await restoreProductAction(p.id); }}><SubmitButton className="btn btn-secondary btn-sm" pending="…">Restore</SubmitButton></form>
@@ -173,22 +173,22 @@ export default async function Products({ searchParams }: { searchParams: Promise
               <div className="table-scroll only-desktop">
                 <table className="table" data-testid="products-table">
                   <thead><tr>{canEdit && (
-                      <th style={{ width: 36 }}>
+                      <th className="col-checkbox">
                         <SelectAllCheckbox label="Select all products" />
                       </th>
-                    )}<th>Product</th><th>Status</th><th>Stock</th><th>Category</th><th className="r">Price</th><th className="r">Sold (30d)</th><th className="r" style={{ width: 140 }}>Actions</th></tr></thead>
+                    )}<th>Product</th><th>Status</th><th>Stock</th><th>Category</th><th className="r">Price</th><th className="r">Sold (30d)</th><th className="r col-actions">Actions</th></tr></thead>
                   <tbody>
                     {list.rows.map((p) => (
                       <tr key={p.id} data-testid="product-row">
-                        {canEdit && <td><input type="checkbox" name="ids" value={p.id} aria-label={`Select ${p.title}`} style={{ width: 18, height: 18 }} /></td>}
-                        <td><Link href={`/products/${p.id}`} className="row" style={{ flexWrap: "nowrap" }} prefetch={false}><Thumb url={p.imageUrl} title={p.title} /><span><b>{p.title}</b><br /><span className="muted" style={{ fontSize: 12.5 }}>{p.optionSummary}</span></span></Link></td>
+                        {canEdit && <td><input type="checkbox" name="ids" value={p.id} aria-label={`Select ${p.title}`} className="pick-checkbox" /></td>}
+                        <td><Link href={`/products/${p.id}`} className="row nowrap" prefetch={false}><Thumb url={p.imageUrl} title={p.title} /><span><b>{p.title}</b><br /><span className="muted text-xs">{p.optionSummary}</span></span></Link></td>
                         <td><span className={`pill ${p.status === "ACTIVE" ? "ok" : "grey"}`}>{p.status === "ACTIVE" ? "Active" : "Draft"}</span></td>
                         <td><StockPill p={p} /></td>
                         <td className="muted">{p.categoryName ?? "—"}</td>
                         <td className="r num">{taka(p.price)}</td>
                         <td className="r num">{p.sold30d}</td>
                         <td className="r">
-                          <div className="row" style={{ justifyContent: "flex-end", gap: 6 }}>
+                          <div className="row flex-end gap-sm">
                             {tab === "archived" ? (
                               <>
                                 <form action={async () => { "use server"; await restoreProductAction(p.id); }}><SubmitButton className="btn btn-secondary btn-sm" pending="…">Restore</SubmitButton></form>
@@ -216,7 +216,7 @@ export default async function Products({ searchParams }: { searchParams: Promise
       {(note || usage.products.limit != null) && (
         <div className="plan-foot" data-testid="plan-foot">
           <Meter label="Products on your plan" usage={usage.products} />
-          {note && <p className="muted" style={{ margin: 0, fontSize: 13.5 }}>{note}</p>}
+          {note && <p className="muted text-sm m-0">{note}</p>}
         </div>
       )}
     </>

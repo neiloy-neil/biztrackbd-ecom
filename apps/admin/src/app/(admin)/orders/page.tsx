@@ -70,15 +70,15 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
     <>
       <PageHeader title="Orders" actions={<><Link href="/orders/drafts" className="btn btn-secondary" prefetch={false} data-testid="open-drafts">Draft orders</Link><a href={`/orders/export${qs(base)}`} className="btn btn-secondary" data-testid="export-orders">Export CSV</a>{canEdit && <Link href="/orders/new" className="btn btn-primary" prefetch={false}>Create order</Link>}</>} />
 
-      {packedMsg && <div className="notice good" role="status" style={{ marginBottom: 12 }}>{packedMsg[1]} marked as packed{packedMsg[2] ? `. ${packedMsg[2]} could not be packed (they must be confirmed first).` : "."}</div>}
-      {bookedMsg && <div className="notice good" role="status" style={{ marginBottom: 12 }} data-testid="booked-msg">{bookedMsg[1]} booked with the courier{bookedMsg[2] ? `. ${bookedMsg[2]} could not be booked${why ? `: ${why}` : ""}.` : "."}</div>}
-      {statusMsg && <div className="notice good" role="status" style={{ marginBottom: 12 }} data-testid="status-msg">{statusMsg[2]} {statusMsg[1]}{statusMsg[3] !== "0" ? `. ${statusMsg[3]} could not be changed (they are already past that step).` : "."}</div>}
-      {msg === "failed" && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{why}</div>}
-      {msg === "none" && <div className="notice" role="status" style={{ marginBottom: 12 }}>Select at least one order first.</div>}
+      {packedMsg && <div className="notice good mb-md" role="status">{packedMsg[1]} marked as packed{packedMsg[2] ? `. ${packedMsg[2]} could not be packed (they must be confirmed first).` : "."}</div>}
+      {bookedMsg && <div className="notice good mb-md" role="status" data-testid="booked-msg">{bookedMsg[1]} booked with the courier{bookedMsg[2] ? `. ${bookedMsg[2]} could not be booked${why ? `: ${why}` : ""}.` : "."}</div>}
+      {statusMsg && <div className="notice good mb-md" role="status" data-testid="status-msg">{statusMsg[2]} {statusMsg[1]}{statusMsg[3] !== "0" ? `. ${statusMsg[3]} could not be changed (they are already past that step).` : "."}</div>}
+      {msg === "failed" && <div className="notice bad mb-md" role="alert">{why}</div>}
+      {msg === "none" && <div className="notice mb-md" role="status">Select at least one order first.</div>}
 
       <Tabs tabs={TABS.map((t) => ({ href: `/orders${qs({ ...base, tab: t.key === "all" ? undefined : t.key })}`, label: t.label, count: counts[t.key], alert: t.alert, current: t.key === tab }))} />
       {canEdit && list.rows.length > 0 && (tab === "check" || tab === "to_pack") && (
-        <p style={{ margin: "0 0 12px" }}>
+        <p className="mb-md">
           <Link href={tab === "check" ? "/orders/check" : "/orders/ship"} className="btn btn-primary" prefetch={false} data-testid="open-desk">{tab === "check" ? "Check them one by one" : "Book them one by one"}</Link>
         </p>
       )}
@@ -111,7 +111,7 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
                   </>
                 )}
                 <SubmitButton formAction={bulkConfirmAction} className="btn btn-secondary btn-sm" pending="Confirming…" data-testid="bulk-confirm">Confirm selected</SubmitButton>
-                <select className="select input-sm" name="reason" style={{ maxWidth: 220 }} data-testid="bulk-reason">
+                <select className="select input-sm select-reason" name="reason" data-testid="bulk-reason">
                   <option value="Customer requested cancellation">Customer requested</option>
                   <option value="Customer unreachable / phone switched off">Phone unreachable / switched off</option>
                   <option value="Customer refused advance delivery charge">Refused advance fee</option>
@@ -130,17 +130,17 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
               {list.rows.map((o) => (
                 <div key={o.id} className="list-card" data-testid="order-row">
                   <div className="top">
-                    {canEdit && <input type="checkbox" name="ids" value={o.id} aria-label={`Select ${o.orderNumber}`} style={{ width: 20, height: 20 }} />}
-                    <Link href={`/orders/${o.id}`} prefetch={false} style={{ flex: 1, display: "flex", alignItems: "center", minHeight: 40, gap: 8 }}><b>{o.orderNumber}</b> <span className="muted" style={{ fontSize: 12.5 }}>{friendlyDate(o.createdAt)}</span></Link>
+                    {canEdit && <input type="checkbox" name="ids" value={o.id} aria-label={`Select ${o.orderNumber}`} className="pick-checkbox-mobile" />}
+                    <Link href={`/orders/${o.id}`} prefetch={false} className="flex-1 row gap-md"><b>{o.orderNumber}</b> <span className="muted text-xs">{friendlyDate(o.createdAt)}</span></Link>
                     <span className="num">{taka(o.totalAmount)}</span>
                   </div>
                   <Link href={`/orders/${o.id}`} prefetch={false}>
-                    <div style={{ marginTop: 4 }}>{o.customerName}</div>
-                    <div className="muted" style={{ fontSize: 13 }}>{o.area}, {o.district} · {o.itemCount} {o.itemCount === 1 ? "item" : "items"}</div>
-                    <div className="row" style={{ marginTop: 8, flexWrap: "wrap", gap: 6 }}><PaymentPill method={o.paymentMethod} status={o.paymentStatus} /><OrderPill status={o.status} /><RiskPill o={o} />{o.tags.map((t) => <span key={t} className="pill grey" data-testid="order-tag">{t}</span>)}</div>
+                    <div className="mt-xs">{o.customerName}</div>
+                    <div className="muted text-sm">{o.area}, {o.district} · {o.itemCount} {o.itemCount === 1 ? "item" : "items"}</div>
+                    <div className="row gap-sm flex-wrap mt-sm"><PaymentPill method={o.paymentMethod} status={o.paymentStatus} /><OrderPill status={o.status} /><RiskPill o={o} />{o.tags.map((t) => <span key={t} className="pill grey" data-testid="order-tag">{t}</span>)}</div>
                   </Link>
-                  <div className="row" style={{ marginTop: 10, gap: 8 }}>
-                    {o.paymentStatus === "PENDING_VERIFICATION" && canEdit && <Link href={`/orders/${o.id}`} className="btn btn-primary btn-sm" style={{ flex: 1 }} prefetch={false}>Verify payment</Link>}
+                  <div className="row gap-md mt-sm">
+                    {o.paymentStatus === "PENDING_VERIFICATION" && canEdit && <Link href={`/orders/${o.id}`} className="btn btn-primary btn-sm flex-1" prefetch={false}>Verify payment</Link>}
                     <QuickViewButton id={o.id} label={o.orderNumber} />
                   </div>
                 </div>
@@ -149,17 +149,17 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
 
             <table className="table only-desktop" data-testid="orders-table">
               <thead><tr>{canEdit && (
-                    <th style={{ width: 36 }}>
+                    <th className="col-checkbox">
                       <SelectAllCheckbox label="Select all orders" />
                     </th>
                   )}<th>Order</th><th>Date</th><th>Customer</th><th>Payment</th><th>Fulfilment</th><th>Source</th><th className="r">Total</th></tr></thead>
               <tbody>
                 {list.rows.map((o) => (
                   <tr key={o.id} data-testid="order-row">
-                    {canEdit && <td><input type="checkbox" name="ids" value={o.id} aria-label={`Select ${o.orderNumber}`} style={{ width: 18, height: 18 }} /></td>}
-                    <td><Link href={`/orders/${o.id}`} className="link" prefetch={false}>{o.orderNumber}</Link>{o.priority && <span className="pill info" style={{ marginLeft: 6 }} data-testid="priority">Priority</span>}<div><QuickViewButton id={o.id} label={o.orderNumber} /></div></td>
+                    {canEdit && <td><input type="checkbox" name="ids" value={o.id} aria-label={`Select ${o.orderNumber}`} className="pick-checkbox" /></td>}
+                    <td><Link href={`/orders/${o.id}`} className="link" prefetch={false}>{o.orderNumber}</Link>{o.priority && <span className="pill info ml-xs" data-testid="priority">Priority</span>}<div><QuickViewButton id={o.id} label={o.orderNumber} /></div></td>
                     <td className="muted">{friendlyDate(o.createdAt)}</td>
-                    <td><div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}><span>{o.customerName}</span><RiskPill o={o} /></div><div className="muted" style={{ fontSize: 12.5 }}>{o.area}, {o.district} · {o.itemCount} {o.itemCount === 1 ? "item" : "items"} · {prettyPhone(o.customerPhone)}</div>{o.tags.length > 0 && <div className="row" style={{ marginTop: 4, gap: 4 }}>{o.tags.map((t) => <span key={t} className="pill grey" data-testid="order-tag">{t}</span>)}</div>}</td>
+                    <td><div className="row gap-sm flex-wrap"><span>{o.customerName}</span><RiskPill o={o} /></div><div className="muted text-xs">{o.area}, {o.district} · {o.itemCount} {o.itemCount === 1 ? "item" : "items"} · {prettyPhone(o.customerPhone)}</div>{o.tags.length > 0 && <div className="row gap-xs mt-xs">{o.tags.map((t) => <span key={t} className="pill grey" data-testid="order-tag">{t}</span>)}</div>}</td>
                     <td><PaymentPill method={o.paymentMethod} status={o.paymentStatus} /></td>
                     <td><OrderPill status={o.status} /></td>
                     <td className="muted">{CHANNEL[o.channel] ?? o.channel}</td>
