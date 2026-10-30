@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { PageHeader } from "@biztrackbd/ui";
 import { renderCode128Svg } from "@biztrackbd/core/barcode-render";
 import { taka } from "@/lib/format";
 import {
@@ -215,20 +216,15 @@ export function BarcodeLabelStudioClient({ initialItems, storeName }: Props) {
 
       {/* Screen Interface */}
       <div className="no-print">
-        <div className="page-head">
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <Link href="/products" className="btn btn-secondary btn-sm">
-                ← Products
-              </Link>
-              <h1>Barcode Label Studio</h1>
-              <span className="pill green">Direct Thermal & A4</span>
-            </div>
-            <p className="page-sub">
-              Select products, customize sticker layout, and print standard barcode labels for clothing hangtags, boxes, and shelf edges.
-            </p>
-          </div>
-          <div className="actions">
+        <PageHeader
+          title="Barcode Label Studio"
+          crumbs={[
+            { label: "Products", href: "/products" },
+            { label: "Barcode Label Studio" },
+          ]}
+          badge={<span className="pill green">Direct Thermal & A4</span>}
+          description="Select products, customize sticker layout, and print standard barcode labels for clothing hangtags, boxes, and shelf edges."
+          actions={
             <button
               type="button"
               className="btn btn-primary"
@@ -237,8 +233,8 @@ export function BarcodeLabelStudioClient({ initialItems, storeName }: Props) {
             >
               Print {totalSelectedLabels > 0 ? `${totalSelectedLabels} Labels` : "Labels"}
             </button>
-          </div>
-        </div>
+          }
+        />
 
         {statusMessage && (
           <div className="notice good" style={{ marginBottom: 16 }}>

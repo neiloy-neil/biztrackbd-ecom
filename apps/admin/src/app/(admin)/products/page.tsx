@@ -5,6 +5,7 @@ import { BulkBar } from "@/components/bulk";
 import { LiveSearch, SelectFilter } from "@/components/live-filters";
 import { PlusIcon } from "@/components/icons";
 import { Pager, SubmitButton, Tabs } from "@/components/ui";
+import { PageHeader } from "@biztrackbd/ui";
 import { taka } from "@/lib/format";
 import { one, pageOf, qs } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
@@ -46,15 +47,18 @@ export default async function Products({ searchParams }: { searchParams: Promise
 
   return (
     <>
-      <div className="page-head">
-        <h1>Products</h1>
-        <div className="actions">
-          <Link href="/products/barcodes" className="btn btn-secondary" prefetch={false}>Barcode Labels</Link>
-          <Link href="/inventory" className="btn btn-secondary" prefetch={false}>Inventory</Link>
-          {canEdit && <Link href="/products/import" className="btn btn-secondary" prefetch={false} data-testid="import-csv">Import CSV</Link>}
-          {canEdit && <Link href="/products/new" className="btn btn-primary" prefetch={false} data-testid="add-product"><PlusIcon width={18} height={18} /> Add product</Link>}
-        </div>
-      </div>
+      <PageHeader
+        title="Products"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Products" }]}
+        actions={
+          <>
+            <Link href="/products/barcodes" className="btn btn-secondary" prefetch={false}>Barcode Labels</Link>
+            <Link href="/inventory" className="btn btn-secondary" prefetch={false}>Inventory</Link>
+            {canEdit && <Link href="/products/import" className="btn btn-secondary" prefetch={false} data-testid="import-csv">Import CSV</Link>}
+            {canEdit && <Link href="/products/new" className="btn btn-primary" prefetch={false} data-testid="add-product"><PlusIcon width={18} height={18} /> Add product</Link>}
+          </>
+        }
+      />
 
       {done && <div className="notice good" role="status" style={{ marginBottom: 12 }} data-testid="bulk-msg">{done[2]} {Number(done[2]) === 1 ? "product" : "products"} {VERBS[done[1]!]}.{Number(done[3]) ? ` ${done[3]} skipped (already ${done[1] === "publish" ? "active" : "that way"}).` : ""}</div>}
       {msg === "none" && <div className="notice" role="status" style={{ marginBottom: 12 }}>Select at least one product first.</div>}

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { PageHeader } from "@biztrackbd/ui";
 import { dateOnly, taka, prettyPhone } from "@/lib/format";
 import {
   approveApplicationAction,
@@ -205,23 +206,24 @@ export function WholesaleManagerClient({ initialData, registerUrl }: Props) {
 
   return (
     <div className="stack" style={{ gap: 20 }}>
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700 }}>Wholesale & B2B Hub</h1>
-          <p className="muted" style={{ margin: "4px 0 0", fontSize: 14 }}>
-            Manage reseller tiers, bulk volume quantity breaks, applications, and direct bank settlement.
-          </p>
-        </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <Link href="/orders?channel=WHOLESALE" className="btn btn-secondary btn-sm" prefetch={false}>
-            Wholesale Orders →
-          </Link>
-          <a href={registerUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm">
-            Preview Reseller Portal ↗
-          </a>
-        </div>
-      </div>
+      <PageHeader
+        title="Wholesale & B2B Hub"
+        crumbs={[
+          { label: "Products", href: "/products" },
+          { label: "Wholesale & B2B" },
+        ]}
+        description="Manage reseller tiers, bulk volume quantity breaks, applications, and direct bank settlement."
+        actions={
+          <>
+            <Link href="/orders?channel=WHOLESALE" className="btn btn-secondary btn-sm" prefetch={false}>
+              Wholesale Orders →
+            </Link>
+            <a href={registerUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm">
+              Preview Reseller Portal ↗
+            </a>
+          </>
+        }
+      />
 
       {/* KPI Cards */}
       <div className="grid grid-4" style={{ gap: 14 }}>

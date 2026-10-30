@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { can, listStockAlerts } from "@biztrackbd/core";
+import { PageHeader } from "@biztrackbd/ui";
 import { SubmitButton } from "@/components/ui";
 import { friendlyDate } from "@/lib/format";
 import { one } from "@/lib/query";
@@ -18,9 +18,14 @@ export default async function StockAlerts({ searchParams }: { searchParams: Prom
   const total = rows.reduce((n, r) => n + r.waiting, 0);
   return (
     <>
-      <Link href="/inventory" className="back" prefetch={false}>← Inventory</Link>
-      <div className="page-head"><h1>Back in stock requests</h1></div>
-      <p className="page-sub">Shoppers who left their number on a sold-out item. When you add stock, each one gets one SMS (it uses one SMS credit). A small restock tells the longest-waiting first, so a few units are not announced to hundreds.</p>
+      <PageHeader
+        title="Back in stock requests"
+        crumbs={[
+          { label: "Inventory", href: "/inventory" },
+          { label: "Back in stock requests" },
+        ]}
+        description="Shoppers who left their number on a sold-out item. When you add stock, each one gets one SMS (it uses one SMS credit). A small restock tells the longest-waiting first, so a few units are not announced to hundreds."
+      />
       {one(sp.cleared) && <div className="notice good" role="status" style={{ marginBottom: 12 }}>Cleared.</div>}
       {one(sp.err) && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{one(sp.err)}</div>}
       <div className="stats" style={{ marginBottom: 14 }}>

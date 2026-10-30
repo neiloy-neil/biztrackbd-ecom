@@ -18,6 +18,7 @@ export {
   MetricGrid,
   FilterToolbar,
   type Crumb,
+  type PageHeaderProps,
   type KpiData,
   type NavItem,
   type LinkAs,

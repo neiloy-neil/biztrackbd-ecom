@@ -5,8 +5,19 @@ export type LinkAs = ElementType;
 
 export interface Crumb { label: string; href?: string }
 
+export interface PageHeaderProps {
+  title: ReactNode;
+  sub?: ReactNode;
+  description?: ReactNode;
+  badge?: ReactNode;
+  crumbs?: Crumb[];
+  actions?: ReactNode;
+  linkAs?: LinkAs;
+}
+
 /** Title, optional breadcrumbs, subtitle and action buttons. Every page starts with one. */
-export function PageHeader({ title, sub, crumbs, actions, linkAs: L = "a" }: { title: ReactNode; sub?: ReactNode; crumbs?: Crumb[]; actions?: ReactNode; linkAs?: LinkAs }) {
+export function PageHeader({ title, sub, description, badge, crumbs, actions, linkAs: L = "a" }: PageHeaderProps) {
+  const subtitle = sub ?? description;
   return (
     <header className="ph">
       {crumbs && crumbs.length > 0 && (
@@ -20,8 +31,18 @@ export function PageHeader({ title, sub, crumbs, actions, linkAs: L = "a" }: { t
         </nav>
       )}
       <div className="ph-row">
-        <div className="ph-title"><h1>{title}</h1>{sub && <p>{sub}</p>}</div>
-        {actions && <div className="ph-actions">{actions}</div>}
+        <div className="ph-title">
+          {badge ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <h1>{title}</h1>
+              {badge}
+            </div>
+          ) : (
+            <h1>{title}</h1>
+          )}
+          {subtitle && <p>{subtitle}</p>}
+        </div>
+        {actions ? <div className="ph-actions">{actions}</div> : null}
       </div>
     </header>
   );

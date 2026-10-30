@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IMPORT_MAX_ROWS } from "@biztrackbd/core";
+import { PageHeader } from "@biztrackbd/ui";
 import { requireAccess } from "@/lib/session";
 import { ImportForm } from "./import-form";
 
@@ -11,10 +12,14 @@ export default async function ImportProducts() {
   await requireAccess("products");
   return (
     <>
-      <div className="page-head">
-        <h1>Import products</h1>
-        <div className="actions"><Link href="/products" className="btn btn-secondary" prefetch={false}>Back to products</Link></div>
-      </div>
+      <PageHeader
+        title="Import products"
+        crumbs={[
+          { label: "Products", href: "/products" },
+          { label: "Import" },
+        ]}
+        actions={<Link href="/products" className="btn btn-secondary" prefetch={false}>Back to products</Link>}
+      />
       <div className="card" style={{ maxWidth: 740 }}>
         <p style={{ margin: "0 0 14px", fontSize: 14.5, lineHeight: 1.6 }}>
           Import your catalog in one click. We automatically detect <b>Shopify (products_export.csv)</b>, <b>WooCommerce</b>, and <b>BizTrackBD CSV</b> files, preserving multi-variant options (Size/Color) and external photo URLs.

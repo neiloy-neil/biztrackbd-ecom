@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { listCategoriesAdmin } from "@biztrackbd/core";
+import { PageHeader } from "@biztrackbd/ui";
 import { requireAccess } from "@/lib/session";
 import { ProductEditor, type EditorProduct } from "../editor";
 
@@ -18,8 +18,13 @@ export default async function NewProduct() {
   const categories = await listCategoriesAdmin(s.tenantId, s.actor);
   return (
     <>
-      <Link href="/products" className="back" prefetch={false}>← Products</Link>
-      <div className="page-head"><h1>Add product</h1></div>
+      <PageHeader
+        title="Add product"
+        crumbs={[
+          { label: "Products", href: "/products" },
+          { label: "Add product" },
+        ]}
+      />
       <ProductEditor initial={EMPTY} categories={categories.map((c) => ({ id: c.id, name: c.name, parentId: c.parentId }))} canPublish />
     </>
   );

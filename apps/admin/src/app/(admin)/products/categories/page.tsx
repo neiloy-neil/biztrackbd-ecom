@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { can, listCategoriesAdmin } from "@biztrackbd/core";
+import { PageHeader } from "@biztrackbd/ui";
 import { SubmitButton } from "@/components/ui";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
@@ -24,12 +25,15 @@ export default async function Categories({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <Link href="/products" className="back" prefetch={false}>← Products</Link>
-      <div className="page-head">
-        <h1>Categories</h1>
-        <div className="actions">{canEdit && <Link href="/products/categories?new=1" className="btn btn-primary" prefetch={false} data-testid="new-category">Add a category</Link>}</div>
-      </div>
-      <p className="page-sub">Group your products so customers can find them. A category can have sub-categories one level deep: the shop page of a category also shows the products in its sub-categories.</p>
+      <PageHeader
+        title="Categories"
+        crumbs={[
+          { label: "Products", href: "/products" },
+          { label: "Categories" },
+        ]}
+        description="Group your products so customers can find them. A category can have sub-categories one level deep: the shop page of a category also shows the products in its sub-categories."
+        actions={canEdit ? <Link href="/products/categories?new=1" className="btn btn-primary" prefetch={false} data-testid="new-category">Add a category</Link> : undefined}
+      />
       {one(sp.saved) && <div className="notice good" role="status" style={{ marginBottom: 12 }} data-testid="category-saved">Category saved.</div>}
       {one(sp.deleted) && <div className="notice good" role="status" style={{ marginBottom: 12 }}>Category deleted. Its products are kept, without a category.</div>}
       {err && <div className="notice bad" role="alert" style={{ marginBottom: 12 }} data-testid="category-error">{err}</div>}

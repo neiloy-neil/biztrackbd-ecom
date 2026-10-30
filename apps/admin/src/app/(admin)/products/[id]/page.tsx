@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProductForEdit, listCategoriesAdmin } from "@biztrackbd/core";
+import { PageHeader } from "@biztrackbd/ui";
 import { SubmitButton } from "@/components/ui";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
@@ -37,12 +37,19 @@ export default async function EditProduct({ params, searchParams }: { params: Pr
   };
   return (
     <>
-      <Link href="/products" className="back" prefetch={false}>← Products</Link>
-      <div className="page-head">
-        <h1>{p.title}</h1>
-        <span className={`pill ${p.status === "ACTIVE" ? "ok" : "grey"}`}>{p.status === "ACTIVE" ? "Active" : "Draft"}</span>
-        <div className="actions"><a className="btn btn-secondary btn-sm" href={`${storefrontOrigin(s.tenantSubdomain)}/products/${p.slug}`} target="_blank" rel="noopener noreferrer">View on store</a></div>
-      </div>
+      <PageHeader
+        title={p.title}
+        crumbs={[
+          { label: "Products", href: "/products" },
+          { label: p.title },
+        ]}
+        badge={<span className={`pill ${p.status === "ACTIVE" ? "ok" : "grey"}`}>{p.status === "ACTIVE" ? "Active" : "Draft"}</span>}
+        actions={
+          <a className="btn btn-secondary btn-sm" href={`${storefrontOrigin(s.tenantSubdomain)}/products/${p.slug}`} target="_blank" rel="noopener noreferrer">
+            View on store
+          </a>
+        }
+      />
       {one(sp.saved) && <div className="notice good" role="status" style={{ marginBottom: 14 }} data-testid="saved">Saved.</div>}
       <ProductEditor key={`${p.id}-${one(sp.saved) ?? ""}`} initial={initial} categories={categories.map((c) => ({ id: c.id, name: c.name, parentId: c.parentId }))} canPublish />
       <section className="card" style={{ marginTop: 14 }}>

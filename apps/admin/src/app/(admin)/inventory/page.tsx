@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { can, listInventory, type InventoryRow, type StockFilter } from "@biztrackbd/core";
+import { PageHeader } from "@biztrackbd/ui";
 import { LiveSearch, SelectFilter } from "@/components/live-filters";
 import { Pager, SubmitButton, Tabs } from "@/components/ui";
 import { taka } from "@/lib/format";
@@ -10,7 +11,6 @@ import { InventoryMobileCard, InventoryTableRow } from "./inline-stepper";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Inventory" };
-
 
 function StatePill({ r }: { r: InventoryRow }) {
   return <span className={`pill ${r.state === "out" ? "bad" : r.state === "low" ? "warn" : "grey"}`}>{r.state === "out" ? "Out" : r.state === "low" ? "Low" : "OK"}</span>;
@@ -32,7 +32,16 @@ export default async function Inventory({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <div className="page-head"><h1>Inventory</h1><div className="actions"><Link href="/inventory/alerts" className="btn btn-secondary" prefetch={false} data-testid="open-alerts">Back in stock requests</Link><Link href="/products" className="btn btn-secondary" prefetch={false}>Products</Link></div></div>
+      <PageHeader
+        title="Inventory"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Inventory" }]}
+        actions={
+          <>
+            <Link href="/inventory/alerts" className="btn btn-secondary" prefetch={false} data-testid="open-alerts">Back in stock requests</Link>
+            <Link href="/products" className="btn btn-secondary" prefetch={false}>Products</Link>
+          </>
+        }
+      />
       <div className="grid grid-4" style={{ marginBottom: 14 }}>
         <div className="stat"><div className="k">Units in stock</div><div className="v num">{list.summary.unitsInStock.toLocaleString("en-IN")}</div></div>
         {showValue ? <div className="stat"><div className="k">Stock value (at cost)</div><div className="v num">{taka(list.summary.stockValueAtCost)}</div></div> : <div className="stat"><div className="k">Variants</div><div className="v num">{list.total}</div></div>}
