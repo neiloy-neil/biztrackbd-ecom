@@ -12,6 +12,7 @@ import {
   type ReconRow,
 } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
+import { PageHeader } from "@biztrackbd/ui";
 import { dateOnly, taka } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
@@ -220,23 +221,20 @@ export default async function CodRecon({
 
   return (
     <>
-      <div className="page-head">
-        <div>
-          <h1>COD Reconciliation & Treasury</h1>
-          <p className="page-sub" style={{ marginTop: 4 }}>
-            Auto-match courier payouts, resolve remittance variances, verify bank deposits, and track return logistics losses.
-          </p>
-        </div>
-        {can(s.user.role, "orders", "edit") && (
-          <div className="actions">
+      <PageHeader
+        title="COD Reconciliation & Treasury"
+        crumbs={[{ label: "Finance", href: "/finance/cod" }, { label: "COD Reconciliation" }]}
+        sub="Auto-match courier payouts, resolve remittance variances, verify bank deposits, and track return logistics losses."
+        actions={
+          can(s.user.role, "orders", "edit") ? (
             <form action={syncNowAction}>
               <SubmitButton className="btn btn-secondary" pending="Checking couriers…">
                 Sync couriers now
               </SubmitButton>
             </form>
-          </div>
-        )}
-      </div>
+          ) : undefined
+        }
+      />
 
       {err && (
         <div className="notice bad" role="alert" style={{ marginBottom: 12 }} data-testid="cod-error">

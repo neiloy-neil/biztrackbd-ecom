@@ -6,6 +6,7 @@ import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { DateRangeFilter } from "../components/date-range-filter";
 import { ReportTabs } from "../components/report-tabs";
+import { PageHeader } from "@biztrackbd/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Customers & Cohorts | Reports" };
@@ -29,14 +30,11 @@ export default async function CustomerReportsPage({
 
   return (
     <>
-      <div className="page-head">
-        <div>
-          <h1 style={{ margin: 0 }}>Customer & Cohort Analytics</h1>
-          <p className="page-sub" style={{ margin: "4px 0 0" }}>
-            Measure first-time vs repeat buyer dynamics, customer lifetime value (LTV), and VIP retention cohorts.
-          </p>
-        </div>
-        <div className="actions">
+      <PageHeader
+        title="Customer & Cohort Analytics"
+        crumbs={[{ label: "Reports", href: "/reports" }, { label: "Customers" }]}
+        sub="Measure first-time vs repeat buyer dynamics, customer lifetime value (LTV), and VIP retention cohorts."
+        actions={
           <a
             className="btn btn-secondary"
             href={`/reports/customers/export?from=${r.range.from}&to=${r.range.to}`}
@@ -44,8 +42,8 @@ export default async function CustomerReportsPage({
           >
             Export Customers CSV
           </a>
-        </div>
-      </div>
+        }
+      />
 
       <ReportTabs currentTab="customers" queryString={queryString} />
 

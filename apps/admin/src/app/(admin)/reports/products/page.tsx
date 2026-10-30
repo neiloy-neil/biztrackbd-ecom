@@ -6,6 +6,7 @@ import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { DateRangeFilter } from "../components/date-range-filter";
 import { ReportTabs } from "../components/report-tabs";
+import { PageHeader } from "@biztrackbd/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Products & Stock Velocity | Reports" };
@@ -30,14 +31,11 @@ export default async function ProductReportsPage({
 
   return (
     <>
-      <div className="page-head">
-        <div>
-          <h1 style={{ margin: 0 }}>Products & Stock Velocity</h1>
-          <p className="page-sub" style={{ margin: "4px 0 0" }}>
-            Identify top revenue drivers, stockout risks, profit margins, and dead stock.
-          </p>
-        </div>
-        <div className="actions">
+      <PageHeader
+        title="Products & Stock Velocity"
+        crumbs={[{ label: "Reports", href: "/reports" }, { label: "Products" }]}
+        sub="Identify top revenue drivers, stockout risks, profit margins, and dead stock."
+        actions={
           <a
             className="btn btn-secondary"
             href={`/reports/products/export?from=${r.range.from}&to=${r.range.to}`}
@@ -45,8 +43,8 @@ export default async function ProductReportsPage({
           >
             Export Products CSV
           </a>
-        </div>
-      </div>
+        }
+      />
 
       <ReportTabs currentTab="products" queryString={queryString} />
 

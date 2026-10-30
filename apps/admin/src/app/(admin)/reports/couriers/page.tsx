@@ -6,6 +6,7 @@ import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { DateRangeFilter } from "../components/date-range-filter";
 import { ReportTabs } from "../components/report-tabs";
+import { PageHeader } from "@biztrackbd/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Couriers & Delivery | Reports" };
@@ -29,14 +30,11 @@ export default async function CourierReportsPage({
 
   return (
     <>
-      <div className="page-head">
-        <div>
-          <h1 style={{ margin: 0 }}>Courier & Delivery Performance</h1>
-          <p className="page-sub" style={{ margin: "4px 0 0" }}>
-            Benchmark courier delivery success rates, return-to-origin (RTO) losses, and district turnaround times.
-          </p>
-        </div>
-        <div className="actions">
+      <PageHeader
+        title="Courier & Delivery Performance"
+        crumbs={[{ label: "Reports", href: "/reports" }, { label: "Couriers" }]}
+        sub="Benchmark courier delivery success rates, return-to-origin (RTO) losses, and district turnaround times."
+        actions={
           <a
             className="btn btn-secondary"
             href={`/reports/couriers/export?from=${r.range.from}&to=${r.range.to}`}
@@ -44,8 +42,8 @@ export default async function CourierReportsPage({
           >
             Export Couriers CSV
           </a>
-        </div>
-      </div>
+        }
+      />
 
       <ReportTabs currentTab="couriers" queryString={queryString} />
 

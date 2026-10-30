@@ -6,6 +6,7 @@ import { requireAccess } from "@/lib/session";
 import { methodName } from "@/lib/status";
 import { DateRangeFilter } from "./components/date-range-filter";
 import { ReportTabs } from "./components/report-tabs";
+import { PageHeader } from "@biztrackbd/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Overview & Sales | Reports" };
@@ -52,14 +53,11 @@ export default async function ReportsPage({
 
   return (
     <>
-      <div className="page-head">
-        <div>
-          <h1 style={{ margin: 0 }}>Reports & Analytics</h1>
-          <p className="page-sub" style={{ margin: "4px 0 0" }}>
-            Real-time business performance, fulfillment analytics, and cohort retention.
-          </p>
-        </div>
-        <div className="actions">
+      <PageHeader
+        title="Reports & Analytics"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Reports" }]}
+        sub="Real-time business performance, fulfillment analytics, and cohort retention."
+        actions={
           <a
             className="btn btn-secondary"
             href={`/reports/export?from=${r.from}&to=${r.to}`}
@@ -67,8 +65,8 @@ export default async function ReportsPage({
           >
             Export Sales CSV
           </a>
-        </div>
-      </div>
+        }
+      />
 
       <ReportTabs currentTab="sales" queryString={queryString} />
 

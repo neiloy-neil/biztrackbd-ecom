@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getRealtimeStudioMetrics } from "@biztrackbd/core";
 import { requireAccess } from "@/lib/session";
 import { ReportTabs } from "../components/report-tabs";
+import { PageHeader } from "@biztrackbd/ui";
 import { RealtimeStudioClient } from "./realtime-client";
 
 export const dynamic = "force-dynamic";
@@ -16,41 +17,12 @@ export default async function RealtimeStudioPage() {
 
   return (
     <>
-      <div className="page-head">
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-            <h1 style={{ margin: 0 }}>⚡ Real-Time Performance Studio</h1>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "3px 10px",
-                borderRadius: 999,
-                fontSize: "12px",
-                fontWeight: 700,
-                background: "var(--success-bg)",
-                color: "var(--success)",
-                border: "1px solid color-mix(in srgb, var(--success) 30%, transparent)",
-              }}
-            >
-              <span
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  backgroundColor: "var(--success)",
-                  boxShadow: "0 0 0 3px color-mix(in srgb, var(--success) 25%, transparent)",
-                }}
-              />
-              LIVE ANALYTICS
-            </span>
-          </div>
-          <p className="page-sub" style={{ margin: "4px 0 0" }}>
-            Sub-second sales velocity curves, 5-stage conversion drop-off funnel, and customer cohort retention.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Real-Time Performance Studio"
+        crumbs={[{ label: "Reports", href: "/reports" }, { label: "Realtime" }]}
+        badge={<span className="pill ok">Live Analytics</span>}
+        sub="Sub-second sales velocity curves, 5-stage conversion drop-off funnel, and customer cohort retention."
+      />
 
       <ReportTabs currentTab="realtime" />
 

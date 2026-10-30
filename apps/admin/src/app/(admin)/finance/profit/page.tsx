@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { EXPENSE_CATEGORIES, EXPENSE_LABELS, addDays, can, dhakaDate, getProfitReport, lastDays, listExpenses } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
+import { PageHeader } from "@biztrackbd/ui";
 import { dateOnly, taka } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
@@ -36,8 +37,11 @@ export default async function Profit({ searchParams }: { searchParams: Promise<R
 
   return (
     <>
-      <div className="page-head"><h1>Profit and loss</h1></div>
-      <p className="page-sub">{label(r.from)} to {label(r.to)} · parcels delivered in this period</p>
+      <PageHeader
+        title="Profit and Loss"
+        crumbs={[{ label: "Finance", href: "/finance/cod" }, { label: "Profit & Loss" }]}
+        sub={`${label(r.from)} to ${label(r.to)} · parcels delivered in this period`}
+      />
       <nav className="tabs" aria-label="Period">
         {RANGES.map(([k, l]) => <Link key={k} href={`/finance/profit?range=${k}`} aria-current={k === key ? "page" : undefined} prefetch={false}>{l}</Link>)}
       </nav>
