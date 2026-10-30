@@ -9,6 +9,11 @@ type Params = { slug: string };
 
 export const revalidate = 300;
 
+// Nothing is built ahead of time, but returning a list lets each guide be cached after its first visit and refreshed every 5 minutes.
+export function generateStaticParams(): Params[] {
+  return [];
+}
+
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params;
   const post = await getBlogPost(slug);

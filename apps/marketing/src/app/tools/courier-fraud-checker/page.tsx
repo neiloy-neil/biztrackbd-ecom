@@ -4,6 +4,9 @@ import { FraudCheckerTool } from "./fraud-checker-tool";
 import { getRemainingDailyChecks } from "./actions";
 import { demoAdminUrl } from "@/lib/demo-admin";
 
+// Shows how many free checks this visitor has left today, which depends on the request, so it must never be cached.
+export const dynamic = "force-dynamic";
+
 const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
 
 export const metadata: Metadata = {

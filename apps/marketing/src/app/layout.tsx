@@ -14,7 +14,9 @@ import { getPlatformSeoConfig, getPlatformSiteVerificationCode } from "@biztrack
 
 const siteUrl = process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002";
 
-export const dynamic = "force-dynamic";
+// Pages are cached and rebuilt in the background every 5 minutes, so SEO and contact settings saved in Platform Admin show up within that
+// time. Pages that read the request (search parameters) or set their own force-dynamic stay dynamic.
+export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   const seoConfig = await getPlatformSeoConfig().catch(() => ({
