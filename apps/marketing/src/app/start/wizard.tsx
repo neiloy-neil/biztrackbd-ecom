@@ -189,8 +189,17 @@ export function Wizard({
   const [eventId] = useState(() => generateTrackingEventId("reg"));
   const [attr, setAttr] = useState(() => getAttributionForPayload());
 
+  const [sessionId, setSessionId] = useState("");
+
   useEffect(() => {
     setAttr(getAttributionForPayload());
+    if (typeof window !== "undefined") {
+      const sid =
+        window.sessionStorage.getItem("bt_native_session_v1") ||
+        (document.cookie.match(/bt_native_session_v1=([^;]+)/) || [])[1] ||
+        "";
+      setSessionId(sid);
+    }
   }, []);
   const [v, setV] = useState({
     storeName: "",
@@ -373,6 +382,7 @@ export function Wizard({
           {keepCode && <input type="hidden" name="from" value={keepCode} />}
 
           {/* Attribution & Meta CAPI Deduplication fields */}
+          <input type="hidden" name="sessionId" value={sessionId} />
           <input type="hidden" name="eventId" value={eventId} />
           <input type="hidden" name="utmSource" value={attr.utmSource || ""} />
           <input type="hidden" name="utmMedium" value={attr.utmMedium || ""} />

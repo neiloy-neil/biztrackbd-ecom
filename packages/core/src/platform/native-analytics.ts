@@ -61,6 +61,10 @@ export async function recordVisitorSession(data: VisitorSessionPayload): Promise
       },
     });
   } else {
+    const utmSource = data.utmSource ? data.utmSource.slice(0, 150) : (data.fbclid || data.fbc ? "meta" : null);
+    const utmMedium = data.utmMedium ? data.utmMedium.slice(0, 150) : (data.fbclid || data.fbc ? "paid_social" : null);
+    const utmCampaign = data.utmCampaign ? data.utmCampaign.slice(0, 200) : (data.fbclid || data.fbc ? "Meta Ads (Untagged)" : null);
+
     await db.platformVisitorSession.create({
       data: {
         id: data.sessionId,
@@ -69,9 +73,9 @@ export async function recordVisitorSession(data: VisitorSessionPayload): Promise
         fbclid: data.fbclid ? data.fbclid.slice(0, 500) : null,
         fbp: data.fbp ? data.fbp.slice(0, 100) : null,
         fbc: data.fbc ? data.fbc.slice(0, 500) : null,
-        utmSource: data.utmSource ? data.utmSource.slice(0, 150) : null,
-        utmMedium: data.utmMedium ? data.utmMedium.slice(0, 150) : null,
-        utmCampaign: data.utmCampaign ? data.utmCampaign.slice(0, 200) : null,
+        utmSource,
+        utmMedium,
+        utmCampaign,
         utmContent: data.utmContent ? data.utmContent.slice(0, 200) : null,
         utmTerm: data.utmTerm ? data.utmTerm.slice(0, 200) : null,
         device: data.device || "desktop",
@@ -182,14 +186,96 @@ export async function recordClientError(data: ClientErrorPayload): Promise<void>
   }
 }
 
+export interface ConversionMeta {
+  tenantId?: string | null;
+  ip?: string | null;
+  fbp?: string | null;
+  fbc?: string | null;
+  utmCampaign?: string | null;
+  utmSource?: string | null;
+}
+
 /** Flag a session as converted when user signs up */
-export async function markSessionConverted(sessionId: string): Promise<void> {
-  if (!sessionId) return;
-  const db = getBasePrisma();
-  await db.platformVisitorSession.updateMany({
-    where: { id: sessionId },
-    data: { convertedToSignup: true },
-  }).catch(() => undefined);
+export async function markSessionConverted(
+  sessionId?: string | null,
+  meta?: ConversionMeta,
+): Promise<boolean> {
+  const db = getPlatformPrisma();
+  const cleanSid = sessionId?.trim();
+
+  // 1. Try marking by explicit sessionId if provided
+  if (cleanSid) {
+    const updated = await db.platformVisitorSession.updateMany({
+      where: { id: cleanSid },
+      data: { convertedToSignup: true },
+    }).catch(() => ({ count: 0 }));
+    if (updated.count > 0) return true;
+  }
+
+  // 2. Fallback: match by fbc or fbp (exact Meta click / browser identifiers)
+  if (meta?.fbc || meta?.fbp) {
+    const orCond: { fbc?: string; fbp?: string }[] = [];
+    if (meta.fbc) orCond.push({ fbc: meta.fbc });
+    if (meta.fbp) orCond.push({ fbp: meta.fbp });
+
+    const match = await db.platformVisitorSession.findFirst({
+      where: {
+        OR: orCond,
+        startedAt: { gte: new Date(Date.now() - 24 * 3600_000) },
+      },
+      orderBy: { startedAt: "desc" },
+      select: { id: true },
+    });
+    if (match) {
+      await db.platformVisitorSession.update({
+        where: { id: match.id },
+        data: { convertedToSignup: true },
+      });
+      return true;
+    }
+  }
+
+  // 3. Fallback: match by IP address + utmCampaign within recent 3 hours
+  if (meta?.ip && meta?.ip !== "local") {
+    const match = await db.platformVisitorSession.findFirst({
+      where: {
+        ipAddress: meta.ip,
+        ...(meta.utmCampaign ? { utmCampaign: meta.utmCampaign } : {}),
+        startedAt: { gte: new Date(Date.now() - 3 * 3600_000) },
+      },
+      orderBy: { startedAt: "desc" },
+      select: { id: true },
+    });
+    if (match) {
+      await db.platformVisitorSession.update({
+        where: { id: match.id },
+        data: { convertedToSignup: true },
+      });
+      return true;
+    }
+  }
+
+  // 4. Fallback: match most recent session on /start or matching campaign within the last 30 minutes
+  if (meta?.utmCampaign) {
+    const match = await db.platformVisitorSession.findFirst({
+      where: {
+        utmCampaign: meta.utmCampaign,
+        convertedToSignup: false,
+        startedAt: { gte: new Date(Date.now() - 30 * 60_000) },
+      },
+      orderBy: { startedAt: "desc" },
+      select: { id: true },
+    });
+    if (match) {
+      await db.platformVisitorSession.update({
+        where: { id: match.id },
+        data: { convertedToSignup: true },
+      });
+      return true;
+    }
+  }
+
+  return false;
 }
 
 // ---- Query functions for Platform Admin (/analytics) ----------------------------------------------------
@@ -249,7 +335,8 @@ export async function getAnalyticsDashboardData(): Promise<{
     totalVisitors,
     totalPageviews,
     fbAdVisitors,
-    totalSignups,
+    convertedSessionCount,
+    actualRealTenantsCount,
     activeErrors,
     campaignRows,
     recentSessions,
@@ -265,6 +352,7 @@ export async function getAnalyticsDashboardData(): Promise<{
       },
     }),
     db.platformVisitorSession.count({ where: { convertedToSignup: true, startedAt: { gte: thirtyDaysAgo } } }),
+    db.tenant.count({ where: { isDemo: false, createdAt: { gte: thirtyDaysAgo } } }),
     db.platformClientError.count({ where: { status: "NEW" } }),
     db.platformVisitorSession.groupBy({
       by: ["utmCampaign", "utmSource"],
@@ -324,6 +412,7 @@ export async function getAnalyticsDashboardData(): Promise<{
     })
   );
 
+  const totalSignups = Math.max(convertedSessionCount, actualRealTenantsCount);
   const conversionRate = totalVisitors > 0 ? Math.round((totalSignups / totalVisitors) * 1000) / 10 : 0;
 
   return {

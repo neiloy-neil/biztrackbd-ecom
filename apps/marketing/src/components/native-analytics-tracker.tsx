@@ -9,9 +9,15 @@ function getOrInitSessionId(): string {
   if (typeof window === "undefined") return "";
   let id = window.sessionStorage.getItem(SESSION_KEY);
   if (!id) {
-    id = "sess_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
-    window.sessionStorage.setItem(SESSION_KEY, id);
+    const cookieMatch = document.cookie.match(/bt_native_session_v1=([^;]+)/);
+    id = cookieMatch ? (cookieMatch[1] ?? null) : null;
   }
+  if (!id) {
+    id = "sess_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+  }
+  window.sessionStorage.setItem(SESSION_KEY, id);
+  const isSecure = window.location.protocol === "https:";
+  document.cookie = `${SESSION_KEY}=${id}; path=/; max-age=2592000; SameSite=Lax${isSecure ? "; Secure" : ""}`;
   return id;
 }
 

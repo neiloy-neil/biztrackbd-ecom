@@ -22,6 +22,7 @@ import { seedBusinessDemoStore } from "../demo/business-seed";
 import { trackPlatformRegistrationCapi } from "./tracking";
 import { enqueueNotificationJob } from "../messaging/queue";
 import { notifyPlatform } from "./notify";
+import { markSessionConverted } from "./native-analytics";
 
 const EXTERNAL_AUTH = "EXTERNAL_AUTH";
 const MAX_STORES_PER_EMAIL = 3;
@@ -63,6 +64,7 @@ export const SignupInput = z.object({
     "SERVICE_PROVIDER",
     "PERSONAL_PORTFOLIO",
   ]).optional().nullable(),
+  sessionId: tracking(100),
   eventId: tracking(100),
   ip: tracking(100),
   userAgent: tracking(400),
@@ -341,6 +343,18 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
         console.warn("[signup] Platform Outbox CAPI dispatch warning:", err instanceof Error ? err.message : err);
       });
     }
+
+    // Mark visitor session as converted in native analytics
+    await markSessionConverted(input.sessionId, {
+      tenantId: id,
+      ip: input.ip,
+      fbp: input.fbp,
+      fbc: input.fbc,
+      utmCampaign: input.utmCampaign,
+      utmSource: input.utmSource,
+    }).catch((err) => {
+      console.warn("[signup] markSessionConverted warning:", err instanceof Error ? err.message : err);
+    });
 
     // Tell staff (feed and email). Awaited with a short limit and never fails the signup.
     const fromAd = Boolean(input.fbc) || /face?book|meta|\bfb\b|\big\b|instagram/i.test(input.utmSource ?? "");

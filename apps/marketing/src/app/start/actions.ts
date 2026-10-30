@@ -1,6 +1,6 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AuthFailure, DomainError, SUBDOMAIN_MESSAGES, checkSubdomain, confirmSignupEmail, emailProofValid, sendSignupCode, signupStore } from "@biztrackbd/core";
 import { keepPictureCopier, samplePictures } from "@/lib/pictures";
@@ -52,9 +52,11 @@ export async function signupAction(_prev: SignupState, form: FormData): Promise<
   if (!subdomain || subdomain.length < 3) return { error: "Choose a valid web address", field: "subdomain" };
 
   // Tracking and Attribution parameters
+  const cookieStore = await cookies();
+  const sessionId = String(form.get("sessionId") ?? "").trim() || cookieStore.get("bt_native_session_v1")?.value || undefined;
   const eventId = String(form.get("eventId") ?? "").trim() || undefined;
-  const fbp = String(form.get("fbp") ?? "").trim() || undefined;
-  const fbc = String(form.get("fbc") ?? "").trim() || undefined;
+  const fbp = String(form.get("fbp") ?? "").trim() || cookieStore.get("_fbp")?.value || undefined;
+  const fbc = String(form.get("fbc") ?? "").trim() || cookieStore.get("_fbc")?.value || undefined;
   const utmSource = String(form.get("utmSource") ?? "").trim() || undefined;
   const utmMedium = String(form.get("utmMedium") ?? "").trim() || undefined;
   const utmCampaign = String(form.get("utmCampaign") ?? "").trim() || undefined;
@@ -80,6 +82,7 @@ export async function signupAction(_prev: SignupState, form: FormData): Promise<
       demoData,
       siteMode,
       businessVertical,
+      sessionId,
       eventId,
       ip,
       userAgent,
