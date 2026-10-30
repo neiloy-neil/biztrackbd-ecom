@@ -78,6 +78,7 @@ export async function createOrder(tenantId: string, rawInput: unknown): Promise<
       }
       await notifyOrder(tenantId, placed.orderId, "ORDER_RECEIVED");
       notifyStoreOrder(tenantId, {
+        orderId: placed.orderId,
         orderNumber: placed.orderNumber,
         totalAmount: placed.totalAmount,
         paymentMethod: input.paymentMethod || "COD",

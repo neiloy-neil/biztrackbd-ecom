@@ -15,6 +15,7 @@ import {
   DomainError,
   type Actor,
 } from "@biztrackbd/core";
+import type { OrderStatus } from "@biztrackbd/db";
 
 export const dynamic = "force-dynamic";
 
@@ -84,6 +85,26 @@ export async function POST(
 
   try {
     switch (action) {
+      case "change_status":
+      case "transition": {
+        const to = body.toStatus as OrderStatus;
+        if (!to) {
+          return NextResponse.json({ error: "Missing target order status (toStatus)" }, { status: 400 });
+        }
+        if (to === "PROCESSING") {
+          const result = await markPacked(session.tenantId, session.actor, [id]);
+          if (result.skipped.length > 0) {
+            throw new DomainError("CANNOT_PACK", result.skipped[0]?.reason || "This order cannot be packed yet. Confirm it first.", 409);
+          }
+        } else {
+          await transitionOrder(session.tenantId, id, to, actor, reason, {
+            forceRestock: body.forceRestock,
+            refused: body.refused,
+          });
+        }
+        break;
+      }
+
       case "confirm": {
         await transitionOrder(session.tenantId, id, "CONFIRMED", actor, reason || "Confirmed via mobile app");
         break;
@@ -116,6 +137,14 @@ export async function POST(
 
       case "deliver": {
         await transitionOrder(session.tenantId, id, "DELIVERED", actor, reason || "Marked delivered via mobile app");
+        break;
+      }
+
+      case "return": {
+        await transitionOrder(session.tenantId, id, "RETURNED", actor, reason || "Marked returned via mobile app", {
+          forceRestock: true,
+          refused: body.refused,
+        });
         break;
       }
 

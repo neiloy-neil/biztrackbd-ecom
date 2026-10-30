@@ -101,6 +101,7 @@ export async function sendExpoPush(messages: ExpoPushMessage[]): Promise<void> {
 export async function notifyStoreOrder(
   tenantId: string,
   order: {
+    orderId?: string;
     orderNumber: string;
     totalAmount: number;
     paymentMethod: string;
@@ -137,6 +138,7 @@ export async function notifyStoreOrder(
     channelId: "orders-high-priority",
     data: {
       type: "ORDER_CREATED",
+      orderId: order.orderId,
       orderNumber: order.orderNumber,
       tab: "unconfirmed",
     },
