@@ -10,7 +10,7 @@ export default async function AdminImportContentPage() {
   const storeOrigin = storefrontOrigin(session.tenantSubdomain);
 
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: "10px 0" }}>
+    <div className="stack gap-4 max-w-4xl mx-auto">
       <PageHeader
         title="Smart Content Import Assistant"
         crumbs={[{ label: "Home", href: "/" }, { label: "Settings" }, { label: "Import" }]}

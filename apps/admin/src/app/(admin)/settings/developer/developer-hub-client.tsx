@@ -13,7 +13,6 @@ import {
   createApiKeyAction,
   revokeApiKeyAction,
   deleteApiKeyAction,
-  type CreateKeyActionState,
 } from "./actions";
 
 interface SerializedApiKey {
@@ -106,26 +105,26 @@ export function DeveloperHubClient({
   const baseUrl = `https://${tenantSubdomain || "mystore"}.biztrack.bd`;
 
   return (
-    <div style={{ marginTop: 20 }}>
+    <div className="mt-3">
       {/* 3-Tab Header Navigation */}
-      <div style={{ display: "flex", gap: 8, borderBottom: "1px solid var(--border)", paddingBottom: 12, marginBottom: 24 }}>
+      <div className="tab-strip mb-4">
         <button
           type="button"
-          className={`btn ${activeTab === "keys" ? "btn-primary" : "btn-secondary"}`}
+          className={`tab-btn ${activeTab === "keys" ? "active" : ""}`}
           onClick={() => setActiveTab("keys")}
         >
           API Keys &amp; Credentials ({keys.length})
         </button>
         <button
           type="button"
-          className={`btn ${activeTab === "docs" ? "btn-primary" : "btn-secondary"}`}
+          className={`tab-btn ${activeTab === "docs" ? "active" : ""}`}
           onClick={() => setActiveTab("docs")}
         >
           Interactive Docs &amp; Code Explorer
         </button>
         <button
           type="button"
-          className={`btn ${activeTab === "logs" ? "btn-primary" : "btn-secondary"}`}
+          className={`tab-btn ${activeTab === "logs" ? "active" : ""}`}
           onClick={() => setActiveTab("logs")}
         >
           Traffic Audit Logs ({logs.length})
@@ -136,48 +135,29 @@ export function DeveloperHubClient({
       {/* ONE-TIME REVEAL DIALOG (Displayed only right after creation) */}
       {/* ======================================================== */}
       {createState.ok && createState.result && (
-        <div
-          style={{
-            background: "linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(6, 95, 70, 0.05))",
-            border: "2px solid #10b981",
-            borderRadius: 8,
-            padding: 20,
-            marginBottom: 24,
-            boxShadow: "0 4px 12px rgba(16, 185, 129, 0.15)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-            <span style={{ fontSize: 24 }}>🎉</span>
+        <div className="key-reveal-box">
+          <div className="row gap-3 mb-3 items-center">
+            <div className="icon-box-lg">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M21 2l-2 2m-1.5 1.5L16 7m-1.5 1.5L13 10m-1.5 1.5L10 13m-2-2l-4 4a2 2 0 0 0 0 2.83l1.17 1.17a2 2 0 0 0 2.83 0l4-4m-2-2l3-3m0 0a4 4 0 1 0-5.66-5.66l5.66 5.66z"/>
+              </svg>
+            </div>
             <div>
-              <h3 style={{ margin: 0, color: "#065f46" }}>
+              <h3 className="m-0 text-success">
                 API Key Created: <strong>{createState.result.name}</strong>
               </h3>
-              <p style={{ margin: "4px 0 0", fontSize: 13, color: "#047857" }}>
+              <p className="m-0 text-sm muted mt-1">
                 <strong>CRITICAL:</strong> Make sure to copy your secret key now. For security, it is stored as an irreversible SHA-256 hash and cannot be recovered or displayed again.
               </p>
             </div>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              background: "#0f172a",
-              color: "#38bdf8",
-              fontFamily: "monospace",
-              fontSize: 14,
-              padding: "12px 16px",
-              borderRadius: 6,
-              overflowX: "auto",
-              marginBottom: 16,
-            }}
-          >
-            <span style={{ flex: 1, wordBreak: "break-all" }}>{createState.result.token}</span>
+          <div className="row-between gap-2 code-block mb-3 items-center">
+            <span className="flex-1 break-all text-sky-400 font-mono text-sm">{createState.result.token}</span>
             <CopyButton value={createState.result.token} label="API Secret Key" />
           </div>
 
-          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <div className="row-end">
             <button
               type="button"
               className="btn btn-secondary btn-sm"
@@ -197,10 +177,10 @@ export function DeveloperHubClient({
       {/* ======================================================== */}
       {activeTab === "keys" && (
         <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <div className="row-between items-center mb-3">
             <div>
-              <h2 style={{ fontSize: 18, margin: 0 }}>Active API Keys</h2>
-              <p className="muted" style={{ fontSize: 13, margin: "4px 0 0" }}>
+              <h2 className="text-lg m-0 font-bold">Active API Keys</h2>
+              <p className="muted text-sm mt-1">
                 Keys authenticate external systems via <code>Authorization: Bearer bzk_live_...</code>
               </p>
             </div>
@@ -216,8 +196,8 @@ export function DeveloperHubClient({
           </div>
 
           {keys.length === 0 ? (
-            <div className="card" style={{ padding: 32, textAlign: "center" }}>
-              <p className="muted" style={{ fontSize: 15, margin: "0 0 16px" }}>
+            <div className="card text-center py-5">
+              <p className="muted text-base mb-3">
                 No API keys generated yet. Create one to begin integrating external ERPs, POS systems, or custom apps.
               </p>
               {canEdit && (
@@ -231,137 +211,96 @@ export function DeveloperHubClient({
               )}
             </div>
           ) : (
-            <div className="card" style={{ padding: 0, overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
-                <thead>
-                  <tr style={{ background: "var(--bg-subtle)", textAlign: "left", borderBottom: "1px solid var(--border)" }}>
-                    <th style={{ padding: "12px 16px" }}>Name</th>
-                    <th style={{ padding: "12px 16px" }}>Key Prefix</th>
-                    <th style={{ padding: "12px 16px" }}>Environment</th>
-                    <th style={{ padding: "12px 16px" }}>Scopes</th>
-                    <th style={{ padding: "12px 16px" }}>Last Used</th>
-                    <th style={{ padding: "12px 16px" }}>Status</th>
-                    {canEdit && <th style={{ padding: "12px 16px", textAlign: "right" }}>Actions</th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {keys.map((k) => (
-                    <tr key={k.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                      <td style={{ padding: "12px 16px", fontWeight: 600 }}>{k.name}</td>
-                      <td style={{ padding: "12px 16px", fontFamily: "monospace", fontSize: 13 }}>
-                        <span style={{ marginRight: 8 }}>{k.keyPrefix}</span>
-                        <CopyButton value={k.keyPrefix} label="Key Prefix" />
-                      </td>
-                      <td style={{ padding: "12px 16px" }}>
-                        <span
-                          style={{
-                            display: "inline-block",
-                            padding: "2px 8px",
-                            borderRadius: 12,
-                            fontSize: 11,
-                            fontWeight: 700,
-                            letterSpacing: "0.5px",
-                            background: k.environment === "TEST" ? "#fef3c7" : "#d1fae5",
-                            color: k.environment === "TEST" ? "#92400e" : "#065f46",
-                          }}
-                        >
-                          {k.environment}
-                        </span>
-                      </td>
-                      <td style={{ padding: "12px 16px" }}>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                          {k.scopes.map((s) => (
-                            <span
-                              key={s}
-                              style={{
-                                padding: "2px 6px",
-                                background: "var(--bg-subtle)",
-                                border: "1px solid var(--border)",
-                                borderRadius: 4,
-                                fontSize: 11,
-                                fontFamily: "monospace",
-                              }}
-                            >
-                              {s}
+            <div className="card p-0 overflow-hidden">
+              <div className="table-wrap">
+                <table className="table m-0">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Key Prefix</th>
+                      <th>Environment</th>
+                      <th>Scopes</th>
+                      <th>Last Used</th>
+                      <th>Status</th>
+                      {canEdit && <th className="text-end">Actions</th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {keys.map((k) => (
+                      <tr key={k.id}>
+                        <td className="font-semibold">{k.name}</td>
+                        <td className="font-mono text-xs">
+                          <span className="me-2">{k.keyPrefix}</span>
+                          <CopyButton value={k.keyPrefix} label="Key Prefix" />
+                        </td>
+                        <td>
+                          <span className={k.environment === "TEST" ? "badge-amber" : "badge-green"}>
+                            {k.environment}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="row gap-1 flex-wrap">
+                            {k.scopes.map((s) => (
+                              <span key={s} className="pill grey font-mono text-xs">
+                                {s}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="text-xs muted">
+                          {k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleDateString() : "Never"}
+                        </td>
+                        <td>
+                          {k.isActive ? (
+                            <span className="badge-green">
+                              <span className="status-dot-active" />
+                              Active
                             </span>
-                          ))}
-                        </div>
-                      </td>
-                      <td style={{ padding: "12px 16px", fontSize: 13 }} className="muted">
-                        {k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleDateString() : "Never"}
-                      </td>
-                      <td style={{ padding: "12px 16px" }}>
-                        {k.isActive ? (
-                          <span style={{ color: "#10b981", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
-                            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981" }} />
-                            Active
-                          </span>
-                        ) : (
-                          <span style={{ color: "#ef4444", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
-                            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#ef4444" }} />
-                            Revoked
-                          </span>
-                        )}
-                      </td>
-                      {canEdit && (
-                        <td style={{ padding: "12px 16px", textAlign: "right" }}>
-                          <div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }}>
-                            {k.isActive && (
+                          ) : (
+                            <span className="badge-red">
+                              <span className="status-dot-error" />
+                              Revoked
+                            </span>
+                          )}
+                        </td>
+                        {canEdit && (
+                          <td className="text-end">
+                            <div className="row-end gap-1">
+                              {k.isActive && (
+                                <button
+                                  type="button"
+                                  className="btn btn-secondary btn-sm text-danger"
+                                  onClick={() => handleRevoke(k.id, k.name)}
+                                  disabled={isPending}
+                                >
+                                  Revoke
+                                </button>
+                              )}
                               <button
                                 type="button"
                                 className="btn btn-secondary btn-sm"
-                                style={{ color: "#dc2626" }}
-                                onClick={() => handleRevoke(k.id, k.name)}
+                                onClick={() => handleDelete(k.id, k.name)}
                                 disabled={isPending}
                               >
-                                Revoke
+                                Delete
                               </button>
-                            )}
-                            <button
-                              type="button"
-                              className="btn btn-secondary btn-sm"
-                              onClick={() => handleDelete(k.id, k.name)}
-                              disabled={isPending}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
 
           {/* CREATE KEY MODAL */}
           {showCreateModal && (
-            <div
-              style={{
-                position: "fixed",
-                inset: 0,
-                background: "rgba(0, 0, 0, 0.5)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 1000,
-                padding: 16,
-              }}
-            >
-              <div
-                className="card"
-                style={{
-                  maxWidth: 680,
-                  width: "100%",
-                  maxHeight: "90vh",
-                  overflowY: "auto",
-                  padding: 24,
-                  boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2)",
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                  <h3 style={{ margin: 0, fontSize: 18 }}>Generate Scoped API Key</h3>
+            <div className="modal-backdrop">
+              <div className="modal-card modal-card-lg">
+                <div className="modal-head">
+                  <h2 className="m-0">Generate Scoped API Key</h2>
                   <button
                     type="button"
                     className="btn btn-secondary btn-sm"
@@ -379,27 +318,23 @@ export function DeveloperHubClient({
                     await formAction(formData);
                     setShowCreateModal(false);
                   }}
+                  className="stack gap-3"
                 >
-                  <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: "block", fontWeight: 600, fontSize: 13, marginBottom: 6 }}>
-                      Key Label / Application Name
-                    </label>
+                  <label className="field">
+                    <span className="label">Key Label / Application Name</span>
                     <input
                       type="text"
                       name="name"
                       required
                       placeholder="e.g. Tally ERP Sync, ManyChat Bot, Warehouse Scanner"
-                      className="form-control"
-                      style={{ width: "100%", padding: "8px 12px", borderRadius: 6, border: "1px solid var(--border)" }}
+                      className="input"
                     />
-                  </div>
+                  </label>
 
-                  <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: "block", fontWeight: 600, fontSize: 13, marginBottom: 6 }}>
-                      Environment Mode
-                    </label>
-                    <div style={{ display: "flex", gap: 12 }}>
-                      <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+                  <div>
+                    <span className="label mb-2 block">Environment Mode</span>
+                    <div className="row gap-4">
+                      <label className="radio">
                         <input
                           type="radio"
                           name="env_radio"
@@ -409,7 +344,7 @@ export function DeveloperHubClient({
                         />
                         <span><strong>Production Live</strong> (<code>bzk_live_...</code>)</span>
                       </label>
-                      <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+                      <label className="radio">
                         <input
                           type="radio"
                           name="env_radio"
@@ -423,21 +358,18 @@ export function DeveloperHubClient({
                   </div>
 
                   {/* 1-Click Role Presets */}
-                  <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: "block", fontWeight: 600, fontSize: 13, marginBottom: 6 }}>
-                      1-Click Role Presets
-                    </label>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                  <div>
+                    <span className="label mb-2 block">1-Click Role Presets</span>
+                    <div className="grid-280">
                       {API_SCOPE_PRESETS.map((preset) => (
                         <button
                           key={preset.id}
                           type="button"
-                          className="btn btn-secondary btn-sm"
-                          style={{ textAlign: "left", padding: 8, height: "auto" }}
+                          className="btn btn-secondary btn-sm text-start p-2 h-auto block"
                           onClick={() => handleApplyPreset(preset.scopes)}
                         >
-                          <div style={{ fontWeight: 600, fontSize: 13 }}>{preset.label}</div>
-                          <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>
+                          <div className="font-semibold text-sm">{preset.label}</div>
+                          <div className="muted text-xs mt-1">
                             {preset.description}
                           </div>
                         </button>
@@ -446,27 +378,24 @@ export function DeveloperHubClient({
                   </div>
 
                   {/* Granular Checkboxes */}
-                  <div style={{ marginBottom: 20 }}>
-                    <label style={{ display: "block", fontWeight: 600, fontSize: 13, marginBottom: 6 }}>
-                      Granular Permission Scopes ({selectedScopes.length} selected)
-                    </label>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8, background: "var(--bg-subtle)", padding: 12, borderRadius: 6 }}>
+                  <div>
+                    <span className="label mb-2 block">Granular Permission Scopes ({selectedScopes.length} selected)</span>
+                    <div className="stack gap-2 card bg-subtle p-3 max-h-60 overflow-y-auto">
                       {API_SCOPES.map((scope) => (
                         <label
                           key={scope.id}
-                          style={{ display: "flex", alignItems: "flex-start", gap: 8, cursor: "pointer" }}
+                          className="check items-start"
                         >
                           <input
                             type="checkbox"
                             checked={selectedScopes.includes(scope.id)}
                             onChange={() => handleToggleScope(scope.id)}
-                            style={{ marginTop: 3 }}
                           />
                           <div>
-                            <div style={{ fontWeight: 600, fontSize: 13 }}>
+                            <div className="font-semibold text-sm">
                               <code>{scope.id}</code> — {scope.label}
                             </div>
-                            <div className="muted" style={{ fontSize: 12 }}>
+                            <div className="muted text-xs">
                               {scope.description}
                             </div>
                           </div>
@@ -475,7 +404,7 @@ export function DeveloperHubClient({
                     </div>
                   </div>
 
-                  <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                  <div className="row-end gap-2 mt-2">
                     <button
                       type="button"
                       className="btn btn-secondary"
@@ -496,30 +425,18 @@ export function DeveloperHubClient({
       {/* TAB 2: INTERACTIVE DOCUMENTATION & CODE SNIPPET EXPLORER */}
       {/* ======================================================== */}
       {activeTab === "docs" && (
-        <div>
+        <div className="stack gap-4">
           {/* Active Key Selector & Language Switcher Bar */}
-          <div
-            className="card"
-            style={{
-              padding: 16,
-              marginBottom: 24,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              flexWrap: "wrap",
-              gap: 12,
-              background: "var(--bg-subtle)",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <label htmlFor="key-select" style={{ fontSize: 13, fontWeight: 600 }}>
+          <div className="card bg-subtle p-3 row-between items-center flex-wrap gap-3">
+            <div className="row gap-2 items-center">
+              <label htmlFor="key-select" className="text-sm font-semibold">
                 Test with Key:
               </label>
               <select
                 id="key-select"
                 value={selectedDocKey}
                 onChange={(e) => setSelectedDocKey(e.target.value)}
-                style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid var(--border)", fontSize: 13 }}
+                className="input py-1 px-2 text-sm w-auto"
               >
                 {activeKeys.length > 0 ? (
                   activeKeys.map((k) => (
@@ -533,12 +450,12 @@ export function DeveloperHubClient({
               </select>
             </div>
 
-            <div style={{ display: "flex", gap: 6 }}>
+            <div className="pill-switcher">
               {(["curl", "javascript", "python"] as const).map((lang) => (
                 <button
                   key={lang}
                   type="button"
-                  className={`btn btn-sm ${docLanguage === lang ? "btn-primary" : "btn-secondary"}`}
+                  className={`pill-switcher-btn ${docLanguage === lang ? "active" : ""}`}
                   onClick={() => setDocLanguage(lang)}
                 >
                   {lang === "curl" ? "cURL" : lang === "javascript" ? "JavaScript (Fetch)" : "Python"}
@@ -548,19 +465,17 @@ export function DeveloperHubClient({
           </div>
 
           {/* ENDPOINT 1: GET /api/v1/products */}
-          <div className="card" style={{ marginBottom: 20 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ background: "#3b82f6", color: "#fff", fontWeight: 700, padding: "2px 8px", borderRadius: 4, fontSize: 12 }}>
-                  GET
-                </span>
-                <strong style={{ fontSize: 15 }}>/api/v1/products</strong>
+          <section className="card">
+            <div className="row-between items-center mb-2">
+              <div className="row gap-2 items-center">
+                <span className="badge-blue">GET</span>
+                <strong className="text-base font-mono">/api/v1/products</strong>
               </div>
-              <span style={{ fontSize: 12, fontFamily: "monospace", padding: "2px 6px", background: "var(--bg-subtle)", borderRadius: 4 }}>
+              <span className="pill grey font-mono text-xs">
                 Scope: products:read
               </span>
             </div>
-            <p className="muted" style={{ fontSize: 13, margin: "0 0 12px" }}>
+            <p className="muted text-sm mb-3">
               List catalog products with pagination, category details, status filtering, and keyword search.
             </p>
 
@@ -570,22 +485,20 @@ export function DeveloperHubClient({
               method="GET"
               keyPrefix={selectedDocKey}
             />
-          </div>
+          </section>
 
           {/* ENDPOINT 2: GET /api/v1/products/:id */}
-          <div className="card" style={{ marginBottom: 20 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ background: "#3b82f6", color: "#fff", fontWeight: 700, padding: "2px 8px", borderRadius: 4, fontSize: 12 }}>
-                  GET
-                </span>
-                <strong style={{ fontSize: 15 }}>/api/v1/products/:id</strong>
+          <section className="card">
+            <div className="row-between items-center mb-2">
+              <div className="row gap-2 items-center">
+                <span className="badge-blue">GET</span>
+                <strong className="text-base font-mono">/api/v1/products/:id</strong>
               </div>
-              <span style={{ fontSize: 12, fontFamily: "monospace", padding: "2px 6px", background: "var(--bg-subtle)", borderRadius: 4 }}>
+              <span className="pill grey font-mono text-xs">
                 Scope: products:read
               </span>
             </div>
-            <p className="muted" style={{ fontSize: 13, margin: "0 0 12px" }}>
+            <p className="muted text-sm mb-3">
               Retrieve full breakdown of a single product and all active SKU variants by product ID or URL slug.
             </p>
 
@@ -595,22 +508,20 @@ export function DeveloperHubClient({
               method="GET"
               keyPrefix={selectedDocKey}
             />
-          </div>
+          </section>
 
           {/* ENDPOINT 3: PATCH /api/v1/inventory/adjust */}
-          <div className="card" style={{ marginBottom: 20 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ background: "#f59e0b", color: "#fff", fontWeight: 700, padding: "2px 8px", borderRadius: 4, fontSize: 12 }}>
-                  PATCH
-                </span>
-                <strong style={{ fontSize: 15 }}>/api/v1/inventory/adjust</strong>
+          <section className="card">
+            <div className="row-between items-center mb-2">
+              <div className="row gap-2 items-center">
+                <span className="badge-amber">PATCH</span>
+                <strong className="text-base font-mono">/api/v1/inventory/adjust</strong>
               </div>
-              <span style={{ fontSize: 12, fontFamily: "monospace", padding: "2px 6px", background: "var(--bg-subtle)", borderRadius: 4 }}>
+              <span className="pill grey font-mono text-xs">
                 Scope: inventory:update
               </span>
             </div>
-            <p className="muted" style={{ fontSize: 13, margin: "0 0 12px" }}>
+            <p className="muted text-sm mb-3">
               Batch sync warehouse stock levels across variants by SKU or variantId. Supports <code>X-Idempotency-Key</code> for network replay safety.
             </p>
 
@@ -627,22 +538,20 @@ export function DeveloperHubClient({
                 ],
               }}
             />
-          </div>
+          </section>
 
           {/* ENDPOINT 4: GET /api/v1/orders */}
-          <div className="card" style={{ marginBottom: 20 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ background: "#3b82f6", color: "#fff", fontWeight: 700, padding: "2px 8px", borderRadius: 4, fontSize: 12 }}>
-                  GET
-                </span>
-                <strong style={{ fontSize: 15 }}>/api/v1/orders</strong>
+          <section className="card">
+            <div className="row-between items-center mb-2">
+              <div className="row gap-2 items-center">
+                <span className="badge-blue">GET</span>
+                <strong className="text-base font-mono">/api/v1/orders</strong>
               </div>
-              <span style={{ fontSize: 12, fontFamily: "monospace", padding: "2px 6px", background: "var(--bg-subtle)", borderRadius: 4 }}>
+              <span className="pill grey font-mono text-xs">
                 Scope: orders:read
               </span>
             </div>
-            <p className="muted" style={{ fontSize: 13, margin: "0 0 12px" }}>
+            <p className="muted text-sm mb-3">
               Query store orders with pagination, status filters (<code>status=PENDING</code>), payment status, and customer phone lookups.
             </p>
 
@@ -652,22 +561,20 @@ export function DeveloperHubClient({
               method="GET"
               keyPrefix={selectedDocKey}
             />
-          </div>
+          </section>
 
           {/* ENDPOINT 5: POST /api/v1/orders */}
-          <div className="card" style={{ marginBottom: 20 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ background: "#10b981", color: "#fff", fontWeight: 700, padding: "2px 8px", borderRadius: 4, fontSize: 12 }}>
-                  POST
-                </span>
-                <strong style={{ fontSize: 15 }}>/api/v1/orders</strong>
+          <section className="card">
+            <div className="row-between items-center mb-2">
+              <div className="row gap-2 items-center">
+                <span className="badge-green">POST</span>
+                <strong className="text-base font-mono">/api/v1/orders</strong>
               </div>
-              <span style={{ fontSize: 12, fontFamily: "monospace", padding: "2px 6px", background: "var(--bg-subtle)", borderRadius: 4 }}>
+              <span className="pill grey font-mono text-xs">
                 Scope: orders:write
               </span>
             </div>
-            <p className="muted" style={{ fontSize: 13, margin: "0 0 12px" }}>
+            <p className="muted text-sm mb-3">
               Place an order with customer details, items, delivery zone calculation, and coupon discount. Accepts <code>X-Idempotency-Key</code>.
             </p>
 
@@ -691,7 +598,7 @@ export function DeveloperHubClient({
                 notes: "Please call before arriving",
               }}
             />
-          </div>
+          </section>
         </div>
       )}
 
@@ -700,89 +607,79 @@ export function DeveloperHubClient({
       {/* ======================================================== */}
       {activeTab === "logs" && (
         <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <div className="row-between items-center mb-3">
             <div>
-              <h2 style={{ fontSize: 18, margin: 0 }}>Recent API Traffic Logs</h2>
-              <p className="muted" style={{ fontSize: 13, margin: "4px 0 0" }}>
+              <h2 className="text-lg m-0 font-bold">Recent API Traffic Logs</h2>
+              <p className="muted text-sm mt-1">
                 Inspecting last 50 requests across all active API keys. Bearer tokens are strictly masked in logs.
               </p>
             </div>
           </div>
 
           {logs.length === 0 ? (
-            <div className="card" style={{ padding: 32, textAlign: "center" }}>
-              <p className="muted" style={{ fontSize: 15, margin: 0 }}>
+            <div className="card text-center py-5">
+              <p className="muted text-base m-0">
                 No API requests recorded yet. Make a request via cURL or Postman to inspect traffic here.
               </p>
             </div>
           ) : (
-            <div className="card" style={{ padding: 0, overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-                <thead>
-                  <tr style={{ background: "var(--bg-subtle)", textAlign: "left", borderBottom: "1px solid var(--border)" }}>
-                    <th style={{ padding: "10px 14px" }}>Timestamp</th>
-                    <th style={{ padding: "10px 14px" }}>Method</th>
-                    <th style={{ padding: "10px 14px" }}>Endpoint</th>
-                    <th style={{ padding: "10px 14px" }}>Status</th>
-                    <th style={{ padding: "10px 14px" }}>Latency</th>
-                    <th style={{ padding: "10px 14px" }}>Key Prefix</th>
-                    <th style={{ padding: "10px 14px" }}>Client IP</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {logs.map((log) => {
-                    const isSuccess = log.statusCode >= 200 && log.statusCode < 300;
-                    const isRateLimit = log.statusCode === 429;
-                    const isAuthError = log.statusCode === 401 || log.statusCode === 403;
+            <div className="card p-0 overflow-hidden">
+              <div className="table-wrap">
+                <table className="table m-0">
+                  <thead>
+                    <tr>
+                      <th>Timestamp</th>
+                      <th>Method</th>
+                      <th>Endpoint</th>
+                      <th>Status</th>
+                      <th>Latency</th>
+                      <th>Key Prefix</th>
+                      <th>Client IP</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {logs.map((log) => {
+                      const isSuccess = log.statusCode >= 200 && log.statusCode < 300;
+                      const isRateLimit = log.statusCode === 429;
+                      const isAuthError = log.statusCode === 401 || log.statusCode === 403;
 
-                    return (
-                      <tr key={log.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                        <td style={{ padding: "10px 14px" }}>
-                          {new Date(log.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-                        </td>
-                        <td style={{ padding: "10px 14px" }}>
-                          <span
-                            style={{
-                              padding: "2px 6px",
-                              borderRadius: 4,
-                              fontWeight: 700,
-                              fontSize: 11,
-                              background:
-                                log.method === "GET" ? "#dbeafe" : log.method === "POST" ? "#d1fae5" : "#fef3c7",
-                              color:
-                                log.method === "GET" ? "#1d4ed8" : log.method === "POST" ? "#065f46" : "#92400e",
-                            }}
-                          >
-                            {log.method}
-                          </span>
-                        </td>
-                        <td style={{ padding: "10px 14px", fontFamily: "monospace" }}>{log.endpoint}</td>
-                        <td style={{ padding: "10px 14px" }}>
-                          <span
-                            style={{
-                              padding: "2px 6px",
-                              borderRadius: 4,
-                              fontWeight: 700,
-                              fontSize: 11,
-                              background: isSuccess ? "#d1fae5" : isRateLimit ? "#f3e8ff" : isAuthError ? "#fee2e2" : "#fef3c7",
-                              color: isSuccess ? "#065f46" : isRateLimit ? "#6b21a8" : isAuthError ? "#991b1b" : "#92400e",
-                            }}
-                          >
-                            {log.statusCode}
-                          </span>
-                        </td>
-                        <td style={{ padding: "10px 14px" }}>{log.durationMs}ms</td>
-                        <td style={{ padding: "10px 14px", fontFamily: "monospace", fontSize: 12 }}>
-                          {log.keyPrefix || "—"}
-                        </td>
-                        <td style={{ padding: "10px 14px", fontFamily: "monospace", fontSize: 12 }}>
-                          {log.ipAddress || "127.0.0.1"}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                      return (
+                        <tr key={log.id}>
+                          <td className="text-xs">
+                            {new Date(log.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                          </td>
+                          <td>
+                            <span
+                              className={
+                                log.method === "GET" ? "badge-blue" : log.method === "POST" ? "badge-green" : "badge-amber"
+                              }
+                            >
+                              {log.method}
+                            </span>
+                          </td>
+                          <td className="font-mono text-xs">{log.endpoint}</td>
+                          <td>
+                            <span
+                              className={
+                                isSuccess ? "badge-green" : isRateLimit ? "badge-purple" : isAuthError ? "badge-red" : "badge-amber"
+                              }
+                            >
+                              {log.statusCode}
+                            </span>
+                          </td>
+                          <td className="text-xs">{log.durationMs}ms</td>
+                          <td className="font-mono text-xs muted">
+                            {log.keyPrefix || "—"}
+                          </td>
+                          <td className="font-mono text-xs muted">
+                            {log.ipAddress || "127.0.0.1"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
@@ -866,23 +763,11 @@ print(response.status_code, response.json())`;
   }
 
   return (
-    <div style={{ position: "relative" }}>
-      <pre
-        style={{
-          background: "#0f172a",
-          color: "#f8fafc",
-          padding: 16,
-          borderRadius: 6,
-          overflowX: "auto",
-          fontSize: 13,
-          fontFamily: "monospace",
-          lineHeight: 1.5,
-          margin: 0,
-        }}
-      >
+    <div className="relative">
+      <pre className="code-block">
         <code>{code}</code>
       </pre>
-      <div style={{ position: "absolute", top: 10, right: 10 }}>
+      <div className="absolute top-2 right-2">
         <CopyButton value={code} label="Code Snippet" />
       </div>
     </div>

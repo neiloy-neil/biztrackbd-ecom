@@ -71,18 +71,9 @@ export function ModeTransitionClient({
   };
 
   return (
-    <div className="stack" style={{ gap: 24 }}>
+    <div className="stack gap-4">
       {doneMessage === "mode_transitioned" && (
-        <div
-          className="notice"
-          style={{
-            background: "#ECFDF3",
-            color: "#027A48",
-            border: "1px solid #A6F4C5",
-            padding: "14px 18px",
-            borderRadius: 8,
-          }}
-        >
+        <div className="notice good" role="status">
           ✓ <strong>Mode Transition Successfully Executed!</strong> Your store is now operating in{" "}
           <strong>{tenant.siteMode}</strong> mode. All historical leads and orders remain 100% preserved.
         </div>
@@ -90,57 +81,44 @@ export function ModeTransitionClient({
 
       {/* Current Operational State Card */}
       <section className="card">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
+        <div className="row-between items-start flex-wrap gap-3">
           <div>
-            <div style={{ display: "inline-flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+            <div className="row gap-2 items-center mb-1">
               <span
-                style={{
-                  fontSize: 11,
-                  fontWeight: 800,
-                  letterSpacing: "0.5px",
-                  padding: "3px 10px",
-                  borderRadius: 12,
-                  background:
-                    tenant.siteMode === "HYBRID"
-                      ? "#EDFDF2"
-                      : tenant.siteMode === "PORTFOLIO"
-                      ? "#EFF8FF"
-                      : "#F4F3FF",
-                  color:
-                    tenant.siteMode === "HYBRID"
-                      ? "#027A48"
-                      : tenant.siteMode === "PORTFOLIO"
-                      ? "#175CD3"
-                      : "#5B4FE8",
-                  border: "1px solid currentColor",
-                }}
+                className={
+                  tenant.siteMode === "HYBRID"
+                    ? "badge-green"
+                    : tenant.siteMode === "PORTFOLIO"
+                    ? "badge-blue"
+                    : "badge-purple"
+                }
               >
                 CURRENT ACTIVE MODE: {tenant.siteMode}
               </span>
               {tenant.businessVertical && (
-                <span style={{ fontSize: 12, color: "var(--ink-2)", fontWeight: 600 }}>
+                <span className="text-xs muted font-semibold">
                   Vertical: {tenant.businessVertical}
                 </span>
               )}
             </div>
-            <h2 style={{ margin: "4px 0", fontSize: 20 }}>Store Operating Architecture</h2>
-            <p className="muted" style={{ margin: 0 }}>
+            <h2 className="text-xl font-bold m-0 my-1">Store Operating Architecture</h2>
+            <p className="muted text-sm m-0">
               Controls what engines and customer routes are unlocked on your storefront.
             </p>
           </div>
 
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-            <div style={{ textAlign: "center", background: "#F8F8FC", padding: "8px 16px", borderRadius: 8, border: "1px solid var(--line)" }}>
-              <div style={{ fontSize: 11, color: "var(--ink-3)", fontWeight: 700 }}>LEADS PRESERVED</div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: "#027A48" }}>{counts.leads}</div>
+          <div className="row gap-3 flex-wrap">
+            <div className="stat-box-sm text-center min-w-28">
+              <div className="text-xs font-bold muted">LEADS PRESERVED</div>
+              <div className="text-lg font-bold text-success">{counts.leads}</div>
             </div>
-            <div style={{ textAlign: "center", background: "#F8F8FC", padding: "8px 16px", borderRadius: 8, border: "1px solid var(--line)" }}>
-              <div style={{ fontSize: 11, color: "var(--ink-3)", fontWeight: 700 }}>ORDERS</div>
-              <div style={{ fontSize: 18, fontWeight: 800 }}>{counts.orders}</div>
+            <div className="stat-box-sm text-center min-w-28">
+              <div className="text-xs font-bold muted">ORDERS</div>
+              <div className="text-lg font-bold">{counts.orders}</div>
             </div>
-            <div style={{ textAlign: "center", background: "#F8F8FC", padding: "8px 16px", borderRadius: 8, border: "1px solid var(--line)" }}>
-              <div style={{ fontSize: 11, color: "var(--ink-3)", fontWeight: 700 }}>PRODUCTS</div>
-              <div style={{ fontSize: 18, fontWeight: 800 }}>{counts.products}</div>
+            <div className="stat-box-sm text-center min-w-28">
+              <div className="text-xs font-bold muted">PRODUCTS</div>
+              <div className="text-lg font-bold">{counts.products}</div>
             </div>
           </div>
         </div>
@@ -149,8 +127,8 @@ export function ModeTransitionClient({
       {/* Mode Transition Execution Form */}
       {canEdit ? (
         <section className="card">
-          <h2 style={{ fontSize: 18, marginBottom: 8 }}>Evolve Operating Mode</h2>
-          <p className="muted" style={{ marginBottom: 20 }}>
+          <h2 className="text-lg font-bold m-0 mb-1">Evolve Operating Mode</h2>
+          <p className="muted text-sm m-0 mb-4">
             Transition smoothly between Portfolio, Hybrid, and Commerce. Our atomic transition engine guarantees that your past inquiries, patient booking notes, and customers are never lost.
           </p>
 
@@ -159,21 +137,20 @@ export function ModeTransitionClient({
               const res = await executeMerchantModeTransitionAction(formState, formData);
               if (res?.error) setFormState(res);
             }}
-            className="stack"
-            style={{ gap: 20 }}
+            className="stack gap-4"
           >
             {formState.error && (
-              <div className="notice notice-error" style={{ color: "#B42318", background: "#FEF3F2", padding: "10px 14px", borderRadius: 6 }}>
+              <div className="notice bad" role="alert">
                 {formState.error}
               </div>
             )}
 
             {/* Target Mode Selector */}
             <div>
-              <label style={{ display: "block", fontWeight: 700, marginBottom: 8 }}>
+              <span className="label mb-2 block">
                 Select Target Mode:
-              </label>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+              </span>
+              <div className="grid-280">
                 {[
                   {
                     id: "PORTFOLIO",
@@ -197,36 +174,19 @@ export function ModeTransitionClient({
                     <div
                       key={m.id}
                       onClick={() => handleModeChange(m.id as SiteMode)}
-                      style={{
-                        padding: "14px 16px",
-                        borderRadius: 8,
-                        border: isSelected ? "2px solid #5B4FE8" : "1px solid var(--line)",
-                        background: isSelected ? "#F8F8FF" : "#FFFFFF",
-                        cursor: "pointer",
-                        position: "relative",
-                      }}
+                      className={`card p-3 cursor-pointer relative ${
+                        isSelected ? "border-primary bg-subtle" : "border"
+                      }`}
                     >
                       {isCurrent && (
-                        <span
-                          style={{
-                            position: "absolute",
-                            top: 8,
-                            right: 8,
-                            fontSize: 9.5,
-                            fontWeight: 800,
-                            padding: "2px 6px",
-                            borderRadius: 6,
-                            background: "#EAECF0",
-                            color: "#344054",
-                          }}
-                        >
+                        <span className="absolute top-2 right-2 pill grey text-xs font-bold">
                           CURRENT
                         </span>
                       )}
-                      <div style={{ fontWeight: 800, fontSize: 15, color: isSelected ? "#5B4FE8" : "var(--ink)" }}>
+                      <div className={`font-bold text-base ${isSelected ? "text-primary" : ""}`}>
                         {m.title}
                       </div>
-                      <div style={{ fontSize: 12.5, color: "var(--ink-2)", marginTop: 4, lineHeight: 1.4 }}>
+                      <div className="text-xs muted mt-1 leading-normal">
                         {m.desc}
                       </div>
                     </div>
@@ -237,17 +197,14 @@ export function ModeTransitionClient({
             </div>
 
             {/* Target Vertical Selector */}
-            <div>
-              <label htmlFor="targetVertical" style={{ display: "block", fontWeight: 700, marginBottom: 6 }}>
-                Business Vertical / Industry Preset:
-              </label>
+            <label className="field">
+              <span className="label">Business Vertical / Industry Preset:</span>
               <select
                 id="targetVertical"
                 name="targetVertical"
                 className="input"
                 value={targetVertical}
                 onChange={(e) => handleVerticalChange(e.target.value)}
-                style={{ width: "100%", padding: "8px 12px", borderRadius: 6 }}
               >
                 {VERTICAL_OPTIONS.map((v) => (
                   <option key={v.id} value={v.id}>
@@ -255,47 +212,30 @@ export function ModeTransitionClient({
                   </option>
                 ))}
               </select>
-            </div>
+            </label>
 
             {/* Pre-Flight Impact Analysis Card */}
-            <div
-              style={{
-                background: "#F8F9FC",
-                border: "1px solid var(--line)",
-                borderRadius: 8,
-                padding: "18px 20px",
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                <h4 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: "var(--ink)" }}>
+            <div className="card bg-subtle p-3">
+              <div className="row-between items-center mb-2">
+                <h4 className="m-0 text-sm font-bold">
                   PRE-FLIGHT DRY-RUN IMPACT REPORT
                 </h4>
                 {isPendingDryRun && (
-                  <span style={{ fontSize: 12, color: "#5B4FE8", fontStyle: "italic" }}>
+                  <span className="text-xs text-primary italic">
                     Analyzing impact…
                   </span>
                 )}
               </div>
 
               {dryRun ? (
-                <div style={{ display: "grid", gap: 12, fontSize: 13 }}>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-                    <span style={{ fontWeight: 700, color: "var(--ink-2)", minWidth: 140 }}>
+                <div className="stack gap-2 text-sm">
+                  <div className="row gap-2 flex-wrap items-center">
+                    <span className="font-semibold muted min-w-36">
                       Capabilities Gained:
                     </span>
                     {dryRun.capabilitiesGained.length > 0 ? (
                       dryRun.capabilitiesGained.map((c) => (
-                        <span
-                          key={c}
-                          style={{
-                            padding: "2px 8px",
-                            background: "#ECFDF3",
-                            color: "#027A48",
-                            borderRadius: 12,
-                            fontWeight: 700,
-                            fontSize: 11.5,
-                          }}
-                        >
+                        <span key={c} className="badge-green">
                           +{c}
                         </span>
                       ))
@@ -304,22 +244,13 @@ export function ModeTransitionClient({
                     )}
                   </div>
 
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-                    <span style={{ fontWeight: 700, color: "var(--ink-2)", minWidth: 140 }}>
+                  <div className="row gap-2 flex-wrap items-center">
+                    <span className="font-semibold muted min-w-36">
                       Routes Unlocked:
                     </span>
                     {dryRun.routesAdded.length > 0 ? (
                       dryRun.routesAdded.map((r) => (
-                        <code
-                          key={r}
-                          style={{
-                            padding: "2px 6px",
-                            background: "#EFF8FF",
-                            color: "#175CD3",
-                            borderRadius: 4,
-                            fontSize: 11.5,
-                          }}
-                        >
+                        <code key={r} className="badge-blue font-mono">
                           {r}
                         </code>
                       ))
@@ -328,17 +259,17 @@ export function ModeTransitionClient({
                     )}
                   </div>
 
-                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <span style={{ fontWeight: 700, color: "var(--ink-2)", minWidth: 140 }}>
+                  <div className="row gap-2 items-center">
+                    <span className="font-semibold muted min-w-36">
                       Zero Data Loss:
                     </span>
-                    <span style={{ color: "#027A48", fontWeight: 700 }}>
+                    <span className="text-success font-semibold">
                       ✓ Guaranteed: {dryRun.preservedDataSummary.leadsCount} inquiries and {dryRun.preservedDataSummary.productsCount} products preserved
                     </span>
                   </div>
 
                   {dryRun.warnings.length > 0 && (
-                    <div style={{ marginTop: 6, background: "#FFFBEB", color: "#B45309", padding: "8px 12px", borderRadius: 6 }}>
+                    <div className="notice warn mt-2">
                       {dryRun.warnings.map((w) => (
                         <div key={w}>⚠️ {w}</div>
                       ))}
@@ -346,17 +277,15 @@ export function ModeTransitionClient({
                   )}
                 </div>
               ) : (
-                <div className="muted" style={{ fontSize: 13 }}>
+                <div className="muted text-sm">
                   Select a mode above to compute the pre-flight dry run impact.
                 </div>
               )}
             </div>
 
             {/* Operational Reason */}
-            <div>
-              <label htmlFor="reason" style={{ display: "block", fontWeight: 700, marginBottom: 6 }}>
-                Business Rationale for Mode Transition:
-              </label>
+            <label className="field">
+              <span className="label">Business Rationale for Mode Transition:</span>
               <input
                 id="reason"
                 name="reason"
@@ -365,29 +294,20 @@ export function ModeTransitionClient({
                 minLength={3}
                 placeholder="e.g. Clinic expanding to deliver diabetes supplies and testing kits directly to patients."
                 className="input"
-                style={{ width: "100%", padding: "10px 12px", borderRadius: 6 }}
                 defaultValue="Clinic expanding to offer direct home delivery of verified diabetic supplies and testing kits."
               />
-            </div>
+            </label>
 
             {/* Affirmative Consent Checkbox */}
-            <div
-              style={{
-                background: "#FAF9FE",
-                border: "1.5px solid #D0C6FD",
-                borderRadius: 8,
-                padding: "14px 16px",
-              }}
-            >
-              <label style={{ display: "flex", gap: 10, cursor: "pointer", alignItems: "flex-start" }}>
+            <div className="advisory-box advisory-box-amber">
+              <label className="check items-start gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   id="confirmedConsent"
                   name="confirmedConsent"
                   required
-                  style={{ marginTop: 3, width: 18, height: 18, accentColor: "#5B4FE8" }}
                 />
-                <span style={{ fontSize: 13.5, color: "var(--ink)", lineHeight: 1.5 }}>
+                <span className="text-sm leading-normal">
                   <strong>I confirm affirmative consent for this mode transition.</strong> I understand that
                   storefront navigation routes and checkout capabilities will adjust according to the target mode,
                   and that all historical consultation inquiries, doctor chamber notes, and customer records will
@@ -401,7 +321,6 @@ export function ModeTransitionClient({
               <SubmitButton
                 className="btn btn-primary"
                 pending="Executing Mode Transition…"
-                style={{ padding: "12px 24px", fontSize: 15, fontWeight: 700 }}
               >
                 Execute Mode Transition (Zero Data Loss)
               </SubmitButton>

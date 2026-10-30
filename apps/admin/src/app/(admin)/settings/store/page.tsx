@@ -27,23 +27,30 @@ export default async function StoreDetails() {
             email: st.email ?? "", facebookUrl: st.facebookUrl ?? "", instagramUrl: st.instagramUrl ?? "", addressLine: st.addressLine ?? "", pickupAddress: st.pickupAddress ?? "", logoUrl: st.logoUrl ?? "",
             announcement: st.announcement ?? "", announcementBn: st.announcementBn ?? "", orderPrefix: st.orderPrefix,
           }} />
-          <section className="card" style={{ marginTop: 14 }} data-testid="pause-card">
-            <h2>Pause or reopen your store</h2>
+          <section className="card mt-md" data-testid="pause-card">
+            <h2 className="text-base font-bold mb-xs">Pause or reopen your store</h2>
             {st.ordersPaused ? (
-              <form action={pauseAction.bind(null, false)} className="stack">
-                <div className="notice">Your store is paused. Customers can look around but cannot place orders.</div>
-                <SubmitButton className="btn btn-primary" pending="Reopening…">Reopen the store</SubmitButton>
+              <form action={pauseAction.bind(null, false)} className="stack gap-sm">
+                <div className="notice warn">Your store is paused. Customers can look around but cannot place orders.</div>
+                <div>
+                  <SubmitButton className="btn btn-primary" pending="Reopening…">Reopen the store</SubmitButton>
+                </div>
               </form>
             ) : (
-              <form action={pauseAction.bind(null, true)} className="stack">
-                <p className="muted">Pausing stops new orders. Customers see a notice. Your products and existing orders are not affected.</p>
-                <SubmitButton className="btn btn-danger" pending="Pausing…">Pause store</SubmitButton>
+              <form action={pauseAction.bind(null, true)} className="stack gap-sm">
+                <p className="muted text-sm m-0">Pausing stops new orders. Customers see a notice. Your products and existing orders are not affected.</p>
+                <div>
+                  <SubmitButton className="btn btn-danger" pending="Pausing…">Pause store</SubmitButton>
+                </div>
               </form>
             )}
           </section>
         </>
       ) : (
-        <div className="card"><b>{st.storeName}</b><p className="muted">You can view these details but not change them.</p></div>
+        <div className="card p-md">
+          <b className="text-base">{st.storeName}</b>
+          <p className="muted text-sm mt-xs m-0">You can view these details but not change them.</p>
+        </div>
       )}
     </>
   );

@@ -409,15 +409,15 @@ export function WebhookForm({
   const subscriptions = overview.subscriptions || (overview.subscription ? [overview.subscription] : []);
 
   return (
-    <div className="stack" style={{ gap: 24 }} data-testid="merchant-webhook-workspace">
+    <div className="stack gap-4" data-testid="merchant-webhook-workspace">
       {/* Top Banner Notifications */}
       {formState.message && (
-        <div className="notice notice-success" data-testid="save-success-banner">
+        <div className="notice good" data-testid="save-success-banner">
           {formState.message}
         </div>
       )}
       {formState.error && (
-        <div className="notice notice-danger" data-testid="save-error-banner">
+        <div className="notice bad" data-testid="save-error-banner">
           {formState.error}
         </div>
       )}
@@ -425,28 +425,20 @@ export function WebhookForm({
       {/* DLQ Consecutive Failure Alert */}
       {consecutiveFailures >= 5 && (
         <div
-          className="notice notice-danger"
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 16,
-            boxShadow: "0 4px 12px rgba(220, 38, 38, 0.15)",
-          }}
+          className="notice bad row-between items-center gap-3"
           data-testid="dlq-consecutive-failure-alert"
         >
           <div>
-            <strong>⚠️ Webhook Delivery Alert:</strong> Endpoints have encountered {consecutiveFailures}{" "}
+            <strong>Webhook Delivery Alert:</strong> Endpoints have encountered {consecutiveFailures}{" "}
             consecutive delivery failures. Your external chat webhook or HTTP receiver may be down, timing
             out, or rejecting payloads.
           </div>
           {canEdit && (
             <button
               type="button"
-              className="btn btn-secondary btn-sm"
+              className="btn btn-secondary btn-sm whitespace-nowrap"
               onClick={() => handleRetryFailed()}
               disabled={retryPending}
-              style={{ whiteSpace: "nowrap" }}
               data-testid="dlq-retry-btn"
             >
               {retryPending ? "Retrying..." : "Batch Re-queue Jobs"}
@@ -456,18 +448,10 @@ export function WebhookForm({
       )}
 
       {/* Header Bar with Add Button */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 12,
-        }}
-      >
+      <div className="row-between items-center flex-wrap gap-3 mb-2">
         <div>
-          <h2 style={{ fontSize: 20, margin: 0, fontWeight: 700 }}>Configured Alert Endpoints</h2>
-          <p className="muted" style={{ margin: "4px 0 0", fontSize: 13 }}>
+          <h2 className="text-xl font-bold m-0">Configured Alert Endpoints</h2>
+          <p className="muted text-sm mt-1 m-0">
             Manage chat platforms (Discord, Slack, Telegram) and automated webhooks (Zapier, Make, Custom API).
           </p>
         </div>
@@ -477,7 +461,6 @@ export function WebhookForm({
             className="btn btn-primary"
             onClick={() => openAddModal()}
             data-testid="add-endpoint-btn"
-            style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
           >
             <span>+ Add Webhook Endpoint</span>
           </button>
@@ -486,52 +469,34 @@ export function WebhookForm({
 
       {/* Endpoints Grid */}
       {subscriptions.length === 0 ? (
-        <section
-          className="card"
-          style={{
-            padding: "36px 24px",
-            textAlign: "center",
-            background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
-            border: "2px dashed #cbd5e1",
-          }}
-        >
-          <div style={{ fontSize: 32, marginBottom: 12 }}>🚀</div>
-          <h3 style={{ fontSize: 18, margin: "0 0 8px", fontWeight: 600 }}>No Endpoints Configured Yet</h3>
-          <p className="muted" style={{ maxWidth: 540, margin: "0 auto 24px", fontSize: 14 }}>
+        <section className="card text-center py-5">
+          <div className="icon-box-lg mx-auto mb-3">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-bold m-0 mb-1">No Endpoints Configured Yet</h3>
+          <p className="muted text-sm max-w-md mx-auto mb-4">
             Connect Discord channels, Telegram groups, Slack rooms, or Zapier to receive instant order,
             delivery, lead, and booking notifications.
           </p>
-          <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 10 }}>
+          <div className="row justify-center flex-wrap gap-2">
             {AUTOMATION_PRESETS.slice(0, 3).map((preset) => (
               <button
                 key={preset.id}
                 type="button"
-                className="btn btn-secondary"
+                className="btn btn-secondary btn-sm"
                 onClick={() => openAddModal(preset)}
                 data-testid={`preset-btn-${preset.id}`}
-                style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
               >
-                <span
-                  style={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: "50%",
-                    backgroundColor: preset.badgeColor,
-                  }}
-                />
                 <span>Add {preset.name}</span>
               </button>
             ))}
           </div>
         </section>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))",
-            gap: 16,
-          }}
-        >
+        <div className="grid-320">
           {subscriptions.map((subItem) => {
             const adapter = subItem.adapter || detectWebhookAdapter(subItem.targetUrl);
             const isRevealed = revealedSecrets[subItem.id] || false;
@@ -834,9 +799,8 @@ export function WebhookForm({
       {/* Global Ping Result Banner */}
       {pingResult && (
         <div
-          className={`notice ${pingResult.ok ? "notice-success" : "notice-danger"}`}
+          className={`notice ${pingResult.ok ? "good" : "bad"} row-between items-center`}
           data-testid="test-ping-result-banner"
-          style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
         >
           <div>
             <b>{pingResult.ok ? "✓ Test Ping Succeeded" : "✕ Test Ping Failed"}</b>: {pingResult.message}
@@ -844,7 +808,7 @@ export function WebhookForm({
           <button
             type="button"
             onClick={() => setPingResult(null)}
-            style={{ background: "transparent", border: 0, cursor: "pointer", color: "inherit" }}
+            className="btn btn-sm btn-secondary"
           >
             ✕
           </button>
@@ -853,7 +817,7 @@ export function WebhookForm({
 
       {/* Global Secret Rotation Notice */}
       {rotateNotice && (
-        <div className="notice notice-info" style={{ marginBottom: 12 }}>
+        <div className="notice info mb-3">
           {rotateNotice}
         </div>
       )}
@@ -861,49 +825,17 @@ export function WebhookForm({
       {/* Add / Edit Endpoint Modal */}
       {isModalOpen && (
         <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(15, 23, 42, 0.65)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-            padding: 16,
-          }}
+          className="modal-backdrop"
           onClick={(e) => {
             if (e.target === e.currentTarget) closeModal();
           }}
         >
           <div
-            className="card"
-            style={{
-              width: "100%",
-              maxWidth: 820,
-              maxHeight: "90vh",
-              overflowY: "auto",
-              boxShadow: "0 20px 40px rgba(0, 0, 0, 0.25)",
-              borderRadius: 12,
-              padding: 24,
-              backgroundColor: "#ffffff",
-            }}
+            className="modal-card modal-card-lg"
             data-testid="endpoint-modal"
           >
             {/* Modal Title Bar */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 18,
-                borderBottom: "1px solid #e2e8f0",
-                paddingBottom: 14,
-              }}
-            >
+            <div className="modal-head">
               <div>
                 <h2 style={{ fontSize: 18, margin: 0, fontWeight: 700 }}>
                   {editingSub ? "Edit Webhook Endpoint" : "Add Webhook Endpoint"}
@@ -1545,123 +1477,93 @@ export function WebhookForm({
         </div>
 
         {retryMessage && (
-          <div className="notice notice-info" style={{ marginBottom: 14 }} data-testid="retry-result-banner">
+          <div className="notice info mb-3" data-testid="retry-result-banner">
             {retryMessage}
           </div>
         )}
 
         {overview.recentLogs.length === 0 ? (
-          <div className="empty" style={{ padding: "28px 0", textAlign: "center", color: "#64748b" }}>
-            No webhook deliveries recorded yet. Send a test ping or trigger an order/lead event.
+          <div className="card text-center py-5">
+            <p className="muted text-sm m-0">No webhook deliveries recorded yet. Send a test ping or trigger an order/lead event.</p>
           </div>
         ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table className="table" style={{ width: "100%", fontSize: 13 }} data-testid="delivery-logs-table">
-              <thead>
-                <tr style={{ textAlign: "left", borderBottom: "1px solid #e2e8f0" }}>
-                  <th style={{ padding: "8px 10px" }}>Status</th>
-                  <th style={{ padding: "8px 10px" }}>Event</th>
-                  <th style={{ padding: "8px 10px" }}>Endpoint</th>
-                  <th style={{ padding: "8px 10px" }}>Time</th>
-                  <th style={{ padding: "8px 10px" }}>Response</th>
-                  <th style={{ padding: "8px 10px", textAlign: "right" }}>Payload</th>
-                </tr>
-              </thead>
-              <tbody>
-                {overview.recentLogs.map((log) => {
-                  const isExpanded = expandedLogId === log.id;
-                  const logSub = subscriptions.find((s) => s.id === log.subscriptionId);
-                  const cleanLogUrl = log.targetUrl.split("#")[0]!;
+          <div className="card p-0 overflow-hidden">
+            <div className="table-wrap">
+              <table className="table m-0" data-testid="delivery-logs-table">
+                <thead>
+                  <tr>
+                    <th>Status</th>
+                    <th>Event</th>
+                    <th>Endpoint</th>
+                    <th>Time</th>
+                    <th>Response</th>
+                    <th className="text-end">Payload</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {overview.recentLogs.map((log) => {
+                    const isExpanded = expandedLogId === log.id;
+                    const logSub = subscriptions.find((s) => s.id === log.subscriptionId);
+                    const cleanLogUrl = log.targetUrl.split("#")[0]!;
 
-                  return (
-                    <tr key={log.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                      <td style={{ padding: "8px 10px" }}>
-                        <span
-                          style={{
-                            display: "inline-block",
-                            padding: "2px 8px",
-                            borderRadius: 12,
-                            fontSize: 11,
-                            fontWeight: 600,
-                            backgroundColor: log.isSuccess ? "#dcfce7" : "#fee2e2",
-                            color: log.isSuccess ? "#166534" : "#991b1b",
-                          }}
-                        >
-                          {log.isSuccess ? "DELIVERED" : "FAILED"}
-                        </span>
-                      </td>
-                      <td style={{ padding: "8px 10px" }}>
-                        <code style={{ fontSize: 12, background: "#f8fafc", padding: "2px 6px", borderRadius: 4 }}>
-                          {log.eventType}
-                        </code>
-                      </td>
-                      <td style={{ padding: "8px 10px", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        <span title={cleanLogUrl}>
-                          {logSub?.name || cleanLogUrl.replace(/^https?:\/\//, "").slice(0, 24)}
-                        </span>
-                      </td>
-                      <td style={{ padding: "8px 10px", color: "#64748b" }}>
-                        {new Date(log.createdAt).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          second: "2-digit",
-                        })}
-                      </td>
-                      <td style={{ padding: "8px 10px", fontFamily: "monospace", fontSize: 12 }}>
-                        {log.responseStatus ? `HTTP ${log.responseStatus}` : "Timeout/Err"}
-                      </td>
-                      <td style={{ padding: "8px 10px", textAlign: "right" }}>
-                        <button
-                          type="button"
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => setExpandedLogId(isExpanded ? null : log.id)}
-                          data-testid={`toggle-payload-${log.id}`}
-                        >
-                          {isExpanded ? "Close" : "Inspect"}
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                    return (
+                      <tr key={log.id}>
+                        <td>
+                          <span className={log.isSuccess ? "badge-green" : "badge-red"}>
+                            {log.isSuccess ? "DELIVERED" : "FAILED"}
+                          </span>
+                        </td>
+                        <td>
+                          <code className="text-xs">{log.eventType}</code>
+                        </td>
+                        <td className="max-w-xs truncate">
+                          <span title={cleanLogUrl}>
+                            {logSub?.name || cleanLogUrl.replace(/^https?:\/\//, "").slice(0, 24)}
+                          </span>
+                        </td>
+                        <td className="text-xs muted">
+                          {new Date(log.createdAt).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
+                          })}
+                        </td>
+                        <td className="font-mono text-xs">
+                          {log.responseStatus ? `HTTP ${log.responseStatus}` : "Timeout/Err"}
+                        </td>
+                        <td className="text-end">
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => setExpandedLogId(isExpanded ? null : log.id)}
+                            data-testid={`toggle-payload-${log.id}`}
+                          >
+                            {isExpanded ? "Close" : "Inspect"}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
         {/* Payload Inspector Drawer */}
         {expandedLogId && (
-          <div
-            style={{
-              marginTop: 14,
-              padding: 14,
-              background: "#0f172a",
-              color: "#f8fafc",
-              borderRadius: 8,
-              fontFamily: "monospace",
-              fontSize: 12,
-              maxHeight: 280,
-              overflowY: "auto",
-            }}
-            data-testid="inspected-payload-box"
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: 8,
-                color: "#94a3b8",
-              }}
-            >
+          <div className="code-block relative mt-3" data-testid="inspected-payload-box">
+            <div className="row-between mb-2 text-xs muted">
               <span>Payload Detail (Log: {expandedLogId})</span>
               <button
                 type="button"
                 onClick={() => setExpandedLogId(null)}
-                style={{ background: "transparent", border: 0, color: "#94a3b8", cursor: "pointer" }}
+                className="btn btn-secondary btn-sm py-0 px-2"
               >
                 ✕ Close
               </button>
             </div>
-            <pre style={{ margin: 0, whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
+            <pre className="m-0 break-all whitespace-pre-wrap text-sky-400 font-mono text-xs">
               {JSON.stringify(
                 overview.recentLogs.find((l) => l.id === expandedLogId)?.payload ?? {},
                 null,

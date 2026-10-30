@@ -57,7 +57,7 @@ export function InvoiceForm({ initial }: { initial: InvoiceValues }) {
         <section className="card">
           <h2>What is printed</h2>
           <label className="check"><input type="checkbox" name="showLogo" checked={v.showLogo} onChange={(e) => set("showLogo", e.target.checked)} data-testid="inv-logo" /><span>Show my logo instead of my store name</span></label>
-          {v.showLogo && !initial.hasLogo && <p className="muted" style={{ margin: "0 0 8px 30px", fontSize: 13 }}>You have not uploaded a logo yet, so the store name is printed. <Link href="/settings/store" className="link" prefetch={false}>Add a logo</Link></p>}
+          {v.showLogo && !initial.hasLogo && <p className="muted text-sm ms-4 mb-2">You have not uploaded a logo yet, so the store name is printed. <Link href="/settings/store" className="link" prefetch={false}>Add a logo</Link></p>}
           <label className="check"><input type="checkbox" name="showSku" checked={v.showSku} onChange={(e) => set("showSku", e.target.checked)} data-testid="inv-sku" /><span>Show SKU codes on the invoice</span></label>
           <label className="check"><input type="checkbox" name="showPricesOnSlip" checked={v.showPricesOnSlip} onChange={(e) => set("showPricesOnSlip", e.target.checked)} data-testid="inv-prices" /><span>Show prices on the packing slip</span></label>
         </section>
@@ -65,7 +65,7 @@ export function InvoiceForm({ initial }: { initial: InvoiceValues }) {
           <h2>Footer and paper</h2>
           <label className="field"><span className="label">Note at the bottom of the invoice <span className="opt">(optional)</span></span>
             <input className="input" name="footer" value={v.footer} maxLength={200} onChange={(e) => set("footer", e.target.value)} placeholder="Exchange within 7 days of delivery" data-testid="inv-footer" /></label>
-          <div className="field" style={{ marginBottom: 0 }}>
+          <div className="field mb-0">
             <span className="label">Paper you usually print on</span>
             <Segmented<Paper> label="Paper size" value={v.paper} onChange={(p) => set("paper", p)} options={[{ value: "a4", label: "A4" }, { value: "a5", label: "A5" }, { value: "thermal", label: "Thermal 80mm" }]} />
             <span className="hint">You can still change the size each time you print.</span>
@@ -77,11 +77,11 @@ export function InvoiceForm({ initial }: { initial: InvoiceValues }) {
       </div>
 
       <div className="inv-side">
-        <div className="row" style={{ justifyContent: "space-between", gap: 8, marginBottom: 10 }}>
+        <div className="row-between gap-2 mb-2">
           <Segmented<Doc> label="Document to preview" value={doc} onChange={setDoc} options={DOCS} />
         </div>
         <Preview doc={doc} paper={v.paper} showLogo={v.showLogo} showSku={v.showSku} prices={v.showPricesOnSlip} footer={v.footer} />
-        <p className="muted" style={{ fontSize: 12.5, marginTop: 8 }}>A sample order, so you can see the layout before you have orders.</p>
+        <p className="muted text-xs mt-2">A sample order, so you can see the layout before you have orders.</p>
       </div>
     </form>
   );

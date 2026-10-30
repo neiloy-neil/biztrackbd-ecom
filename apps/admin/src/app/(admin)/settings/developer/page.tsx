@@ -42,7 +42,7 @@ export default async function DeveloperSettingsPage() {
       />
 
       {!canEdit && (
-        <div className="notice" style={{ marginBottom: 16 }}>
+        <div className="notice mb-3">
           You have view-only access to developer settings. Contact the store owner to create or revoke API keys.
         </div>
       )}

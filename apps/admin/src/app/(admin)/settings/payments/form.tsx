@@ -18,18 +18,18 @@ export function PaymentsForm({ initial }: { initial: PayValues }) {
   return (
     <form action={action} className="stack" data-testid="payments-form">
       <section className="card">
-        <label className="check"><input type="checkbox" name="codEnabled" defaultChecked={initial.codEnabled} data-testid="cod-enabled" /><span><b>Cash on delivery</b><br /><span className="muted" style={{ fontSize: 13 }}>Customer pays the courier when the parcel arrives.</span></span></label>
-        <div className="row-2" style={{ marginTop: 12 }}>
-          <label className="field" style={{ marginBottom: 0 }}><span className="label">Extra COD fee (৳)</span><input className="input" name="codFee" inputMode="decimal" defaultValue={initial.codFee} {...bad("codFee")} data-testid="cod-fee" /></label>
-          <label className="field" style={{ marginBottom: 0 }}><span className="label">Allow COD up to (৳) <span className="opt">(optional)</span></span><input className="input" name="codMaxAmount" inputMode="decimal" defaultValue={initial.codMaxAmount ?? ""} {...bad("codMaxAmount")} data-testid="cod-max" /></label>
+        <label className="check"><input type="checkbox" name="codEnabled" defaultChecked={initial.codEnabled} data-testid="cod-enabled" /><span><b>Cash on delivery</b><br /><span className="muted text-sm">Customer pays the courier when the parcel arrives.</span></span></label>
+        <div className="row-2 mt-sm">
+          <label className="field m-0"><span className="label">Extra COD fee (৳)</span><input className="input" name="codFee" inputMode="decimal" defaultValue={initial.codFee} {...bad("codFee")} data-testid="cod-fee" /></label>
+          <label className="field m-0"><span className="label">Allow COD up to (৳) <span className="opt">(optional)</span></span><input className="input" name="codMaxAmount" inputMode="decimal" defaultValue={initial.codMaxAmount ?? ""} {...bad("codMaxAmount")} data-testid="cod-max" /></label>
         </div>
       </section>
 
-      <section className="card" style={{ background: "linear-gradient(135deg, rgba(15,118,110,0.05), rgba(2,132,199,0.05))" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+      <section className="card bg-subtle border">
+        <div className="flex-between items-center flex-wrap gap-md">
           <div>
             <b>Automated Online Payments (UddoktaPay)</b><br />
-            <span className="muted" style={{ fontSize: 13 }}>Accept automated bKash, Nagad, Rocket, Upay and Cards without manual TrxID checking.</span>
+            <span className="muted text-sm">Accept automated bKash, Nagad, Rocket, Upay and Cards without manual TrxID checking.</span>
           </div>
           <a href="/settings/apps?open=uddoktapay_pay" className="btn btn-secondary btn-sm">Configure UddoktaPay Keys →</a>
         </div>
@@ -40,23 +40,25 @@ export function PaymentsForm({ initial }: { initial: PayValues }) {
         ["nagad", "Nagad", initial.nagadEnabled, initial.nagadNumber, initial.nagadKind, initial.nagadInstruction],
       ] as const).map(([k, name, enabled, number, kindValue, instruction]) => (
         <section className="card" key={k}>
-          <label className="check"><input type="checkbox" name={`${k}Enabled`} defaultChecked={enabled} data-testid={`${k}-enabled`} /><span><b>{name}</b><br /><span className="muted" style={{ fontSize: 13 }}>Customer sends money, then enters the TrxID at checkout. You confirm it.</span></span></label>
-          <div className="row-2" style={{ marginTop: 12 }}>
+          <label className="check"><input type="checkbox" name={`${k}Enabled`} defaultChecked={enabled} data-testid={`${k}-enabled`} /><span><b>{name}</b><br /><span className="muted text-sm">Customer sends money, then enters the TrxID at checkout. You confirm it.</span></span></label>
+          <div className="row-2 mt-sm">
             <label className="field"><span className="label">{name} number</span><input className="input" name={`${k}Number`} inputMode="tel" defaultValue={number} {...bad(`${name} number`)} data-testid={`${k}-number`} /></label>
             <label className="field"><span className="label">Account type</span>
               <select className="select" name={`${k}Kind`} defaultValue={kindValue}>{KINDS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></label>
           </div>
-          <label className="field" style={{ marginBottom: 0 }}><span className="label">Extra instruction shown to customers <span className="opt">(optional)</span></span><input className="input" name={`${k}Instruction`} defaultValue={instruction} maxLength={300} /></label>
+          <label className="field m-0"><span className="label">Extra instruction shown to customers <span className="opt">(optional)</span></span><input className="input" name={`${k}Instruction`} defaultValue={instruction} maxLength={300} /></label>
         </section>
       ))}
 
       <section className="card">
-        <label className="field" style={{ marginBottom: 0 }}><span className="label">Note under the payment steps <span className="opt">(optional)</span></span><input className="input" name="paymentNote" defaultValue={initial.paymentNote} maxLength={200} placeholder="We confirm within 2 hours." /></label>
+        <label className="field m-0"><span className="label">Note under the payment steps <span className="opt">(optional)</span></span><input className="input" name="paymentNote" defaultValue={initial.paymentNote} maxLength={200} placeholder="We confirm within 2 hours." /></label>
       </section>
       <div className="notice info">Customers send money to these numbers. If someone else gets into your account and changes them, your payments go to them, so every change here is recorded in the audit log.</div>
       {state.error && <div className="notice bad" role="alert" data-testid="payments-error">{state.error}</div>}
       {state.ok && <div className="notice good" role="status" data-testid="payments-saved">Payment settings saved.</div>}
-      <SubmitButton className="btn btn-primary btn-lg">Save payment settings</SubmitButton>
+      <div>
+        <SubmitButton className="btn btn-primary btn-lg">Save payment settings</SubmitButton>
+      </div>
     </form>
   );
 }

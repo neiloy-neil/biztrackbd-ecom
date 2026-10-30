@@ -38,45 +38,45 @@ export default async function Domains({ searchParams }: { searchParams: Promise<
     <>
       <DomainWatcher pendingIds={canEdit ? pending : []} />
       <PageHeader
-        title="Domains"
+        title="Custom Domains"
         crumbs={[{ label: "Settings", href: "/settings/store" }, { label: "Domains" }]}
         sub={<>Your store is always at <b>{s.tenantSubdomain}.{root}</b>. Add your own domain, like yourshop.com, and customers will see that instead.</>}
       />
-      {err && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{err}</div>}
-      {done && DONE[done] && <div className="notice good" role="status" style={{ marginBottom: 12 }}>{DONE[done]}</div>}
+      {err && <div className="notice bad mb-sm" role="alert">{err}</div>}
+      {done && DONE[done] && <div className="notice good mb-sm" role="status">{DONE[done]}</div>}
 
-      {rows.length === 0 && <div className="card empty" data-testid="domains-empty">You have not added a domain yet.</div>}
-      <div className="stack" data-testid="domain-list">
+      {rows.length === 0 && <div className="card empty p-xl text-center" data-testid="domains-empty">You have not added a custom domain yet.</div>}
+      <div className="stack gap-md" data-testid="domain-list">
         {rows.map((d) => {
           const st = statusOf(d);
           const rec = dnsInstruction(d.domain);
           return (
-            <section key={d.id} className="card" data-testid="domain-card" data-domain={d.domain} data-status={st.connected ? "connected" : "pending"}>
-              <div className="card-head">
-                <h2 style={{ overflowWrap: "anywhere" }}>{d.domain}</h2>
+            <section key={d.id} className="card p-md" data-testid="domain-card" data-domain={d.domain} data-status={st.connected ? "connected" : "pending"}>
+              <div className="card-head flex-between items-center mb-sm">
+                <h2 className="text-base font-bold m-0 break-all">{d.domain}</h2>
                 <span className={`pill ${st.tone}`} data-testid="domain-status">{st.label}</span>
               </div>
-              {d.isPrimary && st.connected && <p className="muted" style={{ fontSize: 13 }}>This is the address customers see.</p>}
-              {!st.connected && d.dnsNote && <p style={{ marginTop: 6 }} data-testid="domain-note">{d.dnsNote}</p>}
-              {st.connected && <p style={{ marginTop: 6 }}>It works, with a secure padlock. <a className="link" href={`https://${d.domain}`} target="_blank" rel="noopener noreferrer">Open {d.domain}</a></p>}
+              {d.isPrimary && st.connected && <p className="muted text-sm m-0">This is the primary address customers see.</p>}
+              {!st.connected && d.dnsNote && <p className="text-sm text-ink-2 mt-xs" data-testid="domain-note">{d.dnsNote}</p>}
+              {st.connected && <p className="text-sm text-ink-2 mt-xs">It works, with a secure padlock. <a className="link" href={`https://${d.domain}`} target="_blank" rel="noopener noreferrer">Open {d.domain}</a></p>}
 
               {!st.connected && (
-                <div className="card" style={{ marginTop: 10, background: "var(--bg)" }} data-testid="dns-steps">
-                  <h2 style={{ fontSize: 14 }}>Create this record where you bought the domain</h2>
-                  <dl className="kv" style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "4px 14px", margin: "6px 0 10px" }}>
-                    <dt className="muted">Type</dt><dd><b>{rec.kind}</b></dd>
-                    <dt className="muted">Name</dt><dd><b>{rec.name}</b></dd>
-                    <dt className="muted">Value</dt><dd><b style={{ overflowWrap: "anywhere" }} data-testid="dns-value">{rec.value}</b></dd>
-                  </dl>
-                  <ol style={{ paddingLeft: 18, display: "grid", gap: 4, fontSize: 14 }}>{rec.steps.map((t, i) => <li key={i}>{t}</li>)}</ol>
+                <div className="card p-md mt-sm bg-subtle border" data-testid="dns-steps">
+                  <h2 className="text-sm font-bold mb-xs">Create this record where you bought the domain</h2>
+                  <div className="grid grid-2 gap-xs my-sm">
+                    <div><span className="muted text-xs">Type:</span> <b>{rec.kind}</b></div>
+                    <div><span className="muted text-xs">Name:</span> <b>{rec.name}</b></div>
+                    <div className="grid-col-all"><span className="muted text-xs">Value:</span> <b className="font-mono text-xs break-all" data-testid="dns-value">{rec.value}</b></div>
+                  </div>
+                  <ol className="pl-md stack gap-xs text-sm">{rec.steps.map((t, i) => <li key={i}>{t}</li>)}</ol>
                 </div>
               )}
 
               {canEdit && (
-                <div className="row" style={{ marginTop: 12 }}>
-                  {!st.connected && <form action={checkNowAction.bind(null, d.id)}><SubmitButton className="btn btn-secondary" pending="Checking…" data-testid="check-now">Check now</SubmitButton></form>}
-                  {d.verified && !d.isPrimary && <form action={makePrimaryAction.bind(null, d.id)}><SubmitButton className="btn btn-secondary" pending="…">Make this the main address</SubmitButton></form>}
-                  <form action={removeDomainAction.bind(null, d.id)}><SubmitButton className="btn btn-secondary" pending="Removing…" aria-label={`Remove ${d.domain}`}>Remove</SubmitButton></form>
+                <div className="row gap-xs mt-md">
+                  {!st.connected && <form action={checkNowAction.bind(null, d.id)}><SubmitButton className="btn btn-secondary btn-sm" pending="Checking…" data-testid="check-now">Check now</SubmitButton></form>}
+                  {d.verified && !d.isPrimary && <form action={makePrimaryAction.bind(null, d.id)}><SubmitButton className="btn btn-secondary btn-sm" pending="…">Make this the main address</SubmitButton></form>}
+                  <form action={removeDomainAction.bind(null, d.id)}><SubmitButton className="btn btn-secondary btn-sm" pending="Removing…" aria-label={`Remove ${d.domain}`}>Remove</SubmitButton></form>
                 </div>
               )}
             </section>
@@ -85,14 +85,14 @@ export default async function Domains({ searchParams }: { searchParams: Promise<
       </div>
 
       {canEdit && (
-        <form action={addDomainAction} className="card stack" style={{ marginTop: 14 }} data-testid="domain-add">
-          <h2>Add a domain</h2>
-          <div className="field" style={{ margin: 0 }}>
+        <form action={addDomainAction} className="card stack mt-md" data-testid="domain-add">
+          <h2 className="text-base font-bold m-0">Add a domain</h2>
+          <div className="field m-0">
             <label className="label" htmlFor="domain">Your domain</label>
-            <input id="domain" className="input" name="domain" required placeholder="yourshop.com" autoCapitalize="none" autoCorrect="off" spellCheck={false} inputMode="url" />
-            <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>Only the name, without https:// or a slash. Custom domains come with the Growth plan and above.</div>
+            <input id="domain" className="input font-mono" name="domain" required placeholder="yourshop.com" autoCapitalize="none" autoCorrect="off" spellCheck={false} inputMode="url" />
+            <div className="muted text-xs mt-xs">Only the name, without https:// or a slash. Custom domains come with the Growth plan and above.</div>
           </div>
-          <div><SubmitButton pending="Adding…">Add domain</SubmitButton></div>
+          <div><SubmitButton className="btn btn-primary" pending="Adding…">Add domain</SubmitButton></div>
         </form>
       )}
     </>

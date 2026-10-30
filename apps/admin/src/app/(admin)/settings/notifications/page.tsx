@@ -21,15 +21,15 @@ export default async function Notifications() {
         crumbs={[{ label: "Settings", href: "/settings/store" }, { label: "Notifications" }]}
         sub="The SMS your customers get about their order. Each one is off until you turn it on. Every message uses one SMS credit from your plan."
       />
-      <div className="notice" style={{ marginBottom: 14 }} data-testid="sms-credits">
+      <div className="notice mb-3" data-testid="sms-credits">
         {smsCredits.limit == null ? `${smsCredits.used} SMS sent this month. Your plan has no SMS limit.` : `${smsCredits.used} of ${smsCredits.limit} SMS credits used this month.`}
       </div>
-      {!canEdit && <div className="notice" style={{ marginBottom: 14 }}>You can read these messages but not change them.</div>}
-      <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
+      {!canEdit && <div className="notice mb-3">You can read these messages but not change them.</div>}
+      <fieldset disabled={!canEdit} className="border-0 p-0 m-0">
         <div className="stack" data-testid="order-messages">
           {orderMessages.map((t) => <MessageCard key={t.event} t={t} storeName={storeName} />)}
         </div>
-        <h2 style={{ fontSize: 16, margin: "22px 0 10px" }}>Reminders</h2>
+        <h2 className="text-base font-bold mt-4 mb-2">Reminders</h2>
         <div className="stack">
           {reminders.map((t) => <MessageCard key={t.event} t={t} storeName={storeName} />)}
         </div>

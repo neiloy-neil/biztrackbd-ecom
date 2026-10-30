@@ -110,18 +110,18 @@ export default async function Apps({
       />
 
       {err && (
-        <div className="notice bad" role="alert" style={{ marginBottom: 16 }} data-testid="apps-error">
+        <div className="notice bad mb-3" role="alert" data-testid="apps-error">
           {err}
         </div>
       )}
       {one(sp.done) && (
-        <div className="notice good" role="status" style={{ marginBottom: 16 }}>
+        <div className="notice good mb-3" role="status">
           Saved successfully.
         </div>
       )}
 
       {overview.allowance === 0 && (
-        <div className="notice info" style={{ marginBottom: 16 }}>
+        <div className="notice info mb-3">
           Your current plan tier does not include premium addon apps.{" "}
           <Link href="/billing" className="link" prefetch={false}>
             See plans

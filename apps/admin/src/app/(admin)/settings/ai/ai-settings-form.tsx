@@ -28,45 +28,45 @@ export function AiSettingsForm({ initial }: { initial: AiSettingsView }) {
     : Math.min(100, Math.round((initial.usedThisMonth / Math.max(1, initial.monthlyQuota)) * 100));
 
   return (
-    <form action={formAction} className="stack" style={{ gap: "20px" }}>
+    <form action={formAction} className="stack gap-4">
       {state.error && <div className="notice bad" role="alert">{state.error}</div>}
       {state.success && <div className="notice good" role="status">{state.success}</div>}
 
       {/* Quota & Engine Status Card */}
       <section className="card">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <div className="row-between items-center mb-3">
           <div>
-            <h2 style={{ margin: 0, fontSize: 18 }}>Quota &amp; Generation Status</h2>
-            <p className="muted" style={{ margin: "4px 0 0", fontSize: 13.5 }}>
+            <h2 className="m-0 text-lg">Quota &amp; Generation Status</h2>
+            <p className="muted text-sm mt-1">
               Provider: <strong>Standard Content Generator</strong>
             </p>
           </div>
-          <span className={`pill ${initial.hasCustomKey ? "ok" : percentUsed >= 90 ? "bad" : "warn"}`}>
+          <span className={initial.hasCustomKey ? "badge-green" : percentUsed >= 90 ? "badge-red" : "badge-amber"}>
             {initial.hasCustomKey ? "Custom Key (Unlimited)" : `Plan Quota (${initial.planTier})`}
           </span>
         </div>
 
         {!initial.hasCustomKey ? (
           <div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
+            <div className="row-between text-sm mb-2">
               <span>Monthly Generations Used: <strong>{initial.usedThisMonth}</strong> / {initial.monthlyQuota}</span>
               <span className="muted">{initial.remainingThisMonth} remaining</span>
             </div>
-            <div style={{ width: "100%", height: 8, background: "#E2E8F0", borderRadius: 4, overflow: "hidden" }}>
+            <div className="progress-bar-track">
               <div
+                className="progress-bar-fill"
                 style={{
                   width: `${percentUsed}%`,
-                  height: "100%",
                   background: percentUsed >= 90 ? "#DC2626" : percentUsed >= 70 ? "#F59E0B" : "#2563EB",
                 }}
               />
             </div>
-            <p className="muted" style={{ fontSize: 12.5, marginTop: 8 }}>
+            <p className="muted text-xs mt-2">
               Need more generations? Add your own API key below to enable unlimited generations.
             </p>
           </div>
         ) : (
-          <div style={{ padding: "12px 14px", background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 8, fontSize: 13.5, color: "#166534" }}>
+          <div className="notice good">
             Your custom API Key is active. All description generation and chat requests run directly through your key with no monthly limits.
           </div>
         )}
@@ -74,29 +74,27 @@ export function AiSettingsForm({ initial }: { initial: AiSettingsView }) {
 
       {/* Bring Your Own Key Section */}
       <section className="card">
-        <h2 style={{ fontSize: 18, margin: "0 0 4px" }}>Custom API Key (Optional)</h2>
-        <p className="muted" style={{ fontSize: 13.5, margin: "0 0 14px" }}>
+        <h2 className="text-lg m-0 mb-1">Custom API Key (Optional)</h2>
+        <p className="muted text-sm mb-3">
           You can provide your own API key from Google AI Studio. Adding your own key unlocks unlimited description generation and customer assistant requests.
         </p>
 
         <label className="field">
           <span className="label">Google Gemini API Key</span>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div className="row gap-2">
             <input
               type="text"
               name="customGeminiApiKey"
-              className="input"
+              className="input input-mono"
               value={customKey}
               onChange={(e) => setCustomKey(e.target.value)}
               placeholder="AIzaSy..."
-              style={{ fontFamily: "monospace" }}
             />
             <button
               type="button"
-              className="btn btn-secondary"
+              className="btn btn-secondary whitespace-nowrap"
               onClick={handleTestKey}
               disabled={isTesting || !customKey}
-              style={{ whiteSpace: "nowrap" }}
             >
               {isTesting ? "Testing…" : "Test Key"}
             </button>
@@ -121,16 +119,7 @@ export function AiSettingsForm({ initial }: { initial: AiSettingsView }) {
         </label>
 
         {testResult && (
-          <div
-            style={{
-              padding: "10px 14px",
-              borderRadius: 8,
-              fontSize: 13,
-              background: testResult.valid ? "#ECFDF5" : "#FEF2F2",
-              border: `1px solid ${testResult.valid ? "#A7F3D0" : "#FECACA"}`,
-              color: testResult.valid ? "#065F46" : "#991B1B",
-            }}
-          >
+          <div className={`notice ${testResult.valid ? "good" : "bad"} mt-3`}>
             {testResult.valid ? "Connection successful. API key is valid." : `Error: ${testResult.error}`}
           </div>
         )}
@@ -138,19 +127,18 @@ export function AiSettingsForm({ initial }: { initial: AiSettingsView }) {
 
       {/* Storefront Shopping Assistant Settings */}
       <section className="card">
-        <h2 style={{ fontSize: 18, margin: "0 0 4px" }}>Storefront Shopping Assistant</h2>
-        <p className="muted" style={{ fontSize: 13.5, margin: "0 0 16px" }}>
+        <h2 className="text-lg m-0 mb-1">Storefront Shopping Assistant</h2>
+        <p className="muted text-sm mb-3">
           A chat assistant on your website answering product inquiries, checking order status by phone number, and explaining delivery policies.
         </p>
 
-        <label className="checkbox-row" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+        <label className="check mb-3">
           <input
             type="checkbox"
             name="aiChatbotEnabled"
             defaultChecked={initial.chatbotEnabled}
-            style={{ width: 18, height: 18, cursor: "pointer" }}
           />
-          <span style={{ fontWeight: 600 }}>Enable Storefront Shopping Assistant</span>
+          <span><strong>Enable Storefront Shopping Assistant</strong></span>
         </label>
 
         <div className="row-2">
@@ -193,7 +181,7 @@ export function AiSettingsForm({ initial }: { initial: AiSettingsView }) {
           <span className="help">Leave blank to use the default greeting.</span>
         </label>
 
-        <label className="field" style={{ marginTop: 12 }}>
+        <label className="field mt-3">
           <span className="label">Custom Business Instructions &amp; FAQs (AI Grounding)</span>
           <textarea
             name="aiChatbotInstructions"

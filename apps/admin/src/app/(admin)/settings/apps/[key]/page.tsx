@@ -39,7 +39,7 @@ export default async function AppDetailPage({
   }
 
   return (
-    <div className="stack" style={{ gap: 20 }}>
+    <div className="stack gap-4">
       <PageHeader
         title={app.label}
         crumbs={[
@@ -50,35 +50,13 @@ export default async function AppDetailPage({
       />
 
       {/* Header Banner */}
-      <div
-        className="card"
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          flexWrap: "wrap",
-          gap: 16,
-        }}
-      >
-        <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-          <div
-            style={{
-              width: 54,
-              height: 54,
-              borderRadius: 12,
-              background: "var(--bg-subtle, #f3f4f6)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              border: "1px solid var(--border, #e5e7eb)",
-              fontSize: 24,
-              color: "var(--brand, #0f766e)",
-            }}
-          >
+      <div className="card row-between items-start flex-wrap gap-3">
+        <div className="row gap-3 items-center">
+          <div className="icon-box-lg">
             {app.category === "MARKETING" ? (
               <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path d="M18 20V10M12 20V4M6 20v-6" /></svg>
             ) : app.category === "COURIERS" ? (
-              <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true"><rect x="1" y="3" width="15" height="13" /><polygon points="16 8 20 8 23 11 23 16 16 16 16 8" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg>
+              <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true"><rect x="1" y="3" width="15" height="13" /><polygon points="16 8 20 8 23 11 23 16 16 16 8" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg>
             ) : app.category === "GROWTH" ? (
               <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path d="M23 6l-9.5 9.5-5-5L1 18" /><path d="M17 6h6v6" /></svg>
             ) : app.category === "AUTOMATION" ? (
@@ -88,26 +66,20 @@ export default async function AppDetailPage({
             )}
           </div>
           <div>
-            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-              <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{app.label}</h1>
+            <div className="row gap-2 items-center flex-wrap">
+              <h1 className="text-xl font-bold m-0">{app.label}</h1>
               {app.badge && <span className="pill grey">{app.badge}</span>}
-              <span
-                className="pill"
-                style={{
-                  background: app.tier === "INCLUDED" ? "rgba(16, 185, 129, 0.1)" : "rgba(124, 58, 237, 0.1)",
-                  color: app.tier === "INCLUDED" ? "#059669" : "#7C3AED",
-                }}
-              >
+              <span className={app.tier === "INCLUDED" ? "badge-green" : "badge-purple"}>
                 {app.tierLabel}
               </span>
             </div>
-            <div className="muted" style={{ fontSize: 13.5, marginTop: 4 }}>
+            <div className="muted text-sm mt-1">
               Category: <b>{app.categoryLabel}</b> · {app.built ? "Ready to use" : "In development"}
             </div>
           </div>
         </div>
 
-        <div className="row" style={{ gap: 8 }}>
+        <div className="row gap-2">
           {app.tier === "ADDON" && app.built && canEdit && (
             <form action={setModuleAction.bind(null, app.key, !isEnabled)}>
               <SubmitButton className="btn btn-secondary" pending="Saving…">
@@ -125,17 +97,17 @@ export default async function AppDetailPage({
       </div>
 
       {/* Main Content Split */}
-      <div className="split" style={{ alignItems: "flex-start" }}>
-        <div className="col stack" style={{ gap: 16 }}>
+      <div className="split items-start">
+        <div className="col stack gap-3">
           {/* Overview Section */}
           <section className="card">
             <div className="card-head">
               <h2>Overview</h2>
             </div>
-            <p style={{ lineHeight: 1.6, fontSize: 14.5 }}>{app.longDescription}</p>
+            <p className="leading-relaxed text-sm">{app.longDescription}</p>
 
-            <h3 style={{ fontSize: 15, fontWeight: 600, marginTop: 18, marginBottom: 8 }}>Key Capabilities</h3>
-            <ul style={{ paddingLeft: 20, margin: 0, lineHeight: 1.7, fontSize: 14 }}>
+            <h3 className="text-sm font-semibold mt-3 mb-2">Key Capabilities</h3>
+            <ul className="ps-4 m-0 leading-loose text-sm">
               {app.features.map((feat, idx) => (
                 <li key={idx}>✓ {feat}</li>
               ))}
@@ -147,10 +119,10 @@ export default async function AppDetailPage({
             <div className="card-head">
               <h2>Setup & Quick Guide</h2>
             </div>
-            <div className="notice info" style={{ marginBottom: 12 }}>
+            <div className="notice info mb-3">
               {app.docsSummary}
             </div>
-            <p className="muted" style={{ fontSize: 13.5, lineHeight: 1.5 }}>
+            <p className="muted text-sm leading-normal">
               For developer webhooks and advanced settings, visit{" "}
               <Link href="/settings/apps" className="link" prefetch={false}>
                 Settings &gt; Apps &amp; Integrations
@@ -160,7 +132,7 @@ export default async function AppDetailPage({
           </section>
         </div>
 
-        <div className="col stack" style={{ gap: 16 }}>
+        <div className="col stack gap-3">
           {/* Status & Plan Info */}
           <section className="card">
             <div className="card-head">

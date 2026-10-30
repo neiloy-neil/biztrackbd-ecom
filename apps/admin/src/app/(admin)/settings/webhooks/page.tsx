@@ -23,7 +23,7 @@ export default async function WebhooksPage() {
       />
 
       {!canEdit && (
-        <div className="notice" style={{ marginBottom: 16 }}>
+        <div className="notice mb-3">
           You have view-only access to webhook settings. Contact the store owner to make changes.
         </div>
       )}
