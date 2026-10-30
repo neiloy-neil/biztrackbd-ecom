@@ -63,6 +63,10 @@ export function setVercelClient(c: VercelDomainClient | null): void {
  * The real client, used when PLATFORM_VERCEL_TOKEN and PLATFORM_VERCEL_PROJECT_ID are set. Without them nothing is called and the domain stays "waiting for the certificate".
  * The names do not start with VERCEL_ because Vercel's dashboard refuses variables with that prefix; the old VERCEL_* names still work as a fallback (local use, tests).
  */
+function isApex(domain: string): boolean {
+  return domain.split(".").length <= 2 || (/\.(co|com|org|net|gov|edu)\.bd$/.test(domain) && domain.split(".").length <= 3);
+}
+
 export function vercelFromEnv(env = process.env): VercelDomainClient | null {
   const token = env.PLATFORM_VERCEL_TOKEN ?? env.VERCEL_TOKEN ?? env.VERCEL_AUTH_TOKEN, project = env.PLATFORM_VERCEL_PROJECT_ID ?? env.VERCEL_PROJECT_ID;
   if (!token || !project) return null;
@@ -79,6 +83,13 @@ export function vercelFromEnv(env = process.env): VercelDomainClient | null {
       const r = await call("POST", `/v10/projects/${project}/domains`, { name: domain });
       // 409 means it is already on this project.
       if (r.status >= 400 && r.status !== 409) throw new Error(`vercel add ${r.status}`);
+      if (isApex(domain)) {
+        try {
+          await call("POST", `/v10/projects/${project}/domains`, { name: `www.${domain}` });
+        } catch {
+          // ignore if already present or rate limited
+        }
+      }
     },
     async status(domain) {
       const cfg = await call("GET", `/v6/domains/${encodeURIComponent(domain)}/config`);
@@ -90,6 +101,11 @@ export function vercelFromEnv(env = process.env): VercelDomainClient | null {
     async remove(domain) {
       const r = await call("DELETE", `/v9/projects/${project}/domains/${encodeURIComponent(domain)}`);
       if (r.status >= 400 && r.status !== 404) throw new Error(`vercel remove ${r.status}`);
+      if (isApex(domain)) {
+        try {
+          await call("DELETE", `/v9/projects/${project}/domains/${encodeURIComponent(`www.${domain}`)}`);
+        } catch {}
+      }
     },
   };
 }
@@ -112,7 +128,6 @@ export interface DnsInstruction {
   steps: string[];
 }
 
-const isApex = (domain: string) => domain.split(".").length <= 2 || /\.(co|com|org|net|gov|edu)\.bd$/.test(domain) && domain.split(".").length <= 3;
 const aTarget = () => process.env.PLATFORM_A_RECORD ?? "76.76.21.21";
 const cnameTarget = () => (process.env.PLATFORM_CNAME_TARGET ?? "cname.biztrack.bd").toLowerCase();
 
