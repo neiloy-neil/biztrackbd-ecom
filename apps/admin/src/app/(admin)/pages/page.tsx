@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CUSTOM_PAGE_TEMPLATES, can, listCustomPages } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
+import { PageHeader } from "@biztrackbd/ui";
 import { dateOnly } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
@@ -22,8 +23,11 @@ export default async function Pages({ searchParams }: { searchParams: Promise<Re
   const done = one(sp.done);
   return (
     <>
-      <div className="page-head"><h1>Pages built from sections</h1></div>
-      <p className="page-sub">About us, contact, size guide, delivery and returns: build a page from text, pictures, questions and contact details, and edit it right on the page. For a plain page of text, use <Link className="link" href="/content">Pages and blog</Link>.</p>
+      <PageHeader
+        title="Pages Built from Sections"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Pages" }]}
+        sub={<>About us, contact, size guide, delivery and returns: build a page from text, pictures, questions and contact details, and edit it right on the page. For a plain page of text, use <Link className="link" href="/content">Pages and blog</Link>.</>}
+      />
       {err && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{err}</div>}
       {done === "deleted" && <div className="notice good" role="status" style={{ marginBottom: 12 }}>Page deleted.</div>}
 

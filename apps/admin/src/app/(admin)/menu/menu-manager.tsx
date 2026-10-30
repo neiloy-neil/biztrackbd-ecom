@@ -11,6 +11,7 @@ import {
 } from "./actions";
 import type { PublicMenuCategory, PublicMenuItem } from "@biztrackbd/core";
 import { TableQrStudio } from "./table-qr-studio";
+import { PageHeader } from "@biztrackbd/ui";
 import "./menu.css";
 
 const DIETARY_OPTIONS = [
@@ -140,48 +141,44 @@ export function MenuManager({
 
   return (
     <div className="menu-workspace">
-      {/* Header bar */}
-      <div className="menu-header-bar">
-        <div className="menu-title-group">
-          <h1>
-            <span>🍽️</span> Restaurant Menu & Dishes
-          </h1>
-          <p>
-            Organize dish categories, price points, dietary flags, daily availability, and contactless QR dining tables.
-          </p>
-        </div>
-        <div className="menu-header-actions">
-          <button
-            type="button"
-            onClick={() => setActiveMainTab("qr-studio")}
-            className="menu-btn-secondary"
-          >
-            <span>📱</span> Table QR Studio
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setEditingCategory(null);
-              setShowCategoryModal(true);
-            }}
-            className="menu-btn-secondary"
-          >
-            <span>+</span> Add Category
-          </button>
-          <button
-            type="button"
-            disabled={categories.length === 0}
-            onClick={() => {
-              setEditingDish(null);
-              setDishCategoryId(categories[0]?.id ?? "");
-              setShowDishModal(true);
-            }}
-            className="menu-btn-primary"
-          >
-            <span>+</span> Add Dish
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Restaurant Menu & Dishes"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Menu" }]}
+        sub="Organize dish categories, price points, dietary flags, daily availability, and contactless QR dining tables."
+        actions={
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              onClick={() => setActiveMainTab("qr-studio")}
+              className="btn btn-secondary btn-sm"
+            >
+              Table QR Studio
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEditingCategory(null);
+                setShowCategoryModal(true);
+              }}
+              className="btn btn-secondary btn-sm"
+            >
+              + Add Category
+            </button>
+            <button
+              type="button"
+              disabled={categories.length === 0}
+              onClick={() => {
+                setEditingDish(null);
+                setDishCategoryId(categories[0]?.id ?? "");
+                setShowDishModal(true);
+              }}
+              className="btn btn-primary btn-sm"
+            >
+              + Add Dish
+            </button>
+          </div>
+        }
+      />
 
       {/* Primary Module Navigation Tabs */}
       <div className="menu-module-tabs">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { can, getContent, listContent, type ContentDetail } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
+import { PageHeader } from "@biztrackbd/ui";
 import { dateOnly } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
@@ -36,8 +37,11 @@ export default async function Content({ searchParams }: { searchParams: Promise<
 
   return (
     <>
-      <div className="page-head"><h1>Pages and blog</h1></div>
-      <p className="page-sub">Pages are for things like your delivery policy and size guide. Blog posts are for news and tips. Write plain text: a blank line starts a new paragraph.</p>
+      <PageHeader
+        title="Pages and Blog"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Pages & Blog" }]}
+        sub="Pages are for things like your delivery policy and size guide. Blog posts are for news and tips. Write plain text: a blank line starts a new paragraph."
+      />
       <nav className="tabs" aria-label="Type">
         <Link href="/content?tab=pages" aria-current={tab === "pages" ? "page" : undefined} prefetch={false}>Pages</Link>
         <Link href="/content?tab=posts" aria-current={tab === "posts" ? "page" : undefined} prefetch={false}>Blog posts</Link>

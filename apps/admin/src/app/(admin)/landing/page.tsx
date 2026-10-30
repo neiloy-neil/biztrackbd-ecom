@@ -3,6 +3,7 @@ import Link from "next/link";
 import { LANDING_TEMPLATES, can, getModuleStatus, landingTotals, listLandingPages } from "@biztrackbd/core";
 import { withTenant } from "@biztrackbd/db";
 import { SubmitButton } from "@/components/ui";
+import { PageHeader } from "@biztrackbd/ui";
 import { AppDisabledNotice } from "@/components/app-disabled-notice";
 import { dateOnly } from "@/lib/format";
 import { one } from "@/lib/query";
@@ -42,8 +43,11 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
   const done = one(sp.done);
   return (
     <>
-      <div className="page-head"><h1>Landing pages</h1></div>
-      <p className="page-sub">One product, one page, one order form. Send ad traffic here: customers order with cash on delivery without making an account.</p>
+      <PageHeader
+        title="Landing Pages"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Landing Pages" }]}
+        sub="One product, one page, one order form. Send ad traffic here: customers order with cash on delivery without making an account."
+      />
       {err && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{err}</div>}
       {done === "deleted" && <div className="notice good" role="status" style={{ marginBottom: 12 }}>Page deleted.</div>}
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
+import { PageHeader } from "@biztrackbd/ui";
 import type { SiteContentItem, SiteContentKind } from "@biztrackbd/db";
 import {
   saveContentItemAction,
@@ -424,33 +425,31 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
 
   return (
     <div className="content-items-workspace">
-      {/* Page Header */}
-      <div className="page-head" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: "1.75rem", fontWeight: 700 }}>{headerTitle}</h1>
-          <p className="muted" style={{ margin: "4px 0 0", fontSize: "0.95rem" }}>
-            {headerDescription}
-          </p>
-        </div>
-        <div style={{ display: "flex", gap: 10 }}>
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={handleExportCsv}
-            disabled={isPending || items.length === 0}
-          >
-            Export CSV
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            onClick={handleOpenCreate}
-            data-testid="add-content-item-btn"
-          >
-            + Add {lockedKind ? KIND_METAS[lockedKind].singular : "Content Item"}
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title={headerTitle}
+        crumbs={[{ label: "Home", href: "/" }, { label: "Content Items" }]}
+        sub={headerDescription}
+        actions={
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={handleExportCsv}
+              disabled={isPending || items.length === 0}
+            >
+              Export CSV
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              onClick={handleOpenCreate}
+              data-testid="add-content-item-btn"
+            >
+              + Add {lockedKind ? KIND_METAS[lockedKind].singular : "Content Item"}
+            </button>
+          </div>
+        }
+      />
 
       {/* Kind filter tabs if not locked */}
       {!lockedKind && (
