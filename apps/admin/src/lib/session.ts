@@ -217,13 +217,18 @@ async function devSession(): Promise<AdminSession | null> {
   const wantedTenant = (await cookies()).get(DEV_TENANT_COOKIE)?.value;
   const sub = wantedTenant && /^[a-z0-9-]{3,40}$/.test(wantedTenant) ? wantedTenant : process.env.DEV_TENANT_SUBDOMAIN ?? "rongdhonu";
   const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
-  const t = await resolveTenantByHost(`${sub}.${root}`, root);
+  let t = await resolveTenantByHost(`${sub}.${root}`, root);
+  if (!t && sub !== "rongdhonu") {
+    // If browser cookie had a tenant that no longer exists in DB, safely fall back to default demo tenant rongdhonu
+    t = await resolveTenantByHost(`rongdhonu.${root}`, root);
+  }
   if (!t) notFound();
 
   const wanted = (await cookies()).get(DEV_USER_COOKIE)?.value;
   const user = await withTenant(t.id, async (tx) =>
     (wanted ? await tx.tenantUser.findFirst({ where: { email: wanted, isActive: true } }) : null) ??
-    (await tx.tenantUser.findFirst({ where: { role: "STORE_OWNER", isActive: true } })),
+    (await tx.tenantUser.findFirst({ where: { role: "STORE_OWNER", isActive: true } })) ??
+    (await tx.tenantUser.findFirst({ where: { isActive: true } })),
   );
   if (!user) return null;
   const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim();
