@@ -9,6 +9,70 @@
         "dev"
       ],
       "port": 3000
+    },
+    {
+      "name": "marketing",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@biztrackbd/marketing",
+        "dev"
+      ],
+      "port": 3002
+    },
+    {
+      "name": "qa-stack",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "tools/qa-stack.mjs"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "qa-admin",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "tools/qa-stack.mjs",
+        "admin"
+      ],
+      "port": 3001
+    },
+    {
+      "name": "qa-sa",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "tools/qa-stack.mjs",
+        "storefront,admin"
+      ],
+      "port": 3001
+    },
+    {
+      "name": "qa-sam",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "tools/qa-stack.mjs",
+        "storefront,admin,marketing"
+      ],
+      "port": 3001
+    },
+    {
+      "name": "qa-prod",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "tools/qa-stack.mjs",
+        "storefront,admin,marketing,platform",
+        "storefront,marketing,platform"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "qa-platform",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "tools/qa-stack.mjs",
+        "platform"
+      ],
+      "port": 3003
     }
   ]
 }

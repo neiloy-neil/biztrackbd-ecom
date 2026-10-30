@@ -62,7 +62,7 @@ export async function addNoteAction(id: string, form: FormData): Promise<void> {
 export async function impersonateAction(id: string): Promise<never> {
   const s = await requireAction("tenants", "edit");
   const ticket = await createImpersonationTicket(s.actor, id);
-  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3000";
+  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3001";
   redirect(`${adminUrl}/api/auth/impersonate?ticket=${encodeURIComponent(ticket)}`);
 }
 

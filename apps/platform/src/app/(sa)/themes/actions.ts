@@ -73,7 +73,7 @@ export async function openWorkshopEditorAction(tenantId: string): Promise<never>
   // This button must only ever open a workshop: it is not a way into merchants' stores.
   if (!(await listWorkshopStores(s.actor)).some((w) => w.tenantId === tenantId)) return back({ err: "That is not a workshop store." });
   const ticket = await createImpersonationTicket(s.actor, tenantId);
-  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3000";
+  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3001";
   redirect(`${adminUrl}/api/auth/impersonate?ticket=${encodeURIComponent(ticket)}&next=/design`);
 }
 

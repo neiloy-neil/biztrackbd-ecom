@@ -7,6 +7,7 @@ import {
   can,
 } from "@biztrackbd/core";
 import { requireAccess } from "@/lib/session";
+import { storefrontOrigin } from "@/lib/store-url";
 import { AffiliatesClient } from "./affiliates-client";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +21,7 @@ export default async function AffiliatesPage() {
     listAffiliatePartners(s.tenantId),
     listAffiliatePayouts(s.tenantId),
     listAffiliateReferrals(s.tenantId),
-    storeOriginFor(s.tenantId).catch(() => "http://localhost:3000"),
+    storeOriginFor(s.tenantId).catch(() => storefrontOrigin(s.tenantSubdomain)),
   ]);
 
   return (
