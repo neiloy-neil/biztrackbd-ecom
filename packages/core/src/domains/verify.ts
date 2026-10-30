@@ -82,7 +82,10 @@ export function vercelFromEnv(env = process.env): VercelDomainClient | null {
     async add(domain) {
       const r = await call("POST", `/v10/projects/${project}/domains`, { name: domain });
       // 409 means it is already on this project.
-      if (r.status >= 400 && r.status !== 409) throw new Error(`vercel add ${r.status}`);
+      if (r.status >= 400 && r.status !== 409) {
+        const msg = (r.json as any)?.error?.message || (r.json as any)?.message || JSON.stringify(r.json);
+        throw new Error(`vercel add ${r.status}: ${msg}`);
+      }
       if (isApex(domain)) {
         try {
           await call("POST", `/v10/projects/${project}/domains`, { name: `www.${domain}` });
@@ -265,7 +268,7 @@ export async function checkDomain(tenantId: string, host: string): Promise<Check
   // Ask Vercel to serve the name; it issues the certificate by itself.
   const v = client();
   if (!v) {
-    if (probe.live || probe.serverIsVercel) {
+    if (probe.live) {
       await confirmDomainVerified(tenantId, domain);
       await withTenant(tenantId, async (tx) => {
         await tx.domain.update({
@@ -279,8 +282,15 @@ export async function checkDomain(tenantId: string, host: string): Promise<Check
       return { dnsStatus: "verified", note: null, ssl: "issued", connected: true };
     }
 
-    await withTenant(tenantId, (tx) => tx.domain.update({ where: { id: row.id }, data: { dnsStatus: "found", dnsNote: "Your record is correct. We are getting the certificate ready.", lastCheckedAt: new Date() } }));
-    return { dnsStatus: "found", note: "Your record is correct. We are getting the certificate ready.", ssl, connected: false };
+    const token = process.env.PLATFORM_VERCEL_TOKEN ?? process.env.VERCEL_TOKEN ?? process.env.VERCEL_AUTH_TOKEN;
+    const project = process.env.PLATFORM_VERCEL_PROJECT_ID ?? process.env.VERCEL_PROJECT_ID;
+    const missing: string[] = [];
+    if (!token) missing.push("PLATFORM_VERCEL_TOKEN");
+    if (!project) missing.push("PLATFORM_VERCEL_PROJECT_ID");
+    note = missing.length > 0 ? `Vercel configuration missing in admin: ${missing.join(", ")}` : "Your record is correct. We are getting the certificate ready.";
+
+    await withTenant(tenantId, (tx) => tx.domain.update({ where: { id: row.id }, data: { dnsStatus: "found", dnsNote: note, lastCheckedAt: new Date() } }));
+    return { dnsStatus: "found", note, ssl, connected: false };
   }
 
   try {
@@ -304,8 +314,9 @@ export async function checkDomain(tenantId: string, host: string): Promise<Check
     await withTenant(tenantId, (tx) => tx.domain.update({ where: { id: row.id }, data: { dnsStatus: "found", dnsNote: note, lastCheckedAt: new Date() } }));
     return { dnsStatus: "found", note, ssl, connected: false };
   } catch (e) {
-    console.error("[domains] vercel step failed", e instanceof Error ? e.message : "unknown");
-    if (probe.live || probe.serverIsVercel) {
+    const errText = e instanceof Error ? e.message : String(e);
+    console.error("[domains] vercel step failed", errText);
+    if (probe.live) {
       await confirmDomainVerified(tenantId, domain);
       await withTenant(tenantId, async (tx) => {
         await tx.domain.update({
@@ -315,7 +326,7 @@ export async function checkDomain(tenantId: string, host: string): Promise<Check
       });
       return { dnsStatus: "verified", note: null, ssl: "issued", connected: true };
     }
-    note = "Your record is correct. We hit a problem finishing the setup and will try again shortly.";
+    note = `Vercel domain connection error: ${errText}`;
     await withTenant(tenantId, (tx) => tx.domain.update({ where: { id: row.id }, data: { dnsStatus: "found", dnsNote: note, lastCheckedAt: new Date() } }));
     return { dnsStatus: "found", note, ssl, connected: false };
   }
