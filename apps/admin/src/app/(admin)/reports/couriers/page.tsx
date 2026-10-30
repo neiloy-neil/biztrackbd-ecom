@@ -55,13 +55,10 @@ export default async function CourierReportsPage({
       />
 
       {/* 4 KPI Cards */}
-      <div className="grid grid-4" style={{ marginBottom: 20 }}>
+      <div className="grid grid-4 mb-lg">
         <div className="stat">
           <div className="k">Delivery Success Rate</div>
-          <div
-            className="v num"
-            style={{ color: r.deliverySuccessRate >= 85 ? "#16a34a" : "#f59e0b" }}
-          >
+          <div className={`v num ${r.deliverySuccessRate >= 85 ? "stat-success" : "stat-warn"}`}>
             {r.deliverySuccessRate}%
           </div>
           <div className="d">Of {r.totalDispatched} dispatched parcels</div>
@@ -69,10 +66,7 @@ export default async function CourierReportsPage({
 
         <div className="stat">
           <div className="k">Return to Origin (RTO)</div>
-          <div
-            className="v num"
-            style={{ color: r.returnRate > 15 ? "#dc2626" : "inherit" }}
-          >
+          <div className={`v num ${r.returnRate > 15 ? "stat-danger" : ""}`}>
             {r.returnRate}%
           </div>
           <div className="d">Undelivered & returned parcels</div>
@@ -90,7 +84,7 @@ export default async function CourierReportsPage({
           <div className="k">COD Cash Collected</div>
           <div className="v num">{taka(r.totalCodCollected)}</div>
           <div className="d">
-            <Link href="/finance/cod" className="link" style={{ fontSize: 12 }}>
+            <Link href="/finance/cod" className="link text-xs">
               Check COD Payouts &rarr;
             </Link>
           </div>
@@ -98,10 +92,10 @@ export default async function CourierReportsPage({
       </div>
 
       {/* Courier Comparison Matrix */}
-      <section style={{ marginBottom: 24 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <h2 style={{ fontSize: 16, margin: 0 }}>Courier Comparison Matrix</h2>
-          <Link href="/settings/shipping" className="link" style={{ fontSize: 13 }}>
+      <section className="stack gap-sm mb-lg">
+        <div className="flex-between mb-sm">
+          <h2 className="text-base text-bold m-0">Courier Comparison Matrix</h2>
+          <Link href="/settings/shipping" className="link text-sm">
             Courier API Settings &rarr;
           </Link>
         </div>
@@ -109,8 +103,8 @@ export default async function CourierReportsPage({
         {r.couriers.length === 0 ? (
           <div className="card empty">No parcels dispatched in this period.</div>
         ) : (
-          <div className="card" style={{ padding: 0, overflowX: "auto" }}>
-            <table className="table" style={{ width: "100%" }}>
+          <div className="card p-0">
+            <table className="table">
               <thead>
                 <tr>
                   <th>Courier Provider</th>
@@ -155,15 +149,15 @@ export default async function CourierReportsPage({
       </section>
 
       {/* District Fulfillment Performance & Return Reasons */}
-      <div className="grid grid-2" style={{ gap: 16, marginBottom: 28 }}>
+      <div className="grid grid-2 gap-lg mb-xl">
         {/* District Fulfillment Performance */}
-        <section className="card" style={{ padding: 20 }}>
-          <h2 style={{ fontSize: 16, margin: "0 0 14px" }}>District Fulfillment Performance</h2>
-          <div style={{ maxHeight: 320, overflowY: "auto" }}>
+        <section className="card">
+          <h2 className="text-base text-bold mb-md m-0">District Fulfillment Performance</h2>
+          <div className="table-scroll-320">
             {r.districts.length === 0 ? (
               <p className="muted">No district delivery data.</p>
             ) : (
-              <table className="table" style={{ fontSize: 13 }}>
+              <table className="table">
                 <thead>
                   <tr>
                     <th>District</th>
@@ -198,26 +192,24 @@ export default async function CourierReportsPage({
         </section>
 
         {/* Return Reasons Breakdown */}
-        <section className="card" style={{ padding: 20 }}>
-          <h2 style={{ fontSize: 16, margin: "0 0 14px" }}>Reported Return & Refusal Reasons</h2>
+        <section className="card">
+          <h2 className="text-base text-bold mb-md m-0">Reported Return & Refusal Reasons</h2>
           {r.returnReasons.length === 0 ? (
             <p className="muted">No specific return reasons recorded for this period.</p>
           ) : (
             <div>
               {r.returnReasons.map((res) => (
-                <div key={res.reason} style={{ marginBottom: 12 }}>
-                  <div className="row" style={{ justifyContent: "space-between", marginBottom: 4 }}>
-                    <span style={{ fontSize: 13.5 }}>{res.reason}</span>
+                <div key={res.reason} className="mb-sm">
+                  <div className="row flex-between mb-xs">
+                    <span className="text-sm">{res.reason}</span>
                     <b className="num">
                       {res.count} ({res.percent}%)
                     </b>
                   </div>
                   <div className="meter">
                     <i
-                      style={{
-                        width: `${res.percent}%`,
-                        background: res.percent > 40 ? "#dc2626" : "var(--brand)",
-                      }}
+                      style={{ width: `${res.percent}%` }}
+                      className={res.percent > 40 ? "text-danger" : ""}
                     />
                   </div>
                 </div>

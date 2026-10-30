@@ -19,7 +19,7 @@ export function ReportTabs({ currentTab, queryString = "" }: ReportTabsProps) {
   const qs = queryString ? (queryString.startsWith("?") ? queryString : `?${queryString}`) : "";
 
   return (
-    <nav className="tabs" aria-label="Report Category" style={{ marginBottom: 16 }}>
+    <nav className="tabs mb-lg" aria-label="Report Category">
       {TABS.map((tab) => {
         const isActive = tab.id === currentTab;
         const targetHref = `${tab.href}${qs}`;

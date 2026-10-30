@@ -55,10 +55,10 @@ export default async function CustomerReportsPage({
       />
 
       {/* 4 KPI Cards */}
-      <div className="grid grid-4" style={{ marginBottom: 20 }}>
+      <div className="grid grid-4 mb-lg">
         <div className="stat">
           <div className="k">Repeat Buyer Revenue Share</div>
-          <div className="v num" style={{ color: r.repeatRevenueShare >= 40 ? "#16a34a" : "inherit" }}>
+          <div className={`v num ${r.repeatRevenueShare >= 40 ? "stat-success" : ""}`}>
             {r.repeatRevenueShare}%
           </div>
           <div className="d">Of period gross sales</div>
@@ -84,88 +84,76 @@ export default async function CustomerReportsPage({
       </div>
 
       {/* First-Time vs Returning Shopper Comparison */}
-      <div className="grid grid-2" style={{ gap: 16, marginBottom: 24 }}>
-        <div
-          className="card"
-          style={{
-            padding: 20,
-            borderLeft: "4px solid #3b82f6",
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <h3 style={{ margin: 0, fontSize: 16 }}>{r.segments.firstTime.label}</h3>
-            <span className="pill blue" style={{ fontSize: 12 }}>
+      <div className="grid grid-2 gap-lg mb-lg">
+        <div className="card card-panel-info">
+          <div className="flex-between mb-sm">
+            <h3 className="m-0 text-base text-bold">{r.segments.firstTime.label}</h3>
+            <span className="pill info text-xs">
               {r.segments.firstTime.percentOfTotalRevenue}% of revenue
             </span>
           </div>
-          <div className="grid grid-3" style={{ gap: 10 }}>
+          <div className="grid grid-3 gap-sm">
             <div>
-              <div className="muted" style={{ fontSize: 12 }}>Shoppers</div>
-              <div style={{ fontSize: 18, fontWeight: 700 }}>{r.segments.firstTime.customersCount}</div>
+              <div className="muted text-xs">Shoppers</div>
+              <div className="text-base text-bold">{r.segments.firstTime.customersCount}</div>
             </div>
             <div>
-              <div className="muted" style={{ fontSize: 12 }}>Orders</div>
-              <div style={{ fontSize: 18, fontWeight: 700 }}>{r.segments.firstTime.ordersCount}</div>
+              <div className="muted text-xs">Orders</div>
+              <div className="text-base text-bold">{r.segments.firstTime.ordersCount}</div>
             </div>
             <div>
-              <div className="muted" style={{ fontSize: 12 }}>Avg Order (AOV)</div>
-              <div style={{ fontSize: 18, fontWeight: 700 }}>{taka(r.segments.firstTime.averageOrderValue)}</div>
+              <div className="muted text-xs">Avg Order (AOV)</div>
+              <div className="text-base text-bold">{taka(r.segments.firstTime.averageOrderValue)}</div>
             </div>
           </div>
-          <div style={{ marginTop: 14, fontSize: 13, color: "var(--muted)" }}>
+          <div className="mt-md text-sm text-muted">
             Total Revenue: <b>{taka(r.segments.firstTime.revenue)}</b>
           </div>
         </div>
 
-        <div
-          className="card"
-          style={{
-            padding: 20,
-            borderLeft: "4px solid #10b981",
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <h3 style={{ margin: 0, fontSize: 16 }}>{r.segments.returning.label}</h3>
-            <span className="pill green" style={{ fontSize: 12 }}>
+        <div className="card card-panel-muted">
+          <div className="flex-between mb-sm">
+            <h3 className="m-0 text-base text-bold">{r.segments.returning.label}</h3>
+            <span className="pill good text-xs">
               {r.segments.returning.percentOfTotalRevenue}% of revenue
             </span>
           </div>
-          <div className="grid grid-3" style={{ gap: 10 }}>
+          <div className="grid grid-3 gap-sm">
             <div>
-              <div className="muted" style={{ fontSize: 12 }}>Shoppers</div>
-              <div style={{ fontSize: 18, fontWeight: 700 }}>{r.segments.returning.customersCount}</div>
+              <div className="muted text-xs">Shoppers</div>
+              <div className="text-base text-bold">{r.segments.returning.customersCount}</div>
             </div>
             <div>
-              <div className="muted" style={{ fontSize: 12 }}>Orders</div>
-              <div style={{ fontSize: 18, fontWeight: 700 }}>{r.segments.returning.ordersCount}</div>
+              <div className="muted text-xs">Orders</div>
+              <div className="text-base text-bold">{r.segments.returning.ordersCount}</div>
             </div>
             <div>
-              <div className="muted" style={{ fontSize: 12 }}>Avg Order (AOV)</div>
-              <div style={{ fontSize: 18, fontWeight: 700 }}>{taka(r.segments.returning.averageOrderValue)}</div>
+              <div className="muted text-xs">Avg Order (AOV)</div>
+              <div className="text-base text-bold">{taka(r.segments.returning.averageOrderValue)}</div>
             </div>
           </div>
-          <div style={{ marginTop: 14, fontSize: 13, color: "var(--muted)" }}>
+          <div className="mt-md text-sm text-muted">
             Total Revenue: <b>{taka(r.segments.returning.revenue)}</b>
           </div>
         </div>
       </div>
 
       {/* RFM Cohort Segmentation Grid */}
-      <section style={{ marginBottom: 28 }}>
-        <h2 style={{ fontSize: 16, margin: "0 0 12px" }}>Customer Lifecycle & RFM Cohorts</h2>
-        <div className="grid grid-4" style={{ gap: 14 }}>
+      <section className="stack gap-sm mb-xl">
+        <h2 className="text-base text-bold m-0 mb-sm">Customer Lifecycle & RFM Cohorts</h2>
+        <div className="grid grid-4 gap-md">
           {r.rfmCohorts.map((cohort) => (
-            <div key={cohort.segment} className="card" style={{ padding: 16 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700 }}>{cohort.label}</h4>
-                <span className="pill" style={{ fontSize: 11 }}>{cohort.percentOfBase}%</span>
+            <div key={cohort.segment} className="card">
+              <div className="flex-between mb-xs">
+                <h4 className="m-0 text-sm text-bold">{cohort.label}</h4>
+                <span className="pill text-xs">{cohort.percentOfBase}%</span>
               </div>
-              <p className="muted" style={{ fontSize: 12, margin: "0 0 12px", minHeight: 32 }}>
+              <p className="muted text-xs mb-sm min-h-32">
                 {cohort.description}
               </p>
-              <div style={{ borderTop: "1px solid var(--border)", paddingTop: 10 }}>
-                <div style={{ fontSize: 16, fontWeight: 800 }}>{cohort.count.toLocaleString()} customers</div>
-                <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>
+              <div className="border-top pt-xs">
+                <div className="text-base text-bold">{cohort.count.toLocaleString()} customers</div>
+                <div className="muted text-xs mt-xs">
                   Lifetime: {taka(cohort.totalRevenue)}
                 </div>
               </div>
@@ -175,10 +163,10 @@ export default async function CustomerReportsPage({
       </section>
 
       {/* Top 20 VIP Spenders Leaderboard */}
-      <section style={{ marginBottom: 28 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <h2 style={{ fontSize: 16, margin: 0 }}>Top VIP Spenders Leaderboard</h2>
-          <Link href="/customers" className="link" style={{ fontSize: 13 }}>
+      <section className="stack gap-sm mb-xl">
+        <div className="flex-between mb-sm">
+          <h2 className="text-base text-bold m-0">Top VIP Spenders Leaderboard</h2>
+          <Link href="/customers" className="link text-sm">
             Full Customer CRM &rarr;
           </Link>
         </div>
@@ -186,8 +174,8 @@ export default async function CustomerReportsPage({
         {r.topVipCustomers.length === 0 ? (
           <div className="card empty">No customers in database.</div>
         ) : (
-          <div className="card" style={{ padding: 0, overflowX: "auto" }}>
-            <table className="table" style={{ width: "100%" }}>
+          <div className="card p-0">
+            <table className="table">
               <thead>
                 <tr>
                   <th>Rank & Customer</th>
@@ -203,7 +191,7 @@ export default async function CustomerReportsPage({
                 {r.topVipCustomers.map((vip, i) => (
                   <tr key={vip.customerId}>
                     <td>
-                      <span className="muted" style={{ marginRight: 8, fontWeight: 700 }}>
+                      <span className="muted text-bold mr-xs">
                         #{i + 1}
                       </span>
                       <b>{vip.name}</b>
@@ -214,15 +202,15 @@ export default async function CustomerReportsPage({
                       <b>{vip.ordersCount}</b>
                     </td>
                     <td className="r num">
-                      <b style={{ color: "#16a34a" }}>{taka(vip.totalSpend)}</b>
+                      <b className="stat-success">{taka(vip.totalSpend)}</b>
                     </td>
                     <td>
-                      <span className="muted" style={{ fontSize: 12.5 }}>
+                      <span className="muted text-xs">
                         {vip.lastOrderDate}
                       </span>
                     </td>
                     <td>
-                      <Link href={`/customers/${vip.customerId}`} className="link" style={{ fontSize: 12.5 }}>
+                      <Link href={`/customers/${vip.customerId}`} className="link text-xs">
                         View CRM &rarr;
                       </Link>
                     </td>

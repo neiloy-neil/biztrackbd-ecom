@@ -77,8 +77,8 @@ export default async function ReportsPage({
         currentTo={resolved.to}
       />
 
-      <div style={{ marginBottom: 16 }}>
-        <p className="muted" style={{ fontSize: 13.5, margin: 0 }}>
+      <div className="mb-md">
+        <p className="muted text-sm m-0">
           Showing <b>{label(r.from)}</b> to <b>{label(r.to)}</b> ({r.days} days) &bull;{" "}
           compared with the previous {r.days} days ({label(resolved.prevFrom)} to {label(resolved.prevTo)})
         </p>
@@ -107,38 +107,28 @@ export default async function ReportsPage({
         </div>
       </div>
 
-      <section className="card" style={{ marginTop: 16, padding: 20 }}>
-        <div className="card-head" style={{ marginBottom: 12 }}>
-          <h2 style={{ margin: 0, fontSize: 16 }}>Sales Over Time</h2>
-          <span className="muted" style={{ fontSize: 12.5 }}>
+      <section className="card mt-md">
+        <div className="card-head mb-sm">
+          <h2 className="m-0 text-base">Sales Over Time</h2>
+          <span className="muted text-xs">
             Solid bars: current period &bull; Lighter bars: previous period
           </span>
         </div>
         <div
-          className="bars"
-          style={{ height: 160, gap: r.days > 40 ? 1 : 4 }}
+          className="bars chart-bars-160"
           role="img"
           aria-label={`Daily sales from ${label(r.from)} to ${label(r.to)}. Total ${taka(r.current.sales)}.`}
         >
           {r.series.map((d, i) => (
             <div
-              className="bar"
+              className="bar pos-relative"
               key={d.date}
               title={`${label(d.date)}: ${taka(d.sales)} (Prev: ${taka(d.previousSales)})`}
-              style={{ position: "relative" }}
             >
               <i style={{ height: `${Math.max(2, Math.round((d.sales / max) * 100))}%` }} />
               <i
-                style={{
-                  height: `${Math.max(0, Math.round((d.previousSales / max) * 100))}%`,
-                  opacity: 0.25,
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  zIndex: 0,
-                  background: "var(--brand)",
-                }}
+                style={{ height: `${Math.max(0, Math.round((d.previousSales / max) * 100))}%` }}
+                className="bar-prev"
                 aria-hidden="true"
               />
               {r.days <= 14 || i % Math.ceil(r.days / 7) === 0 ? (
@@ -151,16 +141,16 @@ export default async function ReportsPage({
         </div>
       </section>
 
-      <div className="grid grid-2" style={{ marginTop: 16, gap: 16 }}>
-        <section className="card" style={{ padding: 20 }}>
-          <h2 style={{ margin: "0 0 14px", fontSize: 16 }}>Sales by Delivery District</h2>
+      <div className="grid grid-2 gap-lg mt-md">
+        <section className="card">
+          <h2 className="text-base mb-md m-0">Sales by Delivery District</h2>
           {r.byDistrict.length === 0 ? (
             <p className="muted">No sales in this period.</p>
           ) : (
             r.byDistrict.map((d) => (
-              <div key={d.district} style={{ marginBottom: 10 }}>
-                <div className="row" style={{ justifyContent: "space-between", marginBottom: 4 }}>
-                  <span style={{ fontSize: 13.5 }}>{d.district}</span>
+              <div key={d.district} className="mb-sm">
+                <div className="row flex-between mb-xs">
+                  <span className="text-sm">{d.district}</span>
                   <b className="num">{taka(d.sales)}</b>
                 </div>
                 <div className="meter">
@@ -171,17 +161,17 @@ export default async function ReportsPage({
           )}
         </section>
 
-        <section className="card" style={{ padding: 20 }}>
-          <h2 style={{ margin: "0 0 14px", fontSize: 16 }}>Payment Methods Used</h2>
+        <section className="card">
+          <h2 className="text-base mb-md m-0">Payment Methods Used</h2>
           {r.byPayment.length === 0 ? (
             <p className="muted">No sales in this period.</p>
           ) : (
             r.byPayment.map((p) => (
-              <div key={p.method} style={{ marginBottom: 10 }}>
-                <div className="row" style={{ justifyContent: "space-between", marginBottom: 4 }}>
-                  <span style={{ fontSize: 13.5 }}>
+              <div key={p.method} className="mb-sm">
+                <div className="row flex-between mb-xs">
+                  <span className="text-sm">
                     {methodName(p.method)}{" "}
-                    <span className="muted" style={{ fontSize: 12 }}>
+                    <span className="muted text-xs">
                       ({p.orders} {p.orders === 1 ? "order" : "orders"})
                     </span>
                   </span>
@@ -196,17 +186,17 @@ export default async function ReportsPage({
         </section>
       </div>
 
-      <section style={{ marginTop: 20 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-          <h2 style={{ fontSize: 16, margin: 0 }}>Top Performing Products</h2>
-          <a href={`/reports/products?from=${r.from}&to=${r.to}`} className="link" style={{ fontSize: 13 }}>
+      <section className="mt-lg">
+        <div className="flex-between mb-sm">
+          <h2 className="text-base m-0">Top Performing Products</h2>
+          <a href={`/reports/products?from=${r.from}&to=${r.to}`} className="link text-sm">
             Full Products & Stock Report &rarr;
           </a>
         </div>
         {r.topProducts.length === 0 ? (
           <div className="card empty">No sales in this period.</div>
         ) : (
-          <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+          <div className="card p-0">
             <table className="table" data-testid="top-products">
               <thead>
                 <tr>
@@ -243,7 +233,7 @@ export default async function ReportsPage({
         )}
       </section>
 
-      <p className="muted" style={{ marginTop: 16, fontSize: 12.5 }}>
+      <p className="muted text-xs mt-md">
         Sales calculate all completed and dispatched orders in Bangladesh Time. Cancelled orders are excluded.
       </p>
     </>

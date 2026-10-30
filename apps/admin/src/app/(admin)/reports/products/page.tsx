@@ -56,7 +56,7 @@ export default async function ProductReportsPage({
       />
 
       {/* 4 Primary KPI Cards */}
-      <div className="grid grid-4" style={{ marginBottom: 20 }}>
+      <div className="grid grid-4 mb-lg">
         <div className="stat">
           <div className="k">Total Units Sold</div>
           <div className="v num">{r.totalUnitsSold.toLocaleString()}</div>
@@ -68,7 +68,7 @@ export default async function ProductReportsPage({
           <div className="v num">{taka(r.totalSales)}</div>
           <div className="d">
             {r.averageMarginPercent != null ? (
-              <span className="pill green" style={{ fontSize: 11 }}>
+              <span className="pill green text-xs">
                 {r.averageMarginPercent}% avg margin
               </span>
             ) : (
@@ -85,7 +85,7 @@ export default async function ProductReportsPage({
 
         <div className="stat">
           <div className="k">Stock Health Risks</div>
-          <div className="v num" style={{ color: r.lowStockCount > 0 ? "#dc2626" : "inherit" }}>
+          <div className={`v num ${r.lowStockCount > 0 ? "stat-danger" : ""}`}>
             {r.lowStockCount} Low / {r.deadStockCount} Dead
           </div>
           <div className="d">
@@ -95,24 +95,24 @@ export default async function ProductReportsPage({
       </div>
 
       {/* Category Breakdown & Stockout Alert Side-by-Side */}
-      <div className="grid grid-2" style={{ gap: 16, marginBottom: 24 }}>
-        <section className="card" style={{ padding: 20 }}>
-          <h2 style={{ fontSize: 16, margin: "0 0 14px" }}>Sales by Product Category</h2>
+      <div className="grid grid-2 gap-lg mb-lg">
+        <section className="card">
+          <h2 className="text-base text-bold mb-md m-0">Sales by Product Category</h2>
           {r.categories.length === 0 ? (
             <p className="muted">No category sales recorded.</p>
           ) : (
             r.categories.map((c) => (
-              <div key={c.categoryName} style={{ marginBottom: 12 }}>
-                <div className="row" style={{ justifyContent: "space-between", marginBottom: 4 }}>
-                  <span style={{ fontSize: 13.5, fontWeight: 500 }}>
+              <div key={c.categoryName} className="mb-sm">
+                <div className="row flex-between mb-xs">
+                  <span className="text-sm text-medium">
                     {c.categoryName}{" "}
-                    <span className="muted" style={{ fontSize: 12 }}>
+                    <span className="muted text-xs">
                       ({c.units} units)
                     </span>
                   </span>
-                  <span style={{ fontSize: 13.5, fontWeight: 700 }}>
+                  <span className="text-sm text-bold">
                     {taka(c.sales)}{" "}
-                    <span className="muted" style={{ fontSize: 12 }}>
+                    <span className="muted text-xs">
                       ({c.percentOfTotal}%)
                     </span>
                   </span>
@@ -125,18 +125,18 @@ export default async function ProductReportsPage({
           )}
         </section>
 
-        <section className="card" style={{ padding: 20 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-            <h2 style={{ fontSize: 16, margin: 0 }}>Stock Runway & Velocity</h2>
-            <Link href="/inventory" className="link" style={{ fontSize: 13 }}>
+        <section className="card">
+          <div className="flex-between mb-md">
+            <h2 className="text-base text-bold m-0">Stock Runway & Velocity</h2>
+            <Link href="/inventory" className="link text-sm">
               Manage Stock &rarr;
             </Link>
           </div>
-          <div style={{ maxHeight: 280, overflowY: "auto" }}>
+          <div className="table-scroll-280">
             {r.stockRunway.length === 0 ? (
               <p className="muted">No products cataloged.</p>
             ) : (
-              <table className="table" style={{ fontSize: 13 }}>
+              <table className="table text-sm">
                 <thead>
                   <tr>
                     <th>Product</th>
@@ -148,7 +148,7 @@ export default async function ProductReportsPage({
                 <tbody>
                   {r.stockRunway.slice(0, 15).map((s) => (
                     <tr key={s.productId}>
-                      <td style={{ maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <td className="text-ellipsis max-w-160">
                         <b>{s.title}</b>
                       </td>
                       <td className="r num">{s.currentStock}</td>
@@ -171,13 +171,13 @@ export default async function ProductReportsPage({
       </div>
 
       {/* Comprehensive Top Sellers Table */}
-      <section style={{ marginBottom: 28 }}>
-        <h2 style={{ fontSize: 16, margin: "0 0 12px" }}>Product Performance & Margins</h2>
+      <section className="stack gap-sm mb-xl">
+        <h2 className="text-base text-bold mb-sm m-0">Product Performance & Margins</h2>
         {r.topProducts.length === 0 ? (
           <div className="card empty">No product sales in this period.</div>
         ) : (
-          <div className="card" style={{ padding: 0, overflowX: "auto" }}>
-            <table className="table" style={{ width: "100%" }}>
+          <div className="card p-0">
+            <table className="table">
               <thead>
                 <tr>
                   <th>Product Title</th>
@@ -193,7 +193,7 @@ export default async function ProductReportsPage({
                 {r.topProducts.map((p) => (
                   <tr key={p.productId}>
                     <td>
-                      <Link href={`/products/${p.productId}`} className="link" style={{ fontWeight: 600 }}>
+                      <Link href={`/products/${p.productId}`} className="link text-medium">
                         {p.title}
                       </Link>
                     </td>

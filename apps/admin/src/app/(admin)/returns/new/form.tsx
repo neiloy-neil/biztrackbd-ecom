@@ -15,32 +15,32 @@ export function NewReturnForm({ orderId, items, options, reasons }: { orderId: s
       <section className="card">
         <h2>What is coming back?</h2>
         {items.map((i) => (
-          <div key={i.id} className="row" style={{ justifyContent: "space-between", flexWrap: "nowrap", padding: "6px 0" }}>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontWeight: 600 }}>{i.title}</div>
-              <div className="muted" style={{ fontSize: 13 }}>{i.variantTitle && i.variantTitle.toLowerCase() !== "default" ? `${i.variantTitle} · ` : ""}৳ {i.unitPrice} each · {i.left} can still be returned</div>
+          <div key={i.id} className="row flex-between nowrap py-xs">
+            <div className="min-w-0">
+              <div className="text-medium">{i.title}</div>
+              <div className="muted text-sm">{i.variantTitle && i.variantTitle.toLowerCase() !== "default" ? `${i.variantTitle} · ` : ""}৳ {i.unitPrice} each · {i.left} can still be returned</div>
             </div>
-            <input className="input" style={{ width: 72 }} type="number" min={0} max={i.left} defaultValue={0} name={`qty_${i.id}`} disabled={i.left === 0} aria-label={`How many ${i.title}`} />
+            <input className="input w-70" type="number" min={0} max={i.left} defaultValue={0} name={`qty_${i.id}`} disabled={i.left === 0} aria-label={`How many ${i.title}`} />
           </div>
         ))}
       </section>
 
       <section className="card stack">
-        <label className="field" style={{ marginBottom: 0 }}><span className="label">Reason</span>
+        <label className="field mb-0"><span className="label">Reason</span>
           <select className="select" name="reason" value={reason} onChange={(e) => setReason(e.target.value)}>{reasons.map((r) => <option key={r}>{r}</option>)}</select>
         </label>
         {reason === "Other" && <input className="input" name="other_reason" required minLength={3} maxLength={150} placeholder="Tell us what happened" aria-label="Other reason" />}
-        <label className="field" style={{ marginBottom: 0 }}><span className="label">What the customer said <span className="opt">(optional)</span></span><input className="input" name="note" maxLength={300} /></label>
-        <fieldset className="field" style={{ border: 0, padding: 0, margin: 0 }}>
+        <label className="field mb-0"><span className="label">What the customer said <span className="opt">(optional)</span></span><input className="input" name="note" maxLength={300} /></label>
+        <fieldset className="field border-none p-0 m-0">
           <legend className="label">They want</legend>
           <div className="chips">
             {([["REFUND", "A refund"], ["EXCHANGE", "A different size or colour"], ["STORE_CREDIT", "Store credit"]] as const).map(([v, l]) => (
-              <label key={v} className="chip" style={{ cursor: "pointer" }}><input type="radio" name="type" value={v} checked={type === v} onChange={() => setType(v)} /> {l}</label>
+              <label key={v} className="chip cursor-pointer"><input type="radio" name="type" value={v} checked={type === v} onChange={() => setType(v)} /> {l}</label>
             ))}
           </div>
         </fieldset>
         {type === "EXCHANGE" && (
-          <label className="field" style={{ marginBottom: 0 }}><span className="label">Send instead</span>
+          <label className="field mb-0"><span className="label">Send instead</span>
             <select className="select" name="exchangeVariantId" required defaultValue="">
               <option value="" disabled>Choose size or colour</option>
               {options.map((o) => <option key={o.id} value={o.id} disabled={o.stock <= 0}>{o.label} · {o.stock > 0 ? `${o.stock} in stock` : "out of stock"}</option>)}

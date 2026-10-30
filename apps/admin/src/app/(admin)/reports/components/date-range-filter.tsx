@@ -42,29 +42,10 @@ export function DateRangeFilter({
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 12,
-        marginBottom: 16,
-        background: "var(--bg-subtle, #f8fafc)",
-        padding: "12px 16px",
-        borderRadius: 8,
-        border: "1px solid var(--border)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 10,
-        }}
-      >
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: "var(--muted)", marginRight: 4 }}>
+    <div className="card-panel-muted mb-md stack gap-sm">
+      <div className="flex-between flex-wrap gap-sm">
+        <div className="flex-center-y flex-wrap gap-xs">
+          <span className="text-xs text-bold text-muted uppercase mr-xs">
             TIME WINDOW:
           </span>
           {REPORT_PRESETS.map((p) => {
@@ -73,18 +54,8 @@ export function DateRangeFilter({
               <button
                 key={p.key}
                 type="button"
-                className={`chip ${active ? "active" : ""}`}
+                className={`chip cursor-pointer text-xs ${active ? "active" : ""}`}
                 onClick={() => handlePreset(p.key)}
-                style={{
-                  fontSize: 12,
-                  padding: "4px 10px",
-                  borderRadius: 6,
-                  cursor: "pointer",
-                  border: active ? "1px solid #2563eb" : "1px solid var(--border)",
-                  background: active ? "#2563eb" : "#ffffff",
-                  color: active ? "#ffffff" : "inherit",
-                  fontWeight: active ? 600 : 400,
-                }}
               >
                 {p.label}
               </button>
@@ -92,19 +63,8 @@ export function DateRangeFilter({
           })}
           <button
             type="button"
-            className={`chip ${currentPreset === "custom" || isCustomOpen ? "active" : ""}`}
+            className={`chip cursor-pointer text-xs ${currentPreset === "custom" || isCustomOpen ? "active" : ""}`}
             onClick={() => setIsCustomOpen((open) => !open)}
-            style={{
-              fontSize: 12,
-              padding: "4px 10px",
-              borderRadius: 6,
-              cursor: "pointer",
-              border:
-                currentPreset === "custom" ? "1px solid #2563eb" : "1px solid var(--border)",
-              background: currentPreset === "custom" ? "#2563eb" : "#ffffff",
-              color: currentPreset === "custom" ? "#ffffff" : "inherit",
-              fontWeight: currentPreset === "custom" ? 600 : 400,
-            }}
           >
             Custom Range ▾
           </button>
@@ -114,17 +74,10 @@ export function DateRangeFilter({
       {isCustomOpen && (
         <form
           onSubmit={handleApplyCustom}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 10,
-            paddingTop: 8,
-            borderTop: "1px dashed var(--border)",
-          }}
+          className="flex-center-y flex-wrap gap-sm pt-xs border-top-dashed"
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <label htmlFor="custom-from" style={{ fontSize: 12, fontWeight: 600 }}>
+          <div className="flex-center-y gap-xs">
+            <label htmlFor="custom-from" className="text-xs text-medium">
               From:
             </label>
             <input
@@ -134,12 +87,11 @@ export function DateRangeFilter({
               value={from}
               onChange={(e) => setFrom(e.target.value)}
               required
-              style={{ padding: "4px 8px", borderRadius: 4, border: "1px solid var(--border)" }}
             />
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <label htmlFor="custom-to" style={{ fontSize: 12, fontWeight: 600 }}>
+          <div className="flex-center-y gap-xs">
+            <label htmlFor="custom-to" className="text-xs text-medium">
               To:
             </label>
             <input
@@ -149,14 +101,13 @@ export function DateRangeFilter({
               value={to}
               onChange={(e) => setTo(e.target.value)}
               required
-              style={{ padding: "4px 8px", borderRadius: 4, border: "1px solid var(--border)" }}
             />
           </div>
 
           <SubmitButton
             className="btn btn-primary btn-sm"
-            style={{ padding: "4px 12px", fontSize: 12 }}
-           pending="Working…">
+            pending="Working…"
+          >
             Apply Range
           </SubmitButton>
         </form>

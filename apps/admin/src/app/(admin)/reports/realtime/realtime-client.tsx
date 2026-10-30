@@ -79,31 +79,13 @@ export function RealtimeStudioClient({ initialData }: RealtimeStudioClientProps)
   const hoveredPoint = hoveredHour !== null ? velocity[hoveredHour] : null;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+    <div className="stack gap-xl">
       {/* Real-time Control Toolbar */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 12,
-          padding: "12px 18px",
-          background: "var(--surface)",
-          border: "1px solid var(--line)",
-          borderRadius: "var(--radius)",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "13px", fontWeight: 600 }}>
+      <div className="card-panel-muted flex-between flex-wrap gap-sm">
+        <div className="flex-center-y gap-md">
+          <div className="flex-center-y gap-xs text-sm text-medium">
             <span
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background: isPending ? "var(--warning)" : "var(--success)",
-                animation: isPending ? "pulse 1s infinite" : "none",
-              }}
+              className={`live-indicator ${isPending ? "syncing" : "active"}`}
             />
             <span>
               {isPending
@@ -113,29 +95,22 @@ export function RealtimeStudioClient({ initialData }: RealtimeStudioClientProps)
           </div>
 
           {errorMessage && (
-            <span style={{ fontSize: "12px", color: "var(--danger)", fontWeight: 500 }}>
+            <span className="text-xs text-danger text-medium">
               {errorMessage}
             </span>
           )}
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "13px" }}>
-            <label htmlFor="auto-refresh-select" style={{ color: "var(--ink-3)", fontWeight: 500 }}>
+        <div className="flex-center-y flex-wrap gap-sm">
+          <div className="flex-center-y gap-xs text-sm">
+            <label htmlFor="auto-refresh-select" className="text-muted text-medium">
               Auto-Refresh:
             </label>
             <select
               id="auto-refresh-select"
               value={autoRefreshInterval}
               onChange={(e) => setAutoRefreshInterval(e.target.value as "off" | "30s" | "60s")}
-              style={{
-                padding: "4px 8px",
-                borderRadius: 6,
-                border: "1px solid var(--line-2)",
-                background: "var(--bg)",
-                fontSize: "13px",
-                fontWeight: 600,
-              }}
+              className="input text-xs py-xs"
             >
               <option value="30s">Every 30s</option>
               <option value="60s">Every 60s</option>
@@ -148,254 +123,114 @@ export function RealtimeStudioClient({ initialData }: RealtimeStudioClientProps)
             type="button"
             onClick={refreshData}
             disabled={isPending}
-            className="btn"
-            style={{
-              padding: "6px 14px",
-              fontSize: "13px",
-              fontWeight: 600,
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              cursor: isPending ? "not-allowed" : "pointer",
-            }}
+            className="btn btn-secondary btn-sm"
           >
-            <span
-              style={{
-                display: "inline-block",
-                transform: isPending ? "rotate(180deg)" : "none",
-                transition: "transform 0.4s ease",
-              }}
-            >
-              ↻
-            </span>
+            <span>↻</span>
             {isPending ? "Refreshing..." : "Refresh"}
           </button>
         </div>
       </div>
 
       {/* Top Real-Time KPI Matrix */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
-          gap: 14,
-        }}
-      >
+      <div className="grid grid-4">
         {/* Today's Sales */}
-        <div
-          className="card"
-          style={{
-            padding: "16px 20px",
-            background: "var(--surface)",
-            border: "1px solid var(--line)",
-            borderRadius: "var(--radius)",
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
-            <span style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase" }}>
+        <div className="card">
+          <div className="flex-between mb-xs">
+            <span className="text-xs text-muted text-bold uppercase">
               Today's Gross Sales
             </span>
             <span
-              style={{
-                fontSize: "11px",
-                fontWeight: 700,
-                padding: "2px 6px",
-                borderRadius: 4,
-                background: kpis.salesChangePercent >= 0 ? "var(--success-bg)" : "var(--danger-bg)",
-                color: kpis.salesChangePercent >= 0 ? "var(--success)" : "var(--danger)",
-              }}
+              className={`pill text-xs ${kpis.salesChangePercent >= 0 ? "good" : "bad"}`}
             >
               {kpis.salesChangePercent >= 0 ? `+${kpis.salesChangePercent}%` : `${kpis.salesChangePercent}%`}
             </span>
           </div>
-          <div style={{ fontSize: "24px", fontWeight: 800, color: "var(--ink)" }}>
+          <div className="num num-lg">
             {taka(kpis.todaySales)}
           </div>
-          <div style={{ fontSize: "12px", color: "var(--ink-3)", marginTop: 4 }}>
+          <div className="muted text-xs mt-xs">
             Yesterday: {taka(kpis.yesterdaySales)}
           </div>
         </div>
 
         {/* Today's Orders */}
-        <div
-          className="card"
-          style={{
-            padding: "16px 20px",
-            background: "var(--surface)",
-            border: "1px solid var(--line)",
-            borderRadius: "var(--radius)",
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
-            <span style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase" }}>
+        <div className="card">
+          <div className="flex-between mb-xs">
+            <span className="text-xs text-muted text-bold uppercase">
               Orders Today
             </span>
             <span
-              style={{
-                fontSize: "11px",
-                fontWeight: 700,
-                padding: "2px 6px",
-                borderRadius: 4,
-                background: kpis.ordersChangePercent >= 0 ? "var(--success-bg)" : "var(--danger-bg)",
-                color: kpis.ordersChangePercent >= 0 ? "var(--success)" : "var(--danger)",
-              }}
+              className={`pill text-xs ${kpis.ordersChangePercent >= 0 ? "good" : "bad"}`}
             >
               {kpis.ordersChangePercent >= 0 ? `+${kpis.ordersChangePercent}%` : `${kpis.ordersChangePercent}%`}
             </span>
           </div>
-          <div style={{ fontSize: "24px", fontWeight: 800, color: "var(--ink)" }}>
-            {kpis.todayOrders} <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--ink-3)" }}>orders</span>
+          <div className="num num-lg">
+            {kpis.todayOrders} <span className="text-sm text-muted text-normal">orders</span>
           </div>
-          <div style={{ fontSize: "12px", color: "var(--ink-3)", marginTop: 4 }}>
+          <div className="muted text-xs mt-xs">
             Yesterday: {kpis.yesterdayOrders} orders
           </div>
         </div>
 
         {/* Average Order Value (AOV) */}
-        <div
-          className="card"
-          style={{
-            padding: "16px 20px",
-            background: "var(--surface)",
-            border: "1px solid var(--line)",
-            borderRadius: "var(--radius)",
-          }}
-        >
-          <div style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase", marginBottom: 6 }}>
+        <div className="card">
+          <div className="text-xs text-muted text-bold uppercase mb-xs">
             Average Order Value
           </div>
-          <div style={{ fontSize: "24px", fontWeight: 800, color: "var(--ink)" }}>
+          <div className="num num-lg">
             {taka(kpis.todayAov)}
           </div>
-          <div style={{ fontSize: "12px", color: "var(--ink-3)", marginTop: 4 }}>
+          <div className="muted text-xs mt-xs">
             Revenue per completed checkout
           </div>
         </div>
 
         {/* Conversion Rate */}
-        <div
-          className="card"
-          style={{
-            padding: "16px 20px",
-            background: "var(--surface)",
-            border: "1px solid var(--line)",
-            borderRadius: "var(--radius)",
-          }}
-        >
-          <div style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase", marginBottom: 6 }}>
+        <div className="card">
+          <div className="text-xs text-muted text-bold uppercase mb-xs">
             Storefront Conversion
           </div>
-          <div style={{ fontSize: "24px", fontWeight: 800, color: "var(--brand)" }}>
+          <div className="num num-lg text-brand">
             {kpis.conversionRate}%
           </div>
-          <div style={{ fontSize: "12px", color: "var(--ink-3)", marginTop: 4 }}>
+          <div className="muted text-xs mt-xs">
             Placed orders / visitor sessions
-          </div>
-        </div>
-
-        {/* Cart & Abandonment Radar */}
-        <div
-          className="card"
-          style={{
-            padding: "16px 20px",
-            background: "var(--surface)",
-            border: "1px solid var(--line)",
-            borderRadius: "var(--radius)",
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
-            <span style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase" }}>
-              Active Radar
-            </span>
-            <Link
-              href="/growth/abandoned"
-              style={{ fontSize: "11.5px", fontWeight: 700, color: "var(--brand)" }}
-            >
-              Recover →
-            </Link>
-          </div>
-          <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--ink)" }}>
-            {kpis.activeCartCount} active carts
-          </div>
-          <div style={{ fontSize: "12px", color: "var(--ink-3)", marginTop: 4 }}>
-            {kpis.abandonedCheckoutCount} unrecovered checkouts
           </div>
         </div>
       </div>
 
       {/* 24-Hour Velocity Curve */}
-      <div
-        className="card"
-        style={{
-          padding: "20px",
-          background: "var(--surface)",
-          border: "1px solid var(--line)",
-          borderRadius: "var(--radius)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 12,
-            marginBottom: 16,
-          }}
-        >
+      <div className="card">
+        <div className="flex-between flex-wrap gap-sm mb-md">
           <div>
-            <h2 style={{ fontSize: "17px", fontWeight: 700, margin: 0 }}>
+            <h2 className="text-base text-bold m-0">
               24-Hour Velocity Curve (Today vs. Yesterday)
             </h2>
-            <p style={{ fontSize: "13px", color: "var(--ink-3)", margin: "4px 0 0" }}>
+            <p className="muted text-sm mt-xs">
               Hour-by-hour order velocity aligned to Asia/Dhaka standard time (00:00 - 23:00).
             </p>
           </div>
 
           {/* Metric Selector & Legend */}
-          <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: "12px", fontWeight: 600 }}>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#10b981" }}>
-                <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#10b981" }} />
+          <div className="flex-center-y flex-wrap gap-md">
+            <div className="flex-center-y gap-md text-xs text-bold">
+              <span className="flex-center-y gap-xs text-success">
+                <span className="live-indicator active" />
                 Today (Live)
               </span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#94a3b8" }}>
-                <span
-                  style={{
-                    width: 14,
-                    height: 2,
-                    background: "#94a3b8",
-                    borderTop: "2px dashed #94a3b8",
-                  }}
-                />
+              <span className="flex-center-y gap-xs text-muted">
+                <span className="bar-prev" />
                 Yesterday
               </span>
             </div>
 
-            <div
-              style={{
-                display: "inline-flex",
-                background: "var(--bg)",
-                padding: "2px",
-                borderRadius: 8,
-                border: "1px solid var(--line)",
-              }}
-            >
+            <div className="segmented-pill">
               <button
                 type="button"
                 id="velocity-mode-sales"
                 onClick={() => setMetricMode("sales")}
-                style={{
-                  padding: "4px 12px",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  borderRadius: 6,
-                  border: "none",
-                  cursor: "pointer",
-                  background: metricMode === "sales" ? "var(--surface)" : "transparent",
-                  color: metricMode === "sales" ? "var(--brand)" : "var(--ink-3)",
-                  boxShadow: metricMode === "sales" ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
-                }}
+                className={`segmented-pill-btn ${metricMode === "sales" ? "active" : ""}`}
               >
                 Revenue (BDT)
               </button>
@@ -403,17 +238,7 @@ export function RealtimeStudioClient({ initialData }: RealtimeStudioClientProps)
                 type="button"
                 id="velocity-mode-orders"
                 onClick={() => setMetricMode("orders")}
-                style={{
-                  padding: "4px 12px",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  borderRadius: 6,
-                  border: "none",
-                  cursor: "pointer",
-                  background: metricMode === "orders" ? "var(--surface)" : "transparent",
-                  color: metricMode === "orders" ? "var(--brand)" : "var(--ink-3)",
-                  boxShadow: metricMode === "orders" ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
-                }}
+                className={`segmented-pill-btn ${metricMode === "orders" ? "active" : ""}`}
               >
                 Order Count
               </button>
@@ -422,34 +247,26 @@ export function RealtimeStudioClient({ initialData }: RealtimeStudioClientProps)
         </div>
 
         {/* Hover info banner */}
-        <div
-          style={{
-            minHeight: "26px",
-            fontSize: "12.5px",
-            color: "var(--ink-2)",
-            marginBottom: 8,
-            fontWeight: 500,
-          }}
-        >
+        <div className="min-h-32 text-xs text-muted mb-xs text-medium">
           {hoveredPoint ? (
             <span>
               <strong>Hour {hoveredPoint.label} ({hoveredPoint.hour.toString().padStart(2, "0")}:00):</strong>{" "}
-              Today: <strong style={{ color: "#10b981" }}>{metricMode === "sales" ? taka(hoveredPoint.todaySales) : `${hoveredPoint.todayOrders} orders`}</strong>
+              Today: <strong className="text-success">{metricMode === "sales" ? taka(hoveredPoint.todaySales) : `${hoveredPoint.todayOrders} orders`}</strong>
               {" · "}
-              Yesterday: <strong style={{ color: "var(--ink-3)" }}>{metricMode === "sales" ? taka(hoveredPoint.yesterdaySales) : `${hoveredPoint.yesterdayOrders} orders`}</strong>
+              Yesterday: <strong className="text-muted">{metricMode === "sales" ? taka(hoveredPoint.yesterdaySales) : `${hoveredPoint.yesterdayOrders} orders`}</strong>
             </span>
           ) : (
-            <span style={{ color: "var(--ink-3)" }}>
+            <span>
               Hover over any hour on the timeline to inspect the velocity comparison.
             </span>
           )}
         </div>
 
         {/* Interactive SVG Chart */}
-        <div style={{ width: "100%", overflowX: "auto" }}>
+        <div className="chart-svg-wrap">
           <svg
             viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-            style={{ width: "100%", height: "auto", display: "block" }}
+            className="chart-svg"
             aria-label="24-Hour Velocity Curve"
           >
             <defs>
@@ -521,7 +338,6 @@ export function RealtimeStudioClient({ initialData }: RealtimeStudioClientProps)
 
               return (
                 <g key={p.hour}>
-                  {/* Point circle */}
                   <circle
                     cx={cx}
                     cy={cyToday}
@@ -531,7 +347,6 @@ export function RealtimeStudioClient({ initialData }: RealtimeStudioClientProps)
                     strokeWidth={isHovered ? 2.5 : 1}
                   />
 
-                  {/* X-axis label */}
                   {showLabel && (
                     <text
                       x={cx}
@@ -546,14 +361,13 @@ export function RealtimeStudioClient({ initialData }: RealtimeStudioClientProps)
                     </text>
                   )}
 
-                  {/* Invisible wide hit area for hover */}
                   <rect
                     x={cx - (plotWidth / 24) / 2}
                     y={padTop}
                     width={plotWidth / 24}
                     height={plotHeight}
                     fill="transparent"
-                    style={{ cursor: "pointer" }}
+                    className="cursor-pointer"
                     onMouseEnter={() => setHoveredHour(p.hour)}
                     onMouseLeave={() => setHoveredHour(null)}
                   />
@@ -565,85 +379,59 @@ export function RealtimeStudioClient({ initialData }: RealtimeStudioClientProps)
       </div>
 
       {/* 5-Stage Conversion Drop-Off Waterfall */}
-      <div
-        className="card"
-        style={{
-          padding: "20px",
-          background: "var(--surface)",
-          border: "1px solid var(--line)",
-          borderRadius: "var(--radius)",
-        }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+      <div className="card">
+        <div className="flex-between mb-md">
           <div>
-            <h2 style={{ fontSize: "17px", fontWeight: 700, margin: 0 }}>
+            <h2 className="text-base text-bold m-0">
               5-Stage Conversion Drop-Off Waterfall
             </h2>
-            <p style={{ fontSize: "13px", color: "var(--ink-3)", margin: "4px 0 0" }}>
+            <p className="muted text-sm mt-xs">
               Tracking visitors through product discovery, carting, checkout, order placement, and courier fulfillment.
             </p>
           </div>
           <Link
-            href="/growth/abandoned"
-            className="btn"
-            style={{ fontSize: "12px", padding: "6px 12px" }}
+            href="/abandoned"
+            className="btn btn-secondary btn-sm"
           >
             Abandoned Checkout Recovery →
           </Link>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <div className="stack gap-sm">
           {data.conversionFunnel.map((stage, idx) => {
             const isFirst = idx === 0;
             return (
               <div
                 key={stage.stage}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "180px 1fr 140px",
-                  alignItems: "center",
-                  gap: 16,
-                  padding: "10px 14px",
-                  background: "var(--bg)",
-                  borderRadius: 8,
-                  border: "1px solid var(--line)",
-                }}
+                className="waterfall-row"
               >
                 <div>
-                  <div style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--ink)" }}>
+                  <div className="text-sm text-bold">
                     {idx + 1}. {stage.label}
                   </div>
-                  <div style={{ fontSize: "12px", color: "var(--ink-3)", marginTop: 2 }}>
+                  <div className="muted text-xs mt-xs">
                     <strong>{stage.count.toLocaleString()}</strong> events
                   </div>
                 </div>
 
                 {/* Progress Visual Bar */}
-                <div style={{ width: "100%", background: "var(--line)", height: 10, borderRadius: 5, overflow: "hidden" }}>
-                  <div
+                <div className="meter">
+                  <i
                     style={{
                       width: `${Math.min(100, Math.max(1, stage.conversionRatePercent))}%`,
-                      height: "100%",
-                      background: idx === 3 ? "var(--success)" : "var(--brand)",
-                      borderRadius: 5,
-                      transition: "width 0.4s ease",
                     }}
+                    className={idx === 3 ? "text-success" : ""}
                   />
                 </div>
 
                 {/* Metrics Pill */}
-                <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--ink)" }}>
+                <div className="text-right">
+                  <div className="text-sm text-bold">
                     {stage.conversionRatePercent}% conv.
                   </div>
                   {!isFirst && (
                     <div
-                      style={{
-                        fontSize: "11.5px",
-                        fontWeight: 600,
-                        color: stage.dropOffRatePercent > 50 ? "var(--danger)" : "var(--warning)",
-                        marginTop: 2,
-                      }}
+                      className={`text-xs text-bold mt-xs ${stage.dropOffRatePercent > 50 ? "text-danger" : "text-warning"}`}
                     >
                       ▼ {stage.dropOffRatePercent}% drop-off
                     </div>
@@ -656,122 +444,66 @@ export function RealtimeStudioClient({ initialData }: RealtimeStudioClientProps)
       </div>
 
       {/* Customer Cohort Retention Matrix */}
-      <div
-        className="card"
-        style={{
-          padding: "20px",
-          background: "var(--surface)",
-          border: "1px solid var(--line)",
-          borderRadius: "var(--radius)",
-        }}
-      >
-        <div style={{ marginBottom: 16 }}>
-          <h2 style={{ fontSize: "17px", fontWeight: 700, margin: 0 }}>
+      <div className="card">
+        <div className="mb-md">
+          <h2 className="text-base text-bold m-0">
             Customer Cohort Retention Matrix (LTV & Repeat Rates)
           </h2>
-          <p style={{ fontSize: "13px", color: "var(--ink-3)", margin: "4px 0 0" }}>
+          <p className="muted text-sm mt-xs">
             Monthly acquisition cohorts tracking customer retention and cumulative revenue over subsequent months (M0 - M3).
           </p>
         </div>
 
-        <div style={{ width: "100%", overflowX: "auto" }}>
-          <table
-            className="table"
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: "13.5px",
-              textAlign: "left",
-            }}
-          >
+        <div className="chart-svg-wrap">
+          <table className="table">
             <thead>
-              <tr style={{ borderBottom: "1px solid var(--line)", color: "var(--ink-3)", fontSize: "12px" }}>
-                <th style={{ padding: "10px 12px" }}>Cohort Month</th>
-                <th style={{ padding: "10px 12px" }}>New Customers</th>
-                <th style={{ padding: "10px 12px", textAlign: "center" }}>Month 0</th>
-                <th style={{ padding: "10px 12px", textAlign: "center" }}>Month 1</th>
-                <th style={{ padding: "10px 12px", textAlign: "center" }}>Month 2</th>
-                <th style={{ padding: "10px 12px", textAlign: "center" }}>Month 3</th>
-                <th style={{ padding: "10px 12px", textAlign: "right" }}>Cumulative LTV</th>
+              <tr>
+                <th>Cohort Month</th>
+                <th>New Customers</th>
+                <th className="text-center">Month 0</th>
+                <th className="text-center">Month 1</th>
+                <th className="text-center">Month 2</th>
+                <th className="text-center">Month 3</th>
+                <th className="r">Cumulative LTV</th>
               </tr>
             </thead>
             <tbody>
               {data.cohorts.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ padding: "18px 12px", textAlign: "center", color: "var(--ink-3)" }}>
+                  <td colSpan={7} className="text-center py-md muted">
                     No customer cohorts recorded yet. Cohorts populate automatically as customers place orders.
                   </td>
                 </tr>
               ) : (
                 data.cohorts.map((cohort) => (
-                  <tr key={cohort.cohortMonth} style={{ borderBottom: "1px solid var(--line)" }}>
-                    <td style={{ padding: "10px 12px", fontWeight: 700, color: "var(--ink)" }}>
+                  <tr key={cohort.cohortMonth}>
+                    <td className="text-bold">
                       {cohort.cohortMonth}
                     </td>
-                    <td style={{ padding: "10px 12px", color: "var(--ink-2)" }}>
+                    <td className="muted">
                       {cohort.cohortSize} buyers
                     </td>
-                    <td style={{ padding: "10px 12px", textAlign: "center" }}>
-                      <span
-                        style={{
-                          display: "inline-block",
-                          padding: "3px 8px",
-                          borderRadius: 4,
-                          background: "var(--tint)",
-                          color: "var(--brand)",
-                          fontWeight: 700,
-                          fontSize: "12px",
-                        }}
-                      >
+                    <td className="text-center">
+                      <span className="pill info text-xs">
                         100%
                       </span>
                     </td>
-                    <td style={{ padding: "10px 12px", textAlign: "center" }}>
-                      <span
-                        style={{
-                          display: "inline-block",
-                          padding: "3px 8px",
-                          borderRadius: 4,
-                          background: cohort.retentionM1 > 0 ? "var(--success-bg)" : "var(--bg)",
-                          color: cohort.retentionM1 > 0 ? "var(--success)" : "var(--ink-3)",
-                          fontWeight: 700,
-                          fontSize: "12px",
-                        }}
-                      >
+                    <td className="text-center">
+                      <span className={`pill text-xs ${cohort.retentionM1 > 0 ? "good" : ""}`}>
                         {cohort.retentionM1 > 0 ? `${cohort.retentionM1}%` : "—"}
                       </span>
                     </td>
-                    <td style={{ padding: "10px 12px", textAlign: "center" }}>
-                      <span
-                        style={{
-                          display: "inline-block",
-                          padding: "3px 8px",
-                          borderRadius: 4,
-                          background: cohort.retentionM2 > 0 ? "var(--success-bg)" : "var(--bg)",
-                          color: cohort.retentionM2 > 0 ? "var(--success)" : "var(--ink-3)",
-                          fontWeight: 700,
-                          fontSize: "12px",
-                        }}
-                      >
+                    <td className="text-center">
+                      <span className={`pill text-xs ${cohort.retentionM2 > 0 ? "good" : ""}`}>
                         {cohort.retentionM2 > 0 ? `${cohort.retentionM2}%` : "—"}
                       </span>
                     </td>
-                    <td style={{ padding: "10px 12px", textAlign: "center" }}>
-                      <span
-                        style={{
-                          display: "inline-block",
-                          padding: "3px 8px",
-                          borderRadius: 4,
-                          background: cohort.retentionM3 > 0 ? "var(--success-bg)" : "var(--bg)",
-                          color: cohort.retentionM3 > 0 ? "var(--success)" : "var(--ink-3)",
-                          fontWeight: 700,
-                          fontSize: "12px",
-                        }}
-                      >
+                    <td className="text-center">
+                      <span className={`pill text-xs ${cohort.retentionM3 > 0 ? "good" : ""}`}>
                         {cohort.retentionM3 > 0 ? `${cohort.retentionM3}%` : "—"}
                       </span>
                     </td>
-                    <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 700, color: "var(--ink)" }}>
+                    <td className="r text-bold num">
                       {taka(cohort.totalLtvBDT)}
                     </td>
                   </tr>
@@ -783,148 +515,101 @@ export function RealtimeStudioClient({ initialData }: RealtimeStudioClientProps)
       </div>
 
       {/* Regional & Payment Breakdowns */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: 16,
-        }}
-      >
+      <div className="grid grid-2 gap-lg">
         {/* Regional District Distribution */}
-        <div
-          className="card"
-          style={{
-            padding: "20px",
-            background: "var(--surface)",
-            border: "1px solid var(--line)",
-            borderRadius: "var(--radius)",
-          }}
-        >
-          <h2 style={{ fontSize: "16px", fontWeight: 700, margin: "0 0 14px 0" }}>
+        <section className="card">
+          <h2 className="text-base text-bold mb-md m-0">
             Top Regional Deliveries (Live Today)
           </h2>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="stack gap-sm">
             {data.districtBreakdown.map((item) => (
               <div key={item.district}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", marginBottom: 3 }}>
-                  <span style={{ fontWeight: 600, color: "var(--ink)" }}>{item.district}</span>
-                  <span style={{ color: "var(--ink-3)" }}>
+                <div className="flex-between text-sm mb-xs">
+                  <span className="text-medium">{item.district}</span>
+                  <span className="muted text-xs">
                     {item.orders} orders · {taka(item.sales)} ({item.percentage}%)
                   </span>
                 </div>
-                <div style={{ width: "100%", background: "var(--line)", height: 6, borderRadius: 3, overflow: "hidden" }}>
-                  <div
-                    style={{
-                      width: `${item.percentage}%`,
-                      height: "100%",
-                      background: "var(--brand)",
-                      borderRadius: 3,
-                    }}
+                <div className="meter">
+                  <i
+                    style={{ width: `${item.percentage}%` }}
                   />
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </section>
 
         {/* Payment Method Distribution */}
-        <div
-          className="card"
-          style={{
-            padding: "20px",
-            background: "var(--surface)",
-            border: "1px solid var(--line)",
-            borderRadius: "var(--radius)",
-          }}
-        >
-          <h2 style={{ fontSize: "16px", fontWeight: 700, margin: "0 0 14px 0" }}>
+        <section className="card">
+          <h2 className="text-base text-bold mb-md m-0">
             Payment Method Split (Live Today)
           </h2>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="stack gap-sm">
             {data.paymentBreakdown.map((item) => (
               <div key={item.method}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", marginBottom: 3 }}>
-                  <span style={{ fontWeight: 600, color: "var(--ink)" }}>{item.label}</span>
-                  <span style={{ color: "var(--ink-3)" }}>
+                <div className="flex-between text-sm mb-xs">
+                  <span className="text-medium">{item.label}</span>
+                  <span className="muted text-xs">
                     {item.count} orders · {taka(item.sales)} ({item.percentage}%)
                   </span>
                 </div>
-                <div style={{ width: "100%", background: "var(--line)", height: 6, borderRadius: 3, overflow: "hidden" }}>
-                  <div
-                    style={{
-                      width: `${item.percentage}%`,
-                      height: "100%",
-                      background: item.method === "COD" ? "#f59e0b" : "#10b981",
-                      borderRadius: 3,
-                    }}
+                <div className="meter">
+                  <i
+                    style={{ width: `${item.percentage}%` }}
+                    className={item.method === "COD" ? "text-warning" : "text-success"}
                   />
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </section>
       </div>
 
       {/* 14-Day Historical Fast Rollup Summary */}
-      <div
-        className="card"
-        style={{
-          padding: "20px",
-          background: "var(--surface)",
-          border: "1px solid var(--line)",
-          borderRadius: "var(--radius)",
-        }}
-      >
-        <div style={{ marginBottom: 14 }}>
-          <h2 style={{ fontSize: "16px", fontWeight: 700, margin: 0 }}>
+      <section className="card">
+        <div className="mb-sm">
+          <h2 className="text-base text-bold m-0">
             14-Day Immutable Daily Rollups (`DailyStoreMetrics`)
           </h2>
-          <p style={{ fontSize: "13px", color: "var(--ink-3)", margin: "4px 0 0" }}>
+          <p className="muted text-sm mt-xs">
             Fast pre-aggregated daily checkpoints powering instant reporting without scanning raw order tables.
           </p>
         </div>
 
-        <div style={{ width: "100%", overflowX: "auto" }}>
-          <table
-            className="table"
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: "13px",
-              textAlign: "left",
-            }}
-          >
+        <div className="chart-svg-wrap">
+          <table className="table text-sm">
             <thead>
-              <tr style={{ borderBottom: "1px solid var(--line)", color: "var(--ink-3)", fontSize: "12px" }}>
-                <th style={{ padding: "8px 10px" }}>Date</th>
-                <th style={{ padding: "8px 10px" }}>Gross Sales</th>
-                <th style={{ padding: "8px 10px" }}>Total Orders</th>
-                <th style={{ padding: "8px 10px", textAlign: "right" }}>Average Order Value</th>
+              <tr>
+                <th>Date</th>
+                <th>Gross Sales</th>
+                <th>Total Orders</th>
+                <th className="r">Average Order Value</th>
               </tr>
             </thead>
             <tbody>
               {data.historicalTrend.length === 0 ? (
                 <tr>
-                  <td colSpan={4} style={{ padding: "16px 10px", textAlign: "center", color: "var(--ink-3)" }}>
+                  <td colSpan={4} className="text-center py-sm muted">
                     No historical rollups available yet.
                   </td>
                 </tr>
               ) : (
                 data.historicalTrend.map((row) => (
-                  <tr key={row.date} style={{ borderBottom: "1px solid var(--line)" }}>
-                    <td style={{ padding: "8px 10px", fontWeight: 600 }}>{row.date}</td>
-                    <td style={{ padding: "8px 10px" }}>{taka(row.sales)}</td>
-                    <td style={{ padding: "8px 10px" }}>{row.orders} orders</td>
-                    <td style={{ padding: "8px 10px", textAlign: "right", fontWeight: 600 }}>{taka(row.aov)}</td>
+                  <tr key={row.date}>
+                    <td className="text-medium">{row.date}</td>
+                    <td>{taka(row.sales)}</td>
+                    <td>{row.orders} orders</td>
+                    <td className="r num text-medium">{taka(row.aov)}</td>
                   </tr>
                 ))
               )}
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
