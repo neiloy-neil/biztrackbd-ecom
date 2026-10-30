@@ -87,3 +87,99 @@ export function EmptyState({ title, text, action }: { title: ReactNode; text?: R
 export function Skeleton({ width = "100%", height = 16 }: { width?: number | string; height?: number | string }) {
   return <span className="skel" style={{ width, height }} aria-hidden />;
 }
+
+/* ---- Modern High-Craft UI Primitives ---- */
+
+export interface CardProps {
+  children: ReactNode;
+  className?: string;
+  id?: string;
+  style?: React.CSSProperties;
+}
+
+export function Card({ children, className = "", id, style }: CardProps) {
+  return (
+    <div className={`card-base ${className}`.trim()} id={id} style={style}>
+      {children}
+    </div>
+  );
+}
+
+export function CardHeader({ title, description, action, children, className = "" }: { title?: ReactNode; description?: ReactNode; action?: ReactNode; children?: ReactNode; className?: string }) {
+  return (
+    <div className={`card-header-clean ${className}`.trim()}>
+      {(title || description) ? (
+        <div>
+          {title && <h3>{title}</h3>}
+          {description && <p>{description}</p>}
+        </div>
+      ) : (
+        children
+      )}
+      {action && <div>{action}</div>}
+    </div>
+  );
+}
+
+export function CardContent({ children, className = "", style }: { children: ReactNode; className?: string; style?: React.CSSProperties }) {
+  return <div className={`card-body-clean ${className}`.trim()} style={style}>{children}</div>;
+}
+
+export function CardFooter({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <div className={`card-footer-clean ${className}`.trim()}>{children}</div>;
+}
+
+export type StatusTone = "good" | "warn" | "bad" | "info" | "neutral";
+
+export interface StatusBadgeProps {
+  children: ReactNode;
+  tone?: StatusTone;
+  dot?: boolean;
+  className?: string;
+}
+
+export function StatusBadge({ children, tone = "neutral", dot = true, className = "" }: StatusBadgeProps) {
+  return (
+    <span className={`status-badge ${tone} ${className}`.trim()}>
+      {dot && <span className="status-badge-dot" aria-hidden />}
+      <span>{children}</span>
+    </span>
+  );
+}
+
+export interface MetricCardProps {
+  label: ReactNode;
+  value: ReactNode;
+  delta?: ReactNode;
+  trend?: "up" | "down" | "neutral";
+  icon?: ReactNode;
+  className?: string;
+}
+
+export function MetricCard({ label, value, delta, trend, icon, className = "" }: MetricCardProps) {
+  return (
+    <div className={`metric-card-clean ${className}`.trim()}>
+      <div className="metric-card-top">
+        <span className="metric-card-label">{label}</span>
+        {icon && <span className="metric-card-icon">{icon}</span>}
+      </div>
+      <div className="metric-card-value">{value}</div>
+      {delta && (
+        <div className={`metric-card-delta ${trend ?? "neutral"}`}>
+          {trend === "up" && <span>↑</span>}
+          {trend === "down" && <span>↓</span>}
+          <span>{delta}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function MetricGrid({ children, columns = 4, className = "" }: { children: ReactNode; columns?: 2 | 3 | 4; className?: string }) {
+  const colClass = columns === 3 ? "three-col" : "";
+  return <div className={`metric-grid-clean ${colClass} ${className}`.trim()}>{children}</div>;
+}
+
+export function FilterToolbar({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <div className={`filter-toolbar-clean ${className}`.trim()}>{children}</div>;
+}

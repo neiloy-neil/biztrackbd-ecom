@@ -2,6 +2,8 @@
    Mobile first: the base layout is a phone (top bar, bottom tabs, cards). From 900px: sidebar and tables. */
 :root {
   --brand: #5B4FE8;
+  --brand-hover: #4C40D4;
+  --brand-light: #ECEBFE;
   --brand-ink: #fff;
   --ink: #1A1A4E;
   --ink-2: #4B4B73;
@@ -20,7 +22,21 @@
   --danger-ink: #B91C1C; /* text on the pale red: 6:1, where --danger itself is 4.3:1 */
   --info: #0369A1;
   --info-bg: #E6F2F9;
+  --radius-sm: 6px;
   --radius: 10px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --shadow-sm: 0 1px 2px 0 rgba(26, 26, 78, 0.05);
+  --shadow-md: 0 4px 12px 0 rgba(26, 26, 78, 0.08);
+  --shadow-lg: 0 12px 28px -4px rgba(26, 26, 78, 0.12);
+  --shadow-card: 0 1px 3px 0 rgba(26, 26, 78, 0.04), 0 1px 2px -1px rgba(26, 26, 78, 0.04);
   --font: var(--font-jakarta), var(--font-hind), system-ui, -apple-system, "Segoe UI", sans-serif;
   --nav-h: 64px;
   /* Floating buttons sit above the phone bottom bar; on desktop there is none. */
@@ -36,22 +52,30 @@
 
 html[data-theme="dark"] {
   color-scheme: dark;
-  --brand: #8B83F5; --brand-ink: #0F0F2A;
+  --brand: #8B83F5; --brand-hover: #7A72E4; --brand-light: #2A2A6B; --brand-ink: #0F0F2A;
   --ink: #ECECFA; --ink-2: #C9C9E4; --ink-3: #A3A3C8;
   --tint: #22225A; --bg: #0F0F2A; --surface: #171738; --line: #2A2A5A; --line-2: #3B3B72;
   --success: #4ADE80; --success-bg: #12301F; --warning: #FBBF24; --warning-bg: #33260C;
   --danger: #F87171; --danger-bg: #3A1717; --danger-ink: #FCA5A5; --info: #7DD3FC; --info-bg: #102A3A;
   --notice-ink: #FCD9A0; --chip: #25254F; --row-hover: #1B1B40; --tint-info: #1F2A55;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px 0 rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 28px -4px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
 }
 @media (prefers-color-scheme: dark) {
   html:not([data-theme="light"]):not([data-theme="dark"]) {
     color-scheme: dark;
-    --brand: #8B83F5; --brand-ink: #0F0F2A;
+    --brand: #8B83F5; --brand-hover: #7A72E4; --brand-light: #2A2A6B; --brand-ink: #0F0F2A;
     --ink: #ECECFA; --ink-2: #C9C9E4; --ink-3: #A3A3C8;
     --tint: #22225A; --bg: #0F0F2A; --surface: #171738; --line: #2A2A5A; --line-2: #3B3B72;
     --success: #4ADE80; --success-bg: #12301F; --warning: #FBBF24; --warning-bg: #33260C;
     --danger: #F87171; --danger-bg: #3A1717; --danger-ink: #FCA5A5; --info: #7DD3FC; --info-bg: #102A3A;
     --notice-ink: #FCD9A0; --chip: #25254F; --row-hover: #1B1B40; --tint-info: #1F2A55;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px 0 rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 12px 28px -4px rgba(0, 0, 0, 0.5);
+    --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
   }
 }
 

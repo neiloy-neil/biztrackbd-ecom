@@ -96,3 +96,57 @@
 .seg { display: inline-flex; padding: 3px; border-radius: 10px; background: var(--chip); gap: 2px; }
 .seg button { min-height: 40px; padding: 0 14px; border: 0; border-radius: 8px; background: transparent; font-weight: 600; font-size: 13.5px; color: var(--ink-2); cursor: pointer; }
 .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(26, 26, 78, .15); }
+
+/* ---- Typography & Text utilities */
+.text-display { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.25; }
+.text-title { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.35; }
+.text-subtitle { font-size: 15.5px; font-weight: 600; line-height: 1.45; }
+.text-body { font-size: 14.5px; font-weight: 400; line-height: 1.5; }
+.text-caption { font-size: 13px; font-weight: 500; color: var(--ink-3); line-height: 1.4; }
+.text-micro { font-size: 11.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; }
+
+/* ---- Modern Card System */
+.card-base { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg, 14px); box-shadow: var(--shadow-card); overflow: hidden; }
+.card-base + .card-base { margin-top: 14px; }
+.card-header-clean { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+.card-header-clean h3 { margin: 0; font-size: 15.5px; font-weight: 700; color: var(--ink); }
+.card-header-clean p { margin: 2px 0 0; font-size: 13px; color: var(--ink-3); }
+.card-body-clean { padding: 18px; }
+.card-footer-clean { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 12px 18px; background: var(--bg); border-top: 1px solid var(--line); }
+
+/* ---- Modern Metric Cards & Grid */
+.metric-grid-clean { display: grid; gap: 12px; grid-template-columns: repeat(2, 1fr); margin-bottom: 16px; }
+@media (min-width: 900px) {
+  .metric-grid-clean { grid-template-columns: repeat(4, 1fr); }
+  .metric-grid-clean.three-col { grid-template-columns: repeat(3, 1fr); }
+}
+.metric-card-clean { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg, 14px); padding: 16px; box-shadow: var(--shadow-card); display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
+.metric-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.metric-card-label { font-size: 12.5px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.3px; }
+.metric-card-icon { width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: var(--tint); color: var(--brand); flex-shrink: 0; }
+.metric-card-value { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; color: var(--ink); }
+.metric-card-delta { font-size: 12.5px; margin-top: 6px; display: inline-flex; align-items: center; gap: 4px; font-weight: 600; }
+.metric-card-delta.up { color: var(--success); }
+.metric-card-delta.down { color: var(--danger); }
+.metric-card-delta.neutral { color: var(--ink-3); }
+
+/* ---- Refined Status Badge & Indicator Dot */
+.status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: var(--radius-full, 9999px); font-size: 12px; font-weight: 600; white-space: nowrap; line-height: 1.4; border: 1px solid transparent; }
+.status-badge-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.status-badge.good { background: var(--success-bg); color: var(--success); border-color: color-mix(in srgb, var(--success) 20%, transparent); }
+.status-badge.good .status-badge-dot { background: var(--success); }
+.status-badge.warn { background: var(--warning-bg); color: var(--warning); border-color: color-mix(in srgb, var(--warning) 20%, transparent); }
+.status-badge.warn .status-badge-dot { background: var(--warning); }
+.status-badge.bad { background: var(--danger-bg); color: var(--danger-ink, var(--danger)); border-color: color-mix(in srgb, var(--danger) 20%, transparent); }
+.status-badge.bad .status-badge-dot { background: var(--danger); }
+.status-badge.info { background: var(--info-bg); color: var(--info); border-color: color-mix(in srgb, var(--info) 20%, transparent); }
+.status-badge.info .status-badge-dot { background: var(--info); }
+.status-badge.neutral { background: var(--chip); color: var(--ink-2); border-color: var(--line); }
+.status-badge.neutral .status-badge-dot { background: var(--ink-3); }
+
+/* ---- Unified Filter Toolbar */
+.filter-toolbar-clean { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md, 10px); padding: 8px 12px; }
+.filter-search-box { position: relative; flex: 1 1 220px; min-width: 180px; }
+.filter-search-box input { width: 100%; min-height: 38px; padding-left: 32px; padding-right: 12px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--bg); font-size: 13.5px; }
+.filter-search-box svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--ink-3); pointer-events: none; }
+.filter-chips-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }

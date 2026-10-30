@@ -1,17 +1,39 @@
 /* Design tokens from the canvas (docs/29). One sans family, Bangla fallback. */
 :root {
   --brand: #5B4FE8;
+  --brand-hover: #4C40D4;
+  --brand-light: #ECEBFE;
   --ink: #1A1A4E;
+  --ink-2: #4B4B73;
   --ink-3: #6B6B8D;
   --tint: #F4F3FF;
   --surface: #FFFFFF;
   --bg: #FAFAFC;
   --line: #E7E7F0;
+  --line-2: #D9D9E8;
   --success: #15803D;
+  --success-bg: #E8F6EE;
   --warning: #B45309;
+  --warning-bg: #FDF3E3;
   --danger: #DC2626;
+  --danger-bg: #FDECEC;
   --info: #0369A1;
+  --info-bg: #E6F2F9;
+  --radius-sm: 6px;
   --radius: 10px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --shadow-sm: 0 1px 2px 0 rgba(26, 26, 78, 0.05);
+  --shadow-md: 0 4px 12px 0 rgba(26, 26, 78, 0.08);
+  --shadow-lg: 0 12px 28px -4px rgba(26, 26, 78, 0.12);
+  --shadow-card: 0 1px 3px 0 rgba(26, 26, 78, 0.04), 0 1px 2px -1px rgba(26, 26, 78, 0.04);
   --font: "Plus Jakarta Sans", "Hind Siliguri", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 * { box-sizing: border-box; }
