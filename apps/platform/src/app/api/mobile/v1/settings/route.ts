@@ -33,20 +33,20 @@ export async function GET(req: Request) {
       integrations: {
         sms: {
           provider: sms?.provider ?? "smsnetbd",
-          isConfigured: Boolean(sms?.apiKey),
+          isConfigured: Boolean(sms?.hasApiKey),
           senderId: sms?.senderId ?? "BizTrack",
         },
         uddoktapay: {
-          isConfigured: Boolean(uddoktapay?.apiKey),
-          baseURL: uddoktapay?.baseURL ?? "https://pay.biztrack.bd",
+          isConfigured: Boolean(uddoktapay?.hasApiKey),
+          baseURL: uddoktapay?.baseUrl ?? "https://pay.biztrack.bd",
         },
         ai: {
           defaultModel: ai?.defaultModel ?? "gemini-2.5-flash",
-          isConfigured: Boolean(ai?.apiKey),
+          isConfigured: Boolean(ai?.hasKey),
         },
         courier: {
           steadfastConfigured: Boolean(courier?.steadfastApiKey),
-          pathaoConfigured: Boolean(courier?.pathaoApiKey),
+          pathaoConfigured: Boolean(courier?.pathaoClientId),
         },
       },
     });

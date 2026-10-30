@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import {
-  getTenant,
+  getTenantDetail,
   suspendTenant,
   reactivateTenant,
   extendTrial,
@@ -22,7 +22,7 @@ export async function GET(
 
   try {
     const { id } = await params;
-    const tenant = await getTenant(session.actor, id);
+    const tenant = await getTenantDetail(session.actor, id);
     const notes = await listTenantNotes(session.actor, id).catch(() => []);
 
     return NextResponse.json({
@@ -61,20 +61,20 @@ export async function POST(
         );
       }
       await suspendTenant(session.actor, id, reason);
-      const updated = await getTenant(session.actor, id);
+      const updated = await getTenantDetail(session.actor, id);
       return NextResponse.json({ ok: true, message: "Store suspended successfully.", tenant: updated });
     }
 
     if (action === "reactivate") {
       await reactivateTenant(session.actor, id);
-      const updated = await getTenant(session.actor, id);
+      const updated = await getTenantDetail(session.actor, id);
       return NextResponse.json({ ok: true, message: "Store reactivated successfully.", tenant: updated });
     }
 
     if (action === "extend_trial") {
       const days = parseInt(String(body.days ?? "14"), 10) || 14;
       const newTrialEnd = await extendTrial(session.actor, id, days);
-      const updated = await getTenant(session.actor, id);
+      const updated = await getTenantDetail(session.actor, id);
       return NextResponse.json({ ok: true, message: `Trial extended by ${days} days.`, trialEndsAt: newTrialEnd, tenant: updated });
     }
 
