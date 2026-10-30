@@ -68,6 +68,10 @@ const sms = [
   L("SMS_NET_BD_API_KEY", local.SMS_NET_BD_API_KEY, "rotate it: it was pasted into a chat"),
   todo("SMS_SENDER_ID", "optional: your approved sender id"),
 ];
+const posthog = [
+  L("NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN", local.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN || "phc_yNoSSmxPT5BL2Bun4uBSRbQFtRcfy3BsCqbJ6ix2JDyt"),
+  L("NEXT_PUBLIC_POSTHOG_HOST", local.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com"),
+];
 const email = [todo("BREVO_API_KEY", "from Brevo: SMTP & API, API keys (make one named biztrack-production)"), L("EMAIL_FROM", `no-reply@${domain}`), L("EMAIL_FROM_NAME", "BizTrackBD")];
 const payments = [
   // Production numbers live in .env.production.local (never the test numbers in .env.local).
@@ -80,14 +84,14 @@ const shared = (...ks) => ks.map((k) => L(k, gen[k]));
 
 const files = {
   // Signup draws pictures for the sample products (docs/38), so marketing needs the picture storage settings too. The template demo links are built from the root domain.
-  marketing: [...common, L("NEXT_PUBLIC_MARKETING_URL", site), L("NEXT_PUBLIC_ADMIN_URL", admin), ...supabase, L("MEDIA_DRIVER", "supabase"), L("MEDIA_BUCKET", "store-media"), ...email, ...sms, ...shared("CUSTOMER_AUTH_SECRET")], // sign-up sends the confirmation code and the welcome email (docs/45)
+  marketing: [...common, L("NEXT_PUBLIC_MARKETING_URL", site), L("NEXT_PUBLIC_ADMIN_URL", admin), ...supabase, L("MEDIA_DRIVER", "supabase"), L("MEDIA_BUCKET", "store-media"), ...email, ...sms, ...posthog, ...shared("CUSTOMER_AUTH_SECRET")], // sign-up sends the confirmation code and the welcome email (docs/45)
   admin: [
     ...common, ...supabase, ...shared("CRON_SECRET", "CUSTOMER_AUTH_SECRET", "INTEGRATION_VAULT_SECRET", "PREVIEW_SECRET", "PHONE_TRUST_SALT", "IMPERSONATION_SECRET"),
     L("INTEGRATION_VAULT_KEY_ID", "v1"), L("ADMIN_ORIGIN", admin), L("NEXT_PUBLIC_ADMIN_URL", admin),
     L("MEDIA_DRIVER", "supabase"), L("MEDIA_BUCKET", "store-media"), ...payments,
     L("PLATFORM_A_RECORD", local.PLATFORM_A_RECORD || "76.76.21.21"), L("PLATFORM_CNAME_TARGET", `cname.${domain}`),
     todo("PLATFORM_VERCEL_TOKEN", "vercel.com, Account Settings, Tokens: lets the app add stores' custom domains and update routing (Vercel refuses variable names starting VERCEL_)"), todo("PLATFORM_VERCEL_PROJECT_ID", "the biztrack-storefront project's id"), todo("PLATFORM_VERCEL_TEAM_ID", "optional: only for a team-owned project"), todo("EDGE_CONFIG_ID", "Vercel Storage, Edge Config: the id (ecfg_...)"), todo("EDGE_CONFIG", "the Edge Config connection string"),
-    ...sms, ...email,
+    ...sms, ...email, ...posthog,
   ],
   platform: [
     ...common, L("PLATFORM_DATABASE_URL", need("SUPABASE_PLATFORM_DB_URL"), "the biztrack_platform login"), ...supabase, ...shared("CRON_SECRET", "PHONE_TRUST_SALT", "IMPERSONATION_SECRET"),

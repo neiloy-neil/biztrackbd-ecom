@@ -18,6 +18,7 @@ const ITEMS: { href: string; label: string; area: PlatformArea; exact?: boolean;
   { href: "/themes", label: "Themes and modules", area: "tenants", iconPath: "M3 3h7.5v7.5H3zM13.5 3H21v7.5h-7.5zM3 13.5h7.5V21H3zM13.5 13.5H21V21h-7.5z" },
   { href: "/inquiries", label: "Inquiries", area: "tickets", iconPath: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", isInquiries: true },
   { href: "/tickets", label: "Support tickets", area: "tickets", iconPath: "M4 5h16v11H9l-5 4V5z", isTickets: true },
+  { href: "/analytics", label: "Analytics & Ads", area: "tenants", iconPath: "M3 3v18h18M9 9l4 4 5-5M18 8v5h-5" },
   { href: "/notifications", label: "Notifications", area: "tenants", iconPath: "M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 003.4 0" },
   { href: "/announcements", label: "Announcements", area: "announcements", iconPath: "M4 10v4h3l8 4V6L7 10H4zM18 9a4 4 0 010 6" },
   { href: "/blog", label: "Blog", area: "blog", iconPath: "M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" },

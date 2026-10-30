@@ -15,6 +15,7 @@
     "@biztrackbd/media": "workspace:*",
     "@biztrackbd/ui": "workspace:*",
     "next": "^16.4.3",
+    "posthog-js": "^1.442.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sharp": "0.35.5"
