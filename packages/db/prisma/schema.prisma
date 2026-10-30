@@ -3115,3 +3115,21 @@ model PlatformClientError {
   @@index([pageUrl])
   @@index([createdAt])
 }
+
+/// Native mobile push notification device registration
+model MobileDeviceToken {
+  id           String   @id @default(cuid())
+  appType      String   // "STORE_MANAGER" | "PLATFORM_ADMIN"
+  tenantId     String?  // null for platform super admins
+  userId       String   // TenantUser.id or PlatformUser.id
+  pushToken    String   @unique // e.g. "ExponentPushToken[...]"
+  platform     String   @default("android") // "android" | "ios"
+  deviceModel  String?
+  lastActiveAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  @@index([tenantId, appType])
+  @@index([userId, appType])
+  @@index([appType, lastActiveAt])
+}
+

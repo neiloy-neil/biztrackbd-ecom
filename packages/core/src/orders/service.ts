@@ -23,6 +23,8 @@ import { RESTOCKS_ON, assertTransition } from "./state-machine";
 import { attributeOrderToAffiliate, settleAffiliateOrderCommissions } from "../affiliate/service";
 import { emitMerchantWebhookEvent } from "../messaging/webhook";
 
+import { notifyStoreOrder } from "../notifications/push-service";
+
 const IDEMPOTENCY_TTL_MS = 24 * 3_600_000;
 const TRX_ID = /^[A-Z0-9]{8,12}$/;
 /** Customer-facing channels only. Staff keying in a phone order for a regular customer is not limited. */
@@ -75,6 +77,12 @@ export async function createOrder(tenantId: string, rawInput: unknown): Promise<
         console.error("[Affiliate] Failed to attribute order:", err);
       }
       await notifyOrder(tenantId, placed.orderId, "ORDER_RECEIVED");
+      notifyStoreOrder(tenantId, {
+        orderNumber: placed.orderNumber,
+        totalAmount: placed.totalAmount,
+        paymentMethod: input.paymentMethod || "COD",
+        customerName: input.customer.name,
+      }).catch((err) => console.error("[Push Notify Error]", err));
       await publishEvent("order/created", { tenantId, orderId: placed.orderId, orderNumber: placed.orderNumber, totalAmount: placed.totalAmount });
       for (const percent of usage?.crossed ?? ([] as OrderThreshold[])) {
         await publishEvent("usage/threshold-crossed", { tenantId, metric: "orders", percent, used: usage!.used, limit: usage!.limit! });

@@ -512,4 +512,5 @@ export * from "./api-keys";
 export * from "./analytics";
 export * from "./platform/notify";
 export * from "./platform/native-analytics";
+export * from "./notifications/push-service";
 export { sealField, openField, isSealed } from "./vault/field-secret";
