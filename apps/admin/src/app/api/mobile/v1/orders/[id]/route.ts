@@ -14,7 +14,12 @@ import {
   addOrderNote,
   DomainError,
   type Actor,
+  enqueueNotificationJob,
+  consumeSmsCredit,
+  recordOrderEvent,
+  smsParts,
 } from "@biztrackbd/core";
+import { withTenant } from "@biztrackbd/db";
 import type { OrderStatus } from "@biztrackbd/db";
 
 export const dynamic = "force-dynamic";
@@ -189,6 +194,54 @@ export async function POST(
 
       case "add_note": {
         await addOrderNote(session.tenantId, session.actor, id, note || "");
+        break;
+      }
+
+      case "send_sms": {
+        const smsText = typeof body.text === "string" ? body.text.trim() : "";
+        if (!smsText) {
+          return NextResponse.json({ error: "SMS message text is required" }, { status: 400 });
+        }
+
+        const orderData = await getOrderDetail(session.tenantId, session.actor, id);
+        if (!orderData?.customerPhone) {
+          return NextResponse.json({ error: "Customer does not have a valid phone number" }, { status: 400 });
+        }
+
+        const gate = await withTenant(session.tenantId, async (tx) => {
+          const optOut = await tx.smsOptOut.findFirst({ where: { phone: orderData.customerPhone } });
+          if (optOut) return "opted_out" as const;
+          const hasCredit = await consumeSmsCredit(tx, session.tenantId);
+          return hasCredit ? ("ok" as const) : ("no_credits" as const);
+        });
+
+        if (gate === "opted_out") {
+          return NextResponse.json({ error: "Customer has opted out of receiving SMS" }, { status: 400 });
+        }
+        if (gate === "no_credits") {
+          return NextResponse.json(
+            { error: "Insufficient SMS credits. Please recharge your SMS balance in store settings." },
+            { status: 402 }
+          );
+        }
+
+        const enq = await enqueueNotificationJob({
+          tenantId: session.tenantId,
+          recipient: orderData.customerPhone,
+          body: smsText,
+          channel: "SMS",
+          event: body.event || "MANUAL_DISPATCH",
+          metadata: { orderId: id, orderNumber: orderData.orderNumber, sentBy: session.user.email },
+        });
+
+        await withTenant(session.tenantId, (tx) =>
+          recordOrderEvent(tx, session.tenantId, id, {
+            type: "SMS",
+            message: `SMS sent to customer: "${smsText.slice(0, 45)}${smsText.length > 45 ? "..." : ""}"`,
+            actor: { name: session.user.name || session.user.email || "Store Staff" },
+            data: { jobId: enq.jobId, status: enq.status, parts: smsParts(smsText).parts },
+          })
+        );
         break;
       }
 
