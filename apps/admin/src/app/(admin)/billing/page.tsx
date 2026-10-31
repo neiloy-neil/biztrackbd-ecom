@@ -2,7 +2,7 @@ import Link from "next/link";
 import { DemoLocked } from "@/components/demo-locked";
 import { trialHref } from "@/lib/demo";
 import type { Metadata } from "next";
-import { ACCESS_LABELS, getBillingOverview } from "@biztrackbd/core";
+import { ACCESS_LABELS, getBillingOverview, calculatePlanCharge } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
 import { dateOnly, taka } from "@/lib/format";
 import { one } from "@/lib/query";
@@ -10,7 +10,7 @@ import { requireAccess } from "@/lib/session";
 import { PageHeader } from "@biztrackbd/ui";
 import { Meter, limitNote } from "@/lib/usage";
 import { cancelProofAction } from "./actions";
-import { PayForm } from "./pay-form";
+import { PayForm, type SerializedQuote } from "./pay-form";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Plan and usage" };
@@ -35,6 +35,34 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
     : a.suspendedByPlatform ? "Your store has been switched off by BizTrackBD. Please contact support." : "Store locked until you pay";
   const summary = (p: (typeof b.plans)[number]) =>
     `${p.limits.products == null ? "Unlimited" : p.limits.products.toLocaleString("en-IN")} products, ${p.limits.ordersPerMonth == null ? "unlimited" : p.limits.ordersPerMonth.toLocaleString("en-IN")} orders a month, ${p.limits.staff ?? "unlimited"} staff${p.features.courierBooking === "auto" ? ", courier booking" : ""}${p.features.customDomain ? ", your own domain" : ""}`;
+
+  const subForQuote = b.subscription
+    ? {
+        planTier: b.subscription.tier,
+        interval: b.subscription.interval,
+        amount: b.subscription.amount,
+        currentPeriodStart: b.subscription.periodStart,
+        currentPeriodEnd: b.subscription.periodEnd,
+      }
+    : null;
+
+  const quotes: Record<string, SerializedQuote> = {};
+  for (const p of b.plans) {
+    for (const inv of ["MONTHLY", "YEARLY"] as const) {
+      const q = calculatePlanCharge(subForQuote, p, inv);
+      quotes[`${p.tier}:${inv}`] = {
+        planTier: q.planTier,
+        interval: q.interval,
+        fullPrice: q.fullPrice,
+        creditApplied: q.creditApplied,
+        amountToPay: q.amountToPay,
+        isUpgrade: q.isUpgrade,
+        isRenewal: q.isRenewal,
+        newPeriodStart: q.newPeriodStart.toISOString(),
+        newPeriodEnd: q.newPeriodEnd.toISOString(),
+      };
+    }
+  }
 
   return (
     <>
@@ -98,7 +126,24 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
             <form action={cancelProofAction.bind(null, b.pending.id)}><SubmitButton className="btn btn-secondary btn-sm" pending="…">I made a mistake. Remove it</SubmitButton></form>
           </div>
         ) : (
-          <PayForm plans={b.plans.map((p) => ({ tier: p.tier, name: p.name, priceMonthly: p.priceMonthly, priceYearly: p.priceYearly, yearlyMonthsFree: p.yearlyMonthsFree, summary: summary(p) }))} payTo={b.payTo} current={b.tier} suggested={suggested} />
+          <PayForm
+            plans={b.plans.map((p) => ({ tier: p.tier, name: p.name, priceMonthly: p.priceMonthly, priceYearly: p.priceYearly, yearlyMonthsFree: p.yearlyMonthsFree, summary: summary(p) }))}
+            payTo={b.payTo}
+            current={b.tier}
+            suggested={suggested}
+            quotes={quotes}
+            subscription={
+              b.subscription
+                ? {
+                    tier: b.subscription.tier,
+                    interval: b.subscription.interval,
+                    amount: b.subscription.amount,
+                    periodStart: b.subscription.periodStart?.toISOString(),
+                    periodEnd: b.subscription.periodEnd?.toISOString(),
+                  }
+                : null
+            }
+          />
         )}
       </section>
 

@@ -10,6 +10,7 @@ import { TRANSITIONS } from "../orders/state-machine";
 import { recordOrderEvent } from "./order-events";
 import { COURIER_STATUS_LABELS, type CourierStatus } from "../couriers/types";
 import { lookupInTx, fetchSteadfastFraudStats, type PhoneLookup } from "../fraud/service";
+import { fetchUnifiedCourierFraud, toCourierFraudStats } from "../fraud/courier-api";
 import { FLAG_LABELS } from "../fraud/assess";
 
 const actorName = (a: StaffActor) => a.name ?? a.email;
@@ -189,8 +190,11 @@ export async function getOrderDetail(tenantId: string, actor: StaffActor, orderI
     const events = await tx.orderEvent.findMany({ where: { orderId }, orderBy: { createdAt: "asc" } });
     const reuse = o.mfsTrxId ? await tx.order.findMany({ where: { mfsTrxId: o.mfsTrxId, id: { not: o.id } }, select: { id: true, orderNumber: true } }) : [];
 
-    const courierStats = await fetchSteadfastFraudStats(tenantId, o.customerPhone);
-    const lookup = await lookupInTx(tx, o.customerPhone, courierStats);
+    const unifiedCourierData = await fetchUnifiedCourierFraud(o.customerPhone).catch(() => null);
+    let courierStats = unifiedCourierData
+      ? toCourierFraudStats(unifiedCourierData)
+      : await fetchSteadfastFraudStats(tenantId, o.customerPhone).catch(() => null);
+    const lookup = await lookupInTx(tx, o.customerPhone, courierStats, unifiedCourierData);
     let customer: OrderDetail["customer"] = null;
     if (o.customerId) {
       const c = await tx.customer.findFirst({ where: { id: o.customerId } });

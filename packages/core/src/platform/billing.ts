@@ -6,7 +6,7 @@ import { NotFoundError, ValidationError } from "../errors";
 import { readUsage, type UsageSummary } from "../limits/plan";
 import { assertCan, type StaffActor } from "../permissions";
 import { normalizeBdPhone } from "../phone";
-import { accessState, type Access } from "./lifecycle";
+import { accessState, addPeriod, type Access } from "./lifecycle";
 import { notifyPlatform } from "./notify";
 
 /** What a store sees of its own subscription (AdmBilling, AdmLimit, AdmReadOnly). Everything here is read with the store's own context. */
@@ -204,6 +204,96 @@ export async function getBillingOverview(tenantId: string, actor: StaffActor, no
       plans, usage: await readUsage(tx, now), proofs: views, pending: views.find((p) => p.status === "PENDING") ?? null, payTo: paymentTargets(),
     };
   });
+}
+
+export interface PlanChargeQuote {
+  planTier: string;
+  interval: "MONTHLY" | "YEARLY";
+  fullPrice: number;
+  creditApplied: number;
+  amountToPay: number;
+  isUpgrade: boolean;
+  isRenewal: boolean;
+  newPeriodStart: Date;
+  newPeriodEnd: Date;
+}
+
+/**
+ * Calculates the exact amount to charge when a merchant chooses a plan:
+ * 1. Same-plan early renewal: Stacks 1 period onto currentPeriodEnd (keeps 100% of prepaid days).
+ * 2. Mid-cycle upgrade: Prorates unused days from the current plan and applies them as a discount.
+ * 3. Fresh plan / expired: Charges standard price for the interval.
+ */
+export function calculatePlanCharge(
+  sub: { planTier: string; interval: string; amount: number; periodStart?: Date | string; periodEnd?: Date | string; currentPeriodStart?: Date | string; currentPeriodEnd?: Date | string } | null,
+  targetPlan: PlanView,
+  interval: "MONTHLY" | "YEARLY",
+  now: Date = new Date(),
+): PlanChargeQuote {
+  const fullPrice = interval === "YEARLY" ? targetPlan.priceYearly : targetPlan.priceMonthly;
+  const rawEnd = sub?.periodEnd ?? sub?.currentPeriodEnd;
+  const rawStart = sub?.periodStart ?? sub?.currentPeriodStart;
+  const periodEnd = rawEnd ? new Date(rawEnd) : undefined;
+  const periodStart = rawStart ? new Date(rawStart) : undefined;
+  const stillPaid = sub !== null && sub.amount > 0 && periodEnd !== undefined && periodEnd > now;
+
+  // Case 1: Early renewal of the same plan -> Stacking onto existing cycle end
+  if (stillPaid && sub.planTier === targetPlan.tier && sub.interval === interval) {
+    const nextStart = periodEnd!;
+    const nextEnd = addPeriod(nextStart, interval);
+    return {
+      planTier: targetPlan.tier,
+      interval,
+      fullPrice,
+      creditApplied: 0,
+      amountToPay: fullPrice,
+      isUpgrade: false,
+      isRenewal: true,
+      newPeriodStart: nextStart,
+      newPeriodEnd: nextEnd,
+    };
+  }
+
+  // Case 2: Mid-cycle upgrade -> Credit unused portion of previous plan
+  if (stillPaid && periodStart && periodEnd) {
+    const totalMs = Math.max(1, periodEnd.getTime() - periodStart.getTime());
+    const remainingMs = Math.max(0, periodEnd.getTime() - now.getTime());
+    const fractionUnused = Math.min(1, remainingMs / totalMs);
+    const unusedCredit = Math.round(sub.amount * fractionUnused);
+
+    // Only apply credit when upgrading tier or extending interval
+    if (unusedCredit > 0 && fullPrice >= sub.amount) {
+      const amountToPay = Math.max(10, fullPrice - unusedCredit);
+      const nextStart = now;
+      const nextEnd = addPeriod(nextStart, interval);
+      return {
+        planTier: targetPlan.tier,
+        interval,
+        fullPrice,
+        creditApplied: unusedCredit,
+        amountToPay,
+        isUpgrade: true,
+        isRenewal: false,
+        newPeriodStart: nextStart,
+        newPeriodEnd: nextEnd,
+      };
+    }
+  }
+
+  // Case 3: Fresh plan (on trial, expired, or downgrade)
+  const nextStart = now;
+  const nextEnd = addPeriod(nextStart, interval);
+  return {
+    planTier: targetPlan.tier,
+    interval,
+    fullPrice,
+    creditApplied: 0,
+    amountToPay: fullPrice,
+    isUpgrade: false,
+    isRenewal: false,
+    newPeriodStart: nextStart,
+    newPeriodEnd: nextEnd,
+  };
 }
 
 const TRX = /^[A-Z0-9]{8,12}$/;

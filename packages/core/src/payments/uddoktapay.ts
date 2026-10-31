@@ -4,6 +4,7 @@ import { assertCan, type StaffActor } from "../permissions";
 import { sendServerPurchase } from "../growth/tracking";
 import { loadCredentials } from "../vault/integrations";
 import { enqueueNotificationJob } from "../messaging/queue";
+import { addPeriod } from "../platform/lifecycle";
 
 // The shared sandbox address and its public test key exist for development only. In production a store without its own keys must not be
 // offered online payment, or shoppers would be sent to a sandbox where any made-up transaction id marks the order paid.
@@ -385,7 +386,7 @@ export async function processUddoktaPaySubscriptionSuccess(
   let owner: { email: string | null; phone: string | null; name: string | null } = { email: null, phone: null, name: null };
   try {
     await db.$transaction(async (tx) => {
-      const tenant = await tx.tenant.findUnique({ where: { id: tenantId } });
+      const tenant = await tx.tenant.findUnique({ where: { id: tenantId }, include: { subscription: true } });
       if (!tenant) throw new NotFoundError("Tenant");
       owner = { email: tenant.ownerEmail, phone: tenant.ownerPhone, name: tenant.ownerName };
 
@@ -397,12 +398,13 @@ export async function processUddoktaPaySubscriptionSuccess(
       firstTimeSeen = true;
 
       const now = new Date();
-      const periodEnd = new Date(now);
-      if (interval === "YEARLY") {
-        periodEnd.setFullYear(periodEnd.getFullYear() + 1);
-      } else {
-        periodEnd.setMonth(periodEnd.getMonth() + 1);
-      }
+      const sub = tenant.subscription;
+      const stillPaid = sub && Number(sub.amount) > 0 && sub.currentPeriodEnd > now;
+      const isRenewal = Boolean(stillPaid && sub?.planTier === planTier && sub?.interval === interval);
+
+      // Early renewal of the same plan stacks onto the existing end date so the merchant loses no days!
+      const periodStart = isRenewal ? sub!.currentPeriodEnd : now;
+      const periodEnd = addPeriod(periodStart, interval);
 
       // Upsert subscription
       await tx.subscription.upsert({
@@ -412,8 +414,8 @@ export async function processUddoktaPaySubscriptionSuccess(
           planTier: planTier as "STARTER" | "PRO" | "BUSINESS",
           interval,
           status: "ACTIVE",
-          amount: Number(verified.amount || "1990"),
-          currentPeriodStart: now,
+          amount: Number(verified.amount || "699"),
+          currentPeriodStart: periodStart,
           currentPeriodEnd: periodEnd,
           gateway: "UDDOKTAPAY",
           cancelAtPeriodEnd: false,
@@ -422,8 +424,8 @@ export async function processUddoktaPaySubscriptionSuccess(
           planTier: planTier as "STARTER" | "PRO" | "BUSINESS",
           interval,
           status: "ACTIVE",
-          amount: Number(verified.amount || "1990"),
-          currentPeriodStart: now,
+          amount: Number(verified.amount || "699"),
+          currentPeriodStart: isRenewal ? sub!.currentPeriodStart : periodStart,
           currentPeriodEnd: periodEnd,
           gateway: "UDDOKTAPAY",
           cancelAtPeriodEnd: false,
@@ -447,13 +449,14 @@ export async function processUddoktaPaySubscriptionSuccess(
           tenantId,
           planTier: planTier as "STARTER" | "PRO" | "BUSINESS",
           billingPeriod: interval,
-          amount: Number(verified.amount || "1990"),
+          amount: Number(verified.amount || "699"),
           mfsProvider,
           senderNumber,
           trxId,
           status: "APPROVED",
-          note: `UddoktaPay automated checkout (${verified.paymentMethod || "online"} - Invoice: ${invoiceId})`,
+          note: `UddoktaPay automated checkout (${verified.paymentMethod || "online"} - Invoice: ${invoiceId}${isRenewal ? " - Cycle Extended" : ""})`,
           approvedAt: now,
+          appliedFrom: periodStart,
           appliedTo: periodEnd,
         },
       });

@@ -3,7 +3,7 @@
 import { cookies, headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { DomainError, cancelPendingProof, createUddoktaPayCharge, getBillingOverview, submitPaymentProof, getPlatformUddoktaPayCredentials, uddoktaPayPlanUrls, platformOriginFor } from "@biztrackbd/core";
+import { DomainError, cancelPendingProof, createUddoktaPayCharge, getBillingOverview, submitPaymentProof, getPlatformUddoktaPayCredentials, uddoktaPayPlanUrls, platformOriginFor, calculatePlanCharge } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 import { resolveAdminOrigin } from "@/lib/origin";
 
@@ -16,7 +16,20 @@ export async function initiateOnlineBillingAction(plan: string, interval: "MONTH
     const chosen = b.plans.find((p) => p.tier === plan);
     if (!chosen) return { error: "Invalid plan selected" };
 
-    const amount = interval === "YEARLY" ? chosen.priceYearly : chosen.priceMonthly;
+    const quote = calculatePlanCharge(
+      b.subscription
+        ? {
+            planTier: b.subscription.tier,
+            interval: b.subscription.interval,
+            amount: b.subscription.amount,
+            currentPeriodStart: b.subscription.periodStart,
+            currentPeriodEnd: b.subscription.periodEnd,
+          }
+        : null,
+      chosen,
+      interval,
+    );
+    const amount = quote.amountToPay;
     const origin = resolveAdminOrigin(await headers(), 3001);
 
     const urls = uddoktaPayPlanUrls(origin, platformOriginFor(process.env.NEXT_PUBLIC_ROOT_DOMAIN));
@@ -36,6 +49,9 @@ export async function initiateOnlineBillingAction(plan: string, interval: "MONTH
         plan,
         interval,
         type: "subscription",
+        isRenewal: String(quote.isRenewal),
+        isUpgrade: String(quote.isUpgrade),
+        creditApplied: String(quote.creditApplied),
         // The webhook that activates the plan has no browser, so the Pixel details travel with the charge for the Purchase event.
         ...(jar.get("_fbp")?.value ? { fbp: jar.get("_fbp")!.value.slice(0, 100) } : {}),
         ...(jar.get("_fbc")?.value ? { fbc: jar.get("_fbc")!.value.slice(0, 500) } : {}),

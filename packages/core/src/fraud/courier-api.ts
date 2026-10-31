@@ -120,20 +120,23 @@ export async function fetchUnifiedCourierFraud(
   }
 
   const cfg = await getFraudCheckerConfig();
-  if (!cfg.apiKey) return null;
   const endpoint = cfg.endpoint;
   const apiKey = cfg.apiKey;
   const fetcher = options?.fetchImpl ?? globalThis.fetch;
 
+  const reqHeaders: Record<string, string> = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  };
+  if (apiKey) {
+    reqHeaders["X-API-KEY"] = apiKey;
+    reqHeaders["Authorization"] = `Bearer ${apiKey}`;
+  }
+
   try {
     const res = await fetcher(endpoint, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "X-API-KEY": apiKey,
-        Authorization: `Bearer ${apiKey}`,
-      },
+      headers: reqHeaders,
       body: JSON.stringify({ phone }),
       // Default timeout after 8 seconds if external network is slow
       signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined,
@@ -142,13 +145,16 @@ export async function fetchUnifiedCourierFraud(
     if (!res.ok) {
       // If POST is rate-limited or fails, try GET fallback
       const getUrl = `${endpoint}/${phone}`;
+      const getHeaders: Record<string, string> = {
+        Accept: "application/json",
+      };
+      if (apiKey) {
+        getHeaders["X-API-KEY"] = apiKey;
+        getHeaders["Authorization"] = `Bearer ${apiKey}`;
+      }
       const getRes = await fetcher(getUrl, {
         method: "GET",
-        headers: {
-          Accept: "application/json",
-          "X-API-KEY": apiKey,
-          Authorization: `Bearer ${apiKey}`,
-        },
+        headers: getHeaders,
         signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined,
       }).catch(() => null);
 
