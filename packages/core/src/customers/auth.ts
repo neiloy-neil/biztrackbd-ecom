@@ -69,7 +69,7 @@ let smsSender: SmsSender = {
     try {
       const { getPlatformPrisma } = await import("@biztrackbd/db");
       const db = getPlatformPrisma();
-      const rows = await db.platformConfig.findMany({
+      let rows: Array<{ key: string; value: string }> = await db.platformConfig.findMany({
         where: {
           key: {
             in: [
@@ -90,6 +90,26 @@ let smsSender: SmsSender = {
           },
         },
       });
+
+      if (rows.length === 0) {
+        const smsKeys = [
+          "sms_provider", "sms_api_key", "sms_sender_id",
+          "sms_bulksmsbd_api_key", "sms_bulksmsbd_sender_id",
+          "sms_smsnetbd_api_key", "sms_smsnetbd_sender_id",
+          "sms_greenweb_token", "sms_greenweb_api_key",
+          "sms_custom_endpoint", "sms_custom_api_key", "sms_custom_sender_id", "sms_custom_method",
+        ];
+        const rpcResults = await Promise.all(
+          smsKeys.map(async (k) => {
+            const val = await (db as any).$queryRawUnsafe(
+              "SELECT platform_config_value($1) as val",
+              k
+            ).then((r: any) => r[0]?.val).catch(() => null);
+            return val ? { key: k, value: val } : null;
+          })
+        );
+        rows = rpcResults.filter((r): r is { key: string; value: string } => Boolean(r));
+      }
 
       if (rows.length > 0) {
         const map = new Map(rows.map((r) => [r.key, r.value]));
