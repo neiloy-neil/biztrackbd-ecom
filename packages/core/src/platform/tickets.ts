@@ -4,6 +4,7 @@ import { assertPlatformCan, type PlatformActor } from "./admin";
 import { assertCan, type StaffActor } from "../permissions";
 import { NotFoundError, ValidationError } from "../errors";
 import { notifyPlatform } from "./notify";
+import { notifyStoreTicketReply, notifyPlatformTicketActivity } from "../notifications/push-service";
 
 export type TicketStatusType = "OPEN" | "WAITING_ON_TENANT" | "SOLVED";
 export type TicketPriority = "LOW" | "NORMAL" | "HIGH";
@@ -290,6 +291,13 @@ export async function replyPlatformTicket(
         : "http://localhost:3001")
     ).replace(/\/$/, "");
     await notifyOwner(replied.tenantId, "TICKET_REPLY", { ticketCode: replied.code ?? undefined, excerpt: body.length > 400 ? `${body.slice(0, 400)}...` : body, ticketUrl: `${admin}/support/${replied.id}` }, { dedupeKey: message.id });
+    notifyStoreTicketReply(replied.tenantId, {
+      ticketId: replied.id,
+      ticketCode: replied.code ?? "Support",
+      subject: "Support Ticket",
+      replySnippet: body,
+      status: newStatus,
+    }).catch(() => {});
   }
 
   return {
@@ -331,6 +339,15 @@ export async function updateTicketStatus(
       },
     });
   });
+  if (status === "SOLVED" || status === "WAITING_ON_TENANT") {
+    notifyStoreTicketReply(ticket.tenantId, {
+      ticketId: ticket.id,
+      ticketCode: ticket.code,
+      subject: ticket.subject,
+      replySnippet: status === "SOLVED" ? "আপনার টিকিট সমাধান হিসেবে চিহ্নিত করা হয়েছে।" : "টিকিটে আপনার উত্তর প্রয়োজন।",
+      status,
+    }).catch(() => {});
+  }
 }
 
 // ==========================================
@@ -498,6 +515,14 @@ export async function replyTenantTicket(
       data: { status: "OPEN", updatedAt: new Date() },
     });
   });
+  notifyPlatformTicketActivity({
+    ticketId: input.ticketId,
+    ticketCode: "Support",
+    storeName: "Merchant Store",
+    subject: "Ticket Reply",
+    replySnippet: message,
+    isNew: false,
+  }).catch(() => {});
 }
 
 export async function getTenantTicketDetail(

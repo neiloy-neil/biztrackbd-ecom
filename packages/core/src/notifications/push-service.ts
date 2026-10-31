@@ -193,7 +193,8 @@ export type PlatformPushEventType =
   | "PAYMENT_APPROVAL"
   | "SUBSCRIPTION_APPROVAL"
   | "CRITICAL_INCIDENT"
-  | "SUPPORT_TICKET";
+  | "SUPPORT_TICKET"
+  | "SUPPORT_TICKET_REPLY";
 
 export interface PlatformPushEvent {
   type: PlatformPushEventType;
@@ -273,3 +274,83 @@ export async function notifyPlatformTenantSignup(tenant: {
     },
   });
 }
+
+/**
+ * Dispatches an instant high-priority alert to merchant devices when platform staff replies or updates a support ticket.
+ */
+export async function notifyStoreTicketReply(
+  tenantId: string,
+  ticket: {
+    ticketId: string;
+    ticketCode: string;
+    subject: string;
+    replySnippet: string;
+    status?: string;
+  }
+): Promise<void> {
+  const db = getPlatformPrisma();
+
+  const devices = await db.mobileDeviceToken.findMany({
+    where: {
+      tenantId,
+      appType: "STORE_MANAGER",
+    },
+    select: { pushToken: true },
+  });
+
+  if (devices.length === 0) return;
+
+  const isSolved = ticket.status === "SOLVED";
+  const title = isSolved
+    ? `✅ সাপোর্ট টিকিট সমাধান #${ticket.ticketCode}`
+    : `💬 সাপোর্ট উত্তর #${ticket.ticketCode}`;
+
+  const body = isSolved
+    ? `আপনার টিকিট #${ticket.ticketCode} সমাধান হিসেবে চিহ্নিত করা হয়েছে।`
+    : `BizTrackBD Support: ${ticket.replySnippet.slice(0, 150)}`;
+
+  const messages: ExpoPushMessage[] = devices.map((d) => ({
+    to: d.pushToken,
+    title,
+    body,
+    sound: "default",
+    priority: "high",
+    channelId: "tickets-support",
+    data: {
+      type: "SUPPORT_TICKET_REPLY",
+      ticketId: ticket.ticketId,
+      ticketCode: ticket.ticketCode,
+      status: ticket.status || "WAITING_ON_TENANT",
+    },
+  }));
+
+  await sendExpoPush(messages);
+}
+
+/**
+ * Dispatches instant notification to Platform Super Admins when a tenant sends a new reply on a ticket.
+ */
+export async function notifyPlatformTicketActivity(activity: {
+  ticketId: string;
+  ticketCode: string;
+  storeName: string;
+  subject: string;
+  replySnippet: string;
+  isNew?: boolean;
+}): Promise<void> {
+  await notifyPlatformSuperAdmins({
+    type: "SUPPORT_TICKET",
+    title: activity.isNew
+      ? `🎫 নতুন সাপোর্ট টিকিট #${activity.ticketCode}`
+      : `💬 নতুন টিকিট উত্তর #${activity.ticketCode}`,
+    body: `${activity.storeName}: ${activity.replySnippet.slice(0, 150)}`,
+    channelId: "platform-support",
+    data: {
+      type: "SUPPORT_TICKET",
+      ticketId: activity.ticketId,
+      ticketCode: activity.ticketCode,
+      storeName: activity.storeName,
+    },
+  });
+}
+
