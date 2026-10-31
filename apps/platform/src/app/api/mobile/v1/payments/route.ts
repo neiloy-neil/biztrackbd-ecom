@@ -3,6 +3,8 @@ import {
   listPayments,
   approveSubscriptionPayment,
   rejectSubscriptionPayment,
+  getTenantDetail,
+  currentSmsSender,
 } from "@biztrackbd/core";
 import { getPlatformMobileSession } from "@/lib/mobile-auth";
 
@@ -46,6 +48,25 @@ export async function POST(req: Request) {
 
     if (action === "approve") {
       const result = await approveSubscriptionPayment(session.actor, proofId);
+
+      // Notify the store owner via SMS
+      if (result?.tenantId) {
+        const tenant = await getTenantDetail(session.actor, result.tenantId).catch(() => null);
+        if (tenant?.ownerPhone) {
+          const smsSender = currentSmsSender();
+          if (smsSender) {
+            const expiry = result.periodEnd
+              ? new Date(result.periodEnd).toLocaleDateString("en-BD", { day: "numeric", month: "short", year: "numeric" })
+              : "";
+            smsSender.send(
+              result.tenantId,
+              tenant.ownerPhone,
+              `অভিনন্দন! আপনার BizTrackBD ${result.plan} সাবস্ক্রিপশন পেমেন্ট অনুমোদিত হয়েছে। মেয়াদ: ${expiry}। BizTrackBD`
+            ).catch(() => {});
+          }
+        }
+      }
+
       return NextResponse.json({
         ok: true,
         message: "Payment approved and subscription extended successfully.",
@@ -56,6 +77,21 @@ export async function POST(req: Request) {
     if (action === "reject") {
       const reason = String(body.reason ?? "").trim() || "TrxID verification failed or mismatched amount.";
       await rejectSubscriptionPayment(session.actor, proofId, reason);
+
+      if (body.tenantId) {
+        const tenant = await getTenantDetail(session.actor, body.tenantId).catch(() => null);
+        if (tenant?.ownerPhone) {
+          const smsSender = currentSmsSender();
+          if (smsSender) {
+            smsSender.send(
+              body.tenantId,
+              tenant.ownerPhone,
+              `আপনার BizTrackBD পেমেন্ট ভেরিফিকেশন বাতিল হয়েছে। কারণ: ${reason}। সহায়তার জন্য যোগাযোগ করুন: BizTrackBD`
+            ).catch(() => {});
+          }
+        }
+      }
+
       return NextResponse.json({
         ok: true,
         message: "Payment proof rejected.",
