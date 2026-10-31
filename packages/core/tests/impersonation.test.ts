@@ -52,7 +52,7 @@ describe("Platform Impersonation & Security Safeguards", () => {
     expect(verifyImpersonationTicket("abc.def.ghi")).toBeNull();
   });
 
-  it("creates and verifies 15-minute impersonation session cookie", () => {
+  it("creates and verifies 7-day impersonation session cookie", () => {
     const cookieVal = createImpersonationSessionCookie({
       tenantId: "tenant-123",
       actorId: "admin-1",
@@ -63,8 +63,8 @@ describe("Platform Impersonation & Security Safeguards", () => {
     expect(session).not.toBeNull();
     expect(session?.tenantId).toBe("tenant-123");
     expect(session?.actorEmail).toBe("sumi@biztrackbd.com");
-    expect(session?.expiresAt).toBeGreaterThan(Date.now() + 14 * 60_000);
-    expect(session?.expiresAt).toBeLessThanOrEqual(Date.now() + 15 * 60_000 + 1000);
+    expect(session?.expiresAt).toBeGreaterThan(Date.now() + 6 * 86400 * 1000);
+    expect(session?.expiresAt).toBeLessThanOrEqual(Date.now() + 7 * 86400 * 1000 + 1000);
   });
 
   it("rejects tampered session cookie", () => {

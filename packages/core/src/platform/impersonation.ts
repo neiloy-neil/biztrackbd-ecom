@@ -7,7 +7,7 @@ import { assertPlatformCan, type PlatformActor } from "./admin";
 const DEV_SECRET = "dev-only-impersonation-secret-not-for-production";
 const MIN_SECRET_LENGTH = 32;
 const TICKET_TTL_MS = 60_000; // 60 seconds
-const SESSION_TTL_MS = 15 * 60_000; // 15 minutes
+const SESSION_TTL_MS = 7 * 24 * 60 * 60_000; // 7 days (matches Platform Admin session)
 
 export interface ImpersonationTicketPayload {
   tenantId: string;

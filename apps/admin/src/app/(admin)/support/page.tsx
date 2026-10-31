@@ -34,6 +34,36 @@ export default async function MerchantSupportPage({
         </div>
       )}
 
+      {/* Direct 24/7 Hotline & WhatsApp Quick Contact */}
+      <div className="card" style={{ background: "linear-gradient(135deg, #F0FDF4 0%, #FFFFFF 100%)", border: "1px solid #BBF7D0" }}>
+        <div className="flex-between flex-wrap gap-md">
+          <div>
+            <div className="text-base text-bold text-success mb-xs">Direct Merchant Assistance (24/7)</div>
+            <div className="text-xs text-muted">
+              Connect directly with our dedicated technical team for urgent domain, courier or store issues.
+            </div>
+          </div>
+          <div className="flex-center-y gap-sm flex-wrap">
+            <a
+              href="https://wa.me/8801886675596?text=Hello%20BizTrackBD%20Support!%20I%20need%20assistance%20with%20my%20store."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-whatsapp"
+              style={{ padding: "8px 14px", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
+            >
+              💬 WhatsApp: +01886675596
+            </a>
+            <a
+              href="tel:+8801886675596"
+              className="btn btn-secondary"
+              style={{ padding: "8px 14px", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
+            >
+              📞 Hotline: +01886675596
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* Compose Ticket Card */}
       <form action={createTicketAction} className="card stack gap-lg">
         <div className="text-base text-bold">Open a new ticket</div>

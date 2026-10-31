@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 15 * 60, // 15 minutes
+    maxAge: 7 * 86400, // 7 days (matches Platform Admin session)
   });
 
   // Template Studio opens the design editor directly. Only these places may be asked for; anything else lands on orders.
