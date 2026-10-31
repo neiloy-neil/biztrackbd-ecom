@@ -19,6 +19,7 @@ import { ReferralBanner } from "@/components/referral-banner";
 import { DemoRibbon } from "@/components/demo-ribbon";
 import { PausedBanner } from "@/components/paused-notice";
 import { StorefrontTracker } from "@/components/tracker";
+import { AttributionCollector } from "@/components/attribution-collector";
 import { WhatsAppFloatingButton } from "@/components/whatsapp-floating-button";
 import { MobileStickyActionBar } from "@/components/mobile-sticky-action-bar";
 import { AiChatWidget } from "@/components/ai-chat-widget";
@@ -154,6 +155,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         />
       )}
       <StorefrontTracker tracking={tracking} />
+      <AttributionCollector />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaJson) }}

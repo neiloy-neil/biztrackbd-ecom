@@ -1,13 +1,14 @@
 import Link from "next/link";
 
 export interface ReportTabsProps {
-  currentTab: "realtime" | "sales" | "products" | "couriers" | "customers" | "cod" | "profit";
+  currentTab: "realtime" | "sales" | "products" | "couriers" | "customers" | "cod" | "profit" | "acquisition";
   queryString?: string;
 }
 
 const TABS: { id: ReportTabsProps["currentTab"]; href: string; label: string }[] = [
   { id: "realtime", href: "/reports/realtime", label: "Real-Time Studio" },
   { id: "sales", href: "/reports", label: "Overview & Sales" },
+  { id: "acquisition", href: "/reports/acquisition", label: "Ad Campaigns & ROAS" },
   { id: "products", href: "/reports/products", label: "Products & Stock" },
   { id: "couriers", href: "/reports/couriers", label: "Couriers & Delivery" },
   { id: "customers", href: "/reports/customers", label: "Customers & Cohorts" },

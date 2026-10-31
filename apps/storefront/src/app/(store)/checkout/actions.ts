@@ -20,6 +20,7 @@ import {
   signOrderAccess,
 } from "@biztrackbd/core";
 import { withTenant } from "@biztrackbd/db";
+import { ATTR_FIRST_COOKIE, ATTR_LAST_COOKIE, parseAttributionCookie } from "@biztrackbd/core/attribution";
 import { clientIp } from "@/lib/ip";
 import { getCustomerSession } from "@/lib/session";
 import { getStore } from "@/lib/tenant";
@@ -60,6 +61,17 @@ export async function placeOrderAction(p: PlaceOrderPayload): Promise<PlaceOrder
     const cookieStore = await cookies();
     const affiliateRef = p.affiliateRef?.trim() || cookieStore.get("bt_aff_ref")?.value?.trim() || undefined;
 
+    // Dual-touch marketing attribution extraction
+    const lastAttrRaw = cookieStore.get(ATTR_LAST_COOKIE)?.value;
+    const firstAttrRaw = cookieStore.get(ATTR_FIRST_COOKIE)?.value;
+    const lastAttr = parseAttributionCookie(lastAttrRaw);
+    const firstAttr = parseAttributionCookie(firstAttrRaw);
+    const utmSource = lastAttr?.utmSource || firstAttr?.utmSource || undefined;
+    const utmCampaign = lastAttr?.utmCampaign || firstAttr?.utmCampaign || undefined;
+    const utmMedium = lastAttr?.utmMedium || firstAttr?.utmMedium || undefined;
+    const fbp = p.tracking?.fbp || cookieStore.get("_fbp")?.value || lastAttr?.fbp || firstAttr?.fbp || undefined;
+    const fbc = p.tracking?.fbc || cookieStore.get("_fbc")?.value || lastAttr?.fbc || firstAttr?.fbc || undefined;
+
     // Refuse before an order exists: a store with no UddoktaPay keys of its own must not take this payment.
     if (p.paymentMethod === "GATEWAY_UDDOKTAPAY" && !(await getStoreUddoktaPayConfig(store.id)).isCustom) {
       return { ok: false, error: "Online payment is not available for this store right now. Please choose another way to pay." };
@@ -88,6 +100,9 @@ export async function placeOrderAction(p: PlaceOrderPayload): Promise<PlaceOrder
       channel: "STOREFRONT",
       clientHash: hashClient(await clientIp()),
       affiliateRef,
+      utmSource,
+      utmCampaign,
+      utmMedium,
     });
 
     let paymentUrl: string | undefined;
@@ -156,7 +171,7 @@ export async function placeOrderAction(p: PlaceOrderPayload): Promise<PlaceOrder
       if (!placed.replayed) {
         const ua = (await headers()).get("user-agent");
         await Promise.race([
-          sendServerPurchase(store.id, placed.orderId, { ip: await clientIp(), userAgent: ua, fbp: p.tracking?.fbp, fbc: p.tracking?.fbc, url: p.tracking?.url }),
+          sendServerPurchase(store.id, placed.orderId, { ip: await clientIp(), userAgent: ua, fbp, fbc, url: p.tracking?.url || origin }),
           new Promise((resolve) => setTimeout(resolve, 2500)),
         ]);
       }
