@@ -1,11 +1,12 @@
 import { assertNotInDemo } from "../demo/guard";
-import { Prisma, withTenant, type TenantTx } from "@biztrackbd/db";
+import { getBasePrisma, Prisma, withTenant, type TenantTx } from "@biztrackbd/db";
 import { audit } from "../audit/service";
 import { NotFoundError, PlanFeatureError, ValidationError } from "../errors";
 import { publishEvent } from "../events";
 import { assertCan, type StaffActor } from "../permissions";
 import { syncTenantRouting } from "../routing/edge-config";
-import { validateCustomDomain } from "../routing/host";
+import { validateCustomDomain, validateSubdomain } from "../routing/host";
+import { SUBDOMAIN_MESSAGES } from "../platform/signup";
 
 const MAX_DOMAINS_PER_STORE = 5;
 const SYSTEM = { userId: "system", email: "system@biztrackbd" } as const;
@@ -137,4 +138,118 @@ export async function removeDomain(tenantId: string, actor: StaffActor, domainId
 export async function listDomains(tenantId: string, actor: StaffActor) {
   assertCan(actor, "billing", "view");
   return withTenant(tenantId, (tx) => tx.domain.findMany({ orderBy: { createdAt: "asc" } }));
+}
+
+
+export interface SubdomainAvailabilityResult {
+  ok: boolean;
+  reason?: "too_short" | "too_long" | "invalid" | "reserved" | "taken";
+  message: string;
+  isCurrent?: boolean;
+  label?: string;
+}
+
+/**
+ * Checks if a candidate subdomain is valid and available for a tenant.
+ * Recognizes if the candidate is already the tenant's own current subdomain.
+ */
+export async function checkSubdomainAvailabilityForTenant(
+  tenantId: string,
+  candidate: string,
+): Promise<SubdomainAvailabilityResult> {
+  const v = validateSubdomain(candidate);
+  if (!v.ok) {
+    return {
+      ok: false,
+      reason: v.reason,
+      message: SUBDOMAIN_MESSAGES[v.reason] ?? "Invalid subdomain",
+    };
+  }
+
+  // 1. Is it the tenant's own current subdomain?
+  const current = await withTenant(tenantId, (tx) =>
+    tx.tenant.findUnique({ where: { id: tenantId }, select: { subdomain: true } }),
+  );
+  if (current && current.subdomain.toLowerCase() === v.label) {
+    return {
+      ok: true,
+      isCurrent: true,
+      label: v.label,
+      message: "This is your store's current subdomain.",
+    };
+  }
+
+  // 2. Is it taken across the platform (in Tenant or Domain tables)?
+  const [r] = await getBasePrisma().$queryRaw<{ taken: boolean }[]>`
+    SELECT signup_subdomain_taken(${v.label}) AS taken
+  `;
+  if (r?.taken) {
+    return {
+      ok: false,
+      reason: "taken",
+      message: SUBDOMAIN_MESSAGES.taken ?? "That address is already taken. Try another.",
+    };
+  }
+
+  return {
+    ok: true,
+    isCurrent: false,
+    label: v.label,
+    message: `✓ ${v.label} is available!`,
+  };
+}
+
+/**
+ * Changes a store's default *.biztrack.bd subdomain.
+ * Validates availability, updates the database, re-syncs Edge Config routing,
+ * and records an audit log event.
+ */
+export async function changeTenantSubdomain(
+  tenantId: string,
+  actor: StaffActor,
+  newSubdomainInput: string,
+): Promise<{ oldSubdomain: string; newSubdomain: string }> {
+  await assertNotInDemo(tenantId, "Changing store subdomain");
+  assertCan(actor, "billing", "edit");
+
+  const check = await checkSubdomainAvailabilityForTenant(tenantId, newSubdomainInput);
+  if (!check.ok) {
+    throw new ValidationError(check.message, { field: "subdomain" });
+  }
+  if (check.isCurrent) {
+    return { oldSubdomain: check.label!, newSubdomain: check.label! };
+  }
+
+  const newSubdomain = check.label!;
+
+  const { oldSubdomain } = await withTenant(tenantId, async (tx) => {
+    await lockTenant(tx, tenantId);
+    const t = await tx.tenant.findUnique({ where: { id: tenantId }, select: { subdomain: true } });
+    if (!t) throw new NotFoundError("Store");
+
+    const oldSub = t.subdomain;
+    if (oldSub === newSubdomain) return { oldSubdomain: oldSub };
+
+    await tx.tenant.update({
+      where: { id: tenantId },
+      data: { subdomain: newSubdomain },
+    });
+
+    await audit(tx, tenantId, actor, "settings.subdomain_changed", {
+      from: oldSub,
+      to: newSubdomain,
+    });
+
+    return { oldSubdomain: oldSub };
+  });
+
+  const root = rootDomain();
+  await pushRouting(tenantId, [`${oldSubdomain}.${root}`]);
+  await publishEvent("tenant/subdomain-changed", {
+    tenantId,
+    from: oldSubdomain,
+    to: newSubdomain,
+  });
+
+  return { oldSubdomain, newSubdomain };
 }

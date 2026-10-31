@@ -12,6 +12,8 @@ export interface DomainEvents {
   "routing/sync-failed": { tenantId: string };
   /** A store signed itself up. */
   "store/created": { tenantId: string; subdomain: string; plan: string };
+  /** A store changed its default subdomain address. */
+  "tenant/subdomain-changed": { tenantId: string; from: string; to: string };
   /** The platform approved a subscription payment: the plan is live. */
   "billing/payment-approved": { tenantId: string; plan: string; interval: string; periodEnd: string };
   /** A store is at a billing milestone worth a message (Bangla and English SMS/email once messaging ships). */

@@ -8,11 +8,12 @@ import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { addDomainAction, checkNowAction, makePrimaryAction, removeDomainAction } from "./actions";
 import { DomainWatcher } from "./watcher";
+import { SubdomainEditor } from "./subdomain-editor";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Domains" };
 
-const DONE: Record<string, string> = { added: "Domain added. Create the record below and we will do the rest.", primary: "Main address changed.", removed: "Domain removed.", checked: "Checked just now." };
+const DONE: Record<string, string> = { added: "Domain added. Create the record below and we will do the rest.", primary: "Main address changed.", removed: "Domain removed.", checked: "Checked just now.", subdomain_changed: "Store subdomain updated successfully! Your store is now active at your new address." };
 
 function statusOf(d: { verified: boolean; dnsStatus: string; sslStatus: string }): { label: string; tone: "ok" | "warn" | "bad" | "grey"; connected: boolean } {
   if (d.verified && d.sslStatus === "issued" && d.dnsStatus === "verified") return { label: "Connected", tone: "ok", connected: true };
@@ -38,12 +39,21 @@ export default async function Domains({ searchParams }: { searchParams: Promise<
     <>
       <DomainWatcher pendingIds={canEdit ? pending : []} />
       <PageHeader
-        title="Custom Domains"
+        title="Domains"
         crumbs={[{ label: "Settings", href: "/settings/store" }, { label: "Domains" }]}
-        sub={<>Your store is always at <b>{s.tenantSubdomain}.{root}</b>. Add your own domain, like yourshop.com, and customers will see that instead.</>}
+        sub="Manage your free store address and connect branded custom domains."
       />
       {err && <div className="notice bad mb-sm" role="alert">{err}</div>}
       {done && DONE[done] && <div className="notice good mb-sm" role="status">{DONE[done]}</div>}
+
+      <div className="mb-md">
+        <SubdomainEditor currentSubdomain={s.tenantSubdomain} rootDomain={root} canEdit={canEdit} />
+      </div>
+
+      <div className="mt-lg mb-sm">
+        <h2 className="text-base font-bold m-0">Custom Domains</h2>
+        <p className="muted text-xs m-0 mt-xs">Connect your own custom domain (e.g. <code>yourbrand.com</code>) to brand your online store.</p>
+      </div>
 
       {rows.length === 0 && <div className="card empty p-xl text-center" data-testid="domains-empty">You have not added a custom domain yet.</div>}
       <div className="stack gap-md" data-testid="domain-list">

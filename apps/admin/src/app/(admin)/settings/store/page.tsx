@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { can, getStoreSettings } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
 import { PageHeader } from "@biztrackbd/ui";
@@ -13,6 +14,7 @@ export default async function StoreDetails() {
   const s = await requireAccess("design");
   const st = await getStoreSettings(s.tenantId, s.actor);
   const canEdit = can(s.user.role, "design", "edit");
+  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000");
   return (
     <>
       <PageHeader
@@ -20,6 +22,17 @@ export default async function StoreDetails() {
         crumbs={[{ label: "Settings", href: "/settings/store" }, { label: "Store details" }]}
         sub="This information appears on invoices, emails and your store footer."
       />
+      <div className="card p-sm mb-md flex-between items-center" style={{ background: "var(--bg)", border: "1px solid var(--line)", flexWrap: "wrap", gap: 8 }}>
+        <div className="row items-center gap-xs">
+          <span className="muted text-xs">Store Address:</span>
+          <code className="font-mono text-xs font-bold" style={{ color: "var(--brand, #0B4D3B)" }}>
+            {s.tenantSubdomain}.{root}
+          </code>
+        </div>
+        <Link href="/settings/domains" className="link text-xs font-bold" style={{ textDecoration: "none" }}>
+          Change subdomain or custom domain →
+        </Link>
+      </div>
       {canEdit ? (
         <>
           <StoreForm initial={{
