@@ -191,14 +191,17 @@ export async function verifyUddoktaPayPayment(opts: {
   }
 
   const statusRaw = String(data.status ?? raw.status ?? "");
+  const hasFailedStatus = raw.status === false || data.status === false;
   const status: "COMPLETED" | "PENDING" | "ERROR" =
     statusRaw.toUpperCase() === "COMPLETED"
       ? "COMPLETED"
-      : statusRaw.toUpperCase() === "ERROR"
+      : statusRaw.toUpperCase() === "ERROR" || hasFailedStatus
         ? "ERROR"
-        : res.ok
+        : statusRaw.toUpperCase() === "PENDING"
           ? "PENDING"
-          : "ERROR";
+          : res.ok && !hasFailedStatus
+            ? "PENDING"
+            : "ERROR";
 
   return {
     status,

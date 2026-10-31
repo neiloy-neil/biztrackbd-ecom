@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeUddoktaPayBaseUrl, platformOriginFor, uddoktaPayPlanUrls, uddoktaPayUrls } from "../src/payments/uddoktapay";
+import { normalizeUddoktaPayBaseUrl, platformOriginFor, setUddoktaPayFetchForTests, uddoktaPayPlanUrls, uddoktaPayUrls, verifyUddoktaPayPayment } from "../src/payments/uddoktapay";
 
 describe("normalizeUddoktaPayBaseUrl", () => {
   it.each([
@@ -43,5 +43,24 @@ describe("uddoktaPayUrls", () => {
       returnUrl: "https://rongdhonu.biztrack.bd/api/payments/uddoktapay/callback",
     });
     expect(uddoktaPayUrls("store", "https://shop.example.com").webhook).toBe("https://shop.example.com/api/payments/uddoktapay/webhook");
+  });
+
+  it("classifies response as ERROR when status is false or message indicates invalid payment id", async () => {
+    setUddoktaPayFetchForTests(async () => {
+      return new Response(JSON.stringify({ status: false, message: "Invalid Payment ID" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+
+    const res = await verifyUddoktaPayPayment({
+      apiKey: "test-key",
+      baseUrl: "https://pay.example.com",
+      invoiceId: "invalid_id",
+    });
+
+    expect(res.status).toBe("ERROR");
+    expect(res.message).toBe("Invalid Payment ID");
+    setUddoktaPayFetchForTests(undefined);
   });
 });
