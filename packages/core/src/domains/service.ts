@@ -141,12 +141,80 @@ export async function listDomains(tenantId: string, actor: StaffActor) {
 }
 
 
+export const SUBDOMAIN_COOLDOWN_DAYS = 14;
+export const SUBDOMAIN_REDIRECT_DAYS = 30;
+
 export interface SubdomainAvailabilityResult {
   ok: boolean;
-  reason?: "too_short" | "too_long" | "invalid" | "reserved" | "taken";
+  reason?: "too_short" | "too_long" | "invalid" | "reserved" | "taken" | "cooldown";
   message: string;
   isCurrent?: boolean;
   label?: string;
+  cooldown?: {
+    inCooldown: boolean;
+    daysLeft: number;
+    nextAllowedAt: Date;
+  };
+  previousRedirect?: {
+    subdomain: string;
+    expiresAt: Date;
+  } | null;
+}
+
+/**
+ * Returns a store's full subdomain state including current subdomain,
+ * any active 30-day forwarding redirect, and 14-day cooldown status.
+ */
+export async function getTenantSubdomainState(tenantId: string): Promise<{
+  currentSubdomain: string;
+  subdomainChangedAt: Date | null;
+  previousSubdomain: string | null;
+  previousSubdomainExpiresAt: Date | null;
+  inCooldown: boolean;
+  cooldownDaysLeft: number;
+  nextAllowedAt: Date | null;
+}> {
+  return withTenant(tenantId, async (tx) => {
+    const t = await tx.tenant.findUnique({
+      where: { id: tenantId },
+      select: {
+        subdomain: true,
+        subdomainChangedAt: true,
+        previousSubdomain: true,
+        previousSubdomainExpiresAt: true,
+      },
+    });
+    if (!t) throw new NotFoundError("Store");
+
+    const now = new Date();
+    let inCooldown = false;
+    let cooldownDaysLeft = 0;
+    let nextAllowedAt: Date | null = null;
+
+    if (t.subdomainChangedAt) {
+      const elapsedMs = now.getTime() - t.subdomainChangedAt.getTime();
+      const cooldownMs = SUBDOMAIN_COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+      if (elapsedMs < cooldownMs) {
+        inCooldown = true;
+        cooldownDaysLeft = Math.ceil((cooldownMs - elapsedMs) / (24 * 60 * 60 * 1000));
+        nextAllowedAt = new Date(t.subdomainChangedAt.getTime() + cooldownMs);
+      }
+    }
+
+    const previousRedirectActive = Boolean(
+      t.previousSubdomain && t.previousSubdomainExpiresAt && t.previousSubdomainExpiresAt > now,
+    );
+
+    return {
+      currentSubdomain: t.subdomain,
+      subdomainChangedAt: t.subdomainChangedAt,
+      previousSubdomain: previousRedirectActive ? t.previousSubdomain : null,
+      previousSubdomainExpiresAt: previousRedirectActive ? t.previousSubdomainExpiresAt : null,
+      inCooldown,
+      cooldownDaysLeft,
+      nextAllowedAt,
+    };
+  });
 }
 
 /**
@@ -166,20 +234,50 @@ export async function checkSubdomainAvailabilityForTenant(
     };
   }
 
-  // 1. Is it the tenant's own current subdomain?
+  // 1. Is it the tenant's own current subdomain or active previous subdomain?
   const current = await withTenant(tenantId, (tx) =>
-    tx.tenant.findUnique({ where: { id: tenantId }, select: { subdomain: true } }),
+    tx.tenant.findUnique({
+      where: { id: tenantId },
+      select: {
+        subdomain: true,
+        subdomainChangedAt: true,
+        previousSubdomain: true,
+        previousSubdomainExpiresAt: true,
+      },
+    }),
   );
+
+  const now = new Date();
+  let cooldown: SubdomainAvailabilityResult["cooldown"];
+  if (current?.subdomainChangedAt) {
+    const elapsedMs = now.getTime() - current.subdomainChangedAt.getTime();
+    const cooldownMs = SUBDOMAIN_COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+    if (elapsedMs < cooldownMs) {
+      cooldown = {
+        inCooldown: true,
+        daysLeft: Math.ceil((cooldownMs - elapsedMs) / (24 * 60 * 60 * 1000)),
+        nextAllowedAt: new Date(current.subdomainChangedAt.getTime() + cooldownMs),
+      };
+    }
+  }
+
+  const previousRedirect =
+    current?.previousSubdomain && current?.previousSubdomainExpiresAt && current.previousSubdomainExpiresAt > now
+      ? { subdomain: current.previousSubdomain, expiresAt: current.previousSubdomainExpiresAt }
+      : null;
+
   if (current && current.subdomain.toLowerCase() === v.label) {
     return {
       ok: true,
       isCurrent: true,
       label: v.label,
       message: "This is your store's current subdomain.",
+      cooldown,
+      previousRedirect,
     };
   }
 
-  // 2. Is it taken across the platform (in Tenant or Domain tables)?
+  // 2. Is it taken across the platform (in Tenant or Domain tables, or active previousSubdomain)?
   const [r] = await getBasePrisma().$queryRaw<{ taken: boolean }[]>`
     SELECT signup_subdomain_taken(${v.label}) AS taken
   `;
@@ -188,6 +286,8 @@ export async function checkSubdomainAvailabilityForTenant(
       ok: false,
       reason: "taken",
       message: SUBDOMAIN_MESSAGES.taken ?? "That address is already taken. Try another.",
+      cooldown,
+      previousRedirect,
     };
   }
 
@@ -196,19 +296,21 @@ export async function checkSubdomainAvailabilityForTenant(
     isCurrent: false,
     label: v.label,
     message: `✓ ${v.label} is available!`,
+    cooldown,
+    previousRedirect,
   };
 }
 
 /**
  * Changes a store's default *.biztrack.bd subdomain.
- * Validates availability, updates the database, re-syncs Edge Config routing,
- * and records an audit log event.
+ * Validates availability and 14-day cooldown, establishes 30-day transitional forwarding,
+ * updates the database, re-syncs Edge Config routing, and records an audit log event.
  */
 export async function changeTenantSubdomain(
   tenantId: string,
   actor: StaffActor,
   newSubdomainInput: string,
-): Promise<{ oldSubdomain: string; newSubdomain: string }> {
+): Promise<{ oldSubdomain: string; newSubdomain: string; redirectExpiresAt: Date }> {
   await assertNotInDemo(tenantId, "Changing store subdomain");
   assertCan(actor, "billing", "edit");
 
@@ -217,39 +319,75 @@ export async function changeTenantSubdomain(
     throw new ValidationError(check.message, { field: "subdomain" });
   }
   if (check.isCurrent) {
-    return { oldSubdomain: check.label!, newSubdomain: check.label! };
+    const currentSub = check.label!;
+    return { oldSubdomain: currentSub, newSubdomain: currentSub, redirectExpiresAt: new Date() };
   }
 
   const newSubdomain = check.label!;
+  const root = rootDomain();
+  const now = new Date();
+  const redirectExpiresAt = new Date(now.getTime() + SUBDOMAIN_REDIRECT_DAYS * 24 * 60 * 60 * 1000);
 
-  const { oldSubdomain } = await withTenant(tenantId, async (tx) => {
+  const { oldSubdomain, olderAliasToRemove } = await withTenant(tenantId, async (tx) => {
     await lockTenant(tx, tenantId);
-    const t = await tx.tenant.findUnique({ where: { id: tenantId }, select: { subdomain: true } });
+    const t = await tx.tenant.findUnique({
+      where: { id: tenantId },
+      select: {
+        subdomain: true,
+        subdomainChangedAt: true,
+        previousSubdomain: true,
+      },
+    });
     if (!t) throw new NotFoundError("Store");
 
+    // Enforce 14-day cooldown
+    if (t.subdomainChangedAt) {
+      const elapsedMs = now.getTime() - t.subdomainChangedAt.getTime();
+      const cooldownMs = SUBDOMAIN_COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+      if (elapsedMs < cooldownMs) {
+        const daysLeft = Math.ceil((cooldownMs - elapsedMs) / (24 * 60 * 60 * 1000));
+        throw new ValidationError(`Subdomain was changed recently. You can change it again in ${daysLeft} days.`, {
+          field: "subdomain",
+        });
+      }
+    }
+
     const oldSub = t.subdomain;
-    if (oldSub === newSubdomain) return { oldSubdomain: oldSub };
+    if (oldSub === newSubdomain) {
+      return { oldSubdomain: oldSub, olderAliasToRemove: null };
+    }
+
+    // If there was an older alias before this change, that older alias will be replaced by oldSub
+    const olderAlias = t.previousSubdomain && t.previousSubdomain !== oldSub ? t.previousSubdomain : null;
 
     await tx.tenant.update({
       where: { id: tenantId },
-      data: { subdomain: newSubdomain },
+      data: {
+        subdomain: newSubdomain,
+        subdomainChangedAt: now,
+        previousSubdomain: oldSub,
+        previousSubdomainExpiresAt: redirectExpiresAt,
+      },
     });
 
     await audit(tx, tenantId, actor, "settings.subdomain_changed", {
       from: oldSub,
       to: newSubdomain,
+      redirectUntil: redirectExpiresAt.toISOString(),
     });
 
-    return { oldSubdomain: oldSub };
+    return { oldSubdomain: oldSub, olderAliasToRemove: olderAlias };
   });
 
-  const root = rootDomain();
-  await pushRouting(tenantId, [`${oldSubdomain}.${root}`]);
+  // Re-sync routing. If there was an older alias to remove from edge config, pass it.
+  const removedHosts = olderAliasToRemove ? [`${olderAliasToRemove}.${root}`] : [];
+  await pushRouting(tenantId, removedHosts);
+
   await publishEvent("tenant/subdomain-changed", {
     tenantId,
     from: oldSubdomain,
     to: newSubdomain,
   });
 
-  return { oldSubdomain, newSubdomain };
+  return { oldSubdomain, newSubdomain, redirectExpiresAt };
 }

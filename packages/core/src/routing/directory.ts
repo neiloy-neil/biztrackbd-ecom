@@ -14,7 +14,7 @@ export const HostEntrySchema = z.object({
   themeId: z.string().min(1),
   locale: z.string().min(2),
   status: z.enum(["TRIAL", "ACTIVE", "PAST_DUE", "SUSPENDED", "CANCELLED"]),
-  matched: z.enum(["subdomain", "custom", "custom_www"]),
+  matched: z.enum(["subdomain", "custom", "custom_www", "previous_subdomain"]),
   primaryDomain: z.string().nullable(),
   redirectWww: z.boolean(),
 });

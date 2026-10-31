@@ -65,6 +65,9 @@ export async function buildTenantRoutes(tenantId: string, rootDomain: string): P
     };
     const routes: Record<string, HostEntry> = {
       [`${tenant.subdomain}.${root}`]: { ...base, matched: "subdomain", redirectWww: true },
+      ...(tenant.previousSubdomain && tenant.previousSubdomainExpiresAt && tenant.previousSubdomainExpiresAt > new Date()
+        ? { [`${tenant.previousSubdomain}.${root}`]: { ...base, matched: "previous_subdomain", redirectWww: true } }
+        : {}),
     };
     for (const d of domains) {
       routes[d.domain] = { ...base, matched: "custom", redirectWww: d.redirectWww };

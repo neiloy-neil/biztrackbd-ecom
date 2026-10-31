@@ -5,6 +5,7 @@ import { audit } from "../audit/service";
 import { NotFoundError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
 import { confirmDomainVerified } from "./service";
+import { pushRoutes } from "../routing/edge-config";
 
 /**
  * Connecting a domain without support (docs/13): the owner adds a name, we tell them exactly which record to create, and
@@ -343,12 +344,12 @@ export async function recheckDomain(tenantId: string, actor: StaffActor, domainI
   return checkDomain(tenantId, row.domain);
 }
 
-export interface SweepSummary { checked: number; connected: number; failed: number }
+export interface SweepSummary { checked: number; connected: number; failed: number; expiredAliasesCleaned?: number }
 
-/** For the scheduled job: every domain still connecting. One failing does not stop the rest. */
+/** For the scheduled job: every domain still connecting, and cleans up expired 30-day subdomain aliases. */
 export async function sweepDomains(): Promise<SweepSummary> {
   const rows = await getBasePrisma().$queryRaw<{ tenantId: string; domain: string }[]>`SELECT "tenantId", "domain" FROM domains_to_check()`;
-  const out: SweepSummary = { checked: 0, connected: 0, failed: 0 };
+  const out: SweepSummary = { checked: 0, connected: 0, failed: 0, expiredAliasesCleaned: 0 };
   for (const r of rows) {
     try {
       const res = await checkDomain(r.tenantId, r.domain);
@@ -359,5 +360,32 @@ export async function sweepDomains(): Promise<SweepSummary> {
       console.error("[domains] check failed", e instanceof Error ? e.name : "unknown");
     }
   }
+
+  // Expired 30-day subdomain redirect aliases cleanup
+  try {
+    const expiredAliases = await getBasePrisma().$queryRaw<{ id: string; previousSubdomain: string }[]>`
+      SELECT "id", "previousSubdomain"
+      FROM "Tenant"
+      WHERE "previousSubdomain" IS NOT NULL
+        AND "previousSubdomainExpiresAt" IS NOT NULL
+        AND "previousSubdomainExpiresAt" <= timezone('utc', now())
+    `;
+    if (expiredAliases.length > 0) {
+      const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? (process.env.NODE_ENV === "production" ? "biztrack.bd" : "localhost:3000");
+      const cleanRoot = root.toLowerCase().replace(/:\d+$/, "");
+      for (const item of expiredAliases) {
+        await getBasePrisma().$executeRaw`
+          UPDATE "Tenant"
+          SET "previousSubdomain" = NULL, "previousSubdomainExpiresAt" = NULL
+          WHERE "id" = ${item.id}
+        `;
+        await pushRoutes({ upsert: {}, remove: [`${item.previousSubdomain}.${cleanRoot}`] }).catch(() => undefined);
+        out.expiredAliasesCleaned!++;
+      }
+    }
+  } catch (e) {
+    console.error("[domains] expired alias cleanup failed", e instanceof Error ? e.name : "unknown");
+  }
+
   return out;
 }

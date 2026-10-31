@@ -19,7 +19,7 @@ export { RESERVED_SUBDOMAINS, DEMO_SUBDOMAINS, normalizeHost, classifyHost, vali
 export { decideRoute, HEADERS, TRUSTED_HEADER_PREFIX, type HostEntry, type RouteDecision, type DecideInput } from "./routing/decide";
 export { CachedDirectory, chainDirectories, dbDirectory, edgeConfigDirectory, edgeKey, HostEntrySchema, type HostDirectory } from "./routing/directory";
 export { pushRoutes, buildTenantRoutes, syncTenantRouting, EdgeSyncError, type RouteChanges } from "./routing/edge-config";
-export { addDomain, confirmDomainVerified, setPrimaryDomain, removeDomain, listDomains, setRoutingSync, checkSubdomainAvailabilityForTenant, changeTenantSubdomain, type SubdomainAvailabilityResult } from "./domains/service";
+export { addDomain, confirmDomainVerified, setPrimaryDomain, removeDomain, listDomains, setRoutingSync, checkSubdomainAvailabilityForTenant, changeTenantSubdomain, getTenantSubdomainState, SUBDOMAIN_COOLDOWN_DAYS, SUBDOMAIN_REDIRECT_DAYS, type SubdomainAvailabilityResult } from "./domains/service";
 export { BD_GEO, divisionNames, districtsOf, upazilasOf, divisionOfDistrict, isValidAddress, type Division, type District } from "./geo/bd-geo";
 export { quoteOrder, QuoteInput, type Quote, type QuoteLine, type QuoteProblem } from "./orders/quote";
 export { pickZone, deliveryFor, discountFor, money } from "./orders/pricing";

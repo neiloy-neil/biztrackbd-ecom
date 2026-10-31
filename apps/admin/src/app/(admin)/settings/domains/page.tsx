@@ -1,7 +1,7 @@
 import { DemoLocked } from "@/components/demo-locked";
 import { trialHref } from "@/lib/demo";
 import type { Metadata } from "next";
-import { can, dnsInstruction, listDomains } from "@biztrackbd/core";
+import { can, dnsInstruction, getTenantSubdomainState, listDomains } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
 import { PageHeader } from "@biztrackbd/ui";
 import { one } from "@/lib/query";
@@ -13,7 +13,7 @@ import { SubdomainEditor } from "./subdomain-editor";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Domains" };
 
-const DONE: Record<string, string> = { added: "Domain added. Create the record below and we will do the rest.", primary: "Main address changed.", removed: "Domain removed.", checked: "Checked just now.", subdomain_changed: "Store subdomain updated successfully! Your store is now active at your new address." };
+const DONE: Record<string, string> = { added: "Domain added. Create the record below and we will do the rest.", primary: "Main address changed.", removed: "Domain removed.", checked: "Checked just now.", subdomain_changed: "Store subdomain updated successfully! All visitors to your previous address will be forwarded automatically for the next 30 days." };
 
 function statusOf(d: { verified: boolean; dnsStatus: string; sslStatus: string }): { label: string; tone: "ok" | "warn" | "bad" | "grey"; connected: boolean } {
   if (d.verified && d.sslStatus === "issued" && d.dnsStatus === "verified") return { label: "Connected", tone: "ok", connected: true };
@@ -30,6 +30,7 @@ export default async function Domains({ searchParams }: { searchParams: Promise<
   if (s.demo) return <DemoLocked what="Domains" keepHref={trialHref(s.demo.keep)} />;
   const canEdit = can(s.user.role, "billing", "edit");
   const rows = await listDomains(s.tenantId, s.actor);
+  const subState = await getTenantSubdomainState(s.tenantId);
   const err = one(sp.err);
   const done = one(sp.done);
   const pending = rows.filter((r) => !statusOf(r).connected).map((r) => r.id);
@@ -47,7 +48,16 @@ export default async function Domains({ searchParams }: { searchParams: Promise<
       {done && DONE[done] && <div className="notice good mb-sm" role="status">{DONE[done]}</div>}
 
       <div className="mb-md">
-        <SubdomainEditor currentSubdomain={s.tenantSubdomain} rootDomain={root} canEdit={canEdit} />
+        <SubdomainEditor
+          currentSubdomain={subState.currentSubdomain}
+          rootDomain={root}
+          canEdit={canEdit}
+          inCooldown={subState.inCooldown}
+          cooldownDaysLeft={subState.cooldownDaysLeft}
+          nextAllowedAt={subState.nextAllowedAt?.toISOString() ?? null}
+          previousSubdomain={subState.previousSubdomain}
+          previousSubdomainExpiresAt={subState.previousSubdomainExpiresAt?.toISOString() ?? null}
+        />
       </div>
 
       <div className="mt-lg mb-sm">

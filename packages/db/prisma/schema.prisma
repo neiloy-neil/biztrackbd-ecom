@@ -97,6 +97,11 @@ model Tenant {
   siteMode         String    @default("ECOMMERCE")
   businessVertical String?
 
+  // Subdomain Change & Legacy Forwarding
+  subdomainChangedAt         DateTime?
+  previousSubdomain          String?   @unique
+  previousSubdomainExpiresAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

@@ -8,7 +8,7 @@ export interface HostEntry {
   locale: string;
   status: "TRIAL" | "ACTIVE" | "PAST_DUE" | "SUSPENDED" | "CANCELLED";
   /** How the requested host matched this store. */
-  matched: "subdomain" | "custom" | "custom_www";
+  matched: "subdomain" | "custom" | "custom_www" | "previous_subdomain";
   /** The store's primary verified custom domain, or null. Every other hostname redirects here. */
   primaryDomain: string | null;
   redirectWww: boolean;
@@ -18,7 +18,7 @@ export type RouteDecision =
   | { action: "marketing" }
   | { action: "not_found" }
   | { action: "offline"; headers: Record<string, string> }
-  | { action: "redirect"; status: 308; location: string }
+  | { action: "redirect"; status: 301 | 308; location: string }
   | { action: "serve"; headers: Record<string, string> };
 
 /** Headers the proxy sets. Anything a client sends under this prefix is deleted first, so the app can trust them. */
@@ -70,6 +70,13 @@ export function decideRoute(input: DecideInput): RouteDecision {
   const host = normalizeHost(input.host)!;
   const tail = `${input.path.startsWith("/") ? input.path : `/${input.path}`}${input.search}`;
   const go = (target: string): RouteDecision => ({ action: "redirect", status: 308, location: `${input.protocol}://${target}${tail}` });
+
+  // Legacy subdomain migration: 301 permanent redirect to the new primary address preserving path and query.
+  if (entry.matched === "previous_subdomain") {
+    const cleanRoot = input.rootDomain.toLowerCase().replace(/:\d+$/, "");
+    const target = entry.primaryDomain ?? `${entry.subdomain}.${cleanRoot}`;
+    return { action: "redirect", status: 301, location: `${input.protocol}://${target}${tail}` };
+  }
 
   // Canonical host: one address per store so search engines and customers see a single site.
   if (entry.matched === "custom_www") {
