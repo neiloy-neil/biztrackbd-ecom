@@ -2,7 +2,7 @@ import { notifyOwner } from "../mail/send";
 import { getPlatformPrisma, withTenant, type PrismaClient } from "@biztrackbd/db";
 import { assertPlatformCan, type PlatformActor } from "./admin";
 import { assertCan, type StaffActor } from "../permissions";
-import { NotFoundError, ValidationError } from "../errors";
+import { NotFoundError, ValidationError, ForbiddenError } from "../errors";
 import { notifyPlatform } from "./notify";
 import { notifyStoreTicketReply, notifyPlatformTicketActivity } from "../notifications/push-service";
 
@@ -359,7 +359,7 @@ export async function listTenantTickets(
   actor: StaffActor,
   deps?: Deps
 ): Promise<{ id: string; code: string; subject: string; status: TicketStatusType; priority: string; updatedAt: Date }[]> {
-  assertCan(actor, "design", "view"); // all staff can view support
+  if (!actor?.userId) throw new ForbiddenError();
 
   return withTenant(tenantId, async (tx) => {
     const rows = await tx.supportTicket.findMany({
@@ -392,7 +392,7 @@ export async function createTenantTicket(
   input: { subject: string; message: string; priority?: TicketPriority },
   deps?: Deps
 ): Promise<{ id: string; code: string }> {
-  assertCan(actor, "design", "edit");
+  if (!actor?.userId) throw new ForbiddenError();
   const subject = input.subject?.trim();
   const message = input.message?.trim();
   if (!subject) throw new ValidationError("Subject is required");
@@ -482,15 +482,26 @@ export async function replyTenantTicket(
   input: { ticketId: string; message: string },
   deps?: Deps
 ): Promise<void> {
-  assertCan(actor, "design", "edit");
   const message = input.message?.trim();
   if (!message) throw new ValidationError("Message is required");
 
-  return withTenant(tenantId, async (tx) => {
+  let ticketCode = "Support";
+  let ticketSubject = "Ticket Reply";
+  let storeName = "Merchant Store";
+
+  await withTenant(tenantId, async (tx) => {
+    const tenant = await tx.tenant.findUnique({
+      where: { id: tenantId },
+      select: { name: true },
+    });
+    if (tenant?.name) storeName = tenant.name;
+
     const ticket = await tx.supportTicket.findUnique({
       where: { id: input.ticketId },
     });
     if (!ticket) throw new NotFoundError("Ticket not found");
+    ticketCode = ticket.code;
+    ticketSubject = ticket.subject;
 
     const sameReply = await tx.ticketMessage.findFirst({
       where: { ticketId: ticket.id, authorType: "TENANT", authorId: actor.userId, body: message, createdAt: { gte: new Date(Date.now() - 120_000) } },
@@ -515,11 +526,12 @@ export async function replyTenantTicket(
       data: { status: "OPEN", updatedAt: new Date() },
     });
   });
-  notifyPlatformTicketActivity({
+
+  await notifyPlatformTicketActivity({
     ticketId: input.ticketId,
-    ticketCode: "Support",
-    storeName: "Merchant Store",
-    subject: "Ticket Reply",
+    ticketCode,
+    storeName,
+    subject: ticketSubject,
     replySnippet: message,
     isNew: false,
   }).catch(() => {});
@@ -539,7 +551,7 @@ export async function getTenantTicketDetail(
   createdAt: Date;
   messages: { id: string; authorType: string; body: string; createdAt: Date }[];
 }> {
-  assertCan(actor, "design", "view");
+  if (!actor?.userId) throw new ForbiddenError();
 
   return withTenant(tenantId, async (tx) => {
     const ticket = await tx.supportTicket.findUnique({
