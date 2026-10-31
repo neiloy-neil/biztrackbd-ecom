@@ -22,14 +22,14 @@ export async function POST(req: NextRequest) {
     // Some panels post a form instead of JSON.
     body = Object.fromEntries(new URLSearchParams(raw));
   }
-  const invoiceId = String(body.invoice_id ?? body.invoiceId ?? "").trim();
+  const invoiceId = String(body.invoice_id ?? body.invoiceId ?? req.nextUrl.searchParams.get("invoice_id") ?? "").trim();
   if (!/^[A-Za-z0-9_-]{4,80}$/.test(invoiceId)) {
     return NextResponse.json({ status: false, error: "Missing or invalid invoice_id" }, { status: 400 });
   }
 
   try {
     const res = await processUddoktaPaySubscriptionSuccess(invoiceId);
-    return NextResponse.json({ status: res.ok });
+    return NextResponse.json({ status: res.ok, plan: res.plan, tenantId: res.tenantId });
   } catch (err) {
     console.error("[uddoktapay-plan-webhook] processing failed", err instanceof Error ? err.message : err);
     // 500 so the gateway retries.

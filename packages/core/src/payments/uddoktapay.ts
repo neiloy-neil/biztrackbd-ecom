@@ -177,36 +177,42 @@ export async function verifyUddoktaPayPayment(opts: {
     signal: AbortSignal.timeout(10000),
   });
 
-  const data = (await res.json().catch(() => ({}))) as {
-    status?: string;
-    full_name?: string;
-    email?: string;
-    amount?: string;
-    fee?: string;
-    charged_amount?: string;
-    invoice_id?: string;
-    metadata?: Record<string, string>;
-    payment_method?: string;
-    sender_number?: string;
-    transaction_id?: string;
-    date?: string;
-    message?: string;
-  };
+  const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+  const data = (raw.data && typeof raw.data === "object" ? raw.data : raw) as Record<string, unknown>;
+
+  let metadata = data.metadata as Record<string, string> | undefined;
+  if (typeof metadata === "string") {
+    try {
+      metadata = JSON.parse(metadata) as Record<string, string>;
+    } catch {
+      metadata = undefined;
+    }
+  }
+
+  const statusRaw = String(data.status ?? raw.status ?? "");
+  const status: "COMPLETED" | "PENDING" | "ERROR" =
+    statusRaw.toUpperCase() === "COMPLETED"
+      ? "COMPLETED"
+      : statusRaw.toUpperCase() === "ERROR"
+        ? "ERROR"
+        : res.ok
+          ? "PENDING"
+          : "ERROR";
 
   return {
-    status: (data.status as "COMPLETED" | "PENDING" | "ERROR") || (res.ok ? "PENDING" : "ERROR"),
-    fullName: data.full_name,
-    email: data.email,
-    amount: data.amount,
-    fee: data.fee,
-    chargedAmount: data.charged_amount,
-    invoiceId: data.invoice_id,
-    metadata: data.metadata,
-    paymentMethod: data.payment_method,
-    senderNumber: data.sender_number,
-    transactionId: data.transaction_id,
-    date: data.date,
-    message: data.message,
+    status,
+    fullName: data.full_name as string | undefined,
+    email: data.email as string | undefined,
+    amount: data.amount ? String(data.amount) : undefined,
+    fee: data.fee ? String(data.fee) : undefined,
+    chargedAmount: data.charged_amount ? String(data.charged_amount) : undefined,
+    invoiceId: (data.invoice_id ?? raw.invoice_id) as string | undefined,
+    metadata,
+    paymentMethod: data.payment_method as string | undefined,
+    senderNumber: data.sender_number as string | undefined,
+    transactionId: data.transaction_id as string | undefined,
+    date: data.date as string | undefined,
+    message: (data.message ?? raw.message) as string | undefined,
   };
 }
 
@@ -452,10 +458,13 @@ export async function processUddoktaPaySubscriptionSuccess(
         },
       });
 
-      // Update tenant status if trial/past due
+      // Update tenant status and sync active plan tier
       await tx.tenant.update({
         where: { id: tenantId },
-        data: { status: "ACTIVE" },
+        data: {
+          status: "ACTIVE",
+          planTier: planTier as "STARTER" | "PRO" | "BUSINESS",
+        },
       });
     });
   } catch (err) {
@@ -497,4 +506,32 @@ export async function processUddoktaPaySubscriptionSuccess(
   }
 
   return { ok: true, tenantId, plan: planTier };
+}
+
+/**
+ * Dispatches a server-to-server webhook request to the platform app so that the subscription
+ * is activated with the platform database role before the merchant's browser reaches the billing page.
+ */
+export async function notifyPlatformSubscriptionPayment(invoiceId: string, platformOrigin: string): Promise<boolean> {
+  try {
+    const target = `${platformOrigin.trim().replace(/\/+$/, "")}/api/webhooks/uddoktapay`;
+    const res = await fetchImpl(target, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ invoice_id: invoiceId }),
+      signal: AbortSignal.timeout(12000),
+    });
+    if (!res.ok) {
+      console.warn(`[notifyPlatformSubscriptionPayment] platform answered status ${res.status}`);
+      return false;
+    }
+    const data = (await res.json().catch(() => ({}))) as { status?: boolean };
+    return Boolean(data.status);
+  } catch (err) {
+    console.error("[notifyPlatformSubscriptionPayment] failed to contact platform webhook:", err instanceof Error ? err.message : err);
+    return false;
+  }
 }

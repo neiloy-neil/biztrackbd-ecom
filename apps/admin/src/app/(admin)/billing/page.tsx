@@ -26,9 +26,10 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
   const a = b.access;
   const notes = [limitNote("products", b.usage.products), limitNote("orders", b.usage.orders)].filter(Boolean);
   const suggested = b.plans.find((p) => p.tier === b.tier)?.tier ?? b.plans[0]!.tier;
+  const isUnlimited = a.daysLeft === null && a.paidThrough.getUTCFullYear() >= 2099;
   const status =
     a.state === "TRIAL" ? `Free trial, ${a.daysLeft} ${a.daysLeft === 1 ? "day" : "days"} left (ends ${dateOnly(a.paidThrough)})`
-    : a.state === "ACTIVE" ? `Active until ${dateOnly(a.paidThrough)}`
+    : a.state === "ACTIVE" ? (isUnlimited ? "Active (Unlimited Demo)" : `Active until ${dateOnly(a.paidThrough)}`)
     : a.state === "GRACE" ? `Payment overdue by ${a.overdueDays} ${a.overdueDays === 1 ? "day" : "days"}. Your store goes offline in ${4 - (a.overdueDays ?? 0)} days`
     : a.state === "READ_ONLY" ? "Store offline and admin read-only until you pay"
     : a.suspendedByPlatform ? "Your store has been switched off by BizTrackBD. Please contact support." : "Store locked until you pay";
@@ -42,6 +43,11 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
         crumbs={[{ label: "Home", href: "/" }, { label: "Billing" }]}
         sub={status}
       />
+      {one(sp.success) && (
+        <div className="notice good" role="status" style={{ marginBottom: 12 }} data-testid="payment-success">
+          Payment confirmed! Your {TIER[String(one(sp.plan) ?? "").toUpperCase()] ?? one(sp.plan) ?? ""} plan is now active.
+        </div>
+      )}
       {one(sp.sent) && <div className="notice good" role="status" style={{ marginBottom: 12 }} data-testid="proof-sent">Thank you. We will check your payment and switch your plan on.</div>}
       {one(sp.cancelled) && <div className="notice good" role="status" style={{ marginBottom: 12 }}>Payment details removed. You can send them again.</div>}
       {one(sp.err) && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{one(sp.err)}</div>}

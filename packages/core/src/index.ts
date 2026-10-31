@@ -179,6 +179,8 @@ export {
   createGreenwebSender,
   createSmsNetBdSender,
   createBulkSmsBdSender,
+  createCustomSmsSender,
+  type CustomSmsSenderOptions,
   getBulkSmsBdBalance,
   BULKSMSBD_ERRORS,
   smsSenderFromEnv,
@@ -187,7 +189,7 @@ export { createBrevoSender, emailSenderFromEnv, type EmailSender } from "./growt
 export { currentSmsSender } from "./customers/auth";
 export {
   createUddoktaPayCharge, verifyUddoktaPayPayment, getStoreUddoktaPayConfig, processUddoktaPayOrderSuccess, processUddoktaPaySubscriptionSuccess,
-  DEFAULT_UDDOKTAPAY_BASE_URL, DEFAULT_UDDOKTAPAY_API_KEY, setUddoktaPayFetchForTests, normalizeUddoktaPayBaseUrl, uddoktaPayUrls, uddoktaPayPlanUrls, platformOriginFor, checkUddoktaPayPlanInvoice, getPlatformUddoktaPayCredentials,
+  DEFAULT_UDDOKTAPAY_BASE_URL, DEFAULT_UDDOKTAPAY_API_KEY, setUddoktaPayFetchForTests, normalizeUddoktaPayBaseUrl, uddoktaPayUrls, uddoktaPayPlanUrls, platformOriginFor, checkUddoktaPayPlanInvoice, getPlatformUddoktaPayCredentials, notifyPlatformSubscriptionPayment,
   type UddoktaPayChargeRequest, type UddoktaPayChargeResponse, type UddoktaPayVerifyResponse,
 } from "./payments/uddoktapay";
 export {
@@ -367,6 +369,7 @@ export {
   savePlatformAiConfig,
   testPlatformGeminiApiKey,
   getPlatformSmsConfig,
+  resolvePlatformSmsApiKey,
   savePlatformSmsConfig,
   testPlatformSms,
   getPlatformSmsBalance,
@@ -397,6 +400,11 @@ export {
   type PlatformGoogleConfigView,
   type PlatformFraudConfigView,
   type PlatformAiConfigView,
+  type PlatformSmsProvider,
+  type PlatformSmsProviderConfig,
+  type PlatformCustomSmsConfig,
+  type SavePlatformSmsConfigInput,
+  PLATFORM_SMS_KEYS,
   type PlatformSmsConfigView,
   type PlatformSmsBalanceView,
   type PlatformCourierConfigView,
