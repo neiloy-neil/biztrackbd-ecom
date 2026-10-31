@@ -200,7 +200,7 @@ describe("customer sign-in", () => {
     const r = await requestOtp(A.tenantId, p, { storeName: "Shop A" });
     expect(r).toEqual({ sent: true, expiresInSeconds: 300 });
     expect(sent).toHaveLength(1);
-    expect(sent[0]!.text).toMatch(/^\d{6} is your Shop A sign-in code/);
+    expect(sent[0]!.text).toMatch(/^Your Shop A OTP is \d{6}\. Valid for 5 minutes\. Do not share it\./);
     const code = lastCode(p);
     const who = await verifyOtp(A.tenantId, p, code);
     expect(who.phone).toBe(p);

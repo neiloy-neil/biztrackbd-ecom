@@ -3,6 +3,7 @@ import { requireAccess } from "@/lib/session";
 import {
   getPlatformAiConfig,
   getPlatformSmsConfig,
+  getPlatformSmsBalance,
   getPlatformCourierConfig,
   getPlatformUddoktaPayConfig,
   getPlatformMailConfig,
@@ -24,9 +25,10 @@ export const metadata: Metadata = {
 export default async function PlatformSettingsPage() {
   await requireAccess("settings");
 
-  const [aiConfig, smsConfig, courierConfig, uddoktaConfig, mailConfig, fraudConfig, googleConfig, seoConfig, contactConfig] = await Promise.all([
+  const [aiConfig, smsConfig, smsBalance, courierConfig, uddoktaConfig, mailConfig, fraudConfig, googleConfig, seoConfig, contactConfig] = await Promise.all([
     getPlatformAiConfig(),
     getPlatformSmsConfig(),
+    getPlatformSmsBalance().catch(() => null),
     getPlatformCourierConfig(),
     getPlatformUddoktaPayConfig(),
     getPlatformMailConfig(),
@@ -43,6 +45,7 @@ export default async function PlatformSettingsPage() {
     <PlatformSettingsClient
       initialAiConfig={aiConfig}
       initialSmsConfig={smsConfig}
+      initialSmsBalance={smsBalance}
       initialCourierConfig={courierConfig}
       initialUddoktaConfig={uddoktaConfig}
       initialMailConfig={mailConfig}

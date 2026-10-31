@@ -3,6 +3,7 @@ import { ForbiddenError, ValidationError } from "../errors";
 import { normalizeUddoktaPayBaseUrl } from "../payments/uddoktapay";
 import { normalizeBdPhone } from "../phone";
 import { DEFAULT_FRAUD_CHECKER_ENDPOINT, clearFraudCheckerCache } from "../fraud/courier-api";
+import { createBulkSmsBdSender, getBulkSmsBdBalance } from "../growth/sms";
 import type { PlatformActor } from "./admin";
 
 export interface PlatformAiConfigView {
@@ -22,6 +23,13 @@ export interface PlatformSmsConfigView {
   source: "DATABASE" | "ENV" | "NONE";
   updatedAt: Date | null;
   updatedBy: string | null;
+}
+
+export interface PlatformSmsBalanceView {
+  ok: boolean;
+  balance: number | null;
+  provider: "smsnetbd" | "greenweb" | "bulksmsbd";
+  error?: string;
 }
 
 export interface PlatformCourierConfigView {
@@ -361,7 +369,7 @@ export async function getPlatformSmsConfig(deps?: Deps): Promise<PlatformSmsConf
   const senderIdRow = map.get("sms_sender_id");
 
   const provider = (providerRow?.value?.trim() || process.env.SMS_PROVIDER || "smsnetbd") as "smsnetbd" | "greenweb" | "bulksmsbd";
-  const apiKey = keyRow?.value?.trim() || process.env.SMS_NET_BD_API_KEY?.trim() || process.env.GREENWEB_SMS_TOKEN?.trim() || null;
+  const apiKey = keyRow?.value?.trim() || process.env.BULKSMSBD_API_KEY?.trim() || process.env.SMS_NET_BD_API_KEY?.trim() || process.env.GREENWEB_SMS_TOKEN?.trim() || null;
   const senderId = senderIdRow?.value?.trim() || process.env.SMS_SENDER_ID?.trim() || null;
 
   return {
@@ -439,8 +447,8 @@ export async function testPlatformSms(
     db.platformConfig.findUnique({ where: { key: "sms_sender_id" } }),
   ]);
 
-  const provider = providerRow?.value?.trim() || process.env.SMS_PROVIDER || "smsnetbd";
-  const apiKey = keyRow?.value?.trim() || process.env.SMS_NET_BD_API_KEY?.trim() || process.env.GREENWEB_SMS_TOKEN?.trim();
+  const provider = (providerRow?.value?.trim() || process.env.SMS_PROVIDER || "bulksmsbd").toLowerCase();
+  const apiKey = keyRow?.value?.trim() || process.env.BULKSMSBD_API_KEY?.trim() || process.env.SMS_NET_BD_API_KEY?.trim() || process.env.GREENWEB_SMS_TOKEN?.trim();
   const senderId = senderIdRow?.value?.trim() || process.env.SMS_SENDER_ID?.trim() || undefined;
 
   if (!apiKey) {
@@ -451,6 +459,13 @@ export async function testPlatformSms(
   const msg = `[BizTrackBD] Diagnostic SMS test at ${new Date().toLocaleTimeString("en-BD")}. System operational.`;
 
   try {
+    if (provider === "bulksmsbd") {
+      const sender = createBulkSmsBdSender(apiKey, { senderId });
+      await sender.send("platform-admin", cleanPhone, msg);
+      const latencyMs = Date.now() - start;
+      return { ok: true, latencyMs, message: "SMS dispatched successfully via BulkSMSBD." };
+    }
+
     if (provider === "greenweb") {
       const res = await fetch("https://api.greenweb.com.bd/api.php", {
         method: "POST",
@@ -494,6 +509,32 @@ export async function testPlatformSms(
 // ------------------------------------------------------------------------------------------------
 // 3. COURIER LOGISTICS MASTER KEYS
 // ------------------------------------------------------------------------------------------------
+
+export async function getPlatformSmsBalance(deps?: Deps): Promise<PlatformSmsBalanceView> {
+  const db = dbOf(deps);
+  const [providerRow, keyRow] = await Promise.all([
+    db.platformConfig.findUnique({ where: { key: "sms_provider" } }),
+    db.platformConfig.findUnique({ where: { key: "sms_api_key" } }),
+  ]);
+
+  const provider = (providerRow?.value?.trim() || process.env.SMS_PROVIDER || "bulksmsbd").toLowerCase() as "smsnetbd" | "greenweb" | "bulksmsbd";
+  const apiKey = keyRow?.value?.trim() || process.env.BULKSMSBD_API_KEY?.trim() || process.env.SMS_NET_BD_API_KEY?.trim() || process.env.GREENWEB_SMS_TOKEN?.trim() || null;
+
+  if (!apiKey) {
+    return { ok: false, balance: null, provider, error: "No SMS gateway API key configured" };
+  }
+
+  if (provider === "bulksmsbd") {
+    try {
+      const res = await getBulkSmsBdBalance(apiKey);
+      return { ok: true, balance: res.balance, provider };
+    } catch (err) {
+      return { ok: false, balance: null, provider, error: err instanceof Error ? err.message : "Failed to fetch BulkSMSBD balance" };
+    }
+  }
+
+  return { ok: true, balance: null, provider };
+}
 
 export async function getPlatformCourierConfig(deps?: Deps): Promise<PlatformCourierConfigView> {
   const db = dbOf(deps);

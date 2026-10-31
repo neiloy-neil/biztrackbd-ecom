@@ -8,6 +8,7 @@ import {
   getPlatformSmsConfig,
   savePlatformSmsConfig,
   testPlatformSms,
+  getPlatformSmsBalance,
   getPlatformCourierConfig,
   savePlatformCourierConfig,
   testPlatformCouriers,
@@ -87,6 +88,15 @@ export async function testPlatformSmsAction(phoneNumber: string) {
   } catch (err) {
     if (err instanceof ForbiddenError) return { ok: false, latencyMs: 0, message: "Access denied to test SMS gateway." };
     return { ok: false, latencyMs: 0, message: err instanceof Error ? err.message : "SMS test failed." };
+  }
+}
+
+export async function getPlatformSmsBalanceAction() {
+  try {
+    await requireAction("settings", "view");
+    return await getPlatformSmsBalance();
+  } catch (err) {
+    return { ok: false, balance: null, provider: "bulksmsbd" as const, error: err instanceof Error ? err.message : "Failed to fetch SMS balance." };
   }
 }
 

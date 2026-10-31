@@ -4,6 +4,7 @@ import { useState } from "react";
 import type {
   PlatformAiConfigView,
   PlatformSmsConfigView,
+  PlatformSmsBalanceView,
   PlatformCourierConfigView,
   PlatformUddoktaPayConfigView,
   PlatformMailConfigView,
@@ -19,6 +20,7 @@ import {
   testPlatformAiConnectionAction,
   savePlatformSmsConfigAction,
   testPlatformSmsAction,
+  getPlatformSmsBalanceAction,
   savePlatformCourierConfigAction,
   testPlatformCouriersAction,
   savePlatformUddoktaPayConfigAction,
@@ -33,6 +35,7 @@ import {
 interface Props {
   initialAiConfig: PlatformAiConfigView;
   initialSmsConfig: PlatformSmsConfigView;
+  initialSmsBalance?: PlatformSmsBalanceView | null;
   initialCourierConfig: PlatformCourierConfigView;
   initialUddoktaConfig: PlatformUddoktaPayConfigView;
   initialMailConfig: PlatformMailConfigView;
@@ -49,6 +52,7 @@ type TabType = "ai" | "sms" | "couriers" | "payments" | "mail" | "fraud" | "goog
 export function PlatformSettingsClient({
   initialAiConfig,
   initialSmsConfig,
+  initialSmsBalance,
   initialCourierConfig,
   initialUddoktaConfig,
   initialMailConfig,
@@ -118,6 +122,15 @@ export function PlatformSettingsClient({
   const [smsTestPhone, setSmsTestPhone] = useState("");
   const [smsTesting, setSmsTesting] = useState(false);
   const [smsTestResult, setSmsTestResult] = useState<{ ok: boolean; latencyMs: number; message: string } | null>(null);
+  const [smsBalance, setSmsBalance] = useState<PlatformSmsBalanceView | null>(initialSmsBalance ?? null);
+  const [refreshingBalance, setRefreshingBalance] = useState(false);
+
+  async function handleRefreshBalance() {
+    setRefreshingBalance(true);
+    const res = await getPlatformSmsBalanceAction();
+    setRefreshingBalance(false);
+    setSmsBalance(res);
+  }
 
   // Courier State
   const [sfApiKey, setSfApiKey] = useState("");
@@ -203,6 +216,7 @@ export function PlatformSettingsClient({
         setSmsApiKey("");
       }
       setNotice({ good: "SMS Gateway configuration saved successfully." });
+      getPlatformSmsBalanceAction().then((b) => setSmsBalance(b)).catch(() => {});
     } else {
       setNotice({ bad: res.error });
     }

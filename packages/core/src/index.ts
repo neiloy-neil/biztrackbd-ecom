@@ -175,7 +175,14 @@ export {
   getReviewSummary, listPublicReviews, reviewableItems, submitReview, listReviews, reviewTabCounts, setReviewPublished, replyToReview, setReviewsAutoPublish, reviewsAutoPublish, displayName, cleanText,
   type PublicReview, type ReviewSummary, type ReviewableItem, type AdminReview, type ReviewTab,
 } from "./growth/reviews";
-export { createGreenwebSender, createSmsNetBdSender, smsSenderFromEnv } from "./growth/sms";
+export {
+  createGreenwebSender,
+  createSmsNetBdSender,
+  createBulkSmsBdSender,
+  getBulkSmsBdBalance,
+  BULKSMSBD_ERRORS,
+  smsSenderFromEnv,
+} from "./growth/sms";
 export { createBrevoSender, emailSenderFromEnv, type EmailSender } from "./growth/email";
 export { currentSmsSender } from "./customers/auth";
 export {
@@ -362,6 +369,7 @@ export {
   getPlatformSmsConfig,
   savePlatformSmsConfig,
   testPlatformSms,
+  getPlatformSmsBalance,
   getPlatformCourierConfig,
   savePlatformCourierConfig,
   testPlatformCouriers,
@@ -390,6 +398,7 @@ export {
   type PlatformFraudConfigView,
   type PlatformAiConfigView,
   type PlatformSmsConfigView,
+  type PlatformSmsBalanceView,
   type PlatformCourierConfigView,
   type PlatformUddoktaPayConfigView,
   type PlatformMailConfigView,

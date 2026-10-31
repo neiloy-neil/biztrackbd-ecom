@@ -30,19 +30,78 @@ export interface SmsSender {
 
 let smsSender: SmsSender = {
   async send(tenantId, to, text) {
-    // The platform's shared SMS account, when its token is set. Otherwise development logs the message.
-    // A test outbox (DEV_SMS_OUTBOX) always wins: tests must never send a real message.
-    const real = process.env.DEV_SMS_OUTBOX ? null : smsSenderFromEnv();
+    // 1. A test outbox (DEV_SMS_OUTBOX) always wins: tests must never send a real message.
+    if (process.env.DEV_SMS_OUTBOX) {
+      console.log(`[dev sms] to ${to}: ${text}`);
+      const { appendFile } = await import("node:fs/promises");
+      await appendFile(process.env.DEV_SMS_OUTBOX, `${JSON.stringify({ to, text })}\n`);
+      return;
+    }
+
+    // 2. Check if tenant has custom BYO SMS configured
+    if (tenantId && tenantId !== "platform" && tenantId !== "test-platform") {
+      try {
+        const { withTenant } = await import("@biztrackbd/db");
+        const customIntegration = await withTenant(tenantId, async (tx) => {
+          return await tx.tenantIntegration.findFirst({
+            where: { provider: "SMS_BYO", status: "CONNECTED" },
+            select: { config: true },
+          });
+        }).catch(() => null);
+
+        if (customIntegration && customIntegration.config && typeof customIntegration.config === "object") {
+          const cfg = customIntegration.config as Record<string, unknown>;
+          const customApiKey = typeof cfg.apiKey === "string" ? cfg.apiKey.trim() : null;
+          const customSenderId = typeof cfg.senderId === "string" ? cfg.senderId.trim() : undefined;
+          if (customApiKey) {
+            const { createBulkSmsBdSender } = await import("../growth/sms");
+            const byoSender = createBulkSmsBdSender(customApiKey, { senderId: customSenderId });
+            return await byoSender.send(tenantId, to, text);
+          }
+        }
+      } catch {
+        // Fallback to platform-wide SMS gateway
+      }
+    }
+
+    // 3. Platform environment-configured sender
+    let real = smsSenderFromEnv();
+
+    // 4. Dynamic database lookup from PlatformConfig if environment doesn't specify keys
+    if (!real) {
+      try {
+        const { getPlatformPrisma } = await import("@biztrackbd/db");
+        const db = getPlatformPrisma();
+        const rows = await db.platformConfig.findMany({
+          where: { key: { in: ["sms_provider", "sms_api_key", "sms_sender_id"] } },
+        });
+        const map = new Map(rows.map((r) => [r.key, r.value]));
+        const provider = (map.get("sms_provider")?.trim() || "bulksmsbd").toLowerCase();
+        const apiKey = map.get("sms_api_key")?.trim();
+        const senderId = map.get("sms_sender_id")?.trim() || undefined;
+
+        if (apiKey) {
+          if (provider === "bulksmsbd") {
+            const { createBulkSmsBdSender } = await import("../growth/sms");
+            real = createBulkSmsBdSender(apiKey, { senderId });
+          } else if (provider === "smsnetbd") {
+            const { createSmsNetBdSender } = await import("../growth/sms");
+            real = createSmsNetBdSender(apiKey, { senderId });
+          } else if (provider === "greenweb") {
+            const { createGreenwebSender } = await import("../growth/sms");
+            real = createGreenwebSender(apiKey);
+          }
+        }
+      } catch (e) {
+        console.warn("[smsSender] Failed to load SMS gateway config from database:", e);
+      }
+    }
+
     if (real) return real.send(tenantId, to, text);
     if (process.env.NODE_ENV === "production") throw new Error("No SMS provider is configured");
-    // Development only: the code appears in the server log instead of a phone. End-to-end tests set DEV_SMS_OUTBOX
-    // to a file path so they can read the code back.
+
+    // Development only: console output
     console.log(`[dev sms] to ${to}: ${text}`);
-    if (process.env.DEV_SMS_OUTBOX) {
-      const { appendFile } = await import("node:fs/promises");
-      await appendFile(process.env.DEV_SMS_OUTBOX, `${JSON.stringify({ to, text })}
-`);
-    }
   },
 };
 
@@ -112,7 +171,7 @@ export async function requestOtp(tenantId: string, rawPhone: string, ctx: Reques
   });
 
   if (deliver) {
-    await smsSender.send(tenantId, phone, `${code} is your ${ctx.storeName ?? "store"} sign-in code. It works for 5 minutes. Do not share it.`);
+    await smsSender.send(tenantId, phone, `Your ${ctx.storeName ?? "store"} OTP is ${code}. Valid for 5 minutes. Do not share it.`);
   }
   return { sent: true, expiresInSeconds: CODE_TTL_MS / 1000 };
 }
