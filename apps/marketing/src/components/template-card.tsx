@@ -9,6 +9,12 @@ const THEME_HOSTS: Record<string, string> = {
   axionwear: "axionwear",
   bindu: "bindu",
   berber: "berber",
+  "dhaka-bistro": "dhakabistro",
+  "modern-clinic": "modernclinic",
+  "apex-corporate": "apexcorp",
+  "local-service-pro": "localservice",
+  "portfolio-focus": "creativefolio",
+  "public-profile": "publicprofile",
 };
 
 /** Where a template's demo store lives: <name>.<root domain>. Local development uses http and the dev port. */

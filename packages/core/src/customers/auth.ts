@@ -64,37 +64,75 @@ let smsSender: SmsSender = {
       }
     }
 
-    // 3. Platform environment-configured sender
-    let real = smsSenderFromEnv();
+    // 3. Dynamic database lookup from PlatformConfig (Primary authority: configured by platform admin)
+    let real: (import("../growth/sms").SmsSenderLike) | null = null;
+    try {
+      const { getPlatformPrisma } = await import("@biztrackbd/db");
+      const db = getPlatformPrisma();
+      const rows = await db.platformConfig.findMany({
+        where: {
+          key: {
+            in: [
+              "sms_provider",
+              "sms_api_key",
+              "sms_sender_id",
+              "sms_bulksmsbd_api_key",
+              "sms_bulksmsbd_sender_id",
+              "sms_smsnetbd_api_key",
+              "sms_smsnetbd_sender_id",
+              "sms_greenweb_token",
+              "sms_greenweb_api_key",
+              "sms_custom_endpoint",
+              "sms_custom_api_key",
+              "sms_custom_sender_id",
+              "sms_custom_method",
+            ],
+          },
+        },
+      });
 
-    // 4. Dynamic database lookup from PlatformConfig if environment doesn't specify keys
-    if (!real) {
-      try {
-        const { getPlatformPrisma } = await import("@biztrackbd/db");
-        const db = getPlatformPrisma();
-        const rows = await db.platformConfig.findMany({
-          where: { key: { in: ["sms_provider", "sms_api_key", "sms_sender_id"] } },
-        });
+      if (rows.length > 0) {
         const map = new Map(rows.map((r) => [r.key, r.value]));
-        const provider = (map.get("sms_provider")?.trim() || "bulksmsbd").toLowerCase();
-        const apiKey = map.get("sms_api_key")?.trim();
-        const senderId = map.get("sms_sender_id")?.trim() || undefined;
+        const provider = (map.get("sms_provider")?.trim() || "").toLowerCase();
 
-        if (apiKey) {
-          if (provider === "bulksmsbd") {
+        if (provider === "bulksmsbd") {
+          const apiKey = map.get("sms_bulksmsbd_api_key")?.trim() || map.get("sms_api_key")?.trim();
+          const senderId = map.get("sms_bulksmsbd_sender_id")?.trim() || map.get("sms_sender_id")?.trim() || undefined;
+          if (apiKey) {
             const { createBulkSmsBdSender } = await import("../growth/sms");
             real = createBulkSmsBdSender(apiKey, { senderId });
-          } else if (provider === "smsnetbd") {
+          }
+        } else if (provider === "smsnetbd") {
+          const apiKey = map.get("sms_smsnetbd_api_key")?.trim() || map.get("sms_api_key")?.trim();
+          const senderId = map.get("sms_smsnetbd_sender_id")?.trim() || map.get("sms_sender_id")?.trim() || undefined;
+          if (apiKey) {
             const { createSmsNetBdSender } = await import("../growth/sms");
             real = createSmsNetBdSender(apiKey, { senderId });
-          } else if (provider === "greenweb") {
+          }
+        } else if (provider === "greenweb") {
+          const apiKey = map.get("sms_greenweb_token")?.trim() || map.get("sms_greenweb_api_key")?.trim() || map.get("sms_api_key")?.trim();
+          if (apiKey) {
             const { createGreenwebSender } = await import("../growth/sms");
             real = createGreenwebSender(apiKey);
           }
+        } else if (provider === "custom") {
+          const endpoint = map.get("sms_custom_endpoint")?.trim();
+          const apiKey = map.get("sms_custom_api_key")?.trim();
+          const senderId = map.get("sms_custom_sender_id")?.trim();
+          const method = (map.get("sms_custom_method")?.trim() || "POST").toUpperCase() as "GET" | "POST";
+          if (endpoint) {
+            const { createCustomSmsSender } = await import("../growth/sms");
+            real = createCustomSmsSender({ endpoint, apiKey, senderId, method });
+          }
         }
-      } catch (e) {
-        console.warn("[smsSender] Failed to load SMS gateway config from database:", e);
       }
+    } catch (e) {
+      console.warn("[smsSender] Failed to load SMS gateway config from database:", e);
+    }
+
+    // 4. Fallback to platform environment-configured sender only if DB is not configured
+    if (!real) {
+      real = smsSenderFromEnv();
     }
 
     if (real) return real.send(tenantId, to, text);

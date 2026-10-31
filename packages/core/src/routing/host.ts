@@ -17,6 +17,7 @@ export const DEMO_SUBDOMAINS = new Set([
   "kapor", "gadgetstudio", "minibunny", "mini-bunny", "axionwear", "bindu", "berber",
   "dhakabistro", "dhaka-bistro", "modernclinic", "modern-clinic", "apexcorp", "apex-corporate",
   "localservice", "local-service-pro", "creativefolio", "portfolio-focus",
+  "publicprofile", "public-profile",
 ]);
 
 const LABEL = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;

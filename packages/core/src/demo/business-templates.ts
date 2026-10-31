@@ -568,6 +568,77 @@ export const BUSINESS_DEMO_TEMPLATES: BusinessDemoTemplate[] = [
       },
     ],
   },
+  // 6. Public Figure — Dr. Farzana Rahman / Public Profile
+  {
+    id: "public-profile",
+    host: "publicprofile",
+    vertical: "PUBLIC_FIGURE",
+    name: "Dr. Farzana Rahman",
+    nameBn: "ড. ফারজানা রহমান",
+    tagline: "Economist, Author & Public Policy Strategist",
+    taglineBn: "অর্থনীতিবিদ, গবেষক ও পাবলিক পলিসি বিশেষজ্ঞ",
+    description: "Senior Economic Policy Fellow & Author providing research-driven insights on trade economics, digital commerce policy, and emerging markets.",
+    palette: { bg: "#FAFAFA", main: "#1E1B4B", accent: "#4338CA", ink: "#1E1B4B" },
+    baseLook: "kapor",
+    phone: "+8801700000000",
+    whatsapp: "+8801700000000",
+    address: "Gulshan-2, Dhaka 1212",
+    addressBn: "গুলশান-২, ঢাকা ১২১২",
+    contentItems: [
+      {
+        kind: "PUBLICATION",
+        slug: "macroeconomic-outlook-bangladesh-2026",
+        title: "Macroeconomic Outlook & Policy Imperatives for 2026",
+        titleBn: "২০২৬ সালের সামষ্টিক অর্থনৈতিক পূর্বাভাস ও পলিসি নির্দেশনা",
+        summary: "In-depth analysis of trade balances, currency stability, and fiscal reform priorities across South Asia.",
+        summaryBn: "দক্ষিণ এশিয়ার বাণিজ্য ভারসাম্য, মুদ্রা স্থিতিশীলতা ও রাজস্ব সংস্কার নিয়ে বিশ্লেষণ।",
+        data: {
+          category: "Economic Policy",
+          publishedAt: "2026-01-15",
+          readingTimeMinutes: 7,
+          featured: true,
+        },
+      },
+      {
+        kind: "PUBLICATION",
+        slug: "digital-trade-and-msme-resilience",
+        title: "Digital Trade & MSME Resilience in Emerging Markets",
+        titleBn: "উদীয়মান বাজারে ডিজিটাল বাণিজ্য ও ক্ষুদ্র শিল্পের সক্ষমতা",
+        summary: "Oxford University Press monograph evaluating cross-border digital rails and logistics enablement for cottage industries.",
+        summaryBn: "অক্সফোর্ড ইউনিভার্সিটি প্রেস প্রকাশিত গবেষণাপত্র।",
+        data: {
+          publisher: "Oxford University Press",
+          year: "2025",
+          isbn: "978-0-19-887766-5",
+          coAuthors: ["Prof. Julian Davies", "Dr. A. K. Azad"],
+        },
+      },
+      {
+        kind: "EVENT",
+        slug: "world-economic-forum-south-asia-panel",
+        title: "Keynote: Financial Inclusion & Sovereign Digital Infrastructure",
+        titleBn: "মূল প্রবন্ধ: আর্থিক অন্তর্ভুক্তি ও সার্বভৌম ডিজিটাল অবকাঠামো",
+        summary: "Opening keynote at the South Asia Economic Summit covering mobile financial architecture and SME credit access.",
+        summaryBn: "সাউথ এশিয়া ইকোনমিক সামিটে উদ্বোধনী বক্তব্য।",
+        data: {
+          event: "South Asia Economic Summit 2025",
+          location: "New Delhi & Hybrid",
+          date: "2025-11-20",
+          audienceSize: 1200,
+        },
+      },
+    ],
+    downloads: [
+      {
+        label: "Download Executive Biography & Media Kit (PDF)",
+        labelBn: "এক্সিকিউটিভ বায়োগ্রাফি ও মিডিয়া কিট (পিডিএফ)",
+        kind: "MEDIA_KIT",
+        fileName: "Dr-Farzana-Rahman-Media-Kit-2026.pdf",
+        fileUrl: "#",
+        isPublic: true,
+      },
+    ],
+  },
 ];
 
 export function findBusinessDemoTemplate(idOrHost: string): BusinessDemoTemplate | undefined {
@@ -579,7 +650,8 @@ export function findBusinessDemoTemplate(idOrHost: string): BusinessDemoTemplate
       t.host.toLowerCase() === clean ||
       t.id.replace(/-/g, "").toLowerCase() === cleanNoDash ||
       t.host.replace(/-/g, "").toLowerCase() === cleanNoDash ||
-      (t.id === "apex-corporate" && (clean === "corporate-trust" || cleanNoDash === "corporatetrust"))
+      (t.id === "apex-corporate" && (clean === "corporate-trust" || cleanNoDash === "corporatetrust")) ||
+      (t.id === "public-profile" && (clean === "publicprofile" || clean === "public-figure" || clean === "creator-profile"))
     );
   });
 }

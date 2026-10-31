@@ -8,6 +8,8 @@ import {
   getPlatformSmsConfig,
   savePlatformSmsConfig,
   testPlatformSms,
+  type SavePlatformSmsConfigInput,
+  type PlatformSmsProvider,
   getPlatformSmsBalance,
   getPlatformCourierConfig,
   savePlatformCourierConfig,
@@ -63,11 +65,7 @@ export async function testPlatformAiConnectionAction(apiKey?: string, model?: st
 }
 
 // 2. SMS Actions
-export async function savePlatformSmsConfigAction(input: {
-  provider: "smsnetbd" | "greenweb" | "bulksmsbd";
-  apiKey?: string;
-  senderId?: string;
-}) {
+export async function savePlatformSmsConfigAction(input: SavePlatformSmsConfigInput) {
   try {
     const s = await requireAction("settings", "edit");
     await savePlatformSmsConfig(s.actor, input);
@@ -81,22 +79,22 @@ export async function savePlatformSmsConfigAction(input: {
   }
 }
 
-export async function testPlatformSmsAction(phoneNumber: string) {
+export async function testPlatformSmsAction(phoneNumber: string, provider?: PlatformSmsProvider) {
   try {
     await requireAction("settings", "view");
-    return await testPlatformSms(phoneNumber);
+    return await testPlatformSms(phoneNumber, provider);
   } catch (err) {
     if (err instanceof ForbiddenError) return { ok: false, latencyMs: 0, message: "Access denied to test SMS gateway." };
     return { ok: false, latencyMs: 0, message: err instanceof Error ? err.message : "SMS test failed." };
   }
 }
 
-export async function getPlatformSmsBalanceAction() {
+export async function getPlatformSmsBalanceAction(provider?: PlatformSmsProvider) {
   try {
     await requireAction("settings", "view");
-    return await getPlatformSmsBalance();
+    return await getPlatformSmsBalance(provider);
   } catch (err) {
-    return { ok: false, balance: null, provider: "bulksmsbd" as const, error: err instanceof Error ? err.message : "Failed to fetch SMS balance." };
+    return { ok: false, balance: null, provider: (provider || "bulksmsbd") as PlatformSmsProvider, error: err instanceof Error ? err.message : "Failed to fetch SMS balance." };
   }
 }
 

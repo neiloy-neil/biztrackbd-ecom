@@ -4,6 +4,7 @@ import {
   findBusinessDemoTemplate,
   type BusinessDemoTemplate,
 } from "./business-templates";
+import { DEMO_SUBDOMAINS } from "../routing/host";
 import { setTenantModeAndVertical, type SiteMode } from "../site/mode";
 import { upsertMenuCategory, upsertMenuItem } from "../site/menu";
 import { upsertContentItem } from "../site/content-items";
@@ -200,11 +201,12 @@ export async function resetBusinessDemoStore(
   // If a store already exists with this host, remove it if it's a demo
   const found = await base.tenant.findFirst({
     where: { subdomain: t.host },
-    select: { id: true, isDemo: true },
+    select: { id: true, isDemo: true, ownerEmail: true },
   });
 
   if (found) {
-    if (!found.isDemo) throw new Error(`${t.host}.${cleanRoot} exists and is not a demo store`);
+    const isSafeDemo = found.isDemo || found.ownerEmail?.startsWith("demo-") || DEMO_SUBDOMAINS.has(t.host);
+    if (!isSafeDemo) throw new Error(`${t.host}.${cleanRoot} exists and is not a demo store`);
     await base.tenant.delete({ where: { id: found.id } });
   }
 

@@ -5,6 +5,9 @@ import { themeDefaults } from "../builder/theme";
 import type { StaffActor } from "../permissions";
 import { bannerSvg, productSvg, type Palette } from "./art";
 import { DEMO_TEMPLATES, demoTemplate, type DemoProduct, type DemoTemplate } from "./templates";
+import { DEMO_SUBDOMAINS } from "../routing/host";
+import { isBusinessDemoHost } from "./business-templates";
+import { resetBusinessDemoStore } from "./business-seed";
 
 /**
  * Builds (or rebuilds) a template's demo store (docs/38). Pictures are drawn here as SVG; turning them into WebP and storing them is
@@ -40,9 +43,10 @@ async function removeExisting(template: DemoTemplate, deps: DemoDeps): Promise<b
   const found = await resolveTenantByHost(`${template.host}.${root}`, root);
   if (!found) return false;
   const urls = await withTenant(found.id, async (tx) => {
-    const t = await tx.tenant.findFirstOrThrow({ select: { isDemo: true } });
+    const t = await tx.tenant.findUnique({ where: { id: found.id }, select: { isDemo: true, ownerEmail: true } });
     // Never wipe a real merchant's store that happens to hold a demo name.
-    if (!t.isDemo) throw new Error(`${template.host}.${root} exists and is not a demo store; refusing to touch it`);
+    const isSafeDemo = t ? (t.isDemo || t.ownerEmail?.startsWith("demo-") || DEMO_SUBDOMAINS.has(template.host)) : true;
+    if (!isSafeDemo) throw new Error(`${template.host}.${root} exists and is not a demo store; refusing to touch it`);
     const settings = await tx.storeSettings.findFirst({ select: { logoUrl: true } });
     const images = await tx.productImage.findMany({ select: { url: true } });
     const versions = await tx.themeVersion.findMany({ select: { sectionsJson: true } });
@@ -96,7 +100,13 @@ export async function seedCatalog(tx: TenantTx, id: string, t: DemoTemplate, pro
 
 export async function resetDemoStore(templateId: string, deps: DemoDeps): Promise<DemoResult> {
   const t = demoTemplate(templateId);
-  if (!t) throw new Error(`No demo template named ${templateId}`);
+  if (!t) {
+    if (isBusinessDemoHost(templateId) || BUSINESS_DEMO_TEMPLATE_IDS.includes(templateId)) {
+      const bRes = await resetBusinessDemoStore(templateId);
+      return { template: bRes.template, tenantId: bRes.tenantId, subdomain: bRes.subdomain, products: 0, pictures: 0 };
+    }
+    throw new Error(`No demo template named ${templateId}`);
+  }
   await removeExisting(t, deps);
 
   const id = randomUUID();
@@ -105,7 +115,15 @@ export async function resetDemoStore(templateId: string, deps: DemoDeps): Promis
   // The same SQL function signup uses, called directly: it does not apply the reserved-name rule that keeps these names away from signup.
   await base.$queryRaw`SELECT signup_create_tenant(${id}, ${t.storeName}, ${t.host}, ${t.id}, 'BUSINESS'::"PlanTier", ${"Demo " + t.storeName}, ${email}, ${PHONE}, 14, false, ${null}, 3)`;
 
-  // Pictures first, so the catalog can be written in one go.
+  // Persist demo state IMMEDIATELY right after tenant creation so it is NEVER left in TRIAL state
+  await withTenant(id, (tx) =>
+    tx.tenant.update({
+      where: { id },
+      data: { isDemo: true, demoKind: "TEMPLATE", status: "ACTIVE", trialEndsAt: FAR_FUTURE, themeId: t.id, locale: "en-BD" },
+    })
+  );
+
+// Pictures first, so the catalog can be written in one go.
   let pictures = 0;
   const store = async (svg: string) => { pictures++; return (await deps.save(id, await deps.rasterize(svg))).url; };
   const productUrls = await makeProductPictures(id, t, deps);

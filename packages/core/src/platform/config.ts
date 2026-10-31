@@ -3,7 +3,7 @@ import { ForbiddenError, ValidationError } from "../errors";
 import { normalizeUddoktaPayBaseUrl } from "../payments/uddoktapay";
 import { normalizeBdPhone } from "../phone";
 import { DEFAULT_FRAUD_CHECKER_ENDPOINT, clearFraudCheckerCache } from "../fraud/courier-api";
-import { createBulkSmsBdSender, getBulkSmsBdBalance } from "../growth/sms";
+import { createBulkSmsBdSender, createSmsNetBdSender, createGreenwebSender, createCustomSmsSender, getBulkSmsBdBalance } from "../growth/sms";
 import type { PlatformActor } from "./admin";
 
 export interface PlatformAiConfigView {
@@ -15,20 +15,47 @@ export interface PlatformAiConfigView {
   updatedBy: string | null;
 }
 
+export type PlatformSmsProvider = "smsnetbd" | "greenweb" | "bulksmsbd" | "custom";
+
+export interface PlatformSmsProviderConfig {
+  hasApiKey: boolean;
+  maskedApiKey: string | null;
+  senderId: string | null;
+  source: "DATABASE" | "ENV" | "NONE";
+}
+
+export interface PlatformCustomSmsConfig {
+  isConfigured: boolean;
+  endpoint: string | null;
+  hasApiKey: boolean;
+  maskedApiKey: string | null;
+  senderId: string | null;
+  method: "GET" | "POST";
+  source: "DATABASE" | "ENV" | "NONE";
+}
+
 export interface PlatformSmsConfigView {
-  provider: "smsnetbd" | "greenweb" | "bulksmsbd";
+  provider: PlatformSmsProvider;
   hasApiKey: boolean;
   maskedApiKey: string | null;
   senderId: string | null;
   source: "DATABASE" | "ENV" | "NONE";
   updatedAt: Date | null;
   updatedBy: string | null;
+  customEndpoint?: string | null;
+  customMethod?: "GET" | "POST";
+  providers: {
+    bulksmsbd: PlatformSmsProviderConfig;
+    smsnetbd: PlatformSmsProviderConfig;
+    greenweb: PlatformSmsProviderConfig;
+    custom: PlatformCustomSmsConfig;
+  };
 }
 
 export interface PlatformSmsBalanceView {
   ok: boolean;
   balance: number | null;
-  provider: "smsnetbd" | "greenweb" | "bulksmsbd";
+  provider: PlatformSmsProvider;
   error?: string;
 }
 
@@ -354,68 +381,239 @@ export async function testPlatformGeminiApiKey(
 }
 
 // ------------------------------------------------------------------------------------------------
-// 2. SMS GATEWAY CONFIG
+// 2. SMS GATEWAY CONFIG (DATABASE-DRIVEN WITH MULTI-PROVIDER SUPPORT)
 // ------------------------------------------------------------------------------------------------
+
+export const PLATFORM_SMS_KEYS = [
+  "sms_provider",
+  "sms_api_key",
+  "sms_sender_id",
+  "sms_bulksmsbd_api_key",
+  "sms_bulksmsbd_sender_id",
+  "sms_smsnetbd_api_key",
+  "sms_smsnetbd_sender_id",
+  "sms_greenweb_token",
+  "sms_greenweb_api_key",
+  "sms_custom_endpoint",
+  "sms_custom_api_key",
+  "sms_custom_sender_id",
+  "sms_custom_method",
+] as const;
+
+export function resolvePlatformSmsApiKey(
+  provider: string,
+  dbApiKey?: string | null,
+  env: NodeJS.ProcessEnv = process.env,
+): string | null {
+  if (dbApiKey?.trim()) return dbApiKey.trim();
+  const prov = (provider || "").toLowerCase();
+  if (prov === "bulksmsbd") {
+    return env.BULKSMSBD_API_KEY?.trim() || (env.SMS_PROVIDER?.toLowerCase() === "bulksmsbd" ? env.SMS_API_KEY?.trim() : undefined) || null;
+  }
+  if (prov === "smsnetbd") {
+    return env.SMS_NET_BD_API_KEY?.trim() || (env.SMS_PROVIDER?.toLowerCase() === "smsnetbd" ? env.SMS_API_KEY?.trim() : undefined) || null;
+  }
+  if (prov === "greenweb") {
+    return env.GREENWEB_SMS_TOKEN?.trim() || (env.SMS_PROVIDER?.toLowerCase() === "greenweb" ? env.SMS_API_KEY?.trim() : undefined) || null;
+  }
+  if (prov === "custom") {
+    return env.SMS_CUSTOM_API_KEY?.trim() || null;
+  }
+  return null;
+}
 
 export async function getPlatformSmsConfig(deps?: Deps): Promise<PlatformSmsConfigView> {
   const db = dbOf(deps);
   const rows = await db.platformConfig.findMany({
-    where: { key: { in: ["sms_provider", "sms_api_key", "sms_sender_id"] } },
+    where: { key: { in: [...PLATFORM_SMS_KEYS] } },
   });
 
   const map = new Map(rows.map((r) => [r.key, r]));
-  const providerRow = map.get("sms_provider");
-  const keyRow = map.get("sms_api_key");
-  const senderIdRow = map.get("sms_sender_id");
+  const activeProvider = (map.get("sms_provider")?.value?.trim() || process.env.SMS_PROVIDER || "bulksmsbd").toLowerCase() as PlatformSmsProvider;
 
-  const provider = (providerRow?.value?.trim() || process.env.SMS_PROVIDER || "smsnetbd") as "smsnetbd" | "greenweb" | "bulksmsbd";
-  const apiKey = keyRow?.value?.trim() || process.env.BULKSMSBD_API_KEY?.trim() || process.env.SMS_NET_BD_API_KEY?.trim() || process.env.GREENWEB_SMS_TOKEN?.trim() || null;
-  const senderId = senderIdRow?.value?.trim() || process.env.SMS_SENDER_ID?.trim() || null;
+  // 1. BulkSMSBD
+  const bulkDbKey = map.get("sms_bulksmsbd_api_key")?.value || (activeProvider === "bulksmsbd" ? map.get("sms_api_key")?.value : null);
+  const bulkKey = bulkDbKey?.trim() || process.env.BULKSMSBD_API_KEY?.trim() || (process.env.SMS_PROVIDER === "bulksmsbd" ? process.env.SMS_API_KEY?.trim() : null) || null;
+  const bulkSender = map.get("sms_bulksmsbd_sender_id")?.value?.trim() || (activeProvider === "bulksmsbd" ? map.get("sms_sender_id")?.value?.trim() : null) || process.env.BULKSMSBD_SENDER_ID?.trim() || process.env.SMS_SENDER_ID?.trim() || null;
+
+  // 2. Alpha SMS (sms.net.bd)
+  const alphaDbKey = map.get("sms_smsnetbd_api_key")?.value || (activeProvider === "smsnetbd" ? map.get("sms_api_key")?.value : null);
+  const alphaKey = alphaDbKey?.trim() || process.env.SMS_NET_BD_API_KEY?.trim() || (process.env.SMS_PROVIDER === "smsnetbd" ? process.env.SMS_API_KEY?.trim() : null) || null;
+  const alphaSender = map.get("sms_smsnetbd_sender_id")?.value?.trim() || (activeProvider === "smsnetbd" ? map.get("sms_sender_id")?.value?.trim() : null) || process.env.SMS_SENDER_ID?.trim() || null;
+
+  // 3. Greenweb
+  const greenDbKey = map.get("sms_greenweb_token")?.value || map.get("sms_greenweb_api_key")?.value || (activeProvider === "greenweb" ? map.get("sms_api_key")?.value : null);
+  const greenToken = greenDbKey?.trim() || process.env.GREENWEB_SMS_TOKEN?.trim() || (process.env.SMS_PROVIDER === "greenweb" ? process.env.SMS_API_KEY?.trim() : null) || null;
+
+  // 4. Custom Gateway
+  const customDbEndpoint = map.get("sms_custom_endpoint")?.value;
+  const customEndpoint = customDbEndpoint?.trim() || process.env.SMS_CUSTOM_ENDPOINT?.trim() || null;
+  const customDbKey = map.get("sms_custom_api_key")?.value || (activeProvider === "custom" ? map.get("sms_api_key")?.value : null);
+  const customKey = customDbKey?.trim() || process.env.SMS_CUSTOM_API_KEY?.trim() || null;
+  const customSender = map.get("sms_custom_sender_id")?.value?.trim() || (activeProvider === "custom" ? map.get("sms_sender_id")?.value?.trim() : null) || process.env.SMS_CUSTOM_SENDER_ID?.trim() || null;
+  const customMethod = ((map.get("sms_custom_method")?.value?.trim() || process.env.SMS_CUSTOM_METHOD || "POST").toUpperCase() as "GET" | "POST");
+
+  // Determine active provider's details
+  let activeKey: string | null = null;
+  let activeSenderId: string | null = null;
+  let activeSource: "DATABASE" | "ENV" | "NONE" = "NONE";
+
+  if (activeProvider === "bulksmsbd") {
+    activeKey = bulkKey;
+    activeSenderId = bulkSender;
+    activeSource = bulkDbKey ? "DATABASE" : bulkKey ? "ENV" : "NONE";
+  } else if (activeProvider === "smsnetbd") {
+    activeKey = alphaKey;
+    activeSenderId = alphaSender;
+    activeSource = alphaDbKey ? "DATABASE" : alphaKey ? "ENV" : "NONE";
+  } else if (activeProvider === "greenweb") {
+    activeKey = greenToken;
+    activeSenderId = null;
+    activeSource = greenDbKey ? "DATABASE" : greenToken ? "ENV" : "NONE";
+  } else if (activeProvider === "custom") {
+    activeKey = customKey;
+    activeSenderId = customSender;
+    activeSource = customDbEndpoint || customDbKey ? "DATABASE" : customEndpoint ? "ENV" : "NONE";
+  }
+
+  const latestRow = map.get("sms_provider") || map.get("sms_api_key");
 
   return {
-    provider,
-    hasApiKey: Boolean(apiKey),
-    maskedApiKey: mask(apiKey),
-    senderId,
-    source: keyRow?.value ? "DATABASE" : apiKey ? "ENV" : "NONE",
-    updatedAt: keyRow?.updatedAt ?? null,
-    updatedBy: keyRow?.updatedBy ?? null,
+    provider: activeProvider,
+    hasApiKey: Boolean(activeKey),
+    maskedApiKey: mask(activeKey),
+    senderId: activeSenderId,
+    source: activeSource,
+    updatedAt: latestRow?.updatedAt ?? null,
+    updatedBy: latestRow?.updatedBy ?? null,
+    customEndpoint,
+    customMethod,
+    providers: {
+      bulksmsbd: {
+        hasApiKey: Boolean(bulkKey),
+        maskedApiKey: mask(bulkKey),
+        senderId: bulkSender,
+        source: bulkDbKey ? "DATABASE" : bulkKey ? "ENV" : "NONE",
+      },
+      smsnetbd: {
+        hasApiKey: Boolean(alphaKey),
+        maskedApiKey: mask(alphaKey),
+        senderId: alphaSender,
+        source: alphaDbKey ? "DATABASE" : alphaKey ? "ENV" : "NONE",
+      },
+      greenweb: {
+        hasApiKey: Boolean(greenToken),
+        maskedApiKey: mask(greenToken),
+        senderId: null,
+        source: greenDbKey ? "DATABASE" : greenToken ? "ENV" : "NONE",
+      },
+      custom: {
+        isConfigured: Boolean(customEndpoint),
+        endpoint: customEndpoint,
+        hasApiKey: Boolean(customKey),
+        maskedApiKey: mask(customKey),
+        senderId: customSender,
+        method: customMethod,
+        source: customDbEndpoint || customDbKey ? "DATABASE" : customEndpoint ? "ENV" : "NONE",
+      },
+    },
   };
+}
+
+export interface SavePlatformSmsConfigInput {
+  provider: PlatformSmsProvider;
+  apiKey?: string;
+  senderId?: string;
+  customEndpoint?: string;
+  customMethod?: "GET" | "POST";
 }
 
 export async function savePlatformSmsConfig(
   actor: PlatformActor,
-  input: { provider: "smsnetbd" | "greenweb" | "bulksmsbd"; apiKey?: string; senderId?: string },
+  input: SavePlatformSmsConfigInput,
   deps?: Deps,
 ): Promise<{ ok: true }> {
   assertPlatformAdmin(actor);
   const db = dbOf(deps);
 
+  // 1. Save active provider
   await db.platformConfig.upsert({
     where: { key: "sms_provider" },
     create: { key: "sms_provider", value: input.provider, description: "Active SMS Gateway Provider", updatedBy: actor.email },
     update: { value: input.provider, updatedBy: actor.email },
   });
 
+  // 2. Save API key into the provider-specific key in DB
   if (input.apiKey !== undefined) {
     const cleaned = input.apiKey.trim();
+    let targetKey = "sms_api_key";
+    if (input.provider === "bulksmsbd") targetKey = "sms_bulksmsbd_api_key";
+    else if (input.provider === "smsnetbd") targetKey = "sms_smsnetbd_api_key";
+    else if (input.provider === "greenweb") targetKey = "sms_greenweb_token";
+    else if (input.provider === "custom") targetKey = "sms_custom_api_key";
+
     if (cleaned) {
       await db.platformConfig.upsert({
+        where: { key: targetKey },
+        create: { key: targetKey, value: cleaned, description: `${input.provider} API Key / Token`, updatedBy: actor.email },
+        update: { value: cleaned, updatedBy: actor.email },
+      });
+      // Synchronize legacy key for backward compatibility
+      await db.platformConfig.upsert({
         where: { key: "sms_api_key" },
-        create: { key: "sms_api_key", value: cleaned, description: "SMS Gateway API Key / Token", updatedBy: actor.email },
+        create: { key: "sms_api_key", value: cleaned, description: "Active SMS Gateway API Key", updatedBy: actor.email },
         update: { value: cleaned, updatedBy: actor.email },
       });
     } else {
+      await db.platformConfig.deleteMany({ where: { key: targetKey } });
       await db.platformConfig.deleteMany({ where: { key: "sms_api_key" } });
     }
   }
 
+  // 3. Save Sender ID
   if (input.senderId !== undefined) {
     const cleaned = input.senderId.trim();
+    let targetSenderKey = "sms_sender_id";
+    if (input.provider === "bulksmsbd") targetSenderKey = "sms_bulksmsbd_sender_id";
+    else if (input.provider === "smsnetbd") targetSenderKey = "sms_smsnetbd_sender_id";
+    else if (input.provider === "custom") targetSenderKey = "sms_custom_sender_id";
+
+    if (cleaned) {
+      await db.platformConfig.upsert({
+        where: { key: targetSenderKey },
+        create: { key: targetSenderKey, value: cleaned, description: `${input.provider} Sender ID`, updatedBy: actor.email },
+        update: { value: cleaned, updatedBy: actor.email },
+      });
+      await db.platformConfig.upsert({
+        where: { key: "sms_sender_id" },
+        create: { key: "sms_sender_id", value: cleaned, description: "Active SMS Sender ID", updatedBy: actor.email },
+        update: { value: cleaned, updatedBy: actor.email },
+      });
+    } else {
+      await db.platformConfig.deleteMany({ where: { key: targetSenderKey } });
+      await db.platformConfig.deleteMany({ where: { key: "sms_sender_id" } });
+    }
+  }
+
+  // 4. Custom endpoint & method
+  if (input.customEndpoint !== undefined) {
+    const cleaned = input.customEndpoint.trim();
+    if (cleaned) {
+      await db.platformConfig.upsert({
+        where: { key: "sms_custom_endpoint" },
+        create: { key: "sms_custom_endpoint", value: cleaned, description: "Custom SMS Gateway Endpoint URL", updatedBy: actor.email },
+        update: { value: cleaned, updatedBy: actor.email },
+      });
+    } else {
+      await db.platformConfig.deleteMany({ where: { key: "sms_custom_endpoint" } });
+    }
+  }
+
+  if (input.customMethod !== undefined) {
     await db.platformConfig.upsert({
-      where: { key: "sms_sender_id" },
-      create: { key: "sms_sender_id", value: cleaned, description: "Approved Sender ID (Masking)", updatedBy: actor.email },
-      update: { value: cleaned, updatedBy: actor.email },
+      where: { key: "sms_custom_method" },
+      create: { key: "sms_custom_method", value: input.customMethod, description: "Custom SMS HTTP Method", updatedBy: actor.email },
+      update: { value: input.customMethod, updatedBy: actor.email },
     });
   }
 
@@ -433,6 +631,7 @@ export async function savePlatformSmsConfig(
 
 export async function testPlatformSms(
   testPhoneNumber: string,
+  targetProvider?: PlatformSmsProvider,
   deps?: Deps,
 ): Promise<{ ok: boolean; latencyMs: number; message: string }> {
   const cleanPhone = testPhoneNumber.replace(/[^0-9]/g, "");
@@ -441,90 +640,91 @@ export async function testPlatformSms(
   }
 
   const db = dbOf(deps);
-  const [providerRow, keyRow, senderIdRow] = await Promise.all([
-    db.platformConfig.findUnique({ where: { key: "sms_provider" } }),
-    db.platformConfig.findUnique({ where: { key: "sms_api_key" } }),
-    db.platformConfig.findUnique({ where: { key: "sms_sender_id" } }),
-  ]);
+  const rows = await db.platformConfig.findMany({
+    where: { key: { in: [...PLATFORM_SMS_KEYS] } },
+  });
+  const map = new Map(rows.map((r) => [r.key, r.value]));
 
-  const provider = (providerRow?.value?.trim() || process.env.SMS_PROVIDER || "bulksmsbd").toLowerCase();
-  const apiKey = keyRow?.value?.trim() || process.env.BULKSMSBD_API_KEY?.trim() || process.env.SMS_NET_BD_API_KEY?.trim() || process.env.GREENWEB_SMS_TOKEN?.trim();
-  const senderId = senderIdRow?.value?.trim() || process.env.SMS_SENDER_ID?.trim() || undefined;
+  const provider = (targetProvider || map.get("sms_provider")?.trim() || process.env.SMS_PROVIDER || "bulksmsbd").toLowerCase() as PlatformSmsProvider;
 
-  if (!apiKey) {
-    return { ok: false, latencyMs: 0, message: "No SMS gateway API key configured." };
+  let apiKey: string | null = null;
+  let senderId: string | undefined = undefined;
+
+  if (provider === "bulksmsbd") {
+    apiKey = map.get("sms_bulksmsbd_api_key")?.trim() || map.get("sms_api_key")?.trim() || process.env.BULKSMSBD_API_KEY?.trim() || (process.env.SMS_PROVIDER === "bulksmsbd" ? process.env.SMS_API_KEY?.trim() : null) || null;
+    senderId = map.get("sms_bulksmsbd_sender_id")?.trim() || map.get("sms_sender_id")?.trim() || process.env.BULKSMSBD_SENDER_ID?.trim() || process.env.SMS_SENDER_ID?.trim() || undefined;
+  } else if (provider === "smsnetbd") {
+    apiKey = map.get("sms_smsnetbd_api_key")?.trim() || map.get("sms_api_key")?.trim() || process.env.SMS_NET_BD_API_KEY?.trim() || (process.env.SMS_PROVIDER === "smsnetbd" ? process.env.SMS_API_KEY?.trim() : null) || null;
+    senderId = map.get("sms_smsnetbd_sender_id")?.trim() || map.get("sms_sender_id")?.trim() || process.env.SMS_SENDER_ID?.trim() || undefined;
+  } else if (provider === "greenweb") {
+    apiKey = map.get("sms_greenweb_token")?.trim() || map.get("sms_greenweb_api_key")?.trim() || map.get("sms_api_key")?.trim() || process.env.GREENWEB_SMS_TOKEN?.trim() || (process.env.SMS_PROVIDER === "greenweb" ? process.env.SMS_API_KEY?.trim() : null) || null;
+  } else if (provider === "custom") {
+    apiKey = map.get("sms_custom_api_key")?.trim() || process.env.SMS_CUSTOM_API_KEY?.trim() || null;
+    senderId = map.get("sms_custom_sender_id")?.trim() || process.env.SMS_CUSTOM_SENDER_ID?.trim() || undefined;
+  }
+
+  if (!apiKey && provider !== "custom") {
+    return { ok: false, latencyMs: 0, message: `No API key configured for SMS provider '${provider}'. Please add your credentials in the dashboard.` };
   }
 
   const start = Date.now();
-  const msg = `[BizTrackBD] Diagnostic SMS test at ${new Date().toLocaleTimeString("en-BD")}. System operational.`;
+  const msg = `[BizTrackBD] Diagnostic SMS test at ${new Date().toLocaleTimeString("en-BD")}. Gateway operational.`;
 
   try {
     if (provider === "bulksmsbd") {
-      const sender = createBulkSmsBdSender(apiKey, { senderId });
+      const sender = createBulkSmsBdSender(apiKey!, { senderId });
       await sender.send("platform-admin", cleanPhone, msg);
       const latencyMs = Date.now() - start;
       return { ok: true, latencyMs, message: "SMS dispatched successfully via BulkSMSBD." };
     }
 
     if (provider === "greenweb") {
-      const res = await fetch("https://api.greenweb.com.bd/api.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ token: apiKey, to: cleanPhone.replace(/^880/, "0"), message: msg }),
-        signal: AbortSignal.timeout(10000),
-      });
+      const sender = createGreenwebSender(apiKey!);
+      await sender.send("platform-admin", cleanPhone, msg);
       const latencyMs = Date.now() - start;
-      const text = (await res.text()).trim();
-      if (!res.ok || !/^ok/i.test(text)) {
-        return { ok: false, latencyMs, message: `Greenweb error: ${text || res.statusText}` };
+      return { ok: true, latencyMs, message: "SMS dispatched successfully via Greenweb." };
+    }
+
+    if (provider === "smsnetbd") {
+      const sender = createSmsNetBdSender(apiKey!, { senderId });
+      await sender.send("platform-admin", cleanPhone, msg);
+      const latencyMs = Date.now() - start;
+      return { ok: true, latencyMs, message: "SMS dispatched successfully via Alpha SMS (sms.net.bd)." };
+    }
+
+    if (provider === "custom") {
+      const endpoint = map.get("sms_custom_endpoint")?.trim() || process.env.SMS_CUSTOM_ENDPOINT?.trim();
+      if (!endpoint) {
+        return { ok: false, latencyMs: 0, message: "Custom SMS Gateway Endpoint URL is not configured." };
       }
-      return { ok: true, latencyMs, message: `SMS sent successfully via Greenweb (${text})` };
+      const method = (map.get("sms_custom_method")?.trim() || process.env.SMS_CUSTOM_METHOD || "POST").toUpperCase() as "GET" | "POST";
+      const sender = createCustomSmsSender({ endpoint, apiKey: apiKey || undefined, senderId, method });
+      await sender.send("platform-admin", cleanPhone, msg);
+      const latencyMs = Date.now() - start;
+      return { ok: true, latencyMs, message: "SMS dispatched successfully via Custom Gateway." };
     }
 
-    // Default to sms.net.bd
-    const number = cleanPhone.startsWith("880") ? cleanPhone : cleanPhone.startsWith("0") ? `88${cleanPhone}` : cleanPhone;
-    const form = new URLSearchParams({ api_key: apiKey, msg, to: number });
-    if (senderId) form.set("sender_id", senderId);
-
-    const res = await fetch("https://api.sms.net.bd/sendsms", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: form,
-      signal: AbortSignal.timeout(10000),
-    });
-    const latencyMs = Date.now() - start;
-    const j = (await res.json().catch(() => null)) as { error?: number; msg?: string } | null;
-
-    if (!res.ok || (j && j.error !== 0)) {
-      return { ok: false, latencyMs, message: `AlphaSMS error: ${j?.msg ?? `HTTP ${res.status}`}` };
-    }
-
-    return { ok: true, latencyMs, message: "SMS dispatched successfully via Alpha SMS (sms.net.bd)." };
+    return { ok: false, latencyMs: 0, message: `Unsupported SMS provider '${provider}'` };
   } catch (err) {
     const latencyMs = Date.now() - start;
     return { ok: false, latencyMs, message: err instanceof Error ? err.message : "SMS dispatch timeout." };
   }
 }
 
-// ------------------------------------------------------------------------------------------------
-// 3. COURIER LOGISTICS MASTER KEYS
-// ------------------------------------------------------------------------------------------------
-
-export async function getPlatformSmsBalance(deps?: Deps): Promise<PlatformSmsBalanceView> {
+export async function getPlatformSmsBalance(targetProvider?: PlatformSmsProvider, deps?: Deps): Promise<PlatformSmsBalanceView> {
   const db = dbOf(deps);
-  const [providerRow, keyRow] = await Promise.all([
-    db.platformConfig.findUnique({ where: { key: "sms_provider" } }),
-    db.platformConfig.findUnique({ where: { key: "sms_api_key" } }),
-  ]);
+  const rows = await db.platformConfig.findMany({
+    where: { key: { in: [...PLATFORM_SMS_KEYS] } },
+  });
+  const map = new Map(rows.map((r) => [r.key, r.value]));
 
-  const provider = (providerRow?.value?.trim() || process.env.SMS_PROVIDER || "bulksmsbd").toLowerCase() as "smsnetbd" | "greenweb" | "bulksmsbd";
-  const apiKey = keyRow?.value?.trim() || process.env.BULKSMSBD_API_KEY?.trim() || process.env.SMS_NET_BD_API_KEY?.trim() || process.env.GREENWEB_SMS_TOKEN?.trim() || null;
-
-  if (!apiKey) {
-    return { ok: false, balance: null, provider, error: "No SMS gateway API key configured" };
-  }
+  const provider = (targetProvider || map.get("sms_provider")?.trim() || process.env.SMS_PROVIDER || "bulksmsbd").toLowerCase() as PlatformSmsProvider;
 
   if (provider === "bulksmsbd") {
+    const apiKey = map.get("sms_bulksmsbd_api_key")?.trim() || map.get("sms_api_key")?.trim() || process.env.BULKSMSBD_API_KEY?.trim() || (process.env.SMS_PROVIDER === "bulksmsbd" ? process.env.SMS_API_KEY?.trim() : null);
+    if (!apiKey) {
+      return { ok: false, balance: null, provider, error: "No BulkSMSBD API key configured in database" };
+    }
     try {
       const res = await getBulkSmsBdBalance(apiKey);
       return { ok: true, balance: res.balance, provider };
@@ -535,6 +735,12 @@ export async function getPlatformSmsBalance(deps?: Deps): Promise<PlatformSmsBal
 
   return { ok: true, balance: null, provider };
 }
+
+// ------------------------------------------------------------------------------------------------
+// 3. COURIER LOGISTICS MASTER KEYS
+// ------------------------------------------------------------------------------------------------
+
+
 
 export async function getPlatformCourierConfig(deps?: Deps): Promise<PlatformCourierConfigView> {
   const db = dbOf(deps);

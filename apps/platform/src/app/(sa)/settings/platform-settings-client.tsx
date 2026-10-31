@@ -4,6 +4,7 @@ import { useState } from "react";
 import type {
   PlatformAiConfigView,
   PlatformSmsConfigView,
+  PlatformSmsProvider,
   PlatformSmsBalanceView,
   PlatformCourierConfigView,
   PlatformUddoktaPayConfigView,
@@ -114,20 +115,37 @@ export function PlatformSettingsClient({
   const [aiTesting, setAiTesting] = useState(false);
   const [aiTestResult, setAiTestResult] = useState<{ ok: boolean; latencyMs: number; model?: string; error?: string } | null>(null);
 
-  // SMS State
-  const [smsProvider, setSmsProvider] = useState<"smsnetbd" | "greenweb" | "bulksmsbd">(initialSmsConfig.provider);
+  // SMS State (Database-Driven Multi-Provider)
+  const [smsConfig, setSmsConfig] = useState<PlatformSmsConfigView>(initialSmsConfig);
+  const [smsProvider, setSmsProvider] = useState<PlatformSmsProvider>(initialSmsConfig.provider);
   const [smsApiKey, setSmsApiKey] = useState("");
   const [smsSenderId, setSmsSenderId] = useState(initialSmsConfig.senderId || "");
-  const [smsMasked, setSmsMasked] = useState(initialSmsConfig.maskedApiKey);
+  const [customEndpoint, setCustomEndpoint] = useState(initialSmsConfig.customEndpoint || "");
+  const [customMethod, setCustomMethod] = useState<"GET" | "POST">(initialSmsConfig.customMethod || "POST");
   const [smsTestPhone, setSmsTestPhone] = useState("");
   const [smsTesting, setSmsTesting] = useState(false);
   const [smsTestResult, setSmsTestResult] = useState<{ ok: boolean; latencyMs: number; message: string } | null>(null);
   const [smsBalance, setSmsBalance] = useState<PlatformSmsBalanceView | null>(initialSmsBalance ?? null);
   const [refreshingBalance, setRefreshingBalance] = useState(false);
 
+  function handleSelectProvider(newProvider: PlatformSmsProvider) {
+    setSmsProvider(newProvider);
+    setSmsApiKey("");
+    const provCfg = smsConfig.providers?.[newProvider as keyof typeof smsConfig.providers];
+    if (provCfg && "senderId" in provCfg) {
+      setSmsSenderId(provCfg.senderId || "");
+    } else {
+      setSmsSenderId("");
+    }
+    if (newProvider === "custom" && smsConfig.providers?.custom) {
+      setCustomEndpoint(smsConfig.providers.custom.endpoint || "");
+      setCustomMethod(smsConfig.providers.custom.method || "POST");
+    }
+  }
+
   async function handleRefreshBalance() {
     setRefreshingBalance(true);
-    const res = await getPlatformSmsBalanceAction();
+    const res = await getPlatformSmsBalanceAction(smsProvider);
     setRefreshingBalance(false);
     setSmsBalance(res);
   }
@@ -207,16 +225,41 @@ export function PlatformSettingsClient({
       provider: smsProvider,
       apiKey: smsApiKey.trim() || undefined,
       senderId: smsSenderId.trim() || undefined,
+      customEndpoint: smsProvider === "custom" ? customEndpoint.trim() : undefined,
+      customMethod: smsProvider === "custom" ? customMethod : undefined,
     });
     setSaving(false);
     if (res.ok) {
-      if (smsApiKey.trim()) {
-        const k = smsApiKey.trim();
-        setSmsMasked(k.length > 8 ? `${k.slice(0, 4)}••••••••${k.slice(-4)}` : "••••••••");
-        setSmsApiKey("");
-      }
-      setNotice({ good: "SMS Gateway configuration saved successfully." });
-      getPlatformSmsBalanceAction().then((b) => setSmsBalance(b)).catch(() => {});
+      const k = smsApiKey.trim();
+      const masked = k ? (k.length > 8 ? `${k.slice(0, 4)}••••••••${k.slice(-4)}` : "••••••••") : null;
+
+      setSmsConfig((prev) => {
+        const currentProv = prev.providers[smsProvider as keyof typeof prev.providers];
+        const updatedProv = {
+          ...currentProv,
+          hasApiKey: k ? true : currentProv?.hasApiKey ?? false,
+          maskedApiKey: k ? masked : currentProv?.maskedApiKey ?? null,
+          senderId: smsSenderId.trim() || ("senderId" in currentProv ? currentProv.senderId : null),
+          source: (k ? "DATABASE" : currentProv?.source ?? "DATABASE") as "DATABASE" | "ENV" | "NONE",
+        };
+
+        return {
+          ...prev,
+          provider: smsProvider,
+          hasApiKey: k ? true : prev.hasApiKey,
+          maskedApiKey: k ? masked : prev.maskedApiKey,
+          senderId: smsSenderId.trim() || prev.senderId,
+          source: "DATABASE",
+          providers: {
+            ...prev.providers,
+            [smsProvider]: updatedProv,
+          },
+        };
+      });
+
+      setSmsApiKey("");
+      setNotice({ good: `SMS Gateway (${smsProvider}) saved to database as active provider.` });
+      getPlatformSmsBalanceAction(smsProvider).then((b) => setSmsBalance(b)).catch(() => {});
     } else {
       setNotice({ bad: res.error });
     }
@@ -229,7 +272,7 @@ export function PlatformSettingsClient({
     }
     setSmsTesting(true);
     setSmsTestResult(null);
-    const res = await testPlatformSmsAction(smsTestPhone.trim());
+    const res = await testPlatformSmsAction(smsTestPhone.trim(), smsProvider);
     setSmsTesting(false);
     setSmsTestResult(res);
   }
@@ -663,68 +706,210 @@ export function PlatformSettingsClient({
       {/* 2. SMS GATEWAY TAB */}
       {activeTab === "sms" && (
         <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: 24 }}>
-          <form onSubmit={handleSaveSms} style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 640 }}>
+          <form onSubmit={handleSaveSms} style={{ display: "flex", flexDirection: "column", gap: 20, maxWidth: 680 }}>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 700 }}>Platform SMS Aggregator Gateway</div>
+              <div style={{ fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
+                <span>Platform SMS Gateway</span>
+                <span style={{ fontSize: 11, padding: "2px 8px", background: "#E8F6EE", color: "#15803D", borderRadius: 12, fontWeight: 700 }}>
+                  Database-Driven
+                </span>
+              </div>
               <div style={{ fontSize: 13, color: "#6B6B8D", marginTop: 4 }}>
-                Shared platform gateway used for order notifications, OTP authentication, and courier tracking updates.
+                Shared platform gateway used for customer OTPs, order updates, and delivery alerts. Credentials are stored securely in the database so you can add multiple providers and switch between them anytime.
               </div>
             </div>
 
-            {smsMasked && (
-              <div style={{ padding: "8px 12px", background: "#F4F3FF", borderRadius: 8, fontSize: 13, color: "#5B4FE8", fontWeight: 600 }}>
-                Active Key: <code>{smsMasked}</code> (Provider: {initialSmsConfig.provider})
+            {/* Provider Selector Cards */}
+            <div>
+              <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 8 }}>Select Active SMS Provider</label>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10 }}>
+                {[
+                  { id: "bulksmsbd", name: "BulkSMSBD", badge: smsConfig.providers.bulksmsbd.hasApiKey ? "Ready (DB)" : "Setup needed" },
+                  { id: "smsnetbd", name: "Alpha SMS (sms.net.bd)", badge: smsConfig.providers.smsnetbd.hasApiKey ? "Ready (DB)" : "Setup needed" },
+                  { id: "greenweb", name: "Greenweb BD", badge: smsConfig.providers.greenweb.hasApiKey ? "Ready (DB)" : "Setup needed" },
+                  { id: "custom", name: "Custom API / Webhook", badge: smsConfig.providers.custom.isConfigured ? "Ready" : "Optional" },
+                ].map((p) => {
+                  const isSelected = smsProvider === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => handleSelectProvider(p.id as PlatformSmsProvider)}
+                      style={{
+                        padding: "12px 14px",
+                        textAlign: "left",
+                        border: isSelected ? "2px solid #5B4FE8" : "1px solid #E2E8F0",
+                        borderRadius: 10,
+                        background: isSelected ? "#F4F3FF" : "#F8FAFC",
+                        cursor: "pointer",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 4,
+                      }}
+                    >
+                      <div style={{ fontSize: 13, fontWeight: 700, color: isSelected ? "#5B4FE8" : "#1E293B" }}>
+                        {p.name}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 600,
+                          color: p.badge.startsWith("Ready") ? "#15803D" : "#64748B",
+                        }}
+                      >
+                        {p.badge}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
+            </div>
+
+            {/* Provider Active Status Banner */}
+            {(() => {
+              const currentProv = smsConfig.providers[smsProvider as keyof typeof smsConfig.providers];
+              const isConfigured = currentProv && (("hasApiKey" in currentProv && currentProv.hasApiKey) || ("isConfigured" in currentProv && currentProv.isConfigured));
+              return (
+                <div
+                  style={{
+                    padding: "10px 14px",
+                    background: isConfigured ? "#F0FDF4" : "#FFFBEB",
+                    border: isConfigured ? "1px solid #BBF7D0" : "1px solid #FDE68A",
+                    borderRadius: 8,
+                    fontSize: 13,
+                    color: isConfigured ? "#166534" : "#92400E",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span>{isConfigured ? "✓" : "ℹ"}</span>
+                    <span>
+                      {smsProvider === "bulksmsbd" && "BulkSMSBD Bangladesh Gateway"}
+                      {smsProvider === "smsnetbd" && "Alpha SMS (sms.net.bd) Gateway"}
+                      {smsProvider === "greenweb" && "Greenweb SMS Bangladesh Gateway"}
+                      {smsProvider === "custom" && "Custom REST / Webhook SMS Gateway"}
+                      {isConfigured ? " is configured and stored in database." : " has no credentials saved in database yet."}
+                    </span>
+                  </div>
+                  {currentProv && "maskedApiKey" in currentProv && currentProv.maskedApiKey && (
+                    <span style={{ fontFamily: "monospace", fontSize: 12, background: "rgba(0,0,0,0.05)", padding: "2px 6px", borderRadius: 4 }}>
+                      Key: {currentProv.maskedApiKey}
+                    </span>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* Custom Gateway Inputs */}
+            {smsProvider === "custom" && (
+              <>
+                <div>
+                  <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Endpoint URL</label>
+                  <input
+                    type="url"
+                    value={customEndpoint}
+                    onChange={(e) => setCustomEndpoint(e.target.value)}
+                    placeholder="https://api.gateway.com/sms/send or https://...?to={to}&msg={message}"
+                    style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
+                  />
+                  <span style={{ fontSize: 11, color: "#64748B", marginTop: 4, display: "block" }}>
+                    Supports POST with JSON or GET with placeholders ({String.fromCharCode(123)}to{String.fromCharCode(125)}, {String.fromCharCode(123)}message{String.fromCharCode(125)}, {String.fromCharCode(123)}sender_id{String.fromCharCode(125)}).
+                  </span>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>HTTP Method</label>
+                  <select
+                    value={customMethod}
+                    onChange={(e) => setCustomMethod(e.target.value as "GET" | "POST")}
+                    style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
+                  >
+                    <option value="POST">POST (JSON Body: to, message, sender_id, api_key)</option>
+                    <option value="GET">GET (Query Parameters in URL)</option>
+                  </select>
+                </div>
+              </>
             )}
 
+            {/* Standard Gateway Inputs */}
             <div>
-              <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>SMS Provider</label>
-              <select
-                value={smsProvider}
-                onChange={(e) => setSmsProvider(e.target.value as "smsnetbd" | "greenweb" | "bulksmsbd")}
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
-              >
-                <option value="smsnetbd">Alpha SMS (sms.net.bd) - Primary</option>
-                <option value="greenweb">Greenweb BD</option>
-                <option value="bulksmsbd">BulkSMSBD</option>
-              </select>
-            </div>
-
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>API Key / Token</label>
+              <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>
+                {smsProvider === "greenweb" ? "Greenweb SMS Token" : "API Key / Token"}
+              </label>
               <input
                 type="password"
                 value={smsApiKey}
                 onChange={(e) => setSmsApiKey(e.target.value)}
-                placeholder="Enter new SMS API key / token..."
+                placeholder={
+                  smsConfig.providers[smsProvider as keyof typeof smsConfig.providers]?.maskedApiKey
+                    ? `Current: ${smsConfig.providers[smsProvider as keyof typeof smsConfig.providers]?.maskedApiKey} (Enter new key to change)`
+                    : `Enter ${smsProvider} API key / token`
+                }
                 style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
               />
             </div>
 
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Sender ID (Masking Header)</label>
-              <input
-                type="text"
-                value={smsSenderId}
-                onChange={(e) => setSmsSenderId(e.target.value)}
-                placeholder="e.g. 8809612..."
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
-              />
-            </div>
+            {smsProvider !== "greenweb" && (
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>
+                  Sender ID (Masking Header / Number)
+                </label>
+                <input
+                  type="text"
+                  value={smsSenderId}
+                  onChange={(e) => setSmsSenderId(e.target.value)}
+                  placeholder={
+                    smsProvider === "bulksmsbd"
+                      ? "e.g. 8809612... or Brand Masking ID approved on BulkSMSBD"
+                      : "e.g. Approved alphanumeric or numeric sender ID"
+                  }
+                  style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
+                />
+              </div>
+            )}
 
-            <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+            {/* Save Button & Balance display */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 4 }}>
               <button
                 type="submit"
                 disabled={saving}
-                style={{ padding: "10px 20px", background: "#5B4FE8", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
+                style={{
+                  padding: "10px 22px",
+                  background: "#5B4FE8",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 8,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
               >
-                {saving ? "Saving…" : "Save SMS Gateway"}
+                {saving ? "Saving…" : `Save ${smsProvider} & Set as Active Gateway`}
               </button>
+
+              {smsBalance && smsBalance.balance !== null && (
+                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
+                  <span style={{ color: "#64748B" }}>Remaining Balance:</span>
+                  <strong style={{ color: "#15803D" }}>৳ {smsBalance.balance.toLocaleString("en-BD")}</strong>
+                  <button
+                    type="button"
+                    onClick={handleRefreshBalance}
+                    disabled={refreshingBalance}
+                    style={{ background: "none", border: "none", color: "#5B4FE8", cursor: "pointer", fontSize: 12, textDecoration: "underline" }}
+                  >
+                    {refreshingBalance ? "..." : "Refresh"}
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Test SMS Block */}
-            <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid #E7E7F0" }}>
-              <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Send Diagnostic SMS</div>
+            <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid #E7E7F0" }}>
+              <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Send Diagnostic SMS</div>
+              <div style={{ fontSize: 12, color: "#64748B", marginBottom: 8 }}>
+                Test the currently active provider ({smsProvider}) with a real SMS to verify credentials and latency.
+              </div>
               <div style={{ display: "flex", gap: 10 }}>
                 <input
                   type="text"
@@ -737,7 +922,15 @@ export function PlatformSettingsClient({
                   type="button"
                   onClick={handleTestSms}
                   disabled={smsTesting}
-                  style={{ padding: "10px 18px", background: "#F4F3FF", color: "#5B4FE8", border: "1px solid #5B4FE8", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
+                  style={{
+                    padding: "10px 20px",
+                    background: "#F4F3FF",
+                    color: "#5B4FE8",
+                    border: "1px solid #5B4FE8",
+                    borderRadius: 8,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
                 >
                   {smsTesting ? "Sending…" : "Test SMS"}
                 </button>

@@ -78,6 +78,11 @@ describe("what a store may do, by date", () => {
     expect(accessState(t({ amount: 1499 }, { status: "CANCELLED" }), at(-10))).toMatchObject({ state: "LOCKED" });
   });
 
+  it("demo stores and far-future stores have unlimited days active access", () => {
+    expect(accessState({ status: "ACTIVE", trialEndsAt: end, isDemo: true })).toMatchObject({ state: "ACTIVE", daysLeft: null, nextStageAt: null });
+    expect(accessState({ status: "ACTIVE", trialEndsAt: new Date("2100-01-01T00:00:00Z") })).toMatchObject({ state: "ACTIVE", daysLeft: null, nextStageAt: null });
+  });
+
   it("with no subscription row it falls back to the trial date", () => {
     expect(accessState({ status: "TRIAL", trialEndsAt: end }, at(-2)).state).toBe("TRIAL");
     expect(accessState({ status: "TRIAL", trialEndsAt: end }, at(5)).state).toBe("READ_ONLY");

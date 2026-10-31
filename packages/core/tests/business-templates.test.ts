@@ -103,7 +103,7 @@ describe("BizTrack Business Templates & Section Filtering", () => {
         "../src/demo/business-templates"
       );
 
-      expect(BUSINESS_DEMO_TEMPLATES).toHaveLength(5);
+      expect(BUSINESS_DEMO_TEMPLATES).toHaveLength(6);
       const hosts = BUSINESS_DEMO_TEMPLATES.map((t) => t.host);
       expect(hosts).toEqual([
         "dhakabistro",
@@ -111,6 +111,7 @@ describe("BizTrack Business Templates & Section Filtering", () => {
         "apexcorp",
         "localservice",
         "creativefolio",
+        "publicprofile",
       ]);
 
       for (const tpl of BUSINESS_DEMO_TEMPLATES) {

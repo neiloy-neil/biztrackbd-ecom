@@ -16,6 +16,8 @@ supabase/.temp/
 # local databases and tooling output
 *.db
 .vercel
+qa/
+.claude/skills/
 tools/canvas-render/.out/
 apps/storefront/test-results/
 apps/storefront/playwright-report/

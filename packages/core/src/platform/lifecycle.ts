@@ -23,6 +23,8 @@ export interface AccessInput {
   suspendedReason?: string | null;
   /** `amount` is 0 for a trial and the price paid for a paid period. */
   subscription?: { amount: number; currentPeriodEnd: Date } | null;
+  /** True for public demo stores, template demos, and permanent showcases. */
+  isDemo?: boolean;
 }
 
 export interface Access {
@@ -47,6 +49,12 @@ export function accessState(input: AccessInput, now: Date = new Date()): Access 
 
   if (input.suspendedReason) return { ...base, state: "LOCKED", suspendedByPlatform: true };
   if (input.status === "CANCELLED") return { ...base, state: "LOCKED" };
+
+  // Demo stores or stores with far-future trial (year >= 2099) are unlimited active stores
+  const isFarFuture = paidThrough && paidThrough.getUTCFullYear() >= 2099;
+  if (input.isDemo || isFarFuture) {
+    return { ...base, state: "ACTIVE", daysLeft: null, nextStageAt: null };
+  }
 
   const elapsed = now.getTime() - paidThrough.getTime();
   if (elapsed <= 0) {

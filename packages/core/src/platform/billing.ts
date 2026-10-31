@@ -175,31 +175,31 @@ const toProof = (p: { id: string; planTier: string; billingPeriod: string; amoun
 /** The state a store is in right now. Used by the admin on every request, so it is one small read. */
 export async function getStoreAccess(tenantId: string, now: Date = new Date(), clientTx?: TenantTx): Promise<Access> {
   if (clientTx) {
-    const t = await clientTx.tenant.findFirstOrThrow({ select: { status: true, trialEndsAt: true, suspendedReason: true } });
-    const sub = await clientTx.subscription.findFirst({ select: { amount: true, currentPeriodEnd: true } });
-    return accessState({ status: t.status, trialEndsAt: t.trialEndsAt, suspendedReason: t.suspendedReason, subscription: sub ? { amount: Number(sub.amount), currentPeriodEnd: sub.currentPeriodEnd } : null }, now);
+    const t = await clientTx.tenant.findFirstOrThrow({ where: { id: tenantId }, select: { status: true, trialEndsAt: true, suspendedReason: true, isDemo: true } });
+    const sub = await clientTx.subscription.findFirst({ where: { tenantId }, select: { amount: true, currentPeriodEnd: true } });
+    return accessState({ status: t.status, trialEndsAt: t.trialEndsAt, suspendedReason: t.suspendedReason, subscription: sub ? { amount: Number(sub.amount), currentPeriodEnd: sub.currentPeriodEnd } : null, isDemo: t.isDemo }, now);
   }
   return withTenant(tenantId, async (tx) => {
-    const t = await tx.tenant.findFirstOrThrow({ select: { status: true, trialEndsAt: true, suspendedReason: true } });
-    const sub = await tx.subscription.findFirst({ select: { amount: true, currentPeriodEnd: true } });
-    return accessState({ status: t.status, trialEndsAt: t.trialEndsAt, suspendedReason: t.suspendedReason, subscription: sub ? { amount: Number(sub.amount), currentPeriodEnd: sub.currentPeriodEnd } : null }, now);
+    const t = await tx.tenant.findFirstOrThrow({ where: { id: tenantId }, select: { status: true, trialEndsAt: true, suspendedReason: true, isDemo: true } });
+    const sub = await tx.subscription.findFirst({ where: { tenantId }, select: { amount: true, currentPeriodEnd: true } });
+    return accessState({ status: t.status, trialEndsAt: t.trialEndsAt, suspendedReason: t.suspendedReason, subscription: sub ? { amount: Number(sub.amount), currentPeriodEnd: sub.currentPeriodEnd } : null, isDemo: t.isDemo }, now);
   });
 }
 
 export async function getBillingOverview(tenantId: string, actor: StaffActor, now: Date = new Date()): Promise<BillingOverview> {
   assertCan(actor, "billing", "view");
   return withTenant(tenantId, async (tx) => {
-    const t = await tx.tenant.findFirst({ select: { name: true, planTier: true, siteMode: true, businessVertical: true, status: true, trialEndsAt: true, suspendedReason: true } });
+    const t = await tx.tenant.findFirst({ where: { id: tenantId }, select: { name: true, planTier: true, siteMode: true, businessVertical: true, status: true, trialEndsAt: true, suspendedReason: true, isDemo: true } });
     if (!t) throw new NotFoundError("Store");
     const plans = await listPublicPlansForSiteMode(t.siteMode);
-    const sub = await tx.subscription.findFirst();
+    const sub = await tx.subscription.findFirst({ where: { tenantId } });
     const proofs = await tx.paymentProof.findMany({ orderBy: { createdAt: "desc" }, take: 30 });
     const views = proofs.map(toProof);
     return {
       storeName: t.name, tier: t.planTier,
       siteMode: t.siteMode ?? "ECOMMERCE",
       businessVertical: t.businessVertical ?? null,
-      access: accessState({ status: t.status, trialEndsAt: t.trialEndsAt, suspendedReason: t.suspendedReason, subscription: sub ? { amount: Number(sub.amount), currentPeriodEnd: sub.currentPeriodEnd } : null }, now),
+      access: accessState({ status: t.status, trialEndsAt: t.trialEndsAt, suspendedReason: t.suspendedReason, subscription: sub ? { amount: Number(sub.amount), currentPeriodEnd: sub.currentPeriodEnd } : null, isDemo: t.isDemo }, now),
       subscription: sub ? { tier: sub.planTier, interval: sub.interval, amount: Number(sub.amount), periodStart: sub.currentPeriodStart, periodEnd: sub.currentPeriodEnd } : null,
       plans, usage: await readUsage(tx, now), proofs: views, pending: views.find((p) => p.status === "PENDING") ?? null, payTo: paymentTargets(),
     };

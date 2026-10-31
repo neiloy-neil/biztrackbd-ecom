@@ -18,6 +18,7 @@ const THEME_HOSTS: Record<string, string> = {
   "apex-corporate": "apexcorp",
   "local-service-pro": "localservice",
   "portfolio-focus": "creativefolio",
+  "public-profile": "publicprofile",
 };
 
 export type GalleryMode = "ecommerce" | "business";

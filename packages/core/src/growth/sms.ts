@@ -201,3 +201,73 @@ export function smsSenderFromEnv(env: NodeJS.ProcessEnv = process.env, fetchImpl
   if ((want === "greenweb" || !want) && env.GREENWEB_SMS_TOKEN) return createGreenwebSender(env.GREENWEB_SMS_TOKEN, fetchImpl);
   return null;
 }
+
+export interface CustomSmsSenderOptions {
+  endpoint: string;
+  apiKey?: string;
+  senderId?: string;
+  method?: "GET" | "POST";
+  fetchImpl?: typeof fetch;
+}
+
+export function createCustomSmsSender(o: CustomSmsSenderOptions): SmsSenderLike {
+  const fetchImpl = o.fetchImpl ?? fetch;
+  const method = (o.method || "POST").toUpperCase();
+
+  return {
+    async send(_tenantId, to, text) {
+      const digits = to.replace(/[^0-9]/g, "");
+      const number = digits.startsWith("880") ? digits : digits.startsWith("0") ? `88${digits}` : digits;
+
+      let res: Response;
+      try {
+        if (method === "GET") {
+          let url = o.endpoint
+            .replace(/\{to\}/g, encodeURIComponent(number))
+            .replace(/\{number\}/g, encodeURIComponent(number))
+            .replace(/\{message\}/g, encodeURIComponent(text))
+            .replace(/\{msg\}/g, encodeURIComponent(text))
+            .replace(/\{sender_id\}/g, encodeURIComponent(o.senderId || ""))
+            .replace(/\{senderid\}/g, encodeURIComponent(o.senderId || ""));
+
+          if (!url.includes(number)) {
+            const parsed = new URL(url);
+            parsed.searchParams.set("to", number);
+            parsed.searchParams.set("message", text);
+            if (o.senderId) parsed.searchParams.set("sender_id", o.senderId);
+            if (o.apiKey && !parsed.searchParams.has("api_key")) parsed.searchParams.set("api_key", o.apiKey);
+            url = parsed.toString();
+          }
+
+          const headers: Record<string, string> = {};
+          if (o.apiKey) headers["Authorization"] = `Bearer ${o.apiKey}`;
+
+          res = await fetchImpl(url, { method: "GET", headers, signal: AbortSignal.timeout(10_000) });
+        } else {
+          const headers: Record<string, string> = { "Content-Type": "application/json" };
+          if (o.apiKey) headers["Authorization"] = `Bearer ${o.apiKey}`;
+
+          res = await fetchImpl(o.endpoint, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+              to: number,
+              number,
+              message: text,
+              sender_id: o.senderId,
+              api_key: o.apiKey,
+            }),
+            signal: AbortSignal.timeout(10_000),
+          });
+        }
+      } catch (err) {
+        throw new CourierError(`Custom SMS gateway could not be reached: ${err instanceof Error ? err.message : "Network error"}`, "SMS", true);
+      }
+
+      if (!res.ok) {
+        const textErr = await res.text().catch(() => "");
+        throw new CourierError(`Custom SMS gateway answered ${res.status}: ${textErr.slice(0, 100)}`, "SMS", res.status >= 500);
+      }
+    },
+  };
+}
