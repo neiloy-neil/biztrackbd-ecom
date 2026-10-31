@@ -69,7 +69,9 @@ export async function shellCounts(tenantId: string, actor: StaffActor): Promise<
     const low = sees("products")
       ? ((await tx.$queryRaw<{ n: number }[]>`SELECT count(*)::int AS n FROM "ProductVariant" v JOIN "Product" p ON p.id = v."productId" WHERE p.status = 'ACTIVE' AND p."deletedAt" IS NULL AND v."stockQuantity" <= v."reorderLevel"`)[0]?.n ?? 0)
       : 0;
+    const waitingTickets = await tx.platformTicket.count({ where: { status: "WAITING_ON_TENANT" } }).catch(() => 0);
     const items: ShellCounts["items"] = [];
+    if (waitingTickets > 0) items.push({ key: "tickets", text: `${waitingTickets} ${waitingTickets === 1 ? "support ticket" : "support tickets"} awaiting your reply`, href: "/support", tone: "warn", count: waitingTickets });
     if (check > 0) items.push({ key: "check", text: `${check} ${check === 1 ? "payment" : "payments"} to check`, href: "/orders?tab=check", tone: "bad", count: check });
     if (newOrders > 0) items.push({ key: "new", text: `${newOrders} new ${newOrders === 1 ? "order" : "orders"}`, href: "/orders?tab=new", tone: "info", count: newOrders });
     if (returnsPending > 0) items.push({ key: "returns", text: `${returnsPending} ${returnsPending === 1 ? "return" : "returns"} waiting`, href: "/returns", tone: "warn", count: returnsPending });
