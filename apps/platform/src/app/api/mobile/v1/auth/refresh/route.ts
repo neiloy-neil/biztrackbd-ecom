@@ -35,10 +35,10 @@ export async function POST(req: Request) {
       },
     });
   } catch (err: any) {
-    console.error("Platform mobile token refresh error:", err);
-    if (err instanceof AuthFailure) {
-      return NextResponse.json({ error: err.message }, { status: 401 });
+    if (err instanceof AuthFailure || err?.status === 400 || err?.status === 401) {
+      return NextResponse.json({ error: err.message || "Session expired. Please log in again." }, { status: 401 });
     }
+    console.error("Platform mobile token refresh unexpected error:", err);
     return NextResponse.json(
       { error: err?.message || "Failed to refresh platform session." },
       { status: 401 }
