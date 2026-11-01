@@ -4,7 +4,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
   AuthFailure, enrollTotp, getUserFromToken, recordStaffLogin, removeFactor, sendSignInCode, setOwnPassword, signInWithPassword, signOutToken, staffEmailKnown, staffMemberships, verifyEmailCode, verifyTotp,
-  findStaffResetTarget, sendStaffResetOtp, createPasswordResetTicket, verifyPasswordResetTicket, type StaffResetTarget,
+  findStaffResetTarget, sendStaffResetOtp, createPasswordResetTicket, verifyPasswordResetTicket, type StaffResetTarget, type StaffAccountOption,
   type TokenSet,
 } from "@biztrackbd/core";
 import { AT, TENANT, clearSessionCookies, cookieOptions, safeNext, setSessionCookies } from "@/lib/auth";
@@ -147,8 +147,9 @@ export async function completeSetupAction(_prev: LoginState, form: FormData): Pr
 
 export type ResetLookupResult =
   | { success: false; error: string }
-  | { success: true; needsChannelChoice: true; target: StaffResetTarget }
-  | { success: true; needsChannelChoice: false; channel: "email" | "sms"; maskedDestination: string; email: string; phone: string | null };
+  | { success: true; needsAccountChoice: true; accounts: StaffAccountOption[]; phone: string }
+  | { success: true; needsAccountChoice: false; needsChannelChoice: true; target: StaffResetTarget }
+  | { success: true; needsAccountChoice: false; needsChannelChoice: false; channel: "email" | "sms"; maskedDestination: string; email: string; phone: string | null };
 
 export async function lookupResetTargetAction(identifier: string): Promise<ResetLookupResult> {
   const clean = identifier.trim();
@@ -170,9 +171,20 @@ export async function lookupResetTargetAction(identifier: string): Promise<Reset
     return { success: false, error: "No active merchant account found with that email or phone number." };
   }
 
+  // If multiple merchant accounts share this phone number:
+  if (target.multipleAccounts && target.multipleAccounts.length > 1) {
+    return {
+      success: true,
+      needsAccountChoice: true,
+      accounts: target.multipleAccounts,
+      phone: target.phone || clean,
+    };
+  }
+
   if (target.availableChannels.length > 1) {
     return {
       success: true,
+      needsAccountChoice: false,
       needsChannelChoice: true,
       target,
     };
@@ -184,6 +196,7 @@ export async function lookupResetTargetAction(identifier: string): Promise<Reset
     const res = await sendStaffResetOtp({ email: target.email, phone: target.phone }, singleChannel);
     return {
       success: true,
+      needsAccountChoice: false,
       needsChannelChoice: false,
       channel: singleChannel,
       maskedDestination: res.maskedDestination,

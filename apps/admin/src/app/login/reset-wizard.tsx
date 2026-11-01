@@ -9,15 +9,17 @@ import {
   completePasswordResetAction,
   type ResetLookupResult,
 } from "./actions";
-import type { StaffResetTarget } from "@biztrackbd/core";
+import type { StaffResetTarget, StaffAccountOption } from "@biztrackbd/core";
 
 export function PasswordResetWizard({ next }: { next: string }) {
-  // Step state: "identifier" | "channel_choice" | "otp" | "password"
-  const [step, setStep] = useState<"identifier" | "channel_choice" | "otp" | "password">("identifier");
+  // Step state: "identifier" | "account_choice" | "channel_choice" | "otp" | "password"
+  const [step, setStep] = useState<"identifier" | "account_choice" | "channel_choice" | "otp" | "password">("identifier");
   const [isPending, startTransition] = useTransition();
 
   // Data state
   const [identifier, setIdentifier] = useState("");
+  const [accounts, setAccounts] = useState<StaffAccountOption[]>([]);
+  const [selectedAccountEmail, setSelectedAccountEmail] = useState("");
   const [target, setTarget] = useState<StaffResetTarget | null>(null);
   const [chosenChannel, setChosenChannel] = useState<"email" | "sms">("email");
   const [maskedDestination, setMaskedDestination] = useState("");
@@ -60,17 +62,51 @@ export function PasswordResetWizard({ next }: { next: string }) {
         return;
       }
 
-      if (result.needsChannelChoice) {
+      if (result.needsAccountChoice) {
+        setAccounts(result.accounts);
+        setSelectedAccountEmail(result.accounts[0]?.email ?? "");
+        setStep("account_choice");
+      } else if (result.needsChannelChoice) {
+        setAccounts([]);
         setTarget(result.target);
         setChosenChannel(result.target.availableChannels.includes("sms") ? "sms" : "email");
         setStep("channel_choice");
       } else {
+        setAccounts([]);
+        setTarget({
+          email: result.email,
+          phone: result.phone,
+          maskedEmail: "",
+          maskedPhone: null,
+          availableChannels: [result.channel],
+        });
         setChosenChannel(result.channel);
         setMaskedDestination(result.maskedDestination);
         setResendCooldown(60);
         setStep("otp");
       }
     });
+  };
+
+  // Step 1.5: Multi-Account Selection
+  const handleAccountSelect = (e: React.FormEvent) => {
+    e.preventDefault();
+    const acc = accounts.find((a) => a.email === selectedAccountEmail);
+    if (!acc) return;
+    setError(null);
+
+    const newTarget: StaffResetTarget = {
+      email: acc.email,
+      phone: acc.phone,
+      maskedEmail: acc.maskedEmail,
+      maskedPhone: acc.maskedPhone,
+      availableChannels: acc.phone ? ["sms", "email"] : ["email"],
+      storeNames: acc.storeNames,
+    };
+    setTarget(newTarget);
+    // Prefer SMS since phone was the search term
+    setChosenChannel(acc.phone ? "sms" : "email");
+    setStep("channel_choice");
   };
 
   // Step 1b: Channel Choice Submission
@@ -182,7 +218,10 @@ export function PasswordResetWizard({ next }: { next: string }) {
       >
         <span
           style={{
-            color: step === "identifier" || step === "channel_choice" ? "var(--primary, #5B4FE8)" : "#10b981",
+            color:
+              step === "identifier" || step === "account_choice" || step === "channel_choice"
+                ? "var(--primary, #5B4FE8)"
+                : "#10b981",
           }}
         >
           {step === "otp" || step === "password" ? "✓ 1. Channel" : "1. Channel"}
@@ -257,12 +296,106 @@ export function PasswordResetWizard({ next }: { next: string }) {
         </form>
       )}
 
+      {/* STEP 1.5: MULTI-ACCOUNT DISAMBIGUATION (WHEN PHONE HAS MULTIPLE STORES) */}
+      {step === "account_choice" && accounts.length > 0 && (
+        <form onSubmit={handleAccountSelect} className="stack" style={{ gap: 16 }}>
+          <div>
+            <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4, color: "var(--text, #0f172a)" }}>
+              Multiple store accounts found
+            </div>
+            <p className="muted" style={{ margin: 0, fontSize: 13 }}>
+              This phone number is associated with {accounts.length} merchant accounts. Select the store account you want to reset:
+            </p>
+          </div>
+
+          <div style={{ display: "grid", gap: 10 }}>
+            {accounts.map((acc) => {
+              const isSelected = selectedAccountEmail === acc.email;
+              return (
+                <label
+                  key={acc.email}
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 12,
+                    padding: "12px 14px",
+                    borderRadius: 8,
+                    border: `2px solid ${isSelected ? "var(--primary, #5B4FE8)" : "var(--border, #e2e8f0)"}`,
+                    background: isSelected ? "var(--primary-subtle, #f5f3ff)" : "var(--surface, #ffffff)",
+                    cursor: "pointer",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="selectedAccount"
+                    value={acc.email}
+                    checked={isSelected}
+                    onChange={() => setSelectedAccountEmail(acc.email)}
+                    style={{ marginTop: 3 }}
+                  />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: 14, color: "var(--text, #0f172a)" }}>
+                      {acc.maskedEmail}
+                    </div>
+                    {acc.storeNames && acc.storeNames.length > 0 && (
+                      <div style={{ fontSize: 12, color: "var(--text-muted, #64748b)", marginTop: 2 }}>
+                        Store{acc.storeNames.length > 1 ? "s" : ""}:{" "}
+                        <span style={{ fontWeight: 500, color: "var(--text, #334155)" }}>
+                          {acc.storeNames.join(", ")}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </label>
+              );
+            })}
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary btn-block"
+            disabled={isPending || !selectedAccountEmail}
+          >
+            Continue with Selected Account
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-outline btn-block"
+            onClick={() => setStep("identifier")}
+            disabled={isPending}
+            style={{ fontSize: 13 }}
+          >
+            ← Use a different email or phone
+          </button>
+        </form>
+      )}
+
       {/* STEP 1B: CHANNEL CHOICE */}
       {step === "channel_choice" && target && (
         <form onSubmit={handleSendChannelOtp} className="stack" style={{ gap: 16 }}>
-          <p className="muted" style={{ margin: 0 }}>
-            Choose where you would like to receive your 6-digit verification code:
-          </p>
+          <div>
+            <p className="muted" style={{ margin: 0, fontSize: 13 }}>
+              Choose where you would like to receive your 6-digit verification code:
+            </p>
+            {target.storeNames && target.storeNames.length > 0 && (
+              <div
+                style={{
+                  marginTop: 8,
+                  padding: "6px 10px",
+                  background: "var(--surface-sunken, #f8fafc)",
+                  borderRadius: 6,
+                  border: "1px solid var(--border, #e2e8f0)",
+                  fontSize: 12,
+                  color: "var(--text-muted, #64748b)",
+                }}
+              >
+                Store{target.storeNames.length > 1 ? "s" : ""}:{" "}
+                <strong style={{ color: "var(--text, #1e293b)" }}>{target.storeNames.join(", ")}</strong>
+              </div>
+            )}
+          </div>
 
           <div style={{ display: "grid", gap: 10 }}>
             {target.availableChannels.includes("sms") && target.maskedPhone && (
@@ -331,11 +464,17 @@ export function PasswordResetWizard({ next }: { next: string }) {
           <button
             type="button"
             className="btn btn-outline btn-block"
-            onClick={() => setStep("identifier")}
+            onClick={() => {
+              if (accounts.length > 1) {
+                setStep("account_choice");
+              } else {
+                setStep("identifier");
+              }
+            }}
             disabled={isPending}
             style={{ fontSize: 13 }}
           >
-            ← Use a different email or phone
+            {accounts.length > 1 ? "← Choose a different account" : "← Use a different email or phone"}
           </button>
         </form>
       )}

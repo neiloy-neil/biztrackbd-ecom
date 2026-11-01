@@ -1,9 +1,17 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { getBasePrisma } from "@biztrackbd/db";
+import { getPlatformPrisma } from "@biztrackbd/db";
 import { AuthFailure, issueEmailCode, type TokenSet } from "./supabase";
 import { normalizeBdPhone } from "../phone";
 import { currentSmsSender } from "../customers/auth";
 import { sendSignInCode } from "../mail/send";
+
+export interface StaffAccountOption {
+  email: string;
+  maskedEmail: string;
+  phone: string | null;
+  maskedPhone: string | null;
+  storeNames: string[];
+}
 
 export interface StaffResetTarget {
   email: string;
@@ -11,6 +19,8 @@ export interface StaffResetTarget {
   maskedEmail: string;
   maskedPhone: string | null;
   availableChannels: ("email" | "sms")[];
+  storeNames?: string[];
+  multipleAccounts?: StaffAccountOption[];
 }
 
 export function maskEmail(email: string): string {
@@ -40,15 +50,14 @@ export function maskPhone(phone: string): string {
 
 /**
  * Searches for a staff member or store owner by email or phone.
- * Returns their canonical email, registered phone, and available delivery channels.
+ * Supports multi-account disambiguation when a single phone number links to multiple merchant accounts.
+ * Returns canonical email, registered phone, available delivery channels, and associated store names.
  */
 export async function findStaffResetTarget(identifier: string): Promise<StaffResetTarget | null> {
   const raw = identifier.trim();
   if (!raw) return null;
 
-  const db = getBasePrisma();
-  let foundEmail: string | null = null;
-  let foundPhone: string | null = null;
+  const db = getPlatformPrisma();
 
   // 1. Try resolving as Bangladeshi phone number first
   let normalizedPhone: string | null = null;
@@ -60,107 +69,193 @@ export async function findStaffResetTarget(identifier: string): Promise<StaffRes
 
   if (normalizedPhone) {
     const phoneVariants = [normalizedPhone, `+88${normalizedPhone}`, `88${normalizedPhone}`];
-    // Check TenantUser
-    const staffUser = await db.tenantUser.findFirst({
-      where: {
-        phone: { in: phoneVariants },
-        isActive: true,
-      },
-      select: { email: true, phone: true },
-    });
 
-    if (staffUser?.email) {
-      foundEmail = staffUser.email.trim().toLowerCase();
-      foundPhone = normalizedPhone;
-    } else {
-      // Check Tenant owner phone
-      const tenant = await db.tenant.findFirst({
+    const [staffUsers, ownedTenants] = await Promise.all([
+      db.tenantUser.findMany({
+        where: {
+          phone: { in: phoneVariants },
+          isActive: true,
+        },
+        select: {
+          email: true,
+          phone: true,
+          tenant: { select: { id: true, name: true, status: true } },
+        },
+      }),
+      db.tenant.findMany({
         where: {
           ownerPhone: { in: phoneVariants },
           status: { not: "CANCELLED" },
         },
-        select: { ownerEmail: true, ownerPhone: true },
-      });
-      if (tenant?.ownerEmail) {
-        foundEmail = tenant.ownerEmail.trim().toLowerCase();
-        foundPhone = normalizedPhone;
+        select: {
+          id: true,
+          name: true,
+          ownerEmail: true,
+          ownerPhone: true,
+        },
+      }),
+    ]);
+
+    const accountMap = new Map<string, { email: string; phone: string | null; storeNames: Set<string> }>();
+
+    for (const u of staffUsers) {
+      if (!u.email) continue;
+      const emailKey = u.email.trim().toLowerCase();
+      if (!accountMap.has(emailKey)) {
+        accountMap.set(emailKey, {
+          email: emailKey,
+          phone: normalizedPhone,
+          storeNames: new Set<string>(),
+        });
+      }
+      if (u.tenant?.name && u.tenant.status !== "CANCELLED") {
+        accountMap.get(emailKey)!.storeNames.add(u.tenant.name);
       }
     }
-  }
 
-  // 2. If not found by phone, check by email
-  if (!foundEmail && raw.includes("@")) {
-    const emailCandidate = raw.toLowerCase();
-    const staffUser = await db.tenantUser.findFirst({
-      where: {
-        email: { equals: emailCandidate, mode: "insensitive" },
-        isActive: true,
-      },
-      select: { email: true, phone: true },
-    });
+    for (const t of ownedTenants) {
+      if (!t.ownerEmail) continue;
+      const emailKey = t.ownerEmail.trim().toLowerCase();
+      if (!accountMap.has(emailKey)) {
+        accountMap.set(emailKey, {
+          email: emailKey,
+          phone: normalizedPhone,
+          storeNames: new Set<string>(),
+        });
+      }
+      if (t.name) {
+        accountMap.get(emailKey)!.storeNames.add(t.name);
+      }
+    }
 
-    if (staffUser) {
-      foundEmail = staffUser.email.trim().toLowerCase();
-      if (staffUser.phone) {
-        try {
-          foundPhone = normalizeBdPhone(staffUser.phone);
-        } catch {
-          foundPhone = null;
+    // Enrich with any other active stores owned by these emails
+    if (accountMap.size > 0) {
+      const allEmails = Array.from(accountMap.keys());
+      const extraTenants = await db.tenant.findMany({
+        where: {
+          ownerEmail: { in: allEmails },
+          status: { not: "CANCELLED" },
+        },
+        select: { ownerEmail: true, name: true },
+      });
+      for (const t of extraTenants) {
+        if (t.ownerEmail && t.name) {
+          accountMap.get(t.ownerEmail.trim().toLowerCase())?.storeNames.add(t.name);
         }
       }
-    } else {
-      const tenant = await db.tenant.findFirst({
+    }
+
+    if (accountMap.size === 0) return null;
+
+    const accounts: StaffAccountOption[] = Array.from(accountMap.values()).map((acc) => ({
+      email: acc.email,
+      maskedEmail: maskEmail(acc.email),
+      phone: normalizedPhone,
+      maskedPhone: maskPhone(normalizedPhone!),
+      storeNames: Array.from(acc.storeNames),
+    }));
+
+    if (accounts.length === 1) {
+      const single = accounts[0]!;
+      return {
+        email: single.email,
+        phone: normalizedPhone,
+        maskedEmail: single.maskedEmail,
+        maskedPhone: single.maskedPhone,
+        availableChannels: ["sms", "email"],
+        storeNames: single.storeNames,
+      };
+    }
+
+    // Multiple distinct merchant accounts share this phone number
+    return {
+      email: accounts[0]!.email,
+      phone: normalizedPhone,
+      maskedEmail: accounts[0]!.maskedEmail,
+      maskedPhone: accounts[0]!.maskedPhone,
+      availableChannels: ["sms", "email"],
+      storeNames: accounts[0]!.storeNames,
+      multipleAccounts: accounts,
+    };
+  }
+
+  // 2. Lookup by email
+  if (raw.includes("@")) {
+    const emailCandidate = raw.trim().toLowerCase();
+
+    const [staffUsers, ownedTenants] = await Promise.all([
+      db.tenantUser.findMany({
+        where: {
+          email: { equals: emailCandidate, mode: "insensitive" },
+          isActive: true,
+        },
+        select: {
+          email: true,
+          phone: true,
+          tenant: { select: { id: true, name: true, status: true } },
+        },
+      }),
+      db.tenant.findMany({
         where: {
           ownerEmail: { equals: emailCandidate, mode: "insensitive" },
           status: { not: "CANCELLED" },
         },
-        select: { ownerEmail: true, ownerPhone: true },
-      });
-      if (tenant) {
-        foundEmail = tenant.ownerEmail?.trim().toLowerCase() ?? null;
-        if (tenant.ownerPhone) {
-          try {
-            foundPhone = normalizeBdPhone(tenant.ownerPhone);
-          } catch {
-            foundPhone = null;
-          }
-        }
-      }
-    }
-
-    // If staff user was found by email but had no phone in TenantUser, check if they own a tenant with ownerPhone
-    if (foundEmail && !foundPhone) {
-      const tenant = await db.tenant.findFirst({
-        where: {
-          ownerEmail: { equals: foundEmail, mode: "insensitive" },
-          status: { not: "CANCELLED" },
+        select: {
+          id: true,
+          name: true,
+          ownerEmail: true,
+          ownerPhone: true,
         },
-        select: { ownerPhone: true },
-      });
-      if (tenant?.ownerPhone) {
+      }),
+    ]);
+
+    if (staffUsers.length === 0 && ownedTenants.length === 0) return null;
+
+    let foundPhone: string | null = null;
+    const storeNames = new Set<string>();
+
+    for (const u of staffUsers) {
+      if (u.tenant?.name && u.tenant.status !== "CANCELLED") {
+        storeNames.add(u.tenant.name);
+      }
+      if (!foundPhone && u.phone) {
         try {
-          foundPhone = normalizeBdPhone(tenant.ownerPhone);
+          foundPhone = normalizeBdPhone(u.phone);
         } catch {
-          foundPhone = null;
+          // ignore invalid phone
         }
       }
     }
+
+    for (const t of ownedTenants) {
+      if (t.name) {
+        storeNames.add(t.name);
+      }
+      if (!foundPhone && t.ownerPhone) {
+        try {
+          foundPhone = normalizeBdPhone(t.ownerPhone);
+        } catch {
+          // ignore invalid phone
+        }
+      }
+    }
+
+    const availableChannels: ("email" | "sms")[] = ["email"];
+    if (foundPhone) {
+      availableChannels.push("sms");
+    }
+
+    return {
+      email: emailCandidate,
+      phone: foundPhone,
+      maskedEmail: maskEmail(emailCandidate),
+      maskedPhone: foundPhone ? maskPhone(foundPhone) : null,
+      availableChannels,
+      storeNames: Array.from(storeNames),
+    };
   }
 
-  if (!foundEmail) return null;
-
-  const availableChannels: ("email" | "sms")[] = ["email"];
-  if (foundPhone) {
-    availableChannels.push("sms");
-  }
-
-  return {
-    email: foundEmail,
-    phone: foundPhone,
-    maskedEmail: maskEmail(foundEmail),
-    maskedPhone: foundPhone ? maskPhone(foundPhone) : null,
-    availableChannels,
-  };
+  return null;
 }
 
 /**
