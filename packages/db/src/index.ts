@@ -42,6 +42,10 @@ export type {
   WholesaleCustomer,
   WholesalePrice,
   SupportQuickReply,
+  TenantLeadStage,
+  TenantCrmActivityType,
+  TenantCrmActivity,
+  PlatformCrmTemplate,
   // BizTrack Business
   SiteLeadType,
   SiteLeadStatus,

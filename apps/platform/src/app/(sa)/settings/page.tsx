@@ -11,10 +11,12 @@ import {
   getPlatformGoogleConfig,
   getPlatformSeoConfig,
   getPlatformContactConfig,
+  listPlatformCrmTemplates,
   uddoktaPayPlanUrls,
   platformOriginFor,
 } from "@biztrackbd/core";
 import { PlatformSettingsClient } from "./platform-settings-client";
+import { CrmTemplatesSettings } from "./crm-templates-settings";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -25,7 +27,7 @@ export const metadata: Metadata = {
 export default async function PlatformSettingsPage() {
   await requireAccess("settings");
 
-  const [aiConfig, smsConfig, smsBalance, courierConfig, uddoktaConfig, mailConfig, fraudConfig, googleConfig, seoConfig, contactConfig] = await Promise.all([
+  const [aiConfig, smsConfig, smsBalance, courierConfig, uddoktaConfig, mailConfig, fraudConfig, googleConfig, seoConfig, contactConfig, crmTemplates] = await Promise.all([
     getPlatformAiConfig(),
     getPlatformSmsConfig(),
     getPlatformSmsBalance().catch(() => null),
@@ -36,24 +38,28 @@ export default async function PlatformSettingsPage() {
     getPlatformGoogleConfig(),
     getPlatformSeoConfig(),
     getPlatformContactConfig(),
+    listPlatformCrmTemplates(),
   ]);
 
   const adminOrigin = (process.env.NEXT_PUBLIC_ADMIN_URL || process.env.ADMIN_ORIGIN || "https://admin.biztrack.bd").replace(/\/+$/, "");
   const platformOrigin = platformOriginFor(process.env.NEXT_PUBLIC_ROOT_DOMAIN);
 
   return (
-    <PlatformSettingsClient
-      initialAiConfig={aiConfig}
-      initialSmsConfig={smsConfig}
-      initialSmsBalance={smsBalance}
-      initialCourierConfig={courierConfig}
-      initialUddoktaConfig={uddoktaConfig}
-      initialMailConfig={mailConfig}
-      initialFraudConfig={fraudConfig}
-      initialGoogleConfig={googleConfig}
-      initialSeoConfig={seoConfig}
-      initialContactConfig={contactConfig}
-      planPaymentUrls={uddoktaPayPlanUrls(adminOrigin, platformOrigin)}
-    />
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+      <PlatformSettingsClient
+        initialAiConfig={aiConfig}
+        initialSmsConfig={smsConfig}
+        initialSmsBalance={smsBalance}
+        initialCourierConfig={courierConfig}
+        initialUddoktaConfig={uddoktaConfig}
+        initialMailConfig={mailConfig}
+        initialFraudConfig={fraudConfig}
+        initialGoogleConfig={googleConfig}
+        initialSeoConfig={seoConfig}
+        initialContactConfig={contactConfig}
+        planPaymentUrls={uddoktaPayPlanUrls(adminOrigin, platformOrigin)}
+      />
+      <CrmTemplatesSettings initialTemplates={crmTemplates} />
+    </div>
   );
 }

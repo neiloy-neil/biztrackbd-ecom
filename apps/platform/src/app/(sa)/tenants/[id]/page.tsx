@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ACCESS_LABELS, canPlatform, getTenantDetail, listTenantQuotaAdjustments, APP_CATALOG, validateModeTransitionDryRun } from "@biztrackbd/core";
+import { ACCESS_LABELS, canPlatform, getTenantDetail, listTenantQuotaAdjustments, APP_CATALOG, validateModeTransitionDryRun, listPlatformCrmTemplates } from "@biztrackbd/core";
+import { TenantCrmDesk } from "./crm-desk";
 import { SubmitButton } from "@/components/ui";
 import { dateOnly, dateTime, prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
@@ -55,8 +56,12 @@ export default async function TenantDetail({
 }) {
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   const s = await requireAccess("tenants");
-  const t = await getTenantDetail(s.actor, id).catch(() => null);
-  const quotaAdjustments = await listTenantQuotaAdjustments(s.actor, id).catch(() => []);
+  const [t, quotaAdjustments, templates] = await Promise.all([
+    getTenantDetail(s.actor, id).catch(() => null),
+    listTenantQuotaAdjustments(s.actor, id).catch(() => []),
+    listPlatformCrmTemplates(),
+  ]);
+
   if (!t) notFound();
 
   const targetModeChoice = (one(sp.targetMode) as any) || (t.siteMode === "ECOMMERCE" ? "PORTFOLIO" : t.siteMode === "PORTFOLIO" ? "HYBRID" : "ECOMMERCE");
@@ -187,7 +192,7 @@ export default async function TenantDetail({
             {t.quarantined && <span style={{ padding: "3px 10px", borderRadius: 11, background: "#FDF3E3", color: "#B45309", fontSize: 12, fontWeight: 600 }}>Flagged for review</span>}
           </div>
           <div style={{ fontSize: 13, color: "#4B4B73", marginTop: 3 }}>
-            {t.subdomain}.biztrack.bd · Owner {t.ownerName ?? "Unknown"} ({t.ownerEmail ?? "no email"}) · Joined {dateOnly(t.createdAt)}
+            {t.subdomain}.biztrack.bd · Owner {t.ownerName ?? "Unknown"} ({t.ownerEmail ?? "no email"}{t.ownerPhone ? ` · 📞 ${t.ownerPhone}` : ""}) · Joined {dateOnly(t.createdAt)}
           </div>
         </div>
 
@@ -1176,6 +1181,21 @@ export default async function TenantDetail({
               )}
             </div>
           </div>
+
+          {/* Merchant Outreach & CRM Desk Card */}
+          <TenantCrmDesk
+            tenantId={t.id}
+            tenantName={t.name}
+            subdomain={t.subdomain}
+            customDomain={t.customDomain}
+            ownerName={t.ownerName}
+            ownerPhone={t.ownerPhone}
+            leadStage={t.leadStage}
+            leadLastContactedAt={t.leadLastContactedAt}
+            leadNextFollowUpAt={t.leadNextFollowUpAt}
+            crmActivities={t.crmActivities}
+            templates={templates}
+          />
 
           {/* Internal Notes Card */}
           <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }} data-testid="internal-notes-card">

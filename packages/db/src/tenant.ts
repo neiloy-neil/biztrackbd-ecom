@@ -44,7 +44,20 @@ export async function withTenant<T>(
 }
 
 // Platform-level models: never reachable through a tenant client.
-const PLATFORM_MODELS = new Set(["Plan", "Announcement", "PlatformUser", "PlatformAuditLog", "PlatformDailyMetrics", "PhoneTrustStat", "PhoneTrustEvent", "TenantNote", "PlatformConfig", "SubscriptionPromo"]);
+const PLATFORM_MODELS = new Set([
+  "Plan",
+  "Announcement",
+  "PlatformUser",
+  "PlatformAuditLog",
+  "PlatformDailyMetrics",
+  "PhoneTrustStat",
+  "PhoneTrustEvent",
+  "TenantNote",
+  "PlatformConfig",
+  "SubscriptionPromo",
+  "TenantCrmActivity",
+  "PlatformCrmTemplate",
+]);
 
 const WHERE_OPS = new Set([
   "findUnique", "findUniqueOrThrow", "findFirst", "findFirstOrThrow", "findMany",

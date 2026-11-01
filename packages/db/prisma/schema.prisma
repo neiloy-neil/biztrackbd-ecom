@@ -102,6 +102,13 @@ model Tenant {
   previousSubdomain          String?   @unique
   previousSubdomainExpiresAt DateTime?
 
+  // Merchant CRM & Outreach Suite
+  leadStage                  TenantLeadStage @default(NEW)
+  leadAssignedToId           String?
+  leadLastContactedAt        DateTime?
+  leadNextFollowUpAt         DateTime?
+  leadNotesSummary           String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -163,6 +170,7 @@ model Tenant {
   tickets               SupportTicket[]
   settlements           CourierSettlementInvoice[]
   notes                 TenantNote[]
+  crmActivities         TenantCrmActivity[]
   platformMessages      PlatformMessage[]
   productBundles        ProductBundle[]
   orderBumps            OrderBump[]
@@ -1674,6 +1682,51 @@ model TenantNote {
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, createdAt])
+}
+
+enum TenantLeadStage {
+  NEW
+  CONTACTED
+  DEMO_IN_PROGRESS
+  HOT_LEAD
+  CONVERTED
+  LOST
+}
+
+enum TenantCrmActivityType {
+  WHATSAPP
+  PHONE_CALL
+  STAGE_CHANGE
+  NOTE
+  FOLLOW_UP_SCHEDULED
+}
+
+model TenantCrmActivity {
+  id          String                @id @default(cuid())
+  tenantId    String
+  actorId     String                // PlatformUser id
+  actorName   String?
+  type        TenantCrmActivityType
+  outcome     String?               // e.g. "ANSWERED", "BUSY", "CALL_BACK", "SENT_TEMPLATE", "STAGE_CHANGED"
+  templateKey String?               // e.g. "welcome_bn", "setup_help_bn"
+  notes       String?               @db.Text
+  createdAt   DateTime              @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
+  @@index([actorId, createdAt])
+}
+
+model PlatformCrmTemplate {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  title     String
+  body      String   @db.Text
+  language  String   @default("bn") // "bn" or "en"
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // ==========================================

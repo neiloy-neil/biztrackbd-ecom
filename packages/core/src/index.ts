@@ -134,7 +134,9 @@ export {
 export {
   getOverview, listTenants, getTenantDetail, addTenantNote, listTenantNotes, listPayments, approveSubscriptionPayment, rejectSubscriptionPayment, suspendTenant, reactivateTenant, extendTrial, changePlan, reviewQuarantine,
   listPlans, updatePlan, listPlatformAudit, runBillingLifecycle, assertPlatformCan, canPlatform, PLATFORM_PERMISSIONS,
+  recordTenantCrmActivity, updateTenantLeadStage, scheduleTenantFollowUp, listPlatformCrmTemplates, upsertPlatformCrmTemplate,
   type PlatformActor, type PlatformRole, type PlatformArea, type PlatformOverview, type TenantRow, type TenantCounts, type TenantDetail, type TenantNoteRow, type TenantFilter, type PaymentRow, type Approved, type PlanPatch, type LifecycleResult,
+  type TenantCrmActivityRow, type RecordCrmActivityInput,
 } from "./platform/admin";
 export {
   listAnnouncements, createAnnouncement, getActiveAnnouncementsForTenant, countAudienceReach,

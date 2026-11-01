@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ACCESS_LABELS, listTenants, type TenantFilter } from "@biztrackbd/core";
+import { ACCESS_LABELS, listTenants, listPlatformCrmTemplates, type TenantFilter } from "@biztrackbd/core";
+import { TenantOutreachActions } from "./outreach-actions";
 import { Pager } from "@/components/ui";
 import { dateOnly, taka } from "@/lib/format";
 import { one, pageOf, qs } from "@/lib/query";
@@ -36,7 +37,10 @@ export default async function Tenants({ searchParams }: { searchParams: Promise<
   const filter = (FILTERS.find((f) => f[0] === one(sp.filter))?.[0] ?? "all") as TenantFilter;
   const q = one(sp.q)?.trim() ?? "";
   const page = pageOf(one(sp.page));
-  const list = await listTenants(s.actor, { q: q || undefined, filter, page });
+  const [list, templates] = await Promise.all([
+    listTenants(s.actor, { q: q || undefined, filter, page }),
+    listPlatformCrmTemplates(),
+  ]);
   const base = { q, filter: filter === "all" ? undefined : filter };
 
   return (
@@ -109,11 +113,11 @@ export default async function Tenants({ searchParams }: { searchParams: Promise<
           </div>
         ) : (
           <div style={{ overflowX: "auto" }}>
-            <div style={{ minWidth: 960 }}>
+            <div style={{ minWidth: 1140 }}>
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "minmax(0, 2fr) 100px 120px 110px 90px 120px",
+                  gridTemplateColumns: "minmax(0, 2fr) 85px 125px 230px 90px 75px 105px",
                   padding: "12px 20px",
                   background: "#FAFAFC",
                   borderBottom: "1px solid #E7E7F0",
@@ -127,6 +131,7 @@ export default async function Tenants({ searchParams }: { searchParams: Promise<
                 <div>STORE</div>
                 <div>PLAN</div>
                 <div>STATUS</div>
+                <div>OUTREACH & CRM</div>
                 <div style={{ textAlign: "right" }}>MRR</div>
                 <div style={{ textAlign: "right" }}>ORDERS</div>
                 <div style={{ textAlign: "right" }}>JOINED</div>
@@ -158,7 +163,7 @@ export default async function Tenants({ searchParams }: { searchParams: Promise<
                     data-testid="tenant-row"
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "minmax(0, 2fr) 100px 120px 110px 90px 120px",
+                      gridTemplateColumns: "minmax(0, 2fr) 85px 125px 230px 90px 75px 105px",
                       padding: "0 20px",
                       height: 62,
                       alignItems: "center",
@@ -218,6 +223,20 @@ export default async function Tenants({ searchParams }: { searchParams: Promise<
                       >
                         {statusLabel}
                       </span>
+                    </div>
+
+                    <div>
+                      <TenantOutreachActions
+                        tenantId={t.id}
+                        tenantName={t.name}
+                        subdomain={t.subdomain}
+                        customDomain={t.customDomain}
+                        ownerName={t.ownerName}
+                        ownerPhone={t.ownerPhone}
+                        leadStage={t.leadStage}
+                        leadLastContactedAt={t.leadLastContactedAt}
+                        templates={templates}
+                      />
                     </div>
 
                     <div style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>

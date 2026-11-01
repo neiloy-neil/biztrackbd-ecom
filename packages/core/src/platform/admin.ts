@@ -1,5 +1,5 @@
 import { notifyOwner } from "../mail/send";
-import { Prisma, getPlatformPrisma, type PrismaClient } from "@biztrackbd/db";
+import { Prisma, getPlatformPrisma, type PrismaClient, type TenantLeadStage, type TenantCrmActivityType } from "@biztrackbd/db";
 import { addDays, dhakaDate } from "../admin/dashboard";
 import { ForbiddenError, NotFoundError, ValidationError } from "../errors";
 import { publishEvent } from "../events";
@@ -296,6 +296,11 @@ export interface TenantRow {
   status?: string;
   siteMode?: string;
   businessVertical?: string | null;
+  leadStage: TenantLeadStage;
+  leadLastContactedAt?: Date | null;
+  leadNextFollowUpAt?: Date | null;
+  leadNotesSummary?: string | null;
+  leadAssignedToId?: string | null;
 }
 
 export type TenantFilter = "all" | "trial" | "paying" | "overdue" | "locked" | "flagged" | "suspended" | "cancelled";
@@ -367,6 +372,11 @@ export async function listTenants(actor: PlatformActor, opts: { q?: string; filt
       status: t.status,
       siteMode: t.siteMode,
       businessVertical: t.businessVertical,
+      leadStage: t.leadStage,
+      leadLastContactedAt: t.leadLastContactedAt,
+      leadNextFollowUpAt: t.leadNextFollowUpAt,
+      leadNotesSummary: t.leadNotesSummary,
+      leadAssignedToId: t.leadAssignedToId,
     };
   });
 
@@ -385,6 +395,18 @@ export async function listTenants(actor: PlatformActor, opts: { q?: string; filt
 
   const pageSize = opts.pageSize ?? 25, page = Math.max(1, opts.page ?? 1);
   return { rows: rows.slice((page - 1) * pageSize, page * pageSize), total: rows.length, page, pageSize, counts };
+}
+
+export interface TenantCrmActivityRow {
+  id: string;
+  tenantId: string;
+  actorId: string;
+  actorName: string | null;
+  type: TenantCrmActivityType;
+  outcome: string | null;
+  templateKey: string | null;
+  notes: string | null;
+  createdAt: Date;
 }
 
 export interface TenantNoteRow {
@@ -438,6 +460,7 @@ export interface TenantDetail extends TenantRow {
   modules: { key: string; label: string; isEnabled: boolean }[];
   proofs: { id: string; plan: string; interval: string; amount: number; provider: string; trxId: string; status: string; createdAt: Date }[];
   notes: TenantNoteRow[];
+  crmActivities: TenantCrmActivityRow[];
   tickets: { id: string; subject: string; code: string; status: string; priority: string; createdAt: Date }[];
   audit: { id: string; action: string; actorId: string; createdAt: Date; details: unknown }[];
 }
@@ -458,7 +481,7 @@ export async function getTenantDetail(actor: PlatformActor, tenantId: string, de
   if (!t) throw new NotFoundError("Store");
   const since = new Date(now.getTime() - 30 * 86_400_000);
   const month = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-  const [staff, gmv, ordersTotal, orders30Days, customers, smsUsage, usageRow, domains, modules, proofs, notes, tickets, audit, plan, leadsCount, leads30Days, bookingsConfirmed, recentLeads] = await Promise.all([
+  const [staff, gmv, ordersTotal, orders30Days, customers, smsUsage, usageRow, domains, modules, proofs, notes, tickets, audit, plan, leadsCount, leads30Days, bookingsConfirmed, recentLeads, crmActivities] = await Promise.all([
     db.tenantUser.count({ where: { tenantId, isActive: true } }),
     db.order.aggregate({ where: { tenantId, status: "DELIVERED", deliveredAt: { gte: since } }, _sum: { totalAmount: true } }),
     db.order.count({ where: { tenantId } }),
@@ -490,6 +513,7 @@ export async function getTenantDetail(actor: PlatformActor, tenantId: string, de
         createdAt: true,
       },
     }).catch(() => []),
+    db.tenantCrmActivity.findMany({ where: { tenantId }, orderBy: { createdAt: "desc" }, take: 50 }),
   ]);
 
   const limits = (plan?.limits ?? {}) as Record<string, number | null>;
@@ -534,6 +558,22 @@ export async function getTenantDetail(actor: PlatformActor, tenantId: string, de
     modules: modules.map((m) => ({ key: m.moduleKey, label: MODULE_LABELS[m.moduleKey] ?? m.moduleKey, isEnabled: m.isEnabled })),
     proofs: proofs.map((p) => ({ id: p.id, plan: p.planTier, interval: p.billingPeriod, amount: Number(p.amount), provider: p.mfsProvider, trxId: p.trxId, status: p.status, createdAt: p.createdAt })),
     notes: notes.map((n) => ({ id: n.id, tenantId: n.tenantId, authorId: n.authorId, authorName: n.authorName, body: n.body, createdAt: n.createdAt })),
+    crmActivities: crmActivities.map((c) => ({
+      id: c.id,
+      tenantId: c.tenantId,
+      actorId: c.actorId,
+      actorName: c.actorName,
+      type: c.type,
+      outcome: c.outcome,
+      templateKey: c.templateKey,
+      notes: c.notes,
+      createdAt: c.createdAt,
+    })),
+    leadStage: t.leadStage,
+    leadLastContactedAt: t.leadLastContactedAt,
+    leadNextFollowUpAt: t.leadNextFollowUpAt,
+    leadNotesSummary: t.leadNotesSummary,
+    leadAssignedToId: t.leadAssignedToId,
     tickets: tickets.map((tk) => ({ id: tk.id, subject: tk.subject, code: tk.code, status: tk.status, priority: tk.priority, createdAt: tk.createdAt })),
     audit: audit.map((a) => ({ id: a.id, action: a.action, actorId: a.actorId, createdAt: a.createdAt, details: a.details })),
   };
@@ -564,6 +604,178 @@ export async function listTenantNotes(actor: PlatformActor, tenantId: string, de
     orderBy: { createdAt: "desc" },
   });
   return rows.map((n) => ({ id: n.id, tenantId: n.tenantId, authorId: n.authorId, authorName: n.authorName, body: n.body, createdAt: n.createdAt }));
+}
+
+// ---- Merchant CRM & Outreach ----------------------------------------------------------------------------------------
+
+export interface RecordCrmActivityInput {
+  type: TenantCrmActivityType;
+  outcome?: string;
+  templateKey?: string;
+  notes?: string;
+  autoAdvanceStage?: boolean;
+}
+
+export async function recordTenantCrmActivity(
+  actor: PlatformActor,
+  tenantId: string,
+  input: RecordCrmActivityInput,
+  deps?: Deps
+): Promise<TenantCrmActivityRow> {
+  assertPlatformCan(actor, "tenants", "view");
+  const db = dbOf(deps);
+  const now = nowOf(deps);
+
+  const tenant = await db.tenant.findUnique({
+    where: { id: tenantId },
+    select: { id: true, leadStage: true, ownerName: true, ownerPhone: true },
+  });
+  if (!tenant) throw new NotFoundError("Store");
+
+  let newStage = tenant.leadStage;
+  if (input.autoAdvanceStage && tenant.leadStage === "NEW") {
+    newStage = "CONTACTED";
+  }
+
+  const [activity] = await db.$transaction([
+    db.tenantCrmActivity.create({
+      data: {
+        tenantId,
+        actorId: actor.id,
+        actorName: actor.email,
+        type: input.type,
+        outcome: input.outcome ?? null,
+        templateKey: input.templateKey ?? null,
+        notes: input.notes ?? null,
+        createdAt: now,
+      },
+    }),
+    db.tenant.update({
+      where: { id: tenantId },
+      data: {
+        leadLastContactedAt: now,
+        ...(newStage !== tenant.leadStage ? { leadStage: newStage } : {}),
+        ...(input.notes ? { leadNotesSummary: input.notes.slice(0, 200) } : {}),
+      },
+    }),
+  ]);
+
+  return {
+    id: activity.id,
+    tenantId: activity.tenantId,
+    actorId: activity.actorId,
+    actorName: activity.actorName,
+    type: activity.type,
+    outcome: activity.outcome,
+    templateKey: activity.templateKey,
+    notes: activity.notes,
+    createdAt: activity.createdAt,
+  };
+}
+
+export async function updateTenantLeadStage(
+  actor: PlatformActor,
+  tenantId: string,
+  stage: TenantLeadStage,
+  notes?: string,
+  deps?: Deps
+): Promise<void> {
+  assertPlatformCan(actor, "tenants", "view");
+  const db = dbOf(deps);
+  const now = nowOf(deps);
+
+  const prev = await db.tenant.findUnique({
+    where: { id: tenantId },
+    select: { id: true, leadStage: true },
+  });
+  if (!prev) throw new NotFoundError("Store");
+  if (prev.leadStage === stage) return;
+
+  await db.$transaction([
+    db.tenant.update({
+      where: { id: tenantId },
+      data: {
+        leadStage: stage,
+        leadLastContactedAt: now,
+        ...(notes ? { leadNotesSummary: notes.slice(0, 200) } : {}),
+      },
+    }),
+    db.tenantCrmActivity.create({
+      data: {
+        tenantId,
+        actorId: actor.id,
+        actorName: actor.email,
+        type: "STAGE_CHANGE",
+        outcome: `${prev.leadStage} -> ${stage}`,
+        notes: notes ?? `Stage changed to ${stage}`,
+        createdAt: now,
+      },
+    }),
+  ]);
+}
+
+export async function scheduleTenantFollowUp(
+  actor: PlatformActor,
+  tenantId: string,
+  followUpAt: Date | null,
+  notes?: string,
+  deps?: Deps
+): Promise<void> {
+  assertPlatformCan(actor, "tenants", "view");
+  const db = dbOf(deps);
+  const now = nowOf(deps);
+
+  await db.$transaction([
+    db.tenant.update({
+      where: { id: tenantId },
+      data: {
+        leadNextFollowUpAt: followUpAt,
+      },
+    }),
+    db.tenantCrmActivity.create({
+      data: {
+        tenantId,
+        actorId: actor.id,
+        actorName: actor.email,
+        type: "FOLLOW_UP_SCHEDULED",
+        outcome: followUpAt ? followUpAt.toISOString() : "CLEARED",
+        notes: notes ?? (followUpAt ? `Follow-up scheduled for ${followUpAt.toLocaleString("en-GB")}` : "Follow-up cleared"),
+        createdAt: now,
+      },
+    }),
+  ]);
+}
+
+export async function listPlatformCrmTemplates(deps?: Deps) {
+  const db = dbOf(deps);
+  return db.platformCrmTemplate.findMany({
+    orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+  });
+}
+
+export async function upsertPlatformCrmTemplate(
+  actor: PlatformActor,
+  input: { key: string; title: string; body: string; language?: string },
+  deps?: Deps
+) {
+  assertPlatformCan(actor, "settings", "edit");
+  const db = dbOf(deps);
+  const key = input.key.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "_");
+
+  return db.platformCrmTemplate.upsert({
+    where: { key },
+    create: {
+      key,
+      title: input.title.trim(),
+      body: input.body.trim(),
+      language: input.language ?? "bn",
+    },
+    update: {
+      title: input.title.trim(),
+      body: input.body.trim(),
+      language: input.language ?? "bn",
+    },
+  });
 }
 
 // ---- Payments ------------------------------------------------------------------------------------------------------

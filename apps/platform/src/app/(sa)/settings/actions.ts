@@ -26,6 +26,8 @@ import {
   testPlatformGoogleConnection,
   getPlatformSeoConfig,
   savePlatformSeoConfig,
+  listPlatformCrmTemplates,
+  upsertPlatformCrmTemplate,
   DomainError,
   ForbiddenError,
 } from "@biztrackbd/core";
@@ -291,3 +293,34 @@ export async function savePlatformContactConfigAction(input: {
     return { ok: false as const, error: err instanceof Error ? err.message : "Failed to save contact details." };
   }
 }
+
+export async function listCrmTemplatesAction() {
+  try {
+    await requireAction("settings", "view");
+    const templates = await listPlatformCrmTemplates();
+    return { ok: true as const, templates };
+  } catch (err) {
+    console.error("listCrmTemplatesAction error", err);
+    return { ok: false as const, error: err instanceof Error ? err.message : "Failed to load CRM templates." };
+  }
+}
+
+export async function saveCrmTemplateAction(input: {
+  key: string;
+  title: string;
+  body: string;
+  language?: string;
+}) {
+  try {
+    const s = await requireAction("settings", "edit");
+    const tmpl = await upsertPlatformCrmTemplate(s.actor, input);
+    revalidatePath("/settings");
+    revalidatePath("/tenants");
+    return { ok: true as const, template: tmpl };
+  } catch (err) {
+    if (err instanceof ForbiddenError) return { ok: false as const, error: "Access denied: Platform Owner or Support Lead role required." };
+    if (err instanceof DomainError) return { ok: false as const, error: err.message };
+    console.error("saveCrmTemplateAction error", err);
+    return { ok: false as const, error: err instanceof Error ? err.message : "Failed to save CRM template." };
+  }
+  }
