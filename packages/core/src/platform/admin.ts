@@ -314,7 +314,24 @@ export interface TenantCounts {
   cancelled: number;
 }
 
-export async function listTenants(actor: PlatformActor, opts: { q?: string; filter?: TenantFilter; page?: number; pageSize?: number } = {}, deps?: Deps): Promise<{ rows: TenantRow[]; total: number; page: number; pageSize: number; counts: TenantCounts }> {
+export async function listTenants(
+  actor: PlatformActor,
+  opts: {
+    q?: string;
+    filter?: TenantFilter;
+    leadStage?: TenantLeadStage | "all";
+    page?: number;
+    pageSize?: number;
+  } = {},
+  deps?: Deps
+): Promise<{
+  rows: TenantRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+  counts: TenantCounts;
+  leadStageCounts: Record<TenantLeadStage, number>;
+}> {
   assertPlatformCan(actor, "tenants", "view");
   const db = dbOf(deps), now = nowOf(deps);
   const q = opts.q?.trim();
@@ -339,7 +356,23 @@ export async function listTenants(actor: PlatformActor, opts: { q?: string; filt
     },
   });
 
-  const counts: TenantCounts = { all: 0, paying: 0, trial: 0, overdue: 0, suspended: 0, cancelled: 0 };
+  const counts: TenantCounts = {
+    all: 0,
+    paying: 0,
+    trial: 0,
+    overdue: 0,
+    suspended: 0,
+    cancelled: 0,
+  };
+
+  const leadStageCounts: Record<TenantLeadStage, number> = {
+    NEW: 0,
+    CONTACTED: 0,
+    DEMO_IN_PROGRESS: 0,
+    HOT_LEAD: 0,
+    CONVERTED: 0,
+    LOST: 0,
+  };
 
   const allRows = all.map((t): TenantRow => {
     const access = accessOf(t, t.subscription, now);
@@ -353,6 +386,11 @@ export async function listTenants(actor: PlatformActor, opts: { q?: string; filt
     else if (access.state === "ACTIVE") counts.paying++;
     else if (access.state === "TRIAL") counts.trial++;
     else if (access.state === "GRACE") counts.overdue++;
+
+    const stageKey = (t.leadStage || "NEW") as TenantLeadStage;
+    if (stageKey in leadStageCounts) {
+      leadStageCounts[stageKey]++;
+    }
 
     return {
       id: t.id,
@@ -381,7 +419,9 @@ export async function listTenants(actor: PlatformActor, opts: { q?: string; filt
   });
 
   const filter = opts.filter ?? "all";
+  const leadStageFilter = opts.leadStage && opts.leadStage !== "all" ? opts.leadStage : null;
   const rows = allRows.filter((r) => {
+    if (leadStageFilter && (r.leadStage || "NEW") !== leadStageFilter) return false;
     if (filter === "all") return true;
     if (filter === "trial") return r.access.state === "TRIAL" && !r.access.suspendedByPlatform && r.status !== "CANCELLED";
     if (filter === "paying") return r.access.state === "ACTIVE" && !r.access.suspendedByPlatform && r.status !== "CANCELLED";
@@ -394,8 +434,9 @@ export async function listTenants(actor: PlatformActor, opts: { q?: string; filt
   });
 
   const pageSize = opts.pageSize ?? 25, page = Math.max(1, opts.page ?? 1);
-  return { rows: rows.slice((page - 1) * pageSize, page * pageSize), total: rows.length, page, pageSize, counts };
+  return { rows: rows.slice((page - 1) * pageSize, page * pageSize), total: rows.length, page, pageSize, counts, leadStageCounts };
 }
+
 
 export interface TenantCrmActivityRow {
   id: string;
