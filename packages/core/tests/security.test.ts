@@ -85,10 +85,13 @@ describe("who can call each admin and platform action", () => {
       "apps/platform/src/app/api/webhooks/uddoktapay/route.ts",
       // Where the payer lands after UddoktaPay. It only asks the gateway whether the payment went through and redirects; it writes nothing.
       "apps/admin/src/app/api/billing/uddoktapay/callback/route.ts",
+      // Client-side analytics and crash error tracking
+      "apps/platform/src/app/api/track/error/route.ts",
+      "apps/platform/src/app/api/track/native/route.ts",
     ]);
     for (const f of routes.filter((r) => !PUBLIC_ROUTES.has(rel(r)))) {
       const text = readFileSync(f, "utf8");
-      const guarded = /getSession(OrNull)?\(|requireAccess\(|requireAction\(|authorised\(|CRON_SECRET|verify|signature|token/i.test(text);
+      const guarded = /getSession(OrNull)?\(|getMobileSession\(|getPlatformMobileSession\(|requireAccess\(|requireAction\(|authorised\(|CRON_SECRET|verify|signature|token/i.test(text);
       if (!guarded) open.push(rel(f));
     }
     expect(open).toEqual([]);

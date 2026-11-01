@@ -47,7 +47,7 @@ export async function POST(req: Request) {
       stores,
     });
   } catch (err: any) {
-    console.error("[Mobile Token Refresh Error]", err);
+    console.error("[Mobile Auth Refresh Error]", err);
     if (err instanceof AuthFailure) {
       return NextResponse.json({ error: err.message }, { status: 401 });
     }

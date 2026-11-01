@@ -8,7 +8,11 @@ import {
   listTenantNotes,
   changePlan,
   currentSmsSender,
+  recordTenantCrmActivity,
+  updateTenantLeadStage,
+  scheduleTenantFollowUp,
 } from "@biztrackbd/core";
+import type { TenantLeadStage, TenantCrmActivityType } from "@biztrackbd/db";
 import { getPlatformMobileSession } from "@/lib/mobile-auth";
 
 export const dynamic = "force-dynamic";
@@ -30,6 +34,10 @@ export async function GET(
     return NextResponse.json({
       tenant,
       notes,
+      crmActivities: tenant?.crmActivities ?? [],
+      leadStage: tenant?.leadStage ?? "NEW",
+      leadLastContactedAt: tenant?.leadLastContactedAt ?? null,
+      leadNextFollowUpAt: tenant?.leadNextFollowUpAt ?? null,
     });
   } catch (err: any) {
     console.error("Platform mobile tenant detail error:", err);
@@ -53,6 +61,56 @@ export async function POST(
     const { id } = await params;
     const body = await req.json().catch(() => ({}));
     const action = String(body.action ?? "").toLowerCase();
+
+    if (action === "record_crm_activity") {
+      const type = (body.type ?? "WHATSAPP") as TenantCrmActivityType;
+      const outcome = body.outcome ? String(body.outcome) : undefined;
+      const templateKey = body.templateKey ? String(body.templateKey) : undefined;
+      const notes = body.notes ? String(body.notes) : undefined;
+      const autoAdvanceStage = body.autoAdvanceStage !== false;
+
+      const activity = await recordTenantCrmActivity(session.actor, id, {
+        type,
+        outcome,
+        templateKey,
+        notes,
+        autoAdvanceStage,
+      });
+
+      const updated = await getTenantDetail(session.actor, id);
+      return NextResponse.json({ ok: true, activity, tenant: updated });
+    }
+
+    if (action === "update_lead_stage") {
+      const stage = String(body.stage ?? "").toUpperCase() as TenantLeadStage;
+      const validStages: TenantLeadStage[] = [
+        "NEW",
+        "CONTACTED",
+        "DEMO_IN_PROGRESS",
+        "HOT_LEAD",
+        "CONVERTED",
+        "LOST",
+      ];
+      if (!validStages.includes(stage)) {
+        return NextResponse.json(
+          { error: `Invalid lead stage '${stage}'. Valid stages are: ${validStages.join(", ")}` },
+          { status: 400 }
+        );
+      }
+      const notes = body.notes ? String(body.notes) : undefined;
+      await updateTenantLeadStage(session.actor, id, stage, notes);
+      const updated = await getTenantDetail(session.actor, id);
+      return NextResponse.json({ ok: true, stage, tenant: updated });
+    }
+
+    if (action === "schedule_follow_up") {
+      const followUpRaw = body.followUpAt;
+      const followUpAt = followUpRaw ? new Date(followUpRaw) : null;
+      const notes = body.notes ? String(body.notes) : undefined;
+      await scheduleTenantFollowUp(session.actor, id, followUpAt, notes);
+      const updated = await getTenantDetail(session.actor, id);
+      return NextResponse.json({ ok: true, followUpAt, tenant: updated });
+    }
 
     if (action === "change_plan") {
       const tier = String(body.planTier ?? "").toUpperCase() as "STARTER" | "PRO" | "BUSINESS";
