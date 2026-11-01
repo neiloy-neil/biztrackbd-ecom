@@ -4,6 +4,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
   AuthFailure, enrollTotp, getUserFromToken, recordStaffLogin, removeFactor, sendSignInCode, setOwnPassword, signInWithPassword, signOutToken, staffEmailKnown, staffMemberships, verifyEmailCode, verifyTotp,
+  findStaffResetTarget, sendStaffResetOtp, createPasswordResetTicket, verifyPasswordResetTicket, type StaffResetTarget,
   type TokenSet,
 } from "@biztrackbd/core";
 import { AT, TENANT, clearSessionCookies, cookieOptions, safeNext, setSessionCookies } from "@/lib/auth";
@@ -142,6 +143,138 @@ export async function completeSetupAction(_prev: LoginState, form: FormData): Pr
     return { error: fail(e), step: "code", email };
   }
   return finish(t, next);
+}
+
+export type ResetLookupResult =
+  | { success: false; error: string }
+  | { success: true; needsChannelChoice: true; target: StaffResetTarget }
+  | { success: true; needsChannelChoice: false; channel: "email" | "sms"; maskedDestination: string; email: string; phone: string | null };
+
+export async function lookupResetTargetAction(identifier: string): Promise<ResetLookupResult> {
+  const clean = identifier.trim();
+  if (!clean) return { success: false, error: "Please enter your email or mobile phone number." };
+  const ip = await clientIp();
+  if (tooMany(`reset_lookup:${ip}`, 15, 600_000)) {
+    return { success: false, error: "Too many attempts. Please wait a few minutes and try again." };
+  }
+
+  let target: StaffResetTarget | null = null;
+  try {
+    target = await findStaffResetTarget(clean);
+  } catch (e) {
+    console.error("lookupResetTargetAction failed", e);
+    return { success: false, error: BUSY };
+  }
+
+  if (!target || target.availableChannels.length === 0) {
+    return { success: false, error: "No active merchant account found with that email or phone number." };
+  }
+
+  if (target.availableChannels.length > 1) {
+    return {
+      success: true,
+      needsChannelChoice: true,
+      target,
+    };
+  }
+
+  // Single channel available: dispatch immediately
+  const singleChannel = target.availableChannels[0]!;
+  try {
+    const res = await sendStaffResetOtp({ email: target.email, phone: target.phone }, singleChannel);
+    return {
+      success: true,
+      needsChannelChoice: false,
+      channel: singleChannel,
+      maskedDestination: res.maskedDestination,
+      email: target.email,
+      phone: target.phone,
+    };
+  } catch (e) {
+    return { success: false, error: fail(e) };
+  }
+}
+
+export async function dispatchResetOtpAction(
+  email: string,
+  channel: "email" | "sms",
+  phone?: string | null
+): Promise<{ success: boolean; channel?: "email" | "sms"; maskedDestination?: string; error?: string }> {
+  const cleanEmail = email.trim().toLowerCase();
+  const ip = await clientIp();
+  if (tooMany(`code:${ip}`, 10, 3_600_000) || tooMany(`codeem:${cleanEmail}`, 5, 3_600_000)) {
+    return { success: false, error: "Too many codes requested. Please wait a few minutes and try again." };
+  }
+
+  try {
+    const res = await sendStaffResetOtp({ email: cleanEmail, phone }, channel);
+    return {
+      success: true,
+      channel: res.channel,
+      maskedDestination: res.maskedDestination,
+    };
+  } catch (e) {
+    return { success: false, error: fail(e) };
+  }
+}
+
+export async function verifyResetOtpAction(
+  email: string,
+  code: string
+): Promise<{ success: boolean; resetTicket?: string; email?: string; error?: string }> {
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanCode = code.replace(/\s+/g, "");
+  if (!cleanCode || !/^\d{6,8}$/.test(cleanCode)) {
+    return { success: false, error: "Please enter a valid 6-digit verification code." };
+  }
+
+  const ip = await clientIp();
+  if (blocked(`verify_otp:${ip}`, 20) || blocked(`verify_otp:${cleanEmail}`, 8)) {
+    return { success: false, error: "Too many attempts. Please wait a few minutes and try again." };
+  }
+
+  try {
+    const tokens = await verifyEmailCode(cleanEmail, cleanCode);
+    const resetTicket = createPasswordResetTicket(tokens, cleanEmail);
+    return {
+      success: true,
+      resetTicket,
+      email: cleanEmail,
+    };
+  } catch (e) {
+    failed(`verify_otp:${cleanEmail}`);
+    return { success: false, error: fail(e) };
+  }
+}
+
+export async function completePasswordResetAction(
+  resetTicket: string,
+  password: string,
+  again: string,
+  next: string
+): Promise<{ success: boolean; error?: string }> {
+  const p = password.trim();
+  const a = again.trim();
+  if (!p || p.length < 10) {
+    return { success: false, error: "Password must be at least 10 characters long." };
+  }
+  if (p !== a) {
+    return { success: false, error: "The passwords do not match. Please verify and try again." };
+  }
+
+  const tokens = verifyPasswordResetTicket(resetTicket);
+  if (!tokens) {
+    return { success: false, error: "Your reset session has expired or is invalid. Please request a new verification code." };
+  }
+
+  try {
+    await setOwnPassword(tokens.accessToken, p);
+  } catch (e) {
+    return { success: false, error: fail(e) };
+  }
+
+  // Seamless sign in
+  return finish(tokens, safeNext(next));
 }
 
 export async function logoutAction(): Promise<void> {

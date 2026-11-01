@@ -235,6 +235,7 @@ export { saveContent, deleteContent, listContent, getContent, bodyToHtml, slugOf
 // Phase 10: real sign-in (Supabase Auth)
 export * from "./auth/supabase";
 export * from "./auth/membership";
+export * from "./auth/reset";
 export {
   MODULES, isModuleOn, isModuleActive, getModuleStatus, getTenantActiveModules, listModules, setModule, listAppStoreCatalog,
   APP_CATALOG, getAppCatalogItem, CATEGORY_LABELS,
