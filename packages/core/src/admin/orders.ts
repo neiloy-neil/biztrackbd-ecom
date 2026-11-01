@@ -12,6 +12,8 @@ import { COURIER_STATUS_LABELS, type CourierStatus } from "../couriers/types";
 import { lookupInTx, fetchSteadfastFraudStats, type PhoneLookup } from "../fraud/service";
 import { fetchUnifiedCourierFraud, toCourierFraudStats } from "../fraud/courier-api";
 import { FLAG_LABELS } from "../fraud/assess";
+import { createOrderDownloadToken } from "../orders/download";
+import { currentSmsSender } from "../customers/auth";
 
 const actorName = (a: StaffActor) => a.name ?? a.email;
 
@@ -161,7 +163,14 @@ export interface OrderDetail {
     /** Cross-store counts for this number plus this store's own history. */
     lookup: PhoneLookup;
   };
-  items: { id: string; productId: string; slug: string | null; title: string; variantTitle: string | null; sku: string | null; unitPrice: number; quantity: number; total: number; imageUrl: string | null }[];
+  isDigital?: boolean;
+  items: {
+    id: string; productId: string; slug: string | null; title: string; variantTitle: string | null; sku: string | null; unitPrice: number; quantity: number; total: number; imageUrl: string | null;
+    isDigital?: boolean;
+    digitalCustomValues?: any;
+    digitalDeliveryUrl?: string | null;
+    digitalDeliveredAt?: Date | null;
+  }[];
   events: { id: string; type: string; message: string; actorName: string | null; createdAt: Date }[];
   cancellation?: { reason: string | null; createdAt: Date; actorId: string | null; actorType: string | null } | null;
   customer: { id: string | null; totalOrders: number; totalSpent: number; delivered: number; returned: number; cancelled: number; deliverySuccessPercent: number | null; isBlocked: boolean; since: Date | null } | null;
@@ -228,9 +237,14 @@ export async function getOrderDetail(tenantId: string, actor: StaffActor, orderI
         flags: o.fraudFlags.filter((f) => f !== "FIRST_TIME_BUYER").map((code) => ({ code, label: FLAG_LABELS[code] ?? code })), firstTime: o.fraudFlags.includes("FIRST_TIME_BUYER"),
         refusedAtDoor: o.refusedAtDoor, lookup,
       },
+      isDigital: o.isDigital,
       items: items.map((i) => ({
         id: i.id, productId: i.productId, slug: i.product.slug, title: i.productTitle, variantTitle: i.variantTitle, sku: i.sku, unitPrice: Number(i.unitPrice),
         quantity: i.quantity, total: Number(i.totalPrice), imageUrl: i.variant?.imageUrl ?? i.product.images[0]?.url ?? null,
+        isDigital: i.isDigital,
+        digitalCustomValues: i.digitalCustomValues,
+        digitalDeliveryUrl: i.digitalDeliveryUrl,
+        digitalDeliveredAt: i.digitalDeliveredAt,
       })),
       events: events.map((e) => ({ id: e.id, type: e.type, message: e.message, actorName: e.actorName, createdAt: e.createdAt })),
       cancellation: o.status === "CANCELLED"
@@ -532,5 +546,77 @@ export async function recordAdvancePayment(
     });
 
     return { advancePaid: newAdvance, balanceDue: newBalance };
+  });
+}
+
+/**
+ * Merchant admin fulfills an on-demand digital asset (e.g. prepared Khatian / Mouza map PDF)
+ * and dispatches download token to the customer via SMS/Email.
+ */
+export async function deliverDigitalAsset(
+  tenantId: string,
+  actor: StaffActor,
+  orderId: string,
+  itemId: string,
+  input: { fileUrl: string; fileName?: string; notifyCustomer?: boolean }
+): Promise<{ success: boolean; downloadUrl: string }> {
+  assertCan(actor, "orders", "edit");
+  const cleanUrl = input.fileUrl.trim();
+  if (!cleanUrl) throw new ValidationError("Please provide a valid download URL or file link.");
+
+  return withTenant(tenantId, async (tx) => {
+    const order = await tx.order.findFirst({ where: { id: orderId } });
+    if (!order) throw new NotFoundError("Order");
+
+    const item = await tx.orderItem.findFirst({ where: { id: itemId, orderId } });
+    if (!item) throw new NotFoundError("OrderItem");
+
+    await tx.orderItem.update({
+      where: { id: itemId },
+      data: {
+        digitalDeliveryUrl: cleanUrl,
+        digitalDeliveredAt: new Date(),
+      },
+    });
+
+    const undeliveredCount = await tx.orderItem.count({
+      where: { orderId, digitalDeliveredAt: null },
+    });
+
+    if (undeliveredCount === 0 && order.status !== "DELIVERED" && order.status !== "CANCELLED") {
+      await tx.order.update({
+        where: { id: orderId },
+        data: { status: "DELIVERED", deliveredAt: new Date() },
+      });
+    }
+
+    const token = createOrderDownloadToken(tenantId, orderId, itemId);
+    const downloadUrl = `/d/${token}`;
+
+    await recordOrderEvent(tx, tenantId, orderId, {
+      type: "STATUS",
+      message: `Digital document delivered: ${input.fileName || item.productTitle}`,
+      actor: { id: actor.userId, name: actor.name || actor.email },
+      data: { itemId, fileUrl: cleanUrl },
+    });
+
+    await audit(tx, tenantId, actor, "order.digital_delivered", {
+      orderNumber: order.orderNumber,
+      itemId,
+      fileUrl: cleanUrl,
+    });
+
+    if (input.notifyCustomer && order.customerPhone) {
+      try {
+        const store = await tx.tenant.findUnique({ where: { id: tenantId }, select: { name: true, subdomain: true } });
+        const storeName = store?.name || "BizTrack Store";
+        const smsMsg = `আপনার অর্ডার #${order.orderNumber} এর ডিজিটাল ফাইল প্রস্তুত হয়েছে। ডাউনলোড করুন: https://${store?.subdomain || "amarbumi"}.biztrack.bd/d/${token} - ${storeName}`;
+        await currentSmsSender().send("platform", order.customerPhone, smsMsg);
+      } catch (err) {
+        console.warn("[deliverDigitalAsset] SMS notify failed:", err);
+      }
+    }
+
+    return { success: true, downloadUrl };
   });
 }

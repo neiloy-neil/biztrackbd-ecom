@@ -113,6 +113,12 @@ export const SaveProductInput = z.object({
   seoTitle: z.string().trim().max(70).optional().nullable(),
   seoDescription: z.string().trim().max(160).optional().nullable(),
   isFeatured: z.boolean().default(false),
+  isDigital: z.boolean().default(false),
+  digitalDelivery: z.enum(["NONE", "INSTANT_FILE", "ON_DEMAND", "EXTERNAL_URL"]).default("NONE"),
+  digitalFileUrl: z.string().max(1000).optional().nullable(),
+  digitalFileName: z.string().trim().max(255).optional().nullable(),
+  digitalFileSize: z.number().int().min(0).max(500_000_000).optional().nullable(),
+  digitalCustomFields: z.any().optional().nullable(),
   images: z.array(z.object({ url: z.string().max(500), alt: z.string().trim().max(150).optional().nullable() })).max(10).default([]),
   variants: z
     .array(z.object({
@@ -185,6 +191,12 @@ export async function saveProduct(tenantId: string, actor: StaffActor, raw: unkn
       title: p.title, titleBn: p.titleBn || null, slug, descriptionHtml: sanitizeProductHtml(p.descriptionHtml), shortExcerpt: p.shortExcerpt || null,
       basePrice: p.basePrice, compareAtPrice: p.compareAtPrice ?? null, costPrice: p.costPrice ?? null, status: p.status, categoryId,
       tags: [...new Set(p.tags.map((t) => t.toLowerCase()))], seoTitle: p.seoTitle || null, seoDescription: p.seoDescription || null, isFeatured: p.isFeatured,
+      isDigital: p.isDigital ?? false,
+      digitalDelivery: p.digitalDelivery ?? "NONE",
+      digitalFileUrl: p.digitalFileUrl ?? null,
+      digitalFileName: p.digitalFileName ?? null,
+      digitalFileSize: p.digitalFileSize ?? null,
+      digitalCustomFields: p.digitalCustomFields ? (p.digitalCustomFields as Prisma.InputJsonValue) : Prisma.JsonNull,
     };
 
     if (!existing) {
@@ -267,6 +279,12 @@ export async function getProductForEdit(tenantId: string, actor: StaffActor, pro
       id: p.id, title: p.title, titleBn: p.titleBn, slug: p.slug, descriptionHtml: p.descriptionHtml, shortExcerpt: p.shortExcerpt, status: p.status as "DRAFT" | "ACTIVE" | "ARCHIVED",
       basePrice: Number(p.basePrice), compareAtPrice: p.compareAtPrice != null ? Number(p.compareAtPrice) : null, costPrice: p.costPrice != null ? Number(p.costPrice) : null,
       categoryId: p.categoryId, tags: p.tags, seoTitle: p.seoTitle, seoDescription: p.seoDescription, isFeatured: p.isFeatured,
+      isDigital: p.isDigital,
+      digitalDelivery: p.digitalDelivery,
+      digitalFileUrl: p.digitalFileUrl,
+      digitalFileName: p.digitalFileName,
+      digitalFileSize: p.digitalFileSize,
+      digitalCustomFields: p.digitalCustomFields,
       images: p.images.map((i) => ({ url: i.url, alt: i.altText })),
       variants: p.variants.map((v) => ({
         id: v.id, title: v.title, sku: v.sku, price: Number(v.price), compareAtPrice: v.compareAtPrice != null ? Number(v.compareAtPrice) : null,

@@ -27,7 +27,8 @@ import { getStore } from "@/lib/tenant";
 
 export interface PlaceOrderPayload {
   idempotencyKey: string;
-  items: { variantId: string; quantity: number; bundleId?: string; isBump?: boolean }[];
+  items: { variantId: string; quantity: number; bundleId?: string; isBump?: boolean; customValues?: Record<string, string> }[];
+  isDigital?: boolean;
   customer: { name: string; phone: string; email?: string };
   shipping: { division: string; district: string; upazila: string; address: string; note?: string };
   paymentMethod: "COD" | "MANUAL_BKASH" | "MANUAL_NAGAD" | "GATEWAY_UDDOKTAPAY" | "GATEWAY_SSLCOMMERZ" | "GATEWAY_BKASH" | "BANK_TRANSFER";
@@ -53,8 +54,9 @@ export type PlaceOrderResult =
 export async function placeOrderAction(p: PlaceOrderPayload): Promise<PlaceOrderResult> {
   const store = await getStore();
   try {
+    const isDigitalOrder = Boolean(p.isDigital) || p.shipping.division === "Digital" || p.shipping.district === "Digital";
     // Fail early with a field error rather than letting a made-up district reach the order.
-    if (!isValidAddress(p.shipping.division, p.shipping.district, p.shipping.upazila)) {
+    if (!isDigitalOrder && !isValidAddress(p.shipping.division, p.shipping.district, p.shipping.upazila)) {
       return { ok: false, error: "Choose your division, district and upazila from the lists.", field: "district" };
     }
     normalizeBdPhone(p.customer.phone);
@@ -86,8 +88,11 @@ export async function placeOrderAction(p: PlaceOrderPayload): Promise<PlaceOrder
     const placed = await createOrder(store.id, {
       idempotencyKey: p.idempotencyKey,
       customer: { name: p.customer.name, phone: p.customer.phone, email: p.customer.email?.trim() || undefined },
-      shipping: { address: p.shipping.address, city: p.shipping.upazila, district: p.shipping.district, division: p.shipping.division },
+      shipping: isDigitalOrder
+        ? { address: "Digital Delivery", city: "Digital", district: "Digital", division: "Digital" }
+        : { address: p.shipping.address, city: p.shipping.upazila, district: p.shipping.district, division: p.shipping.division },
       items: p.items,
+      isDigital: isDigitalOrder,
       bundleId: p.bundleId,
       bumpIds: p.bumpIds,
       paymentMethod: p.paymentMethod,

@@ -8,7 +8,7 @@ import { dateTime, prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { CHANNEL, OrderPill, PaymentPill, methodName } from "@/lib/status";
-import { blockAction, bookAction, callNoteAction, messageAction, tagsAction, holdAction, noteAction, recordAdvancePaymentAction, refreshCourierAction, refreshFraudAction, releaseHoldAction, returnedAction, shipAction, statusAction, verifyAction } from "./actions";
+import { blockAction, bookAction, callNoteAction, deliverDigitalAssetAction, messageAction, tagsAction, holdAction, noteAction, recordAdvancePaymentAction, refreshCourierAction, refreshFraudAction, releaseHoldAction, returnedAction, shipAction, statusAction, verifyAction } from "./actions";
 import { AddressEditor, CopyButton, RejectForm } from "./forms";
 
 export const dynamic = "force-dynamic";
@@ -93,6 +93,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
           <div className="row gap-md flex-wrap">
             <span data-testid="order-title">{o.orderNumber}</span>
             <div className="row gap-sm">
+              {o.isDigital && <span className="pill green" style={{ fontWeight: 700 }}>⚡ DIGITAL ORDER</span>}
               <PaymentPill method={o.paymentMethod} status={o.paymentStatus} />
               <OrderPill status={o.status} />
             </div>
@@ -192,14 +193,65 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
           <section className="card" data-testid="items-card">
             <div className="card-head"><h2>Items ({o.items.reduce((n, i) => n + i.quantity, 0)})</h2>{canEdit && ["PENDING", "CONFIRMED", "PROCESSING"].includes(o.status) && <Link href={`/orders/${o.id}/items`} className="link" prefetch={false} data-testid="change-items">Change items</Link>}</div>
             {o.items.map((i) => (
-              <div key={i.id} className="row py-xs nowrap flex-start">
-                <span className="thumb">{i.imageUrl ? /* eslint-disable-line @next/next/no-img-element */ <img src={i.imageUrl} alt="" width={44} height={44} className="thumb-img" /> : "·"}</span>
-                <div className="flex-1">
-                  <div className="text-medium">{i.title}</div>
-                  <div className="muted text-sm">{[i.variantTitle && i.variantTitle.toLowerCase() !== "default" ? i.variantTitle : null, i.sku ? `SKU ${i.sku}` : null].filter(Boolean).join(" · ")}</div>
-                  <div className="muted num text-sm">{taka(i.unitPrice)} × {i.quantity}</div>
+              <div key={i.id} className="py-xs border-bottom-subtle">
+                <div className="row nowrap flex-start">
+                  <span className="thumb">{i.imageUrl ? /* eslint-disable-line @next/next/no-img-element */ <img src={i.imageUrl} alt="" width={44} height={44} className="thumb-img" /> : "·"}</span>
+                  <div className="flex-1">
+                    <div className="row gap-xs items-center">
+                      <span className="text-medium">{i.title}</span>
+                      {i.isDigital && <span className="pill green text-xs">⚡ Digital</span>}
+                    </div>
+                    <div className="muted text-sm">{[i.variantTitle && i.variantTitle.toLowerCase() !== "default" ? i.variantTitle : null, i.sku ? `SKU ${i.sku}` : null].filter(Boolean).join(" · ")}</div>
+                    <div className="muted num text-sm">{taka(i.unitPrice)} × {i.quantity}</div>
+                  </div>
+                  <b className="num">{taka(i.total)}</b>
                 </div>
-                <b className="num">{taka(i.total)}</b>
+
+                {i.digitalCustomValues && typeof i.digitalCustomValues === "object" && Object.keys(i.digitalCustomValues).length > 0 && (
+                  <div className="mt-xs p-xs rounded bg-muted text-xs stack gap-2" style={{ background: "rgba(0,0,0,0.03)", padding: 8, borderRadius: 6, margin: "6px 0" }}>
+                    <span className="font-semibold text-muted-foreground">Customer Provided Details (গ্রাহকের প্রদত্ত তথ্য):</span>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                      {Object.entries(i.digitalCustomValues).map(([k, v]) => (
+                        <div key={k} className="text-sm">
+                          <span className="muted">{k}: </span>
+                          <b>{String(v)}</b>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {i.isDigital && (
+                  <div className="mt-xs text-xs">
+                    {i.digitalDeliveryUrl ? (
+                      <div className="row gap-sm items-center text-success" style={{ color: "var(--success, #16a34a)" }}>
+                        <span>✓ Delivered</span>
+                        <a href={i.digitalDeliveryUrl} target="_blank" rel="noopener noreferrer" className="link font-bold">
+                          View / Download Document ↗
+                        </a>
+                      </div>
+                    ) : (
+                      canEdit && o.status !== "CANCELLED" && o.status !== "REFUNDED" && (
+                        <details className="mt-xs">
+                          <summary className="link cursor-pointer font-medium text-xs">⚡ Deliver Document / File (ডেলিভারি ফাইল যুক্ত করুন)</summary>
+                          <form action={deliverDigitalAssetAction.bind(null, o.id, i.id)} className="stack gap-xs mt-xs p-xs border rounded" style={{ padding: 8, marginTop: 6 }}>
+                            <label className="field mb-0">
+                              <span className="label text-xs">Digital Asset URL (Google Drive / Direct PDF / Image Link)</span>
+                              <input className="input text-xs" name="fileUrl" required placeholder="https://drive.google.com/... or https://..." />
+                            </label>
+                            <label className="row gap-xs items-center text-xs mt-xs">
+                              <input type="checkbox" name="notifyCustomer" defaultChecked />
+                              <span>Notify customer via SMS with access link</span>
+                            </label>
+                            <SubmitButton className="btn btn-primary btn-sm mt-xs" pending="Delivering…">
+                              Deliver Asset & Complete Order
+                            </SubmitButton>
+                          </form>
+                        </details>
+                      )
+                    )}
+                  </div>
+                )}
               </div>
             ))}
             <div className="totals mt-sm pt-sm border-top">

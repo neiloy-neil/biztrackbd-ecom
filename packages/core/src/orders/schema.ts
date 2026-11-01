@@ -10,11 +10,16 @@ export const CreateOrderInput = z.object({
     email: z.string().email().optional(),
   }),
   shipping: z.object({
-    address: z.string().trim().min(5).max(300),
-    city: z.string().trim().min(1).max(80),
-    district: z.string().trim().min(1).max(80),
-    division: z.string().trim().min(1).max(80),
+    address: z.string().trim().min(2).max(300).default("Digital Delivery"),
+    city: z.string().trim().min(1).max(80).default("Digital"),
+    district: z.string().trim().min(1).max(80).default("Digital"),
+    division: z.string().trim().min(1).max(80).default("Digital"),
     postalCode: z.string().max(10).optional(),
+  }).default({
+    address: "Digital Delivery",
+    city: "Digital",
+    district: "Digital",
+    division: "Digital",
   }),
   // Client-sent prices are never read. Only ids and quantities.
   items: z.array(z.object({
@@ -23,7 +28,9 @@ export const CreateOrderInput = z.object({
     bundleId: z.string().optional(),
     bundleTitle: z.string().optional(),
     isBump: z.boolean().optional(),
+    customValues: z.record(z.string(), z.string()).optional(),
   })).min(1).max(50),
+  isDigital: z.boolean().optional(),
   bundleId: z.string().optional(),
   bumpIds: z.array(z.string()).optional(),
   paymentMethod: z.enum(PAYMENT_METHODS).default("COD"),

@@ -160,3 +160,11 @@ export async function messageAction(id: string, form: FormData): Promise<void> {
   const s = await requireAction("orders", "edit");
   await run(id, () => messageCustomer(s.tenantId, s.actor, id, String(form.get("text") ?? "")));
 }
+
+export async function deliverDigitalAssetAction(orderId: string, itemId: string, form: FormData): Promise<void> {
+  const s = await requireAction("orders", "edit");
+  const fileUrl = String(form.get("fileUrl") ?? "").trim();
+  const notifyCustomer = form.get("notifyCustomer") === "on" || form.get("notifyCustomer") === "true";
+  const { deliverDigitalAsset } = await import("@biztrackbd/core");
+  await run(orderId, () => deliverDigitalAsset(s.tenantId, s.actor, orderId, itemId, { fileUrl, notifyCustomer }));
+}

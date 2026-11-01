@@ -356,6 +356,14 @@ model Product {
   orderBumps  OrderBump[]
   dropProducts DropProduct[]
 
+  // Digital & Virtual Product Fields
+  isDigital           Boolean  @default(false)
+  digitalDelivery     String   @default("NONE") // "INSTANT_FILE" | "ON_DEMAND" | "EXTERNAL_URL" | "NONE"
+  digitalFileUrl      String?
+  digitalFileName     String?
+  digitalFileSize     Int?
+  digitalCustomFields Json?
+
   // SEO Fields
   seoTitle       String?
   seoDescription String?
@@ -369,6 +377,7 @@ model Product {
   @@index([tenantId, status])
   @@index([tenantId, categoryId])
   @@index([tenantId, isFeatured])
+  @@index([tenantId, isDigital])
 }
 
 model ProductImage {
@@ -505,6 +514,7 @@ model Order {
   clientHash          String? // keyed hash of the buyer's address, only to spot a referral from the referrer's own connection
   deliveryWaived      Boolean @default(false) // delivery was free because of the member's level or a coupon, so editing the address keeps it free
   totalAmount         Decimal @db.Decimal(12, 2)
+  isDigital           Boolean @default(false)
   isWholesale         Boolean @default(false)
   advancePaidAmount   Decimal @default(0.00) @db.Decimal(12, 2)
   balanceDue          Decimal @default(0.00) @db.Decimal(12, 2)
@@ -595,6 +605,7 @@ model Order {
   @@index([tenantId, consignmentId])
   @@index([tenantId, status, courierSyncedAt])
   @@index([tenantId, landingPageId])
+  @@index([tenantId, isDigital])
   @@index([tags], type: Gin) // the label filter on the orders list (migration 28)
 }
 
@@ -616,6 +627,12 @@ model OrderItem {
   bundleId    String?
   bundleTitle String?
   isBump      Boolean @default(false)
+
+  // Digital Fulfillment Details
+  isDigital           Boolean   @default(false)
+  digitalCustomValues Json?
+  digitalDeliveryUrl  String?
+  digitalDeliveredAt  DateTime?
 
   order   Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product         @relation(fields: [productId], references: [id], onDelete: Restrict)

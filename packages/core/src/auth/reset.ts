@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { getPlatformPrisma } from "@biztrackbd/db";
+import { getBasePrisma, getPlatformPrisma } from "@biztrackbd/db";
 import { AuthFailure, issueEmailCode, type TokenSet } from "./supabase";
 import { normalizeBdPhone } from "../phone";
 import { currentSmsSender } from "../customers/auth";
@@ -48,8 +48,21 @@ export function maskPhone(phone: string): string {
   return digits;
 }
 
+interface StaffResetLookupRow {
+  account_email: string;
+  account_phone: string | null;
+  store_name: string;
+  tenant_status: string;
+  subdomain: string;
+  user_name: string;
+  role: string;
+  is_active: boolean;
+}
+
 /**
  * Searches for a staff member or store owner by email or phone.
+ * Uses a SECURITY DEFINER Postgres RPC (staff_reset_lookup) to safely bypass
+ * Row Level Security before a tenant session has been established.
  * Supports multi-account disambiguation when a single phone number links to multiple merchant accounts.
  * Returns canonical email, registered phone, available delivery channels, and associated store names.
  */
@@ -57,9 +70,80 @@ export async function findStaffResetTarget(identifier: string): Promise<StaffRes
   const raw = identifier.trim();
   if (!raw) return null;
 
+  try {
+    const rows = await getBasePrisma().$queryRaw<StaffResetLookupRow[]>`SELECT * FROM staff_reset_lookup(${raw})`;
+    if (rows && rows.length > 0) {
+      const accountMap = new Map<string, { email: string; phone: string | null; storeNames: Set<string> }>();
+
+      for (const r of rows) {
+        if (!r.account_email) continue;
+        const emailKey = r.account_email.trim().toLowerCase();
+        if (!accountMap.has(emailKey)) {
+          accountMap.set(emailKey, {
+            email: emailKey,
+            phone: null,
+            storeNames: new Set<string>(),
+          });
+        }
+        const acc = accountMap.get(emailKey)!;
+        if (r.store_name) {
+          acc.storeNames.add(r.store_name);
+        }
+        if (!acc.phone && r.account_phone) {
+          try {
+            acc.phone = normalizeBdPhone(r.account_phone);
+          } catch {
+            // ignore unparseable phone
+          }
+        }
+      }
+
+      if (accountMap.size > 0) {
+        const accounts: StaffAccountOption[] = Array.from(accountMap.values()).map((acc) => ({
+          email: acc.email,
+          maskedEmail: maskEmail(acc.email),
+          phone: acc.phone,
+          maskedPhone: acc.phone ? maskPhone(acc.phone) : null,
+          storeNames: Array.from(acc.storeNames),
+        }));
+
+        // Disambiguate if multiple accounts share this phone number (and query wasn't an email)
+        if (accounts.length > 1 && !raw.includes("@")) {
+          return {
+            email: accounts[0]!.email,
+            phone: accounts[0]!.phone,
+            maskedEmail: accounts[0]!.maskedEmail,
+            maskedPhone: accounts[0]!.maskedPhone,
+            availableChannels: ["sms", "email"],
+            storeNames: accounts[0]!.storeNames,
+            multipleAccounts: accounts,
+          };
+        }
+
+        const target = accounts[0]!;
+        const availableChannels: ("email" | "sms")[] = ["email"];
+        if (target.phone) {
+          availableChannels.push("sms");
+        }
+
+        return {
+          email: target.email,
+          phone: target.phone,
+          maskedEmail: target.maskedEmail,
+          maskedPhone: target.maskedPhone,
+          availableChannels,
+          storeNames: target.storeNames,
+        };
+      }
+    }
+  } catch (err) {
+    console.error("staff_reset_lookup RPC failed, attempting platform fallback", err);
+  }
+
+  // Fallback for isolated unit tests or non-RPC connections
   const db = getPlatformPrisma();
 
-  // 1. Try resolving as Bangladeshi phone number first
+  // 1. Try resolving as Bangladeshi phone number
   let normalizedPhone: string | null = null;
   try {
     normalizedPhone = normalizeBdPhone(raw);
@@ -128,23 +212,6 @@ export async function findStaffResetTarget(identifier: string): Promise<StaffRes
       }
     }
 
-    // Enrich with any other active stores owned by these emails
-    if (accountMap.size > 0) {
-      const allEmails = Array.from(accountMap.keys());
-      const extraTenants = await db.tenant.findMany({
-        where: {
-          ownerEmail: { in: allEmails },
-          status: { not: "CANCELLED" },
-        },
-        select: { ownerEmail: true, name: true },
-      });
-      for (const t of extraTenants) {
-        if (t.ownerEmail && t.name) {
-          accountMap.get(t.ownerEmail.trim().toLowerCase())?.storeNames.add(t.name);
-        }
-      }
-    }
-
     if (accountMap.size === 0) return null;
 
     const accounts: StaffAccountOption[] = Array.from(accountMap.values()).map((acc) => ({
@@ -167,7 +234,6 @@ export async function findStaffResetTarget(identifier: string): Promise<StaffRes
       };
     }
 
-    // Multiple distinct merchant accounts share this phone number
     return {
       email: accounts[0]!.email,
       phone: normalizedPhone,

@@ -173,9 +173,14 @@ async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof Cr
   // Reserve stock atomically, in a stable order so concurrent orders cannot deadlock each other.
   for (const id of variantIds) {
     const qty = wanted.get(id)!;
+    const v = variants.find((x) => x.id === id)!;
+    if (v.product.isDigital) {
+      // Digital products have unlimited inventory
+      await tx.$executeRaw`UPDATE "ProductVariant" SET "stockQuantity" = GREATEST("stockQuantity" - ${qty}, 0), "updatedAt" = now() WHERE "id" = ${id}`;
+      continue;
+    }
     const n = await tx.$executeRaw`UPDATE "ProductVariant" SET "stockQuantity" = "stockQuantity" - ${qty}, "updatedAt" = now() WHERE "id" = ${id} AND "stockQuantity" >= ${qty}`;
     if (n === 0) {
-      const v = variants.find((x) => x.id === id)!;
       throw new InsufficientStockError(`Only ${Math.max(v.stockQuantity, 0)} left of ${v.product.title}`, id, Math.max(v.stockQuantity, 0));
     }
   }
@@ -268,12 +273,21 @@ async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof Cr
   }).reduce((s, l) => s + l.totalPrice, 0);
   couponEligibleSubtotal = Math.max(0, couponEligibleSubtotal - noCouponBumpsSum);
 
-  // Delivery zone: exact district match first, then the catch-all "*" zone.
-  const zones = await tx.shippingZone.findMany();
-  const district = input.shipping.district.trim().toLowerCase();
-  const zone = pickZone(zones, district);
-  if (!zone) throw new ValidationError("We do not deliver to that district yet", { field: "district" });
-  let deliveryCharge = deliveryFor(zone, subtotal);
+  const isOrderDigital = Boolean(input.isDigital) || variants.every((v) => v.product.isDigital);
+  let zoneName = "DIGITAL";
+  let deliveryCharge = 0;
+  let rawZone: any = null;
+
+  if (!isOrderDigital) {
+    // Delivery zone: exact district match first, then the catch-all "*" zone.
+    const zones = await tx.shippingZone.findMany();
+    const district = (input.shipping?.district || "").trim().toLowerCase();
+    const found = pickZone(zones, district);
+    if (!found) throw new ValidationError("We do not deliver to that district yet", { field: "district" });
+    rawZone = found;
+    zoneName = found.name;
+    deliveryCharge = deliveryFor(found, subtotal);
+  }
 
   // Coupon: validated, then usage claimed atomically so the limit holds under concurrency.
   let discount = 0;
@@ -307,7 +321,7 @@ async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof Cr
   // A landing page's deal (bundle price, order bump), already worked out from database prices by placeLandingOrder; it can never exceed what is left to pay for the goods.
   const offerDiscount = money(Math.min(input.offerDiscount ?? 0, Math.max(0, subtotal - discount - loyalty.tierDiscount - loyalty.referralDiscount - loyalty.pointsDiscount)));
   discount = money(discount + offerDiscount);
-  const couponWaives = couponId != null && deliveryCharge === 0 && zone != null && deliveryFor(zone, subtotal) > 0;
+  const couponWaives = couponId != null && deliveryCharge === 0 && rawZone != null && deliveryFor(rawZone, subtotal) > 0;
   if (loyalty.freeDelivery) deliveryCharge = 0;
   const deliveryWaived = loyalty.freeDelivery || couponWaives;
   const memberDiscount = money(loyalty.tierDiscount + loyalty.referralDiscount + loyalty.pointsDiscount);
@@ -360,15 +374,16 @@ async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof Cr
   if (!customer) throw new NotFoundError("Customer");
 
   const fraud = await assessOrderRisk(tx, {
-    phone, paymentMethod: input.paymentMethod, total, address: input.shipping.address, district: input.shipping.district, customerFacing,
+    phone, paymentMethod: input.paymentMethod, total, address: input.shipping?.address || "Digital Delivery", district: input.shipping?.district || "Digital", customerFacing,
   });
   const order = await tx.order.create({
     data: {
       tenantId, orderNumber, idempotencyKey: input.idempotencyKey, customerId: customer.id,
       customerName: input.customer.name, customerPhone: phone, customerEmail: input.customer.email,
-      shippingAddress: input.shipping.address, shippingCity: input.shipping.city,
-      shippingDistrict: input.shipping.district, shippingDivision: input.shipping.division,
-      shippingPostalCode: input.shipping.postalCode, deliveryZone: zone.name,
+      shippingAddress: input.shipping?.address || "Digital Delivery", shippingCity: input.shipping?.city || "Digital",
+      shippingDistrict: input.shipping?.district || "Digital", shippingDivision: input.shipping?.division || "Digital",
+      shippingPostalCode: input.shipping?.postalCode || null, deliveryZone: zoneName,
+      isDigital: isOrderDigital,
       paymentMethod: input.paymentMethod,
       paymentStatus: staffPaid && input.paymentMethod !== "COD" ? "PAID" : mfs ? "PENDING_VERIFICATION" : "UNPAID",
       ...(staffPaid && input.paymentMethod !== "COD" ? { mfsVerifiedAt: new Date(), mfsVerifiedBy: input.createdByUserId } : {}),
@@ -381,11 +396,21 @@ async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof Cr
       channel: input.channel, createdByUserId: input.createdByUserId,
       utmSource: input.utmSource, utmCampaign: input.utmCampaign, utmMedium: input.utmMedium, landingPageId: input.landingPageId, notes: input.notes,
       items: {
-        create: lines.map((l) => ({
-          tenantId, productId: l.v.productId, variantId: l.v.id, productTitle: l.v.product.title,
-          variantTitle: l.v.title, sku: l.v.sku, unitPrice: l.unitPrice, unitCost: l.v.product.costPrice, quantity: l.quantity, totalPrice: l.totalPrice,
-          bundleId: l.bundleId, bundleTitle: l.bundleTitle, isBump: l.isBump,
-        })),
+        create: lines.map((l) => {
+          const itemInput = input.items.find((it) => it.variantId === l.v.id);
+          const isDigitalItem = Boolean(l.v.product.isDigital);
+          const customValues = itemInput?.customValues ? (itemInput.customValues as Prisma.InputJsonValue) : Prisma.JsonNull;
+          const instantUrl = isDigitalItem && l.v.product.digitalDelivery === "INSTANT_FILE" ? l.v.product.digitalFileUrl : null;
+          return {
+            tenantId, productId: l.v.productId, variantId: l.v.id, productTitle: l.v.product.title,
+            variantTitle: l.v.title, sku: l.v.sku, unitPrice: l.unitPrice, unitCost: l.v.product.costPrice, quantity: l.quantity, totalPrice: l.totalPrice,
+            bundleId: l.bundleId, bundleTitle: l.bundleTitle, isBump: l.isBump,
+            isDigital: isDigitalItem,
+            digitalCustomValues: customValues,
+            digitalDeliveryUrl: instantUrl,
+            digitalDeliveredAt: instantUrl && staffPaid ? new Date() : null,
+          };
+        }),
       },
       stateLogs: { create: { tenantId, fromStatus: "PENDING", toStatus: "PENDING", actorType: "CUSTOMER", reason: "Order placed" } },
     },
@@ -611,6 +636,22 @@ export async function markPaid(tenantId: string, orderId: string, actorId: strin
       where: { id: orderId },
       data: { paymentStatus: "PAID", mfsVerifiedAt: new Date(), mfsVerifiedBy: actorId },
     });
+
+    // Auto-deliver instant digital items
+    await tx.orderItem.updateMany({
+      where: { orderId, isDigital: true, digitalDeliveryUrl: { not: null }, digitalDeliveredAt: null },
+      data: { digitalDeliveredAt: new Date() },
+    });
+
+    const undeliveredCount = await tx.orderItem.count({
+      where: { orderId, digitalDeliveredAt: null },
+    });
+    if (order.isDigital && undeliveredCount === 0 && (order.status === "PENDING" || order.status === "CONFIRMED")) {
+      await tx.order.update({
+        where: { id: orderId },
+        data: { status: "DELIVERED", deliveredAt: new Date() },
+      });
+    }
     if (staff) await audit(tx, tenantId, staff, "order.marked_paid", { orderNumber: order.orderNumber, method: order.paymentMethod, trxId: order.mfsTrxId });
     await recordOrderEvent(tx, tenantId, orderId, {
       type: "PAYMENT_VERIFIED", message: order.mfsTrxId ? `Payment confirmed (TrxID ${order.mfsTrxId})` : "Marked as paid",

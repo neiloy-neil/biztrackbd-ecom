@@ -98,6 +98,7 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
   const [pasteText, setPasteText] = useState("");
   const [parsingAddress, setParsingAddress] = useState(false);
   const [aiParseSuccess, setAiParseSuccess] = useState(false);
+  const [customValues, setCustomValues] = useState<Record<string, string>>({});
 
   async function handleAiParse() {
     if (!pasteText.trim() || parsingAddress) return;
@@ -215,6 +216,33 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
     );
   }
 
+  const isDigitalOrder = Boolean(quote?.isDigitalOrder);
+
+  // Auto-switch away from COD if digital order
+  useEffect(() => {
+    if (isDigitalOrder && method === "COD") {
+      if (pay.uddoktapayEnabled) setMethod("GATEWAY_UDDOKTAPAY");
+      else if (pay.bkashDirectEnabled) setMethod("GATEWAY_BKASH");
+      else if (pay.sslcommerzEnabled) setMethod("GATEWAY_SSLCOMMERZ");
+      else if (pay.bkashNumber) setMethod("MANUAL_BKASH");
+      else if (pay.nagadNumber) setMethod("MANUAL_NAGAD");
+      else setMethod("GATEWAY_UDDOKTAPAY");
+    }
+  }, [isDigitalOrder, method, pay]);
+
+  const digitalFields = useMemo(() => {
+    if (!quote) return [];
+    const map = new Map<string, { id: string; label: string; required?: boolean; placeholder?: string }>();
+    for (const l of quote.lines) {
+      if (l.digitalCustomFields && Array.isArray(l.digitalCustomFields)) {
+        for (const f of l.digitalCustomFields as any[]) {
+          if (f.id && !map.has(f.id)) map.set(f.id, f);
+        }
+      }
+    }
+    return Array.from(map.values());
+  }, [quote]);
+
   const total = quote?.total ?? null;
   const itemCount = cart.count;
 
@@ -223,8 +251,16 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
     if (!validLocal(phone)) e.phone = errorsText.phone!;
     if (name.trim().length < 2) e.name = errorsText.name!;
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = errorsText.email!;
-    if (!upazila) e.upazila = errorsText.upazila!;
-    if (address.trim().length < 5) e.address = errorsText.address!;
+    if (!isDigitalOrder) {
+      if (!upazila) e.upazila = errorsText.upazila!;
+      if (address.trim().length < 5) e.address = errorsText.address!;
+    } else {
+      for (const df of digitalFields) {
+        if (df.required && !customValues[df.id]?.trim()) {
+          (e as any)[df.id] = lang === "bn" ? `${df.label} পূরণ করুন` : `Please fill ${df.label}`;
+        }
+      }
+    }
     if (method === "MANUAL_BKASH" || method === "MANUAL_NAGAD") {
       const sender = cleanPhoneDigits(mfsSender);
       if (!validLocal(sender)) e.mfsSender = errorsText.mfsSender!;
@@ -262,13 +298,20 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
     const r = await placeOrderAction({
       idempotencyKey: key.current,
       items: [
-        ...cart.lines.map((l) => ({ variantId: l.variantId, quantity: l.quantity })),
+        ...cart.lines.map((l) => ({
+          variantId: l.variantId,
+          quantity: l.quantity,
+          customValues: Object.keys(customValues).length > 0 ? customValues : undefined,
+        })),
         ...bumpItems,
       ],
       bumpIds: selectedBumpIds,
       customer: { name: name.trim(), phone: full(phone), email: email.trim() || undefined },
-      shipping: { division, district, upazila, address: address.trim(), note: note.trim() || undefined },
+      shipping: isDigitalOrder
+        ? { division: "Digital", district: "Digital", upazila: "Digital", address: "Digital Delivery", note: note.trim() || undefined }
+        : { division, district, upazila, address: address.trim(), note: note.trim() || undefined },
       paymentMethod: method,
+      isDigital: isDigitalOrder,
       mfs:
         method === "MANUAL_BKASH" || method === "MANUAL_NAGAD"
           ? { senderNumber: full(cleanPhoneDigits(mfsSender)), trxId: trx.trim() }
@@ -443,6 +486,7 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
           <div style={{ marginTop: 10 }}>{summary}</div>
         </details>
 
+        {!isDigitalOrder && (
         <section className="card" style={{ background: "rgba(99, 102, 241, 0.04)", borderColor: "rgba(99, 102, 241, 0.2)" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
             <div>
@@ -501,6 +545,7 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
             </div>
           )}
         </section>
+        )}
 
         <section className="card">
           <h2>{s.contactSection}</h2>
@@ -524,59 +569,113 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
           </label>
         </section>
 
-        <section className="card">
-          <h2>{s.deliveryAddress}</h2>
-          <div className="row2">
-            <label className="field">
-              <span className="label">{s.division}</span>
-              <select id="f-division" className="select" value={division} onChange={(e) => { const d = e.target.value; setDivision(d); const first = BD_GEO.find((x) => x.name === d)?.districts[0]?.name ?? ""; setDistrict(first); setUpazila(""); }}>
-                {BD_GEO.map((d) => <option key={d.name} value={d.name}>{d.name}</option>)}
-              </select>
-            </label>
-            <label className="field">
-              <span className="label">{s.district}</span>
-              <select id="f-district" className="select" value={district} onChange={(e) => { setDistrict(e.target.value); setUpazila(""); }}>
-                {districts.map((d) => <option key={d.name} value={d.name}>{d.name}</option>)}
-              </select>
-            </label>
-          </div>
-          <label className="field">
-            <span className="label">{s.upazila}</span>
-            <select id="f-upazila" className="select" value={upazila} onChange={(e) => setUpazila(e.target.value)} {...invalid("upazila")}>
-              <option value="">{s.chooseOne}</option>
-              {upazilas.map((u) => <option key={u} value={u}>{u}</option>)}
-            </select>
-            {err("upazila")}
-          </label>
-          <label className="field">
-            <span className="label">{s.houseRoad}</span>
-            <textarea id="f-address" className="textarea" name="address" autoComplete="street-address" value={address} onChange={(e) => setAddress(e.target.value)} {...invalid("address")} />
-            {err("address")}
-          </label>
-          <label className="field" style={{ marginBottom: 0 }}>
-            <span className="label">{s.note} <span className="opt">{s.optional}</span></span>
-            <input className="input" name="note" value={note} onChange={(e) => setNote(e.target.value)} maxLength={200} />
-          </label>
-        </section>
-
-        <section className="card">
-          <h2>{s.deliverySection}</h2>
-          <div className="option selected" data-testid="delivery-option" style={{ cursor: "default" }}>
-            <input type="radio" checked readOnly aria-label={quote?.zone?.name ?? s.deliverySection} />
-            <div className="grow">
-              <div className="t">{quote?.zone?.name ?? s.deliversEverywhere}</div>
-              {quote?.zone && <div className="s">{fmt(s.arrives, { min: quote.zone.etaMinDays, max: quote.zone.etaMaxDays })}</div>}
+        {isDigitalOrder ? (
+          <section className="card" style={{ background: "rgba(16, 185, 129, 0.05)", borderColor: "rgba(16, 185, 129, 0.3)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+              <span style={{ fontSize: 24 }}>⚡</span>
+              <div>
+                <h2 style={{ margin: 0, fontSize: 16, color: "#065f46" }}>
+                  {lang === "bn" ? "ডিজিটাল সেবা ও ডেলিভারি তথ্য" : "Digital Service & Delivery Info"}
+                </h2>
+                <p style={{ margin: "4px 0 0", fontSize: 13, color: "#047857" }}>
+                  {lang === "bn"
+                    ? "এটি ডিজিটাল/ভার্চুয়াল সেবা। প্রস্তুত হওয়া মাত্রই ডাউনলোড লিংক আপনার মোবাইলে SMS আকারে পৌঁছে যাবে। কোনো ডেলিভারি চার্জ নেই (৳০)।"
+                    : "Digital delivery. Download link will be sent via SMS upon completion. Delivery fee: ৳0."}
+                </p>
+              </div>
             </div>
-            <div className="t num">{quote?.deliveryCharge == null ? "" : quote.deliveryCharge === 0 ? s.free : money(quote.deliveryCharge, lang)}</div>
-          </div>
-        </section>
+
+            {digitalFields.length > 0 && (
+              <div style={{ borderTop: "1px dashed rgba(16, 185, 129, 0.3)", paddingTop: 14, marginTop: 10 }}>
+                <h3 style={{ fontSize: 14, fontWeight: 600, color: "#065f46", marginBottom: 12 }}>
+                  {lang === "bn" ? "প্রয়োজনীয় তথ্য পূরণ করুন:" : "Required Information:"}
+                </h3>
+                {digitalFields.map((df) => (
+                  <label key={df.id} className="field">
+                    <span className="label">
+                      {df.label} {df.required ? <span style={{ color: "#dc2626" }}>*</span> : <span className="opt">{s.optional}</span>}
+                    </span>
+                    <input
+                      className="input"
+                      placeholder={df.placeholder || (lang === "bn" ? `${df.label} লিখুন` : `Enter ${df.label}`)}
+                      value={customValues[df.id] || ""}
+                      onChange={(e) => setCustomValues((prev) => ({ ...prev, [df.id]: e.target.value }))}
+                      required={df.required}
+                    />
+                    {(errors as any)[df.id] && <div className="error">{(errors as any)[df.id]}</div>}
+                  </label>
+                ))}
+              </div>
+            )}
+
+            <label className="field" style={{ marginTop: 12, marginBottom: 0 }}>
+              <span className="label">{lang === "bn" ? "বিশেষ নির্দেশনা বা নোট" : "Special Instructions / Note"} <span className="opt">{s.optional}</span></span>
+              <input className="input" placeholder={lang === "bn" ? "অতিরিক্ত কোনো তথ্য থাকলে লিখুন" : "Any additional notes"} value={note} onChange={(e) => setNote(e.target.value)} maxLength={200} />
+            </label>
+          </section>
+        ) : (
+          <>
+            <section className="card">
+              <h2>{s.deliveryAddress}</h2>
+              <div className="row2">
+                <label className="field">
+                  <span className="label">{s.division}</span>
+                  <select id="f-division" className="select" value={division} onChange={(e) => { const d = e.target.value; setDivision(d); const first = BD_GEO.find((x) => x.name === d)?.districts[0]?.name ?? ""; setDistrict(first); setUpazila(""); }}>
+                    {BD_GEO.map((d) => <option key={d.name} value={d.name}>{d.name}</option>)}
+                  </select>
+                </label>
+                <label className="field">
+                  <span className="label">{s.district}</span>
+                  <select id="f-district" className="select" value={district} onChange={(e) => { setDistrict(e.target.value); setUpazila(""); }}>
+                    {districts.map((d) => <option key={d.name} value={d.name}>{d.name}</option>)}
+                  </select>
+                </label>
+              </div>
+              <label className="field">
+                <span className="label">{s.upazila}</span>
+                <select id="f-upazila" className="select" value={upazila} onChange={(e) => setUpazila(e.target.value)} {...invalid("upazila")}>
+                  <option value="">{s.chooseOne}</option>
+                  {upazilas.map((u) => <option key={u} value={u}>{u}</option>)}
+                </select>
+                {err("upazila")}
+              </label>
+              <label className="field">
+                <span className="label">{s.houseRoad}</span>
+                <textarea id="f-address" className="textarea" name="address" autoComplete="street-address" value={address} onChange={(e) => setAddress(e.target.value)} {...invalid("address")} />
+                {err("address")}
+              </label>
+              <label className="field" style={{ marginBottom: 0 }}>
+                <span className="label">{s.note} <span className="opt">{s.optional}</span></span>
+                <input className="input" name="note" value={note} onChange={(e) => setNote(e.target.value)} maxLength={200} />
+              </label>
+            </section>
+
+            <section className="card">
+              <h2>{s.deliverySection}</h2>
+              <div className="option selected" data-testid="delivery-option" style={{ cursor: "default" }}>
+                <input type="radio" checked readOnly aria-label={quote?.zone?.name ?? s.deliverySection} />
+                <div className="grow">
+                  <div className="t">{quote?.zone?.name ?? s.deliversEverywhere}</div>
+                  {quote?.zone && <div className="s">{fmt(s.arrives, { min: quote.zone.etaMinDays, max: quote.zone.etaMaxDays })}</div>}
+                </div>
+                <div className="t num">{quote?.deliveryCharge == null ? "" : quote.deliveryCharge === 0 ? s.free : money(quote.deliveryCharge, lang)}</div>
+              </div>
+            </section>
+          </>
+        )}
 
         <section className="card">
           <h2>{s.paymentSection}</h2>
-          <label className={`option${method === "COD" ? " selected" : ""}`}>
-            <input type="radio" name="pay" checked={method === "COD"} onChange={() => setMethod("COD")} data-testid="pay-cod" />
-            <div className="grow"><div className="t">{s.cod}</div><div className="s">{s.codS}</div></div>
-          </label>
+          {!isDigitalOrder ? (
+            <label className={`option${method === "COD" ? " selected" : ""}`}>
+              <input type="radio" name="pay" checked={method === "COD"} onChange={() => setMethod("COD")} data-testid="pay-cod" />
+              <div className="grow"><div className="t">{s.cod}</div><div className="s">{s.codS}</div></div>
+            </label>
+          ) : (
+            <div style={{ padding: "8px 12px", background: "#fef3c7", borderRadius: 8, fontSize: 13, color: "#92400e", marginBottom: 12 }}>
+              ℹ️ {lang === "bn" ? "ডিজিটাল সেবার ক্ষেত্রে ক্যাশ অন ডেলিভারি প্রযোজ্য নয়। অনুগ্রহ করে বিকাশ, নগদ অথবা অনলাইন পেমেন্ট সিলেক্ট করুন।" : "Cash on delivery is not applicable for digital services. Please choose bKash, Nagad or Online payment."}
+            </div>
+          )}
           {pay.bkashDirectEnabled && (
             <label className={`option${method === "GATEWAY_BKASH" ? " selected" : ""}`} style={{ borderColor: method === "GATEWAY_BKASH" ? "var(--bkash, #D12053)" : undefined }}>
               <input type="radio" name="pay" checked={method === "GATEWAY_BKASH"} onChange={() => setMethod("GATEWAY_BKASH")} data-testid="pay-bkash-direct" />

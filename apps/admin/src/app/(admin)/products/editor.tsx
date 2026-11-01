@@ -42,6 +42,12 @@ export interface EditorProduct {
   seoTitle: string;
   seoDescription: string;
   isFeatured: boolean;
+  isDigital?: boolean;
+  digitalDelivery?: "NONE" | "INSTANT_FILE" | "ON_DEMAND" | "EXTERNAL_URL";
+  digitalFileUrl?: string | null;
+  digitalFileName?: string | null;
+  digitalFileSize?: number | null;
+  digitalCustomFields?: any;
   images: { url: string; alt: string | null }[];
   variants: VariantRow[];
   options: OptionDef[];
@@ -152,6 +158,10 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
       title: p.title, titleBn: p.titleBn || null, slug: isNew ? undefined : p.slug, descriptionHtml: p.descriptionHtml, basePrice: p.basePrice || 0,
       compareAtPrice: p.compareAtPrice || null, costPrice: p.costPrice ?? null, status, categoryId: p.categoryId,
       tags: p.tags, seoTitle: p.seoTitle || null, seoDescription: p.seoDescription || null, isFeatured: p.isFeatured, images: p.images,
+      isDigital: p.isDigital ?? false,
+      digitalDelivery: p.digitalDelivery ?? "NONE",
+      digitalFileUrl: p.digitalFileUrl || null,
+      digitalCustomFields: p.digitalCustomFields || null,
       variants: p.variants.map((v) => ({ id: v.id, title: v.title, sku: v.sku || null, price: v.price || 0, stockQuantity: v.stockQuantity, stockBefore: v.stockBefore, reorderLevel: v.reorderLevel, isActive: v.isActive !== false, options: v.options })),
     }, initial.id);
     setBusy(false);
@@ -537,6 +547,153 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
               <label className="field"><span className="label">Tags <span className="opt">(separate with commas)</span></span>
                 <input className="input" value={p.tags.join(", ")} onChange={(e) => set("tags", e.target.value.split(",").map((t) => t.trim()).filter(Boolean).slice(0, 20))} placeholder="cotton, handloom" /></label>
               <label className="check"><input type="checkbox" checked={p.isFeatured} onChange={(e) => set("isFeatured", e.target.checked)} /><span>Feature on the home page</span></label>
+            </section>
+
+            <section className="card">
+              <h2>Product Kind / ডেলিভারি টাইপ</h2>
+              <div style={{ display: "flex", gap: 12, marginBottom: 14 }}>
+                <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontWeight: !p.isDigital ? 600 : 400 }}>
+                  <input
+                    type="radio"
+                    name="isDigital"
+                    checked={!p.isDigital}
+                    onChange={() => setP((cur) => ({ ...cur, isDigital: false, digitalDelivery: "NONE" }))}
+                  />
+                  <span>📦 Physical Goods</span>
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontWeight: p.isDigital ? 600 : 400, color: "#059669" }}>
+                  <input
+                    type="radio"
+                    name="isDigital"
+                    checked={Boolean(p.isDigital)}
+                    onChange={() => setP((cur) => ({ ...cur, isDigital: true, digitalDelivery: cur.digitalDelivery === "NONE" ? "ON_DEMAND" : cur.digitalDelivery }))}
+                  />
+                  <span>⚡ Digital / Service</span>
+                </label>
+              </div>
+
+              {p.isDigital && (
+                <div style={{ background: "rgba(16, 185, 129, 0.05)", padding: 12, borderRadius: 8, border: "1px solid rgba(16, 185, 129, 0.2)" }}>
+                  <label className="field">
+                    <span className="label">Delivery Method</span>
+                    <select
+                      className="select"
+                      value={p.digitalDelivery || "ON_DEMAND"}
+                      onChange={(e) => set("digitalDelivery", e.target.value as any)}
+                    >
+                      <option value="ON_DEMAND">On-Demand Custom Service (খতিয়ান, নকশা, ম্যাপ, তথ্য যাচাই)</option>
+                      <option value="INSTANT_FILE">Instant Download (Pre-uploaded PDF / eBook / Zip file)</option>
+                      <option value="EXTERNAL_URL">External Link (Google Drive / Dropbox)</option>
+                    </select>
+                  </label>
+
+                  {p.digitalDelivery === "INSTANT_FILE" || p.digitalDelivery === "EXTERNAL_URL" ? (
+                    <label className="field">
+                      <span className="label">Download URL / File Link</span>
+                      <input
+                        className="input"
+                        placeholder="https://drive.google.com/... or media link"
+                        value={p.digitalFileUrl || ""}
+                        onChange={(e) => set("digitalFileUrl", e.target.value)}
+                      />
+                    </label>
+                  ) : (
+                    <div style={{ marginTop: 10 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, flexWrap: "wrap", gap: 6 }}>
+                        <span style={{ fontSize: 13, fontWeight: 600 }}>Customer Input Fields</span>
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => {
+                            setP((cur) => ({
+                              ...cur,
+                              digitalCustomFields: [
+                                { id: "khatian_no", label: "খতিয়ান নাম্বার", required: true },
+                                { id: "dag_no", label: "দাগ নাম্বার", required: true },
+                                { id: "mouza_name", label: "মৌজার নাম ও জে এল নং", required: true },
+                                { id: "upazila_district", label: "উপজেলা ও জেলা", required: true },
+                                { id: "owner_name", label: "মালিকের নাম", required: false },
+                              ],
+                            }));
+                          }}
+                        >
+                          ⚡ Load Land Record Preset
+                        </button>
+                      </div>
+
+                      {Array.isArray(p.digitalCustomFields) && p.digitalCustomFields.length > 0 ? (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          {p.digitalCustomFields.map((f: any, idx: number) => (
+                            <div key={idx} style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                              <input
+                                className="input"
+                                style={{ flex: 1, fontSize: 12.5 }}
+                                value={f.label}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setP((cur) => {
+                                    const next = [...(cur.digitalCustomFields || [])];
+                                    next[idx] = { ...next[idx], label: val, id: next[idx].id || `field_${idx}` };
+                                    return { ...cur, digitalCustomFields: next };
+                                  });
+                                }}
+                                placeholder="Field Label (e.g. খতিয়ান নং)"
+                              />
+                              <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12 }}>
+                                <input
+                                  type="checkbox"
+                                  checked={Boolean(f.required)}
+                                  onChange={(e) => {
+                                    const val = e.target.checked;
+                                    setP((cur) => {
+                                      const next = [...(cur.digitalCustomFields || [])];
+                                      next[idx] = { ...next[idx], required: val };
+                                      return { ...cur, digitalCustomFields: next };
+                                    });
+                                  }}
+                                />
+                                Req
+                              </label>
+                              <button
+                                type="button"
+                                className="btn btn-danger btn-sm"
+                                style={{ padding: "4px 8px" }}
+                                onClick={() => {
+                                  setP((cur) => ({
+                                    ...cur,
+                                    digitalCustomFields: cur.digitalCustomFields.filter((_: any, i: number) => i !== idx),
+                                  }));
+                                }}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p style={{ fontSize: 12.5, color: "#64748b", margin: "6px 0" }}>No custom fields added yet.</p>
+                      )}
+
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        style={{ marginTop: 8 }}
+                        onClick={() => {
+                          setP((cur) => ({
+                            ...cur,
+                            digitalCustomFields: [
+                              ...(cur.digitalCustomFields || []),
+                              { id: `field_${Date.now()}`, label: "নতুন ফিল্ড", required: true },
+                            ],
+                          }));
+                        }}
+                      >
+                        + Add Custom Field
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </section>
 
             <section className="card">

@@ -48,6 +48,9 @@ export interface QuoteLine {
   isBump?: boolean;
   isWholesale?: boolean;
   wholesaleSavings?: number;
+  isDigital?: boolean;
+  digitalDelivery?: string;
+  digitalCustomFields?: any;
 }
 
 export interface QuoteProblem {
@@ -87,6 +90,7 @@ export interface Quote {
   total: number | null;
   problems: QuoteProblem[];
   /** Which ways to pay the store offers for this order, from its payment settings. */
+  isDigitalOrder?: boolean;
   paymentOptions: {
     cod: { available: boolean; fee: number; reason: string | null };
     bkash: { available: boolean };
@@ -236,9 +240,12 @@ export async function quoteOrder(tenantId: string, rawInput: unknown): Promise<Q
         isBump: Boolean(matchedBump),
         isWholesale,
         wholesaleSavings: wholesaleSavingsOnLine > 0 ? wholesaleSavingsOnLine : undefined,
+        isDigital: v.product.isDigital,
+        digitalDelivery: v.product.digitalDelivery,
+        digitalCustomFields: v.product.digitalCustomFields,
       });
 
-      if (v.stockQuantity < quantity) problems.push({ variantId: id, kind: "insufficient_stock", available: Math.max(v.stockQuantity, 0) });
+      if (v.stockQuantity < quantity && !v.product.isDigital) problems.push({ variantId: id, kind: "insufficient_stock", available: Math.max(v.stockQuantity, 0) });
     }
 
     // Apply bundle discount if all required bundle products are present
@@ -285,9 +292,10 @@ export async function quoteOrder(tenantId: string, rawInput: unknown): Promise<Q
     }).reduce((s, l) => s + l.lineTotal, 0);
     couponEligibleSubtotal = Math.max(0, couponEligibleSubtotal - noCouponBumpsSum);
 
+    const isDigitalOrder = variants.length > 0 && variants.every((v) => v.product.isDigital);
     const zones = input.district ? await tx.shippingZone.findMany() : [];
     const zone = input.district ? pickZone(zones, input.district) : undefined;
-    let deliveryCharge = zone ? deliveryFor(zone, subtotal) : null;
+    let deliveryCharge = isDigitalOrder ? 0 : zone ? deliveryFor(zone, subtotal) : null;
 
     let discount = 0;
     let couponCode: string | null = null;
@@ -332,10 +340,12 @@ export async function quoteOrder(tenantId: string, rawInput: unknown): Promise<Q
     const bankDetails = (settings?.wholesaleBankDetails as any) ?? null;
     const isBankTransferAvailable = Boolean(settings?.wholesaleEnabled && bankDetails?.accountNumber);
     const paymentOptions = {
-      cod: {
-        available: (settings?.codEnabled ?? true) && !codTooBig, fee: codFeeRule,
-        reason: settings && !settings.codEnabled ? "off" : codTooBig ? `Cash on delivery is available up to ৳${codMax}` : null,
-      },
+      cod: isDigitalOrder
+        ? { available: false, fee: 0, reason: "ডিজিটাল সার্ভিসের জন্য অনলাইন/MFS পেমেন্ট আবশ্যক।" }
+        : {
+            available: (settings?.codEnabled ?? true) && !codTooBig, fee: codFeeRule,
+            reason: settings && !settings.codEnabled ? "off" : codTooBig ? `Cash on delivery is available up to ৳${codMax}` : null,
+          },
       bkash: { available: (settings?.bkashEnabled ?? true) && Boolean(settings?.bkashNumber) },
       nagad: { available: (settings?.nagadEnabled ?? true) && Boolean(settings?.nagadNumber) },
       bankTransfer: {
@@ -349,6 +359,7 @@ export async function quoteOrder(tenantId: string, rawInput: unknown): Promise<Q
     const wholesaleMin = settings?.wholesaleMinOrderAmount ? Number(settings.wholesaleMinOrderAmount) : 0;
 
     return {
+      isDigitalOrder,
       codFee, paymentOptions,
       lines, subtotal, problems, discount, couponCode, couponError, loyalty, deliveryCharge,
       bundleSavings, bumpSavings, wholesaleSavings: totalWholesaleSavings,
@@ -360,7 +371,9 @@ export async function quoteOrder(tenantId: string, rawInput: unknown): Promise<Q
         isMinOrderMet: subtotal >= wholesaleMin,
         deficit: Math.max(0, wholesaleMin - subtotal),
       },
-      zone: zone ? { name: zone.name, rate: Number(zone.rate), freeOverAmount: freeOver, etaMinDays: zone.etaMinDays, etaMaxDays: zone.etaMaxDays } : null,
+      zone: isDigitalOrder
+        ? { name: "DIGITAL", rate: 0, freeOverAmount: null, etaMinDays: 0, etaMaxDays: 0 }
+        : zone ? { name: zone.name, rate: Number(zone.rate), freeOverAmount: freeOver, etaMinDays: zone.etaMinDays, etaMaxDays: zone.etaMaxDays } : null,
       freeDeliveryRemaining: freeOver != null && subtotal < freeOver && deliveryCharge !== 0 ? money(freeOver - subtotal) : null,
       total: deliveryCharge != null ? money(subtotal - discount - memberDiscount + deliveryCharge + codFee) : null,
     };
