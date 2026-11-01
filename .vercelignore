@@ -2,11 +2,11 @@
 # from being uploaded to Vercel build containers or counted toward function storage.
 
 # Documentation & reference specs
-docs/
-deliverables/
-checkup/
-design/
-Landing Page/
+/docs/
+/deliverables/
+/checkup/
+/design/
+/Landing Page/
 
 # Local media, test uploads and auth sessions
 .uploads/
