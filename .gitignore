@@ -64,3 +64,6 @@ checkup/logs/
 ~$*
 *.tmp
 .seo-cache/
+
+.vercel
+.env*
