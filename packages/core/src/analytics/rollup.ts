@@ -11,7 +11,7 @@ export function dhakaDate(d: Date = new Date()): string {
     timeZone: STORE_TZ,
     year: "numeric",
     month: "2-digit",
-    day: "numeric",
+    day: "2-digit",
   }).format(d);
 }
 
@@ -19,9 +19,17 @@ export function dhakaDate(d: Date = new Date()): string {
  * Adds or subtracts days from a YYYY-MM-DD string.
  */
 export function addDays(dateStr: string, n: number): string {
-  const d = new Date(`${dateStr}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + n);
-  return d.toISOString().slice(0, 10);
+  const [yearStr, monthStr, dayStr] = dateStr.split("-");
+  const y = Number(yearStr);
+  const m = Number(monthStr);
+  const d = Number(dayStr);
+  if (Number.isFinite(y) && Number.isFinite(m) && Number.isFinite(d)) {
+    const dt = new Date(Date.UTC(y, m - 1, d + n));
+    return dt.toISOString().slice(0, 10);
+  }
+  const dt = new Date(`${dateStr}T00:00:00Z`);
+  dt.setUTCDate(dt.getUTCDate() + n);
+  return dt.toISOString().slice(0, 10);
 }
 
 /**

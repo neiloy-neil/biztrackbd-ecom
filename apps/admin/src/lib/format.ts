@@ -8,8 +8,10 @@ export function taka(n: number | string | { toString(): string }): string {
 const TZ = "Asia/Dhaka";
 
 /** "10 Oct, 10:42 am" in Bangladesh time. */
-export function dateTime(d: Date | string): string {
+export function dateTime(d: Date | string | null | undefined): string {
+  if (!d) return "";
   const x = typeof d === "string" ? new Date(d) : d;
+  if (isNaN(x.getTime())) return "";
   return `${new Intl.DateTimeFormat("en-GB", { timeZone: TZ, day: "numeric", month: "short" }).format(x)}, ${new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" }).format(x).toLowerCase()}`;
 }
 
@@ -23,8 +25,11 @@ export function friendlyDate(d: Date | string, now = new Date()): string {
   return new Intl.DateTimeFormat("en-GB", { timeZone: TZ, day: "numeric", month: "short" }).format(x);
 }
 
-export function dateOnly(d: Date | string): string {
-  return new Intl.DateTimeFormat("en-GB", { timeZone: TZ, day: "numeric", month: "short", year: "numeric" }).format(typeof d === "string" ? new Date(d) : d);
+export function dateOnly(d: Date | string | null | undefined): string {
+  if (!d) return "";
+  const dt = typeof d === "string" ? new Date(d) : d;
+  if (isNaN(dt.getTime())) return "";
+  return new Intl.DateTimeFormat("en-GB", { timeZone: TZ, day: "numeric", month: "short", year: "numeric" }).format(dt);
 }
 
 /** 01712345678 -> 01712-345678 */

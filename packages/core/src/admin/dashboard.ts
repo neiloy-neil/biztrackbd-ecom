@@ -6,13 +6,21 @@ export const STORE_TZ = "Asia/Dhaka";
 
 /** YYYY-MM-DD for a moment, as the calendar date in Bangladesh. */
 export function dhakaDate(d: Date): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: STORE_TZ, year: "numeric", month: "2-digit", day: "numeric" }).format(d);
+  return new Intl.DateTimeFormat("en-CA", { timeZone: STORE_TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
 }
 
 export function addDays(date: string, n: number): string {
-  const d = new Date(`${date}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + n);
-  return d.toISOString().slice(0, 10);
+  const [yearStr, monthStr, dayStr] = date.split("-");
+  const y = Number(yearStr);
+  const m = Number(monthStr);
+  const d = Number(dayStr);
+  if (Number.isFinite(y) && Number.isFinite(m) && Number.isFinite(d)) {
+    const dt = new Date(Date.UTC(y, m - 1, d + n));
+    return dt.toISOString().slice(0, 10);
+  }
+  const dt = new Date(`${date}T00:00:00Z`);
+  dt.setUTCDate(dt.getUTCDate() + n);
+  return dt.toISOString().slice(0, 10);
 }
 
 /** Orders that count as sales: placed and not cancelled, returned or refunded. */
