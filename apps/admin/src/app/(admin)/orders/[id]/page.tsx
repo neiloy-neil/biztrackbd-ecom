@@ -560,10 +560,10 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               </form>
             </section>
           )}
-          {canEdit && o.status === "DELIVERED" && (
+          {canEdit && !o.isDigital && o.status === "DELIVERED" && (
             <section className="card"><Link href={`/returns/new?order=${o.id}`} className="btn btn-secondary btn-block" prefetch={false} data-testid="start-return">Start a return or exchange</Link></section>
           )}
-          {canEdit && (o.status === "SHIPPED" || o.status === "DELIVERED") && (
+          {canEdit && !o.isDigital && (o.status === "SHIPPED" || o.status === "DELIVERED") && (
             <section className="card">
               <div className="row">
                 {o.status === "SHIPPED" && <form action={statusAction.bind(null, o.id, "DELIVERED")}><SubmitButton className="btn btn-secondary">Mark delivered</SubmitButton></form>}
@@ -588,6 +588,11 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
           {step === "pack" && <form action={statusAction.bind(null, o.id, "PROCESSING")} className="flex-1"><SubmitButton className="btn btn-primary btn-block btn-lg" pending="Saving…">Mark as packed</SubmitButton></form>}
           {step === "ship" && <a href="#courier-card" className="btn btn-primary btn-block btn-lg only-mobile">Book courier or ship</a>}
           {step === "deliver" && <form action={statusAction.bind(null, o.id, "DELIVERED")} className="flex-1"><SubmitButton className="btn btn-primary btn-block btn-lg" pending="Saving…">Mark delivered</SubmitButton></form>}
+          {step === "deliver_asset" && (
+            <a href="#digital-delivery-card" className="btn btn-primary btn-block btn-lg flex-1" style={{ textAlign: "center" }}>
+              ⚡ Deliver Digital Asset (ফাইল আপলোড করুন)
+            </a>
+          )}
         </div>
       )}
     </div>
