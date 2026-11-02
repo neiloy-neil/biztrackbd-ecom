@@ -217,18 +217,27 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
   }
 
   const isDigitalOrder = Boolean(quote?.isDigitalOrder);
+  const hasDigitalItems = Boolean(isDigitalOrder || quote?.lines.some((l) => l.isDigital));
 
-  // Auto-switch away from COD if digital order
-  useEffect(() => {
-    if (isDigitalOrder && method === "COD") {
-      if (pay.uddoktapayEnabled) setMethod("GATEWAY_UDDOKTAPAY");
-      else if (pay.bkashDirectEnabled) setMethod("GATEWAY_BKASH");
-      else if (pay.sslcommerzEnabled) setMethod("GATEWAY_SSLCOMMERZ");
-      else if (pay.bkashNumber) setMethod("MANUAL_BKASH");
-      else if (pay.nagadNumber) setMethod("MANUAL_NAGAD");
-      else setMethod("GATEWAY_UDDOKTAPAY");
+  const availableMethods = useMemo(() => {
+    const list: Method[] = [];
+    if (!isDigitalOrder) {
+      list.push("COD");
     }
-  }, [isDigitalOrder, method, pay]);
+    if (pay.bkashDirectEnabled) list.push("GATEWAY_BKASH");
+    if (pay.sslcommerzEnabled) list.push("GATEWAY_SSLCOMMERZ");
+    if (pay.uddoktapayEnabled) list.push("GATEWAY_UDDOKTAPAY");
+    if (pay.bkashNumber && pay.bkashNumber.trim().length > 0) list.push("MANUAL_BKASH");
+    if (pay.nagadNumber && pay.nagadNumber.trim().length > 0) list.push("MANUAL_NAGAD");
+    return list;
+  }, [isDigitalOrder, pay]);
+
+  // Auto-switch away from COD if digital order, or switch to first available method
+  useEffect(() => {
+    if (availableMethods.length > 0 && !availableMethods.includes(method)) {
+      setMethod(availableMethods[0]!);
+    }
+  }, [availableMethods, method]);
 
   const digitalFields = useMemo(() => {
     if (!quote) return [];
@@ -250,7 +259,13 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
     const e: Errors = {};
     if (!validLocal(phone)) e.phone = errorsText.phone!;
     if (name.trim().length < 2) e.name = errorsText.name!;
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = errorsText.email!;
+    if (hasDigitalItems) {
+      if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+        e.email = lang === "bn" ? "ডিজিটাল সেবার ডেলিভারির জন্য সঠিক ইমেইল আবশ্যক" : "Valid email is required for digital delivery";
+      }
+    } else if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      e.email = errorsText.email!;
+    }
     if (!isDigitalOrder) {
       if (!upazila) e.upazila = errorsText.upazila!;
       if (address.trim().length < 5) e.address = errorsText.address!;
@@ -563,8 +578,15 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
             {err("name")}
           </label>
           <label className="field">
-            <span className="label">{s.email} <span className="opt">{s.optional}</span></span>
-            <input id="f-email" className="input" name="email" type="email" inputMode="email" autoComplete="email" placeholder="name@example.com" value={email} onChange={(e) => setEmail(e.target.value)} {...invalid("email")} />
+            <span className="label">
+              {s.email}{" "}
+              {hasDigitalItems ? (
+                <span style={{ color: "#dc2626", fontWeight: 700 }}>* ({lang === "bn" ? "ডেলিভারির জন্য আবশ্যক" : "Required for delivery"})</span>
+              ) : (
+                <span className="opt">{s.optional}</span>
+              )}
+            </span>
+            <input id="f-email" className="input" name="email" type="email" inputMode="email" autoComplete="email" placeholder="name@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required={hasDigitalItems} {...invalid("email")} />
             {err("email")}
           </label>
         </section>
@@ -706,15 +728,27 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
               <span className="mfs-tag" style={{ background: "linear-gradient(135deg, #0f766e, #0284c7)", color: "#fff", fontWeight: 700 }} aria-hidden="true">ONLINE</span>
             </label>
           )}
+          {availableMethods.length === 0 && (
+            <div style={{ padding: "16px", background: "#fee2e2", border: "1px solid #ef4444", borderRadius: 8, fontSize: 13.5, color: "#991b1b", margin: "12px 0" }}>
+              <b style={{ display: "block", marginBottom: 4 }}>⚠️ {lang === "bn" ? "পেমেন্ট মাধ্যম অনুপলব্ধ" : "Payment Method Unavailable"}</b>
+              <span>
+                {lang === "bn"
+                  ? "এই স্টোরে বর্তমানে কোনো ডিজিটাল পেমেন্ট মাধ্যম কনফিগার করা হয়নি। অনুগ্রহ করে স্টোর কর্তৃপক্ষের সাথে যোগাযোগ করুন।"
+                  : "This store currently has no active digital payment methods configured. Please contact store support."}
+              </span>
+            </div>
+          )}
           {(["MANUAL_BKASH", "MANUAL_NAGAD"] as const).map((m) => {
             const info = mfsInfo(m);
+            // Hide completely if merchant has not configured their manual MFS number
+            if (!info.n || !info.n.trim()) return null;
             const brand = m === "MANUAL_BKASH" ? "bkash" : "nagad";
             const open = method === m;
             return (
               <div key={m} className={`pay-box ${brand}${open ? " open" : ""}`}>
                 <label className="option" style={open ? { padding: 14 } : undefined}>
                   <input type="radio" name="pay" checked={open} disabled={!info.n} onChange={() => setMethod(m)} data-testid={`pay-${brand}`} />
-                  <div className="grow"><div className="t">{info.app}</div><div className="s">{info.n ? s.mfsS : fmt(s.mfsNumberMissing, { app: info.app })}</div></div>
+                  <div className="grow"><div className="t">{info.app}</div><div className="s">{s.mfsS}</div></div>
                   <span className="mfs-tag" style={{ background: brand === "bkash" ? "var(--bkash)" : "var(--nagad)" }} aria-hidden="true">{info.app}</span>
                 </label>
                 {open && info.n && (
@@ -857,13 +891,13 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
         {summary}
         <div style={{ marginTop: 14 }}>
           {formError && <div className="notice" role="alert" style={{ marginBottom: 10 }}>{formError}</div>}
-          <button type="submit" className="btn btn-primary btn-block btn-round" disabled={busy} data-testid="place-order-desktop">{busy ? s.placing : `${s.placeOrder} · ${money(total ?? quote?.subtotal ?? 0, lang)}`}</button>
+          <button type="submit" className="btn btn-primary btn-block btn-round" disabled={busy || (isDigitalOrder && availableMethods.length === 0)} data-testid="place-order-desktop">{busy ? s.placing : isDigitalOrder && availableMethods.length === 0 ? (lang === "bn" ? "পেমেন্ট মাধ্যম নেই" : "Payment Unavailable") : `${s.placeOrder} · ${money(total ?? quote?.subtotal ?? 0, lang)}`}</button>
         </div>
       </aside>
 
       <div className="stickybar checkout-bar mobile-summary" style={{ flexDirection: "column" }}>
         {formError && <div className="notice" role="alert">{formError}</div>}
-        <button type="submit" className="btn btn-primary btn-block btn-round" disabled={busy} data-testid="place-order">{busy ? s.placing : `${s.placeOrder} · ${money(total ?? quote?.subtotal ?? 0, lang)}`}</button>
+        <button type="submit" className="btn btn-primary btn-block btn-round" disabled={busy || (isDigitalOrder && availableMethods.length === 0)} data-testid="place-order">{busy ? s.placing : isDigitalOrder && availableMethods.length === 0 ? (lang === "bn" ? "পেমেন্ট মাধ্যম নেই" : "Payment Unavailable") : `${s.placeOrder} · ${money(total ?? quote?.subtotal ?? 0, lang)}`}</button>
       </div>
     </form>
   );

@@ -574,6 +574,9 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
 
               {p.isDigital && (
                 <div style={{ background: "rgba(16, 185, 129, 0.05)", padding: 12, borderRadius: 8, border: "1px solid rgba(16, 185, 129, 0.2)" }}>
+                  <div style={{ padding: "8px 12px", background: "#f0fdf4", border: "1px solid #86efac", borderRadius: 6, fontSize: 13, color: "#166534", marginBottom: 12 }}>
+                    💡 <b>Digital Checkout Rules:</b> For digital items, delivery charges are ৳0, Cash on Delivery (COD) is disabled, and customer email is mandatory. Make sure your bKash/Nagad number or payment gateway is configured in <Link href="/settings/payments" style={{ textDecoration: "underline", fontWeight: 600 }}>Payment Settings</Link> so customers can complete checkout.
+                  </div>
                   <label className="field">
                     <span className="label">Delivery Method</span>
                     <select

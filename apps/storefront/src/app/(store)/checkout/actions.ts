@@ -55,6 +55,14 @@ export async function placeOrderAction(p: PlaceOrderPayload): Promise<PlaceOrder
   const store = await getStore();
   try {
     const isDigitalOrder = Boolean(p.isDigital) || p.shipping.division === "Digital" || p.shipping.district === "Digital";
+    if (isDigitalOrder) {
+      if (!p.customer.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.customer.email.trim())) {
+        return { ok: false, error: "A valid email address is mandatory for digital delivery.", field: "email" };
+      }
+      if (p.paymentMethod === "COD") {
+        return { ok: false, error: "Cash on delivery is not available for digital products. Please choose an online payment method.", field: "paymentMethod" };
+      }
+    }
     // Fail early with a field error rather than letting a made-up district reach the order.
     if (!isDigitalOrder && !isValidAddress(p.shipping.division, p.shipping.district, p.shipping.upazila)) {
       return { ok: false, error: "Choose your division, district and upazila from the lists.", field: "district" };

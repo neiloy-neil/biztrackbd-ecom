@@ -14,6 +14,7 @@ import { fetchUnifiedCourierFraud, toCourierFraudStats } from "../fraud/courier-
 import { FLAG_LABELS } from "../fraud/assess";
 import { createOrderDownloadToken } from "../orders/download";
 import { currentSmsSender } from "../customers/auth";
+import { sendCustomerDigitalDeliveryEmail } from "../mail/send";
 
 const actorName = (a: StaffActor) => a.name ?? a.email;
 
@@ -606,14 +607,33 @@ export async function deliverDigitalAsset(
       fileUrl: cleanUrl,
     });
 
-    if (input.notifyCustomer && order.customerPhone) {
-      try {
-        const store = await tx.tenant.findUnique({ where: { id: tenantId }, select: { name: true, subdomain: true } });
-        const storeName = store?.name || "BizTrack Store";
-        const smsMsg = `আপনার অর্ডার #${order.orderNumber} এর ডিজিটাল ফাইল প্রস্তুত হয়েছে। ডাউনলোড করুন: https://${store?.subdomain || "amarbumi"}.biztrack.bd/d/${token} - ${storeName}`;
-        await currentSmsSender().send("platform", order.customerPhone, smsMsg);
-      } catch (err) {
-        console.warn("[deliverDigitalAsset] SMS notify failed:", err);
+    if (input.notifyCustomer) {
+      const store = await tx.tenant.findUnique({ where: { id: tenantId }, select: { name: true, subdomain: true } });
+      const storeName = store?.name || "BizTrack Store";
+      const fullDownloadUrl = `https://${store?.subdomain || "amarbumi"}.biztrack.bd/d/${token}`;
+
+      if (order.customerPhone) {
+        try {
+          const smsMsg = `আপনার অর্ডার #${order.orderNumber} এর ডিজিটাল ফাইল প্রস্তুত হয়েছে। ডাউনলোড করুন: ${fullDownloadUrl} - ${storeName}`;
+          await currentSmsSender().send("platform", order.customerPhone, smsMsg);
+        } catch (err) {
+          console.warn("[deliverDigitalAsset] SMS notify failed:", err);
+        }
+      }
+
+      if (order.customerEmail) {
+        try {
+          await sendCustomerDigitalDeliveryEmail({
+            to: order.customerEmail,
+            orderNumber: order.orderNumber,
+            storeName,
+            customerName: order.customerName,
+            productTitle: item.productTitle,
+            downloadUrl: fullDownloadUrl,
+          });
+        } catch (err) {
+          console.warn("[deliverDigitalAsset] Email notify failed:", err);
+        }
       }
     }
 

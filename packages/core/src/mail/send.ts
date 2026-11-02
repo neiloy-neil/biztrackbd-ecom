@@ -176,3 +176,36 @@ export async function sendSignInCode(email: string, lang: MailLang | "both" = "b
     return "failed";
   }
 }
+
+/**
+ * Sends a digital delivery email to the customer with their download / access link.
+ */
+export async function sendCustomerDigitalDeliveryEmail(opts: {
+  to: string;
+  orderNumber: string;
+  storeName: string;
+  customerName?: string | null;
+  productTitle: string;
+  downloadUrl: string;
+}): Promise<"sent" | "skipped" | "failed"> {
+  const subject = `আপনার ডিজিটাল ফাইল প্রস্তুত হয়েছে - অর্ডার #${opts.orderNumber} (${opts.storeName})`;
+  const html = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+      <h2 style="color: #0f766e; margin-top: 0;">${opts.storeName}</h2>
+      <p>প্রিয় ${opts.customerName || "গ্রাহক"},</p>
+      <p>আপনার অর্ডার <b>#${opts.orderNumber}</b> (${opts.productTitle}) এর ডিজিটাল ফাইল প্রস্তুত করা হয়েছে।</p>
+      <div style="margin: 24px 0;">
+        <a href="${opts.downloadUrl}" style="background-color: #0f766e; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+          ফাইল ডাউনলোড করুন / এক্সেস করুন
+        </a>
+      </div>
+      <p style="font-size: 13px; color: #64748b;">
+        সরাসরি লিংক: <a href="${opts.downloadUrl}">${opts.downloadUrl}</a>
+      </p>
+      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
+      <p style="font-size: 12px; color: #94a3b8;">ধন্যবাদ,<br/>${opts.storeName}</p>
+    </div>
+  `;
+  const text = `প্রিয় ${opts.customerName || "গ্রাহক"},\n\nআপনার অর্ডার #${opts.orderNumber} এর ডিজিটাল ফাইল প্রস্তুত হয়েছে। ডাউনলোড লিংক: ${opts.downloadUrl}\n\nধন্যবাদ,\n${opts.storeName}`;
+  return deliver(opts.to, subject, html, text);
+}
