@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies, headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import {
@@ -142,7 +143,7 @@ export type AuthState =
  * Real sign-in: the access token in the cookie is checked with Supabase (cached 30 seconds), the account's confirmed email
  * decides which stores it may work in, and a person who has set up two-factor must have completed it for this session.
  */
-export async function resolveAuth(): Promise<AuthState> {
+export const resolveAuth = cache(async (): Promise<AuthState> => {
   const jar = await cookies();
   const token = jar.get(AT)?.value;
   if (!token) return { state: "anon" };
@@ -162,10 +163,10 @@ export async function resolveAuth(): Promise<AuthState> {
   const member = stores.find((m) => m.tenantId === chosen) ?? (stores.length === 1 ? stores[0] : undefined);
   if (!member) return { state: "choose", user, stores };
   return { state: "ok", user, member, stores };
-}
+});
 
 /** Null for anyone who is not signed in to a store (for route handlers that answer 401 instead of redirecting). */
-export async function getSessionOrNull(): Promise<AdminSession | null> {
+export const getSessionOrNull = cache(async (): Promise<AdminSession | null> => {
   const demo = await getDemoSession();
   if (demo) return demo;
   const imp = await getImpersonationSession();
@@ -176,7 +177,7 @@ export async function getSessionOrNull(): Promise<AdminSession | null> {
   const a = await resolveAuth();
   if (a.state !== "ok") return null;
   return buildSession(a.member, a.user.email);
-}
+});
 
 async function buildSession(m: StaffMembership, email: string): Promise<AdminSession> {
   const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim();
@@ -193,7 +194,7 @@ async function buildSession(m: StaffMembership, email: string): Promise<AdminSes
  * For pages: sends people who are not signed in to the right sign-in step. In development with DEV_AUTH=1 it acts as one seeded
  * staff member chosen by a cookie so each role can be tried; that stand-in refuses to run in production.
  */
-export async function getSession(): Promise<AdminSession> {
+export const getSession = cache(async (): Promise<AdminSession> => {
   const demo = await getDemoSession();
   if (demo) return demo;
   const imp = await getImpersonationSession();
@@ -211,7 +212,7 @@ export async function getSession(): Promise<AdminSession> {
   if (a.state === "no-store") redirect("/login?err=no-store");
   if (a.state === "choose") redirect("/choose-store");
   return buildSession(a.member, a.user.email);
-}
+});
 
 async function devSession(): Promise<AdminSession | null> {
   const wantedTenant = (await cookies()).get(DEV_TENANT_COOKIE)?.value;

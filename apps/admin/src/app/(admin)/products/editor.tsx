@@ -180,7 +180,6 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
     toast.update(toastId, "Product saved successfully!", "success");
     // Keep busy=true to maintain disabled button state and loading indicators during router transition
     router.push(`/products/${r.id}?saved=1`);
-    router.refresh();
   }
 
   return (

@@ -1,6 +1,7 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { ROLE_LABELS, can, getActiveAnnouncementsForTenant, getStoreSettings, getTenantActiveModules, getTenantCapabilities, shellCounts, type Area, type TenantCapabilities } from "@biztrackbd/core";
+import { ROLE_LABELS, can, getAdminShellContext, type Area, type TenantCapabilities } from "@biztrackbd/core";
 import { withTenant } from "@biztrackbd/db";
 import { ChartIcon, CustomersIcon, GearIcon, HomeIcon, MoreIcon, OrdersIcon, ProductsIcon, PuzzleIcon, StoreIcon, TagIcon } from "@/components/icons";
 import { NavLink } from "@/components/nav";
@@ -27,6 +28,7 @@ import { SubmitButton } from "@/components/ui";
 
 // Every admin page depends on who is signed in, so nothing here may be prerendered at build time.
 export const dynamic = "force-dynamic";
+export const preferredRegion = ["bom1"];
 
 interface Item { href: string; label: string; area: Area; exact?: boolean; badge?: "check"; moduleKey?: string; capability?: keyof TenantCapabilities }
 interface Group { id: string; label: string; icon: React.ReactNode; items: Item[]; activePrefixes?: string[]; capability?: keyof TenantCapabilities }
@@ -148,16 +150,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const s = await getSession();
   const role = s.user.role;
   const lang = asLang((await cookies()).get(LANG_COOKIE)?.value);
-  // Production deliberately uses a one-connection tenant pool. Starting several
-  // interactive RLS transactions together makes the losing calls hit Prisma P2028
-  // while the first transaction still owns that connection.
-  const staff = await withTenant(s.tenantId, (tx) => tx.tenantUser.findMany({ where: { isActive: true }, orderBy: { createdAt: "asc" }, select: { email: true, name: true, role: true } }));
-  const settings = can(role, "design") ? await getStoreSettings(s.tenantId, s.actor) : null;
-  const counts = await shellCounts(s.tenantId, s.actor);
-  const announcements = await getActiveAnnouncementsForTenant(s.tenantId);
-  const activeModules = await getTenantActiveModules(s.tenantId);
-  const capabilities = await getTenantCapabilities(s.tenantId);
-  const storeName = settings?.storeName ?? s.tenantSubdomain;
+
+  // Consolidated admin shell data: counts, store metadata, active modules, and capabilities
+  // fetched in a single efficient database transaction to prevent pool contention.
+  const shell = await getAdminShellContext(s.tenantId, s.actor);
+  const { counts, storeName: loadedStoreName, activeModules, capabilities, announcements } = shell;
+  const storeName = loadedStoreName || s.tenantSubdomain;
+  const staff = authMode() === "dev" ? await withTenant(s.tenantId, (tx) => tx.tenantUser.findMany({ where: { isActive: true }, orderBy: { createdAt: "asc" }, select: { email: true, name: true, role: true } })) : [];
   const check = counts.check;
   const a = s.access;
 
@@ -324,7 +323,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </nav>
         <CommandPalette />
         <AdminCopilotWidget lang={lang} />
-        <NavigationProgress />
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
         <ToastContainer />
       </div>
     </ShellProvider>

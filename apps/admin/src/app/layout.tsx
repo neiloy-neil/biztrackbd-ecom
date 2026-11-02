@@ -10,6 +10,7 @@ import { DoubleSubmitGuard } from "@biztrackbd/ui";
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-jakarta", display: "swap" });
 const hind = Hind_Siliguri({ subsets: ["bengali", "latin"], weight: ["400", "500", "600", "700"], variable: "--font-hind", display: "swap" });
 
+export const preferredRegion = ["bom1"];
 export const metadata: Metadata = {
   title: { default: "BizTrackBD Admin", template: "%s | BizTrackBD" },
   robots: { index: false, follow: false },

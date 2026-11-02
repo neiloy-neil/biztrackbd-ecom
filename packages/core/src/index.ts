@@ -39,7 +39,7 @@ export { DEMO_TEMPLATES, demoTemplate, type DemoTemplate, type DemoProduct, type
 export { resetDemoStore, DEMO_TEMPLATE_IDS, type DemoDeps, type DemoResult } from "./demo/seed";
 export { isDemoStore, assertNotDemo } from "./demo/guard";
 export { productSvg, bannerSvg, ART_KINDS, type ArtKind, type Palette } from "./demo/art";
-export { adminSearch, shellCounts, type SearchHit, type ShellCounts } from "./admin/shell";
+export { adminSearch, shellCounts, getAdminShellContext, type SearchHit, type ShellCounts, type AdminShellContext } from "./admin/shell";
 export {
   getDashboard, DASHBOARD_RANGES, type DashboardRange, dhakaDate, addDays, STORE_TZ, type Dashboard, type SetupStep,
   type FunnelStage, type FulfillmentFunnel, type CodCashflowLedger, type CourierHealth, type CourierShareItem,
