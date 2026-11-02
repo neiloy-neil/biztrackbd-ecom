@@ -34,6 +34,7 @@ export { messageCustomer, ORDER_MESSAGE_MAX } from "./admin/order-messages";
 export { getEditableOrder, editOrderItems, type EditableOrder, type WantedLine } from "./admin/order-items";
 export { listOrders, orderTabCounts, setOrderTags, listOrderTags, setCallNote, bulkChangeStatus, ordersCsv, cleanTag, getOrderDetail, deliverDigitalAsset, verifyPayment, rejectPayment, recordAdvancePayment, addOrderNote, updateShippingAddress, markPacked, shipManually, recordPrinted, type OrderTab, type OrderFilters, type OrderRow, type OrderDetail, type AddressEdit } from "./admin/orders";
 export { createOrderDownloadToken, verifyOrderDownloadToken, type DownloadTokenPayload } from "./orders/download";
+export { handleDigitalOrderPaymentSuccess, dispatchDigitalOrderDeliveryNotifications, type DigitalPaymentResult } from "./orders/digital";
 export { recordOrderEvent, type OrderEventType } from "./admin/order-events";
 export { DEMO_TEMPLATES, demoTemplate, type DemoTemplate, type DemoProduct, type DemoVariant } from "./demo/templates";
 export { resetDemoStore, DEMO_TEMPLATE_IDS, type DemoDeps, type DemoResult } from "./demo/seed";

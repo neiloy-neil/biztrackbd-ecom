@@ -225,6 +225,8 @@ export async function notifyPlatformSuperAdmins(event: PlatformPushEvent): Promi
       ? "platform-critical-alerts"
       : event.type === "TENANT_SIGNUP"
       ? "platform-signups"
+      : event.type === "SUPPORT_TICKET"
+      ? "platform-support"
       : "platform-approvals");
 
   const messages: ExpoPushMessage[] = devices.map((d) => ({

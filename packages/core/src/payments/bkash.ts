@@ -2,6 +2,7 @@ import { withTenant } from "@biztrackbd/db";
 import { NotFoundError, ValidationError } from "../errors";
 import { sendServerPurchase } from "../growth/tracking";
 import { loadCredentials } from "../vault/integrations";
+import { handleDigitalOrderPaymentSuccess, dispatchDigitalOrderDeliveryNotifications } from "../orders/digital";
 
 export const DEFAULT_BKASH_SANDBOX_URL = "https://tokenized.sandbox.bka.sh/v1.2.0-beta";
 export const DEFAULT_BKASH_LIVE_URL = "https://tokenized.pay.bka.sh/v1.2.0-beta";
@@ -333,6 +334,7 @@ export async function processBkashOrderSuccess(
 
   let orderNumber = "";
 
+  let autoDelivered = false;
   await withTenant(tenantId, async (tx) => {
     const order = await tx.order.findFirst({ where: { id: orderId } });
     if (!order) throw new NotFoundError("Order");
@@ -364,8 +366,15 @@ export async function processBkashOrderSuccess(
           reason: `bKash Direct tokenized payment confirmed (TrxID: ${execResult.trxId || paymentId})`,
         },
       });
+
+      const digitalRes = await handleDigitalOrderPaymentSuccess(tx, tenantId, orderId);
+      autoDelivered = digitalRes.autoDelivered;
     }
   });
+
+  if (autoDelivered) {
+    dispatchDigitalOrderDeliveryNotifications(tenantId, orderId).catch(() => undefined);
+  }
 
   // Report conversion tracking
   sendServerPurchase(tenantId, orderId, ctx).catch(() => undefined);

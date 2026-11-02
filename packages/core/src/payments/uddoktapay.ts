@@ -2,6 +2,7 @@ import { withTenant, getPlatformPrisma, type OrderStatus, type Prisma } from "@b
 import { NotFoundError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
 import { sendServerPurchase } from "../growth/tracking";
+import { handleDigitalOrderPaymentSuccess, dispatchDigitalOrderDeliveryNotifications } from "../orders/digital";
 import { loadCredentials } from "../vault/integrations";
 import { enqueueNotificationJob } from "../messaging/queue";
 import { addPeriod } from "../platform/lifecycle";
@@ -307,6 +308,7 @@ export async function processUddoktaPayOrderSuccess(
     throw new ValidationError("Missing orderId in payment metadata");
   }
 
+  let autoDelivered = false;
   await withTenant(tenantId, async (tx) => {
     const order = await tx.order.findFirst({ where: { id: orderId } });
     if (!order) throw new NotFoundError("Order");
@@ -316,6 +318,7 @@ export async function processUddoktaPayOrderSuccess(
         where: { id: orderId },
         data: {
           paymentStatus: "PAID",
+          status: "CONFIRMED",
           paymentMethod: "GATEWAY_UDDOKTAPAY",
           mfsTrxId: verified.transactionId || invoiceId,
           mfsSenderNumber: verified.senderNumber || null,
@@ -329,14 +332,21 @@ export async function processUddoktaPayOrderSuccess(
           tenantId,
           orderId,
           fromStatus: order.status,
-          toStatus: order.status,
+          toStatus: "CONFIRMED",
           actorType: "SYSTEM",
           actorId: "uddoktapay",
           reason: `Automated UddoktaPay payment (${verified.paymentMethod || "online"} - Trx: ${verified.transactionId})`,
         },
       });
+
+      const digitalRes = await handleDigitalOrderPaymentSuccess(tx, tenantId, orderId);
+      autoDelivered = digitalRes.autoDelivered;
     }
   });
+
+  if (autoDelivered) {
+    dispatchDigitalOrderDeliveryNotifications(tenantId, orderId).catch(() => undefined);
+  }
 
   // Report the server purchase event for accurate tracking
   sendServerPurchase(tenantId, orderId, ctx).catch(() => undefined);

@@ -2,6 +2,7 @@ import { withTenant } from "@biztrackbd/db";
 import { NotFoundError, ValidationError } from "../errors";
 import { sendServerPurchase } from "../growth/tracking";
 import { loadCredentials } from "../vault/integrations";
+import { handleDigitalOrderPaymentSuccess, dispatchDigitalOrderDeliveryNotifications } from "../orders/digital";
 
 export const DEFAULT_SSLCOMMERZ_SANDBOX_URL = "https://sandbox.sslcommerz.com";
 export const DEFAULT_SSLCOMMERZ_LIVE_URL = "https://securepay.sslcommerz.com";
@@ -277,6 +278,7 @@ export async function processSslCommerzOrderSuccess(
 
   let orderNumber = "";
 
+  let autoDelivered = false;
   await withTenant(tenantId, async (tx) => {
     const order = await tx.order.findFirst({ where: { id: orderId } });
     if (!order) throw new NotFoundError("Order");
@@ -319,8 +321,15 @@ export async function processSslCommerzOrderSuccess(
           })`,
         },
       });
+
+      const digitalRes = await handleDigitalOrderPaymentSuccess(tx, tenantId, orderId);
+      autoDelivered = digitalRes.autoDelivered;
     }
   });
+
+  if (autoDelivered) {
+    dispatchDigitalOrderDeliveryNotifications(tenantId, orderId).catch(() => undefined);
+  }
 
   // Report the server purchase event for accurate conversion tracking
   sendServerPurchase(tenantId, orderId, ctx).catch(() => undefined);

@@ -74,6 +74,14 @@ async function run(input: NotifyInput, deps?: Deps): Promise<void> {
       body: input.title,
       data: { kind: input.kind },
     }).catch(() => {});
+  } else if (input.kind === "INQUIRY") {
+    notifyPlatformSuperAdmins({
+      type: "SUPPORT_TICKET",
+      title: "📩 নতুন কন্টাক্ট ইনকোয়ারি",
+      body: input.title,
+      channelId: "platform-support",
+      data: { kind: input.kind },
+    }).catch(() => {});
   }
 
   const sender = deps?.sender !== undefined ? deps.sender : emailSenderFromEnv();

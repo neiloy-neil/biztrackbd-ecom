@@ -17,9 +17,14 @@ export const metadata: Metadata = { title: "Order" };
 const EVENT_TONE: Record<string, string> = { PAYMENT_VERIFIED: "pay", PAYMENT_REJECTED: "bad", NOTE: "note" };
 
 /** The one thing to do next, so the owner on a phone is never hunting for the button. */
-function nextStep(o: OrderDetail): "verify" | "confirm" | "pack" | "ship" | "deliver" | null {
+function nextStep(o: OrderDetail): "verify" | "confirm" | "pack" | "ship" | "deliver" | "deliver_asset" | null {
   if (o.status === "CANCELLED" || o.status === "REFUNDED" || o.status === "RETURNED" || o.status === "DELIVERED") return null;
   if (o.paymentStatus === "PENDING_VERIFICATION") return "verify";
+  if (o.isDigital) {
+    const hasUndelivered = o.items.some((i) => i.isDigital && !i.digitalDeliveredAt);
+    if (hasUndelivered) return "deliver_asset";
+    return null;
+  }
   if (o.status === "PENDING") return "confirm";
   if (o.status === "CONFIRMED") return "pack";
   if (o.status === "PROCESSING") return "ship";
@@ -102,7 +107,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
         sub={`${dateTime(o.createdAt)} · ${CHANNEL[o.channel] ?? o.channel}`}
         actions={
           <>
-            {o.status === "PENDING" && (
+            {o.status === "PENDING" && !o.isDigital && (
               <a
                 href={waConfirmLink}
                 target="_blank"
@@ -113,7 +118,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
                 WhatsApp Confirm
               </a>
             )}
-            {o.status === "SHIPPED" && (
+            {o.status === "SHIPPED" && !o.isDigital && (
               <a
                 href={waShippingLink}
                 target="_blank"
@@ -124,7 +129,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
                 Send Tracking
               </a>
             )}
-            {(o.status === "CONFIRMED" || o.status === "PROCESSING") && (
+            {(o.status === "CONFIRMED" || o.status === "PROCESSING") && !o.isDigital && (
               <a
                 href={waCashReminderLink}
                 target="_blank"
@@ -136,7 +141,9 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               </a>
             )}
             <Link href={`/orders/print?ids=${o.id}&doc=invoice`} target="_blank" className="btn btn-secondary btn-sm" prefetch={false}>Print invoice</Link>
-            <Link href={`/orders/print?ids=${o.id}&doc=slip`} target="_blank" className="btn btn-secondary btn-sm" prefetch={false}>Packing slip</Link>
+            {!o.isDigital && (
+              <Link href={`/orders/print?ids=${o.id}&doc=slip`} target="_blank" className="btn btn-secondary btn-sm" prefetch={false}>Packing slip</Link>
+            )}
             {o.channel === "TABLE_ORDER" && (
               <Link href={`/orders/print?ids=${o.id}&doc=kitchen_slip&size=thermal`} target="_blank" className="btn btn-secondary btn-sm" prefetch={false} data-testid="print-kot-btn">
                 Kitchen slip (KOT)
@@ -232,16 +239,16 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
                       </div>
                     ) : (
                       canEdit && o.status !== "CANCELLED" && o.status !== "REFUNDED" && (
-                        <details className="mt-xs">
+                        <details open className="mt-xs" id="digital-delivery-card">
                           <summary className="link cursor-pointer font-medium text-xs">⚡ Deliver Document / File (ডেলিভারি ফাইল যুক্ত করুন)</summary>
-                          <form action={deliverDigitalAssetAction.bind(null, o.id, i.id)} className="stack gap-xs mt-xs p-xs border rounded" style={{ padding: 8, marginTop: 6 }}>
+                          <form action={deliverDigitalAssetAction.bind(null, o.id, i.id)} className="stack gap-xs mt-xs p-xs border rounded" style={{ padding: 8, marginTop: 6, background: "rgba(15, 118, 110, 0.04)", borderColor: "rgba(15, 118, 110, 0.25)" }}>
                             <label className="field mb-0">
                               <span className="label text-xs">Digital Asset URL (Google Drive / Direct PDF / Image Link)</span>
                               <input className="input text-xs" name="fileUrl" required placeholder="https://drive.google.com/... or https://..." />
                             </label>
                             <label className="row gap-xs items-center text-xs mt-xs">
                               <input type="checkbox" name="notifyCustomer" defaultChecked />
-                              <span>Notify customer via SMS with access link</span>
+                              <span>Notify customer via Email & SMS with download link</span>
                             </label>
                             <SubmitButton className="btn btn-primary btn-sm mt-xs" pending="Delivering…">
                               Deliver Asset & Complete Order
@@ -434,63 +441,83 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
             </section>
           )}
 
-          <section className="card" data-testid="delivery-card">
-            <div className="card-head"><h2>Delivery</h2></div>
-            <div>{o.address.line}</div>
-            <div className="muted">{o.address.area}, {o.address.district} · {o.address.division}</div>
-            {o.notes && <div className="notice info mt-sm">Customer note: {o.notes}</div>}
-            {canEdit && o.canEditAddress && <div className="mt-sm"><AddressEditor orderId={o.id} value={{ name: o.customerName, line: o.address.line, area: o.address.area, district: o.address.district, division: o.address.division }} /></div>}
-          </section>
+          {o.isDigital ? (
+            <section className="card" data-testid="delivery-card" style={{ borderColor: "rgba(15, 118, 110, 0.3)" }}>
+              <div className="card-head">
+                <h2 style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span>⚡ Digital Delivery</span>
+                </h2>
+                <span className="pill green">ONLINE</span>
+              </div>
+              <div className="text-sm">
+                <b>Delivery Method:</b> Automated Download / Secure Link
+              </div>
+              <div className="muted text-sm mt-xs">
+                No physical shipping or courier dispatch required. Assets are accessible directly via customer order page and download token.
+              </div>
+              {o.notes && <div className="notice info mt-sm">Customer note: {o.notes}</div>}
+            </section>
+          ) : (
+            <section className="card" data-testid="delivery-card">
+              <div className="card-head"><h2>Delivery</h2></div>
+              <div>{o.address.line}</div>
+              <div className="muted">{o.address.area}, {o.address.district} · {o.address.division}</div>
+              {o.notes && <div className="notice info mt-sm">Customer note: {o.notes}</div>}
+              {canEdit && o.canEditAddress && <div className="mt-sm"><AddressEditor orderId={o.id} value={{ name: o.customerName, line: o.address.line, area: o.address.area, district: o.address.district, division: o.address.division }} /></div>}
+            </section>
+          )}
 
-          <section className="card" id="courier-card" data-testid="courier-card">
-            <div className="card-head"><h2>Courier</h2>{o.courier.status && <span className={`pill ${o.courier.status === "DELIVERED" ? "ok" : o.courier.status === "HOLD" ? "warn" : "bad"}`} data-testid="courier-status">{COURIER_STATUS_LABELS[o.courier.status]}</span>}</div>
-            {o.courier.provider && (
-              <dl className="kv">
-                <dt>Courier</dt><dd>{courierName(o.courier.provider)}</dd>
-                {o.courier.trackingCode && (<><dt>Tracking</dt><dd data-testid="tracking">{o.courier.trackingUrl ? <a className="link" href={o.courier.trackingUrl} target="_blank" rel="noopener noreferrer">{o.courier.trackingCode}</a> : o.courier.trackingCode}</dd></>)}
-                {o.courier.bookedAt && (<><dt>Booked</dt><dd>{dateTime(o.courier.bookedAt)}</dd></>)}
-                {o.courier.syncedAt && o.status === "SHIPPED" && (<><dt>Last checked</dt><dd>{dateTime(o.courier.syncedAt)}</dd></>)}
-                {o.courier.fee != null && (<><dt>Courier charge</dt><dd className="num">{taka(o.courier.fee)}</dd></>)}
-              </dl>
-            )}
-            {o.courier.consignmentId && o.status === "SHIPPED" && (
-              <form action={refreshCourierAction.bind(null, o.id)} className="mt-sm"><SubmitButton className="btn btn-secondary btn-sm" pending="Checking…">Check status now</SubmitButton></form>
-            )}
-            {canBook && couriers.length > 0 && (
-              <form action={bookAction.bind(null, o.id)} className="stack mt-xs" data-testid="book-form">
-                <fieldset className="field border-none p-0 m-0">
-                  <legend className="label">Book with</legend>
-                  <div className="chips">
-                    {couriers.map((c) => (
-                      <label key={c.provider} className="chip cursor-pointer">
-                        <input type="radio" name="provider" value={c.provider} defaultChecked={c.provider === preferred} required /> {c.label}{c.mode === "TEST" ? " (test)" : ""}
-                      </label>
-                    ))}
+          {!o.isDigital && (
+            <section className="card" id="courier-card" data-testid="courier-card">
+              <div className="card-head"><h2>Courier</h2>{o.courier.status && <span className={`pill ${o.courier.status === "DELIVERED" ? "ok" : o.courier.status === "HOLD" ? "warn" : "bad"}`} data-testid="courier-status">{COURIER_STATUS_LABELS[o.courier.status]}</span>}</div>
+              {o.courier.provider && (
+                <dl className="kv">
+                  <dt>Courier</dt><dd>{courierName(o.courier.provider)}</dd>
+                  {o.courier.trackingCode && (<><dt>Tracking</dt><dd data-testid="tracking">{o.courier.trackingUrl ? <a className="link" href={o.courier.trackingUrl} target="_blank" rel="noopener noreferrer">{o.courier.trackingCode}</a> : o.courier.trackingCode}</dd></>)}
+                  {o.courier.bookedAt && (<><dt>Booked</dt><dd>{dateTime(o.courier.bookedAt)}</dd></>)}
+                  {o.courier.syncedAt && o.status === "SHIPPED" && (<><dt>Last checked</dt><dd>{dateTime(o.courier.syncedAt)}</dd></>)}
+                  {o.courier.fee != null && (<><dt>Courier charge</dt><dd className="num">{taka(o.courier.fee)}</dd></>)}
+                </dl>
+              )}
+              {o.courier.consignmentId && o.status === "SHIPPED" && (
+                <form action={refreshCourierAction.bind(null, o.id)} className="mt-sm"><SubmitButton className="btn btn-secondary btn-sm" pending="Checking…">Check status now</SubmitButton></form>
+              )}
+              {canBook && couriers.length > 0 && (
+                <form action={bookAction.bind(null, o.id)} className="stack mt-xs" data-testid="book-form">
+                  <fieldset className="field border-none p-0 m-0">
+                    <legend className="label">Book with</legend>
+                    <div className="chips">
+                      {couriers.map((c) => (
+                        <label key={c.provider} className="chip cursor-pointer">
+                          <input type="radio" name="provider" value={c.provider} defaultChecked={c.provider === preferred} required /> {c.label}{c.mode === "TEST" ? " (test)" : ""}
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                  <div className="row-2">
+                    <label className="field mb-0"><span className="label">Weight (kg)</span><input className="input" name="weight" type="number" inputMode="decimal" step="0.1" min="0.1" max="30" defaultValue="0.5" /></label>
+                    <label className="field mb-0"><span className="label">Note to courier <span className="opt">(optional)</span></span><input className="input" name="note" maxLength={150} defaultValue={o.notes ?? ""} /></label>
                   </div>
-                </fieldset>
-                <div className="row-2">
-                  <label className="field mb-0"><span className="label">Weight (kg)</span><input className="input" name="weight" type="number" inputMode="decimal" step="0.1" min="0.1" max="30" defaultValue="0.5" /></label>
-                  <label className="field mb-0"><span className="label">Note to courier <span className="opt">(optional)</span></span><input className="input" name="note" maxLength={150} defaultValue={o.notes ?? ""} /></label>
-                </div>
-                <p className="muted text-sm">{o.paymentMethod === "COD" && o.paymentStatus !== "PAID" ? `The courier will collect ${taka(o.totals.total)}.` : "Already paid. The courier collects nothing."}</p>
-                <SubmitButton className="btn btn-primary btn-block btn-lg" pending="Booking…" disabled={held}>Book courier</SubmitButton>
-                {held && <p className="err" role="alert">Release the hold above before booking.</p>}
-              </form>
-            )}
-            {canBook && couriers.length === 0 && (
-              <div className="notice info mt-xs">Connect Steadfast, Pathao or RedX with your own keys to book parcels from here. <Link href="/settings/apps?open=steadfast_courier" className="link" prefetch={false}>Add courier keys</Link></div>
-            )}
-            {canBook && (
-              <details className="mt-md" data-testid="manual-ship">
-                <summary className="link cursor-pointer">Deliver it yourself, or book outside this app</summary>
-                <form action={shipAction.bind(null, o.id)} className="stack mt-sm">
-                  <label className="field mb-0"><span className="label">Tracking code <span className="opt">(optional)</span></span><input className="input" name="tracking" maxLength={60} /></label>
-                  <SubmitButton className="btn btn-secondary btn-block" pending="Saving…">Hand over and mark shipped</SubmitButton>
+                  <p className="muted text-sm">{o.paymentMethod === "COD" && o.paymentStatus !== "PAID" ? `The courier will collect ${taka(o.totals.total)}.` : "Already paid. The courier collects nothing."}</p>
+                  <SubmitButton className="btn btn-primary btn-block btn-lg" pending="Booking…" disabled={held}>Book courier</SubmitButton>
+                  {held && <p className="err" role="alert">Release the hold above before booking.</p>}
                 </form>
-              </details>
-            )}
-            {!o.courier.provider && !canBook && <p className="muted">Not shipped yet.</p>}
-          </section>
+              )}
+              {canBook && couriers.length === 0 && (
+                <div className="notice info mt-xs">Connect Steadfast, Pathao or RedX with your own keys to book parcels from here. <Link href="/settings/apps?open=steadfast_courier" className="link" prefetch={false}>Add courier keys</Link></div>
+              )}
+              {canBook && (
+                <details className="mt-md" data-testid="manual-ship">
+                  <summary className="link cursor-pointer">Deliver it yourself, or book outside this app</summary>
+                  <form action={shipAction.bind(null, o.id)} className="stack mt-sm">
+                    <label className="field mb-0"><span className="label">Tracking code <span className="opt">(optional)</span></span><input className="input" name="tracking" maxLength={60} /></label>
+                    <SubmitButton className="btn btn-secondary btn-block" pending="Saving…">Hand over and mark shipped</SubmitButton>
+                  </form>
+                </details>
+              )}
+              {!o.courier.provider && !canBook && <p className="muted">Not shipped yet.</p>}
+            </section>
+          )}
 
           {canCancel && (
             <section className="card" data-testid="cancel-order-card">

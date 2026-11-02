@@ -24,6 +24,7 @@ import { attributeOrderToAffiliate, settleAffiliateOrderCommissions } from "../a
 import { emitMerchantWebhookEvent } from "../messaging/webhook";
 
 import { notifyStoreOrder } from "../notifications/push-service";
+import { dispatchDigitalOrderDeliveryNotifications } from "./digital";
 
 const IDEMPOTENCY_TTL_MS = 24 * 3_600_000;
 const TRX_ID = /^[A-Z0-9]{8,12}$/;
@@ -624,6 +625,7 @@ export async function transitionOrder(tenantId: string, orderId: string, to: Ord
 export async function markPaid(tenantId: string, orderId: string, actorId: string, staff?: StaffActor) {
   if (staff) assertCan(staff, "orders", "edit");
   let changed = false;
+  let autoDelivered = false;
   const result = await withTenant(tenantId, async (tx) => {
     const order = await tx.order.findFirst({ where: { id: orderId } });
     if (!order) throw new NotFoundError("Order");
@@ -646,11 +648,19 @@ export async function markPaid(tenantId: string, orderId: string, actorId: strin
     const undeliveredCount = await tx.orderItem.count({
       where: { orderId, digitalDeliveredAt: null },
     });
-    if (order.isDigital && undeliveredCount === 0 && (order.status === "PENDING" || order.status === "CONFIRMED")) {
-      await tx.order.update({
-        where: { id: orderId },
-        data: { status: "DELIVERED", deliveredAt: new Date() },
-      });
+    if (order.isDigital) {
+      if (undeliveredCount === 0 && (order.status === "PENDING" || order.status === "CONFIRMED")) {
+        await tx.order.update({
+          where: { id: orderId },
+          data: { status: "DELIVERED", deliveredAt: new Date() },
+        });
+        autoDelivered = true;
+      } else if (undeliveredCount > 0 && order.status === "PENDING") {
+        await tx.order.update({
+          where: { id: orderId },
+          data: { status: "CONFIRMED" },
+        });
+      }
     }
     if (staff) await audit(tx, tenantId, staff, "order.marked_paid", { orderNumber: order.orderNumber, method: order.paymentMethod, trxId: order.mfsTrxId });
     await recordOrderEvent(tx, tenantId, orderId, {
@@ -660,6 +670,9 @@ export async function markPaid(tenantId: string, orderId: string, actorId: strin
     changed = true;
     return updated;
   });
+  if (autoDelivered) {
+    dispatchDigitalOrderDeliveryNotifications(tenantId, orderId).catch(() => undefined);
+  }
   if (changed) await notifyOrder(tenantId, orderId, "PAYMENT_CONFIRMED");
   return result;
 }
