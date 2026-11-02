@@ -33,6 +33,12 @@ export default async function EditProduct({ params, searchParams }: { params: Pr
   const initial: EditorProduct = {
     id: p.id, title: p.title, titleBn: p.titleBn ?? "", descriptionHtml: p.descriptionHtml, basePrice: p.basePrice, compareAtPrice: p.compareAtPrice, costPrice: p.costPrice,
     status: p.status === "ACTIVE" ? "ACTIVE" : "DRAFT", categoryId: p.categoryId, tags: p.tags, seoTitle: p.seoTitle ?? "", seoDescription: p.seoDescription ?? "", isFeatured: p.isFeatured,
+    isDigital: p.isDigital,
+    digitalDelivery: (p.digitalDelivery as any) || "NONE",
+    digitalFileUrl: p.digitalFileUrl,
+    digitalFileName: p.digitalFileName,
+    digitalFileSize: p.digitalFileSize,
+    digitalCustomFields: p.digitalCustomFields,
     images: p.images, slug: p.slug, options: optionsOf(p.variants),
     variants: p.variants.map((v) => ({ id: v.id, title: v.title, sku: v.sku ?? "", price: v.price, stockQuantity: v.stockQuantity, stockBefore: v.stockQuantity, reorderLevel: v.reorderLevel, isActive: v.isActive ?? true, options: v.options })),
   };

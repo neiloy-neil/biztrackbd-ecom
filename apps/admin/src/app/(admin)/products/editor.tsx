@@ -101,6 +101,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
   const [field, setField] = useState("");
   const [limit, setLimit] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [saveNotice, setSaveNotice] = useState("");
   const [showAiModal, setShowAiModal] = useState(false);
   const [aiPromptHint, setAiPromptHint] = useState("");
   const [aiCustomBrandVoice, setAiCustomBrandVoice] = useState("");
@@ -154,6 +155,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
   async function save(status: "DRAFT" | "ACTIVE") {
     if (busy) return;
     setBusy(true); setError(""); setField(""); setLimit(false);
+    setSaveNotice(isNew ? "Creating product..." : "Saving changes...");
     const r = await saveProductAction({
       title: p.title, titleBn: p.titleBn || null, slug: isNew ? undefined : p.slug, descriptionHtml: p.descriptionHtml, basePrice: p.basePrice || 0,
       compareAtPrice: p.compareAtPrice || null, costPrice: p.costPrice ?? null, status, categoryId: p.categoryId,
@@ -164,8 +166,19 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
       digitalCustomFields: p.digitalCustomFields || null,
       variants: p.variants.map((v) => ({ id: v.id, title: v.title, sku: v.sku || null, price: v.price || 0, stockQuantity: v.stockQuantity, stockBefore: v.stockBefore, reorderLevel: v.reorderLevel, isActive: v.isActive !== false, options: v.options })),
     }, initial.id);
-    setBusy(false);
-    if (!r.ok) { setError(r.error); setField(r.field ?? ""); setLimit(Boolean(r.limit)); window.scrollTo({ top: 0, behavior: "smooth" }); return; }
+
+    if (!r.ok) {
+      setBusy(false);
+      setSaveNotice("");
+      setError(r.error);
+      setField(r.field ?? "");
+      setLimit(Boolean(r.limit));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    setSaveNotice("Saved! Updating page...");
+    // Keep busy=true to maintain disabled button state and loading indicators during router transition
     router.push(`/products/${r.id}?saved=1`);
     router.refresh();
   }
@@ -173,6 +186,11 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
   return (
     <>
       <form onSubmit={(e) => { e.preventDefault(); void save(p.status); }} className="has-sticky" data-testid="product-editor" noValidate>
+        {saveNotice && (
+          <div className="notice good" role="status" style={{ marginBottom: 14 }}>
+            ⏳ {saveNotice}
+          </div>
+        )}
         {error && (
           <div className="notice bad" role="alert" style={{ marginBottom: 14 }} data-testid="editor-error">
             {error} {limit && <Link href="/billing" className="link">See your plan</Link>}
@@ -716,9 +734,33 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
           </div>
         </div>
 
-        <div className="sticky-actions">
-          <button type="button" className="btn btn-secondary btn-lg" disabled={busy || uploading > 0} onClick={() => void save("DRAFT")} data-testid="save-draft">Save draft</button>
-          {canPublish && <button type="button" className="btn btn-primary btn-lg" disabled={busy || uploading > 0} onClick={() => void save("ACTIVE")} data-testid="publish">{busy ? "Saving…" : isNew ? "Publish product" : "Save and publish"}</button>}
+        <div className="sticky-actions" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 10 }}>
+          {busy && (
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 3,
+                background: "linear-gradient(90deg, #3b82f6, #10b981, #3b82f6)",
+                backgroundSize: "200% 100%",
+              }}
+            />
+          )}
+          {saveNotice && (
+            <span style={{ marginRight: "auto", fontSize: 13, fontWeight: 600, color: saveNotice.includes("Saved") ? "#16a34a" : "#2563eb", display: "inline-flex", alignItems: "center", gap: 6 }}>
+              {saveNotice.includes("Saved") ? "✓" : "⏳"} {saveNotice}
+            </span>
+          )}
+          <button type="button" className="btn btn-secondary btn-lg" disabled={busy || uploading > 0} onClick={() => void save("DRAFT")} data-testid="save-draft">
+            {busy ? "Saving draft…" : "Save draft"}
+          </button>
+          {canPublish && (
+            <button type="button" className="btn btn-primary btn-lg" disabled={busy || uploading > 0} onClick={() => void save("ACTIVE")} data-testid="publish">
+              {busy ? "Saving product…" : isNew ? "Publish product" : "Save and publish"}
+            </button>
+          )}
         </div>
       </form>
 

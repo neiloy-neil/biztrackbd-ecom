@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import {
+  createOrderDownloadToken,
   customerExchangeVariants,
   customerReturnableItems,
   getOrderTrackingTimeline,
@@ -38,9 +39,11 @@ export default async function OrderPlaced({
   searchParams,
 }: {
   params: Promise<{ orderId: string }>;
-  searchParams: Promise<{ k?: string; paymentStatus?: string; cancelled?: string; paid?: string }>;
+  searchParams: Promise<{ k?: string; token?: string; paymentStatus?: string; cancelled?: string; paid?: string }>;
 }) {
-  const [{ orderId }, { k, paymentStatus, cancelled, paid }] = await Promise.all([params, searchParams]);
+  const [{ orderId }, sp] = await Promise.all([params, searchParams]);
+  const k = sp.k || sp.token;
+  const { paymentStatus, cancelled, paid } = sp;
   const store = await getStore();
   const lang = await getLang(store.locale);
   const t = makeT(lang);
@@ -96,8 +99,89 @@ export default async function OrderPlaced({
           <p className="muted" style={{ marginTop: 4 }}>{t("sentDetails", { phone })}</p>
         </div>
 
-        {/* Live Courier Tracking Timeline */}
-        <OrderTrackingTimelineComponent timeline={timeline} lang={lang} />
+        {/* Digital Fulfillment Card OR Physical Courier Tracking Timeline */}
+        {order.isDigital ? (
+          <div className="card" style={{ borderColor: "#0f766e", background: "#f0fdfa", padding: 20 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+              <span className="pill" style={{ background: "#0f766e", color: "#fff", fontWeight: 700 }}>⚡ {lang === "bn" ? "ডিজিটাল সেবা / পণ্য" : "Digital Service / Goods"}</span>
+              <span style={{ fontSize: 13, color: "#0f766e", fontWeight: 600 }}>
+                {order.paymentStatus === "PAID"
+                  ? (lang === "bn" ? "পেমেন্ট সফল ও নিশ্চিত" : "Payment Verified")
+                  : (lang === "bn" ? "পেমেন্ট যাচাই চলছে" : "Payment Pending")}
+              </span>
+            </div>
+
+            {order.paymentStatus === "PAID" ? (
+              <div>
+                <p style={{ margin: "4px 0 14px", fontSize: 14, color: "#134e4a", lineHeight: 1.5 }}>
+                  {lang === "bn"
+                    ? "আপনার ডিজিটাল সেবা বা ডকুমেন্টের অর্ডার সফলভাবে গ্রহণ করা হয়েছে। আমাদের টিম খতিয়ান/রেকর্ড প্রস্তুত হওয়া মাত্রই আপনার মোবাইল ও ইমেইলে পাঠিয়ে দেবে।"
+                    : "Your digital service or document order has been placed. Our team will deliver the asset to your phone & email as soon as it is processed."}
+                </p>
+
+                {order.items.map((it) => {
+                  const downloadUrl = it.digitalDeliveryUrl
+                    ? `/d/${createOrderDownloadToken(store.id, order.id, it.id)}`
+                    : null;
+                  const custom = (it.digitalCustomValues && typeof it.digitalCustomValues === "object") ? (it.digitalCustomValues as Record<string, string>) : null;
+
+                  return (
+                    <div key={it.id} style={{ background: "#fff", border: "1px solid #ccfbf1", borderRadius: 8, padding: 14, marginBottom: 10 }}>
+                      <div style={{ fontWeight: 600, fontSize: 15, color: "#0f766e", marginBottom: 6 }}>
+                        {it.productTitle}
+                      </div>
+
+                      {downloadUrl ? (
+                        <div style={{ marginTop: 10 }}>
+                          <a
+                            href={downloadUrl}
+                            className="btn btn-primary btn-round"
+                            style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#0f766e" }}
+                          >
+                            ⬇️ {lang === "bn" ? "ডিজিটাল ফাইল ডাউনলোড করুন" : "Download Digital File"}
+                          </a>
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: 13, color: "#0d9488", display: "flex", alignItems: "center", gap: 6, marginTop: 6 }}>
+                          <span>📄</span>
+                          <span>
+                            {lang === "bn"
+                              ? "আপনার খতিয়ান / জমির রেকর্ড সেবাটি বর্তমানে প্রসেসিং রয়েছে।"
+                              : "This digital asset / service is currently being processed."}
+                          </span>
+                        </div>
+                      )}
+
+                      {custom && Object.keys(custom).length > 0 && (
+                        <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px dashed #e2e8f0" }}>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>
+                            {lang === "bn" ? "আপনার দেওয়া তথ্য (জমির বিবরণ)" : "Your Submitted Details"}
+                          </span>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 8, marginTop: 6, fontSize: 13 }}>
+                            {Object.entries(custom).map(([k, v]) => (
+                              <div key={k}>
+                                <span style={{ color: "#64748b" }}>{k}: </span>
+                                <b>{String(v)}</b>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p style={{ margin: 0, fontSize: 13.5, color: "#92400e" }}>
+                {lang === "bn"
+                  ? "আপনার পেমেন্ট যাচাই হওয়ার সাথে সাথে ডিজিটাল সেবাটি সক্রিয় হবে।"
+                  : "Your digital service will be processed as soon as payment is confirmed."}
+              </p>
+            )}
+          </div>
+        ) : (
+          <OrderTrackingTimelineComponent timeline={timeline} lang={lang} />
+        )}
 
         {order.paymentStatus === "PAID" ? (
           <div className="card" style={{ borderColor: "#16a34a", background: "#f0fdf4" }}>
@@ -146,14 +230,14 @@ export default async function OrderPlaced({
             <div className="r"><span>{t("subtotal")}</span><span className="num">{money(Number(order.subtotalAmount), lang)}</span></div>
             {Number(order.discountAmount) > 0 && <div className="r"><span>{t("discount")} {order.couponCode}</span><span className="num">−{money(Number(order.discountAmount), lang)}</span></div>}
             {Number(order.tierDiscountBdt) + Number(order.referralDiscountBdt) + Number(order.loyaltyDiscountBdt) > 0 && <div className="r"><span>{t("memberDiscounts")}</span><span className="num">−{money(Number(order.tierDiscountBdt) + Number(order.referralDiscountBdt) + Number(order.loyaltyDiscountBdt), lang)}</span></div>}
-            <div className="r"><span>{t("deliveryTo", { place })}</span><span className="num">{Number(order.deliveryCharge) === 0 ? t("free") : money(Number(order.deliveryCharge), lang)}</span></div>
+            <div className="r"><span>{order.isDigital ? (lang === "bn" ? "ডেলিভারি চার্জ (ডিজিটাল)" : "Delivery Fee (Digital)") : t("deliveryTo", { place })}</span><span className="num">{Number(order.deliveryCharge) === 0 ? t("free") : money(Number(order.deliveryCharge), lang)}</span></div>
             <div className="r grand"><span>{t("total")}</span><span className="num">{money(Number(order.totalAmount), lang)}</span></div>
           </div>
-          {zone && <p className="muted" style={{ marginTop: 12, fontSize: 13.5 }}>{t("expectedDelivery")}: <b style={{ color: "var(--ink)" }}>{dateRange(order.createdAt, zone.etaMinDays, zone.etaMaxDays, lang)}</b></p>}
+          {!order.isDigital && zone && <p className="muted" style={{ marginTop: 12, fontSize: 13.5 }}>{t("expectedDelivery")}: <b style={{ color: "var(--ink)" }}>{dateRange(order.createdAt, zone.etaMinDays, zone.etaMaxDays, lang)}</b></p>}
         </div>
 
-        {/* Return Lifecycle: Active Status Card OR Return Request Form */}
-        {returnable.activeReturn ? (
+        {/* Return Lifecycle: Active Status Card OR Return Request Form (Physical Goods Only) */}
+        {!order.isDigital && (returnable.activeReturn ? (
           <ReturnStatusTrackerComponent returnRow={returnable.activeReturn} lang={lang} />
         ) : returnable.eligible ? (
           <CustomerReturnFormComponent
@@ -163,7 +247,7 @@ export default async function OrderPlaced({
             exchangeVariants={exchangeVariants}
             lang={lang}
           />
-        ) : null}
+        ) : null)}
 
         <div style={{ display: "grid", gap: 10 }}>
           <Link href="/account" className="btn btn-primary btn-block btn-round">{t("trackOrder")}</Link>

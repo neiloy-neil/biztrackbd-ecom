@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     if (res.ok && res.orderId) {
       const token = signOrderAccess(tenantId, res.orderId);
       return NextResponse.redirect(
-        new URL(`/order/${res.orderId}?token=${encodeURIComponent(token)}&paid=1`, origin),
+        new URL(`/order/${res.orderId}?k=${encodeURIComponent(token)}&token=${encodeURIComponent(token)}&paid=1`, origin),
       );
     }
     return NextResponse.redirect(
