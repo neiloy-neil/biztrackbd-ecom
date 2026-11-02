@@ -31,19 +31,21 @@ export async function saveProductAction(payload: unknown, productId?: string): P
   const s = await requireAction("products", "edit");
   try {
     const r = await saveProduct(s.tenantId, s.actor, payload, productId);
-    // Photos taken off the product that no other product uses are deleted, and the store gets the space back. A problem here
-    // never undoes the save: a photo left behind only wastes space.
-    for (const url of r.removedImages) {
-      try {
-        const freed = await removeImage(s.tenantId, url);
-        if (freed) await releaseStorage(s.tenantId, freed);
-      } catch (e) {
-        console.error("removing a photo failed", e instanceof Error ? e.name : "unknown");
-      }
+    // Photos taken off the product that no other product uses are deleted in the background so the merchant response is instant.
+    if (r.removedImages.length > 0) {
+      void (async () => {
+        for (const url of r.removedImages) {
+          try {
+            const freed = await removeImage(s.tenantId, url);
+            if (freed) await releaseStorage(s.tenantId, freed);
+          } catch (e) {
+            console.error("removing a photo failed", e instanceof Error ? e.name : "unknown");
+          }
+        }
+      })().catch(() => undefined);
     }
-    revalidatePath("/products");
+    revalidatePath("/products", "layout");
     revalidatePath("/inventory");
-    revalidatePath("/");
     return { ok: true, id: r.id, slug: r.slug };
   } catch (e) {
     if (e instanceof DomainError) return { ok: false, error: e.message, field: typeof e.details?.field === "string" ? e.details.field : undefined, limit: e.code === "PLAN_LIMIT" };

@@ -12,6 +12,8 @@ import { ImpersonationBanner } from "@/components/impersonation-banner";
 import { trialHref } from "@/lib/demo";
 import { CommandPalette, ShellProvider, SideNav, TopActions, type NavGroup, type Page } from "@/components/shell";
 import { AdminCopilotWidget } from "@/components/admin-copilot-widget";
+import { ToastContainer } from "@/components/toast";
+import { NavigationProgress } from "@/components/navigation-progress";
 import { ThemeSwitch } from "./theme-switch";
 import { BusinessSwitcher } from "@/components/business-switcher";
 import { getSession, resolveAuth } from "@/lib/session";
@@ -322,6 +324,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </nav>
         <CommandPalette />
         <AdminCopilotWidget lang={lang} />
+        <NavigationProgress />
+        <ToastContainer />
       </div>
     </ShellProvider>
   );

@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { SubmitButton } from "@/components/ui";
+import { toast } from "@/components/toast";
 import { savePaymentsAction, type PayState } from "./actions";
 
 export interface PayValues {
@@ -14,6 +15,10 @@ const KINDS: [string, string][] = [["PERSONAL", "Personal (send money)"], ["AGEN
 
 export function PaymentsForm({ initial }: { initial: PayValues }) {
   const [state, action] = useActionState<PayState, FormData>(savePaymentsAction, {});
+  useEffect(() => {
+    if (state.ok) toast.success("Payment settings saved.");
+    else if (state.error) toast.error(state.error);
+  }, [state]);
   const bad = (f: string) => (state.field === f ? { "aria-invalid": true as const } : {});
   return (
     <form action={action} className="stack" data-testid="payments-form">

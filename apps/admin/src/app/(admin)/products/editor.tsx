@@ -8,6 +8,7 @@ import { taka } from "@/lib/format";
 import { createQuickCategoryAction, generateProductDescriptionAction, generateImageAltTagsAction, generateBarcodeAction, saveProductAction } from "./actions";
 import type { GeneratedProductListing, AiTonePreset } from "@biztrackbd/core";
 import { useBusyAction } from "@biztrackbd/ui";
+import { toast } from "@/components/toast";
 
 export interface VariantRow {
   id?: string;
@@ -101,7 +102,6 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
   const [field, setField] = useState("");
   const [limit, setLimit] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [saveNotice, setSaveNotice] = useState("");
   const [showAiModal, setShowAiModal] = useState(false);
   const [aiPromptHint, setAiPromptHint] = useState("");
   const [aiCustomBrandVoice, setAiCustomBrandVoice] = useState("");
@@ -155,7 +155,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
   async function save(status: "DRAFT" | "ACTIVE") {
     if (busy) return;
     setBusy(true); setError(""); setField(""); setLimit(false);
-    setSaveNotice(isNew ? "Creating product..." : "Saving changes...");
+    const toastId = toast.loading(isNew ? "Creating product…" : "Saving changes…");
     const r = await saveProductAction({
       title: p.title, titleBn: p.titleBn || null, slug: isNew ? undefined : p.slug, descriptionHtml: p.descriptionHtml, basePrice: p.basePrice || 0,
       compareAtPrice: p.compareAtPrice || null, costPrice: p.costPrice ?? null, status, categoryId: p.categoryId,
@@ -169,7 +169,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
 
     if (!r.ok) {
       setBusy(false);
-      setSaveNotice("");
+      toast.update(toastId, r.error || "Failed to save product", "error");
       setError(r.error);
       setField(r.field ?? "");
       setLimit(Boolean(r.limit));
@@ -177,7 +177,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
       return;
     }
 
-    setSaveNotice("Saved! Updating page...");
+    toast.update(toastId, "Product saved successfully!", "success");
     // Keep busy=true to maintain disabled button state and loading indicators during router transition
     router.push(`/products/${r.id}?saved=1`);
     router.refresh();
@@ -186,11 +186,6 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
   return (
     <>
       <form onSubmit={(e) => { e.preventDefault(); void save(p.status); }} className="has-sticky" data-testid="product-editor" noValidate>
-        {saveNotice && (
-          <div className="notice good" role="status" style={{ marginBottom: 14 }}>
-            ⏳ {saveNotice}
-          </div>
-        )}
         {error && (
           <div className="notice bad" role="alert" style={{ marginBottom: 14 }} data-testid="editor-error">
             {error} {limit && <Link href="/billing" className="link">See your plan</Link>}
@@ -734,25 +729,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
           </div>
         </div>
 
-        <div className="sticky-actions" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 10 }}>
-          {busy && (
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 3,
-                background: "linear-gradient(90deg, #3b82f6, #10b981, #3b82f6)",
-                backgroundSize: "200% 100%",
-              }}
-            />
-          )}
-          {saveNotice && (
-            <span style={{ marginRight: "auto", fontSize: 13, fontWeight: 600, color: saveNotice.includes("Saved") ? "#16a34a" : "#2563eb", display: "inline-flex", alignItems: "center", gap: 6 }}>
-              {saveNotice.includes("Saved") ? "✓" : "⏳"} {saveNotice}
-            </span>
-          )}
+        <div className="sticky-actions">
           <button type="button" className="btn btn-secondary btn-lg" disabled={busy || uploading > 0} onClick={() => void save("DRAFT")} data-testid="save-draft">
             {busy ? "Saving draft…" : "Save draft"}
           </button>

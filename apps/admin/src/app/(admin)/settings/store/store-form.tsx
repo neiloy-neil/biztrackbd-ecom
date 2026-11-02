@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
 import { ContactIcon, SaveBar, type ContactIconName } from "@biztrackbd/ui";
+import { toast } from "@/components/toast";
 import { saveStoreAction, type FormState } from "./actions";
 
 /** A field label with the same icon the store footer shows next to that link. */
@@ -27,7 +28,14 @@ export function StoreForm({ initial }: { initial: StoreValues }) {
   const [state, action, pending] = useActionState<FormState, FormData>(saveStoreAction, {});
   const [tab, setTab] = useState<Tab>("brand");
   const [dirty, setDirty] = useState(false);
-  useEffect(() => { if (state.ok) setDirty(false); }, [state]);
+  useEffect(() => {
+    if (state.ok) {
+      setDirty(false);
+      toast.success("Store details saved successfully!");
+    } else if (state.error) {
+      toast.error(state.error);
+    }
+  }, [state]);
   useEffect(() => { const t = state.field ? FIELD_TAB[state.field] : undefined; if (t) setTab(t); }, [state]);
   const [logo, setLogo] = useState(initial.logoUrl);
   const [uploadError, setUploadError] = useState("");
