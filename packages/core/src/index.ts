@@ -102,7 +102,7 @@ export {
   type OrderTrackingTimeline, type MilestoneStage, type TrackingCheckpoint,
 } from "./orders/tracking";
 export {
-  createReturn, approveReturn, declineReturn, markPickupBooked, receiveReturn, refundReturn, listReturns, returnTabCounts, getReturnMetrics, returnableItems, exchangeOptions,
+  createReturn, approveReturn, declineReturn, markPickupBooked, receiveReturn, refundReturn, listReturns, returnTabCounts, RETURNS_PAGE_SIZE, getReturnMetrics, returnableItems, exchangeOptions,
   customerReturnableItems, customerExchangeVariants, customerRequestReturn, getCustomerOrderReturns,
   CreateReturnInput, CustomerReturnInput, RETURN_REASONS,
   type ReturnRow, type ReturnTab, type ReturnStatus, type ReturnType, type ReturnMetrics, type ApproveInput, type RefundInput,

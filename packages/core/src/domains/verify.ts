@@ -248,7 +248,7 @@ export async function checkDomain(tenantId: string, host: string): Promise<Check
 
   let dnsStatus: CheckOutcome["dnsStatus"] = row.dnsStatus as CheckOutcome["dnsStatus"];
   let note: string | null = row.dnsNote;
-  let ssl = row.sslStatus as CheckOutcome["ssl"];
+  const ssl = row.sslStatus as CheckOutcome["ssl"];
   const want = dnsInstruction(domain);
 
   const seen = await inspectDns(domain);

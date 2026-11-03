@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { WidgetIcon } from "./widget-icons";
+import { mark } from "@/components/edit-marks";
 
 export interface PricingPlanItem {
   name: string;
@@ -30,7 +31,6 @@ export function PricingMatrixSection({
   badgeBn,
   items = [],
   lang,
-  ed,
   editing,
 }: {
   title?: string;
@@ -41,9 +41,10 @@ export function PricingMatrixSection({
   badgeBn?: string;
   items?: PricingPlanItem[];
   lang: "en" | "bn";
-  ed: (path: string) => Record<string, string>;
   editing?: boolean;
 }) {
+  // Built here, not passed in: a function cannot cross from the server page into this client component.
+  const ed = mark(editing);
   const displayTitle = lang === "bn" && titleBn ? titleBn : title;
   const displaySubtitle = lang === "bn" && subtitleBn ? subtitleBn : subtitle;
   const displayBadge = lang === "bn" && badgeBn ? badgeBn : badge;

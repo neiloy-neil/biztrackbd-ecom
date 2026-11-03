@@ -146,7 +146,7 @@ export async function getMobileSession(req?: Request): Promise<MobileAuthResult>
   }
 
   // Resolve target tenant: either the explicitly requested tenant or the first available store
-  let activeStore = requestedTenantId
+  const activeStore = requestedTenantId
     ? activeStores.find((s) => s.tenantId === requestedTenantId)
     : activeStores[0];
 

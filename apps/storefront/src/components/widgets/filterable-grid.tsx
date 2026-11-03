@@ -3,6 +3,8 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { WidgetIcon } from "./widget-icons";
+import { SmartImage } from "@/components/smart-image";
+import { mark } from "@/components/edit-marks";
 
 export interface FilterableItem {
   title?: string;
@@ -30,7 +32,6 @@ export function FilterableGridSection({
   columns = "3",
   items = [],
   lang,
-  ed,
   editing,
 }: {
   title?: string;
@@ -42,9 +43,10 @@ export function FilterableGridSection({
   columns?: "2" | "3" | "4";
   items?: FilterableItem[];
   lang: "en" | "bn";
-  ed: (path: string) => Record<string, string>;
   editing?: boolean;
 }) {
+  // Built here, not passed in: a function cannot cross from the server page into this client component.
+  const ed = mark(editing);
   const displayTitle = lang === "bn" && titleBn ? titleBn : title;
   const displaySubtitle = lang === "bn" && subtitleBn ? subtitleBn : subtitle;
   const displayBadge = lang === "bn" && badgeBn ? badgeBn : badge;
@@ -135,7 +137,7 @@ export function FilterableGridSection({
               <div key={idx} className="bt-filterable-card" {...ed(`items.${idx}.title`)}>
                 {item.image && (
                   <div className="bt-filterable-card-media">
-                    <img src={item.image} alt={itemTitle || "Card preview"} loading="lazy" />
+                    <SmartImage src={item.image} alt={itemTitle || "Card preview"} sizes="(max-width: 640px) 90vw, 360px" />
                     {itemBadge && <span className="bt-filterable-card-badge">{itemBadge}</span>}
                   </div>
                 )}

@@ -91,7 +91,7 @@ export function getAttributionForPayload(): {
   let utmCampaign = best?.utmCampaign || null;
   let utmTerm = best?.utmTerm || null;
   let utmContent = best?.utmContent || null;
-  let referrer = best?.referrer || (document.referrer || null);
+  const referrer = best?.referrer || (document.referrer || null);
 
   // Immediate fallback: read current URL search params directly (e.g. if cookies were blocked or haven't written)
   try {

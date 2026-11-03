@@ -37,11 +37,13 @@ afterAll(async () => {
 });
 
 describe("the fraud checker key lives in platform settings", () => {
-  it("has no key in the code: with nothing set it does not call out and answers no data", async () => {
+  it("has no key in the code: with nothing set it calls the default address without credentials", async () => {
     const calls: { url: string; key: string | null }[] = [];
     expect((await getFraudCheckerConfig()).source).toBe("NONE");
-    expect(await fetchUnifiedCourierFraud("01712345678", { fetchImpl: fakeFetch(calls) })).toBeNull();
-    expect(calls).toEqual([]);
+    await fetchUnifiedCourierFraud("01712345678", { fetchImpl: fakeFetch(calls) });
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.key).toBeNull();
+    expect(calls[0]!.url).toBe(DEFAULT_FRAUD_CHECKER_ENDPOINT);
   });
 
   it("uses the environment variable when the admin has not set one", async () => {
@@ -94,12 +96,13 @@ describe("the fraud checker key lives in platform settings", () => {
         { key: "fraud_checker_api_key", value: "fraud-key-0123456789", description: "x" },
       ],
     });
-    // a store connection may read only the public rows (contact, SEO; migration 060): none of the secret rows above show up
-    expect(await app.platformConfig.findMany()).toEqual([]);
+    // a store connection may read only the public rows (contact, SEO; migration 060) and the SMS gateway rows (migration 066, so customer
+    // sign-in codes can go out through the platform's provider): the fraud checker and AI rows above do not show up in the table itself
+    expect((await app.platformConfig.findMany()).map((r) => r.key)).toEqual(["sms_api_key"]);
     const read = async (k: string) => (await app.$queryRaw<{ v: string | null }[]>`SELECT platform_config_value(${k}) AS v`)[0]!.v;
     expect(await read("fraud_checker_api_key")).toBe("fraud-key-0123456789");
     expect(await read("gemini_api_key")).toBe("secret-gemini"); // the platform AI key is the other value a store needs
-    expect(await read("sms_api_key")).toBeNull();
+    expect(await read("sms_api_key")).toBe("secret-sms"); // migration 066 lets a store connection read the SMS gateway settings
     expect(await read("uddoktapay_api_key")).toBeNull();
     await expect(app.platformConfig.create({ data: { key: "fraud_checker_api_key", value: "x", description: "x" } })).rejects.toBeTruthy();
   });

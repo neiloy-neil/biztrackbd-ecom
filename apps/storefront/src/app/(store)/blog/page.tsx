@@ -3,6 +3,7 @@ import Link from "next/link";
 import { listPublishedPosts } from "@biztrackbd/core";
 import { getLang, makeT } from "@/lib/i18n";
 import { getStore } from "@/lib/tenant";
+import { SmartImage } from "@/components/smart-image";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Blog", alternates: { canonical: "/blog" } };
@@ -18,8 +19,7 @@ export default async function Blog() {
         <div className="post-grid" data-testid="post-list">
           {items.map((p) => (
             <Link key={p.slug} href={`/blog/${p.slug}`} className="post-card" data-testid="post-card">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              {p.coverImage && <img src={p.coverImage} alt="" loading="lazy" />}
+              {p.coverImage && <SmartImage src={p.coverImage} alt="" sizes="(max-width: 640px) 90vw, 380px" style={{ height: "auto" }} />}
               <h2>{p.title}</h2>
               {p.summary && <p>{p.summary}</p>}
               <span className="post-meta">{new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Dhaka" }).format(p.createdAt)}</span>

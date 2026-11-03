@@ -10,6 +10,9 @@ const testDirect = process.env.TEST_DIRECT_URL ?? "";
 process.env.DATABASE_URL = testApp;
 process.env.DIRECT_URL = testDirect;
 process.env.PLATFORM_DATABASE_URL = testDirect;
+// Some suites seal and open integration secrets without setting a key themselves (bKash, SSLCommerz). A fixed throwaway key keeps them independent
+// of a developer's .env.local; a real key already in the environment is left alone.
+process.env.INTEGRATION_VAULT_SECRET ||= "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 
 export default defineConfig({
   test: {

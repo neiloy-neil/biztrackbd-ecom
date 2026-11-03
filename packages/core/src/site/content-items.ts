@@ -158,7 +158,7 @@ export const UpsertContentItemSchema = z.object({
   bodyHtml: z.string().max(50000).optional().nullable(),
   bodyHtmlBn: z.string().max(50000).optional().nullable(),
   mediaUrl: z.string().max(500).optional().nullable().or(z.literal("")),
-  data: z.record(z.unknown()).optional().nullable(),
+  data: z.record(z.string(), z.unknown()).optional().nullable(),
   sortOrder: z.number().int().default(0),
   isPublished: z.boolean().default(true),
 });

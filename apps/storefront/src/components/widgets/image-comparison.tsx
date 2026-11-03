@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { SmartImage } from "@/components/smart-image";
+import { mark } from "@/components/edit-marks";
 
 export function ImageComparisonSection({
   title,
@@ -18,7 +20,6 @@ export function ImageComparisonSection({
   orientation = "horizontal",
   initialSplit = "50",
   lang,
-  ed,
   editing,
 }: {
   title?: string;
@@ -36,9 +37,10 @@ export function ImageComparisonSection({
   orientation?: "horizontal" | "vertical";
   initialSplit?: string;
   lang: "en" | "bn";
-  ed: (path: string) => Record<string, string>;
   editing?: boolean;
 }) {
+  // Built here, not passed in: a function cannot cross from the server page into this client component.
+  const ed = mark(editing);
   const displayTitle = lang === "bn" && titleBn ? titleBn : title;
   const displaySubtitle = lang === "bn" && subtitleBn ? subtitleBn : subtitle;
   const displayBadge = lang === "bn" && badgeBn ? badgeBn : badge;
@@ -127,7 +129,7 @@ export function ImageComparisonSection({
         >
           {/* AFTER LAYER (FULL BACKGROUND) */}
           <div className="bt-comparison-layer bt-comparison-after">
-            <img src={defaultAfter} alt={displayAfter} loading="lazy" />
+            <SmartImage src={defaultAfter} alt={displayAfter} sizes="(max-width: 1000px) 100vw, 1000px" />
             <span className="bt-comparison-pill bt-pill-after" {...ed("afterLabel")}>
               {displayAfter}
             </span>
@@ -143,7 +145,7 @@ export function ImageComparisonSection({
                   : `polygon(0 0, ${splitPos}% 0, ${splitPos}% 100%, 0 100%)`,
             }}
           >
-            <img src={defaultBefore} alt={displayBefore} loading="lazy" />
+            <SmartImage src={defaultBefore} alt={displayBefore} sizes="(max-width: 1000px) 100vw, 1000px" />
             <span className="bt-comparison-pill bt-pill-before" {...ed("beforeLabel")}>
               {displayBefore}
             </span>

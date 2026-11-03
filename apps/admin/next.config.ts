@@ -23,6 +23,13 @@ const config: NextConfig = {
   outputFileTracingRoot: resolve(process.cwd(), "../../"),
   transpilePackages: ["@biztrackbd/core", "@biztrackbd/db", "@biztrackbd/ui", "@biztrackbd/media"],
   serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg", "pg", "sharp"],
+  images: {
+    // Product photos live in Supabase Storage. Lists show them as 44px thumbnails and small cards, so serve resized AVIF/WebP, not the originals.
+    formats: ["image/avif", "image/webp"],
+    qualities: [60, 75],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+    remotePatterns: [{ protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" }],
+  },
   async headers() {
     return [
       // The print preview in settings (Invoices) is shown in a frame on our own pages. Every other page refuses to be framed.

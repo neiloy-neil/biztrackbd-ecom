@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { SmartImage } from "@/components/smart-image";
+import { mark } from "@/components/edit-marks";
 
 export interface HotspotPin {
   x?: string;
@@ -26,7 +28,6 @@ export function ImageHotspotsSection({
   image,
   items = [],
   lang,
-  ed,
   editing,
 }: {
   title?: string;
@@ -38,9 +39,10 @@ export function ImageHotspotsSection({
   image?: string;
   items?: HotspotPin[];
   lang: "en" | "bn";
-  ed: (path: string) => Record<string, string>;
   editing?: boolean;
 }) {
+  // Built here, not passed in: a function cannot cross from the server page into this client component.
+  const ed = mark(editing);
   const displayTitle = lang === "bn" && titleBn ? titleBn : title;
   const displaySubtitle = lang === "bn" && subtitleBn ? subtitleBn : subtitle;
   const displayBadge = lang === "bn" && badgeBn ? badgeBn : badge;
@@ -84,7 +86,7 @@ export function ImageHotspotsSection({
         )}
 
         <div ref={containerRef} className="bt-hotspots-stage">
-          <img src={defaultImage} alt={displayTitle || "Interactive lookbook"} className="bt-hotspots-img" loading="lazy" />
+          <SmartImage src={defaultImage} alt={displayTitle || "Interactive lookbook"} className="bt-hotspots-img" sizes="(max-width: 1000px) 100vw, 1000px" style={{ height: "auto" }} />
 
           {items.map((pin, idx) => {
             const pinTitle = lang === "bn" && pin.titleBn ? pin.titleBn : pin.title;

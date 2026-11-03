@@ -397,10 +397,14 @@ export async function expireInactivePoints(tenantId: string, now = new Date()): 
     const locale = (await tx.tenant.findFirstOrThrow({ select: { locale: true } })).locale;
     const store = await tx.storeSettings.findFirst({ select: { storeName: true } });
     const accounts = await tx.customerLoyaltyAccount.findMany({ where: { availablePoints: { gt: 0 } }, include: { customer: { select: { phone: true, name: true } } }, take: 2000 });
+    // One grouped query for every account's last activity, instead of one query per account.
+    const lastActivity = new Map(
+      (await tx.loyaltyTransaction.groupBy({ by: ["accountId"], where: { accountId: { in: accounts.map((a) => a.id) }, type: { not: "EXPIRED" }, status: { in: ["CONFIRMED", "PENDING"] } }, _max: { createdAt: true } }))
+        .map((g) => [g.accountId, g._max.createdAt] as const),
+    );
     let expired = 0, points = 0, warned = 0;
     for (const a of accounts) {
-      const last = await tx.loyaltyTransaction.findFirst({ where: { accountId: a.id, type: { not: "EXPIRED" }, status: { in: ["CONFIRMED", "PENDING"] } }, orderBy: { createdAt: "desc" }, select: { createdAt: true } });
-      const lastAt = last?.createdAt ?? a.createdAt;
+      const lastAt = lastActivity.get(a.id) ?? a.createdAt;
       if (lastAt < cutoff) {
         const n = await tx.$executeRaw`UPDATE "CustomerLoyaltyAccount" SET "availablePoints" = 0, "updatedAt" = now() WHERE "id" = ${a.id} AND "availablePoints" = ${a.availablePoints}`;
         if (n === 1) {

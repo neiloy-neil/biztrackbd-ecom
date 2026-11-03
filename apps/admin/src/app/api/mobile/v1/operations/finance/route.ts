@@ -53,7 +53,7 @@ export async function GET(req: Request) {
     }
 
     // 2. Attempt to fetch live wallet balance from Steadfast API if connected
-    let liveSteadfastBalance: number | null = null;
+    const liveSteadfastBalance: number | null = null;
     try {
       // In @biztrackbd/core, getSteadfastBalance queries Steadfast /get_balance
       // If credentials exist, it returns the live wallet number

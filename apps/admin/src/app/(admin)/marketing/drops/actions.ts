@@ -84,10 +84,10 @@ export async function notifySubscribersAction(dropId: string): Promise<ActionRes
   }
 }
 
-export async function getDropSubscribersAction(dropId: string): Promise<ActionResponse> {
+export async function getDropSubscribersAction(dropId: string, page = 1): Promise<ActionResponse> {
   const s = await requireAction("marketing", "view");
   try {
-    const res = await listDropSubscribers(s.tenantId, dropId);
+    const res = await listDropSubscribers(s.tenantId, dropId, page);
     return { ok: true, data: res };
   } catch (e) {
     if (e instanceof DomainError) return { ok: false, error: e.message };

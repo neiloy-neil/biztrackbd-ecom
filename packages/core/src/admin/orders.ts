@@ -201,7 +201,7 @@ export async function getOrderDetail(tenantId: string, actor: StaffActor, orderI
     const reuse = o.mfsTrxId ? await tx.order.findMany({ where: { mfsTrxId: o.mfsTrxId, id: { not: o.id } }, select: { id: true, orderNumber: true } }) : [];
 
     const unifiedCourierData = await fetchUnifiedCourierFraud(o.customerPhone).catch(() => null);
-    let courierStats = unifiedCourierData
+    const courierStats = unifiedCourierData
       ? toCourierFraudStats(unifiedCourierData)
       : await fetchSteadfastFraudStats(tenantId, o.customerPhone).catch(() => null);
     const lookup = await lookupInTx(tx, o.customerPhone, courierStats, unifiedCourierData);

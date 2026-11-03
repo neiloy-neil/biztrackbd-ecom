@@ -320,11 +320,14 @@ export async function refundReturn(tenantId: string, actor: StaffActor, returnId
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export async function listReturns(tenantId: string, actor: StaffActor, tab: ReturnTab = "all"): Promise<ReturnRow[]> {
+export const RETURNS_PAGE_SIZE = 50;
+
+/** One page of returns, newest first. The total for the tab is in `returnTabCounts`. */
+export async function listReturns(tenantId: string, actor: StaffActor, tab: ReturnTab = "all", page = 1, pageSize = RETURNS_PAGE_SIZE): Promise<ReturnRow[]> {
   assertCan(actor, "orders", "view");
   const statuses = TAB_STATUSES[tab];
   return withTenant(tenantId, async (tx) => {
-    const rows = await tx.returnRequest.findMany({ where: statuses ? { status: { in: statuses } } : {}, orderBy: { createdAt: "desc" }, take: 200 });
+    const rows = await tx.returnRequest.findMany({ where: statuses ? { status: { in: statuses } } : {}, orderBy: [{ createdAt: "desc" }, { id: "desc" }], skip: (Math.max(1, page) - 1) * pageSize, take: pageSize });
     const orders = await tx.order.findMany({ where: { id: { in: rows.map((r) => r.orderId) } }, select: { id: true, orderNumber: true, customerName: true, customerPhone: true } });
     const variantIds = rows.map((r) => r.exchangeVariantId).filter((x): x is string => Boolean(x));
     const variants = variantIds.length ? await tx.productVariant.findMany({ where: { id: { in: variantIds } }, include: { product: { select: { title: true } } } }) : [];

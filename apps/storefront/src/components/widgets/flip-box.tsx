@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { WidgetIcon } from "./widget-icons";
+import { SmartImage } from "@/components/smart-image";
+import { mark } from "@/components/edit-marks";
 
 export interface FlipCardItem {
   frontTitle?: string;
@@ -32,7 +34,6 @@ export function FlipBoxSection({
   columns = "3",
   items = [],
   lang,
-  ed,
   editing,
 }: {
   title?: string;
@@ -44,9 +45,10 @@ export function FlipBoxSection({
   columns?: "2" | "3" | "4";
   items?: FlipCardItem[];
   lang: "en" | "bn";
-  ed: (path: string) => Record<string, string>;
   editing?: boolean;
 }) {
+  // Built here, not passed in: a function cannot cross from the server page into this client component.
+  const ed = mark(editing);
   const displayTitle = lang === "bn" && titleBn ? titleBn : title;
   const displaySubtitle = lang === "bn" && subtitleBn ? subtitleBn : subtitle;
   const displayBadge = lang === "bn" && badgeBn ? badgeBn : badge;
@@ -111,7 +113,7 @@ export function FlipBoxSection({
                   <div className="bt-flip-face bt-flip-front">
                     {card.frontImage && (
                       <div className="bt-flip-img-wrap">
-                        <img src={card.frontImage} alt={frontTitle || "Card preview"} loading="lazy" />
+                        <SmartImage src={card.frontImage} alt={frontTitle || "Card preview"} sizes="(max-width: 640px) 90vw, 360px" />
                         <div className="bt-flip-overlay" />
                       </div>
                     )}

@@ -661,3 +661,11 @@ h1, h2, h3, p { margin: 0; }
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+
+/* Skeleton loading screens (route loading.tsx). Neutral grey so it reads on every merchant theme. */
+.sk { display: block; background: linear-gradient(90deg, rgba(128,128,128,.12) 25%, rgba(128,128,128,.22) 37%, rgba(128,128,128,.12) 63%); background-size: 400% 100%; animation: sk-shimmer 1.4s ease infinite; border-radius: var(--radius, 8px); }
+.sk-line { height: 14px; margin: 10px 0; }
+.sk-title { height: 28px; width: 40%; margin: 28px 0 18px; }
+.sk-card .sk-img { aspect-ratio: 1 / 1; width: 100%; }
+@keyframes sk-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+@media (prefers-reduced-motion: reduce) { .sk { animation: none; } }

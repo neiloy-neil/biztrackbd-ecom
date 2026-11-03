@@ -6,8 +6,12 @@ import type { PageData, PageJson } from "@biztrackbd/core";
 import { themeCss, validatePage, validateTheme, type PageKind, type ThemeSettings } from "@biztrackbd/core/builder-client";
 import { makeT, type Lang } from "@/lib/i18n-core";
 import type { PageCtx } from "@/lib/page-ctx";
-import { EditOverlay } from "./edit-overlay";
+import dynamic from "next/dynamic";
 import { Sections, type LandingInfo, type SectionExtras, type SiteInfo } from "./sections";
+
+// The 35 KB editor is only for the builder preview iframe, never for shoppers.
+const EditOverlay = dynamic(() => import("./edit-overlay").then((m) => m.EditOverlay), { ssr: false });
+
 
 /**
  * The editor sits in the admin and shows the store in an iframe. Each change in the editor is posted here as a message

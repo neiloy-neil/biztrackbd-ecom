@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { SmartImage } from "@/components/smart-image";
+import { mark } from "@/components/edit-marks";
 
 export interface MarqueeItem {
   name: string;
@@ -21,7 +23,6 @@ export function LogoMarqueeSection({
   maskEdges = true,
   items = [],
   lang,
-  ed,
   editing,
 }: {
   title?: string;
@@ -34,9 +35,10 @@ export function LogoMarqueeSection({
   maskEdges?: boolean;
   items?: MarqueeItem[];
   lang: "en" | "bn";
-  ed: (path: string) => Record<string, string>;
   editing?: boolean;
 }) {
+  // Built here, not passed in: a function cannot cross from the server page into this client component.
+  const ed = mark(editing);
   const displayTitle = lang === "bn" && titleBn ? titleBn : title;
   const displayBadge = lang === "bn" && badgeBn ? badgeBn : badge;
 
@@ -74,7 +76,7 @@ export function LogoMarqueeSection({
               const content = (
                 <div className="bt-marquee-card">
                   {item.image ? (
-                    <img src={item.image} alt={item.name} className="bt-marquee-img" loading="lazy" />
+                    <SmartImage src={item.image} alt={item.name} className="bt-marquee-img" sizes="160px" style={{ width: "auto", height: "auto" }} />
                   ) : (
                     <div className="bt-marquee-chip">
                       <span className="bt-marquee-name">{item.name}</span>

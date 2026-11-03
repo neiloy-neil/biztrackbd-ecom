@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { SmartImage } from "@/components/smart-image";
 import type { Lang } from "@/lib/i18n-core";
 
 export interface ProjectItem {
@@ -147,8 +148,7 @@ export function PortfolioGridSection({
                 }}
               >
                 {item.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.image} alt={pTitle} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <SmartImage src={item.image} alt={pTitle} sizes="(max-width: 640px) 90vw, 400px" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
                   <span>📁</span>
                 )}

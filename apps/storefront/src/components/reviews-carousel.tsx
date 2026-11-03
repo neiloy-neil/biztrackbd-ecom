@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Lang } from "@/lib/i18n-core";
+import { SmartImage } from "@/components/smart-image";
 
 export interface ReviewItem {
   name: string;
@@ -73,8 +74,7 @@ export function ReviewsCarousel({
 
                   {rev.photo && (
                     <div className="lp-review-photo">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={rev.photo} alt={rev.name} loading="lazy" />
+                      <SmartImage src={rev.photo} alt={rev.name} sizes="(max-width: 640px) 90vw, 360px" style={{ height: "auto" }} />
                     </div>
                   )}
 

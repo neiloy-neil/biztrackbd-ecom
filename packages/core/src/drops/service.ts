@@ -312,12 +312,17 @@ export async function subscribeDropWaitlist(tenantId: string, input: WaitlistSub
   });
 }
 
-export async function listDropSubscribers(tenantId: string, dropId: string) {
+export const DROP_SUBSCRIBERS_PAGE_SIZE = 100;
+
+/** One page of a drop's waitlist, newest first, with the full count so the screen can offer "load more". */
+export async function listDropSubscribers(tenantId: string, dropId: string, page = 1, pageSize = DROP_SUBSCRIBERS_PAGE_SIZE) {
   return withTenant(tenantId, async (tx) => {
-    return tx.dropWaitlistSubscriber.findMany({
-      where: { dropId, tenantId },
-      orderBy: { createdAt: "desc" },
-    });
+    const where = { dropId, tenantId };
+    const [rows, total] = await Promise.all([
+      tx.dropWaitlistSubscriber.findMany({ where, orderBy: [{ createdAt: "desc" }, { id: "desc" }], skip: (Math.max(1, page) - 1) * pageSize, take: pageSize }),
+      tx.dropWaitlistSubscriber.count({ where }),
+    ]);
+    return { rows, total };
   });
 }
 

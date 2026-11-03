@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { WidgetIcon } from "./widget-icons";
+import { mark } from "@/components/edit-marks";
 
 export interface TestimonialItem {
   name: string;
@@ -27,7 +28,6 @@ export function TestimonialsSliderSection({
   layout = "cards",
   items = [],
   lang,
-  ed,
   editing,
 }: {
   title?: string;
@@ -39,9 +39,10 @@ export function TestimonialsSliderSection({
   layout?: "cards" | "minimal" | "single";
   items?: TestimonialItem[];
   lang: "en" | "bn";
-  ed: (path: string) => Record<string, string>;
   editing?: boolean;
 }) {
+  // Built here, not passed in: a function cannot cross from the server page into this client component.
+  const ed = mark(editing);
   const [activeIdx, setActiveIdx] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);

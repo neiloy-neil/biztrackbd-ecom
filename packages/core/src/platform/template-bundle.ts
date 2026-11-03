@@ -39,7 +39,7 @@ const Header = z.object({
   vertical: z.enum(BUNDLE_VERTICALS).optional(),
   previews: z.object({ desktop: httpsUrl.optional(), mobile: httpsUrl.optional() }).default({}),
   settings: z.unknown(),
-  pages: z.record(z.unknown()).default({}),
+  pages: z.record(z.string(), z.unknown()).default({}),
   chrome: z.unknown().optional(),
   customPages: z.array(z.unknown()).max(12).default([]),
 });

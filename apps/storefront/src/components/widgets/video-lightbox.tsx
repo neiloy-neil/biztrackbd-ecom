@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { youtubeId } from "@biztrackbd/core/builder-client";
+import { mark } from "@/components/edit-marks";
 
 export function VideoLightboxSection({
   title,
@@ -16,7 +17,6 @@ export function VideoLightboxSection({
   playLabel = "Watch Video",
   playLabelBn = "ভিডিওটি দেখুন",
   lang,
-  ed,
   editing,
 }: {
   title?: string;
@@ -31,9 +31,10 @@ export function VideoLightboxSection({
   playLabel?: string;
   playLabelBn?: string;
   lang: "en" | "bn";
-  ed: (path: string) => Record<string, string>;
   editing?: boolean;
 }) {
+  // Built here, not passed in: a function cannot cross from the server page into this client component.
+  const ed = mark(editing);
   const [isOpen, setIsOpen] = useState(false);
 
   const displayTitle = lang === "bn" && titleBn ? titleBn : title;
