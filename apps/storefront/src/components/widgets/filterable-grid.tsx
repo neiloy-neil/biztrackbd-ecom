@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { WidgetIcon } from "./widget-icons";
+import { SmartImage } from "@/components/smart-image";
 
 export interface FilterableItem {
   title?: string;
@@ -135,7 +136,7 @@ export function FilterableGridSection({
               <div key={idx} className="bt-filterable-card" {...ed(`items.${idx}.title`)}>
                 {item.image && (
                   <div className="bt-filterable-card-media">
-                    <img src={item.image} alt={itemTitle || "Card preview"} loading="lazy" />
+                    <SmartImage src={item.image} alt={itemTitle || "Card preview"} sizes="(max-width: 640px) 90vw, 360px" />
                     {itemBadge && <span className="bt-filterable-card-badge">{itemBadge}</span>}
                   </div>
                 )}

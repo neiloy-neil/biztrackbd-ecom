@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { SmartImage } from "@/components/smart-image";
 
 export function ImageComparisonSection({
   title,
@@ -127,7 +128,7 @@ export function ImageComparisonSection({
         >
           {/* AFTER LAYER (FULL BACKGROUND) */}
           <div className="bt-comparison-layer bt-comparison-after">
-            <img src={defaultAfter} alt={displayAfter} loading="lazy" />
+            <SmartImage src={defaultAfter} alt={displayAfter} sizes="(max-width: 1000px) 100vw, 1000px" />
             <span className="bt-comparison-pill bt-pill-after" {...ed("afterLabel")}>
               {displayAfter}
             </span>
@@ -143,7 +144,7 @@ export function ImageComparisonSection({
                   : `polygon(0 0, ${splitPos}% 0, ${splitPos}% 100%, 0 100%)`,
             }}
           >
-            <img src={defaultBefore} alt={displayBefore} loading="lazy" />
+            <SmartImage src={defaultBefore} alt={displayBefore} sizes="(max-width: 1000px) 100vw, 1000px" />
             <span className="bt-comparison-pill bt-pill-before" {...ed("beforeLabel")}>
               {displayBefore}
             </span>

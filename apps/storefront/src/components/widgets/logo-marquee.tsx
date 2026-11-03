@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SmartImage } from "@/components/smart-image";
 
 export interface MarqueeItem {
   name: string;
@@ -74,7 +75,7 @@ export function LogoMarqueeSection({
               const content = (
                 <div className="bt-marquee-card">
                   {item.image ? (
-                    <img src={item.image} alt={item.name} className="bt-marquee-img" loading="lazy" />
+                    <SmartImage src={item.image} alt={item.name} className="bt-marquee-img" sizes="160px" style={{ width: "auto", height: "auto" }} />
                   ) : (
                     <div className="bt-marquee-chip">
                       <span className="bt-marquee-name">{item.name}</span>

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { SmartImage } from "@/components/smart-image";
 
 export interface HotspotPin {
   x?: string;
@@ -84,7 +85,7 @@ export function ImageHotspotsSection({
         )}
 
         <div ref={containerRef} className="bt-hotspots-stage">
-          <img src={defaultImage} alt={displayTitle || "Interactive lookbook"} className="bt-hotspots-img" loading="lazy" />
+          <SmartImage src={defaultImage} alt={displayTitle || "Interactive lookbook"} className="bt-hotspots-img" sizes="(max-width: 1000px) 100vw, 1000px" style={{ height: "auto" }} />
 
           {items.map((pin, idx) => {
             const pinTitle = lang === "bn" && pin.titleBn ? pin.titleBn : pin.title;

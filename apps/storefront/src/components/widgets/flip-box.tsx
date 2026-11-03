@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { WidgetIcon } from "./widget-icons";
+import { SmartImage } from "@/components/smart-image";
 
 export interface FlipCardItem {
   frontTitle?: string;
@@ -111,7 +112,7 @@ export function FlipBoxSection({
                   <div className="bt-flip-face bt-flip-front">
                     {card.frontImage && (
                       <div className="bt-flip-img-wrap">
-                        <img src={card.frontImage} alt={frontTitle || "Card preview"} loading="lazy" />
+                        <SmartImage src={card.frontImage} alt={frontTitle || "Card preview"} sizes="(max-width: 640px) 90vw, 360px" />
                         <div className="bt-flip-overlay" />
                       </div>
                     )}
