@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { SmartImage } from "@/components/smart-image";
+import { mark } from "@/components/edit-marks";
 
 export function ImageComparisonSection({
   title,
@@ -19,7 +20,6 @@ export function ImageComparisonSection({
   orientation = "horizontal",
   initialSplit = "50",
   lang,
-  ed,
   editing,
 }: {
   title?: string;
@@ -37,9 +37,10 @@ export function ImageComparisonSection({
   orientation?: "horizontal" | "vertical";
   initialSplit?: string;
   lang: "en" | "bn";
-  ed: (path: string) => Record<string, string>;
   editing?: boolean;
 }) {
+  // Built here, not passed in: a function cannot cross from the server page into this client component.
+  const ed = mark(editing);
   const displayTitle = lang === "bn" && titleBn ? titleBn : title;
   const displaySubtitle = lang === "bn" && subtitleBn ? subtitleBn : subtitle;
   const displayBadge = lang === "bn" && badgeBn ? badgeBn : badge;

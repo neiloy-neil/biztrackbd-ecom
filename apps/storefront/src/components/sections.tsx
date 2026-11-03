@@ -1153,7 +1153,6 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
             tabStyle={(s.tabStyle as "pills" | "underline" | "boxed") || "pills"}
             items={items}
             lang={lang}
-            ed={ed}
             editing={editing}
           />
         </div>
@@ -1175,7 +1174,6 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
             playLabel={str(s.playLabel)}
             playLabelBn={str(s.playLabelBn)}
             lang={lang}
-            ed={ed}
             editing={editing}
           />
         </div>
@@ -1209,7 +1207,6 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
             layout={(s.layout as "cards" | "minimal" | "single") || "cards"}
             items={items}
             lang={lang}
-            ed={ed}
             editing={editing}
           />
         </div>
@@ -1246,7 +1243,6 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
             badgeBn={str(s.badgeBn)}
             items={items}
             lang={lang}
-            ed={ed}
             editing={editing}
           />
         </div>
@@ -1272,7 +1268,6 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
             trigger={(s.trigger as "delay" | "scroll" | "immediate") || "delay"}
             showPhoneCapture={Boolean(s.showPhoneCapture)}
             lang={lang}
-            ed={ed}
             editing={editing}
           />
         </div>
@@ -1297,7 +1292,6 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
             orientation={(s.orientation as "horizontal" | "vertical") || "horizontal"}
             initialSplit={str(s.initialSplit) || "50"}
             lang={lang}
-            ed={ed}
             editing={editing}
           />
         </div>
@@ -1326,7 +1320,6 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
             maskEdges={s.maskEdges !== false}
             items={items}
             lang={lang}
-            ed={ed}
             editing={editing}
           />
         </div>
@@ -1395,7 +1388,6 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
             columns={(s.columns as "2" | "3" | "4") || "3"}
             items={items}
             lang={lang}
-            ed={ed}
             editing={editing}
           />
         </div>
@@ -1428,7 +1420,6 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
             image={str(s.image) || undefined}
             items={items}
             lang={lang}
-            ed={ed}
             editing={editing}
           />
         </div>
@@ -1464,7 +1455,6 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
             columns={(s.columns as "2" | "3" | "4") || "3"}
             items={items}
             lang={lang}
-            ed={ed}
             editing={editing}
           />
         </div>

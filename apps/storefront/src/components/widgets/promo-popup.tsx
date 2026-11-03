@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { WidgetIcon } from "./widget-icons";
+import { mark } from "@/components/edit-marks";
 
 export function PromoPopupSection({
   title,
@@ -21,7 +22,6 @@ export function PromoPopupSection({
   trigger = "delay",
   showPhoneCapture = false,
   lang,
-  ed,
   editing,
 }: {
   title?: string;
@@ -40,9 +40,10 @@ export function PromoPopupSection({
   trigger?: "delay" | "scroll" | "immediate";
   showPhoneCapture?: boolean;
   lang: "en" | "bn";
-  ed: (path: string) => Record<string, string>;
   editing?: boolean;
 }) {
+  // Built here, not passed in: a function cannot cross from the server page into this client component.
+  const ed = mark(editing);
   const [isOpen, setIsOpen] = useState(editing ? false : false);
   const [copied, setCopied] = useState(false);
   const [phone, setPhone] = useState("");
