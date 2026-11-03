@@ -147,6 +147,7 @@ import { NativeAnalyticsTracker } from "@/components/native-analytics-tracker";
 import { PostHogProvider } from "@/components/posthog-provider";
 import { SiteNavigation } from "@/components/site-navigation";
 import { DoubleSubmitGuard } from "@biztrackbd/ui";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const CONTACT = await getContact();
@@ -170,6 +171,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <a className="skip-link" href="#main">Skip to main content</a>
         <PlatformTracker />
         <NativeAnalyticsTracker />
+        <SpeedInsights />
         <header className="site-head">
           <div className="wrap row-between">
             <Link href="/" className="brand" prefetch={false}>

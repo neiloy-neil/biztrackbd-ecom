@@ -23,6 +23,13 @@ const config: NextConfig = {
   outputFileTracingRoot: resolve(process.cwd(), "../../"),
   transpilePackages: ["@biztrackbd/core", "@biztrackbd/db", "@biztrackbd/ui", "@biztrackbd/media"],
   serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg", "pg", "sharp"],
+  images: {
+    // Staff-uploaded template previews live in Supabase Storage. Serve them resized as AVIF or WebP, not as the full screenshots.
+    formats: ["image/avif", "image/webp"],
+    qualities: [72, 75],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+    remotePatterns: [{ protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" }],
+  },
   async headers() {
     return [{ source: "/:path*", headers: [...securityHeaders("'none'"), { key: "X-Frame-Options", value: "DENY" }] }];
   },

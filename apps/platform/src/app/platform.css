@@ -331,3 +331,10 @@ select, button[type="submit"], td button, td select { min-height: 40px; }
 .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
 .toolbar .input, .toolbar .select { width: auto; flex: 1 1 160px; }
 .toolbar .grow { flex: 2 1 220px; }
+
+/* Skeleton loading screens (route loading.tsx). */
+.sk { display: block; background: linear-gradient(90deg, rgba(128,128,128,.12) 25%, rgba(128,128,128,.22) 37%, rgba(128,128,128,.12) 63%); background-size: 400% 100%; animation: sk-shimmer 1.4s ease infinite; border-radius: 8px; }
+.sk-title { height: 26px; width: 220px; margin: 4px 0 18px; }
+.sk-row { height: 48px; margin: 8px 0; }
+@keyframes sk-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+@media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
