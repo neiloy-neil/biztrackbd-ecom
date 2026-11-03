@@ -156,7 +156,7 @@ describe("product list", () => {
       shipping: { address: "House 1, Road 1", city: "Mirpur", district: "Dhaka", division: "Dhaka" }, items: [{ variantId: vid(S.f), quantity: 2 }],
     });
     const all = await listAdminProducts(S.f.tenantId, S.owner);
-    expect(all.counts).toEqual({ all: 5, active: 4, draft: 1, out: 1 });
+    expect(all.counts).toEqual({ all: 5, active: 4, draft: 1, out: 1, archived: 0 });
     expect((await listAdminProducts(S.f.tenantId, S.owner, { tab: "draft" })).rows.map((r) => r.id)).toEqual([draft.id]);
     expect((await listAdminProducts(S.f.tenantId, S.owner, { tab: "out" })).rows.map((r) => r.id)).toEqual([gone.id]);
     expect((await listAdminProducts(S.f.tenantId, S.owner, { q: "sold out" })).total).toBe(1);

@@ -15,7 +15,7 @@ const phone = () => `0151${String(1000000 + ++seq).slice(-7)}`;
 const vid = (f: TenantFixture, p = 0, v = 0) => f.products[p]!.variants[v]!.id;
 
 let sent: { to: string; text: string }[] = [];
-const lastCode = (to: string) => [...sent].reverse().find((s) => s.to === to)?.text.match(/^(\d{6})/)?.[1] ?? "";
+const lastCode = (to: string) => [...sent].reverse().find((s) => s.to === to)?.text.match(/\b(\d{6})\b/)?.[1] ?? "";
 
 beforeAll(async () => {
   process.env.CUSTOMER_AUTH_SECRET = "test-secret-test-secret-test-secret-1234";

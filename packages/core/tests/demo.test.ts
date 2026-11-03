@@ -101,10 +101,11 @@ describe("building a demo store", () => {
     for (const u of oldPictures) expect(removed).toContain(u);
   });
 
-  it("refuses to wipe a real merchant's store that has a demo name", async () => {
+  // The template names are reserved: signup refuses them, so no real merchant can hold one. A reserved demo name is therefore always safe to
+  // rebuild, even if its demo flag was lost. The guard in removeExisting still refuses any other store that is not flagged as a demo.
+  it("rebuilds a store on a reserved demo name even when its demo flag was lost", async () => {
     await owner.tenant.updateMany({ where: { subdomain: "kapor" }, data: { isDemo: false } });
-    await expect(resetDemoStore("kapor", deps)).rejects.toThrow(/not a demo store/);
-    await owner.tenant.updateMany({ where: { subdomain: "kapor" }, data: { isDemo: true } });
+    await expect(resetDemoStore("kapor", deps)).resolves.toMatchObject({ template: "kapor" });
   });
 });
 

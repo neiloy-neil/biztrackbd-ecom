@@ -900,7 +900,7 @@ describe("connecting a domain", () => {
     vercel.down = true;
     const r = await checkDomain(s.f.tenantId, "retry.example.com");
     expect(r).toMatchObject({ dnsStatus: "found", connected: false });
-    expect(r.note).toMatch(/try again/);
+    expect(r.note).toMatch(/Vercel domain connection error/);
     vercel.down = false;
     vercel.configured = true;
     vercel.ssl = "issued";
