@@ -150,9 +150,9 @@ export default async function ContactPage() {
               >
                 <ContactIcon name="whatsapp" size={22} />
               </div>
-              <h3 style={{ fontSize: 19, fontWeight: 700, margin: 0, color: "var(--ink)" }}>
+              <h2 style={{ fontSize: 19, fontWeight: 700, margin: 0, color: "var(--ink)" }}>
                 Direct WhatsApp Desk
-              </h3>
+              </h2>
               <p style={{ fontSize: 14, color: "var(--ink-2)", lineHeight: 1.55, margin: 0 }}>
                 Quickest way to reach us. For live order questions, courier connection bugs, or general guidance.
               </p>
@@ -204,9 +204,9 @@ export default async function ContactPage() {
               >
                 <ContactIcon name="email" size={22} />
               </div>
-              <h3 style={{ fontSize: 19, fontWeight: 700, margin: 0, color: "var(--ink)" }}>
+              <h2 style={{ fontSize: 19, fontWeight: 700, margin: 0, color: "var(--ink)" }}>
                 Email &amp; Billing Desk
-              </h3>
+              </h2>
               <p style={{ fontSize: 14, color: "var(--ink-2)", lineHeight: 1.55, margin: 0 }}>
                 For official billing receipts, custom domain setup, CSV bulk catalog imports, and data requests.
               </p>
@@ -251,9 +251,9 @@ export default async function ContactPage() {
               >
                 🏢
               </div>
-              <h3 style={{ fontSize: 19, fontWeight: 700, margin: 0, color: "var(--ink)" }}>
+              <h2 style={{ fontSize: 19, fontWeight: 700, margin: 0, color: "var(--ink)" }}>
                 Dhaka Office &amp; Group
-              </h3>
+              </h2>
               <p style={{ fontSize: 14, color: "var(--ink-2)", lineHeight: 1.55, margin: 0 }}>
                 BizTrackBD is a product &amp; sister concern of <strong>The Digital Dude</strong>. Consultations available for high-volume enterprise stores.
               </p>

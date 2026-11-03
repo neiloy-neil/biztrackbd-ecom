@@ -203,7 +203,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
 
               <div className="foot-col">
-                <h4>Platform</h4>
+                <h3>Platform</h3>
                 <nav aria-label="Product Links">
                   <Link href="/product" prefetch={false}>Platform Architecture</Link>
                   <Link href="/features" prefetch={false}>Commerce Overview</Link>
@@ -217,7 +217,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
 
               <div className="foot-col">
-                <h4>Logistics &amp; Pay</h4>
+                <h3>Logistics &amp; Pay</h3>
                 <nav aria-label="Integrations Links">
                   <Link href="/tools/courier-fraud-checker" prefetch={false}>Free Courier Fraud Checker</Link>
                   <Link href="/couriers#steadfast" prefetch={false}>Steadfast Automation</Link>
@@ -228,7 +228,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
 
               <div className="foot-col foot-contact">
-                <h4>Get in touch</h4>
+                <h3>Get in touch</h3>
                 <ul className="contact-cards" aria-label="Contact details">
                   <li>
                     <a href={`mailto:${CONTACT.email}`}>
@@ -256,7 +256,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
 
               <div className="foot-col">
-                <h4>Company &amp; Trust</h4>
+                <h3>Company &amp; Trust</h3>
                 <nav aria-label="Company Links">
                   <a href="https://digitaldude.co.uk" target="_blank" rel="noopener noreferrer">
                     The Digital Dude ↗

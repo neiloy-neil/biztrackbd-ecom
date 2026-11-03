@@ -228,10 +228,10 @@
   display: grid;
   gap: 2px;
 }
-.metric-label { font-size: 11.5px; font-weight: 600; color: var(--ink-3); }
+.metric-label { font-size: 12px; font-weight: 600; color: var(--ink-3); }
 .metric-value { font-size: 20px; font-weight: 800; color: var(--ink); }
 .metric-value.warn { color: var(--warning); }
-.metric-note { font-size: 11px; color: var(--ink-3); }
+.metric-note { font-size: 12px; color: var(--ink-3); }
 .metric-note.up { color: var(--success); font-weight: 600; }
 
 /* Orders Desk */
@@ -275,7 +275,7 @@
   background: var(--success-bg);
 }
 .tag-bkash {
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 700;
   padding: 3px 9px;
   border-radius: 6px;
@@ -283,7 +283,7 @@
   color: #BE185D;
 }
 .tag-courier {
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 700;
   padding: 3px 9px;
   border-radius: 6px;
@@ -291,7 +291,7 @@
   color: var(--green-fresh);
 }
 .tag-cod {
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 700;
   padding: 3px 9px;
   border-radius: 6px;
@@ -682,7 +682,7 @@
   background: var(--success-bg);
   border: 1px solid #C6DFD3;
   color: var(--success);
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 800;
 }
 .roi-label {

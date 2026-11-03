@@ -222,6 +222,16 @@ export function Wizard({
   const [touchedAddress, setTouchedAddress] = useState(false);
   const [address, setAddress] = useState<{ ok: boolean; message: string } | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
+  // Which field the problem is about, so it can be marked invalid and focused (the message itself is shown at the top of the step).
+  const [problemField, setProblemField] = useState<string | null>(null);
+  const failAt = useRef<string | null>(null);
+  const problemRef = useRef<HTMLDivElement>(null);
+  const inv = (id: string) => (problem && problemField === id ? { "aria-invalid": true as const, "aria-describedby": "step-problem" } : {});
+  useEffect(() => {
+    if (!problem || !problemField) return;
+    problemRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    document.querySelector<HTMLElement>(`[data-testid="${problemField}"]`)?.focus({ preventScroll: true });
+  }, [problem, problemField]);
   const [showPassword, setShowPassword] = useState(false);
   const [showPlanSwitcher, setShowPlanSwitcher] = useState(false);
   const checkId = useRef(0);
@@ -290,6 +300,7 @@ export function Wizard({
   function validate(s: number): string | null {
     if (s === 0) {
       if (v.storeName.trim().length < 2) {
+        failAt.current = "f-storeName";
         return v.siteMode === "PORTFOLIO"
           ? "Enter your website or business name (at least 2 letters)"
           : "Enter your store name (at least 2 letters)";
@@ -299,25 +310,28 @@ export function Wizard({
       // Selling Channel / Vertical is always pre-selected with defaults
     }
     if (s === 2) {
-      if (v.subdomain.length < 3) return "Choose a web address of at least 3 letters or numbers";
-      if (address && !address.ok) return address.message;
+      if (v.subdomain.length < 3) { failAt.current = "f-subdomain"; return "Choose a web address of at least 3 letters or numbers"; }
+      if (address && !address.ok) { failAt.current = "f-subdomain"; return address.message; }
     }
     if (s === 3) {
-      if (v.ownerName.trim().length < 2) return "Enter your full name";
-      if (!/^\S+@\S+\.\S+$/.test(v.email.trim())) return "Enter a valid email address for store admin login";
+      if (v.ownerName.trim().length < 2) { failAt.current = "f-ownerName"; return "Enter your full name"; }
+      if (!/^\S+@\S+\.\S+$/.test(v.email.trim())) { failAt.current = "f-email"; return "Enter a valid email address for store admin login"; }
       const cleanPhone = v.phone.replace(/[\s-]/g, "");
       if (!/^(\+?88)?01[3-9]\d{8}$/.test(cleanPhone)) {
+        failAt.current = "f-phone";
         return "Enter a valid Bangladeshi mobile number (e.g. 01712345678)";
       }
-      if (v.password.length < 8) return "Password must be at least 8 characters";
-      if (v.password !== v.confirmPassword) return "The two passwords do not match";
+      if (v.password.length < 8) { failAt.current = "f-password"; return "Password must be at least 8 characters"; }
+      if (v.password !== v.confirmPassword) { failAt.current = "f-confirmPassword"; return "The two passwords do not match"; }
     }
     return null;
   }
 
   function next() {
+    failAt.current = null;
     const p = validate(step);
     setProblem(p);
+    setProblemField(p ? failAt.current : null);
     if (p) return;
     setProblem(null);
     if (!startedTracked.current) {
@@ -346,6 +360,7 @@ export function Wizard({
   return (
     <div className="split-start">
       <div className="split-form" style={{ position: "relative" }}>
+        <h1 className="sr-only">Open your BizTrackBD store: free 14-day trial</h1>
         {keepCode && keptProductsCount !== undefined && (
           <div className="notice" role="status" data-testid="keep-note" style={{ marginBottom: 20 }}>
             Your demo store comes with you: {keptProductsCount}{" "}
@@ -435,6 +450,30 @@ export function Wizard({
             </div>
           </div>
 
+          {/* The problem with this step, at the top of it so a phone shows it (it used to sit below the fold, under the sticky button) */}
+          {problem && (
+            <div
+              id="step-problem"
+              ref={problemRef}
+              className="err"
+              role="alert"
+              style={{
+                marginBottom: 16,
+                padding: "10px 12px",
+                background: "#FEF2F2",
+                border: "1px solid #FCA5A5",
+                borderRadius: 8,
+                color: "#DC2626",
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+              data-testid="step-problem"
+            >
+              ⚠️ {problem}
+            </div>
+          )}
+
+
           {/* =========================================================================
               STEP 1 (Index 0): Business Identity & Category
               ========================================================================= */}
@@ -462,10 +501,11 @@ export function Wizard({
                   value={v.storeName}
                   onChange={(e) => set("storeName", e.target.value)}
                   data-testid="f-storeName"
+                  {...inv("f-storeName")}
                   style={{
                     width: "100%",
                     padding: "11px 14px",
-                    fontSize: 15,
+                    fontSize: 16,
                     borderRadius: 10,
                     border: "1.5px solid var(--line, #CBD5E1)",
                   }}
@@ -792,6 +832,7 @@ export function Wizard({
                     aria-invalid={address ? !address.ok : undefined}
                     aria-describedby="sub-msg"
                     data-testid="f-subdomain"
+                  {...inv("f-subdomain")}
                     placeholder="yourshop"
                     style={{ flex: 1, padding: "11px 14px", border: "none", outline: "none", fontSize: 14.5 }}
                   />
@@ -1034,7 +1075,8 @@ export function Wizard({
                   value={v.ownerName}
                   onChange={(e) => set("ownerName", e.target.value)}
                   data-testid="f-ownerName"
-                  style={{ width: "100%", padding: "10px 12px", borderRadius: 8, fontSize: 14 }}
+                  {...inv("f-ownerName")}
+                  style={{ width: "100%", padding: "10px 12px", borderRadius: 8, fontSize: 16 }}
                 />
               </label>
 
@@ -1051,7 +1093,8 @@ export function Wizard({
                   value={v.phone}
                   onChange={(e) => set("phone", e.target.value)}
                   data-testid="f-phone"
-                  style={{ width: "100%", padding: "10px 12px", borderRadius: 8, fontSize: 14 }}
+                  {...inv("f-phone")}
+                  style={{ width: "100%", padding: "10px 12px", borderRadius: 8, fontSize: 16 }}
                 />
                 <span className="hint" style={{ fontSize: 11.5, color: "#64748B", marginTop: 4, display: "block" }}>
                   Used for instant SMS order alerts, courier sync, and merchant support.
@@ -1070,7 +1113,8 @@ export function Wizard({
                   value={v.email}
                   onChange={(e) => set("email", e.target.value)}
                   data-testid="f-email"
-                  style={{ width: "100%", padding: "10px 12px", borderRadius: 8, fontSize: 14 }}
+                  {...inv("f-email")}
+                  style={{ width: "100%", padding: "10px 12px", borderRadius: 8, fontSize: 16 }}
                 />
                 <span className="hint" style={{ fontSize: 11.5, color: "#64748B", marginTop: 4, display: "block" }}>
                   Your primary BizTrackBD dashboard login email.
@@ -1091,6 +1135,7 @@ export function Wizard({
                       value={v.password}
                       onChange={(e) => set("password", e.target.value)}
                       data-testid="f-password"
+                  {...inv("f-password")}
                       style={{ width: "100%", padding: "10px 34px 10px 12px", borderRadius: 8, fontSize: 14 }}
                     />
                     <button
@@ -1126,7 +1171,8 @@ export function Wizard({
                     value={v.confirmPassword}
                     onChange={(e) => set("confirmPassword", e.target.value)}
                     data-testid="f-confirmPassword"
-                    style={{ width: "100%", padding: "10px 12px", borderRadius: 8, fontSize: 14 }}
+                  {...inv("f-confirmPassword")}
+                    style={{ width: "100%", padding: "10px 12px", borderRadius: 8, fontSize: 16 }}
                   />
                 </label>
               </div>
@@ -1176,27 +1222,6 @@ export function Wizard({
                   ⚠️ {state.error}
                 </div>
               )}
-            </div>
-          )}
-
-          {/* Validation Alert */}
-          {problem && (
-            <div
-              className="err"
-              role="alert"
-              style={{
-                marginTop: 12,
-                padding: "10px 12px",
-                background: "#FEF2F2",
-                border: "1px solid #FCA5A5",
-                borderRadius: 8,
-                color: "#DC2626",
-                fontSize: 13,
-                fontWeight: 600,
-              }}
-              data-testid="step-problem"
-            >
-              ⚠️ {problem}
             </div>
           )}
 

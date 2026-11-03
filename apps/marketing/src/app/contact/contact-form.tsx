@@ -238,7 +238,7 @@ export function ContactForm() {
           required
           checked={consent}
           onChange={(e) => setConsent(e.target.checked)}
-          style={{ marginTop: 2, accentColor: "var(--brand, #11795A)", cursor: "pointer" }}
+          style={{ marginTop: 0, width: 20, height: 20, flex: "none", accentColor: "var(--brand, #11795A)", cursor: "pointer" }}
           data-testid="c-consent"
         />
         <span>
