@@ -133,11 +133,11 @@ function AiChatWidgetInner({
           display: flex;
           align-items: center;
           gap: 9px;
-          background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-          color: #ffffff;
+          background: var(--accent, #8C5A3C);
+          color: var(--accent-ink, #fff);
           padding: 12px 18px;
           border-radius: 9999px;
-          box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.45), 0 8px 10px -6px rgba(79, 70, 229, 0.3);
+          box-shadow: 0 10px 25px -5px color-mix(in srgb, var(--accent, #8C5A3C) 45%, transparent), 0 8px 10px -6px color-mix(in srgb, var(--accent, #8C5A3C) 30%, transparent);
           border: 1px solid rgba(255, 255, 255, 0.2);
           cursor: pointer;
           font-weight: 600;
@@ -146,7 +146,7 @@ function AiChatWidgetInner({
         }
         .bt-ai-chat-bubble:hover {
           transform: translateY(-2px) scale(1.03);
-          box-shadow: 0 14px 28px -4px rgba(79, 70, 229, 0.55);
+          box-shadow: 0 14px 28px -4px color-mix(in srgb, var(--accent, #8C5A3C) 55%, transparent);
         }
         .bt-ai-pulse {
           width: 8px;
@@ -183,13 +183,20 @@ function AiChatWidgetInner({
           from { opacity: 0; transform: translateY(16px) scale(0.97); }
           to { opacity: 1; transform: translateY(0) scale(1); }
         }
+        /* On a wide screen the round WhatsApp button sits in the same corner: this one stands above it instead of under it. */
+        @media (min-width: 641px) {
+          body:has(.bt-wa-float) .bt-ai-chat-bubble { bottom: 84px; }
+          body:has(.bt-wa-float) .bt-chat-window { bottom: 148px; }
+        }
         @media (max-width: 640px) {
           .bt-ai-chat-bubble {
             bottom: 80px;
             right: 16px;
-            padding: 10px 14px;
+            padding: 12px;
             font-size: 13px;
           }
+          /* Icon only on a phone: the label and the pulse dot cover less of the page without it. */
+          .bt-ai-chat-bubble > span { display: none; }
           .bt-chat-window {
             bottom: 16px;
             right: 16px;
@@ -221,8 +228,8 @@ function AiChatWidgetInner({
           <div
             style={{
               padding: "14px 18px",
-              background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
-              color: "#ffffff",
+              background: "var(--accent, #8C5A3C)",
+              color: "var(--accent-ink, #fff)",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
@@ -302,11 +309,11 @@ function AiChatWidgetInner({
                     maxWidth: "84%",
                     padding: "10px 14px",
                     borderRadius: m.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-                    background: m.role === "user" ? "#4f46e5" : "#ffffff",
-                    color: m.role === "user" ? "#ffffff" : "#1f2937",
+                    background: m.role === "user" ? "var(--accent, #8C5A3C)" : "#ffffff",
+                    color: m.role === "user" ? "var(--accent-ink, #fff)" : "#1f2937",
                     fontSize: 13.5,
                     lineHeight: 1.45,
-                    boxShadow: m.role === "user" ? "0 2px 4px rgba(79, 70, 229, 0.2)" : "0 1px 3px rgba(0, 0, 0, 0.08)",
+                    boxShadow: m.role === "user" ? "0 2px 4px color-mix(in srgb, var(--accent, #8C5A3C) 20%, transparent)" : "0 1px 3px rgba(0, 0, 0, 0.08)",
                     border: m.role === "user" ? "none" : "1px solid #e5e7eb",
                     whiteSpace: "pre-line",
                   }}
@@ -322,8 +329,8 @@ function AiChatWidgetInner({
                       padding: "12px",
                       borderRadius: 12,
                       background: "#ffffff",
-                      border: "1px solid #e0e7ff",
-                      boxShadow: "0 2px 8px rgba(99, 102, 241, 0.1)",
+                      border: "1px solid var(--line-2, #E3D9CA)",
+                      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
                       fontSize: 12.5,
                     }}
                   >
@@ -331,8 +338,8 @@ function AiChatWidgetInner({
                       <span style={{ fontWeight: 600, color: "#374151" }}>অর্ডার #{m.orderTracking.orderNumber}</span>
                       <span
                         style={{
-                          background: "#e0e7ff",
-                          color: "#4338ca",
+                          background: "var(--tint-1, #F1E9DD)",
+                          color: "var(--accent-strong, var(--accent, #8C5A3C))",
                           padding: "2px 8px",
                           borderRadius: 9999,
                           fontWeight: 600,
@@ -358,7 +365,7 @@ function AiChatWidgetInner({
                         style={{
                           display: "inline-block",
                           marginTop: 4,
-                          color: "#4f46e5",
+                          color: "var(--accent-strong, var(--accent, #8C5A3C))",
                           fontWeight: 600,
                           textDecoration: "underline",
                         }}
@@ -390,7 +397,7 @@ function AiChatWidgetInner({
                         }}
                       >
                         <span style={{ color: "#1f2937", fontWeight: 500 }}>{p.title}</span>
-                        <span style={{ color: "#4f46e5", fontWeight: 700 }}>৳{p.price.toLocaleString("en-BD")}</span>
+                        <span style={{ color: "var(--accent-strong, var(--accent, #8C5A3C))", fontWeight: 700 }}>৳{p.price.toLocaleString("en-BD")}</span>
                       </Link>
                     ))}
                   </div>
@@ -424,7 +431,7 @@ function AiChatWidgetInner({
 
             {loading && (
               <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#6b7280", fontSize: 12.5 }}>
-                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4f46e5", animation: "btPulse 1s infinite" }} />
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent, #8C5A3C)", animation: "btPulse 1s infinite" }} />
                 <span>উত্তর তৈরি হচ্ছে...</span>
               </div>
             )}
@@ -499,8 +506,8 @@ function AiChatWidgetInner({
               type="submit"
               disabled={loading || !input.trim()}
               style={{
-                background: "#4f46e5",
-                color: "#ffffff",
+                background: "var(--accent, #8C5A3C)",
+                color: "var(--accent-ink, #fff)",
                 border: "none",
                 borderRadius: "50%",
                 width: 34,

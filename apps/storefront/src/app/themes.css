@@ -2370,11 +2370,12 @@ body:has(#bt-preview-select) .bt-anim:not(.bt-revealed) {
   .bt-fomo-hide-mobile {
     display: none !important;
   }
+  .bt-fomo-close { min-width: 40px; min-height: 40px; }
   .bt-fomo-toast {
     bottom: var(--fomo-safe-bottom, 76px) !important;
     left: 14px !important;
-    right: 14px !important;
-    max-width: calc(100vw - 28px) !important;
+    right: 76px !important; /* the chat launcher is a circle in the right-hand corner */
+    max-width: calc(100vw - 90px) !important;
   }
 }
 

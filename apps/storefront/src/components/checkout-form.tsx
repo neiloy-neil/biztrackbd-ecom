@@ -504,7 +504,7 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
         </details>
 
         {!isDigitalOrder && (
-        <section className="card" style={{ background: "rgba(99, 102, 241, 0.04)", borderColor: "rgba(99, 102, 241, 0.2)" }}>
+        <section className="card" style={{ background: "color-mix(in srgb, var(--accent, #8C5A3C) 4%, transparent)", borderColor: "color-mix(in srgb, var(--accent, #8C5A3C) 20%, transparent)" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 600, fontSize: 14 }}>
@@ -520,7 +520,7 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
             <button
               type="button"
               className="btn btn-secondary"
-              style={{ fontSize: 13, padding: "6px 12px", border: "1px solid rgba(99, 102, 241, 0.3)" }}
+              style={{ fontSize: 13, padding: "6px 12px", border: "1px solid color-mix(in srgb, var(--accent, #8C5A3C) 30%, transparent)" }}
               onClick={() => setShowAiPaste(!showAiPaste)}
             >
               {showAiPaste
@@ -530,7 +530,7 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
           </div>
 
           {showAiPaste && (
-            <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px dashed rgba(99, 102, 241, 0.2)" }}>
+            <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px dashed color-mix(in srgb, var(--accent, #8C5A3C) 20%, transparent)" }}>
               <textarea
                 className="textarea"
                 rows={3}
@@ -779,7 +779,7 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
             );
           })}
           {quote?.paymentOptions?.bankTransfer?.available && (
-            <div className={`pay-box ${method === "BANK_TRANSFER" ? " open" : ""}`} style={{ border: "1px solid #4f46e5" }}>
+            <div className={`pay-box ${method === "BANK_TRANSFER" ? " open" : ""}`} style={{ border: "1px solid var(--accent, #8C5A3C)" }}>
               <label className="option" style={method === "BANK_TRANSFER" ? { padding: 14 } : undefined}>
                 <input
                   type="radio"
@@ -789,30 +789,30 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
                   data-testid="pay-bank-transfer"
                 />
                 <div className="grow">
-                  <div className="t" style={{ color: "#4338ca", fontWeight: 700 }}>
+                  <div className="t" style={{ color: "var(--accent-strong, var(--accent, #8C5A3C))", fontWeight: 700 }}>
                     {lang === "bn" ? "ব্যাংক ডিপোজিট / ব্যাংক ট্রান্সফার" : "Direct Bank Transfer / Wire"}
                   </div>
                   <div className="s">
                     {lang === "bn" ? "অফিসিয়াল ব্যাংক একাউন্টে জমা দিয়ে স্লিপ রেফারেন্স দিন" : "Transfer funds directly to official corporate account"}
                   </div>
                 </div>
-                <span className="mfs-tag" style={{ background: "#4f46e5", color: "#fff", fontWeight: 700 }} aria-hidden="true">
+                <span className="mfs-tag" style={{ background: "var(--accent, #8C5A3C)", color: "var(--accent-ink, #fff)", fontWeight: 700 }} aria-hidden="true">
                   B2B BANK
                 </span>
               </label>
 
               {method === "BANK_TRANSFER" && quote?.paymentOptions.bankTransfer.bankDetails && (
-                <div className="pay-body" style={{ background: "rgba(79, 70, 229, 0.04)", padding: 14, borderRadius: 8 }}>
+                <div className="pay-body" style={{ background: "color-mix(in srgb, var(--accent, #8C5A3C) 4%, transparent)", padding: 14, borderRadius: 8 }}>
                   <div className="steps" style={{ fontSize: 13, lineHeight: 1.6 }}>
                     <div><b>Bank:</b> {quote.paymentOptions.bankTransfer.bankDetails.bankName}</div>
                     <div><b>Branch:</b> {quote.paymentOptions.bankTransfer.bankDetails.branchName}</div>
                     <div><b>Account Name:</b> {quote.paymentOptions.bankTransfer.bankDetails.accountName}</div>
-                    <div><b>Account No:</b> <b style={{ fontSize: 15, color: "#1e1b4b" }}>{quote.paymentOptions.bankTransfer.bankDetails.accountNumber}</b></div>
+                    <div><b>Account No:</b> <b style={{ fontSize: 15, color: "var(--ink, #2B2118)" }}>{quote.paymentOptions.bankTransfer.bankDetails.accountNumber}</b></div>
                     {quote.paymentOptions.bankTransfer.bankDetails.routingNumber && (
                       <div><b>Routing:</b> {quote.paymentOptions.bankTransfer.bankDetails.routingNumber}</div>
                     )}
                     {quote.paymentOptions.bankTransfer.bankDetails.instructions && (
-                      <div style={{ marginTop: 6, color: "#4338ca" }}>
+                      <div style={{ marginTop: 6, color: "var(--accent-strong, var(--accent, #8C5A3C))" }}>
                         <b>Note:</b> {quote.paymentOptions.bankTransfer.bankDetails.instructions}
                       </div>
                     )}

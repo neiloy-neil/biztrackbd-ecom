@@ -9,11 +9,11 @@ const RING = (
 const ARROW = <path d="M534 362L678 527H390z" />;
 
 /** Symbol on its deep green rounded square (app icon), or open (no square) for light grounds. */
-export function BrandSymbol({ size = 30, tile = true, onDark = false, title = "BizTrackBD" }: { size?: number; tile?: boolean; onDark?: boolean; title?: string }) {
+export function BrandSymbol({ size = 30, tile = true, onDark = false, mono = false, title = "BizTrackBD" }: { size?: number; tile?: boolean; onDark?: boolean; /** Open symbol only: the "b" takes the surrounding text colour, for a footer of any colour. The arrow stays marigold. */ mono?: boolean; title?: string }) {
   if (!tile) {
     return (
       <svg width={size * 0.91} height={size} viewBox="370 342 672 740" role="img" aria-label={title}>
-        <g fill={onDark ? "#FFFFFF" : GREEN_DEEP}>{STEM}{RING}</g>
+        <g fill={mono ? "currentColor" : onDark ? "#FFFFFF" : GREEN_DEEP}>{STEM}{RING}</g>
         <g fill={MARIGOLD}>{ARROW}</g>
       </svg>
     );

@@ -55,6 +55,7 @@ export async function generateMetadata(): Promise<Metadata> {
       metadataBase: new URL(origin),
       title: { default: siteTitle, template: `%s | ${info.storeName}` },
       description: siteDesc,
+      icons: info.logoUrl ? { icon: info.logoUrl, apple: info.logoUrl } : undefined,
       keywords: keywordsList,
       openGraph: {
         siteName: info.storeName,

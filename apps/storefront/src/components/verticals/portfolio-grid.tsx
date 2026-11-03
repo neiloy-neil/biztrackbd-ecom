@@ -156,7 +156,7 @@ export function PortfolioGridSection({
 
               <div style={{ padding: "20px", display: "flex", flexDirection: "column", flex: 1, justifyContent: "space-between" }}>
                 <div>
-                  <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "var(--accent, #6366f1)", marginBottom: 6, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                  <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "var(--accent, #8C5A3C)", marginBottom: 6, letterSpacing: "0.04em", textTransform: "uppercase" }}>
                     {pCat}
                   </div>
                   <h3 style={{ fontSize: "1.15rem", fontWeight: 700, margin: "0 0 8px", lineHeight: 1.3 }}>{pTitle}</h3>

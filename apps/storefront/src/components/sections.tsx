@@ -577,8 +577,8 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
       const subhead = L(s, "subhead", lang);
       const badge = L(s, "badge", lang);
       const ctaText = L(s, "ctaText", lang);
-      const bgColor = str(s.bgColor) || "#1E1B4B";
-      const textColor = str(s.textColor) || "#FFFFFF";
+      const bgColor = str(s.bgColor) || "var(--accent)";
+      const textColor = str(s.textColor) || "var(--accent-ink, #FFFFFF)";
       const link = str(s.ctaLink);
 
       return (
@@ -641,8 +641,8 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
       if (!text && !editing) return null;
       const speed = str(s.speed) || "normal";
       const speedClass = speed === "fast" ? "bt-marquee-fast" : speed === "slow" ? "bt-marquee-slow" : "";
-      const bgColor = str(s.bgColor) || "#4F46E5";
-      const textColor = str(s.textColor) || "#FFFFFF";
+      const bgColor = str(s.bgColor) || "var(--accent)";
+      const textColor = str(s.textColor) || "var(--accent-ink, #FFFFFF)";
       const icon = str(s.icon) || "lightning";
       const renderIcon = () => {
         if (icon === "truck") {

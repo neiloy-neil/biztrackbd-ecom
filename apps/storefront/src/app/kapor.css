@@ -647,8 +647,8 @@ h1, h2, h3, p { margin: 0; }
   box-shadow: 0 8px 24px rgba(37, 211, 102, 0.55);
 }
 .bt-floating-phone {
-  background: var(--accent, #4F46E5);
-  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
+  background: var(--accent, #8C5A3C);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--accent, #8C5A3C) 45%, transparent);
 }
 .bt-floating-tooltip {
   background: #111827;
@@ -669,3 +669,15 @@ h1, h2, h3, p { margin: 0; }
 .sk-card .sk-img { aspect-ratio: 1 / 1; width: 100%; }
 @keyframes sk-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
 @media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
+
+/* Phones: the links people tap (footer columns and legal row, the section "see all" link, the logo) are 44px tall. The credit line is inline text and keeps its size. */
+@media (max-width: 640px) {
+  .footer .cols a, .footer .legal a { display: flex; align-items: center; min-height: 44px; line-height: 1.4; }
+  .link-accent { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 6px; margin-inline: -6px; }
+  .logo { display: flex; align-items: center; justify-content: center; min-height: 44px; }
+  .footer .lang-btn { min-height: 44px; }
+}
+/* The fixed Call and WhatsApp bar (and the chat circle above it) would sit over the last lines of the footer, the credit and the language button. */
+@media (max-width: 768px) {
+  body:not(:has(.stickybar)):has(.mobile-sticky-bar) .footer { padding-bottom: 104px; }
+}
