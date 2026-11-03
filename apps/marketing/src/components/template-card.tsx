@@ -12,6 +12,7 @@ const THEME_HOSTS: Record<string, string> = {
   freshbasket: "freshbasket",
   bazaar: "bazaar",
   nakshi: "nakshi",
+  maison: "maison",
   "dhaka-bistro": "dhakabistro",
   "modern-clinic": "modernclinic",
   "apex-corporate": "apexcorp",

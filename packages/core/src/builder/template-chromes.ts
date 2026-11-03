@@ -36,5 +36,6 @@ export const BUILT_IN_CHROMES: Record<string, Chrome> = {
   berber: make({ logo: "stacked", search: "icon" }, { bgColor: "#C9A24B", textColor: "#0D121E" }, "about", "shop", "contact", "payments"),
   freshbasket: make({ logo: "left", search: "bar" }, { bgColor: "#B4421C", textColor: "#FFFFFF" }, "shop", "help", "contact", "payments"),
   bazaar: make({ logo: "left", search: "bar" }, { bgColor: "#C2410C", textColor: "#FFFFFF" }, "shop", "help", "contact", "payments"),
+  maison: make({ logo: "center", search: "icon" }, { bgColor: "#1C1917", textColor: "#FFFFFF" }, "about", "shop", "help", "social"),
   nakshi: make({ logo: "center", search: "icon" }, { bgColor: "#7A1F2E", textColor: "#FFFFFF" }, "about", "shop", "contact", "social"),
 };

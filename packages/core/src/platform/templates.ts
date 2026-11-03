@@ -4,7 +4,7 @@ import type { Chrome } from "../builder/chrome";
 import { installTemplateChrome, liveChromeForTemplate } from "../builder/chrome-store";
 import { BUILT_IN_CHROMES, templateChrome } from "../builder/template-chromes";
 import { defaultPageFor, STORE_PAGE_KINDS, validatePage, type PageJson, type PageKind } from "../builder/registry";
-import { STORE_THEMES, isThemeId, themeDefaults, validateTheme, type ThemeId, type ThemeSettings } from "../builder/theme";
+import { STORE_THEMES, isFreeThemeId, isThemeId, themeDefaults, validateTheme, type ThemeId, type ThemeSettings } from "../builder/theme";
 import { NotFoundError, ValidationError } from "../errors";
 import { audit } from "../audit/service";
 import { assertCan, type StaffActor } from "../permissions";
@@ -88,7 +88,7 @@ type Row = { id: string; name: string; blurb: string; audience: string; baseLook
 
 /** A saved row as a template, checked again on the way out: a damaged row falls back to the original look rather than breaking a page. */
 function fromRow(r: Row): TemplateInfo {
-  const baseLook: ThemeId = isThemeId(r.baseLook) ? r.baseLook : "kapor";
+  const baseLook: ThemeId = isFreeThemeId(r.baseLook) ? r.baseLook : "kapor";
   let settings: ThemeSettings;
   try { settings = validateTheme(r.settingsJson); } catch { settings = themeDefaults(baseLook); }
   const pages: TemplatePages = {};
@@ -191,7 +191,8 @@ export async function publishTemplateFromStore(actor: PlatformActor, input: Publ
   const tenant = await db.tenant.findFirst({ where: { id: input.tenantId }, select: { id: true, themeId: true, demoKind: true, siteMode: true, businessVertical: true } });
   if (!tenant) throw new NotFoundError("Store");
   if (tenant.demoKind) throw new ValidationError("Choose a real store: a demo store is erased after a few hours", { field: "tenantId" });
-  const baseLook: ThemeId = isThemeId(tenant.themeId) ? tenant.themeId : "kapor";
+  // A premium theme is bought, not shared: a store on one cannot turn its design into a template others could start from.
+  const baseLook: ThemeId = isFreeThemeId(tenant.themeId) ? tenant.themeId : "kapor";
 
   const live = async (pageKey: string) => db.themeVersion.findFirst({ where: { tenantId: tenant.id, themeId: baseLook, pageKey, state: "PUBLISHED" }, orderBy: { version: "desc" } });
   const home = await live("home");

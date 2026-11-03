@@ -213,7 +213,7 @@ export const FONT_LABELS: Record<FontPair, string> = {
 
 export const DEFAULT_THEME: ThemeSettings = { accent: "#8C5A3C", background: "#FBF8F3", text: "#2B2118", radius: "soft", font: "sans" };
 
-export const THEME_IDS = ["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu", "berber", "freshbasket", "bazaar", "nakshi"] as const;
+export const THEME_IDS = ["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu", "berber", "freshbasket", "bazaar", "nakshi", "maison"] as const;
 export type ThemeId = (typeof THEME_IDS)[number];
 
 export interface ThemeDefinition {
@@ -222,6 +222,8 @@ export interface ThemeDefinition {
   blurb: string;
   audience: string;
   defaults: ThemeSettings;
+  /** Set on the paid family: a store must own the theme (PREMIUM_THEME_PRICE, once) before it can use it. */
+  premium?: true;
 }
 
 /** The installed storefront templates. Domain features remain separate modules. */
@@ -250,6 +252,23 @@ export const CATEGORY_THEMES = {
 } as const satisfies Record<string, ThemeId>;
 export type StoreCategory = keyof typeof CATEGORY_THEMES;
 
+/** What one premium theme costs, in taka, paid once. The store then owns it for life. */
+export const PREMIUM_THEME_PRICE = 49;
+
+/**
+ * The premium family: richer layouts and polish, sold one by one. They are not in STORE_THEMES, so they are never offered at signup or as a
+ * free template; a store can only switch to one it has bought (see activateTheme and the themes page in the admin).
+ */
+export const PREMIUM_THEMES: readonly ThemeDefinition[] = [
+  { id: "maison", name: "Maison", blurb: "An editorial fashion flagship: a full-bleed lookbook home, portrait cards, a size and fit guide and a sticky add-to-cart.", audience: "Fashion and apparel brands", premium: true, defaults: { accent: "#8F4A2B", background: "#FAF7F2", text: "#1C1917", radius: "sharp", font: "editorial" } },
+] as const;
+
+export const ALL_THEMES: readonly ThemeDefinition[] = [...STORE_THEMES, ...PREMIUM_THEMES];
+
+export const isPremiumTheme = (value: unknown): boolean => PREMIUM_THEMES.some((t) => t.id === value);
+/** A theme every store can use: the original family, not the paid one. */
+export const isFreeThemeId = (value: unknown): value is ThemeId => isThemeId(value) && !isPremiumTheme(value);
+
 export const isThemeId = (value: unknown): value is ThemeId => typeof value === "string" && (THEME_IDS as readonly string[]).includes(value);
 
 export function validateThemeId(value: unknown): ThemeId {
@@ -257,7 +276,7 @@ export function validateThemeId(value: unknown): ThemeId {
   return value;
 }
 
-export const themeDefinition = (id: unknown): ThemeDefinition => STORE_THEMES.find((theme) => theme.id === id) ?? STORE_THEMES[0]!;
+export const themeDefinition = (id: unknown): ThemeDefinition => ALL_THEMES.find((theme) => theme.id === id) ?? STORE_THEMES[0]!;
 export const themeDefaults = (id: unknown): ThemeSettings => ({ ...themeDefinition(id).defaults });
 
 export const RADIUS_PX: Record<ThemeRadius, number> = {

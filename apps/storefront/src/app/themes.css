@@ -158,6 +158,33 @@ body[data-store-theme="nakshi"] .trust > div { border: 0; border-top: 1px solid 
 body[data-store-theme="nakshi"] .footer { background: #3B0F1A; color: #EBD9CC; border-top: 3px double #B8893A; }
 body[data-store-theme="nakshi"] .footer b, body[data-store-theme="nakshi"] .footer .brand { color: #FFFFFF; }
 
+/* Maison (premium): an editorial fashion flagship. Black and copper on warm white, sharp corners, portrait cards, a sticky header. */
+body[data-store-theme="maison"] {
+  --bg: #FAF7F2; --surface: #FFFFFF; --ink: #1C1917; --ink-2: #44403C; --muted: #57534E; --faint: #6B655F;
+  --accent: #8F4A2B; --accent-strong: #6E3318; --accent-ink: #FFFFFF; --hero: #EFE6DA;
+  --line: #E7DFD3; --line-2: #D6CBBB; --field: #9A8F80; --tint-1: #F3EBDF; --tint-2: #ECEFE4; --tint-3: #F0EAF0; --tint-4: #F7E6E0;
+  --radius: 0px; --font: var(--font-playfair),"Hind Siliguri",Georgia,"Noto Serif Bengali",serif;
+}
+body[data-store-theme="maison"] .announce { background: #1C1917; color: #F5EFE6; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+body[data-store-theme="maison"] .header { position: sticky; top: 0; background: rgba(250,247,242,.94); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line-2); }
+body[data-store-theme="maison"] .logo { font-weight: 500; letter-spacing: .32em; text-transform: uppercase; }
+body[data-store-theme="maison"] .hero { min-height: min(78vh, 640px); display: flex; align-items: center; background: linear-gradient(100deg,#F4ECE0 0 56%,#E8D9C7 56%); border-bottom: 1px solid var(--line-2); }
+body[data-store-theme="maison"] .hero h1 { font-weight: 500; letter-spacing: -.02em; line-height: 1.05; }
+body[data-store-theme="maison"] .eyebrow { color: var(--accent-strong); letter-spacing: .34em; font-size: 12px; }
+body[data-store-theme="maison"] .btn { border-radius: 0; text-transform: uppercase; letter-spacing: .14em; font-size: 13px; }
+body[data-store-theme="maison"] .section-head h2 { font-weight: 500; letter-spacing: -.01em; }
+body[data-store-theme="maison"] .pimg { aspect-ratio: 3 / 4; border-radius: 0; background: var(--tint-1); transition: transform .5s ease; }
+body[data-store-theme="maison"] .pcard { border: 0; padding-bottom: 16px; overflow: hidden; }
+body[data-store-theme="maison"] .pcard:hover .pimg { transform: scale(1.03); }
+body[data-store-theme="maison"] .pname { font-weight: 500; letter-spacing: .01em; }
+body[data-store-theme="maison"] .cat { border-radius: 0; border: 1px solid var(--ink); text-transform: uppercase; letter-spacing: .16em; font-size: 13px; min-height: 120px; }
+body[data-store-theme="maison"] .trust > div { border: 0; border-top: 1px solid var(--ink); text-align: left; }
+body[data-store-theme="maison"] .footer { background: #1C1917; color: #D9D1C5; }
+body[data-store-theme="maison"] .footer b, body[data-store-theme="maison"] .footer .brand { color: #FFFFFF; }
+@media (max-width: 720px) {
+  body[data-store-theme="maison"] .hero { min-height: 70vh; background: linear-gradient(180deg,#F4ECE0 0 62%,#E8D9C7 62%); }
+}
+
 /* Orders paused by the owner */
 .paused-banner { background: var(--ink, #1A1A1A); color: #fff; text-align: center; padding: 10px 16px; font-size: 14px; font-weight: 600; }
 

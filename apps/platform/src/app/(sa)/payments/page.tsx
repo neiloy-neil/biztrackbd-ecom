@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { canPlatform, listPayments } from "@biztrackbd/core";
+import { canPlatform, listPayments, listPendingThemePurchases } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
 import { dateTime, prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
-import { approveAction, rejectAction } from "./actions";
+import { approveAction, approveThemeAction, rejectAction, rejectThemeAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Payment Approvals" };
@@ -48,6 +48,7 @@ export default async function Payments({
   const tabRaw = one(sp.tab) ?? "PENDING";
   const tab = (TABS.find((t) => t.id === tabRaw)?.id ?? "PENDING") as "PENDING" | "APPROVED" | "REJECTED" | "ALL";
   const rows = await listPayments(s.actor, tab);
+  const themePurchases = await listPendingThemePurchases(s.actor);
   const canEdit = canPlatform(s.user.role, "payments", "edit");
   const err = one(sp.err);
   const done = one(sp.done);
@@ -112,8 +113,32 @@ export default async function Payments({
       {err && <div className="notice bad" role="alert" style={{ marginBottom: 4 }} data-testid="payment-error">{err}</div>}
       {done && (
         <div className="notice good" role="status" style={{ marginBottom: 4 }}>
-          {done === "approved" ? "Payment approved. Plan activated." : "Payment rejected."}
+          {done === "approved" ? "Payment approved. Plan activated." : done === "theme-approved" ? "Theme payment approved. The theme is unlocked for the store." : done === "theme-rejected" ? "Theme payment rejected." : "Payment rejected."}
         </div>
+      )}
+
+      {/* Premium theme purchases: 49 taka each, approved here, owned for life */}
+      {themePurchases.length > 0 && (
+        <section className="card" aria-labelledby="theme-purchases-h" data-testid="theme-purchases" style={{ padding: 16 }}>
+          <h2 id="theme-purchases-h" style={{ margin: "0 0 10px", fontSize: 17 }}>Theme purchases waiting ({themePurchases.length})</h2>
+          <div style={{ display: "grid", gap: 12 }}>
+            {themePurchases.map((p) => (
+              <form key={p.id} style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", paddingTop: 10, borderTop: "1px solid #E5E5F0" }}>
+                <div style={{ flex: "1 1 260px", fontSize: 14 }}>
+                  <b>{p.storeName}</b> ({p.subdomain}) bought <b>{p.themeName}</b> for ৳ {p.amount}<br />
+                  <span style={{ color: "#4B4B73" }}>{p.provider} from {p.senderNumber}, TrxID {p.trxId}</span>
+                </div>
+                {canEdit && (
+                  <>
+                    <input name="reason" placeholder="Reason, if rejecting" aria-label={`Rejection reason for ${p.storeName}`} style={{ height: 44, flex: "1 1 180px", border: "1px solid #D5D5E4", borderRadius: 8, padding: "0 12px", fontSize: 14 }} />
+                    <SubmitButton formAction={approveThemeAction.bind(null, p.id)} style={{ height: 44, padding: "0 20px", borderRadius: 8, background: "#15803D", color: "#fff", fontWeight: 700 }} pending="Approving…">Approve</SubmitButton>
+                    <SubmitButton formAction={rejectThemeAction.bind(null, p.id)} style={{ height: 44, padding: "0 18px", border: "1px solid #F1C0C0", borderRadius: 8, color: "#DC2626", background: "#fff", fontWeight: 600 }} pending="Rejecting…">Reject</SubmitButton>
+                  </>
+                )}
+              </form>
+            ))}
+          </div>
+        </section>
       )}
 
       {/* Master-Detail 2-Pane Desk */}

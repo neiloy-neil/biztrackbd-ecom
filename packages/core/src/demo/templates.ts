@@ -246,6 +246,25 @@ export const DEMO_TEMPLATES: readonly DemoTemplate[] = [
       { slug: "embroidered-clutch", title: "Embroidered Clutch", titleBn: "এমব্রয়ডারি ক্লাচ", text: "A small festive clutch with zari work.", textBn: "জরির কাজ করা ছোট উৎসবের ক্লাচ।", price: 1250, cost: 640, category: "accessories", art: "bag", variants: one, stock: 28 },
     ],
   },
+  {
+    id: "maison", host: "maison", storeName: "Maison", storeNameBn: "মেইজন", tagline: "Considered fashion, made in Dhaka",
+    palette: { bg: "#EFE6DA", main: "#1C1917", accent: "#8F4A2B", ink: "#1C1917" },
+    announcement: { text: "Demo store: free delivery over ৳ 3,000. Easy 7-day exchange.", textBn: "ডেমো স্টোর: ৳ ৩,০০০ এর উপরে ফ্রি ডেলিভারি। ৭ দিনের সহজ এক্সচেঞ্জ।" },
+    hero: { eyebrow: "THE NEW EDIT", eyebrowBn: "নতুন সংগ্রহ", title: "Dressed for the occasion", titleBn: "প্রতিটি উপলক্ষের পোশাক", text: "Considered cuts and honest fabrics, from our atelier to your wardrobe.", textBn: "যত্নে কাটা পোশাক, খাঁটি কাপড়, আমাদের কারখানা থেকে আপনার ওয়ার্ডরোবে।", ctaText: "Shop the lookbook", ctaTextBn: "লুকবুক দেখুন", art: ["blazer", "dress", "shirt"] },
+    banner: { heading: "The festive edit", headingBn: "উৎসবের সংগ্রহ", text: "Pieces made to be worn, photographed and kept.", textBn: "পরার, ছবি তোলার এবং তুলে রাখার মতো পোশাক।", ctaText: "Explore the edit", ctaTextBn: "সংগ্রহ দেখুন", art: ["kurta", "scarf"] },
+    about: { heading: "Made with intent", headingBn: "ভাবনা নিয়ে তৈরি", body: "Small runs, careful fitting and fabrics we would wear ourselves. This is a demo store: products are samples.", bodyBn: "অল্প সংখ্যায় তৈরি, যত্নের ফিটিং এবং নিজেরা পরতে চাইব এমন কাপড়। এটি একটি ডেমো স্টোর: পণ্যগুলো নমুনা।" },
+    categories: [{ slug: "women", name: "Women" }, { slug: "men", name: "Men" }, { slug: "festive", name: "Festive" }, { slug: "accessories", name: "Accessories" }],
+    products: [
+      { slug: "tailored-blazer-ink", title: "Tailored Blazer, Ink", titleBn: "টেইলর্ড ব্লেজার, কালি", text: "A structured blazer with a half-canvas front.", textBn: "হাফ-ক্যানভাস ফ্রন্টের গড়নওয়ালা ব্লেজার।", price: 7800, compareAt: 8900, cost: 4600, category: "men", art: "blazer", variants: sizes(["S", "M", "L", "XL"]), stock: 18, featured: true },
+      { slug: "linen-shirt-sand", title: "Linen Shirt, Sand", titleBn: "লিনেন শার্ট, স্যান্ড", text: "Washed linen that softens with every wear.", textBn: "ধোয়া লিনেন, প্রতিবার পরার সাথে নরম হয়।", price: 2900, cost: 1500, category: "men", art: "shirt", tone: "accent", variants: sizes(["S", "M", "L", "XL"]), stock: 30, featured: true },
+      { slug: "wrap-dress-copper", title: "Wrap Dress, Copper", titleBn: "র‍্যাপ ড্রেস, কপার", text: "A fluid wrap dress that moves well and travels light.", textBn: "ঝরঝরে র‍্যাপ ড্রেস, চলাফেরায় আরামদায়ক, ভ্রমণে হালকা।", price: 4600, compareAt: 5400, cost: 2500, category: "women", art: "dress", tone: "accent", variants: sizes(["S", "M", "L"]), stock: 22, featured: true },
+      { slug: "pleated-trouser-black", title: "Pleated Trouser, Black", titleBn: "প্লিটেড ট্রাউজার, কালো", text: "A high-waisted pleated trouser with a clean drape.", textBn: "উঁচু কোমরের প্লিটেড ট্রাউজার, পরিচ্ছন্ন ঝুল।", price: 3400, cost: 1800, category: "women", art: "pants", variants: sizes(["S", "M", "L"]), stock: 26 },
+      { slug: "festive-kurta-ivory", title: "Festive Kurta, Ivory", titleBn: "উৎসবের কুর্তা, আইভরি", text: "Hand-embroidered neckline on soft cotton silk.", textBn: "নরম কটন সিল্কে হাতে এমব্রয়ডারি করা গলা।", price: 5200, cost: 2900, category: "festive", art: "kurta", colour: { main: "#F1E6D2", accent: "#8F4A2B" }, variants: sizes(["S", "M", "L", "XL"]), stock: 20, featured: true },
+      { slug: "silk-scarf-rust", title: "Silk Scarf, Rust", titleBn: "সিল্ক স্কার্ফ, রাস্ট", text: "A printed silk twill scarf, hand-rolled edges.", textBn: "প্রিন্টেড সিল্ক টুইল স্কার্ফ, হাতে গোটানো কিনারা।", price: 1850, cost: 900, category: "festive", art: "scarf", tone: "accent", variants: one, stock: 34 },
+      { slug: "leather-tote-tan", title: "Leather Tote, Tan", titleBn: "চামড়ার টোট, ট্যান", text: "A roomy vegetable-tanned leather tote.", textBn: "প্রশস্ত, উদ্ভিজ্জ ট্যান করা চামড়ার টোট।", price: 6400, compareAt: 7200, cost: 3600, category: "accessories", art: "bag", tone: "accent", variants: one, stock: 14 },
+      { slug: "everyday-tee-bone", title: "Everyday Tee, Bone", titleBn: "এভরিডে টি, বোন", text: "A heavyweight cotton tee with a relaxed shoulder.", textBn: "ভারী সুতির টি-শার্ট, ঢিলেঢালা কাঁধ।", price: 1250, cost: 600, category: "men", art: "tee", colour: { main: "#E9E2D3", accent: "#8F4A2B" }, variants: sizes(["S", "M", "L", "XL"]), stock: 60 },
+    ],
+  },
 ] as const;
 
 export const demoTemplate = (id: string): DemoTemplate | undefined =>

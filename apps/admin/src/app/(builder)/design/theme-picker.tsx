@@ -11,6 +11,7 @@ const swatch: Record<ThemeId, string> = {
   freshbasket: "linear-gradient(135deg,#FFF8EC 0 50%,#B4421C 50%)",
   bazaar: "linear-gradient(135deg,#F8F6F1 0 50%,#C2410C 50%)",
   nakshi: "linear-gradient(135deg,#FBF6EE 0 50%,#7A1F2E 50%)",
+  maison: "linear-gradient(135deg,#FAF7F2 0 50%,#8F4A2B 50%)",
 };
 
 export function ThemePicker({ active, canEdit }: { active: ThemeId; canEdit: boolean }) {

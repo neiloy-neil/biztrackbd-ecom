@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { validatePage, STORE_PAGE_KINDS, type PageJson, type PageKind } from "../builder/registry";
-import { isThemeId, validateTheme, type ThemeId, type ThemeSettings } from "../builder/theme";
+import { isFreeThemeId, validateTheme, type ThemeId, type ThemeSettings } from "../builder/theme";
 import { templateChrome } from "../builder/template-chromes";
 import type { Chrome } from "../builder/chrome";
 import { ValidationError } from "../errors";
@@ -77,7 +77,7 @@ export function parseTemplateBundle(text: string): TemplateBundle {
     throw new ValidationError(`Template file: ${i.path.join(".") || "file"} ${i.message}`);
   }
   const b = head.data;
-  if (!isThemeId(b.baseLook)) throw new ValidationError("baseLook: choose one of the original looks (kapor, gadgetstudio, mini-bunny, axionwear, bindu, berber, freshbasket, bazaar, nakshi)");
+  if (!isFreeThemeId(b.baseLook)) throw new ValidationError("baseLook: choose one of the original looks (kapor, gadgetstudio, mini-bunny, axionwear, bindu, berber, freshbasket, bazaar, nakshi)");
   if (b.siteMode === "ECOMMERCE" && b.vertical) throw new ValidationError("vertical: a store template has no business vertical");
   if (b.siteMode !== "ECOMMERCE" && !b.vertical) throw new ValidationError("vertical: a business template needs one (for example RESTAURANT)");
 

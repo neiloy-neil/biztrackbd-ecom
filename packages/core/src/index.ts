@@ -121,6 +121,8 @@ export {
 export { accessState, statusFor, addPeriod, ACCESS_LABELS, GRACE_DAYS, READ_ONLY_UNTIL_DAY, type AccessState, type Access, type AccessInput } from "./platform/lifecycle";
 export { scanBrandRisk } from "./platform/brand";
 export * from "./platform/templates";
+export * from "./platform/theme-store";
+export { premiumPagesFor } from "./builder/premium-pages";
 export * from "./platform/template-bundle";
 export * from "./platform/template-studio";
 export * from "./platform/template-previews";
