@@ -41,7 +41,8 @@ export async function signupAction(_prev: SignupState, form: FormData): Promise<
   const rawVertical = form.get("businessVertical");
   const businessVertical = rawVertical && String(rawVertical).trim() ? String(rawVertical).toUpperCase() as any : undefined;
   const plan = (String(form.get("plan") ?? "PRO").toUpperCase()) as "STARTER" | "PRO" | "BUSINESS";
-  const theme = String(form.get("theme") ?? "kapor");
+  // Blank means "follow the category": signupStore picks the category's theme.
+  const theme = String(form.get("theme") ?? "").trim() || undefined;
   const demoData = form.get("demoData") !== "off";
 
   if (!ownerName || ownerName.length < 2) return { error: "Enter your full name", field: "ownerName" };

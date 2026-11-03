@@ -234,6 +234,19 @@ export const STORE_THEMES: readonly ThemeDefinition[] = [
   { id: "berber", name: "Berber", blurb: "Dark, editorial and tailored: serif headings, navy and gold, and a made-to-measure section.", audience: "Formalwear and tailoring", defaults: { accent: "#C9A24B", background: "#0D121E", text: "#F1EDE4", radius: "sharp", font: "serif" } },
 ] as const;
 
+/**
+ * The theme a new store starts on for each business category the signup wizard offers. The wizard, the signup action and signupStore all read
+ * this one table, so a category can no longer point at a theme that does not exist. Grocery has no theme of its own yet and starts on Kapor.
+ */
+export const CATEGORY_THEMES = {
+  FASHION: "kapor",
+  BEAUTY: "bindu",
+  ELECTRONICS: "gadgetstudio",
+  GROCERY: "kapor",
+  GENERAL: "kapor",
+} as const satisfies Record<string, ThemeId>;
+export type StoreCategory = keyof typeof CATEGORY_THEMES;
+
 export const isThemeId = (value: unknown): value is ThemeId => typeof value === "string" && (THEME_IDS as readonly string[]).includes(value);
 
 export function validateThemeId(value: unknown): ThemeId {

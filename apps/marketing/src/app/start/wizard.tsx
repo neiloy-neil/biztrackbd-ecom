@@ -30,7 +30,6 @@ export const CATEGORY_OPTIONS = [
     bn: "ফ্যাশন ও পোশাক",
     icon: "👗",
     hint: "শাড়ি, পাঞ্জাবি, জুতা ও ক্লোথিং",
-    theme: "kapor",
   },
   {
     id: "BEAUTY" as StoreCategory,
@@ -38,7 +37,6 @@ export const CATEGORY_OPTIONS = [
     bn: "রূপচর্চা ও প্রসাধনী",
     icon: "💄",
     hint: "স্কিনকেয়ার, মেকআপ ও পার্সোনাল কেয়ার",
-    theme: "shondor",
   },
   {
     id: "ELECTRONICS" as StoreCategory,
@@ -46,7 +44,6 @@ export const CATEGORY_OPTIONS = [
     bn: "ইলেকট্রনিক্স ও গ্যাজেট",
     icon: "📱",
     hint: "মোবাইল এক্সেসরিজ ও স্মার্ট ডিভাইস",
-    theme: "boithok",
   },
   {
     id: "GROCERY" as StoreCategory,
@@ -54,7 +51,6 @@ export const CATEGORY_OPTIONS = [
     bn: "মুদি ও অর্গানিক ফুড",
     icon: "🍯",
     hint: "মধু, ঘি, মসলা ও খাঁটি খাবার",
-    theme: "rokomari",
   },
   {
     id: "GENERAL" as StoreCategory,
@@ -62,7 +58,6 @@ export const CATEGORY_OPTIONS = [
     bn: "জেনারেল স্টোর",
     icon: "🛍️",
     hint: "সব ধরণের পণ্য ও বহুমুখী কালেকশন",
-    theme: "kapor",
   },
 ] as const;
 
@@ -167,6 +162,8 @@ export function Wizard({
   rootDomain,
   initialPlan,
   initialTheme,
+  categoryThemes,
+  themeFromLink = false,
   initialMode = "ECOMMERCE",
   initialVertical = "RESTAURANT",
   keepCode = "",
@@ -181,6 +178,10 @@ export function Wizard({
   rootDomain: string;
   initialPlan: string;
   initialTheme: string;
+  /** The theme each category starts on (CATEGORY_THEMES in core), so the wizard and the signup agree. */
+  categoryThemes: Record<StoreCategory, string>;
+  /** True when the visitor arrived with a template chosen on purpose; picking a category must not replace it. */
+  themeFromLink?: boolean;
   initialMode?: "ECOMMERCE" | "PORTFOLIO" | "HYBRID";
   initialVertical?: BusinessVertical;
 }) {
@@ -257,10 +258,9 @@ export function Wizard({
   }, [state]);
 
   function handleCategorySelect(catId: StoreCategory) {
-    const cat = CATEGORY_OPTIONS.find((c) => c.id === catId);
     set("category", catId);
-    if (cat && v.siteMode === "ECOMMERCE") {
-      set("theme", cat.theme);
+    if (v.siteMode === "ECOMMERCE" && !themeFromLink) {
+      set("theme", categoryThemes[catId]);
     }
   }
 
@@ -279,8 +279,7 @@ export function Wizard({
       set("theme", vert.recommendedTheme);
       set("plan", "PRO");
     } else if (mode === "ECOMMERCE") {
-      const cat = CATEGORY_OPTIONS.find((c) => c.id === v.category) ?? CATEGORY_OPTIONS[0]!;
-      set("theme", cat.theme);
+      if (!themeFromLink) set("theme", categoryThemes[v.category]);
       set("plan", "PRO");
     } else if (mode === "HYBRID") {
       set("plan", "PRO");

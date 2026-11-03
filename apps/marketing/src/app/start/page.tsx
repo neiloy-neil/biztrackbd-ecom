@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { THEMES, BUSINESS_TEMPLATES, listPublicPlans, listPublicPortfolioPlans, listPublishedTemplates, readKeptStore, verificationRequired } from "@biztrackbd/core";
+import { CATEGORY_THEMES, THEMES, BUSINESS_TEMPLATES, listPublicPlans, listPublicPortfolioPlans, listPublishedTemplates, readKeptStore, verificationRequired } from "@biztrackbd/core";
 import { planBullets, portfolioPlanBullets } from "@/lib/plans";
 import { Wizard } from "./wizard";
 
@@ -105,7 +105,7 @@ export default async function Start({
   const initialVertical =
     resolvedVertical ?? (validVerticals.includes(rawVertical) ? (rawVertical as any) : (initialMode === "PORTFOLIO" ? "RESTAURANT" : undefined));
 
-  let defaultTheme = "kapor";
+  let defaultTheme: string = CATEGORY_THEMES.FASHION; // the wizard opens on the Fashion category
   if (wantedTemplate) defaultTheme = wantedTemplate;
   else if (initialVertical === "RESTAURANT") defaultTheme = "dhaka-bistro";
   else if (initialVertical === "DOCTOR_CLINIC") defaultTheme = "modern-clinic";
@@ -127,6 +127,8 @@ export default async function Start({
       rootDomain={rootDomain}
       initialPlan={initialPlan}
       initialTheme={initialTheme}
+      categoryThemes={CATEGORY_THEMES}
+      themeFromLink={Boolean(wantedTemplate) && initialMode === "ECOMMERCE"}
       initialMode={initialMode}
       initialVertical={initialVertical}
       themes={offered}
