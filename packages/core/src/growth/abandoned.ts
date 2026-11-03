@@ -1,3 +1,4 @@
+import { TRIAL_CAPS, isOnTrial, withTrialCap } from "../platform/trial";
 import { isDemoStore } from "../demo/guard";
 import { randomBytes, randomUUID } from "node:crypto";
 import { Prisma, getBasePrisma, withTenant, type TenantTx } from "@biztrackbd/db";
@@ -224,7 +225,8 @@ function storeOrigin(subdomain: string, primaryDomain: string | null): string {
 export async function consumeSmsCredit(tx: TenantTx, tenantId: string, now: Date = new Date()): Promise<boolean> {
   const plan = await getPlanLimits(tx);
   const limits = (await tx.plan.findUnique({ where: { tier: plan.tier as never } }))?.limits as Record<string, unknown> | undefined;
-  const limit = typeof limits?.smsCredits === "number" ? limits.smsCredits : null;
+  const planLimit = typeof limits?.smsCredits === "number" ? limits.smsCredits : null;
+  const limit = withTrialCap(planLimit, await isOnTrial(tx, now), TRIAL_CAPS.smsCredits);
   const period = monthStart(now, plan.timezone);
   const rows = await tx.$queryRaw<{ v: number }[]>`
     INSERT INTO "UsageCounter" ("id", "tenantId", "metric", "periodStart", "value", "updatedAt")

@@ -84,6 +84,8 @@ describe("integrations in the database", () => {
     await seedPlans(owner);
     A = await createTenantFixture(owner, { name: "Vault A", subdomain: "vault-a" });
     B = await createTenantFixture(owner, { name: "Vault B", subdomain: "vault-b" });
+    // Connecting a payment gateway is a Business feature.
+    await owner.tenant.updateMany({ where: { id: { in: [A.tenantId, B.tenantId] } }, data: { planTier: "BUSINESS" } });
   });
 
   afterAll(async () => {
@@ -169,6 +171,19 @@ describe("integrations in the database", () => {
     const fresh = await rotateWebhookToken(A.tenantId, "STEADFAST", "LIVE");
     expect(await resolveIntegrationByToken(token)).toBeNull();
     expect((await resolveIntegrationByToken(fresh))?.tenantId).toBe(A.tenantId);
+  });
+
+  it("connecting a payment gateway needs a plan that includes it; one already connected stays", async () => {
+    const C = await createTenantFixture(owner, { name: "Vault C", subdomain: "vault-c" });
+    const creds = { storeId: "s", storePassword: "p" };
+    await expect(saveIntegration(C.tenantId, { provider: "SSLCOMMERZ", mode: "TEST", secrets: creds }, ring)).rejects.toMatchObject({ code: "PLAN_FEATURE" });
+    // Other integrations are not gateways.
+    await expect(saveIntegration(C.tenantId, { provider: "STEADFAST", mode: "TEST", secrets: { apiKey: "a", secretKey: "b" } }, ring)).resolves.toBeDefined();
+    // Connected while on Business, then moved to Starter: it keeps working and can be updated.
+    await owner.tenant.update({ where: { id: C.tenantId }, data: { planTier: "BUSINESS" } });
+    await saveIntegration(C.tenantId, { provider: "SSLCOMMERZ", mode: "TEST", secrets: creds }, ring);
+    await owner.tenant.update({ where: { id: C.tenantId }, data: { planTier: "STARTER" } });
+    await expect(saveIntegration(C.tenantId, { provider: "SSLCOMMERZ", mode: "TEST", secrets: { storePassword: "p2" } }, ring)).resolves.toBeDefined();
   });
 
   it("the app role cannot read another store's integrations directly or by guessing the token column", async () => {
