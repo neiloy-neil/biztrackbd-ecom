@@ -206,16 +206,6 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
     if (want !== redeem) setRedeem(want);
   }, [quote, usePoints, redeem]);
 
-  if (!cart.ready) return <div className="empty" aria-busy="true" />;
-  if (cart.lines.length === 0) {
-    return (
-      <div className="empty">
-        <p>{s.cartEmpty}</p>
-        <p style={{ marginTop: 16 }}><Link href="/search" className="btn btn-primary">{s.continueShopping}</Link></p>
-      </div>
-    );
-  }
-
   const isDigitalOrder = Boolean(quote?.isDigitalOrder);
   const hasDigitalItems = Boolean(isDigitalOrder || quote?.lines.some((l) => l.isDigital));
 
@@ -251,6 +241,18 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
     }
     return Array.from(map.values());
   }, [quote]);
+
+  // Every hook above runs on every render. These early returns used to sit above three of them, so the hook count changed when the cart
+  // finished loading and React threw "Rendered more hooks than during the previous render".
+  if (!cart.ready) return <div className="empty" aria-busy="true" />;
+  if (cart.lines.length === 0) {
+    return (
+      <div className="empty">
+        <p>{s.cartEmpty}</p>
+        <p style={{ marginTop: 16 }}><Link href="/search" className="btn btn-primary">{s.continueShopping}</Link></p>
+      </div>
+    );
+  }
 
   const total = quote?.total ?? null;
   const itemCount = cart.count;

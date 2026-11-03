@@ -57,7 +57,7 @@ export async function GET(req: Request) {
     const unifiedCourierData = await fetchUnifiedCourierFraud(phone).catch(() => null);
 
     // 3. Fallback to store's direct Steadfast connection if unified API returns null
-    let courierStats = unifiedCourierData
+    const courierStats = unifiedCourierData
       ? toCourierFraudStats(unifiedCourierData)
       : await fetchSteadfastFraudStats(session.tenantId, phone).catch(() => null);
 

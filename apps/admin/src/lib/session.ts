@@ -238,7 +238,7 @@ async function devSession(): Promise<AdminSession | null> {
   if (!t) notFound();
 
   const wanted = (await cookies()).get(DEV_USER_COOKIE)?.value;
-  let user = await withTenant(t.id, async (tx) =>
+  const user = await withTenant(t.id, async (tx) =>
     (wanted ? await tx.tenantUser.findFirst({ where: { email: wanted, isActive: true } }) : null) ??
     (await tx.tenantUser.findFirst({ where: { role: "STORE_OWNER", isActive: true } })) ??
     (await tx.tenantUser.findFirst({ where: { isActive: true } })),
