@@ -8,6 +8,7 @@ import { assertCan, type StaffActor } from "../permissions";
 import { normalizeBdPhone } from "../phone";
 import { accessState, addPeriod, type Access } from "./lifecycle";
 import { notifyPlatform } from "./notify";
+import { PORTFOLIO_PLAN_DEFS } from "./portfolio-plans";
 
 /** What a store sees of its own subscription (AdmBilling, AdmLimit, AdmReadOnly). Everything here is read with the store's own context. */
 
@@ -71,38 +72,20 @@ const FALLBACK_PUBLIC_PLANS: PlanView[] = [
   },
 ];
 
-export const FALLBACK_PORTFOLIO_PLANS: PlanView[] = [
-  {
-    tier: "STARTER",
-    name: "Business Starter",
-    priceMonthly: 399,
-    priceYearly: 3990,
-    yearlyMonthsFree: 2,
-    trialDays: 14,
-    limits: { products: 0, ordersPerMonth: 0, staff: 1, storageGb: 5, smsCredits: 0, landingPages: 5 },
-    features: { customDomain: true, sectionBuilder: "home", leadCapture: true, downloadsLimit: 5, contentItemsLimit: 15, bookingRequests: false, whatsappAlerts: true, teamProfiles: false, hybridStore: false, mode: "PORTFOLIO" },
+export const FALLBACK_PORTFOLIO_PLANS: PlanView[] = PORTFOLIO_PLAN_DEFS.map((d) => ({
+  tier: d.tier,
+  name: d.name,
+  priceMonthly: d.priceMonthly,
+  priceYearly: d.priceYearly,
+  yearlyMonthsFree: 2,
+  trialDays: 14,
+  limits: { products: d.limits.products, ordersPerMonth: d.limits.ordersPerMonth, staff: d.limits.staff, storageGb: d.limits.storageGb, smsCredits: 0, landingPages: d.limits.landingPages },
+  features: {
+    customDomain: true, sectionBuilder: d.sectionBuilder, leadCapture: true, whatsappAlerts: true, mode: "PORTFOLIO",
+    downloadsLimit: d.limits.downloads ?? "unlimited", contentItemsLimit: d.limits.contentItems ?? "unlimited",
+    ...d.features,
   },
-  {
-    tier: "PRO",
-    name: "Business Pro",
-    priceMonthly: 799,
-    priceYearly: 7990,
-    yearlyMonthsFree: 2,
-    trialDays: 14,
-    limits: { products: 0, ordersPerMonth: 0, staff: 3, storageGb: 20, smsCredits: 0, landingPages: 20 },
-    features: { customDomain: true, sectionBuilder: "all", leadCapture: true, downloadsLimit: "unlimited", contentItemsLimit: "unlimited", bookingRequests: true, whatsappAlerts: true, teamProfiles: true, hybridStore: true, mode: "PORTFOLIO" },
-  },
-  {
-    tier: "BUSINESS",
-    name: "Business Plus",
-    priceMonthly: 1499,
-    priceYearly: 14990,
-    yearlyMonthsFree: 2,
-    trialDays: 14,
-    limits: { products: 200, ordersPerMonth: 1000, staff: 8, storageGb: 100, smsCredits: 0, landingPages: 50 },
-    features: { customDomain: true, sectionBuilder: "all", leadCapture: true, downloadsLimit: "unlimited", contentItemsLimit: "unlimited", bookingRequests: true, whatsappAlerts: true, teamProfiles: true, hybridStore: true, mode: "PORTFOLIO" },
-  },
-];
+}));
 
 /** The plans on the pricing page and the upgrade screen. Prices and limits come from the Plan table, falling back to defaults if DB is unreachable. */
 export async function listPublicPlans(): Promise<PlanView[]> {
