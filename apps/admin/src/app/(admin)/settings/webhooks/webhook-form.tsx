@@ -560,7 +560,7 @@ export function WebhookForm({
                           style={{
                             padding: "2px 8px",
                             borderRadius: 12,
-                            fontSize: 11,
+                            fontSize: 12,
                             fontWeight: 700,
                             letterSpacing: "0.03em",
                             backgroundColor: `${platformColor}15`,
@@ -576,7 +576,7 @@ export function WebhookForm({
                             style={{
                               padding: "2px 6px",
                               borderRadius: 4,
-                              fontSize: 11,
+                              fontSize: 12,
                               fontWeight: 600,
                               background: "#fee2e2",
                               color: "#991b1b",
@@ -646,7 +646,7 @@ export function WebhookForm({
 
                   {/* Subscribed Events Badges */}
                   <div style={{ marginBottom: 12 }}>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 4 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "#64748b", marginBottom: 4 }}>
                       SUBSCRIBED EVENTS ({subItem.events.length})
                     </div>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
@@ -654,7 +654,7 @@ export function WebhookForm({
                         <span
                           key={evtKey}
                           style={{
-                            fontSize: 11,
+                            fontSize: 12,
                             padding: "2px 6px",
                             borderRadius: 4,
                             background: "#f1f5f9",
@@ -706,7 +706,7 @@ export function WebhookForm({
                           background: "transparent",
                           border: 0,
                           cursor: "pointer",
-                          fontSize: 11,
+                          fontSize: 12,
                           color: "#0284c7",
                         }}
                       >
@@ -1033,7 +1033,7 @@ export function WebhookForm({
                         />
                         <div>
                           <div style={{ fontWeight: 600 }}>{evt.label}</div>
-                          <code style={{ fontSize: 10, color: "#64748b" }}>{evt.key}</code>
+                          <code style={{ fontSize: 12, color: "#64748b" }}>{evt.key}</code>
                         </div>
                       </label>
                     );
@@ -1085,7 +1085,7 @@ export function WebhookForm({
                       style={{
                         padding: "1px 6px",
                         borderRadius: 10,
-                        fontSize: 10,
+                        fontSize: 12,
                         background: "rgba(255,255,255,0.2)",
                         textTransform: "uppercase",
                       }}
@@ -1101,7 +1101,7 @@ export function WebhookForm({
                       value={previewEvent}
                       onChange={(e) => setPreviewEvent(e.target.value as WebhookEventKey | "ping")}
                       style={{
-                        fontSize: 11,
+                        fontSize: 12,
                         padding: "2px 6px",
                         borderRadius: 4,
                         background: "#1e293b",
@@ -1159,13 +1159,13 @@ export function WebhookForm({
                             color: "#fff",
                             borderRadius: 4,
                             padding: "0 4px",
-                            fontSize: 9,
+                            fontSize: 12,
                             fontWeight: 700,
                           }}
                         >
                           APP
                         </span>
-                        <span style={{ fontSize: 11, color: "#949ba4" }}>Today at 20:30</span>
+                        <span style={{ fontSize: 12, color: "#949ba4" }}>Today at 20:30</span>
                       </div>
 
                       <div style={{ color: "#f2f3f5", fontWeight: 600, marginBottom: 6 }}>
@@ -1221,20 +1221,20 @@ export function WebhookForm({
                           }}
                         >
                           <div>
-                            <div style={{ color: "#949ba4", fontSize: 11, fontWeight: 600 }}>CUSTOMER / CLIENT</div>
+                            <div style={{ color: "#949ba4", fontSize: 12, fontWeight: 600 }}>CUSTOMER / CLIENT</div>
                             <div style={{ color: "#f2f3f5" }}>
                               {String(sampleData.customerName || sampleData.name || sampleData.patientName || "Customer")}
                             </div>
                           </div>
                           <div>
-                            <div style={{ color: "#949ba4", fontSize: 11, fontWeight: 600 }}>PHONE NUMBER</div>
+                            <div style={{ color: "#949ba4", fontSize: 12, fontWeight: 600 }}>PHONE NUMBER</div>
                             <div style={{ color: "#00a8fc", fontFamily: "monospace" }}>
                               {String(sampleData.phone || "01712345678")}
                             </div>
                           </div>
                         </div>
 
-                        <div style={{ fontSize: 11, color: "#949ba4", borderTop: "1px solid #35373c", paddingTop: 6 }}>
+                        <div style={{ fontSize: 12, color: "#949ba4", borderTop: "1px solid #35373c", paddingTop: 6 }}>
                           BizTrack Outbound Webhook • Today at 20:30
                         </div>
                       </div>
@@ -1266,7 +1266,7 @@ export function WebhookForm({
                             alignItems: "center",
                             justifyContent: "center",
                             fontWeight: 700,
-                            fontSize: 11,
+                            fontSize: 12,
                           }}
                         >
                           BT
@@ -1277,13 +1277,13 @@ export function WebhookForm({
                             background: "#e8e8e8",
                             padding: "1px 4px",
                             borderRadius: 3,
-                            fontSize: 10,
+                            fontSize: 12,
                             fontWeight: 600,
                           }}
                         >
                           APP
                         </span>
-                        <span style={{ fontSize: 11, color: "#616061" }}>20:30</span>
+                        <span style={{ fontSize: 12, color: "#616061" }}>20:30</span>
                       </div>
 
                       <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 8 }}>
@@ -1310,16 +1310,16 @@ export function WebhookForm({
                         }}
                       >
                         <div>
-                          <div style={{ fontWeight: 700, fontSize: 11 }}>Customer:</div>
+                          <div style={{ fontWeight: 700, fontSize: 12 }}>Customer:</div>
                           <div>{String(sampleData.customerName || sampleData.name || "Customer")}</div>
                         </div>
                         <div>
-                          <div style={{ fontWeight: 700, fontSize: 11 }}>Total / Method:</div>
+                          <div style={{ fontWeight: 700, fontSize: 12 }}>Total / Method:</div>
                           <div>৳{Number(sampleData.total || 2500).toLocaleString("en-BD")} (COD)</div>
                         </div>
                       </div>
 
-                      <div style={{ fontSize: 11, color: "#616061" }}>
+                      <div style={{ fontSize: 12, color: "#616061" }}>
                         ⚡ <a href="#" onClick={(e) => e.preventDefault()} style={{ color: "#1264a3" }}>Open Order in BizTrack Admin</a> • Just now
                       </div>
                     </div>
@@ -1374,7 +1374,7 @@ export function WebhookForm({
                           </a>
                         </div>
 
-                        <div style={{ textAlign: "right", fontSize: 10, color: "#9ca3af", marginTop: 4 }}>
+                        <div style={{ textAlign: "right", fontSize: 12, color: "#9ca3af", marginTop: 4 }}>
                           20:30 ✓✓
                         </div>
                       </div>

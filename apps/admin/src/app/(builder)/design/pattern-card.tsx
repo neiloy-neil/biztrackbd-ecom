@@ -88,7 +88,7 @@ export function PatternCard({ pattern, onInsert, disabled, disabledReason, def }
           <span
             className="pill"
             style={{
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: 600,
               padding: "2px 6px",
               background: isDark ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.75)",
@@ -103,7 +103,7 @@ export function PatternCard({ pattern, onInsert, disabled, disabledReason, def }
             <span
               className="pill ok"
               style={{
-                fontSize: 10,
+                fontSize: 12,
                 fontWeight: 600,
                 padding: "2px 6px",
                 lineHeight: "14px",
@@ -131,7 +131,7 @@ export function PatternCard({ pattern, onInsert, disabled, disabledReason, def }
           {pattern.style?.animation && pattern.style.animation !== "none" && (
             <span
               style={{
-                fontSize: 9,
+                fontSize: 12,
                 padding: "1px 4px",
                 borderRadius: 4,
                 background: isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.06)",
@@ -145,7 +145,7 @@ export function PatternCard({ pattern, onInsert, disabled, disabledReason, def }
           {pattern.style?.cardMode && (
             <span
               style={{
-                fontSize: 9,
+                fontSize: 12,
                 padding: "1px 4px",
                 borderRadius: 4,
                 background: isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.06)",
@@ -166,7 +166,7 @@ export function PatternCard({ pattern, onInsert, disabled, disabledReason, def }
             {pattern.title}
           </b>
           {pattern.titleBn && (
-            <span style={{ fontSize: 11, color: "var(--text-3)", display: "block", marginTop: 1 }}>
+            <span style={{ fontSize: 12, color: "var(--text-3)", display: "block", marginTop: 1 }}>
               {pattern.titleBn}
             </span>
           )}
@@ -194,7 +194,7 @@ export function PatternCard({ pattern, onInsert, disabled, disabledReason, def }
           {disabled ? (
             <span
               style={{
-                fontSize: 11,
+                fontSize: 12,
                 color: "var(--text-3)",
                 fontStyle: "italic",
               }}
@@ -202,7 +202,7 @@ export function PatternCard({ pattern, onInsert, disabled, disabledReason, def }
               {disabledReason || "Already on page"}
             </span>
           ) : (
-            <span style={{ fontSize: 11, color: "var(--text-3)" }}>
+            <span style={{ fontSize: 12, color: "var(--text-3)" }}>
               {pattern.defaultLabel}
             </span>
           )}
@@ -214,7 +214,7 @@ export function PatternCard({ pattern, onInsert, disabled, disabledReason, def }
             onClick={() => onInsert(pattern)}
             style={{
               padding: "3px 10px",
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: 600,
               gap: 4,
             }}

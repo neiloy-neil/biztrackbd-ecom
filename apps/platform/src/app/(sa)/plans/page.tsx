@@ -218,7 +218,7 @@ export default async function PlansPage({
                         <div style={{ fontWeight: 700, fontFamily: "monospace", fontSize: 14.5, color: "var(--brand)" }}>
                           {pr.code}
                         </div>
-                        <div style={{ fontSize: 11.5, color: "var(--ink-3)" }}>
+                        <div style={{ fontSize: 12, color: "var(--ink-3)" }}>
                           By {pr.createdBy || "System"}
                         </div>
                       </div>
@@ -249,7 +249,7 @@ export default async function PlansPage({
                             <form action={togglePromoAction.bind(null, pr.id, !pr.isActive)} style={{ margin: 0 }}>
                               <SubmitButton
                                 className={`btn btn-sm ${pr.isActive ? "btn-secondary" : "btn-primary"}`}
-                                style={{ fontSize: 11 }}
+                                style={{ fontSize: 12 }}
                                pending="Working…">
                                 {pr.isActive ? "Deactivate" : "Activate"}
                               </SubmitButton>
@@ -257,7 +257,7 @@ export default async function PlansPage({
                             <form action={deletePromoAction.bind(null, pr.id)} style={{ margin: 0 }}>
                               <SubmitButton
                                 className="btn btn-sm btn-secondary"
-                                style={{ fontSize: 11, color: "#DC2626" }}
+                                style={{ fontSize: 12, color: "#DC2626" }}
                                pending="Working…">
                                 Delete
                               </SubmitButton>

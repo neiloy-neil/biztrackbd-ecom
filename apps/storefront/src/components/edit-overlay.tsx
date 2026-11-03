@@ -460,7 +460,7 @@ export function EditOverlay({ page, selectedId, send, onTyping }: { page: PageJs
             <div className="bt-pop-header">
               <span className="bt-pop-title">
                 <span>➕ Add Block</span>
-                <span style={{ fontSize: 11, fontWeight: 500, color: "#64748B" }}>
+                <span style={{ fontSize: 12, fontWeight: 500, color: "#64748B" }}>
                   (at position {pickerGap.index + 1})
                 </span>
               </span>

@@ -62,8 +62,9 @@ export default async function Overview() {
             <input
               type="search"
               name="q"
+              aria-label="Search tenants, domains and owners"
               placeholder="Search tenants, domains, owners"
-              style={{ border: "none", outline: "none", background: "transparent", fontSize: 13.5, width: "100%", minHeight: 40, color: "var(--ink)" }}
+              style={{ border: "none", outline: "none", background: "transparent", fontSize: 16, width: "100%", minHeight: 40, color: "var(--ink)" }}
             />
           </div>
         </form>
@@ -81,12 +82,12 @@ export default async function Overview() {
       </div>
 
       {/* Headline numbers: revenue, paying stores, trials, churn, failing domains */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }} data-testid="sa-stats">
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 16 }} data-testid="sa-stats">
         {/* Platform revenue leads: it is the number the business runs on */}
         <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "18px 20px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 600 }}>Platform Revenue</span>
-            <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4, background: "#E8F6EE", color: "#15803D" }}>
+            <span style={{ fontSize: 12, fontWeight: 700, padding: "2px 7px", borderRadius: 4, background: "#E8F6EE", color: "#15803D" }}>
               MRR
             </span>
           </div>
@@ -186,7 +187,7 @@ export default async function Overview() {
                             display: "inline-block",
                             padding: "2px 8px",
                             borderRadius: 6,
-                            fontSize: 11,
+                            fontSize: 12,
                             fontWeight: 800,
                             background: sev.bg,
                             color: sev.color,
@@ -198,11 +199,11 @@ export default async function Overview() {
                       </td>
                       <td style={{ padding: "10px 12px" }}>
                         <div style={{ fontWeight: 700, color: "var(--ink)" }}>{item.tenantName}</div>
-                        <div style={{ fontSize: 11.5, color: "var(--ink-3)", display: "flex", alignItems: "center", gap: 6 }}>
+                        <div style={{ fontSize: 12, color: "var(--ink-3)", display: "flex", alignItems: "center", gap: 6 }}>
                           <span>{item.subdomain}.biztrackbd.com</span>
                           <span
                             style={{
-                              fontSize: 10,
+                              fontSize: 12,
                               fontWeight: 700,
                               padding: "1px 5px",
                               borderRadius: 4,
@@ -249,7 +250,7 @@ export default async function Overview() {
         <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "18px 20px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 600 }}>BizTrack Business</span>
-            <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4, background: "var(--brand-light)", color: "var(--brand)" }}>
+            <span style={{ fontSize: 12, fontWeight: 700, padding: "2px 7px", borderRadius: 4, background: "var(--brand-light)", color: "var(--brand)" }}>
               PORTFOLIO
             </span>
           </div>
@@ -265,7 +266,7 @@ export default async function Overview() {
         <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "18px 20px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 600 }}>BizTrack Ecommerce</span>
-            <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4, background: "var(--chip)", color: "var(--ink-2)" }}>
+            <span style={{ fontSize: 12, fontWeight: 700, padding: "2px 7px", borderRadius: 4, background: "var(--chip)", color: "var(--ink-2)" }}>
               ECOMMERCE
             </span>
           </div>
@@ -281,7 +282,7 @@ export default async function Overview() {
         <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "18px 20px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 600 }}>Hybrid Dual Stores</span>
-            <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4, background: "#FEF9C3", color: "#854D0E" }}>
+            <span style={{ fontSize: 12, fontWeight: 700, padding: "2px 7px", borderRadius: 4, background: "#FEF9C3", color: "#854D0E" }}>
               HYBRID
             </span>
           </div>
@@ -303,7 +304,7 @@ export default async function Overview() {
               <span style={{ fontSize: 14, fontWeight: 700 }}>System Health & Infrastructure Telemetry</span>
               <span
                 style={{
-                  fontSize: 11.5,
+                  fontSize: 12,
                   padding: "2px 8px",
                   borderRadius: 8,
                   fontWeight: 700,

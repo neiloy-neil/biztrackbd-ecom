@@ -71,7 +71,7 @@ export function AnalyticsFilterBar({
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
         {/* Preset Range Buttons */}
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: 11.5, fontWeight: 700, color: "var(--ink-3)", marginRight: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-3)", marginRight: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>
             Time Window:
           </span>
           {presets.map((p) => {
@@ -101,7 +101,7 @@ export function AnalyticsFilterBar({
 
         {/* Device Segmented Control */}
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: 11.5, fontWeight: 700, color: "var(--ink-3)", marginRight: 2, textTransform: "uppercase", letterSpacing: 0.5 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-3)", marginRight: 2, textTransform: "uppercase", letterSpacing: 0.5 }}>
             Device:
           </span>
           {[
@@ -138,7 +138,7 @@ export function AnalyticsFilterBar({
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12, paddingTop: 10, borderTop: "1px dashed var(--line)" }}>
         {/* Custom date range form */}
         <form onSubmit={applyCustomRange} style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          <span style={{ fontSize: 11.5, color: "var(--ink-3)", fontWeight: 600 }}>Custom Dates:</span>
+          <span style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>Custom Dates:</span>
           <input
             type="date"
             value={fromInput}
@@ -166,7 +166,7 @@ export function AnalyticsFilterBar({
               color: "var(--ink)",
             }}
           />
-          <button type="submit" className="btn btn-secondary btn-sm" style={{ height: 28, fontSize: 11.5, padding: "0 10px" }}>
+          <button type="submit" className="btn btn-secondary btn-sm" style={{ height: 28, fontSize: 12, padding: "0 10px" }}>
             Apply Dates
           </button>
         </form>
@@ -174,7 +174,7 @@ export function AnalyticsFilterBar({
         {/* Active Filters Indicators */}
         {(Boolean(currentCampaign) || Boolean(currentDevice) || isCustom) && (
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 11.5, color: "var(--ink-3)", fontWeight: 600 }}>Active Filters:</span>
+            <span style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>Active Filters:</span>
             {currentCampaign && (
               <span
                 style={{
@@ -186,7 +186,7 @@ export function AnalyticsFilterBar({
                   color: "var(--brand-hover)",
                   borderRadius: 16,
                   padding: "2px 10px",
-                  fontSize: 11.5,
+                  fontSize: 12,
                   fontWeight: 600,
                 }}
               >
@@ -212,7 +212,7 @@ export function AnalyticsFilterBar({
                   color: "#374151",
                   borderRadius: 16,
                   padding: "2px 10px",
-                  fontSize: 11.5,
+                  fontSize: 12,
                   fontWeight: 600,
                 }}
               >
@@ -235,7 +235,7 @@ export function AnalyticsFilterBar({
                 background: "none",
                 color: "var(--danger, #DC2626)",
                 cursor: "pointer",
-                fontSize: 11.5,
+                fontSize: 12,
                 fontWeight: 600,
                 textDecoration: "underline",
               }}

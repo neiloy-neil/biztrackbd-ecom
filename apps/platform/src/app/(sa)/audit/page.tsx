@@ -163,7 +163,7 @@ export default async function AuditPage({
                         style={{
                           padding: "3px 8px",
                           borderRadius: 8,
-                          fontSize: 11.5,
+                          fontSize: 12,
                           fontWeight: 700,
                           background: u.isActive ? "#E8F6EE" : "#FCEBEB",
                           color: u.isActive ? "#15803D" : "#DC2626",
@@ -182,7 +182,7 @@ export default async function AuditPage({
                         <form action={toggleStaffActiveAction.bind(null, u.id)} style={{ margin: 0 }}>
                           <SubmitButton
                             className={`btn btn-sm ${u.isActive ? "btn-secondary" : "btn-primary"}`}
-                            style={{ fontSize: 11.5 }}
+                            style={{ fontSize: 12 }}
                            pending="Working…">
                             {u.isActive ? "Deactivate" : "Activate"}
                           </SubmitButton>

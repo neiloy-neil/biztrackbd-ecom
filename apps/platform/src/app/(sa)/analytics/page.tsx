@@ -235,7 +235,7 @@ export default async function AnalyticsPage({
                 <Link
                   href={buildCampaignFilterUrl("")}
                   className="btn btn-secondary btn-sm"
-                  style={{ fontSize: 11.5 }}
+                  style={{ fontSize: 12 }}
                 >
                   Show All Campaigns
                 </Link>
@@ -264,7 +264,7 @@ export default async function AnalyticsPage({
                         <div style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>{c.campaign}</div>
                         {c.creatives && c.creatives.length > 0 && (
                           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
-                            <span style={{ fontSize: 11, color: "var(--ink-3)", fontWeight: 600, alignSelf: "center" }}>
+                            <span style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600, alignSelf: "center" }}>
                               Creatives:
                             </span>
                             {c.creatives.map((cr, idx) => (
@@ -278,7 +278,7 @@ export default async function AnalyticsPage({
                                   border: "1px solid var(--line)",
                                   borderRadius: 6,
                                   padding: "3px 8px",
-                                  fontSize: 11.5,
+                                  fontSize: 12,
                                 }}
                               >
                                 <span style={{ fontWeight: 600, color: "var(--ink)" }}>{cr.creative}</span>
@@ -314,14 +314,14 @@ export default async function AnalyticsPage({
                           <Link
                             href={buildCampaignFilterUrl(c.campaign)}
                             className="btn btn-secondary btn-sm"
-                            style={{ fontSize: 11, padding: "2px 8px", height: 26 }}
+                            style={{ fontSize: 12, padding: "2px 8px", height: 26 }}
                           >
                             Filter
                           </Link>
                           <Link
                             href={buildCampaignJourneysUrl(c.campaign)}
                             className="btn btn-secondary btn-sm"
-                            style={{ fontSize: 11, padding: "2px 8px", height: 26 }}
+                            style={{ fontSize: 12, padding: "2px 8px", height: 26 }}
                           >
                             Journeys &rarr;
                           </Link>
@@ -389,7 +389,7 @@ export default async function AnalyticsPage({
               <Link
                 href={buildTabUrl("visitors")}
                 className="btn btn-secondary btn-sm"
-                style={{ fontSize: 11.5 }}
+                style={{ fontSize: 12 }}
               >
                 Clear Campaign Filter
               </Link>
@@ -416,7 +416,7 @@ export default async function AnalyticsPage({
                   <tr key={v.id}>
                     <td style={{ ...cell, fontSize: 12, color: "var(--ink-3)", whiteSpace: "nowrap" }}>
                       <div>{new Date(v.startedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</div>
-                      <div style={{ fontSize: 10.5, color: "var(--ink-3)" }}>
+                      <div style={{ fontSize: 12, color: "var(--ink-3)" }}>
                         {new Date(v.startedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
                       </div>
                     </td>
@@ -425,7 +425,7 @@ export default async function AnalyticsPage({
                     </td>
                     <td style={cell}>
                       {v.campaign ? (
-                        <span className="pill ok" style={{ fontSize: 11 }}>
+                        <span className="pill ok" style={{ fontSize: 12 }}>
                           Ad: {v.campaign}
                         </span>
                       ) : v.referrer ? (

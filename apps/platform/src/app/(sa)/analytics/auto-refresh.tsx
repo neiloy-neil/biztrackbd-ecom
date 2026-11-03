@@ -72,7 +72,7 @@ export function AutoRefreshControl() {
               borderRadius: 4,
               padding: "2px 7px",
               cursor: "pointer",
-              fontSize: 11.5,
+              fontSize: 12,
               transition: "all 0.15s ease",
             }}
           >
@@ -102,7 +102,7 @@ export function AutoRefreshControl() {
       </button>
 
       {intervalSec > 0 && (
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, color: "var(--success, #059669)", fontWeight: 600 }}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color: "var(--success, #059669)", fontWeight: 600 }}>
           <span
             style={{
               width: 8,

@@ -30,10 +30,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .content form { flex-wrap: wrap; }
 }
 .bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: grid; grid-template-columns: repeat(5, 1fr); height: var(--nav-h); padding-bottom: env(safe-area-inset-bottom); background: var(--surface); border-top: 1px solid var(--line); }
-.bottom-nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 11.5px; font-weight: 600; color: var(--ink-3); position: relative; min-height: 44px; }
+.bottom-nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 12px; font-weight: 600; color: var(--ink-3); position: relative; min-height: 44px; }
 .bottom-nav a[aria-current="page"] { color: var(--brand); }
 .bottom-nav svg { width: 22px; height: 22px; }
-.nav-badge { position: absolute; top: 6px; left: calc(50% + 6px); min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: var(--danger); color: #fff; font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.nav-badge { position: absolute; top: 6px; left: calc(50% + 6px); min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: var(--danger); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
 
 @media (min-width: 900px) {
   .only-desktop { display: block; }
@@ -71,7 +71,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
     padding: 4px 10px;
     border-radius: 6px;
     background: #1B6450;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     letter-spacing: 1px;
     color: #D6E9E0;
@@ -113,7 +113,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
     border-radius: 9px;
     background: var(--marigold);
     color: #0B4D3B;
-    font-size: 11.5px;
+    font-size: 12px;
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -156,7 +156,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
     text-overflow: ellipsis;
   }
   .side .who-role {
-    font-size: 11.5px;
+    font-size: 12px;
     color: #9CC3B3;
   }
   .content { padding: 28px 36px 64px; }
@@ -253,7 +253,7 @@ select, button[type="submit"], td button, td select { min-height: 40px; }
 .table tr:last-child td { border-bottom: 0; }
 .table tbody tr:hover td { background: #FCFCFE; }
 .table td.r, .table th.r { text-align: right; }
-.thumb { width: 44px; height: 44px; border-radius: 8px; background: var(--tint); object-fit: cover; flex: none; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; color: var(--ink-3); }
+.thumb { width: 44px; height: 44px; border-radius: 8px; background: var(--tint); object-fit: cover; flex: none; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; color: var(--ink-3); }
 .pager { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; }
 
 /* ---- Stat tiles, meters */
@@ -266,7 +266,7 @@ select, button[type="submit"], td button, td select { min-height: 40px; }
 .meter { height: 8px; background: var(--tint); border-radius: 99px; margin-top: 6px; overflow: hidden; }
 .meter i { display: block; height: 100%; border-radius: 99px; background: var(--brand); }
 .bars { display: flex; align-items: flex-end; gap: 6px; height: 120px; }
-.bars .bar { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; font-size: 11px; color: var(--ink-3); }
+.bars .bar { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; font-size: 12px; color: var(--ink-3); }
 .bars .bar i { display: block; width: 100%; border-radius: 6px 6px 2px 2px; background: var(--brand); min-height: 3px; }
 .attention { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
 .attention .n { font-size: 22px; font-weight: 800; min-width: 34px; text-align: center; }
@@ -295,7 +295,7 @@ select, button[type="submit"], td button, td select { min-height: 40px; }
 .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
 .photo { position: relative; aspect-ratio: 3 / 4; border-radius: 10px; overflow: hidden; background: var(--tint); border: 1px solid var(--line); }
 .photo img { width: 100%; height: 100%; object-fit: cover; }
-.photo .cover { position: absolute; left: 6px; top: 6px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--ink); color: #fff; }
+.photo .cover { position: absolute; left: 6px; top: 6px; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--ink); color: #fff; }
 .photo .x { position: absolute; right: 6px; top: 6px; width: 28px; height: 28px; border-radius: 50%; border: 0; background: rgba(11, 77, 59, .8); color: #fff; cursor: pointer; font-size: 16px; line-height: 1; }
 .photo-add { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; aspect-ratio: 3 / 4; border: 1.5px dashed var(--line-2); border-radius: 10px; background: var(--bg); color: var(--brand); font-weight: 600; font-size: 13px; cursor: pointer; text-align: center; padding: 6px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -321,3 +321,12 @@ nav.only-mobile .chip { flex: none; }
 .sk-row { height: 48px; margin: 8px 0; }
 @keyframes sk-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
 @media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
+
+/* Phones: buttons in the page are at least 40px tall. */
+@media (max-width: 899px) {
+  .content button, .content .btn { min-height: 40px; }
+}
+
+/* CRM message templates: the list and the editor stack on a phone and sit side by side from 900px. */
+.crm-tpl-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+@media (min-width: 900px) { .crm-tpl-grid { grid-template-columns: 220px minmax(0, 1fr); } }

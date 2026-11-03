@@ -149,7 +149,7 @@ export function OrderTrackingTimelineComponent({
                   )}
                 </div>
                 <div style={{ marginTop: 8, maxWidth: 64 }}>
-                  <div style={{ fontSize: 11, fontWeight: isCurrent ? 700 : isDone ? 600 : 500, color: isCurrent ? "var(--accent-strong)" : isDone ? "var(--ink)" : "var(--faint)", lineHeight: 1.2 }}>
+                  <div style={{ fontSize: 12, fontWeight: isCurrent ? 700 : isDone ? 600 : 500, color: isCurrent ? "var(--accent-strong)" : isDone ? "var(--ink)" : "var(--faint)", lineHeight: 1.2 }}>
                     {lang === "bn" ? st.labelBn : st.label}
                   </div>
                   {st.date && (
@@ -182,7 +182,7 @@ export function OrderTrackingTimelineComponent({
                   style={{
                     background: "var(--accent)",
                     color: "#fff",
-                    fontSize: 10.5,
+                    fontSize: 12,
                     fontWeight: 700,
                     padding: "2px 8px",
                     borderRadius: 6,
@@ -284,7 +284,7 @@ export function OrderTrackingTimelineComponent({
                       {cp.note}
                     </div>
                   )}
-                  <div className="faint" style={{ fontSize: 11.5, marginTop: 3 }}>
+                  <div className="faint" style={{ fontSize: 12, marginTop: 3 }}>
                     {fmtTime(cp.time)}
                   </div>
                 </div>

@@ -226,7 +226,7 @@ export function QuickOrderDesk({ prefill }: { prefill?: Prefill }) {
                   )}
                 </button>
                 {aiParsed && (
-                  <span className="pill green" style={{ fontSize: 11, padding: "2px 8px" }}>
+                  <span className="pill green" style={{ fontSize: 12, padding: "2px 8px" }}>
                     Parsed from text
                   </span>
                 )}
@@ -240,7 +240,7 @@ export function QuickOrderDesk({ prefill }: { prefill?: Prefill }) {
             <label className="field">
               <span className="label">Mobile number</span>
               <div className="row" style={{ flexWrap: "nowrap", gap: 0 }}>
-                <span className="input" style={{ width: "auto", display: "flex", alignItems: "center", borderRight: 0, borderRadius: "10px 0 0 10px", background: "var(--bg)", color: "var(--ink-3)" }}>+880</span>
+                <span className="input" style={{ width: "auto", flex: "none", whiteSpace: "nowrap", display: "flex", alignItems: "center", borderRight: 0, borderRadius: "10px 0 0 10px", background: "var(--bg)", color: "var(--ink-3)" }}>+880</span>
                 <input className="input" style={{ borderRadius: "0 10px 10px 0" }} inputMode="tel" autoComplete="off" placeholder="1712-345678" value={show(phone)} onChange={(e) => setPhone(digits(e.target.value))} data-testid="desk-phone" />
               </div>
             </label>

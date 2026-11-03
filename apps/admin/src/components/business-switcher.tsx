@@ -62,6 +62,9 @@ export function BusinessSwitcher({
 
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // The label colours are pastels chosen for the dark sidebar. On the white phone top bar (compact) they are mixed toward a dark green so they read.
+  const ink = (color: string) => (compact ? `color-mix(in srgb, ${color} 25%, #0B2E24)` : color);
+
   // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -163,15 +166,15 @@ export function BusinessSwitcher({
               {activeBiz.storeName || storeName}
             </b>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "11px", opacity: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "12px", opacity: 1 }}>
             <span
               style={{
                 display: "inline-block",
                 padding: "1px 5px",
                 borderRadius: "4px",
                 fontWeight: 600,
-                fontSize: "10px",
-                color: vInfo.color,
+                fontSize: "12px",
+                color: ink(vInfo.color),
                 backgroundColor: vInfo.bg,
               }}
             >
@@ -232,12 +235,12 @@ export function BusinessSwitcher({
               marginBottom: 6,
             }}
           >
-            <span style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", opacity: 0.65 }}>
+            <span style={{ fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", opacity: 0.65 }}>
               {lang === "bn" ? "আপনার প্রতিষ্ঠানসমূহ" : "Your Businesses"}
             </span>
             <span
               style={{
-                fontSize: "11px",
+                fontSize: "12px",
                 background: "var(--tint, rgba(255,255,255,0.08))",
                 padding: "2px 6px",
                 borderRadius: "10px",
@@ -273,7 +276,7 @@ export function BusinessSwitcher({
                 <span>{vInfo.icon}</span>
                 <div>
                   <b>{activeBiz.storeName}</b>
-                  <div style={{ fontSize: "11px", opacity: 0.7 }}>{activeBiz.subdomain} (Active)</div>
+                  <div style={{ fontSize: "12px", opacity: 0.7 }}>{activeBiz.subdomain} (Active)</div>
                 </div>
               </div>
             ) : (
@@ -313,8 +316,8 @@ export function BusinessSwitcher({
                           >
                             {biz.storeName}
                           </div>
-                          <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "11px", opacity: 0.7 }}>
-                            <span style={{ color: bizVInfo.color, fontWeight: 600 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "12px", opacity: 0.7 }}>
+                            <span style={{ color: ink(bizVInfo.color), fontWeight: 600 }}>
                               {lang === "bn" ? bizVInfo.labelBn : bizVInfo.label}
                             </span>
                             <span>•</span>
@@ -326,7 +329,7 @@ export function BusinessSwitcher({
                       </div>
                       <span
                         style={{
-                          fontSize: "10px",
+                          fontSize: "12px",
                           fontWeight: 700,
                           padding: "2px 6px",
                           borderRadius: "4px",
@@ -384,8 +387,8 @@ export function BusinessSwitcher({
                           >
                             {biz.storeName}
                           </div>
-                          <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "11px", opacity: 0.7 }}>
-                            <span style={{ color: bizVInfo.color, fontWeight: 600 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "12px", opacity: 0.7 }}>
+                            <span style={{ color: ink(bizVInfo.color), fontWeight: 600 }}>
                               {lang === "bn" ? bizVInfo.labelBn : bizVInfo.label}
                             </span>
                             <span>•</span>
@@ -395,7 +398,7 @@ export function BusinessSwitcher({
                           </div>
                         </div>
                       </div>
-                      <span style={{ fontSize: "11px", color: "var(--accent, #0070f3)", opacity: 0.85, fontWeight: 600 }}>
+                      <span style={{ fontSize: "12px", color: "var(--accent, #0070f3)", opacity: 0.85, fontWeight: 600 }}>
                         {lang === "bn" ? "যান →" : "Switch →"}
                       </span>
                     </SubmitButton>
@@ -675,11 +678,11 @@ function AddBusinessModal({ lang, rootDomain, onClose }: AddBusinessModalProps) 
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <span style={{ fontSize: "24px" }}>{opt.icon}</span>
                       {isSelected && (
-                        <span style={{ fontSize: "11px", fontWeight: 700, color: "#0070f3" }}>● Selected</span>
+                        <span style={{ fontSize: "12px", fontWeight: 700, color: "#0070f3" }}>● Selected</span>
                       )}
                     </div>
                     <b style={{ fontSize: "14px" }}>{lang === "bn" ? opt.titleBn : opt.title}</b>
-                    <span style={{ fontSize: "11px", opacity: 0.75, lineHeight: 1.4 }}>
+                    <span style={{ fontSize: "12px", opacity: 0.75, lineHeight: 1.4 }}>
                       {lang === "bn" ? opt.descBn : opt.desc}
                     </span>
                   </button>

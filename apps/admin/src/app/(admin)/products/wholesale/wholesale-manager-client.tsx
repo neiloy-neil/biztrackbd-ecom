@@ -353,7 +353,7 @@ export function WholesaleManagerClient({ initialData, registerUrl }: Props) {
                         <div>{a.customer.name}</div>
                         <div className="muted" style={{ fontSize: 12 }}>{prettyPhone(a.customer.phone)}</div>
                         {a.whatsappNumber && (
-                          <div style={{ fontSize: 11, color: "#16a34a" }}>WA: {prettyPhone(a.whatsappNumber)}</div>
+                          <div style={{ fontSize: 12, color: "#16a34a" }}>WA: {prettyPhone(a.whatsappNumber)}</div>
                         )}
                       </td>
                       <td style={{ padding: "12px 14px" }}>
@@ -374,7 +374,7 @@ export function WholesaleManagerClient({ initialData, registerUrl }: Props) {
                             REJECTED
                           </span>
                         )}
-                        <div className="muted" style={{ fontSize: 11, marginTop: 4 }}>
+                        <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
                           {dateOnly(a.createdAt)}
                         </div>
                       </td>
@@ -602,7 +602,7 @@ export function WholesaleManagerClient({ initialData, registerUrl }: Props) {
                       </td>
                       <td style={{ padding: "12px 14px", textAlign: "right" }}>
                         <b style={{ color: "#16a34a" }}>{taka(p.price)}</b>
-                        <div className="muted" style={{ fontSize: 11 }}>
+                        <div className="muted" style={{ fontSize: 12 }}>
                           Save {Math.round(((p.variant.price - p.price) / p.variant.price) * 100)}%
                         </div>
                       </td>

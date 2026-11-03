@@ -78,7 +78,7 @@ export default async function UsagePage() {
               <div style={{ fontSize: 12, color: "var(--ink-3)" }}>{t.subdomain}</div>
             </div>
             <div>
-              <span style={{ padding: "2px 8px", borderRadius: 10, fontSize: 11.5, fontWeight: 600, background: "var(--tint)", color: "var(--brand)" }}>
+              <span style={{ padding: "2px 8px", borderRadius: 10, fontSize: 12, fontWeight: 600, background: "var(--tint)", color: "var(--brand)" }}>
                 {t.planTier}
               </span>
             </div>

@@ -58,7 +58,7 @@ export function WholesaleVolumeCard({ variantId, lang }: Props) {
         {data.tierName && (
           <span
             style={{
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: 700,
               padding: "2px 8px",
               borderRadius: 12,
@@ -86,7 +86,7 @@ export function WholesaleVolumeCard({ variantId, lang }: Props) {
             <div style={{ fontSize: 12, fontWeight: 700, color: "#3730a3" }}>{b.minQuantity}+ pcs</div>
             <div style={{ fontSize: 14, fontWeight: 800, color: "#111", margin: "2px 0" }}>{money(b.price, lang)}</div>
             {b.savingsPercent > 0 && (
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#16a34a" }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#16a34a" }}>
                 {lang === "bn" ? `${b.savingsPercent}% ছাড়` : `Save ${b.savingsPercent}%`}
               </div>
             )}

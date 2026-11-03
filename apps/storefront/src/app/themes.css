@@ -2528,7 +2528,7 @@ body:has(#bt-preview-select) .bt-anim:not(.bt-revealed) {
   transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-
-
-
-
+/* Checkout: nothing floats over the form. Help is in the footer, and the buy bar is the one thing at the bottom. */
+body:has(.checkout-bar) .bt-ai-chat-bubble,
+body:has(.checkout-bar) .bt-wa-float,
+body:has(.checkout-bar) .bt-fomo-toast { display: none !important; }

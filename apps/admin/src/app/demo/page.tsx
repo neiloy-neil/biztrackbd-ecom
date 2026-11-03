@@ -54,7 +54,7 @@ export default async function DemoChooser({ searchParams }: { searchParams: Prom
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 6 }}>
                   <b style={{ fontSize: 15 }}>{t.name}</b>
-                  <span className="muted" style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.04em" }}>{t.vertical}</span>
+                  <span className="muted" style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "0.04em" }}>{t.vertical}</span>
                 </div>
                 <div className="muted" style={{ fontSize: 13, marginTop: 4 }}>{t.tagline}</div>
               </div>

@@ -89,7 +89,7 @@ export function VisitorCounterSection({
                 <span className="bt-visitor-count">{viewers}</span> {isBn ? "জন ক্রেতা সক্রিয়" : "Live Shoppers"}
               </span>
             </div>
-            <span style={{ fontSize: 11, fontWeight: 600, color: "#10b981", background: "rgba(16, 185, 129, 0.1)", padding: "2px 8px", borderRadius: 9999 }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "#10b981", background: "rgba(16, 185, 129, 0.1)", padding: "2px 8px", borderRadius: 9999 }}>
               LIVE
             </span>
           </div>

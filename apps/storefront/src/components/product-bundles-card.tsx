@@ -226,7 +226,7 @@ export function ProductBundlesCard({ productId, lang }: Props) {
                     </del>
                   )}
                   {bundle.savingsPercent > 0 && (
-                    <span className="pill green" style={{ fontSize: 11, padding: "1px 6px" }}>
+                    <span className="pill green" style={{ fontSize: 12, padding: "1px 6px" }}>
                       {bundle.savingsPercent}% OFF
                     </span>
                   )}

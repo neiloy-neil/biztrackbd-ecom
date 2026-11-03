@@ -93,7 +93,7 @@ export default async function NotificationsPage({ searchParams }: { searchParams
           feed.map((n) => (
             <details key={n.id} style={cell}>
               <summary style={{ cursor: "pointer", display: "flex", gap: 10, alignItems: "center" }}>
-                <span style={{ padding: "2px 9px", borderRadius: 10, fontSize: 11.5, fontWeight: 600, background: "var(--bg)", color: "var(--ink-2)" }}>
+                <span style={{ padding: "2px 9px", borderRadius: 10, fontSize: 12, fontWeight: 600, background: "var(--bg)", color: "var(--ink-2)" }}>
                   {NOTIFY_LABELS[n.kind as keyof typeof NOTIFY_LABELS] ?? n.kind}
                 </span>
                 <b style={{ flex: 1, fontSize: 14 }}>{n.title}</b>

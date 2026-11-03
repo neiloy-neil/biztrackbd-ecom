@@ -159,7 +159,7 @@ export function TenantCrmDesk({
             <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-2)" }}>
               Next Follow-up Reminder:
             </div>
-            <div style={{ fontSize: 11.5, color: "var(--ink-3)" }}>
+            <div style={{ fontSize: 12, color: "var(--ink-3)" }}>
               {leadNextFollowUpAt
                 ? `Scheduled for: ${new Date(leadNextFollowUpAt).toLocaleString("en-GB")}`
                 : "No follow-up scheduled yet"}
@@ -274,12 +274,12 @@ export function TenantCrmDesk({
                       <span style={{ fontWeight: 700, color: "#1E293B" }}>
                         {isWa ? "WhatsApp Message Sent" : isCall ? "Phone Call" : isStage ? "Pipeline Stage Updated" : isFollowUp ? "Follow-up Scheduled" : "CRM Note"}
                         {act.outcome && (
-                          <span style={{ marginLeft: 6, fontWeight: 600, color: "var(--ink-2)", fontSize: 11.5 }}>
+                          <span style={{ marginLeft: 6, fontWeight: 600, color: "var(--ink-2)", fontSize: 12 }}>
                             ({act.outcome})
                           </span>
                         )}
                       </span>
-                      <span style={{ fontSize: 11, color: "var(--ink-3)", whiteSpace: "nowrap" }}>
+                      <span style={{ fontSize: 12, color: "var(--ink-3)", whiteSpace: "nowrap" }}>
                         {new Date(act.createdAt).toLocaleString("en-GB", {
                           day: "numeric",
                           month: "short",
@@ -293,7 +293,7 @@ export function TenantCrmDesk({
                         {act.notes}
                       </div>
                     )}
-                    <div style={{ fontSize: 11, color: "#94A3B8", marginTop: 3 }}>
+                    <div style={{ fontSize: 12, color: "#94A3B8", marginTop: 3 }}>
                       By: {act.actorName || "Staff"}
                     </div>
                   </div>

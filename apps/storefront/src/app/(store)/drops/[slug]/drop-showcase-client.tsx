@@ -430,7 +430,7 @@ export function DropShowcaseClient({ drop, lang = "en" }: Props) {
                   <span>Due on Delivery (COD):</span>
                   <b>৳{balanceDue.toLocaleString()}</b>
                 </div>
-                <div className="muted" style={{ fontSize: 11.5, marginTop: 6, lineHeight: 1.4 }}>
+                <div className="muted" style={{ fontSize: 12, marginTop: 6, lineHeight: 1.4 }}>
                   {depositAmount > 0
                     ? "Advance deposit payable online via bKash, Nagad or Card to confirm production allocation. Remaining balance collected when parcel arrives at your door."
                     : "100% Cash-on-Delivery. Pay the full amount to the courier when parcel arrives."}

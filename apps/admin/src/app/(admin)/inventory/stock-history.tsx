@@ -108,24 +108,24 @@ export function StockHistory({ variantId }: { variantId: string }) {
                     >
                       {deltaStr}
                     </span>
-                    <span className="pill grey" style={{ fontSize: 11, padding: "2px 6px" }}>
+                    <span className="pill grey" style={{ fontSize: 12, padding: "2px 6px" }}>
                       {reasonName}
                     </span>
                     <span className="muted" style={{ fontSize: 12 }}>
                       → {item.quantityAfter} left
                     </span>
                   </div>
-                  <span className="muted" style={{ fontSize: 11 }}>
+                  <span className="muted" style={{ fontSize: 12 }}>
                     {dateStr}
                   </span>
                 </div>
 
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 2 }}>
-                  <span className="muted" style={{ fontSize: 11.5 }}>
+                  <span className="muted" style={{ fontSize: 12 }}>
                     by {item.actorName}
                   </span>
                   {item.note && (
-                    <span style={{ fontSize: 11.5, fontStyle: "italic", color: "var(--ink-2)" }}>
+                    <span style={{ fontSize: 12, fontStyle: "italic", color: "var(--ink-2)" }}>
                       &ldquo;{item.note}&rdquo;
                     </span>
                   )}

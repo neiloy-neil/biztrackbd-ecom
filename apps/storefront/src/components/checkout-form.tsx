@@ -391,7 +391,7 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
                 {hl || (lang === "bn" ? "এককালীন বিশেষ অফার" : "ONE-TIME SPECIAL OFFER")}
               </span>
               {b.savings > 0 && (
-                <span className="pill green" style={{ fontSize: 11, padding: "2px 8px", fontWeight: 700 }}>
+                <span className="pill green" style={{ fontSize: 12, padding: "2px 8px", fontWeight: 700 }}>
                   {lang === "bn" ? `${money(b.savings, lang)} সাশ্রয়!` : `SAVE ${money(b.savings, lang)}!`}
                 </span>
               )}
@@ -449,12 +449,12 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
             <div className="r">
               <span>
                 {l.isBump && (
-                  <span className="pill green" style={{ fontSize: 10, marginRight: 6, padding: "1px 5px", textTransform: "uppercase" }}>
+                  <span className="pill green" style={{ fontSize: 12, marginRight: 6, padding: "1px 5px", textTransform: "uppercase" }}>
                     {lang === "bn" ? "অর্ডার বাম্প" : "Order Bump"}
                   </span>
                 )}
                 {l.bundleTitle && (
-                  <span className="pill blue" style={{ fontSize: 10, marginRight: 6, padding: "1px 5px" }}>
+                  <span className="pill blue" style={{ fontSize: 12, marginRight: 6, padding: "1px 5px" }}>
                     {l.bundleTitle}
                   </span>
                 )}
@@ -509,7 +509,7 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 600, fontSize: 14 }}>
                 <span>{lang === "bn" ? "স্বয়ংক্রিয় ঠিকানা পূরণ" : "Auto-Parse Address"}</span>
-                <span className="pill" style={{ fontSize: 10, padding: "1px 6px" }}>Auto-Fill</span>
+                <span className="pill" style={{ fontSize: 12, padding: "1px 6px" }}>Auto-Fill</span>
               </div>
               <p style={{ margin: "4px 0 0", fontSize: 12.5, color: "var(--ink-2, #6b7280)" }}>
                 {lang === "bn"

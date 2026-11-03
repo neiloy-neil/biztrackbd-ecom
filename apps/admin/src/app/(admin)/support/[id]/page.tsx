@@ -175,7 +175,7 @@ export default async function MerchantTicketDetailPage({
                       </b>
                       <span
                         style={{
-                          fontSize: 10,
+                          fontSize: 12,
                           opacity: 0.8,
                           color: isMerchant ? "#E3F1EA" : "#64748b",
                         }}

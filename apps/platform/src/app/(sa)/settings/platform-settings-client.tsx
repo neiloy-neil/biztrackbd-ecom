@@ -642,19 +642,20 @@ export function PlatformSettingsClient({
               </label>
               <input
                 type="password"
+                aria-label="Gemini API key"
                 value={aiApiKey}
                 onChange={(e) => setAiApiKey(e.target.value)}
                 placeholder="AIzaSy..."
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               />
             </div>
 
             <div>
               <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Default Gemini Model</label>
-              <select
+              <select aria-label="Default Gemini Model"
                 value={aiModel}
                 onChange={(e) => setAiModel(e.target.value)}
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               >
                 <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended)</option>
                 <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite (500 Req/Day Free)</option>
@@ -710,7 +711,7 @@ export function PlatformSettingsClient({
             <div>
               <div style={{ fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
                 <span>Platform SMS Gateway</span>
-                <span style={{ fontSize: 11, padding: "2px 8px", background: "#E8F6EE", color: "#15803D", borderRadius: 12, fontWeight: 700 }}>
+                <span style={{ fontSize: 12, padding: "2px 8px", background: "#E8F6EE", color: "#15803D", borderRadius: 12, fontWeight: 700 }}>
                   Database-Driven
                 </span>
               </div>
@@ -752,7 +753,7 @@ export function PlatformSettingsClient({
                       </div>
                       <div
                         style={{
-                          fontSize: 11,
+                          fontSize: 12,
                           fontWeight: 600,
                           color: p.badge.startsWith("Ready") ? "#15803D" : "var(--ink-3)",
                         }}
@@ -807,24 +808,24 @@ export function PlatformSettingsClient({
               <>
                 <div>
                   <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Endpoint URL</label>
-                  <input
+                  <input aria-label="Endpoint URL"
                     type="url"
                     value={customEndpoint}
                     onChange={(e) => setCustomEndpoint(e.target.value)}
                     placeholder="https://api.gateway.com/sms/send or https://...?to={to}&msg={message}"
-                    style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 }}
+                    style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
                   />
-                  <span style={{ fontSize: 11, color: "var(--ink-3)", marginTop: 4, display: "block" }}>
+                  <span style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 4, display: "block" }}>
                     Supports POST with JSON or GET with placeholders ({String.fromCharCode(123)}to{String.fromCharCode(125)}, {String.fromCharCode(123)}message{String.fromCharCode(125)}, {String.fromCharCode(123)}sender_id{String.fromCharCode(125)}).
                   </span>
                 </div>
 
                 <div>
                   <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>HTTP Method</label>
-                  <select
+                  <select aria-label="HTTP Method"
                     value={customMethod}
                     onChange={(e) => setCustomMethod(e.target.value as "GET" | "POST")}
-                    style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 }}
+                    style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
                   >
                     <option value="POST">POST (JSON Body: to, message, sender_id, api_key)</option>
                     <option value="GET">GET (Query Parameters in URL)</option>
@@ -847,16 +848,14 @@ export function PlatformSettingsClient({
                     ? `Current: ${smsConfig.providers[smsProvider as keyof typeof smsConfig.providers]?.maskedApiKey} (Enter new key to change)`
                     : `Enter ${smsProvider} API key / token`
                 }
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               />
             </div>
 
             {smsProvider !== "greenweb" && (
               <div>
-                <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>
-                  Sender ID (Masking Header / Number)
-                </label>
-                <input
+                <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Sender ID (Masking Header / Number)</label>
+                <input aria-label="Sender ID (Masking Header / Number)"
                   type="text"
                   value={smsSenderId}
                   onChange={(e) => setSmsSenderId(e.target.value)}
@@ -865,7 +864,7 @@ export function PlatformSettingsClient({
                       ? "e.g. 8809612... or Brand Masking ID approved on BulkSMSBD"
                       : "e.g. Approved alphanumeric or numeric sender ID"
                   }
-                  style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 }}
+                  style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
                 />
               </div>
             )}
@@ -916,7 +915,7 @@ export function PlatformSettingsClient({
                   value={smsTestPhone}
                   onChange={(e) => setSmsTestPhone(e.target.value)}
                   placeholder="017xxxxxxxx"
-                  style={{ flex: 1, padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 }}
+                  style={{ flex: 1, padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
                 />
                 <button
                   type="button"
@@ -969,7 +968,7 @@ export function PlatformSettingsClient({
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div>
                 <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 4 }}>Steadfast API Key</label>
-                <input
+                <input aria-label="Steadfast API Key"
                   type="password"
                   value={sfApiKey}
                   onChange={(e) => setSfApiKey(e.target.value)}
@@ -979,7 +978,7 @@ export function PlatformSettingsClient({
               </div>
               <div>
                 <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 4 }}>Steadfast Secret Key</label>
-                <input
+                <input aria-label="Steadfast Secret Key"
                   type="password"
                   value={sfSecretKey}
                   onChange={(e) => setSfSecretKey(e.target.value)}
@@ -990,7 +989,7 @@ export function PlatformSettingsClient({
 
               <div>
                 <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 4 }}>Pathao Client ID</label>
-                <input
+                <input aria-label="Pathao Client ID"
                   type="password"
                   value={pathaoClientId}
                   onChange={(e) => setPathaoClientId(e.target.value)}
@@ -1000,7 +999,7 @@ export function PlatformSettingsClient({
               </div>
               <div>
                 <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 4 }}>Pathao Client Secret</label>
-                <input
+                <input aria-label="Pathao Client Secret"
                   type="password"
                   value={pathaoClientSecret}
                   onChange={(e) => setPathaoClientSecret(e.target.value)}
@@ -1011,7 +1010,7 @@ export function PlatformSettingsClient({
 
               <div>
                 <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 4 }}>RedX API Key</label>
-                <input
+                <input aria-label="RedX API Key"
                   type="password"
                   value={redxKey}
                   onChange={(e) => setRedxKey(e.target.value)}
@@ -1021,7 +1020,7 @@ export function PlatformSettingsClient({
               </div>
               <div>
                 <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 4 }}>CarryBee API Key</label>
-                <input
+                <input aria-label="CarryBee API Key"
                   type="password"
                   value={carrybeeKey}
                   onChange={(e) => setCarrybeeKey(e.target.value)}
@@ -1110,34 +1109,34 @@ export function PlatformSettingsClient({
 
             <div>
               <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>UddoktaPay Base URL</label>
-              <input
+              <input aria-label="UddoktaPay Base URL"
                 type="text"
                 value={uddoktaBaseUrl}
                 onChange={(e) => setUddoktaBaseUrl(e.target.value)}
                 placeholder="https://pay.biztrack.bd"
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               />
             </div>
 
             <div>
               <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>API Key</label>
-              <input
+              <input aria-label="API Key"
                 type="password"
                 value={uddoktaApiKey}
                 onChange={(e) => setUddoktaApiKey(e.target.value)}
                 placeholder="Enter API key..."
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               />
             </div>
 
             <div>
               <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Webhook Signature Secret</label>
-              <input
+              <input aria-label="Webhook Signature Secret"
                 type="password"
                 value={uddoktaSecret}
                 onChange={(e) => setUddoktaSecret(e.target.value)}
                 placeholder="Enter webhook secret..."
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               />
             </div>
 
@@ -1191,56 +1190,56 @@ export function PlatformSettingsClient({
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div>
                 <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>From Email</label>
-                <input
+                <input aria-label="From Email"
                   type="email"
                   value={fromEmail}
                   onChange={(e) => setFromEmail(e.target.value)}
                   placeholder="support@biztrack.bd"
-                  style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 }}
+                  style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
                 />
               </div>
               <div>
                 <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Sender Display Name</label>
-                <input
+                <input aria-label="Sender Display Name"
                   type="text"
                   value={fromName}
                   onChange={(e) => setFromName(e.target.value)}
                   placeholder="BizTrackBD Platform"
-                  style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 }}
+                  style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
                 />
               </div>
             </div>
 
             <div>
               <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Resend API Key</label>
-              <input
+              <input aria-label="Resend API Key"
                 type="password"
                 value={resendKey}
                 onChange={(e) => setResendKey(e.target.value)}
                 placeholder={initialMailConfig.maskedResendKey || "re_..."}
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               />
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 12 }}>
               <div>
                 <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Custom SMTP Host (Optional)</label>
-                <input
+                <input aria-label="Custom SMTP Host (Optional)"
                   type="text"
                   value={smtpHost}
                   onChange={(e) => setSmtpHost(e.target.value)}
                   placeholder="smtp.resend.com"
-                  style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 }}
+                  style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
                 />
               </div>
               <div>
                 <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Port</label>
-                <input
+                <input aria-label="Port"
                   type="number"
                   value={smtpPort}
                   onChange={(e) => setSmtpPort(e.target.value)}
                   placeholder="587"
-                  style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 }}
+                  style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
                 />
               </div>
             </div>
@@ -1269,7 +1268,7 @@ export function PlatformSettingsClient({
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                 <div style={{ fontSize: 18, fontWeight: 700, color: "var(--ink)" }}>Google Cloud Platform & Console Suite</div>
-                <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 12, background: "#E8F0FE", color: "#1A73E8" }}>
+                <span style={{ fontSize: 12, fontWeight: 700, padding: "3px 8px", borderRadius: 12, background: "#E8F0FE", color: "#1A73E8" }}>
                   GCP Enterprise
                 </span>
               </div>
@@ -1281,19 +1280,19 @@ export function PlatformSettingsClient({
             {/* Service Status Badges */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10 }}>
               <div style={{ padding: "10px 14px", background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 8 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase" }}>Search Console</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase" }}>Search Console</div>
                 <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4, color: googleSiteVerification ? "#15803D" : "var(--ink-3)" }}>
                   {googleSiteVerification ? "● Verified" : "○ Not Set"}
                 </div>
               </div>
               <div style={{ padding: "10px 14px", background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 8 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase" }}>Merchant Center</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase" }}>Merchant Center</div>
                 <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4, color: googleMerchantId ? "#15803D" : "var(--ink-3)" }}>
                   {googleMerchantId ? "● Linked" : "○ Not Set"}
                 </div>
               </div>
               <div style={{ padding: "10px 14px", background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 8 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase" }}>GCS Storage</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase" }}>GCS Storage</div>
                 <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4, color: googleGcsEnabled && (googleGcsBucket || googleGcsMaskedKey) ? "#15803D" : "var(--ink-3)" }}>
                   {googleGcsEnabled && (googleGcsBucket || googleGcsMaskedKey) ? "● Active" : "○ Inactive"}
                 </div>
@@ -1324,7 +1323,7 @@ export function PlatformSettingsClient({
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
                     <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>GCP Project ID</label>
-                    <input
+                    <input aria-label="GCP Project ID"
                       type="text"
                       value={googleGcsProject}
                       onChange={(e) => setGoogleGcsProject(e.target.value)}
@@ -1334,7 +1333,7 @@ export function PlatformSettingsClient({
                   </div>
                   <div>
                     <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>GCS Bucket Name</label>
-                    <input
+                    <input aria-label="GCS Bucket Name"
                       type="text"
                       value={googleGcsBucket}
                       onChange={(e) => setGoogleGcsBucket(e.target.value)}
@@ -1355,7 +1354,7 @@ export function PlatformSettingsClient({
                     placeholder={googleGcsMaskedKey ? "Leave blank to retain active Service Account Key JSON, or paste replacement JSON..." : '{\n  "type": "service_account",\n  "project_id": "...",\n  "private_key": "..."\n}'}
                     style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 12, fontFamily: "monospace" }}
                   />
-                  <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 4 }}>
+                  <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 4 }}>
                     Requires role: <code style={{ background: "#F0F0F8", padding: "2px 4px", borderRadius: 4 }}>Storage Object Admin (roles/storage.objectAdmin)</code>
                   </div>
                 </div>
@@ -1373,10 +1372,8 @@ export function PlatformSettingsClient({
 
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 <div>
-                  <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>
-                    Google Search Console Site Verification (biztrack.bd website only)
-                  </label>
-                  <input
+                  <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>Google Search Console Site Verification (biztrack.bd website only)</label>
+                  <input aria-label="Google Search Console Site Verification (biztrack.bd website only)"
                     type="text"
                     value={googleSiteVerification}
                     onChange={(e) => {
@@ -1400,17 +1397,15 @@ export function PlatformSettingsClient({
                       ✓ Generated Meta Tag: <code style={{ color: "#15803D" }}>&lt;meta name="google-site-verification" content="{googleSiteVerification}" /&gt;</code>
                     </div>
                   )}
-                  <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 4 }}>
+                  <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 4 }}>
                     Injected into the HTML &lt;head&gt; of the main biztrack.bd website. Merchants verify their individual store domains separately in their merchant admin panel.
                   </div>
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
-                    <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>
-                      Merchant Center ID
-                    </label>
-                    <input
+                    <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>Merchant Center ID</label>
+                    <input aria-label="Merchant Center ID"
                       type="text"
                       value={googleMerchantId}
                       onChange={(e) => setGoogleMerchantId(e.target.value)}
@@ -1513,7 +1508,7 @@ export function PlatformSettingsClient({
                 <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>
                   Platform SEO & Dynamic Sitemaps (biztrack.bd)
                 </h2>
-                <span style={{ fontSize: 11, fontWeight: 700, background: "var(--brand-light)", color: "var(--brand)", padding: "3px 8px", borderRadius: 6, textTransform: "uppercase" }}>
+                <span style={{ fontSize: 12, fontWeight: 700, background: "var(--brand-light)", color: "var(--brand)", padding: "3px 8px", borderRadius: 6, textTransform: "uppercase" }}>
                   Apex Website
                 </span>
               </div>
@@ -1563,7 +1558,7 @@ export function PlatformSettingsClient({
                   {copiedField === "sitemap" ? "Copied! ✓" : "Copy"}
                 </button>
               </div>
-              <p style={{ margin: "6px 0 0", fontSize: 11.5, color: "var(--ink-3)" }}>
+              <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--ink-3)" }}>
                 Submit this URL to Google Search Console to index all biztrack.bd landing pages, tools, and blog.
               </p>
             </div>
@@ -1601,7 +1596,7 @@ export function PlatformSettingsClient({
                   {copiedField === "robots" ? "Copied! ✓" : "Copy"}
                 </button>
               </div>
-              <p style={{ margin: "6px 0 0", fontSize: 11.5, color: "var(--ink-3)" }}>
+              <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--ink-3)" }}>
                 Contains crawler allow/disallow instructions and points Googlebot directly to the sitemap index.
               </p>
             </div>
@@ -1624,7 +1619,7 @@ export function PlatformSettingsClient({
                 value={seoTitle}
                 onChange={(e) => setSeoTitle(e.target.value)}
                 placeholder="BizTrackBD: Online Store Software for Bangladesh"
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               />
               <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--ink-3)" }}>
                 The clickable headline displayed on Google search results for biztrack.bd.
@@ -1655,15 +1650,13 @@ export function PlatformSettingsClient({
 
             {/* Meta Keywords */}
             <div>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "var(--ink)", marginBottom: 6 }}>
-                Meta Keywords (Comma-separated)
-              </label>
-              <input
+              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "var(--ink)", marginBottom: 6 }}>Meta Keywords (Comma-separated)</label>
+              <input aria-label="Meta Keywords (Comma-separated)"
                 type="text"
                 value={seoKeywords}
                 onChange={(e) => setSeoKeywords(e.target.value)}
                 placeholder="online store bangladesh, ecommerce website builder bangladesh, bkash payment gateway, steadfast courier integration"
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               />
               <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--ink-3)" }}>
                 Search indexing terms prioritized by search engines for regional ecommerce queries in Bangladesh.
@@ -1672,22 +1665,20 @@ export function PlatformSettingsClient({
 
             {/* OpenGraph Social Image URL */}
             <div>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "var(--ink)", marginBottom: 6 }}>
-                Social Share Image (OpenGraph / Twitter Card Banner)
-              </label>
-              <input
+              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "var(--ink)", marginBottom: 6 }}>Social Share Image (OpenGraph / Twitter Card Banner)</label>
+              <input aria-label="Social Share Image (OpenGraph / Twitter Card Banner)"
                 type="url"
                 value={seoOgImage}
                 onChange={(e) => setSeoOgImage(e.target.value)}
                 placeholder="https://biztrack.bd/opengraph-image"
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               />
               <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--ink-3)" }}>
                 Preview image generated when biztrack.bd is shared on Facebook, WhatsApp, LinkedIn, or Twitter (1200x630px).
               </p>
               {seoOgImage && (
                 <div style={{ marginTop: 8, padding: 8, background: "var(--bg)", borderRadius: 8, display: "inline-block", border: "1px solid var(--line)" }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: "var(--ink-3)", display: "block", marginBottom: 4 }}>Banner Preview:</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-3)", display: "block", marginBottom: 4 }}>Banner Preview:</span>
                   <img
                     src={seoOgImage}
                     alt="OpenGraph Banner Preview"
@@ -1775,7 +1766,7 @@ export function PlatformSettingsClient({
                   onChange={(e) => f.set(e.target.value)}
                   placeholder={f.placeholder}
                   data-testid={f.testid}
-                  style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 }}
+                  style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
                 />
               </div>
             ))}

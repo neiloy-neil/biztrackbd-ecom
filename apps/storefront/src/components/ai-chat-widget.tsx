@@ -255,7 +255,7 @@ function AiChatWidgetInner({
               </div>
               <div>
                 <div style={{ fontWeight: 700, fontSize: 14.5, lineHeight: 1.2 }}>{displayName}</div>
-                <div style={{ fontSize: 11.5, opacity: 0.9, display: "flex", alignItems: "center", gap: 5 }}>
+                <div style={{ fontSize: 12, opacity: 0.9, display: "flex", alignItems: "center", gap: 5 }}>
                   <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80" }} />
                   <span>Store Assistant</span>
                 </div>
@@ -344,7 +344,7 @@ function AiChatWidgetInner({
                           padding: "2px 8px",
                           borderRadius: 9999,
                           fontWeight: 600,
-                          fontSize: 11,
+                          fontSize: 12,
                         }}
                       >
                         {m.orderTracking.status}
@@ -354,7 +354,7 @@ function AiChatWidgetInner({
                       মোট টাকা: <strong style={{ color: "#111827" }}>৳{m.orderTracking.total.toLocaleString("en-BD")}</strong>
                     </div>
                     {m.orderTracking.courierName && (
-                      <div style={{ color: "#6b7280", fontSize: 11.5, marginBottom: 6 }}>
+                      <div style={{ color: "#6b7280", fontSize: 12, marginBottom: 6 }}>
                         কুরিয়ার: {m.orderTracking.courierName}
                       </div>
                     )}
@@ -462,7 +462,7 @@ function AiChatWidgetInner({
                   border: "1px solid #e5e7eb",
                   borderRadius: 9999,
                   padding: "4px 10px",
-                  fontSize: 11.5,
+                  fontSize: 12,
                   color: "#374151",
                   cursor: "pointer",
                   flexShrink: 0,

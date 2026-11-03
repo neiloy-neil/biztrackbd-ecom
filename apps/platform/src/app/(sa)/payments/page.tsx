@@ -166,7 +166,7 @@ export default async function Payments({
                       borderRadius: 19,
                       background: prov.bg,
                       color: "#fff",
-                      fontSize: 10,
+                      fontSize: 12,
                       fontWeight: 800,
                       display: "flex",
                       alignItems: "center",
@@ -283,7 +283,7 @@ export default async function Payments({
                     <div style={{ fontSize: 24, fontWeight: 700, margin: "6px 0", fontVariantNumeric: "tabular-nums" }}>
                       {taka(selected.amount)}.00
                     </div>
-                    <div style={{ fontSize: 11.5, color: "var(--ink-2)", lineHeight: 1.7 }}>
+                    <div style={{ fontSize: 12, color: "var(--ink-2)", lineHeight: 1.7 }}>
                       Sender: {prettyPhone(selected.senderNumber)}<br />
                       TrxID: <code>{selected.trxId}</code><br />
                       {dateTime(selected.createdAt)}

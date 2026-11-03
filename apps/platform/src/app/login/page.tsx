@@ -24,7 +24,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<Re
   if (a.state === "enroll") redirect("/enroll");
   const note = NOTES[one(sp.err) ?? ""];
   return (
-    <div className="card" style={{ margin: "64px auto", maxWidth: 420 }}>
+    <div role="main" className="card" style={{ margin: "64px auto", maxWidth: 420 }}>
       <AuthBrand />
       <h1 style={{ marginTop: 0 }}>Platform sign in</h1>
       <p className="muted">BizTrackBD team only. Two-factor sign-in is required.</p>

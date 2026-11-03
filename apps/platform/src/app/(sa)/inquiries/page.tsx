@@ -163,7 +163,7 @@ export default async function InquiriesPage({
                               : item.status === "CONVERTED"
                               ? "#15803D"
                               : "var(--ink-3)",
-                          fontSize: 11.5,
+                          fontSize: 12,
                           fontWeight: 700,
                         }}
                       >

@@ -129,23 +129,23 @@ export default async function PlatformTrackingDiagnosticsPage({
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginTop: 14 }}>
           <div style={{ background: "var(--chip)", padding: "12px 14px", borderRadius: 8 }}>
-            <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ink-3)" }}>Delivered (Sent)</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-3)" }}>Delivered (Sent)</div>
             <div style={{ fontSize: 18, fontWeight: 800, color: "#15803D", marginTop: 2 }}>{outbox.sent}</div>
           </div>
           <div style={{ background: "var(--chip)", padding: "12px 14px", borderRadius: 8 }}>
-            <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ink-3)" }}>Pending (Retrying)</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-3)" }}>Pending (Retrying)</div>
             <div style={{ fontSize: 18, fontWeight: 800, color: outbox.pending > 0 ? "#D97706" : "var(--ink)", marginTop: 2 }}>{outbox.pending}</div>
           </div>
           <div style={{ background: "var(--chip)", padding: "12px 14px", borderRadius: 8 }}>
-            <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ink-3)" }}>Failed</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-3)" }}>Failed</div>
             <div style={{ fontSize: 18, fontWeight: 800, color: outbox.failed > 0 ? "#DC2626" : "var(--ink)", marginTop: 2 }}>{outbox.failed}</div>
           </div>
           <div style={{ background: "var(--chip)", padding: "12px 14px", borderRadius: 8 }}>
-            <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ink-3)" }}>Exhausted (Dead-Letter)</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-3)" }}>Exhausted (Dead-Letter)</div>
             <div style={{ fontSize: 18, fontWeight: 800, color: outbox.exhausted > 0 ? "#DC2626" : "var(--ink)", marginTop: 2 }}>{outbox.exhausted}</div>
           </div>
           <div style={{ background: "var(--chip)", padding: "12px 14px", borderRadius: 8 }}>
-            <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ink-3)" }}>Total Cluster Jobs</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-3)" }}>Total Cluster Jobs</div>
             <div style={{ fontSize: 18, fontWeight: 800, color: "var(--brand)", marginTop: 2 }}>{outbox.total}</div>
           </div>
         </div>

@@ -125,7 +125,7 @@ export function CrmTemplatesSettings({ initialTemplates }: { initialTemplates: C
         inside template bodies. They are automatically replaced with real merchant info.
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "220px minmax(0, 1fr)", gap: 20 }}>
+      <div className="crm-tpl-grid">
         {/* Template List Selector */}
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {templates.map((t) => {
@@ -148,7 +148,7 @@ export function CrmTemplatesSettings({ initialTemplates }: { initialTemplates: C
                 }}
               >
                 <div>{t.title}</div>
-                <div style={{ fontSize: 11, color: isSelected ? "var(--brand)" : "#94A3B8", marginTop: 2 }}>
+                <div style={{ fontSize: 12, color: isSelected ? "var(--brand)" : "#94A3B8", marginTop: 2 }}>
                   Key: {t.key} · {t.language.toUpperCase()}
                 </div>
               </button>
@@ -171,10 +171,8 @@ export function CrmTemplatesSettings({ initialTemplates }: { initialTemplates: C
             }}
           >
             <div>
-              <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--ink-2)", marginBottom: 4 }}>
-                Template Title
-              </label>
-              <input
+              <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--ink-2)", marginBottom: 4 }}>Template Title</label>
+              <input aria-label="Template Title"
                 type="text"
                 value={current.title}
                 onChange={(e) => setEditingTemplate({ ...current, title: e.target.value })}
@@ -185,16 +183,14 @@ export function CrmTemplatesSettings({ initialTemplates }: { initialTemplates: C
                   padding: "7px 10px",
                   borderRadius: 6,
                   border: "1px solid var(--line-2)",
-                  fontSize: 13,
+                  fontSize: 16,
                 }}
               />
             </div>
 
             <div>
-              <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--ink-2)", marginBottom: 4 }}>
-                Message Text (WhatsApp Body)
-              </label>
-              <textarea
+              <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--ink-2)", marginBottom: 4 }}>Message Text (WhatsApp Body)</label>
+              <textarea aria-label="Message Text (WhatsApp Body)"
                 value={current.body}
                 onChange={(e) => setEditingTemplate({ ...current, body: e.target.value })}
                 required
@@ -205,7 +201,7 @@ export function CrmTemplatesSettings({ initialTemplates }: { initialTemplates: C
                   padding: "10px",
                   borderRadius: 6,
                   border: "1px solid var(--line-2)",
-                  fontSize: 13,
+                  fontSize: 16,
                   lineHeight: 1.5,
                   fontFamily: "inherit",
                 }}

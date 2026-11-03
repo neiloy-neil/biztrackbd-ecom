@@ -157,7 +157,7 @@ export function InlineStockStepper({
         </button>
       </div>
       {error && (
-        <span style={{ fontSize: 11, color: "var(--danger, #d32f2f)", maxWidth: 140, textAlign: "right" }}>
+        <span style={{ fontSize: 12, color: "var(--danger, #d32f2f)", maxWidth: 140, textAlign: "right" }}>
           {error}
         </span>
       )}

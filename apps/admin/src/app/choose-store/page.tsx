@@ -19,7 +19,7 @@ export default async function ChooseStore({ searchParams }: { searchParams: Prom
   if (a.state === "no-store") redirect("/login?err=no-store");
   const stores = a.stores;
   return (
-    <div className="card" style={{ margin: "64px auto", maxWidth: 460 }}>
+    <div role="main" className="card" style={{ margin: "64px auto", maxWidth: 460 }}>
       <AuthBrand />
       <h1 style={{ marginTop: 0 }}>Which store?</h1>
       <p className="muted">You work in more than one store. Signed in as {a.user.email}.</p>

@@ -602,7 +602,7 @@ export default async function TenantDetail({
                             <span style={{ fontWeight: 700, color: "var(--brand)" }}>+{q.amount} {q.type.replace("_", " ")}</span>
                             <span style={{ color: "var(--ink-2)", marginLeft: 8 }}>"{q.reason}"</span>
                           </div>
-                          <span style={{ color: "var(--ink-3)", fontSize: 11.5 }}>{dateTime(q.createdAt)} · {q.actorId}</span>
+                          <span style={{ color: "var(--ink-3)", fontSize: 12 }}>{dateTime(q.createdAt)} · {q.actorId}</span>
                         </div>
                       ))}
                     </div>
@@ -629,7 +629,7 @@ export default async function TenantDetail({
                     style={{
                       padding: "4px 10px",
                       borderRadius: 9999,
-                      fontSize: 11.5,
+                      fontSize: 12,
                       fontWeight: 700,
                       background: "var(--brand-light)",
                       color: "var(--brand)",
@@ -711,7 +711,7 @@ export default async function TenantDetail({
                                 style={{
                                   padding: "2px 6px",
                                   borderRadius: 4,
-                                  fontSize: 11,
+                                  fontSize: 12,
                                   fontWeight: 700,
                                   background: lead.type === "RESERVATION" || lead.type === "APPOINTMENT" ? "var(--brand-light)" : "var(--chip)",
                                   color: lead.type === "RESERVATION" || lead.type === "APPOINTMENT" ? "var(--brand)" : "var(--ink-2)",
@@ -728,7 +728,7 @@ export default async function TenantDetail({
                                 style={{
                                   padding: "2px 7px",
                                   borderRadius: 9999,
-                                  fontSize: 11,
+                                  fontSize: 12,
                                   fontWeight: 700,
                                   background: lead.status === "NEW" ? "#FEF3C7" : lead.status === "WON" ? "#DCFCE7" : "var(--chip)",
                                   color: lead.status === "NEW" ? "#92400E" : lead.status === "WON" ? "#15803D" : "var(--ink-2)",
@@ -739,7 +739,7 @@ export default async function TenantDetail({
                             </td>
                             <td style={{ padding: "12px 14px" }}>
                               <div style={{ fontWeight: 600, color: "var(--ink)" }}>{lead.name}</div>
-                              <div style={{ fontSize: 11.5, color: "var(--ink-3)", fontFamily: "monospace" }}>{lead.phone}</div>
+                              <div style={{ fontSize: 12, color: "var(--ink-3)", fontFamily: "monospace" }}>{lead.phone}</div>
                             </td>
                             <td style={{ padding: "12px 14px", color: "var(--ink-3)" }}>
                               <code>{lead.sourcePage || "/"}</code>
@@ -795,7 +795,7 @@ export default async function TenantDetail({
                       <strong style={{ fontSize: 14, color: "var(--ink)" }}>
                         Pre-Flight Dry-Run Impact Analysis
                       </strong>
-                      <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 9999, background: "#DCFCE7", color: "#15803D" }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, padding: "2px 8px", borderRadius: 9999, background: "#DCFCE7", color: "#15803D" }}>
                         Safety Verified ✓
                       </span>
                     </div>
@@ -808,7 +808,7 @@ export default async function TenantDetail({
                         {dryRun.capabilitiesGained.length > 0 ? (
                           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                             {dryRun.capabilitiesGained.map((c) => (
-                              <span key={c} style={{ background: "#DCFCE7", color: "#15803D", padding: "1px 6px", borderRadius: 4, fontSize: 11, fontWeight: 600 }}>
+                              <span key={c} style={{ background: "#DCFCE7", color: "#15803D", padding: "1px 6px", borderRadius: 4, fontSize: 12, fontWeight: 600 }}>
                                 +{c}
                               </span>
                             ))}
@@ -825,7 +825,7 @@ export default async function TenantDetail({
                         {dryRun.capabilitiesDisabled.length > 0 ? (
                           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                             {dryRun.capabilitiesDisabled.map((c) => (
-                              <span key={c} style={{ background: "#FEE2E2", color: "#B91C1C", padding: "1px 6px", borderRadius: 4, fontSize: 11, fontWeight: 600 }}>
+                              <span key={c} style={{ background: "#FEE2E2", color: "#B91C1C", padding: "1px 6px", borderRadius: 4, fontSize: 12, fontWeight: 600 }}>
                                 -{c}
                               </span>
                             ))}
@@ -986,7 +986,7 @@ export default async function TenantDetail({
                       <div>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <span style={{ fontWeight: 700, fontSize: 14, color: isEnabled ? "var(--brand)" : "var(--ink)" }}>{app.label}</span>
-                          <span style={{ padding: "2px 8px", borderRadius: 8, fontSize: 11, fontWeight: 700, background: isEnabled ? "#E8F6EE" : "var(--chip)", color: isEnabled ? "#15803D" : "#5B5B7B" }}>
+                          <span style={{ padding: "2px 8px", borderRadius: 8, fontSize: 12, fontWeight: 700, background: isEnabled ? "#E8F6EE" : "var(--chip)", color: isEnabled ? "#15803D" : "#5B5B7B" }}>
                             {isEnabled ? "Active" : "Disabled"}
                           </span>
                         </div>
@@ -1052,7 +1052,7 @@ export default async function TenantDetail({
                           <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             {al.action}
                             {isImpersonate && (
-                              <span style={{ fontSize: 10.5, padding: "2px 6px", borderRadius: 6, background: "#FEF3E2", color: "#92400E", fontWeight: 700 }}>
+                              <span style={{ fontSize: 12, padding: "2px 6px", borderRadius: 6, background: "#FEF3E2", color: "#92400E", fontWeight: 700 }}>
                                 IMPERSONATION SESSION
                               </span>
                             )}
@@ -1207,7 +1207,7 @@ export default async function TenantDetail({
                 t.notes.map((n) => (
                   <div key={n.id} style={{ padding: "10px 12px", borderRadius: 8, background: "var(--bg)", border: "1px solid var(--line)", fontSize: 13 }}>
                     <div style={{ color: "var(--ink)", lineHeight: 1.5 }}>{n.body}</div>
-                    <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 4 }}>
+                    <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 4 }}>
                       {n.authorName ?? "Staff"} · {dateTime(n.createdAt)}
                     </div>
                   </div>

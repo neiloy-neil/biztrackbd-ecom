@@ -80,7 +80,7 @@ export default async function AnnouncementsPage({
                     style={{
                       padding: "2px 9px",
                       borderRadius: 10,
-                      fontSize: 11.5,
+                      fontSize: 12,
                       fontWeight: 600,
                       background: isLive ? "var(--success-bg)" : "var(--bg)",
                       color: isLive ? "var(--success)" : "var(--ink-3)",

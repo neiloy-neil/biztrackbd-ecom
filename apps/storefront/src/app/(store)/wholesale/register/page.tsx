@@ -88,7 +88,7 @@ export default async function WholesaleRegisterPage() {
           <div style={{ fontWeight: 700, fontSize: 13 }}>
             {lang === "bn" ? "বিশেষ পাইকারি মূল্য" : "Wholesale Rates"}
           </div>
-          <div className="muted" style={{ fontSize: 11.5 }}>
+          <div className="muted" style={{ fontSize: 12 }}>
             {lang === "bn" ? "রিটেইল দামের চেয়ে কম" : "Up to 35% trade discount"}
           </div>
         </div>
@@ -105,7 +105,7 @@ export default async function WholesaleRegisterPage() {
           <div style={{ fontWeight: 700, fontSize: 13 }}>
             {lang === "bn" ? "ক্যাশ অন ডেলিভারি" : "Flexible COD"}
           </div>
-          <div className="muted" style={{ fontSize: 11.5 }}>
+          <div className="muted" style={{ fontSize: 12 }}>
             {lang === "bn" ? "অগ্রিম জমা দিয়ে বাকিটা COD" : "Deposit + door collection"}
           </div>
         </div>
@@ -123,7 +123,7 @@ export default async function WholesaleRegisterPage() {
           <div style={{ fontWeight: 700, fontSize: 13 }}>
             {lang === "bn" ? "বাণিজ্যিক চালান" : "Official Challans"}
           </div>
-          <div className="muted" style={{ fontSize: 11.5 }}>
+          <div className="muted" style={{ fontSize: 12 }}>
             {lang === "bn" ? "BIN/TIN সহ ভ্যাট বিল" : "B2B Invoices & signatures"}
           </div>
         </div>

@@ -273,14 +273,14 @@ function ListEditor({
     <fieldset className="stack" style={{ border: 0, padding: 0, margin: 0 }}>
       <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
         <legend style={{ fontWeight: 700, margin: 0, fontSize: 13 }}>
-          {spec.label} <span className="muted" style={{ fontWeight: 500, fontSize: 11 }}>({items.length}/{spec.max})</span>
+          {spec.label} <span className="muted" style={{ fontWeight: 500, fontSize: 12 }}>({items.length}/{spec.max})</span>
         </legend>
         {items.length < spec.max && !disabled && (
           <button
             type="button"
             className="btn btn-secondary btn-sm"
             onClick={addItem}
-            style={{ fontSize: 11, height: 26, padding: "0 8px" }}
+            style={{ fontSize: 12, height: 26, padding: "0 8px" }}
           >
             + Add {spec.itemLabel.toLowerCase()}
           </button>
@@ -819,7 +819,7 @@ function SectionStyleTab({
                   aria-pressed={deviceTarget === "desktop"}
                   title="Desktop default settings"
                   onClick={() => setDeviceTarget("desktop")}
-                  style={{ fontSize: 11, padding: "2px 8px" }}
+                  style={{ fontSize: 12, padding: "2px 8px" }}
                 >
                   🖥️ Desktop
                 </button>
@@ -828,7 +828,7 @@ function SectionStyleTab({
                   aria-pressed={deviceTarget === "mobile"}
                   title="Mobile phone overrides"
                   onClick={() => setDeviceTarget("mobile")}
-                  style={{ fontSize: 11, padding: "2px 8px" }}
+                  style={{ fontSize: 12, padding: "2px 8px" }}
                 >
                   📱 Mobile
                 </button>
@@ -1328,7 +1328,7 @@ function ThemePanel({ theme, onChange, disabled }: { theme: ThemeSettings; onCha
       <div className="bld-group" data-testid="brand-palettes-group">
         <div className="bld-gh" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <span>Curated Brand Palettes</span>
-          <span className="pill" style={{ fontSize: 10, padding: "2px 6px", background: "var(--brand)", color: "var(--brand-ink)" }}>1-Click Apply</span>
+          <span className="pill" style={{ fontSize: 12, padding: "2px 6px", background: "var(--brand)", color: "var(--brand-ink)" }}>1-Click Apply</span>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, padding: "6px 0" }}>
           {THEME_PALETTES.map((p) => {
@@ -1371,14 +1371,14 @@ function ThemePanel({ theme, onChange, disabled }: { theme: ThemeSettings; onCha
                     }}
                   >
                     <div style={{ width: 12, height: 12, borderRadius: "50%", background: p.accent }} />
-                    <span style={{ fontSize: 9, fontWeight: 700, color: p.text }}>Aa</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: p.text }}>Aa</span>
                   </div>
                   {isSelected && (
-                    <span style={{ marginLeft: "auto", fontSize: 10, color: "var(--brand)", fontWeight: 700 }}>✓</span>
+                    <span style={{ marginLeft: "auto", fontSize: 12, color: "var(--brand)", fontWeight: 700 }}>✓</span>
                   )}
                 </div>
                 <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", lineHeight: 1.2 }}>{p.name}</div>
-                <div style={{ fontSize: 10, color: "var(--ink-muted)", marginTop: 2, lineHeight: 1.2 }}>{p.nameBn}</div>
+                <div style={{ fontSize: 12, color: "var(--ink-muted)", marginTop: 2, lineHeight: 1.2 }}>{p.nameBn}</div>
               </button>
             );
           })}
@@ -1394,7 +1394,7 @@ function ThemePanel({ theme, onChange, disabled }: { theme: ThemeSettings; onCha
             {color("background", "Page background")}
             {color("text", "Text colour")}
 
-            <div style={{ display: "flex", gap: 8, fontSize: 11, flexWrap: "wrap", marginTop: 4 }}>
+            <div style={{ display: "flex", gap: 8, fontSize: 12, flexWrap: "wrap", marginTop: 4 }}>
               <div style={{ padding: "3px 8px", borderRadius: 6, background: textContrast >= 4.5 ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)", color: textContrast >= 4.5 ? "#065F46" : "#991B1B", fontWeight: 600 }}>
                 Text Contrast: {textContrast.toFixed(1)}:1 {textContrast >= 4.5 ? "(WCAG AA Pass)" : "(Too Low)"}
               </div>
@@ -1460,8 +1460,8 @@ function ThemePanel({ theme, onChange, disabled }: { theme: ThemeSettings; onCha
                     transition: "all 0.15s ease",
                   }}
                 >
-                  <div style={{ fontSize: 11, fontWeight: 700, color: active ? "var(--brand)" : "var(--ink)" }}>{r.name}</div>
-                  <div style={{ fontSize: 9, color: "var(--ink-muted)" }}>{r.label}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: active ? "var(--brand)" : "var(--ink)" }}>{r.name}</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-muted)" }}>{r.label}</div>
                 </button>
               );
             })}
@@ -1620,7 +1620,7 @@ function SeoInspector({
                 </span>
                 <div>
                   <div style={{ fontWeight: item.passed ? 600 : 500 }}>{item.label}</div>
-                  {!item.passed && <div className="muted" style={{ fontSize: 11 }}>{item.tip}</div>}
+                  {!item.passed && <div className="muted" style={{ fontSize: 12 }}>{item.tip}</div>}
                 </div>
               </div>
             ))}
@@ -1988,7 +1988,7 @@ function FomoInspector({
               onChange={(e) => onChange({ safeAreaBottomPx: parseInt(e.target.value, 10) || 0 })}
               data-testid="fomo-safe-bottom-input"
             />
-            <div className="muted" style={{ fontSize: 11, marginTop: 4 }}>
+            <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
               Prevents toasts from overlapping sticky bottom add-to-cart bars and floating WhatsApp buttons. Default: 76px.
             </div>
           </div>
@@ -2050,7 +2050,7 @@ function FomoInspector({
             onChange={(e) => onChange({ intervalSec: parseInt(e.target.value, 10) || 4 })}
             data-testid="fomo-interval-input"
           />
-          <div className="muted" style={{ fontSize: 11, marginTop: 4 }}>
+          <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
             Time to pause between rotating to the next customer purchase notification.
           </div>
         </div>
@@ -2118,7 +2118,7 @@ function FomoInspector({
           <div className="bld-fomo-widget-item">
             <div>
               <div style={{ fontSize: 12, fontWeight: 600 }}>🔥 Live Visitors Badge</div>
-              <div className="muted" style={{ fontSize: 11 }}>Shopper count &amp; live cart interest indicator</div>
+              <div className="muted" style={{ fontSize: 12 }}>Shopper count &amp; live cart interest indicator</div>
             </div>
             <button
               type="button"
@@ -2135,7 +2135,7 @@ function FomoInspector({
           <div className="bld-fomo-widget-item">
             <div>
               <div style={{ fontSize: 12, fontWeight: 600 }}>⚡ Stock Scarcity Urgency</div>
-              <div className="muted" style={{ fontSize: 11 }}>Low stock countdown bar &amp; progress gauge</div>
+              <div className="muted" style={{ fontSize: 12 }}>Low stock countdown bar &amp; progress gauge</div>
             </div>
             <button
               type="button"
@@ -2976,16 +2976,16 @@ export function Builder(props: Props) {
                 <span className="bld-glyph" aria-hidden>{sectionGlyph(s.type)}</span>
                 <span style={{ display: "inline-flex", flexDirection: "column", minWidth: 0, flex: 1, gap: 1 }}>
                   <b style={{ fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.label || def?.label || s.type}</b>
-                  {s.label && <span style={{ fontSize: 10, color: "var(--ink-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{def?.label}</span>}
+                  {s.label && <span style={{ fontSize: 12, color: "var(--ink-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{def?.label}</span>}
                 </span>
-                <span className="pill grey" style={{ fontSize: 9, padding: "1px 4px", opacity: 0.8 }}>#{origIdx + 1}</span>
-                {s.style?.anchorId && <span className="pill grey" style={{ fontSize: 9, padding: "1px 4px" }}>#{s.style.anchorId}</span>}
-                {s.style?.animation && s.style.animation !== "none" && <span className="pill blue" style={{ fontSize: 9, padding: "1px 4px" }} title={`Entrance: ${s.style.animation}`}>✦ {s.style.animation}</span>}
-                {s.style?.hideOn === "mobile" && <span className="pill blue" style={{ fontSize: 9, padding: "1px 4px" }} title="Visible on desktop only">Desktop</span>}
-                {s.style?.hideOn === "desktop" && <span className="pill purple" style={{ fontSize: 9, padding: "1px 4px" }} title="Visible on mobile phones only">Mobile</span>}
-                {s.style?.bgPattern && s.style.bgPattern !== "none" && <span className="pill blue" style={{ fontSize: 9, padding: "1px 4px" }} title={`Pattern: ${s.style.bgPattern}`}>▦ {s.style.bgPattern}</span>}
-                {s.style?.mobile && <span className="pill green" style={{ fontSize: 9, padding: "1px 4px" }} title="Has custom mobile overrides">📱 Mobile</span>}
-                {s.disabled && <span className="pill grey" style={{ fontSize: 9, padding: "1px 4px" }}>Hidden</span>}
+                <span className="pill grey" style={{ fontSize: 12, padding: "1px 4px", opacity: 0.8 }}>#{origIdx + 1}</span>
+                {s.style?.anchorId && <span className="pill grey" style={{ fontSize: 12, padding: "1px 4px" }}>#{s.style.anchorId}</span>}
+                {s.style?.animation && s.style.animation !== "none" && <span className="pill blue" style={{ fontSize: 12, padding: "1px 4px" }} title={`Entrance: ${s.style.animation}`}>✦ {s.style.animation}</span>}
+                {s.style?.hideOn === "mobile" && <span className="pill blue" style={{ fontSize: 12, padding: "1px 4px" }} title="Visible on desktop only">Desktop</span>}
+                {s.style?.hideOn === "desktop" && <span className="pill purple" style={{ fontSize: 12, padding: "1px 4px" }} title="Visible on mobile phones only">Mobile</span>}
+                {s.style?.bgPattern && s.style.bgPattern !== "none" && <span className="pill blue" style={{ fontSize: 12, padding: "1px 4px" }} title={`Pattern: ${s.style.bgPattern}`}>▦ {s.style.bgPattern}</span>}
+                {s.style?.mobile && <span className="pill green" style={{ fontSize: 12, padding: "1px 4px" }} title="Has custom mobile overrides">📱 Mobile</span>}
+                {s.disabled && <span className="pill grey" style={{ fontSize: 12, padding: "1px 4px" }}>Hidden</span>}
               </button>
               {!locked && (
                 <span className="bld-acts" style={{ position: "relative" }}>
@@ -3127,13 +3127,13 @@ export function Builder(props: Props) {
                 <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {current.label || currentDef.label}
                 </h2>
-                <span className="pill grey" style={{ fontSize: 10, padding: "1px 5px" }}>#{currentIndex + 1}</span>
+                <span className="pill grey" style={{ fontSize: 12, padding: "1px 5px" }}>#{currentIndex + 1}</span>
                 {current.style?.anchorId && (
-                  <span className="pill grey" style={{ fontSize: 10, padding: "1px 5px" }}>#{current.style.anchorId}</span>
+                  <span className="pill grey" style={{ fontSize: 12, padding: "1px 5px" }}>#{current.style.anchorId}</span>
                 )}
               </div>
               {current.label && (
-                <span className="muted" style={{ fontSize: 11, display: "block" }}>{currentDef.label}</span>
+                <span className="muted" style={{ fontSize: 12, display: "block" }}>{currentDef.label}</span>
               )}
             </div>
           </div>
@@ -3202,7 +3202,7 @@ export function Builder(props: Props) {
             <button
               type="button"
               className="btn btn-secondary btn-sm"
-              style={{ height: 28, padding: "0 6px", fontSize: 11 }}
+              style={{ height: 28, padding: "0 6px", fontSize: 12 }}
               disabled={locked}
               onClick={() => patchLabel(current.id, undefined)}
               title="Reset nickname"
@@ -3213,7 +3213,7 @@ export function Builder(props: Props) {
           {!locked && page.sections.length > 1 && (
             <select
               className="select"
-              style={{ maxWidth: 115, height: 28, fontSize: 11, padding: "2px 6px" }}
+              style={{ maxWidth: 115, height: 28, fontSize: 12, padding: "2px 6px" }}
               value={currentIndex}
               onChange={(e) => moveTo(current.id, Number(e.target.value))}
               title="Quick jump to section position"
@@ -3586,7 +3586,7 @@ export function Builder(props: Props) {
                         <button
                           type="button"
                           className="btn btn-secondary btn-sm"
-                          style={{ fontSize: 11, padding: "2px 8px" }}
+                          style={{ fontSize: 12, padding: "2px 8px" }}
                           onClick={() => setLibrary(true)}
                           title="Open expanded gallery modal"
                         >
@@ -3608,7 +3608,7 @@ export function Builder(props: Props) {
                         <button
                           type="button"
                           className={`btn btn-sm ${libraryTab === "components" ? "btn-primary" : "btn-secondary"}`}
-                          style={{ flex: 1, fontSize: 11 }}
+                          style={{ flex: 1, fontSize: 12 }}
                           onClick={() => setLibraryTab("components")}
                         >
                           Blocks ({defs.length})
@@ -3616,7 +3616,7 @@ export function Builder(props: Props) {
                         <button
                           type="button"
                           className={`btn btn-sm ${libraryTab === "patterns" ? "btn-primary" : "btn-secondary"}`}
-                          style={{ flex: 1, fontSize: 11 }}
+                          style={{ flex: 1, fontSize: 12 }}
                           onClick={() => setLibraryTab("patterns")}
                         >
                           Patterns ({SECTION_PATTERNS.length})
@@ -3644,7 +3644,7 @@ export function Builder(props: Props) {
                                 <span className="bld-glyph">{sectionGlyph(d.type)}</span>
                                 <div style={{ minWidth: 0, flex: 1 }}>
                                   <b style={{ fontSize: 13, display: "block" }}>{d.label}</b>
-                                  <span style={{ fontSize: 11, display: "block", color: "var(--ink-3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{d.description}</span>
+                                  <span style={{ fontSize: 12, display: "block", color: "var(--ink-3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{d.description}</span>
                                 </div>
                                 <span style={{ color: "var(--brand)", fontWeight: 700, fontSize: 12 }}>+</span>
                               </div>
@@ -3673,7 +3673,7 @@ export function Builder(props: Props) {
                                 <span className="bld-glyph">⭐</span>
                                 <div style={{ minWidth: 0, flex: 1 }}>
                                   <b style={{ fontSize: 13, display: "block" }}>{pat.title}</b>
-                                  <span style={{ fontSize: 11, display: "block", color: "var(--ink-3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pat.description}</span>
+                                  <span style={{ fontSize: 12, display: "block", color: "var(--ink-3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pat.description}</span>
                                 </div>
                                 <span style={{ color: "var(--brand)", fontWeight: 700, fontSize: 12 }}>+</span>
                               </div>
@@ -4200,7 +4200,7 @@ export function Builder(props: Props) {
                     <span className="bld-card-txt">
                       <span className="row" style={{ gap: 6, alignItems: "center", justifyContent: "space-between" }}>
                         <b>{d.label}</b>
-                        {isRecommended && <span className="pill ok" style={{ fontSize: 10, padding: "1px 5px", lineHeight: "14px" }}>Recommended</span>}
+                        {isRecommended && <span className="pill ok" style={{ fontSize: 12, padding: "1px 5px", lineHeight: "14px" }}>Recommended</span>}
                       </span>
                       <span>{d.description}</span>
                       {d.max && count(d.type) >= d.max && <em>Already on the page</em>}

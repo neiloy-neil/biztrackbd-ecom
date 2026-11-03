@@ -99,13 +99,13 @@ export function TemplateSwitcher({
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
               <span style={{ fontWeight: 700, fontSize: 13.5 }}>{activeTemplate.name}</span>
-              <span className="pill ok" style={{ fontSize: 11, padding: "1px 6px" }}>
+              <span className="pill ok" style={{ fontSize: 12, padding: "1px 6px" }}>
                 Active
               </span>
               {activeTemplate.vertical && (
                 <span
                   style={{
-                    fontSize: 11,
+                    fontSize: 12,
                     background: "rgba(0,0,0,0.06)",
                     padding: "1px 6px",
                     borderRadius: 4,
@@ -193,11 +193,11 @@ export function TemplateSwitcher({
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                     <b>{t.name}</b>
-                    {current && <span className="pill ok" style={{ fontSize: 11 }}>Current</span>}
+                    {current && <span className="pill ok" style={{ fontSize: 12 }}>Current</span>}
                     {t.vertical && (
                       <span
                         style={{
-                          fontSize: 10.5,
+                          fontSize: 12,
                           background: "rgba(0,0,0,0.06)",
                           padding: "1px 5px",
                           borderRadius: 4,
@@ -227,7 +227,7 @@ export function TemplateSwitcher({
                             <span>Home page</span>
                           </label>
                           {t.customPages && t.customPages.length > 0 && (
-                            <span className="muted" style={{ fontSize: 11.5, alignSelf: "center" }}>
+                            <span className="muted" style={{ fontSize: 12, alignSelf: "center" }}>
                               + Includes {t.customPages.map((cp) => cp.title).join(", ")}
                             </span>
                           )}

@@ -239,7 +239,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
             <BoltIcon width={15} height={15} style={{ color: "var(--brand)" }} />
             <span>POS Register</span>
             {activeModules["pos_barcode"] && (
-              <span className="pill good" style={{ padding: "1px 6px", fontSize: 10 }}>ACTIVE</span>
+              <span className="pill good" style={{ padding: "1px 6px", fontSize: 12 }}>ACTIVE</span>
             )}
           </Link>
           <Link
@@ -251,7 +251,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
             <BoxIcon width={15} height={15} style={{ color: "var(--info)" }} />
             <span>Courier Dispatch</span>
             {d.toPack.count > 0 && (
-              <span className="pill warn" style={{ padding: "1px 6px", fontSize: 10 }}>{d.toPack.count}</span>
+              <span className="pill warn" style={{ padding: "1px 6px", fontSize: 12 }}>{d.toPack.count}</span>
             )}
           </Link>
           <Link
@@ -552,7 +552,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                   {d.courierHealth.courierBreakdown.map((c) => (
                     <div key={c.courier} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
                       <span style={{ fontWeight: 700 }}>{c.courier}</span>
-                      <span className="chip" style={{ fontSize: 11, padding: "2px 6px" }}>{c.count} parcels ({c.percentage}%)</span>
+                      <span className="chip" style={{ fontSize: 12, padding: "2px 6px" }}>{c.count} parcels ({c.percentage}%)</span>
                     </div>
                   ))}
                 </div>
@@ -680,7 +680,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                   <BoltIcon width={16} height={16} style={{ color: "var(--brand)" }} />
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 600 }}>POS & Barcode Register</div>
-                    <div className="muted" style={{ fontSize: 11.5 }}>Retail counter sales</div>
+                    <div className="muted" style={{ fontSize: 12 }}>Retail counter sales</div>
                   </div>
                 </div>
                 <Link href="/pos" className="btn btn-sm btn-secondary" prefetch={false}>Open</Link>
@@ -693,7 +693,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                   </svg>
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 600 }}>Marketing Content Studio</div>
-                    <div className="muted" style={{ fontSize: 11.5 }}>Copywriter & Address Parsing</div>
+                    <div className="muted" style={{ fontSize: 12 }}>Copywriter & Address Parsing</div>
                   </div>
                 </div>
                 <Link href="/marketing/ai" className="btn btn-sm btn-secondary" prefetch={false}>Launch</Link>
@@ -704,7 +704,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                   <SearchIcon width={16} height={16} style={{ color: "var(--danger)" }} />
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 600 }}>Courier Fraud Shield</div>
-                    <div className="muted" style={{ fontSize: 11.5 }}>5-network COD trust score</div>
+                    <div className="muted" style={{ fontSize: 12 }}>5-network COD trust score</div>
                   </div>
                 </div>
                 <Link href="/fraud" className="btn btn-sm btn-secondary" prefetch={false}>Check</Link>
@@ -715,7 +715,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                   <TagIcon width={16} height={16} style={{ color: "var(--success)" }} />
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 600 }}>Campaigns & SMS</div>
-                    <div className="muted" style={{ fontSize: 11.5 }}>Broadcast & offers</div>
+                    <div className="muted" style={{ fontSize: 12 }}>Broadcast & offers</div>
                   </div>
                 </div>
                 <Link href="/marketing/campaigns" className="btn btn-sm btn-secondary" prefetch={false}>Manage</Link>

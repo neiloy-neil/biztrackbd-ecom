@@ -549,7 +549,7 @@ export function BundlesManagerClient({
                       <td>
                         <div style={{ fontWeight: 600, fontSize: 14 }}>{b.title}</div>
                         {b.titleBn && <div style={{ fontSize: 12, color: "var(--ink-2, #6b7280)" }}>{b.titleBn}</div>}
-                        <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>slug: /{b.slug}</div>
+                        <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>slug: /{b.slug}</div>
                       </td>
                       <td>
                         <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
@@ -557,7 +557,7 @@ export function BundlesManagerClient({
                             <span
                               key={it.id}
                               className="pill grey"
-                              style={{ fontSize: 11, display: "inline-flex", alignItems: "center", gap: 4 }}
+                              style={{ fontSize: 12, display: "inline-flex", alignItems: "center", gap: 4 }}
                             >
                               {it.quantity > 1 ? `${it.quantity}x ` : ""}
                               {it.product.title}
@@ -575,7 +575,7 @@ export function BundlesManagerClient({
                         </span>
                       </td>
                       <td>
-                        <span className={`pill ${b.allowCoupon ? "blue" : "grey"}`} style={{ fontSize: 11 }}>
+                        <span className={`pill ${b.allowCoupon ? "blue" : "grey"}`} style={{ fontSize: 12 }}>
                           {b.allowCoupon ? "Allowed" : "Protected (No Stacking)"}
                         </span>
                       </td>
@@ -654,7 +654,7 @@ export function BundlesManagerClient({
                     <tr key={b.id} data-testid={`bump-row-${b.id}`}>
                       <td>
                         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <span style={{ fontSize: 11, color: "#d97706", fontWeight: 700 }}>
+                          <span style={{ fontSize: 12, color: "#d97706", fontWeight: 700 }}>
                             {b.highlightText || "OFFER"}
                           </span>
                         </div>
@@ -676,7 +676,7 @@ export function BundlesManagerClient({
                         </del>
                       </td>
                       <td>
-                        <span className="pill grey" style={{ fontSize: 11 }}>
+                        <span className="pill grey" style={{ fontSize: 12 }}>
                           {b.triggerType === "GLOBAL" ? "All Checkouts (Global)" : b.triggerType}
                         </span>
                       </td>
@@ -1288,7 +1288,7 @@ export function BundlesManagerClient({
                       {bumpHl || "SPECIAL OFFER"}
                     </span>
                     {selectedBumpVariant && Number(selectedBumpVariant.price) > bumpPrice && (
-                      <span className="pill green" style={{ fontSize: 10, padding: "2px 6px", fontWeight: 700 }}>
+                      <span className="pill green" style={{ fontSize: 12, padding: "2px 6px", fontWeight: 700 }}>
                         SAVE {taka(Number(selectedBumpVariant.price) - bumpPrice)}!
                       </span>
                     )}

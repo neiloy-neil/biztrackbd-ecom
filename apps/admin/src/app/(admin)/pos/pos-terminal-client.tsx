@@ -721,7 +721,7 @@ export function PosTerminalClient({ initialData }: Props) {
           <div>
             <div style={{ fontWeight: 700, fontSize: 15, display: "flex", alignItems: "center", gap: 8 }}>
               <span>{initialData.register.name}</span>
-              <span className="pill green" style={{ fontSize: 11, padding: "1px 6px" }}>
+              <span className="pill green" style={{ fontSize: 12, padding: "1px 6px" }}>
                 Shift Active
               </span>
             </div>
@@ -865,7 +865,7 @@ export function PosTerminalClient({ initialData }: Props) {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          fontSize: 11,
+                          fontSize: 12,
                           fontWeight: 700,
                         }}
                       >
@@ -884,7 +884,7 @@ export function PosTerminalClient({ initialData }: Props) {
                         {p.productTitle}
                       </div>
                       {p.variantTitle && (
-                        <div style={{ fontSize: 11, color: "var(--ink-2, #6b7280)", margin: "2px 0" }}>
+                        <div style={{ fontSize: 12, color: "var(--ink-2, #6b7280)", margin: "2px 0" }}>
                           {p.variantTitle}
                         </div>
                       )}
@@ -893,7 +893,7 @@ export function PosTerminalClient({ initialData }: Props) {
                       <span style={{ fontWeight: 700, fontSize: 13, color: "var(--brand)" }}>
                         {taka(p.price)}
                       </span>
-                      <span style={{ fontSize: 10.5, color: p.stockQuantity <= 5 ? "#d97706" : "#6b7280" }}>
+                      <span style={{ fontSize: 12, color: p.stockQuantity <= 5 ? "#d97706" : "#6b7280" }}>
                         {p.stockQuantity} left
                       </span>
                     </div>
@@ -910,7 +910,7 @@ export function PosTerminalClient({ initialData }: Props) {
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-2, #6b7280)" }}>CUSTOMER (ওয়াক-ইন)</span>
                 {customerLoyalty && (
-                  <span className="pill green" style={{ fontSize: 10 }}>
+                  <span className="pill green" style={{ fontSize: 12 }}>
                     VIP {customerLoyalty.tier} · {customerLoyalty.points} pts
                   </span>
                 )}
@@ -959,7 +959,7 @@ export function PosTerminalClient({ initialData }: Props) {
                         <div style={{ fontSize: 13, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                           {item.title}
                         </div>
-                        <div style={{ fontSize: 11.5, color: "var(--ink-2, #6b7280)" }}>
+                        <div style={{ fontSize: 12, color: "var(--ink-2, #6b7280)" }}>
                           {item.variantTitle && `${item.variantTitle} · `}
                           {taka(item.price)}
                         </div>
@@ -1036,7 +1036,7 @@ export function PosTerminalClient({ initialData }: Props) {
                   <button
                     type="button"
                     className="link"
-                    style={{ fontSize: 11, border: "none", background: "none", cursor: "pointer", padding: 0 }}
+                    style={{ fontSize: 12, border: "none", background: "none", cursor: "pointer", padding: 0 }}
                     onClick={() => setShowDiscountModal(true)}
                   >
                     [Edit]
@@ -1332,14 +1332,14 @@ export function PosTerminalClient({ initialData }: Props) {
             >
               <div style={{ textAlign: "center", marginBottom: 12 }}>
                 <div style={{ fontSize: 16, fontWeight: 800 }}>{activeReceipt.storeName}</div>
-                {activeReceipt.storeAddress && <div style={{ fontSize: 11 }}>{activeReceipt.storeAddress}</div>}
-                {activeReceipt.storePhone && <div style={{ fontSize: 11 }}>Phone: {activeReceipt.storePhone}</div>}
+                {activeReceipt.storeAddress && <div style={{ fontSize: 12 }}>{activeReceipt.storeAddress}</div>}
+                {activeReceipt.storePhone && <div style={{ fontSize: 12 }}>Phone: {activeReceipt.storePhone}</div>}
                 <div style={{ margin: "6px 0", borderTop: "1px dashed #9ca3af" }} />
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
                   <span>Inv: #{activeReceipt.orderNumber}</span>
                   <span>{new Date(activeReceipt.createdAt).toLocaleTimeString()}</span>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
                   <span>Cashier: {activeReceipt.cashierName}</span>
                   <span>Cust: {activeReceipt.customerName}</span>
                 </div>
@@ -1352,8 +1352,8 @@ export function PosTerminalClient({ initialData }: Props) {
                   <div key={idx} style={{ display: "flex", justifyContent: "space-between" }}>
                     <div style={{ flex: 1, paddingRight: 6 }}>
                       <div>{it.title}</div>
-                      {it.variantTitle && <div style={{ fontSize: 10, color: "#666" }}>{it.variantTitle}</div>}
-                      <div style={{ fontSize: 10, color: "#666" }}>
+                      {it.variantTitle && <div style={{ fontSize: 12, color: "#666" }}>{it.variantTitle}</div>}
+                      <div style={{ fontSize: 12, color: "#666" }}>
                         {it.quantity} × {it.unitPrice}
                       </div>
                     </div>
@@ -1381,13 +1381,13 @@ export function PosTerminalClient({ initialData }: Props) {
               </div>
 
               {activeReceipt.tenderedCash > 0 && (
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
                   <span>Cash Tendered:</span>
                   <span>৳{activeReceipt.tenderedCash}</span>
                 </div>
               )}
               {activeReceipt.changeDue > 0 && (
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, fontWeight: 700 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 700 }}>
                   <span>Change Return:</span>
                   <span>৳{activeReceipt.changeDue}</span>
                 </div>
@@ -1399,7 +1399,7 @@ export function PosTerminalClient({ initialData }: Props) {
                   style={{ display: "flex", justifyContent: "center" }}
                   dangerouslySetInnerHTML={{ __html: safeHtml(activeReceipt.barcodeSvg) }}
                 />
-                <div style={{ fontSize: 10, color: "#666", marginTop: 4 }}>
+                <div style={{ fontSize: 12, color: "#666", marginTop: 4 }}>
                   Thank you for shopping with us!
                 </div>
               </div>

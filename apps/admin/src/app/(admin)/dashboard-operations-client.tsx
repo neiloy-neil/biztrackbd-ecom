@@ -253,7 +253,7 @@ export function DashboardOperationsClient({
               <div style={{ fontWeight: 700, fontSize: 13.5, letterSpacing: "0.02em" }}>
                 LIVE OPERATIONS PULSE
               </div>
-              <div style={{ fontSize: 11, color: "#64748B" }} suppressHydrationWarning>
+              <div style={{ fontSize: 12, color: "#64748B" }} suppressHydrationWarning>
                 Updated {mounted ? formatBDTime(lastRefreshedAt) : "Just now"} ·{" "}
                 <button
                   type="button"
@@ -264,8 +264,8 @@ export function DashboardOperationsClient({
                     color: autoRefresh ? "#4ADE80" : "#CBD5E1",
                     textDecoration: "underline",
                     cursor: "pointer",
-                    padding: 0,
-                    fontSize: 11,
+                    padding: "8px 0",
+                    fontSize: 12,
                     fontWeight: 600,
                   }}
                 >
@@ -278,7 +278,7 @@ export function DashboardOperationsClient({
           {/* Right: Key Telemetry Metrics */}
           <div style={{ display: "flex", gap: 20, flexWrap: "wrap", alignItems: "center" }}>
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 11, color: "#64748B", textTransform: "uppercase" }}>
+              <div style={{ fontSize: 12, color: "#64748B", textTransform: "uppercase" }}>
                 Today's AOV
               </div>
               <div style={{ fontSize: 16, fontWeight: 800, color: "#F8FAFC" }}>
@@ -286,7 +286,7 @@ export function DashboardOperationsClient({
                 {telemetry.aovYesterday > 0 && (
                   <span
                     style={{
-                      fontSize: 11,
+                      fontSize: 12,
                       marginLeft: 4,
                       color: telemetry.aovToday >= telemetry.aovYesterday ? "#4ADE80" : "#F87171",
                     }}
@@ -299,7 +299,7 @@ export function DashboardOperationsClient({
             </div>
 
             <div style={{ textAlign: "right", borderLeft: "1px solid #334155", paddingLeft: 16 }}>
-              <div style={{ fontSize: 11, color: "#64748B", textTransform: "uppercase" }}>
+              <div style={{ fontSize: 12, color: "#64748B", textTransform: "uppercase" }}>
                 COD Cash-at-Risk
               </div>
               <div
@@ -311,7 +311,7 @@ export function DashboardOperationsClient({
               >
                 ৳ {telemetry.cashAtRisk.toLocaleString("en-IN")}
                 {telemetry.highRiskOrdersCount > 0 && (
-                  <span style={{ fontSize: 11, marginLeft: 4, color: "#EF4444" }}>
+                  <span style={{ fontSize: 12, marginLeft: 4, color: "#EF4444" }}>
                     ({telemetry.highRiskOrdersCount} flagged)
                   </span>
                 )}
@@ -319,7 +319,7 @@ export function DashboardOperationsClient({
             </div>
 
             <div style={{ textAlign: "right", borderLeft: "1px solid #334155", paddingLeft: 16 }}>
-              <div style={{ fontSize: 11, color: "#64748B", textTransform: "uppercase" }}>
+              <div style={{ fontSize: 12, color: "#64748B", textTransform: "uppercase" }}>
                 Live Conversion
               </div>
               <div style={{ fontSize: 16, fontWeight: 800, color: "#38BDF8" }}>
@@ -366,7 +366,7 @@ export function DashboardOperationsClient({
               <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>
                 Courier Fraud Radar & Check
               </h3>
-              <span className="muted" style={{ fontSize: 11.5 }}>
+              <span className="muted" style={{ fontSize: 12 }}>
                 5-Courier delivery records & RTO risk detection
               </span>
             </div>
@@ -377,7 +377,7 @@ export function DashboardOperationsClient({
                 type="button"
                 onClick={() => setActiveFraudTab("WATCHLIST")}
                 style={{
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: 700,
                   padding: "4px 8px",
                   borderRadius: 6,
@@ -393,7 +393,7 @@ export function DashboardOperationsClient({
                 type="button"
                 onClick={() => setActiveFraudTab("MANUAL_CHECK")}
                 style={{
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: 700,
                   padding: "4px 8px",
                   borderRadius: 6,
@@ -451,7 +451,7 @@ export function DashboardOperationsClient({
                             <span style={{ fontWeight: 600, fontSize: 12.5 }}>
                               {item.customerName}
                             </span>
-                            <div className="muted" style={{ fontSize: 11.5 }}>
+                            <div className="muted" style={{ fontSize: 12 }}>
                               {item.customerPhone} {item.district ? `· ${item.district}` : ""} · ৳{" "}
                               {item.totalAmount.toLocaleString("en-IN")}
                             </div>
@@ -460,7 +460,7 @@ export function DashboardOperationsClient({
                           <div style={{ textAlign: "right" }}>
                             <span
                               className={`pill ${isHigh ? "bad" : "warn"}`}
-                              style={{ fontSize: 10, padding: "2px 6px" }}
+                              style={{ fontSize: 12, padding: "2px 6px" }}
                             >
                               {item.fraudReview === "HELD" ? "HELD" : `${item.fraudRiskLevel} RISK`} ·{" "}
                               {item.fraudTrustScore}/100
@@ -488,7 +488,7 @@ export function DashboardOperationsClient({
                             rel="noopener noreferrer"
                             className="btn btn-secondary btn-sm"
                             style={{
-                              fontSize: 10.5,
+                              fontSize: 12,
                               padding: "2px 8px",
                               background: "#25D366",
                               color: "#FFF",
@@ -504,7 +504,7 @@ export function DashboardOperationsClient({
                               onClick={() => handleReleaseOrder(item.id, item.orderNumber)}
                               disabled={opBusy !== null}
                               className="btn btn-secondary btn-sm"
-                              style={{ fontSize: 10.5, padding: "2px 8px" }}
+                              style={{ fontSize: 12, padding: "2px 8px" }}
                             >
                               Approve COD
                             </button>
@@ -514,7 +514,7 @@ export function DashboardOperationsClient({
                               onClick={() => handleHoldOrder(item.id, item.orderNumber)}
                               disabled={opBusy !== null}
                               className="btn btn-secondary btn-sm"
-                              style={{ fontSize: 10.5, padding: "2px 8px", color: "#B91C1C" }}
+                              style={{ fontSize: 12, padding: "2px 8px", color: "#B91C1C" }}
                             >
                               Hold Order
                             </button>
@@ -523,7 +523,7 @@ export function DashboardOperationsClient({
                           <a
                             href={`tel:${item.customerPhone}`}
                             className="btn btn-secondary btn-sm"
-                            style={{ fontSize: 10.5, padding: "2px 8px" }}
+                            style={{ fontSize: 12, padding: "2px 8px" }}
                           >
                             Call
                           </a>
@@ -531,7 +531,7 @@ export function DashboardOperationsClient({
                           <Link
                             href={`/fraud?tab=check&phone=${encodeURIComponent(item.customerPhone)}`}
                             className="btn btn-secondary btn-sm"
-                            style={{ fontSize: 10.5, padding: "2px 8px" }}
+                            style={{ fontSize: 12, padding: "2px 8px" }}
                           >
                             5-Courier Dossier →
                           </Link>
@@ -603,7 +603,7 @@ export function DashboardOperationsClient({
                           ? "warn"
                           : "ok"
                       }`}
-                      style={{ fontSize: 11, padding: "2px 8px" }}
+                      style={{ fontSize: 12, padding: "2px 8px" }}
                     >
                       Score: {lookupResult.unifiedScore}/100 ({lookupResult.unifiedLevel} RISK)
                     </span>
@@ -622,7 +622,7 @@ export function DashboardOperationsClient({
                     </div>
                   )}
 
-                  <div style={{ fontSize: 11.5, color: "#475569", marginBottom: 10 }}>
+                  <div style={{ fontSize: 12, color: "#475569", marginBottom: 10 }}>
                     <b>In your store:</b> {lookupResult.here.orders} orders (
                     {lookupResult.here.delivered} delivered, {lookupResult.here.returned} returned)
                   </div>
@@ -659,7 +659,7 @@ export function DashboardOperationsClient({
                     <Link
                       href={`/fraud?tab=check&phone=${encodeURIComponent(lookupResult.phone)}`}
                       className="link"
-                      style={{ fontSize: 11.5 }}
+                      style={{ fontSize: 12 }}
                     >
                       View full 5-courier network breakdown →
                     </Link>
@@ -695,7 +695,7 @@ export function DashboardOperationsClient({
               <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>
                 1-Click Bulk Dispatch Queue
               </h3>
-              <span className="muted" style={{ fontSize: 11.5 }}>
+              <span className="muted" style={{ fontSize: 12 }}>
                 {dispatchQueue.length} orders ready to pack and book
               </span>
             </div>
@@ -750,7 +750,7 @@ export function DashboardOperationsClient({
                     className="input"
                     value={chosenCourier}
                     onChange={(e) => setChosenCourier(e.target.value)}
-                    style={{ fontSize: 11.5, padding: "4px 8px", width: "auto" }}
+                    style={{ fontSize: 12, padding: "4px 8px", width: "auto" }}
                   >
                     {connectedCouriers.map((c) => (
                       <option key={c.provider} value={c.provider}>
@@ -766,7 +766,7 @@ export function DashboardOperationsClient({
                     className="input"
                     value={chosenWeight}
                     onChange={(e) => setChosenWeight(e.target.value)}
-                    style={{ fontSize: 11.5, padding: "4px 8px", width: "auto" }}
+                    style={{ fontSize: 12, padding: "4px 8px", width: "auto" }}
                   >
                     <option value="0.5">0.5 kg</option>
                     <option value="1">1.0 kg</option>
@@ -779,7 +779,7 @@ export function DashboardOperationsClient({
                     onClick={handleExecuteBulkBooking}
                     disabled={!canEdit || isBulkBooking || selectedOrderIds.length === 0}
                     className="btn btn-primary btn-sm"
-                    style={{ fontSize: 11.5, fontWeight: 700, padding: "4px 12px" }}
+                    style={{ fontSize: 12, fontWeight: 700, padding: "4px 12px" }}
                   >
                     {isBulkBooking ? "Booking…" : `Book (${selectedOrderIds.length})`}
                   </button>
@@ -826,13 +826,13 @@ export function DashboardOperationsClient({
                             ৳ {ord.totalAmount.toLocaleString("en-IN")}
                           </span>
                         </div>
-                        <div style={{ fontSize: 11.5, color: "#334155" }}>
+                        <div style={{ fontSize: 12, color: "#334155" }}>
                           {ord.customerName} · {ord.shippingDistrict || "Dhaka"}
                         </div>
                         <div
                           className="muted"
                           style={{
-                            fontSize: 10.5,
+                            fontSize: 12,
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -896,7 +896,7 @@ export function DashboardOperationsClient({
                   border: "1px solid #CBD5E1",
                   borderRadius: 6,
                   padding: "4px 8px",
-                  fontSize: 11.5,
+                  fontSize: 12,
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
@@ -912,7 +912,7 @@ export function DashboardOperationsClient({
                 />
                 <span style={{ fontWeight: 700 }}>#{ev.orderNumber}</span>
                 <span style={{ color: "#334155" }}>{ev.message}</span>
-                <span style={{ color: "#64748B", fontSize: 10 }} suppressHydrationWarning>
+                <span style={{ color: "#64748B", fontSize: 12 }} suppressHydrationWarning>
                   {formatBDTime(ev.createdAt)}
                 </span>
               </div>

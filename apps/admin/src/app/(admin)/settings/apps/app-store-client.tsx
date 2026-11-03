@@ -455,14 +455,14 @@ export function AppStoreClient({
                   {/* Badge & Tier */}
                   <div className="row" style={{ gap: 6, marginBottom: 16 }}>
                     {app.badge && (
-                      <span className="pill grey" style={{ fontSize: 11, fontWeight: 600 }}>
+                      <span className="pill grey" style={{ fontSize: 12, fontWeight: 600 }}>
                         {app.badge}
                       </span>
                     )}
                     <span
                       className="pill grey"
                       style={{
-                        fontSize: 11,
+                        fontSize: 12,
                         background: app.tier === "INCLUDED" ? "color-mix(in srgb, var(--success) 10%, transparent)" : "color-mix(in srgb, var(--gold-dark) 10%, transparent)",
                         color: app.tier === "INCLUDED" ? "var(--success)" : "var(--gold-dark)",
                       }}
@@ -671,7 +671,7 @@ export function AppStoreClient({
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
                       <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 14 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                          <span style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "#1E293B" }}>
+                          <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "#1E293B" }}>
                             Dynamic XML Sitemap
                           </span>
                           <a
@@ -704,14 +704,14 @@ export function AppStoreClient({
                             {copiedSitemap ? "Copied! ✓" : "Copy"}
                           </button>
                         </div>
-                        <span className="muted" style={{ fontSize: 11, display: "block", marginTop: 4 }}>
+                        <span className="muted" style={{ fontSize: 12, display: "block", marginTop: 4 }}>
                           Includes products, images, categories, and landing pages.
                         </span>
                       </div>
 
                       <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 14 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                          <span style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "#1E293B" }}>
+                          <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "#1E293B" }}>
                             Robots.txt Directives
                           </span>
                           <a
@@ -744,7 +744,7 @@ export function AppStoreClient({
                             {copiedRobots ? "Copied! ✓" : "Copy"}
                           </button>
                         </div>
-                        <span className="muted" style={{ fontSize: 11, display: "block", marginTop: 4 }}>
+                        <span className="muted" style={{ fontSize: 12, display: "block", marginTop: 4 }}>
                           Crawler allow/disallow rules pointing to your sitemap.
                         </span>
                       </div>
@@ -1003,7 +1003,7 @@ export function AppStoreClient({
                             {copiedWebhook ? "Copied! ✓" : "Copy"}
                           </button>
                         </div>
-                        <span className="muted" style={{ fontSize: 11.5, marginTop: 4, display: "block" }}>
+                        <span className="muted" style={{ fontSize: 12, marginTop: 4, display: "block" }}>
                           Paste this in your Steadfast merchant portal under API Webhook settings.
                         </span>
                       </div>
@@ -1627,7 +1627,7 @@ export function AppStoreClient({
                           className="input"
                           style={{ width: "100%", fontSize: 13 }}
                         />
-                        <span className="muted" style={{ fontSize: 11 }}>1.25x points</span>
+                        <span className="muted" style={{ fontSize: 12 }}>1.25x points</span>
                       </div>
                       <div>
                         <label className="label" style={{ fontSize: 12 }}>Gold Min (৳)</label>
@@ -1639,7 +1639,7 @@ export function AppStoreClient({
                           style={{ width: "100%", fontSize: 13 }}
                         />
                         <input type="hidden" name="vipGoldDiscount" value={storeSettings?.vipGoldDiscount ?? 5} />
-                        <span className="muted" style={{ fontSize: 11 }}>1.5x pts + 5% off</span>
+                        <span className="muted" style={{ fontSize: 12 }}>1.5x pts + 5% off</span>
                       </div>
                       <div>
                         <label className="label" style={{ fontSize: 12 }}>Platinum Min (৳)</label>
@@ -1651,7 +1651,7 @@ export function AppStoreClient({
                           style={{ width: "100%", fontSize: 13 }}
                         />
                         <input type="hidden" name="vipPlatinumDiscount" value={storeSettings?.vipPlatinumDiscount ?? 10} />
-                        <span className="muted" style={{ fontSize: 11 }}>2x + 10% + Free Ship</span>
+                        <span className="muted" style={{ fontSize: 12 }}>2x + 10% + Free Ship</span>
                       </div>
                     </div>
                   </div>

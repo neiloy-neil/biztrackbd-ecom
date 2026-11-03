@@ -258,7 +258,7 @@ export function TenantOutreachActions({
             background: stageStyle.bg,
             color: stageStyle.color,
             border: `1px solid ${stageStyle.border}`,
-            fontSize: 11.5,
+            fontSize: 12,
             fontWeight: 700,
             cursor: "pointer",
             whiteSpace: "nowrap",
@@ -384,7 +384,7 @@ export function TenantOutreachActions({
                   <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>
                     WhatsApp {tenantName}
                   </div>
-                  <div style={{ fontSize: 11.5, color: "var(--ink-3)" }}>
+                  <div style={{ fontSize: 12, color: "var(--ink-3)" }}>
                     To: {ownerName || "Merchant"} ({phoneInfo.clean})
                   </div>
                 </div>
@@ -407,7 +407,7 @@ export function TenantOutreachActions({
 
             {/* Template Selector Pills */}
             <div style={{ padding: "12px 18px", borderBottom: "1px solid var(--chip)" }}>
-              <div style={{ fontSize: 11.5, fontWeight: 700, color: "var(--ink-3)", marginBottom: 8 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-3)", marginBottom: 8 }}>
                 SELECT OUTREACH TEMPLATE:
               </div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -438,7 +438,7 @@ export function TenantOutreachActions({
 
             {/* Message Preview Textarea */}
             <div style={{ padding: "14px 18px" }}>
-              <div style={{ fontSize: 11.5, fontWeight: 700, color: "var(--ink-3)", marginBottom: 6 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-3)", marginBottom: 6 }}>
                 MESSAGE PREVIEW (EDITABLE):
               </div>
               <textarea
@@ -471,7 +471,7 @@ export function TenantOutreachActions({
                 justifyContent: "space-between",
               }}
             >
-              <div style={{ fontSize: 11.5, color: "var(--ink-3)" }}>
+              <div style={{ fontSize: 12, color: "var(--ink-3)" }}>
                 Auto-advances to <strong>Contacted</strong>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
@@ -560,7 +560,7 @@ export function TenantOutreachActions({
                 <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>
                   Call Logged: {tenantName}
                 </div>
-                <div style={{ fontSize: 11.5, color: "var(--ink-3)" }}>
+                <div style={{ fontSize: 12, color: "var(--ink-3)" }}>
                   Dialed: +{phoneInfo.international} ({ownerName || "Merchant"})
                 </div>
               </div>
@@ -610,7 +610,7 @@ export function TenantOutreachActions({
                     }}
                   >
                     <span style={{ fontSize: 12.5, fontWeight: 700, color: "var(--ink)" }}>{item.label}</span>
-                    <span style={{ fontSize: 11, color: "var(--ink-3)" }}>{item.desc}</span>
+                    <span style={{ fontSize: 12, color: "var(--ink-3)" }}>{item.desc}</span>
                   </button>
                 ))}
               </div>

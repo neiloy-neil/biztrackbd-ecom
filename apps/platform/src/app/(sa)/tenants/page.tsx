@@ -57,8 +57,9 @@ export default async function Tenants({ searchParams }: { searchParams: Promise<
               type="search"
               name="q"
               defaultValue={q}
+              aria-label="Search tenants, domains and owners"
               placeholder="Search tenants, domains, owners"
-              style={{ border: "none", outline: "none", background: "transparent", fontSize: 13.5, width: "100%", minHeight: 40, color: "var(--ink)" }}
+              style={{ border: "none", outline: "none", background: "transparent", fontSize: 16, width: "100%", minHeight: 40, color: "var(--ink)" }}
             />
           </div>
           <button type="submit" className="btn btn-secondary" style={{ height: 38 }}>Search</button>

@@ -165,7 +165,7 @@ export default async function TicketsPage({
                       {t.subject}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
-                      <span style={{ padding: "2px 9px", borderRadius: 10, fontSize: 11.5, fontWeight: 600, background: pBg, color: pColor }}>
+                      <span style={{ padding: "2px 9px", borderRadius: 10, fontSize: 12, fontWeight: 600, background: pBg, color: pColor }}>
                         {t.priority}
                       </span>
                       <span style={{ fontSize: 12, color: "var(--ink-3)" }}>
@@ -253,7 +253,7 @@ export default async function TicketsPage({
                             background: "var(--chip)",
                             color: "var(--ink-2)",
                             fontWeight: 700,
-                            fontSize: 11,
+                            fontSize: 12,
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",

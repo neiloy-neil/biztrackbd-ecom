@@ -47,7 +47,7 @@ export default async function BlogAdminPage({ searchParams }: { searchParams: Pr
                   <b style={{ flex: 1, fontSize: 14 }}>{p.title}</b>
                   <span
                     style={{
-                      padding: "2px 9px", borderRadius: 10, fontSize: 11.5, fontWeight: 600,
+                      padding: "2px 9px", borderRadius: 10, fontSize: 12, fontWeight: 600,
                       background: live ? "var(--success-bg)" : "var(--bg)", color: live ? "var(--success)" : "var(--ink-3)",
                     }}
                   >
