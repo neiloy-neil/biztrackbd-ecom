@@ -1,6 +1,7 @@
 import { withTenant, type Prisma, type SiteDownload } from "@biztrackbd/db";
 import { z } from "zod";
-import { NotFoundError, ValidationError } from "../errors";
+import { NotFoundError, PlanLimitError, ValidationError } from "../errors";
+import { getEffectivePlan } from "../limits/plan";
 
 export const DOWNLOAD_KINDS = [
   "CV",
@@ -151,11 +152,11 @@ export async function upsertDownload(
       });
     }
 
+    const count = await tx.siteDownload.count({ where: { tenantId } });
+    const { downloads: cap } = await getEffectivePlan(tx);
+    if (cap !== null && count >= cap) throw new PlanLimitError("downloads", cap, count);
     let sortOrder = parsed.sortOrder;
-    if (sortOrder === 0) {
-      const count = await tx.siteDownload.count({ where: { tenantId } });
-      sortOrder = count;
-    }
+    if (sortOrder === 0) sortOrder = count;
 
     return tx.siteDownload.create({
       data: {

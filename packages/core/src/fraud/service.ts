@@ -10,7 +10,7 @@ import {
   FLAG_LABELS, computeUnifiedFraudScore, type CourierFraudStats, type UnifiedFraudReport,
 } from "./assess";
 import { fetchUnifiedCourierFraud, toCourierFraudStats, type ExternalCourierFraudData } from "./courier-api";
-import { lookupTrust, type TrustScore } from "./trust";
+import { lookupTrustForPlan, type TrustScore } from "./trust";
 
 const actorName = (a: StaffActor) => a.name ?? a.email;
 const OPEN = ["PENDING", "CONFIRMED", "PROCESSING"] as const;
@@ -196,7 +196,7 @@ async function lookup(
   courierDetails: ExternalCourierFraudData | null = null
 ): Promise<PhoneLookup> {
   const [network, orders, delivered, returned, cancelled, blocked] = await Promise.all([
-    lookupTrust(tx, phone),
+    lookupTrustForPlan(tx, phone),
     tx.order.count({ where: { customerPhone: phone } }),
     tx.order.count({ where: { customerPhone: phone, status: "DELIVERED" } }),
     tx.order.count({ where: { customerPhone: phone, status: { in: ["RETURNED", "REFUNDED"] } } }),
@@ -273,7 +273,7 @@ export async function refreshOrderFraudReport(tenantId: string, actor: StaffActo
     }
 
     const [trust, storeOrders, storeDelivered, storeReturned, storeCancelled] = await Promise.all([
-      lookupTrust(tx, o.customerPhone),
+      lookupTrustForPlan(tx, o.customerPhone),
       tx.order.count({ where: { customerPhone: o.customerPhone } }),
       tx.order.count({ where: { customerPhone: o.customerPhone, status: "DELIVERED" } }),
       tx.order.count({ where: { customerPhone: o.customerPhone, status: { in: ["RETURNED", "REFUNDED"] } } }),

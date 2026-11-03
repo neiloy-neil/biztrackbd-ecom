@@ -1,4 +1,5 @@
 export { formatBdt, banglaDigits } from "./format";
+export { BrandSymbol, BrandWordmark, BrandLockup } from "./brand";
 export { Button, type ButtonProps } from "./button";
 export {
   PageHeader,

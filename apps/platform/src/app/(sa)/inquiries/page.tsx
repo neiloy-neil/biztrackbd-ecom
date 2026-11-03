@@ -128,7 +128,7 @@ export default async function InquiriesPage({
                   borderRadius: 14,
                   border: item.status === "NEW" ? "1.5px solid var(--brand)" : "1px solid var(--line)",
                   background: "#FFFFFF",
-                  boxShadow: item.status === "NEW" ? "0 4px 16px rgba(91, 79, 232, 0.08)" : "none",
+                  boxShadow: item.status === "NEW" ? "0 4px 16px color-mix(in srgb, var(--brand) 8%, transparent)" : "none",
                 }}
               >
                 <div
@@ -163,7 +163,7 @@ export default async function InquiriesPage({
                               : item.status === "CONVERTED"
                               ? "#15803D"
                               : "var(--ink-3)",
-                          fontSize: 11.5,
+                          fontSize: 12,
                           fontWeight: 700,
                         }}
                       >

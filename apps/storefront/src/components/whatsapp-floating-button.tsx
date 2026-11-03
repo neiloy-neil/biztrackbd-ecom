@@ -46,6 +46,10 @@ export function WhatsAppFloatingButton({ whatsappNumber, greeting }: Props) {
           transform: scale(1.06) translateY(-2px);
           box-shadow: 0 8px 24px rgba(37, 211, 102, 0.55), 0 3px 8px rgba(0,0,0,0.2);
         }
+        /* The full-width bar on phones already has a WhatsApp button, so the round one steps aside while that bar is showing. */
+        @media (max-width: 768px) {
+          body:not(:has(.stickybar)):has(.mobile-sticky-bar) .bt-wa-float { display: none; }
+        }
         @media (max-width: 640px) {
           .bt-wa-float {
             bottom: 84px;
@@ -53,6 +57,9 @@ export function WhatsAppFloatingButton({ whatsappNumber, greeting }: Props) {
             padding: 8px 12px;
             font-size: 12.5px;
           }
+          /* A page with its own fixed buy bar (product, cart, checkout): both round buttons stack in the right-hand corner above it. */
+          body:has(.stickybar) .bt-wa-float { bottom: 164px; padding: 12px; }
+          body:has(.stickybar) .bt-wa-float > span { display: none; }
         }
       `}</style>
       <a

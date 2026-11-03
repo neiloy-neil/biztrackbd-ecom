@@ -84,7 +84,7 @@ export function DemoRibbon({
               background: bizTemplate ? "#10b981" : "#3b82f6",
               color: "#ffffff",
               fontWeight: 700,
-              fontSize: "11px",
+              fontSize: "12px",
               letterSpacing: "0.5px",
               padding: "2px 8px",
               borderRadius: "999px",

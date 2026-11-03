@@ -1,4 +1,7 @@
-import { createHash, createHmac } from "node:crypto";
+import { createHash, createHmac, randomUUID } from "node:crypto";
+import { monthStart } from "../limits/plan";
+import { tenantPlanFeatures } from "../platform/plan-source";
+import { TRIAL_CAPS, isOnTrial } from "../platform/trial";
 import type { TenantTx } from "@biztrackbd/db";
 
 /**
@@ -72,6 +75,28 @@ export async function lookupTrust(tx: TenantTx, phone: string): Promise<TrustSco
   const rows = await tx.$queryRaw<TrustCounts[]>`
     SELECT delivered30, delivered90, "deliveredOld", failed30, failed90, "failedOld", refused60, stores FROM phone_trust_lookup(${phoneHash(phone)})`;
   return computeTrust(rows[0] ?? EMPTY);
+}
+
+/**
+ * The cross-store score a store's plan allows. The basic check (Starter) never looks at other stores' history, and a store on
+ * its free trial gets a few lookups a month. Without a lookup the number counts as new, so the store's own checks still run.
+ * `count` is true when this call is a fresh lookup for a new order, which uses up one of the trial's lookups.
+ */
+export async function lookupTrustForPlan(tx: TenantTx, phone: string, count = false): Promise<TrustScore> {
+  const { features } = await tenantPlanFeatures(tx);
+  if (features.fraud === "basic") return computeTrust(EMPTY);
+  if (count && (await isOnTrial(tx))) {
+    const t = await tx.tenant.findFirstOrThrow({ select: { id: true, timezone: true } });
+    const period = monthStart(new Date(), t.timezone);
+    const rows = await tx.$queryRaw<{ v: number }[]>`
+      INSERT INTO "UsageCounter" ("id", "tenantId", "metric", "periodStart", "value", "updatedAt")
+      VALUES (${randomUUID()}, ${t.id}, 'fraud_lookups', ${period}::date, 1, now())
+      ON CONFLICT ("tenantId", "metric", "periodStart") DO UPDATE SET "value" = "UsageCounter"."value" + 1, "updatedAt" = now()
+        WHERE "UsageCounter"."value" < ${TRIAL_CAPS.fraudLookups}::int
+      RETURNING "value"::int AS v`;
+    if (rows.length === 0) return computeTrust(EMPTY);
+  }
+  return lookupTrust(tx, phone);
 }
 
 /** Records (or corrects) what happened to one order's parcel. Safe to call twice: one outcome per order. */

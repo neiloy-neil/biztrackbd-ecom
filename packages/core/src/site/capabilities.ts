@@ -1,4 +1,6 @@
 import { withTenant } from "@biztrackbd/db";
+import { planFor } from "../platform/plan-source";
+import { usesPortfolioPlans } from "../platform/portfolio-plans";
 import { normalizeBusinessVertical, normalizeSiteMode, type BusinessVertical, type SiteMode } from "./mode";
 
 export interface TenantCapabilities {
@@ -42,6 +44,8 @@ export interface ResolveCapabilitiesParams {
   siteMode: string | null | undefined;
   vertical?: string | null;
   planTier?: string | null;
+  /** What the store's Business-website plan switches on. Left out, nothing is held back. */
+  planFeatures?: { bookingRequests?: unknown; teamProfiles?: unknown } | null;
   activeModules?: Record<string, boolean>;
   maintenance?: boolean;
 }
@@ -50,6 +54,9 @@ export function resolveTenantCapabilities(params: ResolveCapabilitiesParams): Te
   const mode = normalizeSiteMode(params.siteMode);
   const vertical = normalizeBusinessVertical(params.vertical);
   const modules = params.activeModules ?? {};
+  // Booking requests and team profiles are Pro features of the Business plans. Without a plan, nothing is held back.
+  const planFeatures = params.planFeatures ?? null;
+  const planAllows = (f: "bookingRequests" | "teamProfiles") => planFeatures === null || planFeatures[f] === true;
 
   // Ecommerce mode: full commerce, portfolio features optional via modules
   if (mode === "ECOMMERCE") {
@@ -91,10 +98,10 @@ export function resolveTenantCapabilities(params: ResolveCapabilitiesParams): Te
       analytics: true,
       services: isService || isCompany || isDoctor || Boolean(modules.services),
       portfolio_items: isPersonal || isCompany || isService || isPublicFigure || Boolean(modules.portfolio),
-      team_profiles: isCompany || isDoctor || isRestaurant || Boolean(modules.team),
+      team_profiles: planAllows("teamProfiles") && (isCompany || isDoctor || isRestaurant || Boolean(modules.team)),
       credentials: isDoctor || isPublicFigure || isPersonal || Boolean(modules.credentials),
       menu: isRestaurant || Boolean(modules.menu),
-      booking_requests: isRestaurant || isDoctor || isService || Boolean(modules.booking_requests),
+      booking_requests: planAllows("bookingRequests") && (isRestaurant || isDoctor || isService || Boolean(modules.booking_requests)),
       public_events: isPublicFigure || isCompany || Boolean(modules.events),
       downloads: true,
       commerce: false,
@@ -121,10 +128,10 @@ export function resolveTenantCapabilities(params: ResolveCapabilitiesParams): Te
     analytics: true,
     services: isService || isCompany || isDoctor || Boolean(modules.services),
     portfolio_items: isPersonal || isCompany || isService || isPublicFigure || Boolean(modules.portfolio),
-    team_profiles: isCompany || isDoctor || isRestaurant || Boolean(modules.team),
+    team_profiles: planAllows("teamProfiles") && (isCompany || isDoctor || isRestaurant || Boolean(modules.team)),
     credentials: isDoctor || isPublicFigure || isPersonal || Boolean(modules.credentials),
     menu: isRestaurant || Boolean(modules.menu),
-    booking_requests: isRestaurant || isDoctor || isService || Boolean(modules.booking_requests),
+    booking_requests: planAllows("bookingRequests") && (isRestaurant || isDoctor || isService || Boolean(modules.booking_requests)),
     public_events: isPublicFigure || isCompany || Boolean(modules.events),
     downloads: true,
     commerce: isCommerceEnabled,
@@ -150,6 +157,7 @@ export async function getTenantCapabilities(tenantId: string): Promise<TenantCap
       siteMode: tenant?.siteMode,
       vertical: tenant?.businessVertical,
       planTier: tenant?.planTier,
+      planFeatures: tenant && usesPortfolioPlans(tenant.siteMode) ? (await planFor(tx, tenant.planTier, tenant.siteMode)).features : null,
       activeModules,
     });
   });

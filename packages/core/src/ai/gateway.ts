@@ -1,4 +1,5 @@
 import { withTenant } from "@biztrackbd/db";
+import { TRIAL_CAPS, isOnTrial, withTrialCap } from "../platform/trial";
 import { AiQuotaExhaustedError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
 import { normalizeBdPhone } from "../phone";
@@ -65,7 +66,7 @@ export async function resolveGeminiApiKey(tenantId: string): Promise<ResolvedAiK
       select: { planTier: true },
     });
 
-    const quota = PLAN_AI_QUOTAS[tenant.planTier] ?? PLAN_AI_QUOTAS.STARTER ?? 50;
+    const quota = withTrialCap(PLAN_AI_QUOTAS[tenant.planTier] ?? PLAN_AI_QUOTAS.STARTER ?? 50, await isOnTrial(tx), TRIAL_CAPS.aiGenerations) as number;
     const periodMonth = getDhakaMonthStr();
 
     const usage = await tx.tenantAiUsage.findUnique({
@@ -146,7 +147,7 @@ export async function getAiSettings(tenantId: string, actor: StaffActor): Promis
     ]);
 
     const hasCustomKey = Boolean(settings?.customGeminiApiKey?.trim());
-    const quota = PLAN_AI_QUOTAS[tenant.planTier] ?? PLAN_AI_QUOTAS.STARTER ?? 50;
+    const quota = withTrialCap(PLAN_AI_QUOTAS[tenant.planTier] ?? PLAN_AI_QUOTAS.STARTER ?? 50, await isOnTrial(tx), TRIAL_CAPS.aiGenerations) as number;
     const used = usage?.generationCount ?? 0;
     const remaining = hasCustomKey ? 999999 : Math.max(0, quota - used);
 

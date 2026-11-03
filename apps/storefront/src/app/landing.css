@@ -228,7 +228,7 @@ body[data-store-theme] .lp-pro .btn-primary, body[data-store-theme] .lp-pro .btn
 .lp-social-ticker { position: fixed; bottom: 20px; left: 20px; z-index: 50; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(8px); border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16); max-width: 380px; animation: lp-slide-up 0.4s ease-out; }
 @keyframes lp-slide-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
 @media (max-width: 640px) { .lp-social-ticker { bottom: 76px; left: 12px; right: 12px; max-width: none; } }
-.lp-social-avatar { width: 36px; height: 36px; border-radius: 50%; background: #E0E7FF; color: #4F46E5; display: grid; place-items: center; flex-shrink: 0; }
+.lp-social-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--tint-1, #F1E9DD); color: var(--accent-strong, var(--accent, #8C5A3C)); display: grid; place-items: center; flex-shrink: 0; }
 .lp-social-content { flex: 1; line-height: 1.35; }
 .lp-social-title { font-size: 13px; font-weight: 700; color: #111827; }
 .lp-social-name { color: #111827; }

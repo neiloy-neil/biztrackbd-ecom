@@ -110,18 +110,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   letter-spacing: -0.3px;
   color: var(--ink);
 }
-.brand-wordmark {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 22px;
-  line-height: 1;
-  letter-spacing: -0.2px;
-  text-transform: none;
-}
-.brand-wordmark-light { color: var(--green-deep); }
-.brand-wordmark-light .brand-wordmark-bd { color: var(--gold-dark); }
-.brand-wordmark-dark { color: #FFFFFF; }
-.brand-wordmark-dark .brand-wordmark-bd { color: var(--marigold); }
+/* The wordmark (.brand-wordmark) is styled in @biztrackbd/ui/brand.css. */
 .site-nav { display: flex; align-items: center; gap: 8px; }
 .nav-menu-toggle { display: none; }
 .site-nav > a:not(.btn) {
@@ -274,7 +263,7 @@ section.block .sub {
   border-radius: 99px;
   background: var(--tint);
   color: var(--brand);
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 700;
 }
 .pill.live {
@@ -336,7 +325,9 @@ details.faq p { margin-top: 10px; color: var(--ink-2); font-size: 15px; line-hei
 .foot-col {
   flex: 1 1 140px;
 }
-.foot-col h4 {
+.foot-col h3 {
+  font-family: var(--font);
+  line-height: 1.4;
   font-size: 13px;
   font-weight: 700;
   margin-bottom: 16px;
@@ -390,7 +381,7 @@ details.faq p { margin-top: 10px; color: var(--ink-2); font-size: 15px; line-hei
   border-radius: 10px;
   background: #FFFFFF;
   color: var(--ink);
-  font-size: 15.5px;
+  font-size: 16px;
   transition: border-color 0.15s ease;
 }
 .input:focus { border-color: var(--brand); outline: none; }
@@ -526,7 +517,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   padding: 10px 18px;
   border-radius: 10px;
   background: #F6921E;
-  color: var(--green-deep);
+  color: #1F1300; /* Nagad's orange is light: deep green on it was 4.2:1, this is 8:1 */
   font-size: 13.5px;
   font-weight: 800;
 }
@@ -1255,7 +1246,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   background: var(--mint);
   border: 1px solid #C6DFD3;
   color: var(--green-deep);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.04em;
   font-family: var(--font-mono, monospace);
@@ -1398,7 +1389,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
 .tco-slider-ticks {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--ink-muted);
   font-family: var(--font-mono, monospace);
   margin-top: 8px;
@@ -1443,7 +1434,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   margin-bottom: 8px;
 }
 .tco-pane-eyebrow {
-  font-size: 11px;
+  font-size: 12px;
   font-family: var(--font-mono, monospace);
   text-transform: uppercase;
   font-weight: 800;
@@ -1464,7 +1455,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   align-items: center;
   padding: 4px 10px;
   border-radius: 9999px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   background: #FDF1EA;
   border: 1px solid #F2B79B;
@@ -1476,7 +1467,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   align-items: center;
   padding: 4px 10px;
   border-radius: 9999px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   background: var(--mint);
   border: 1px solid #C6DFD3;
@@ -1510,7 +1501,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   line-height: 1.35;
 }
 .tco-line-note {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--ink-muted);
   margin-top: 2px;
   line-height: 1.35;
@@ -1589,7 +1580,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
 }
 .tco-savings-eyebrow {
   font-family: var(--font-mono, monospace);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.08em;
   color: #8FD3B8;
@@ -1693,7 +1684,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
 }
 .migration-step-tag {
   font-family: var(--font-mono, monospace);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   color: var(--brand, var(--green-fresh));
   margin-bottom: 6px;
@@ -1987,7 +1978,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   gap: 8px;
   padding: 5px 14px;
   border-radius: 9999px;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -2242,7 +2233,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -2502,7 +2493,7 @@ table.compare tr:last-child th, table.compare tr:last-child td {
 }
 .contact-cards a:hover .cc-icon { background: var(--marigold); color: var(--green-deep); }
 .cc-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
-.cc-text small { font-size: 11.5px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: #8FD3B8; }
+.cc-text small { font-size: 12px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: #8FD3B8; }
 .cc-text strong { font-size: 14.5px; font-weight: 600; overflow-wrap: anywhere; }
 .contact-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .contact-pills a {
@@ -2530,3 +2521,18 @@ table.compare tr:last-child th, table.compare tr:last-child td {
 .cp-text small { font-size: 12px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; color: var(--ink-muted); }
 .cp-text strong { font-size: 15px; color: var(--ink); overflow-wrap: anywhere; }
 @media (prefers-reduced-motion: reduce) { .cp-strip a { transition: none; } .cp-strip a:hover { transform: none; } }
+
+/* Skeleton loading screen (route loading.tsx). */
+.sk { display: block; background: linear-gradient(90deg, rgba(128,128,128,.12) 25%, rgba(128,128,128,.22) 37%, rgba(128,128,128,.12) 63%); background-size: 400% 100%; animation: sk-shimmer 1.4s ease infinite; border-radius: 12px; }
+.sk-hero { height: 44px; width: min(520px, 90%); margin: 0 0 20px; }
+.sk-line { height: 18px; margin: 10px 0; }
+.sk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-top: 36px; }
+.sk-card { height: 200px; }
+@keyframes sk-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+@media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
+
+/* Phones: footer links are 44px tall rows, not 22px lines. */
+@media (max-width: 899px) {
+  .foot-col nav { gap: 0; }
+  .foot-col nav a { display: flex; align-items: center; min-height: 44px; }
+}

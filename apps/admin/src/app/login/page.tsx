@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AuthBrand } from "@/components/auth-brand";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { loadDemoTenant, verifyDemoCookie } from "@biztrackbd/core";
@@ -33,7 +34,8 @@ export default async function Login({ searchParams }: { searchParams: Promise<Re
   const keepHref = demo?.keepCode ? trialHref(demo.keepCode) : null;
   const signupHref = trialHref();
   return (
-    <div className="card" style={{ margin: "64px auto", maxWidth: 420 }}>
+    <div role="main" className="card" style={{ margin: "64px auto", maxWidth: 420 }}>
+      <AuthBrand />
       <h1 style={{ marginTop: 0 }}>Sign in</h1>
       <p className="muted">to your BizTrackBD store</p>
       {note && <div className="notice" role="note" style={{ marginBottom: 12 }}>{note}</div>}

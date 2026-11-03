@@ -208,7 +208,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                     setAiError("");
                     setShowAiModal(true);
                   }}
-                  style={{ borderColor: "#818CF8", color: "#4F46E5", background: "#EEF2FF", fontWeight: 700 }}
+                  style={{ borderColor: "var(--brand)", color: "var(--brand)", background: "var(--brand-light)", fontWeight: 700 }}
                 >
                   Auto-Fill Listing
                 </button>
@@ -266,7 +266,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                         setAltBusy(false);
                       }
                     }}
-                    style={{ borderColor: "#818CF8", color: "#4F46E5", background: "#EEF2FF", fontWeight: 700, fontSize: 12 }}
+                    style={{ borderColor: "var(--brand)", color: "var(--brand)", background: "var(--brand-light)", fontWeight: 700, fontSize: 12 }}
                   >
                     {altBusy ? "Generating Alts…" : "✨ AI Alt-Tags"}
                   </button>
@@ -299,7 +299,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                         border: "none",
                         borderRadius: "4px",
                         padding: "2px 6px",
-                        fontSize: "10.5px",
+                        fontSize: "12px",
                         fontWeight: 700,
                         cursor: "pointer",
                         backdropFilter: "blur(4px)",
@@ -486,7 +486,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                                 <button
                                   type="button"
                                   className="btn btn-secondary btn-sm"
-                                  style={{ padding: "2px 5px", fontSize: 11 }}
+                                  style={{ padding: "2px 5px", fontSize: 12 }}
                                   title="Auto-generate barcode"
                                   disabled={barcodeBusy !== null}
                                   onClick={() => runBarcode(`barcode-${i}`, async () => {
@@ -976,7 +976,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                 </label>
 
                 {p.images.length > 0 && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", background: "#EEF2FF", border: "1px solid #C7D2FE", borderRadius: 8, fontSize: 12.5, color: "#3730A3" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", background: "var(--brand-light)", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 12.5, color: "var(--brand-hover)" }}>
                     <span>📸</span>
                     <span><strong>{p.images.length} gallery photo(s) detected.</strong> Gemini will inspect images to detect attributes and generate SEO alt-tags.</span>
                   </div>
@@ -1046,7 +1046,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                     >
                       {t.label}
                       {t.badge && (
-                        <span style={{ fontSize: 10, background: "#E0E7FF", color: "#3730A3", padding: "1px 5px", borderRadius: 4 }}>
+                        <span style={{ fontSize: 12, background: "var(--brand-light)", color: "var(--brand-hover)", padding: "1px 5px", borderRadius: 4 }}>
                           {t.badge}
                         </span>
                       )}
@@ -1059,11 +1059,11 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                   <div className="stack" style={{ gap: 12 }}>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                       <div style={{ padding: 10, background: "#F8FAFC", borderRadius: 8, border: "1px solid #E2E8F0" }}>
-                        <span className="muted" style={{ fontSize: 11, textTransform: "uppercase", fontWeight: 700 }}>English Title</span>
+                        <span className="muted" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>English Title</span>
                         <div style={{ fontWeight: 600, fontSize: 14, marginTop: 4 }}>{aiGeneratedData.titleEn || "N/A"}</div>
                       </div>
                       <div style={{ padding: 10, background: "#F8FAFC", borderRadius: 8, border: "1px solid #E2E8F0" }}>
-                        <span className="muted" style={{ fontSize: 11, textTransform: "uppercase", fontWeight: 700 }}>Bangla Title (বাংলা)</span>
+                        <span className="muted" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>Bangla Title (বাংলা)</span>
                         <div style={{ fontWeight: 600, fontSize: 14, marginTop: 4 }} lang="bn">{aiGeneratedData.titleBn || "N/A"}</div>
                       </div>
                     </div>
@@ -1077,7 +1077,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                     <div style={{ border: "1px solid #E2E8F0", borderRadius: 8, overflow: "hidden" }}>
                       <div style={{ background: "#F8FAFC", padding: "8px 12px", borderBottom: "1px solid #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span style={{ fontSize: 12.5, fontWeight: 700, color: "#334155" }}>Rich HTML Description Preview</span>
-                        <span className="muted" style={{ fontSize: 11 }}>Semantic HTML with lists</span>
+                        <span className="muted" style={{ fontSize: 12 }}>Semantic HTML with lists</span>
                       </div>
                       <div
                         style={{ padding: 14, maxHeight: 180, overflowY: "auto", fontSize: 13.5, lineHeight: 1.6 }}
@@ -1090,7 +1090,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                         <span className="muted" style={{ fontSize: 12, marginRight: 8 }}>Suggested Tags:</span>
                         <div className="chips" style={{ display: "inline-flex", gap: 4, flexWrap: "wrap" }}>
                           {aiGeneratedData.tags.map((tg) => (
-                            <span key={tg} className="chip" style={{ fontSize: 11.5 }}>#{tg}</span>
+                            <span key={tg} className="chip" style={{ fontSize: 12 }}>#{tg}</span>
                           ))}
                         </div>
                       </div>
@@ -1108,7 +1108,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                     <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 10, padding: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
                       {/* Google URL Breadcrumb */}
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                        <span style={{ width: 18, height: 18, borderRadius: "50%", background: "#4285F4", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700 }}>G</span>
+                        <span style={{ width: 18, height: 18, borderRadius: "50%", background: "#4285F4", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700 }}>G</span>
                         <span style={{ fontSize: 12, color: "#202124" }}>yourstore.biztrack.bd › products › {p.slug || "item"}</span>
                       </div>
                       {/* Google Blue Title Link */}
@@ -1126,20 +1126,20 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                       <div style={{ padding: 10, background: "#F8FAFC", borderRadius: 8, border: "1px solid #E2E8F0" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <span style={{ fontSize: 12, fontWeight: 700 }}>Meta Title Length</span>
-                          <span style={{ fontSize: 11, fontWeight: 700, color: (aiGeneratedData.seo.metaTitle?.length || 0) <= 60 ? "#16A34A" : "#DC2626" }}>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: (aiGeneratedData.seo.metaTitle?.length || 0) <= 60 ? "#16A34A" : "#DC2626" }}>
                             {aiGeneratedData.seo.metaTitle?.length || 0} / 60 chars
                           </span>
                         </div>
-                        <span className="muted" style={{ fontSize: 11.5 }}>Recommended for Google Search in BD</span>
+                        <span className="muted" style={{ fontSize: 12 }}>Recommended for Google Search in BD</span>
                       </div>
                       <div style={{ padding: 10, background: "#F8FAFC", borderRadius: 8, border: "1px solid #E2E8F0" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <span style={{ fontSize: 12, fontWeight: 700 }}>Meta Description Length</span>
-                          <span style={{ fontSize: 11, fontWeight: 700, color: (aiGeneratedData.seo.metaDescription?.length || 0) <= 160 ? "#16A34A" : "#DC2626" }}>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: (aiGeneratedData.seo.metaDescription?.length || 0) <= 160 ? "#16A34A" : "#DC2626" }}>
                             {aiGeneratedData.seo.metaDescription?.length || 0} / 160 chars
                           </span>
                         </div>
-                        <span className="muted" style={{ fontSize: 11.5 }}>Includes call-to-action &amp; COD note</span>
+                        <span className="muted" style={{ fontSize: 12 }}>Includes call-to-action &amp; COD note</span>
                       </div>
                     </div>
                   </div>
@@ -1304,7 +1304,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                         setShowAiModal(false);
                         setTimeout(() => setAiNotice(""), 6000);
                       }}
-                      style={{ background: "#4F46E5", fontWeight: 700 }}
+                      style={{ background: "var(--brand)", fontWeight: 700 }}
                     >
                       ✓ Apply All to Product
                     </button>

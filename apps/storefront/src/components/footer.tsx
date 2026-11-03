@@ -131,7 +131,7 @@ export function Footer({ info, categories, lang, t, pages = [], hasBlog = false,
         ) : <DefaultColumns info={info} categories={categories} t={t} pages={pages} hasBlog={hasBlog} commerce={commerce} />}
         <div className="legal">
           <span>{copyright || `© ${new Date().getFullYear()} ${info.storeName}`}</span>
-          <form action={setLanguage.bind(null, other)}><button className="lang-btn" type="submit" lang={other} style={{ color: "inherit", minHeight: 32 }}>{t("switchLang")}</button></form>
+          <form action={setLanguage.bind(null, other)}><button className="lang-btn" type="submit" lang={other} style={{ color: "inherit", minHeight: 44 }}>{t("switchLang")}</button></form>
         </div>
         <PlatformCredit t={t} />
       </div>

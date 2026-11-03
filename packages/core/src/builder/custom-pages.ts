@@ -1,6 +1,7 @@
 import { Prisma, withTenant } from "@biztrackbd/db";
 import { audit } from "../audit/service";
 import { NotFoundError, PlanLimitError, ValidationError } from "../errors";
+import { getEffectivePlan } from "../limits/plan";
 import { assertCan, type StaffActor } from "../permissions";
 import { defaultCustomPage, normalizeSettings, sectionDef, validatePage, type PageJson, type PageSection } from "./registry";
 import { customKey } from "./versions";
@@ -20,7 +21,6 @@ export const RESERVED_PAGE_SLUGS = new Set([
 const slugify = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60);
 
 /** How many pages built from sections a plan allows. A plan's own `limits.customPages` wins (null = no limit); otherwise 3, 10 and 50. */
-const DEFAULT_LIMIT: Record<string, number> = { STARTER: 3, PRO: 10, BUSINESS: 50 };
 
 export interface CustomPageRow {
   id: string;
@@ -141,10 +141,7 @@ export async function createCustomPage(tenantId: string, actor: StaffActor, inpu
   if (!SLUG.test(slug) || slug.length > 60 || RESERVED_PAGE_SLUGS.has(slug)) throw new ValidationError("The address can use small letters, numbers and dashes, like about-us", { field: "slug" });
   const layout = (customPageTemplate(input.templateId) ?? CUSTOM_PAGE_TEMPLATES[0]!).build();
   return withTenant(tenantId, async (tx) => {
-    const tenant = await tx.tenant.findFirstOrThrow({ select: { planTier: true } });
-    const plan = await tx.plan.findUnique({ where: { tier: tenant.planTier } });
-    const limits = (plan?.limits as Record<string, unknown> | null) ?? {};
-    const cap = "customPages" in limits ? (limits.customPages as number | null) : (DEFAULT_LIMIT[tenant.planTier] ?? 3);
+    const { customPages: cap } = await getEffectivePlan(tx);
     if (typeof cap === "number") {
       const used = await tx.page.count({ where: hasLayout });
       if (used >= cap) throw new PlanLimitError("pages built from sections", cap, used);

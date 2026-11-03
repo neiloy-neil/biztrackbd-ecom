@@ -1,5 +1,6 @@
 "use client";
 
+import { BagIcon } from "@/components/mode-icon";
 import Link from "next/link";
 import { useState } from "react";
 import { demoAdminUrl } from "@/lib/demo-admin";
@@ -64,7 +65,7 @@ export function ArchitectureExplorer() {
               transition: "all 0.15s ease",
             }}
           >
-            <span aria-hidden="true">🛍️</span> Commerce Engine
+            <BagIcon /> Commerce Engine
           </button>
 
           <button

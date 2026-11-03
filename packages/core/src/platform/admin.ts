@@ -6,7 +6,9 @@ import { publishEvent } from "../events";
 import { money } from "../orders/pricing";
 import { syncTenantRouting } from "../routing/edge-config";
 import { accessState, addPeriod, statusFor, type Access } from "./lifecycle";
-import { toPlanView, type PlanView } from "./billing";
+import { toPlanView, toSitePlanView, type PlanView } from "./billing";
+import { planFor, planFromRow } from "./plan-source";
+import { cleanFeature, PLAN_FEATURE_FIELDS, PLAN_LIMIT_FIELDS, type PlanFamily } from "./plan-schema";
 import { redactName, redactPhone } from "../site/mode";
 
 /**
@@ -117,6 +119,10 @@ const THEME_NAMES: Record<string, string> = {
   axionwear: "Axionwear",
   bindu: "Bindu",
   berber: "Berber",
+  freshbasket: "Fresh Basket",
+  bazaar: "Bazaar",
+  nakshi: "Nakshi",
+  maison: "Maison",
 };
 
 export async function getOverview(actor: PlatformActor, deps?: Deps): Promise<PlatformOverview> {
@@ -522,7 +528,7 @@ export async function getTenantDetail(actor: PlatformActor, tenantId: string, de
   if (!t) throw new NotFoundError("Store");
   const since = new Date(now.getTime() - 30 * 86_400_000);
   const month = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-  const [staff, gmv, ordersTotal, orders30Days, customers, smsUsage, usageRow, domains, modules, proofs, notes, tickets, audit, plan, leadsCount, leads30Days, bookingsConfirmed, recentLeads, crmActivities] = await Promise.all([
+  const [staff, gmv, ordersTotal, orders30Days, customers, smsUsage, usageRow, domains, modules, proofs, notes, tickets, audit, plan, shopPlan, leadsCount, leads30Days, bookingsConfirmed, recentLeads, crmActivities] = await Promise.all([
     db.tenantUser.count({ where: { tenantId, isActive: true } }),
     db.order.aggregate({ where: { tenantId, status: "DELIVERED", deliveredAt: { gte: since } }, _sum: { totalAmount: true } }),
     db.order.count({ where: { tenantId } }),
@@ -536,6 +542,7 @@ export async function getTenantDetail(actor: PlatformActor, tenantId: string, de
     db.tenantNote.findMany({ where: { tenantId }, orderBy: { createdAt: "desc" }, take: 30 }),
     db.supportTicket.findMany({ where: { tenantId }, orderBy: { createdAt: "desc" }, take: 10 }),
     db.platformAuditLog.findMany({ where: { tenantId }, orderBy: { createdAt: "desc" }, take: 20 }),
+    planFor(db, t.planTier, t.siteMode),
     db.plan.findUnique({ where: { tier: t.planTier } }),
     db.siteLead.count({ where: { tenantId } }).catch(() => 0),
     db.siteLead.count({ where: { tenantId, createdAt: { gte: since } } }).catch(() => 0),
@@ -557,7 +564,9 @@ export async function getTenantDetail(actor: PlatformActor, tenantId: string, de
     db.tenantCrmActivity.findMany({ where: { tenantId }, orderBy: { createdAt: "desc" }, take: 50 }),
   ]);
 
-  const limits = (plan?.limits ?? {}) as Record<string, number | null>;
+  const limits = plan.limits as Record<string, number | null>;
+  // SMS credits always follow the online-shop plan.
+  const smsLimit = (shopPlan?.limits as Record<string, unknown> | null)?.smsCredits;
 
   return {
     id: t.id, name: t.name, subdomain: t.subdomain, ownerName: t.ownerName, ownerEmail: t.ownerEmail, ownerPhone: t.ownerPhone, tier: t.planTier, access: accessOf(t, t.subscription, now),
@@ -588,13 +597,13 @@ export async function getTenantDetail(actor: PlatformActor, tenantId: string, de
       smsUsed: Number(smsUsage?.value ?? 0),
       storageMb: Math.round(Number(t.storageBytesUsed) / 1_048_576),
     },
-    planLimits: plan ? {
+    planLimits: {
       products: typeof limits.products === "number" ? limits.products : null,
       staff: typeof limits.staff === "number" ? limits.staff : null,
       storageGb: typeof limits.storageGb === "number" ? limits.storageGb : null,
-      smsCredits: typeof limits.smsCredits === "number" ? limits.smsCredits : null,
+      smsCredits: typeof smsLimit === "number" ? smsLimit : null,
       ordersPerMonth: typeof limits.ordersPerMonth === "number" ? limits.ordersPerMonth : null,
-    } : null,
+    },
     domains,
     modules: modules.map((m) => ({ key: m.moduleKey, label: MODULE_LABELS[m.moduleKey] ?? m.moduleKey, isEnabled: m.isEnabled })),
     proofs: proofs.map((p) => ({ id: p.id, plan: p.planTier, interval: p.billingPeriod, amount: Number(p.amount), provider: p.mfsProvider, trxId: p.trxId, status: p.status, createdAt: p.createdAt })),
@@ -845,6 +854,30 @@ export async function listPayments(actor: PlatformActor, status: "PENDING" | "AP
   assertPlatformCan(actor, "payments", "view");
   const db = dbOf(deps);
   const rows = await db.paymentProof.findMany({ where: status === "ALL" ? {} : { status }, orderBy: { createdAt: status === "PENDING" ? "asc" : "desc" }, take: 200, include: { tenant: { select: { name: true, subdomain: true } } } });
+  return toPaymentRows(db, rows);
+}
+
+export const PAYMENTS_PAGE_SIZE = 25;
+
+/** One page of proofs, oldest first while pending and newest first otherwise, with the total for the tab and the count still waiting. */
+export async function listPaymentsPage(actor: PlatformActor, status: "PENDING" | "APPROVED" | "REJECTED" | "ALL" = "PENDING", page = 1, deps?: Deps): Promise<{ rows: PaymentRow[]; total: number; pending: number }> {
+  assertPlatformCan(actor, "payments", "view");
+  const db = dbOf(deps);
+  const where = status === "ALL" ? {} : { status };
+  const [rows, total, pending] = await Promise.all([
+    db.paymentProof.findMany({
+      where, orderBy: [{ createdAt: status === "PENDING" ? "asc" : "desc" }, { id: "asc" }], skip: (Math.max(1, page) - 1) * PAYMENTS_PAGE_SIZE, take: PAYMENTS_PAGE_SIZE,
+      include: { tenant: { select: { name: true, subdomain: true } } },
+    }),
+    db.paymentProof.count({ where }),
+    status === "PENDING" ? Promise.resolve(null) : db.paymentProof.count({ where: { status: "PENDING" } }),
+  ]);
+  return { rows: await toPaymentRows(db, rows), total, pending: pending ?? total };
+}
+
+type ProofWithStore = Prisma.PaymentProofGetPayload<{ include: { tenant: { select: { name: true; subdomain: true } } } }>;
+
+async function toPaymentRows(db: PrismaClient, rows: ProofWithStore[]): Promise<PaymentRow[]> {
   const senders = [...new Set(rows.map((r) => r.senderNumber))];
   const others = senders.length ? await db.paymentProof.groupBy({ by: ["senderNumber", "tenantId"], where: { senderNumber: { in: senders } } }) : [];
   return rows.map((p) => ({
@@ -1001,44 +1034,80 @@ export async function reviewQuarantine(actor: PlatformActor, tenantId: string, d
 
 // ---- Plans ---------------------------------------------------------------------------------------------------------
 
-export async function listPlans(actor: PlatformActor, deps?: Deps): Promise<(PlanView & { isPublic: boolean; stores: number })[]> {
+export interface PlanAdminView extends PlanView {
+  family: PlanFamily;
+  isPublic: boolean;
+  stores: number;
+  /** Every limit the admin can edit, null meaning unlimited. */
+  allLimits: Record<string, number | null>;
+}
+
+/** The plans of one family: online-shop plans (Plan) or Business-website plans (SitePlan). */
+export async function listPlans(actor: PlatformActor, family: PlanFamily = "SHOP", deps?: Deps): Promise<PlanAdminView[]> {
   assertPlatformCan(actor, "plans", "view");
   const db = dbOf(deps);
-  const [plans, counts] = await Promise.all([db.plan.findMany({ orderBy: { sortOrder: "asc" } }), db.tenant.groupBy({ by: ["planTier"], _count: { _all: true } })]);
-  return plans.map((p) => ({ ...toPlanView(p), isPublic: p.isPublic, stores: counts.find((c) => c.planTier === p.tier)?._count._all ?? 0 }));
+  const site = family === "SITE";
+  const [rows, counts] = await Promise.all([
+    site ? db.sitePlan.findMany({ orderBy: { sortOrder: "asc" } }) : db.plan.findMany({ orderBy: { sortOrder: "asc" } }),
+    db.tenant.groupBy({ by: ["planTier"], where: { siteMode: site ? "PORTFOLIO" : { not: "PORTFOLIO" } }, _count: { _all: true } }),
+  ]);
+  return rows.map((p) => {
+    const data = planFromRow(p);
+    const view = site ? toSitePlanView(data) : toPlanView(p);
+    const allLimits = Object.fromEntries(PLAN_LIMIT_FIELDS[family].map((f) => [f.key, typeof data.limits[f.key] === "number" ? (data.limits[f.key] as number) : null]));
+    return { ...view, family, isPublic: p.isPublic, stores: counts.find((c) => c.planTier === p.tier)?._count._all ?? 0, allLimits, features: data.features };
+  });
 }
 
 export interface PlanPatch {
+  name?: string;
   priceMonthlyBdt?: number;
   priceYearlyBdt?: number;
   trialDays?: number;
   isPublic?: boolean;
   /** null means unlimited. */
-  limits?: Partial<Record<"products" | "ordersPerMonth" | "staff" | "storageGb" | "smsCredits" | "landingPages", number | null>>;
+  limits?: Record<string, number | null>;
+  features?: Record<string, unknown>;
 }
 
-/** Prices and limits live in the Plan table (docs/05). A change applies at once to everyone on the plan, because limits are read live. */
-export async function updatePlan(actor: PlatformActor, tier: string, patch: PlanPatch, deps?: Deps): Promise<void> {
+/** Prices, limits and features live in the Plan and SitePlan tables (docs/05). A change applies at once to everyone on the plan, because they are read live. */
+export async function updatePlan(actor: PlatformActor, tier: string, patch: PlanPatch, family: PlanFamily = "SHOP", deps?: Deps): Promise<void> {
   assertPlatformCan(actor, "plans", "edit");
-  if (!["STARTER", "PRO", "BUSINESS", "ENTERPRISE"].includes(tier)) throw new NotFoundError("Plan");
+  const site = family === "SITE";
+  if (!(site ? ["STARTER", "PRO", "BUSINESS"] : ["STARTER", "PRO", "BUSINESS", "ENTERPRISE"]).includes(tier)) throw new NotFoundError("Plan");
   const db = dbOf(deps);
   const bad = (n: unknown, max: number) => typeof n !== "number" || !Number.isFinite(n) || n < 0 || n > max;
+  if (patch.name !== undefined && (patch.name.trim().length < 2 || patch.name.trim().length > 60)) throw new ValidationError("Give the plan a name of 2 to 60 characters");
   if (patch.priceMonthlyBdt !== undefined && bad(patch.priceMonthlyBdt, 1_000_000)) throw new ValidationError("Enter the monthly price in taka");
   if (patch.priceYearlyBdt !== undefined && bad(patch.priceYearlyBdt, 10_000_000)) throw new ValidationError("Enter the yearly price in taka");
   if (patch.trialDays !== undefined && (!Number.isInteger(patch.trialDays) || patch.trialDays < 0 || patch.trialDays > 60)) throw new ValidationError("Trial days are 0 to 60");
-  for (const [k, v] of Object.entries(patch.limits ?? {})) if (v !== null && (v === undefined || bad(v, 1_000_000_000))) throw new ValidationError(`Enter a number for ${k}, or leave it unlimited`);
+  const limitKeys = new Set(PLAN_LIMIT_FIELDS[family].map((f) => f.key));
+  for (const [k, v] of Object.entries(patch.limits ?? {})) {
+    if (!limitKeys.has(k)) throw new ValidationError(`${k} is not a limit on these plans`);
+    if (v !== null && (v === undefined || bad(v, 1_000_000_000))) throw new ValidationError(`Enter a number for ${k}, or leave it unlimited`);
+  }
+  const features: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(patch.features ?? {})) {
+    const field = PLAN_FEATURE_FIELDS[family].find((f) => f.key === k);
+    if (!field) throw new ValidationError(`${k} is not a feature on these plans`);
+    const c = cleanFeature(field, v);
+    if (!c.ok) throw new ValidationError(`${field.label}: that value is not allowed`);
+    features[k] = c.value;
+  }
   await db.$transaction(async (tx) => {
-    const p = await tx.plan.findUnique({ where: { tier: tier as never } });
+    const p = site ? await tx.sitePlan.findUnique({ where: { tier: tier as never } }) : await tx.plan.findUnique({ where: { tier: tier as never } });
     if (!p) throw new NotFoundError("Plan");
     const limits = { ...((p.limits ?? {}) as Record<string, unknown>), ...(patch.limits ?? {}) };
-    await tx.plan.update({
-      where: { tier: tier as never },
-      data: {
-        ...(patch.priceMonthlyBdt !== undefined ? { priceMonthlyBdt: patch.priceMonthlyBdt } : {}), ...(patch.priceYearlyBdt !== undefined ? { priceYearlyBdt: patch.priceYearlyBdt } : {}),
-        ...(patch.trialDays !== undefined ? { trialDays: patch.trialDays } : {}), ...(patch.isPublic !== undefined ? { isPublic: patch.isPublic } : {}), limits: limits as Prisma.InputJsonValue,
-      },
-    });
-    await log(tx, actor, "PLAN_EDITED", null, { tier, patch, before: { priceMonthlyBdt: Number(p.priceMonthlyBdt), priceYearlyBdt: Number(p.priceYearlyBdt), trialDays: p.trialDays, limits: p.limits } });
+    const data = {
+      ...(patch.name !== undefined ? { name: patch.name.trim() } : {}),
+      ...(patch.priceMonthlyBdt !== undefined ? { priceMonthlyBdt: patch.priceMonthlyBdt } : {}), ...(patch.priceYearlyBdt !== undefined ? { priceYearlyBdt: patch.priceYearlyBdt } : {}),
+      ...(patch.trialDays !== undefined ? { trialDays: patch.trialDays } : {}), ...(patch.isPublic !== undefined ? { isPublic: patch.isPublic } : {}),
+      limits: limits as Prisma.InputJsonValue,
+      features: { ...((p.features ?? {}) as Record<string, unknown>), ...features } as Prisma.InputJsonValue,
+    };
+    if (site) await tx.sitePlan.update({ where: { tier: tier as never }, data });
+    else await tx.plan.update({ where: { tier: tier as never }, data });
+    await log(tx, actor, "PLAN_EDITED", null, { tier, family, patch, before: { name: p.name, priceMonthlyBdt: Number(p.priceMonthlyBdt), priceYearlyBdt: Number(p.priceYearlyBdt), trialDays: p.trialDays, isPublic: p.isPublic, limits: p.limits, features: p.features } });
   });
 }
 
@@ -1050,6 +1119,20 @@ export async function listPlatformAudit(actor: PlatformActor, opts: { tenantId?:
     where: { ...(opts.tenantId ? { tenantId: opts.tenantId } : {}), ...(opts.action ? { action: opts.action } : {}) }, orderBy: { createdAt: "desc" }, take: Math.min(opts.limit ?? 100, 500),
   });
   return rows.map((r) => ({ id: r.id, action: r.action, actorId: r.actorId, tenantId: r.tenantId, details: r.details, createdAt: r.createdAt }));
+}
+
+export const AUDIT_PAGE_SIZE = 50;
+
+/** One page of the audit trail, newest first, with the total for the filter. The plain list above stops at its limit; this one reaches back as far as the log goes. */
+export async function listPlatformAuditPage(actor: PlatformActor, opts: { tenantId?: string; action?: string; page?: number } = {}, deps?: Deps) {
+  assertPlatformCan(actor, "audit", "view");
+  const db = dbOf(deps);
+  const where = { ...(opts.tenantId ? { tenantId: opts.tenantId } : {}), ...(opts.action ? { action: opts.action } : {}) };
+  const [rows, total] = await Promise.all([
+    db.platformAuditLog.findMany({ where, orderBy: [{ createdAt: "desc" }, { id: "desc" }], skip: (Math.max(1, opts.page ?? 1) - 1) * AUDIT_PAGE_SIZE, take: AUDIT_PAGE_SIZE }),
+    db.platformAuditLog.count({ where }),
+  ]);
+  return { rows: rows.map((r) => ({ id: r.id, action: r.action, actorId: r.actorId, tenantId: r.tenantId, details: r.details, createdAt: r.createdAt })), total };
 }
 
 // ---- The sweep -----------------------------------------------------------------------------------------------------

@@ -128,7 +128,7 @@ export function TicketReplyBox({ ticketId }: ReplyBoxProps) {
                   onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                 >
                   <div style={{ fontWeight: 600, color: "var(--ink)" }}>{m.label}</div>
-                  <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {m.text}
                   </div>
                 </button>

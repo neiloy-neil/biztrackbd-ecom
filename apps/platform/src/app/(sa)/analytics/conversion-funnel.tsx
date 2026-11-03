@@ -44,7 +44,7 @@ export function AnalyticsConversionFunnel({ funnel }: { funnel: ConversionFunnel
             textAlign: "center",
           }}
         >
-          <div style={{ fontSize: 11.5, fontWeight: 700, color: "var(--ink-3)", textTransform: "uppercase" }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-3)", textTransform: "uppercase" }}>
             1. Total Visitors
           </div>
           <div style={{ fontSize: 24, fontWeight: 800, color: "var(--ink)", marginTop: 4 }}>
@@ -53,7 +53,7 @@ export function AnalyticsConversionFunnel({ funnel }: { funnel: ConversionFunnel
           <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 2 }}>
             100% of traffic
           </div>
-          <div style={{ width: "100%", height: 6, background: "#E2E8F0", borderRadius: 3, marginTop: 8, overflow: "hidden" }}>
+          <div style={{ width: "100%", height: 6, background: "var(--line)", borderRadius: 3, marginTop: 8, overflow: "hidden" }}>
             <div style={{ width: "100%", height: "100%", background: "#3B82F6" }} />
           </div>
         </div>
@@ -64,7 +64,7 @@ export function AnalyticsConversionFunnel({ funnel }: { funnel: ConversionFunnel
             {visitorToWizardRate}%
           </div>
           <div style={{ fontSize: 18, lineHeight: 1 }}>&rarr;</div>
-          <div style={{ fontSize: 10.5, color: "var(--ink-3)" }}>
+          <div style={{ fontSize: 12, color: "var(--ink-3)" }}>
             {Math.max(0, Math.round((100 - visitorToWizardRate) * 10) / 10)}% bounce
           </div>
         </div>
@@ -79,7 +79,7 @@ export function AnalyticsConversionFunnel({ funnel }: { funnel: ConversionFunnel
             textAlign: "center",
           }}
         >
-          <div style={{ fontSize: 11.5, fontWeight: 700, color: "var(--ink-3)", textTransform: "uppercase" }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-3)", textTransform: "uppercase" }}>
             2. Reached Wizard (/start)
           </div>
           <div style={{ fontSize: 24, fontWeight: 800, color: "#2563EB", marginTop: 4 }}>
@@ -88,7 +88,7 @@ export function AnalyticsConversionFunnel({ funnel }: { funnel: ConversionFunnel
           <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 2 }}>
             {visitorToWizardRate}% reached onboarding
           </div>
-          <div style={{ width: "100%", height: 6, background: "#E2E8F0", borderRadius: 3, marginTop: 8, overflow: "hidden" }}>
+          <div style={{ width: "100%", height: 6, background: "var(--line)", borderRadius: 3, marginTop: 8, overflow: "hidden" }}>
             <div style={{ width: `${Math.min(100, visitorToWizardRate)}%`, height: "100%", background: "#2563EB" }} />
           </div>
         </div>
@@ -99,7 +99,7 @@ export function AnalyticsConversionFunnel({ funnel }: { funnel: ConversionFunnel
             {wizardToSignupRate}%
           </div>
           <div style={{ fontSize: 18, lineHeight: 1 }}>&rarr;</div>
-          <div style={{ fontSize: 10.5, color: "var(--ink-3)" }}>
+          <div style={{ fontSize: 12, color: "var(--ink-3)" }}>
             {Math.max(0, Math.round((100 - wizardToSignupRate) * 10) / 10)}% dropped
           </div>
         </div>
@@ -114,7 +114,7 @@ export function AnalyticsConversionFunnel({ funnel }: { funnel: ConversionFunnel
             textAlign: "center",
           }}
         >
-          <div style={{ fontSize: 11.5, fontWeight: 700, color: "var(--brand-primary, #0B4D3B)", textTransform: "uppercase" }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "var(--brand-primary, #0B4D3B)", textTransform: "uppercase" }}>
             3. Store Launched
           </div>
           <div style={{ fontSize: 24, fontWeight: 800, color: "var(--brand-primary, #0B4D3B)", marginTop: 4 }}>
@@ -123,7 +123,7 @@ export function AnalyticsConversionFunnel({ funnel }: { funnel: ConversionFunnel
           <div style={{ fontSize: 12, color: "var(--brand-primary, #0B4D3B)", marginTop: 2, fontWeight: 600 }}>
             {overallConversionRate}% overall CVR
           </div>
-          <div style={{ width: "100%", height: 6, background: "#E2E8F0", borderRadius: 3, marginTop: 8, overflow: "hidden" }}>
+          <div style={{ width: "100%", height: 6, background: "var(--line)", borderRadius: 3, marginTop: 8, overflow: "hidden" }}>
             <div style={{ width: `${Math.min(100, overallConversionRate)}%`, height: "100%", background: "var(--brand-primary, #0B4D3B)" }} />
           </div>
         </div>

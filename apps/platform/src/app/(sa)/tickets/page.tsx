@@ -140,8 +140,8 @@ export default async function TicketsPage({
             ) : (
               filteredTickets.map((t) => {
                 const isSelected = t.id === selectedId;
-                const pColor = t.priority === "HIGH" ? "#DC2626" : "#4B4B73";
-                const pBg = t.priority === "HIGH" ? "#FCEBEB" : "#EFEFF6";
+                const pColor = t.priority === "HIGH" ? "#DC2626" : "var(--ink-2)";
+                const pBg = t.priority === "HIGH" ? "#FCEBEB" : "var(--chip)";
                 const dateStr = t.lastMessageAt.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
 
                 return (
@@ -152,8 +152,8 @@ export default async function TicketsPage({
                       display: "block",
                       padding: "14px 16px",
                       borderBottom: "1px solid var(--line)",
-                      background: isSelected ? "#F4F3FF" : "#fff",
-                      borderLeft: isSelected ? "3px solid #5B4FE8" : "3px solid transparent",
+                      background: isSelected ? "var(--tint)" : "#fff",
+                      borderLeft: isSelected ? "3px solid var(--brand)" : "3px solid transparent",
                       color: "inherit",
                     }}
                   >
@@ -165,7 +165,7 @@ export default async function TicketsPage({
                       {t.subject}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
-                      <span style={{ padding: "2px 9px", borderRadius: 10, fontSize: 11.5, fontWeight: 600, background: pBg, color: pColor }}>
+                      <span style={{ padding: "2px 9px", borderRadius: 10, fontSize: 12, fontWeight: 600, background: pBg, color: pColor }}>
                         {t.priority}
                       </span>
                       <span style={{ fontSize: 12, color: "var(--ink-3)" }}>
@@ -209,8 +209,8 @@ export default async function TicketsPage({
                   style={{
                     padding: "3px 11px",
                     borderRadius: 11,
-                    background: activeTicket.priority === "HIGH" ? "#FCEBEB" : "#EFEFF6",
-                    color: activeTicket.priority === "HIGH" ? "#DC2626" : "#4B4B73",
+                    background: activeTicket.priority === "HIGH" ? "#FCEBEB" : "var(--chip)",
+                    color: activeTicket.priority === "HIGH" ? "#DC2626" : "var(--ink-2)",
                     fontSize: 12,
                     fontWeight: 700,
                   }}
@@ -250,10 +250,10 @@ export default async function TicketsPage({
                             width: 34,
                             height: 34,
                             borderRadius: 17,
-                            background: "#F0F0F6",
+                            background: "var(--chip)",
                             color: "var(--ink-2)",
                             fontWeight: 700,
-                            fontSize: 11,
+                            fontSize: 12,
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -307,7 +307,7 @@ export default async function TicketsPage({
                       <div key={m.id} style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
                         <div
                           style={{
-                            background: "#F4F3FF",
+                            background: "var(--tint)",
                             border: "1px solid #D9D5FA",
                             borderRadius: "14px 4px 14px 14px",
                             padding: "14px 16px",
@@ -332,7 +332,7 @@ export default async function TicketsPage({
                           width: 34,
                           height: 34,
                           borderRadius: 17,
-                          background: "#E9E7FD",
+                          background: "var(--brand-light)",
                           color: "var(--brand)",
                           fontWeight: 700,
                           fontSize: 12,

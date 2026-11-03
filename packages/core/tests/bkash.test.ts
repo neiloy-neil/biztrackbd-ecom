@@ -158,6 +158,7 @@ describe("Direct bKash Tokenized Checkout Integration Engine", () => {
           name: "bKash Test Store",
           subdomain: `sub${randomUUID().slice(0, 8)}`,
           status: "ACTIVE",
+          planTier: "BUSINESS", // connecting a payment gateway is a Business feature
           trialEndsAt: new Date(Date.now() + 86400000),
         },
       });

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useRef } from "react";
 import { demoUrl } from "@/components/template-card";
+import { SmartImage } from "@/components/smart-image";
 import { handleTabListKeyDown, useModalFocusTrap } from "@/lib/a11y";
 
 const THEME_HOSTS: Record<string, string> = {
@@ -13,6 +14,10 @@ const THEME_HOSTS: Record<string, string> = {
   axionwear: "axionwear",
   bindu: "bindu",
   berber: "berber",
+  freshbasket: "freshbasket",
+  bazaar: "bazaar",
+  nakshi: "nakshi",
+  maison: "maison",
   "dhaka-bistro": "dhakabistro",
   "modern-clinic": "modernclinic",
   "apex-corporate": "apexcorp",
@@ -24,7 +29,7 @@ const THEME_HOSTS: Record<string, string> = {
 export type GalleryMode = "ecommerce" | "business";
 const GALLERY_MODES: readonly GalleryMode[] = ["ecommerce", "business"];
 
-export type EcommerceCategoryFilter = "all" | "fashion" | "electronics" | "kids" | "streetwear" | "beauty";
+export type EcommerceCategoryFilter = "all" | "fashion" | "electronics" | "kids" | "streetwear" | "beauty" | "grocery" | "general";
 export type BusinessCategoryFilter = "all" | "restaurant" | "doctor" | "corporate" | "services" | "portfolio" | "public-figure";
 
 export interface GalleryTheme {
@@ -111,6 +116,50 @@ export const ECOMMERCE_TEMPLATES: GalleryTheme[] = [
     tag1: "Formalwear",
     tag2: "Tailoring",
     module: "Bespoke ready",
+    mode: "ecommerce",
+  },
+  {
+    id: "freshbasket",
+    name: "Fresh Basket",
+    sub: "Warm, appetising grocery and organic food storefront with clear weights, unit prices and pantry bundles.",
+    category: "grocery",
+    categoryLabel: "Grocery",
+    tag1: "Grocery",
+    tag2: "Organic food",
+    module: "Unit pricing",
+    mode: "ecommerce",
+  },
+  {
+    id: "bazaar",
+    name: "Bazaar",
+    sub: "Bright, deal-led general store for a wide catalogue: bold price tags, fast browsing and a busy home page.",
+    category: "general",
+    categoryLabel: "General store",
+    tag1: "General store",
+    tag2: "Deals",
+    module: "Deal badges",
+    mode: "ecommerce",
+  },
+  {
+    id: "nakshi",
+    name: "Nakshi",
+    sub: "Heritage ivory and maroon storefront for sarees, three-pieces and festive wear, with fine gold rules.",
+    category: "fashion",
+    categoryLabel: "Fashion",
+    tag1: "Sarees",
+    tag2: "Festive wear",
+    module: "Festive edit",
+    mode: "ecommerce",
+  },
+  {
+    id: "maison",
+    name: "Maison",
+    sub: "Premium editorial fashion flagship: lookbook home, portrait cards, size and fit guide and a sticky header. 49 taka once, yours for life.",
+    category: "fashion",
+    categoryLabel: "Fashion",
+    tag1: "Premium",
+    tag2: "Lookbook",
+    module: "Size guide",
     mode: "ecommerce",
   },
 ];
@@ -209,6 +258,8 @@ const ECOM_CATEGORIES: { id: EcommerceCategoryFilter; label: string }[] = [
   { id: "kids", label: "Kids & Toys" },
   { id: "streetwear", label: "Streetwear" },
   { id: "beauty", label: "Beauty & Cosmetics" },
+  { id: "grocery", label: "Grocery & Organics" },
+  { id: "general", label: "General Store" },
 ];
 
 const BIZ_CATEGORIES: { id: BusinessCategoryFilter; label: string }[] = [
@@ -521,12 +572,10 @@ export function TemplateGallery({
               >
                 {t.uploaded && t.previewDesktop ? (
                   <>
-                    {/* eslint-disable-next-line @next/next/no-img-element -- staff-uploaded preview on an external https host */}
-                    <img src={t.previewDesktop} alt={`${t.name} template home page`} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
+                    <SmartImage src={t.previewDesktop} alt={`${t.name} template home page`} sizes="(max-width: 768px) 100vw, 33vw" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
                     {t.previewMobile && (
                       <div style={{ position: "absolute", right: 12, bottom: -8, width: "28%", height: "75%", borderRadius: 10, overflow: "hidden", border: "2px solid #FFFFFF", boxShadow: "0 6px 16px rgba(11, 77, 59, 0.2)" }}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={t.previewMobile} alt={`${t.name} mobile preview`} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
+                        <SmartImage src={t.previewMobile} alt={`${t.name} mobile preview`} sizes="120px" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
                       </div>
                     )}
                   </>
@@ -943,10 +992,10 @@ export function TemplateGallery({
               }}
             >
               {previewTemplate.uploaded ? (
-                // eslint-disable-next-line @next/next/no-img-element -- staff-uploaded preview on an external https host
-                <img
+                <SmartImage
                   src={(viewportMode === "mobile" ? previewTemplate.previewMobile : previewTemplate.previewDesktop) ?? previewTemplate.previewDesktop ?? previewTemplate.previewMobile ?? ""}
                   alt={`${previewTemplate.name} preview`}
+                  sizes="(max-width: 768px) 100vw, 80vw"
                   style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "top", background: "#FBF7EC" }}
                 />
               ) : (

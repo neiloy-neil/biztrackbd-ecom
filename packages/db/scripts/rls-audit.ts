@@ -21,7 +21,7 @@ console.log(`tables holding data: ${withData.length}; cross-tenant insert attemp
 console.log(`platform tables readable by the app role: ${report.readablePlatformTables.join(", ")}`);
 // Platform tables the store apps are meant to read: plans and announcements (billing screens), Tenant (host lookup), Template (published templates are
 // offered to every store: docs/46), and PublicToolUsage (the free tools on the marketing site count visits per device and IP hash, with no store involved).
-const bad = failures(report, { platformTablesAllowed: ["Plan", "Announcement", "Tenant", "Template", "PublicToolUsage"] });
+const bad = failures(report, { platformTablesAllowed: ["Plan", "SitePlan", "Announcement", "Tenant", "Template", "PublicToolUsage"] });
 if (bad.length) {
   console.error("FAILURES:\n" + bad.map((b) => " - " + b).join("\n"));
   process.exit(1);

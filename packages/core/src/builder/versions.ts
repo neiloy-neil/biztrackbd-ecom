@@ -1,9 +1,11 @@
 import { Prisma, withTenant, type TenantTx } from "@biztrackbd/db";
+import { tenantPlanFeatures } from "../platform/plan-source";
 import { audit } from "../audit/service";
 import { DomainError, NotFoundError, PlanFeatureError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
 import { STORE_PAGE_KINDS, defaultPageFor, validatePage, type PageJson, type PageKind } from "./registry";
-import { themeDefaults, validateTheme, validateThemeId, type ThemeId, type ThemeSettings } from "./theme";
+import { isPremiumTheme, themeDefaults, validateTheme, validateThemeId, type ThemeId, type ThemeSettings } from "./theme";
+import { premiumPagesFor } from "./premium-pages";
 
 /**
  * Drafts and published versions of a page (ThemeVersion). Editing only ever touches the draft; the live store changes when
@@ -65,13 +67,8 @@ const asTheme = (v: unknown, themeId: ThemeId): ThemeSettings => {
 /** What the plan allows in the builder: "settings" (colours and style only), "home" (home sections too), "all". */
 export type SectionBuilderTier = "settings" | "home" | "all";
 async function builderTier(tx: TenantTx): Promise<SectionBuilderTier> {
-  const t = await tx.tenant.findFirstOrThrow({ select: { planTier: true, siteMode: true } });
-  // Business Website & Portfolio: Starter (৳399) allows home sections, Pro (৳799) & Business Plus (৳1,499) allow all pages
-  if (t.siteMode === "PORTFOLIO") {
-    return t.planTier === "STARTER" ? "home" : "all";
-  }
-  const plan = await tx.plan.findUnique({ where: { tier: t.planTier } });
-  const v = (plan?.features as Record<string, unknown> | null)?.sectionBuilder;
+  const { features } = await tenantPlanFeatures(tx);
+  const v = features.sectionBuilder;
   return v === "all" || v === "home" ? v : "settings";
 }
 
@@ -280,12 +277,14 @@ export async function installTemplatePages(
   tx: TenantTx, tenantId: string, themeId: ThemeId, tpl: { settings: ThemeSettings; pages: Partial<Record<PageKind, PageJson>> }, mode: "publish" | "draft", createdBy: string,
   /** Take the template's layout for these pages only; the others keep what they have. The colours and style come either way. */
   only?: readonly PageKind[],
+  /** A premium theme brings its own layouts whatever the plan; the plan only limits what the owner can then edit. */
+  ignorePlan = false,
 ): Promise<string[]> {
   const tier = await builderTier(tx);
   const actor = { userId: createdBy } as StaffActor;
   const written: string[] = [];
   for (const kind of STORE_PAGE_KINDS) {
-    const allowed = kind === HOME_KEY ? tier !== "settings" : tier === "all";
+    const allowed = ignorePlan || (kind === HOME_KEY ? tier !== "settings" : tier === "all");
     let page: PageJson | undefined = allowed && (!only || only.includes(kind)) ? tpl.pages[kind] : undefined;
     // The home page carries the colours and style, so it is always written; with sections the plan does not allow, it keeps what it had.
     if (!page && kind === HOME_KEY) {
@@ -439,6 +438,14 @@ export async function activateTheme(tenantId: string, actor: StaffActor, rawThem
   const themeId = validateThemeId(rawThemeId);
   await withTenant(tenantId, async (tx) => {
     await tx.$queryRaw`SELECT "id" FROM "Tenant" WHERE "id" = ${tenantId} FOR UPDATE`;
+    // A premium theme is only for a store that bought it (an approved ThemePurchase); the first switch also installs its layouts.
+    const premium = isPremiumTheme(themeId);
+    const firstUse = premium && !(await tx.themeInstall.findFirst({ where: { themeId } }));
+    // The template demo stores show every theme, premium included, so visitors can preview before they buy.
+    const demo = premium && (await tx.tenant.findFirst({ select: { isDemo: true } }))?.isDemo === true;
+    if (premium && !demo && (await tx.themePurchase.count({ where: { themeId, status: "APPROVED" } })) === 0) {
+      throw new ValidationError("Buy this premium theme first, then you can apply it.", { field: "themeId" });
+    }
     await tx.themeInstall.updateMany({ where: { isActive: true }, data: { isActive: false } });
     await tx.themeInstall.upsert({
       where: { tenantId_themeId: { tenantId, themeId } },
@@ -446,6 +453,7 @@ export async function activateTheme(tenantId: string, actor: StaffActor, rawThem
       create: { tenantId, themeId, isActive: true, settings: {}, pagesJson: {} },
     });
     await tx.tenant.update({ where: { id: tenantId }, data: { themeId } });
+    if (firstUse) await installTemplatePages(tx, tenantId, themeId, { settings: themeDefaults(themeId), pages: premiumPagesFor(themeId) }, "publish", actor.userId, undefined, true);
     await audit(tx, tenantId, actor, "design.theme_activated", { themeId });
   });
   return themeId;

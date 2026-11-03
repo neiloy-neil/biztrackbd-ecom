@@ -18,6 +18,8 @@ const counts = (over: Partial<TrustCounts>): TrustCounts => ({ delivered30: 0, d
 
 async function store(name: string) {
   const f = await createTenantFixture(owner, { name, subdomain: `${name}${++seq}`, stock: 100 });
+  // The cross-store score is part of the full fraud check, which Starter does not get.
+  await owner.tenant.update({ where: { id: f.tenantId }, data: { planTier: "PRO" } });
   await owner.storeSettings.create({ data: { tenantId: f.tenantId, storeName: name, contactPhone: "01712345678", bkashNumber: "01712345678", nagadNumber: "01812345678" } });
   const mk = (role: StaffActor["role"], n: string): StaffActor => ({ userId: `u-${n}-${seq}`, email: `${n}${seq}@example.test`, name: n, role });
   return { f, owner: mk("STORE_OWNER", "Nusrat"), manager: mk("STORE_MANAGER", "Kamrul"), packer: mk("ORDER_PACKER", "Rubel"), support: mk("TELEMARKETER", "Sumaiya") };

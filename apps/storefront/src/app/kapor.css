@@ -54,7 +54,7 @@ h1, h2, h3, p { margin: 0; }
 .logo { flex: 1; text-align: center; font-weight: 800; letter-spacing: 2.6px; font-size: 17px; }
 .logo img { margin: 0 auto; max-height: 36px; width: auto; }
 .icon-btn { position: relative; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 0; background: none; cursor: pointer; border-radius: 10px; }
-.badge { position: absolute; top: 5px; right: 3px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: var(--accent); color: #fff; font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.badge { position: absolute; top: 5px; right: 3px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
 .nav-desktop, .header-tools { display: none; }
 .menu { position: relative; }
 .menu summary { list-style: none; }
@@ -142,7 +142,7 @@ h1, h2, h3, p { margin: 0; }
 .pay-box.nagad .option input[type="radio"]:checked { border-color: var(--nagad); }
 .pay-body { padding: 14px; background: #fff; }
 .steps { background: var(--bg); border-radius: 10px; padding: 12px 14px; font-size: 13.5px; line-height: 1.7; margin-bottom: 12px; }
-.mfs-tag { width: 40px; height: 26px; border-radius: 6px; color: #fff; font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.mfs-tag { width: 52px; height: 26px; border-radius: 6px; color: #fff; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
 
 /* ---- Product cards + grids */
 .grid { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -153,7 +153,7 @@ h1, h2, h3, p { margin: 0; }
 .pimg img { object-fit: cover; }
 .pimg .ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
 .pimg .ph i { display: block; width: 38%; aspect-ratio: 9 / 11; background: rgba(43, 33, 24, .14); border-radius: 10px 10px 5px 5px; }
-.tag { position: absolute; left: 10px; top: 10px; padding: 3px 10px; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; border-radius: 4px; z-index: 1; }
+.tag { position: absolute; left: 10px; top: 10px; padding: 3px 10px; background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; border-radius: 4px; z-index: 1; }
 .tag.out { background: var(--ink); }
 .pname { font-size: 14.5px; font-weight: 600; margin-top: 10px; line-height: 1.35; }
 .price-row { display: flex; align-items: baseline; gap: 8px; margin-top: 3px; flex-wrap: wrap; }
@@ -202,7 +202,7 @@ h1, h2, h3, p { margin: 0; }
 .footer a { display: block; line-height: 2; font-size: 14px; }
 .footer a.ficon { display: flex; align-items: center; gap: 10px; word-break: break-word; }
 .footer a.ficon svg { flex: none; opacity: .9; }
-.footer .credit { margin: 14px 0 0; text-align: center; font-size: 11.5px; line-height: 1.6; color: #B7A88F; opacity: .8; }
+.footer .credit { margin: 14px 0 0; text-align: center; font-size: 12px; line-height: 1.6; color: #B7A88F; opacity: .8; }
 .footer .credit a, .lp-footer .credit a { display: inline; line-height: inherit; font-size: inherit; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 2px; }
 .footer .credit a:hover, .lp-footer .credit a:hover { text-decoration-color: currentColor; }
 .lp-footer .credit { margin: 6px 0 0; }
@@ -471,7 +471,7 @@ h1, h2, h3, p { margin: 0; }
   font-variant-numeric: tabular-nums;
 }
 .bt-countdown-slot span {
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   opacity: 0.85;
@@ -647,8 +647,8 @@ h1, h2, h3, p { margin: 0; }
   box-shadow: 0 8px 24px rgba(37, 211, 102, 0.55);
 }
 .bt-floating-phone {
-  background: var(--accent, #4F46E5);
-  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
+  background: var(--accent, #8C5A3C);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--accent, #8C5A3C) 45%, transparent);
 }
 .bt-floating-tooltip {
   background: #111827;
@@ -669,3 +669,20 @@ h1, h2, h3, p { margin: 0; }
 .sk-card .sk-img { aspect-ratio: 1 / 1; width: 100%; }
 @keyframes sk-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
 @media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
+
+/* Phones: the links people tap (footer columns and legal row, the section "see all" link, the logo) are 44px tall. The credit line is inline text and keeps its size. */
+@media (max-width: 640px) {
+  .footer .cols a, .footer .legal a { display: flex; align-items: center; min-height: 44px; line-height: 1.4; }
+  .link-accent { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 6px; margin-inline: -6px; }
+  .logo { display: flex; align-items: center; justify-content: center; min-height: 44px; }
+  .footer .lang-btn { min-height: 44px; }
+}
+/* The fixed Call and WhatsApp bar (and the chat circle above it) would sit over the last lines of the footer, the credit and the language button. */
+@media (max-width: 768px) {
+  body:not(:has(.stickybar)):has(.mobile-sticky-bar) .footer { padding-bottom: 104px; }
+}
+
+/* Phones: a field under 16px makes iOS zoom the page in when it is tapped. */
+@media (max-width: 640px) {
+  .toolbar .select { font-size: 16px; }
+}

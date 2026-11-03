@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Baloo_Da_2, Hind_Siliguri } from "next/font/google";
 import Link from "next/link";
-import { BrandLockup } from "@/components/brand-logo";
-import { ContactIcon } from "@biztrackbd/ui";
+import { BrandLockup, ContactIcon, DoubleSubmitGuard } from "@biztrackbd/ui";
+import "@biztrackbd/ui/brand.css";
 import { getContact, type Contact } from "@/lib/contact";
 import "./marketing.css";
 import "./site.css";
@@ -146,7 +146,7 @@ import { PlatformTracker } from "@/components/platform-tracker";
 import { NativeAnalyticsTracker } from "@/components/native-analytics-tracker";
 import { PostHogProvider } from "@/components/posthog-provider";
 import { SiteNavigation } from "@/components/site-navigation";
-import { DoubleSubmitGuard } from "@biztrackbd/ui";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const CONTACT = await getContact();
@@ -170,6 +170,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <a className="skip-link" href="#main">Skip to main content</a>
         <PlatformTracker />
         <NativeAnalyticsTracker />
+        <SpeedInsights />
         <header className="site-head">
           <div className="wrap row-between">
             <Link href="/" className="brand" prefetch={false}>
@@ -202,7 +203,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
 
               <div className="foot-col">
-                <h4>Platform</h4>
+                <h3>Platform</h3>
                 <nav aria-label="Product Links">
                   <Link href="/product" prefetch={false}>Platform Architecture</Link>
                   <Link href="/features" prefetch={false}>Commerce Overview</Link>
@@ -216,7 +217,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
 
               <div className="foot-col">
-                <h4>Logistics &amp; Pay</h4>
+                <h3>Logistics &amp; Pay</h3>
                 <nav aria-label="Integrations Links">
                   <Link href="/tools/courier-fraud-checker" prefetch={false}>Free Courier Fraud Checker</Link>
                   <Link href="/couriers#steadfast" prefetch={false}>Steadfast Automation</Link>
@@ -227,7 +228,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
 
               <div className="foot-col foot-contact">
-                <h4>Get in touch</h4>
+                <h3>Get in touch</h3>
                 <ul className="contact-cards" aria-label="Contact details">
                   <li>
                     <a href={`mailto:${CONTACT.email}`}>
@@ -255,7 +256,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
 
               <div className="foot-col">
-                <h4>Company &amp; Trust</h4>
+                <h3>Company &amp; Trust</h3>
                 <nav aria-label="Company Links">
                   <a href="https://digitaldude.co.uk" target="_blank" rel="noopener noreferrer">
                     The Digital Dude ↗

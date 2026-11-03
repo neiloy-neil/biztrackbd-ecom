@@ -68,7 +68,7 @@ export function AnalyticsTrendChart({
               <div
                 style={{
                   height: `${heightPercent}%`,
-                  background: point.signups > 0 ? "#60A5FA" : "#E2E8F0",
+                  background: point.signups > 0 ? "#60A5FA" : "var(--line)",
                   borderRadius: "3px 3px 0 0",
                   position: "relative",
                   overflow: "hidden",
@@ -95,7 +95,7 @@ export function AnalyticsTrendChart({
       </div>
 
       {/* Axis labels */}
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontSize: 11, color: "var(--ink-3)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontSize: 12, color: "var(--ink-3)" }}>
         <span>{trend[0]?.label}</span>
         {trend.length > 2 && <span>{trend[Math.floor(trend.length / 2)]?.label}</span>}
         <span>{trend[trend.length - 1]?.label}</span>

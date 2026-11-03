@@ -54,7 +54,7 @@ export {
   type CustomerRow, type CustomerSegment, type CustomerActivityItem, type CustomerAddressView,
   type CustomerDetailView, type CreateCustomerInput, type UpdateCustomerInput,
 } from "./admin/customers";
-export { listCoupons, saveCoupon, setCouponActive, deleteCoupon, couponStatus, CouponInput, type CouponStatus } from "./admin/coupons";
+export { COUPONS_PAGE_SIZE, listCoupons, listCouponsPage, getCoupon, saveCoupon, setCouponActive, deleteCoupon, couponStatus, CouponInput, type CouponStatus } from "./admin/coupons";
 export { submitContactMessage, listContactMessages, markContactRead, replyToContact, closeContact, ContactRateLimitError, CONTACT_MESSAGE_MAX, CONTACT_REPLY_MAX, type ContactInput, type ContactRow, type ContactStatus, type ContactTab } from "./admin/contact-inbox";
 export { requestStockAlert, listStockAlerts, notifyRestocked, sweepStockAlerts, removeStockAlerts, type StockAlertRow, type RestockSummary } from "./admin/stock-alerts";
 export { storeOriginFor } from "./storefront/origin";
@@ -121,6 +121,8 @@ export {
 export { accessState, statusFor, addPeriod, ACCESS_LABELS, GRACE_DAYS, READ_ONLY_UNTIL_DAY, type AccessState, type Access, type AccessInput } from "./platform/lifecycle";
 export { scanBrandRisk } from "./platform/brand";
 export * from "./platform/templates";
+export * from "./platform/theme-store";
+export { premiumPagesFor } from "./builder/premium-pages";
 export * from "./platform/template-bundle";
 export * from "./platform/template-studio";
 export * from "./platform/template-previews";
@@ -134,10 +136,10 @@ export {
   type PlanView, type BillingOverview, type ProofView, type PayTo, type PlanChargeQuote,
 } from "./platform/billing";
 export {
-  getOverview, listTenants, getTenantDetail, addTenantNote, listTenantNotes, listPayments, approveSubscriptionPayment, rejectSubscriptionPayment, suspendTenant, reactivateTenant, extendTrial, changePlan, reviewQuarantine,
-  listPlans, updatePlan, listPlatformAudit, runBillingLifecycle, assertPlatformCan, canPlatform, PLATFORM_PERMISSIONS,
+  getOverview, listTenants, getTenantDetail, addTenantNote, listTenantNotes, listPayments, listPaymentsPage, PAYMENTS_PAGE_SIZE, approveSubscriptionPayment, rejectSubscriptionPayment, suspendTenant, reactivateTenant, extendTrial, changePlan, reviewQuarantine,
+  listPlans, updatePlan, listPlatformAudit, listPlatformAuditPage, AUDIT_PAGE_SIZE, runBillingLifecycle, assertPlatformCan, canPlatform, PLATFORM_PERMISSIONS,
   recordTenantCrmActivity, updateTenantLeadStage, scheduleTenantFollowUp, listPlatformCrmTemplates, upsertPlatformCrmTemplate,
-  type PlatformActor, type PlatformRole, type PlatformArea, type PlatformOverview, type TenantRow, type TenantCounts, type TenantDetail, type TenantNoteRow, type TenantFilter, type PaymentRow, type Approved, type PlanPatch, type LifecycleResult,
+  type PlatformActor, type PlatformRole, type PlatformArea, type PlatformOverview, type TenantRow, type TenantCounts, type TenantDetail, type TenantNoteRow, type TenantFilter, type PaymentRow, type Approved, type PlanPatch, type PlanAdminView, type LifecycleResult,
   type TenantCrmActivityRow, type RecordCrmActivityInput,
 } from "./platform/admin";
 export {
@@ -225,7 +227,7 @@ export * from "./landing/offers";
 export * from "./landing/templates";
 export * from "./landing/stats";
 export { checkDomain, recheckDomain, sweepDomains, dnsInstruction, setDnsResolver, setVercelClient, vercelFromEnv, type DnsResolver, type VercelDomainClient, type DnsInstruction, type DnsRecordItem, type CheckOutcome, type SweepSummary } from "./domains/verify";
-export { listPlatformDomains, checkPlatformDomain, type PlatformDomainRow, type DomainFilter } from "./platform/domains";
+export { listPlatformDomains, listPlatformDomainsPage, DOMAINS_PAGE_SIZE, checkPlatformDomain, type PlatformDomainRow, type DomainFilter } from "./platform/domains";
 
 // Phase 9: loyalty points, VIP tiers and referrals
 export { TIERS, tiersOf, tierFor, tierOf, nextTier, pointsFor, pointsValue, priceLoyalty, hashClient, REFERRAL_CODE, type LoyaltySettings, type LoyaltyPricing, type Tier, type TierLevel } from "./loyalty/engine";
@@ -536,3 +538,4 @@ export * from "./platform/notify";
 export * from "./platform/native-analytics";
 export * from "./notifications/push-service";
 export { sealField, openField, isSealed } from "./vault/field-secret";
+export { PLAN_LIMIT_FIELDS, PLAN_FEATURE_FIELDS, type PlanFamily, type FeatureField } from "./platform/plan-schema";

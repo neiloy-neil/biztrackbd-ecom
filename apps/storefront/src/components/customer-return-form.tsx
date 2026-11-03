@@ -402,7 +402,7 @@ export function CustomerReturnFormComponent({
           <div>
             <div style={{ fontSize: 13.5, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span>{t.photoProof}</span>
-              {isDefect && <span style={{ color: "var(--danger)", fontSize: 11.5 }}>* {lang === "bn" ? "আবশ্যক" : "Required"}</span>}
+              {isDefect && <span style={{ color: "var(--danger)", fontSize: 12 }}>* {lang === "bn" ? "আবশ্যক" : "Required"}</span>}
             </div>
             {isDefect && (
               <p className="muted" style={{ fontSize: 12, marginTop: 2 }}>{t.photoMandatoryNotice}</p>
@@ -426,7 +426,7 @@ export function CustomerReturnFormComponent({
                       background: "rgba(0,0,0,0.6)",
                       color: "#fff",
                       border: "none",
-                      fontSize: 10,
+                      fontSize: 12,
                       cursor: "pointer",
                       display: "flex",
                       alignItems: "center",
@@ -454,7 +454,7 @@ export function CustomerReturnFormComponent({
                   }}
                 >
                   <span style={{ fontSize: 18, color: "var(--muted)" }}>+</span>
-                  <span style={{ fontSize: 10, color: "var(--muted)" }}>Photo</span>
+                  <span style={{ fontSize: 12, color: "var(--muted)" }}>Photo</span>
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp"

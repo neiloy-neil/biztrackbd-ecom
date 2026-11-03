@@ -8,10 +8,11 @@ let report: RlsReport;
 // PlatformConfig: migration 060 lets the marketing site read ONLY the public keys (contact details, SEO text) through a row policy; every
 // secret row stays hidden (the core test "reads only the public settings, never a secret" proves it with real rows).
 // PublicToolUsage: the free courier fraud checker's per-visitor counter, written and read by the marketing site.
+// SitePlan: the Business-website plan catalogue, read by every store like Plan (migration 075 grants SELECT only; changes go through the platform role).
 // PlatformBlogPost: guides written in Platform Admin; the marketing site reads only published, due rows (row-level security hides drafts).
 // PlatformVisitorSession, PlatformVisitorEvent, PlatformClientError: the marketing site records visits and browser errors as the app role (migration 064),
 // so the app role has an open policy on them. This is the platform's own analytics, not store data; tighten it if a store ever gets a query path to them.
-const PLATFORM_READABLE = ["Plan", "Announcement", "Template", "Tenant", "PlatformConfig", "PublicToolUsage", "PlatformBlogPost", "PlatformVisitorSession", "PlatformVisitorEvent", "PlatformClientError"];
+const PLATFORM_READABLE = ["Plan", "SitePlan", "Announcement", "Template", "Tenant", "PlatformConfig", "PublicToolUsage", "PlatformBlogPost", "PlatformVisitorSession", "PlatformVisitorEvent", "PlatformClientError"];
 const urls = testUrls();
 
 beforeAll(async () => {

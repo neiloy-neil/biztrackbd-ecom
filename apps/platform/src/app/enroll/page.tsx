@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AuthBrand } from "@/components/auth-brand";
 import { redirect } from "next/navigation";
 import { resolveAuth } from "@/lib/session";
 import { logoutAction } from "../login/actions";
@@ -14,7 +15,8 @@ export default async function Enroll() {
   if (a.state === "mfa") redirect("/login/mfa");
   if (a.state === "ok") redirect("/");
   return (
-    <div className="card" style={{ margin: "64px auto", maxWidth: 460 }}>
+    <div role="main" className="card" style={{ margin: "64px auto", maxWidth: 460 }}>
+      <AuthBrand />
       <h1 style={{ marginTop: 0 }}>Set up two-factor sign-in</h1>
       <p className="muted">Signed in as {a.user.email}. You cannot use the platform until this is done.</p>
       <EnrollPanel />

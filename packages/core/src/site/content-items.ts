@@ -1,6 +1,7 @@
 import { withTenant, Prisma, type SiteContentKind, type SiteContentItem } from "@biztrackbd/db";
 import { z } from "zod";
-import { NotFoundError, ValidationError } from "../errors";
+import { NotFoundError, PlanLimitError, ValidationError } from "../errors";
+import { getEffectivePlan } from "../limits/plan";
 
 export type { SiteContentKind, SiteContentItem };
 
@@ -315,6 +316,12 @@ export async function upsertContentItem(
           isPublished: parsed.isPublished,
         },
       });
+    }
+
+    const { contentItems: cap } = await getEffectivePlan(tx);
+    if (cap !== null) {
+      const used = await tx.siteContentItem.count({ where: { tenantId } });
+      if (used >= cap) throw new PlanLimitError("content items", cap, used);
     }
 
     // Creating new item: default sortOrder to after highest existing

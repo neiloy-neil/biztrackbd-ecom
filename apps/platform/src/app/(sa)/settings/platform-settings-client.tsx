@@ -451,7 +451,7 @@ export function PlatformSettingsClient({
       {/* Page Header */}
       <div>
         <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Platform Settings & Gateways</h1>
-        <p style={{ color: "#4B4B73", margin: "6px 0 0 0", fontSize: 13.5 }}>
+        <p style={{ color: "var(--ink-2)", margin: "6px 0 0 0", fontSize: 13.5 }}>
           Centralized configuration for platform AI engines, SMS providers, master courier networks, and payment gateways.
         </p>
       </div>
@@ -468,16 +468,16 @@ export function PlatformSettingsClient({
       )}
 
       {/* Navigation Tabs */}
-      <div style={{ display: "flex", gap: 8, borderBottom: "1px solid #E7E7F0", paddingBottom: 2, overflowX: "auto", maxWidth: "100%" }}>
+      <div style={{ display: "flex", gap: 8, borderBottom: "1px solid var(--line)", paddingBottom: 2, overflowX: "auto", maxWidth: "100%" }}>
         <button
           type="button"
           onClick={() => { setActiveTab("ai"); setNotice(null); }}
           style={{
             padding: "8px 16px",
             border: "none",
-            borderBottom: activeTab === "ai" ? "3px solid #5B4FE8" : "3px solid transparent",
+            borderBottom: activeTab === "ai" ? "3px solid var(--brand)" : "3px solid transparent",
             background: "none",
-            color: activeTab === "ai" ? "#5B4FE8" : "#4B4B73",
+            color: activeTab === "ai" ? "var(--brand)" : "var(--ink-2)",
             fontWeight: 700,
             fontSize: 14,
             cursor: "pointer",
@@ -491,9 +491,9 @@ export function PlatformSettingsClient({
           style={{
             padding: "8px 16px",
             border: "none",
-            borderBottom: activeTab === "sms" ? "3px solid #5B4FE8" : "3px solid transparent",
+            borderBottom: activeTab === "sms" ? "3px solid var(--brand)" : "3px solid transparent",
             background: "none",
-            color: activeTab === "sms" ? "#5B4FE8" : "#4B4B73",
+            color: activeTab === "sms" ? "var(--brand)" : "var(--ink-2)",
             fontWeight: 700,
             fontSize: 14,
             cursor: "pointer",
@@ -507,9 +507,9 @@ export function PlatformSettingsClient({
           style={{
             padding: "8px 16px",
             border: "none",
-            borderBottom: activeTab === "couriers" ? "3px solid #5B4FE8" : "3px solid transparent",
+            borderBottom: activeTab === "couriers" ? "3px solid var(--brand)" : "3px solid transparent",
             background: "none",
-            color: activeTab === "couriers" ? "#5B4FE8" : "#4B4B73",
+            color: activeTab === "couriers" ? "var(--brand)" : "var(--ink-2)",
             fontWeight: 700,
             fontSize: 14,
             cursor: "pointer",
@@ -523,9 +523,9 @@ export function PlatformSettingsClient({
           style={{
             padding: "8px 16px",
             border: "none",
-            borderBottom: activeTab === "payments" ? "3px solid #5B4FE8" : "3px solid transparent",
+            borderBottom: activeTab === "payments" ? "3px solid var(--brand)" : "3px solid transparent",
             background: "none",
-            color: activeTab === "payments" ? "#5B4FE8" : "#4B4B73",
+            color: activeTab === "payments" ? "var(--brand)" : "var(--ink-2)",
             fontWeight: 700,
             fontSize: 14,
             cursor: "pointer",
@@ -539,9 +539,9 @@ export function PlatformSettingsClient({
           style={{
             padding: "8px 16px",
             border: "none",
-            borderBottom: activeTab === "mail" ? "3px solid #5B4FE8" : "3px solid transparent",
+            borderBottom: activeTab === "mail" ? "3px solid var(--brand)" : "3px solid transparent",
             background: "none",
-            color: activeTab === "mail" ? "#5B4FE8" : "#4B4B73",
+            color: activeTab === "mail" ? "var(--brand)" : "var(--ink-2)",
             fontWeight: 700,
             fontSize: 14,
             cursor: "pointer",
@@ -556,9 +556,9 @@ export function PlatformSettingsClient({
           style={{
             padding: "8px 16px",
             border: "none",
-            borderBottom: activeTab === "fraud" ? "3px solid #5B4FE8" : "3px solid transparent",
+            borderBottom: activeTab === "fraud" ? "3px solid var(--brand)" : "3px solid transparent",
             background: "none",
-            color: activeTab === "fraud" ? "#5B4FE8" : "#4B4B73",
+            color: activeTab === "fraud" ? "var(--brand)" : "var(--ink-2)",
             fontWeight: 700,
             fontSize: 14,
             cursor: "pointer",
@@ -573,9 +573,9 @@ export function PlatformSettingsClient({
           style={{
             padding: "8px 16px",
             border: "none",
-            borderBottom: activeTab === "google" ? "3px solid #5B4FE8" : "3px solid transparent",
+            borderBottom: activeTab === "google" ? "3px solid var(--brand)" : "3px solid transparent",
             background: "none",
-            color: activeTab === "google" ? "#5B4FE8" : "#4B4B73",
+            color: activeTab === "google" ? "var(--brand)" : "var(--ink-2)",
             fontWeight: 700,
             fontSize: 14,
             cursor: "pointer",
@@ -590,9 +590,9 @@ export function PlatformSettingsClient({
           style={{
             padding: "8px 16px",
             border: "none",
-            borderBottom: activeTab === "seo" ? "3px solid #5B4FE8" : "3px solid transparent",
+            borderBottom: activeTab === "seo" ? "3px solid var(--brand)" : "3px solid transparent",
             background: "none",
-            color: activeTab === "seo" ? "#5B4FE8" : "#4B4B73",
+            color: activeTab === "seo" ? "var(--brand)" : "var(--ink-2)",
             fontWeight: 700,
             fontSize: 14,
             cursor: "pointer",
@@ -607,9 +607,9 @@ export function PlatformSettingsClient({
           style={{
             padding: "8px 16px",
             border: "none",
-            borderBottom: activeTab === "contact" ? "3px solid #5B4FE8" : "3px solid transparent",
+            borderBottom: activeTab === "contact" ? "3px solid var(--brand)" : "3px solid transparent",
             background: "none",
-            color: activeTab === "contact" ? "#5B4FE8" : "#4B4B73",
+            color: activeTab === "contact" ? "var(--brand)" : "var(--ink-2)",
             fontWeight: 700,
             fontSize: 14,
             cursor: "pointer",
@@ -621,17 +621,17 @@ export function PlatformSettingsClient({
 
       {/* 1. AI SUITE TAB */}
       {activeTab === "ai" && (
-        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: 24 }}>
+        <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: 24 }}>
           <form onSubmit={handleSaveAi} style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 640 }}>
             <div>
               <div style={{ fontSize: 16, fontWeight: 700 }}>Google Gemini System Key</div>
-              <div style={{ fontSize: 13, color: "#6B6B8D", marginTop: 4 }}>
+              <div style={{ fontSize: 13, color: "var(--ink-3)", marginTop: 4 }}>
                 Platform default used for merchant copy generation, order address parser, and storefront copilot.
               </div>
             </div>
 
             {aiMasked && (
-              <div style={{ padding: "8px 12px", background: "#F4F3FF", borderRadius: 8, fontSize: 13, color: "#5B4FE8", fontWeight: 600 }}>
+              <div style={{ padding: "8px 12px", background: "var(--tint)", borderRadius: 8, fontSize: 13, color: "var(--brand)", fontWeight: 600 }}>
                 Active Key: <code>{aiMasked}</code> (Source: {initialAiConfig.source})
               </div>
             )}
@@ -642,19 +642,20 @@ export function PlatformSettingsClient({
               </label>
               <input
                 type="password"
+                aria-label="Gemini API key"
                 value={aiApiKey}
                 onChange={(e) => setAiApiKey(e.target.value)}
                 placeholder="AIzaSy..."
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               />
             </div>
 
             <div>
               <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Default Gemini Model</label>
-              <select
+              <select aria-label="Default Gemini Model"
                 value={aiModel}
                 onChange={(e) => setAiModel(e.target.value)}
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               >
                 <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended)</option>
                 <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite (500 Req/Day Free)</option>
@@ -669,7 +670,7 @@ export function PlatformSettingsClient({
               <button
                 type="submit"
                 disabled={saving}
-                style={{ padding: "10px 20px", background: "#5B4FE8", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
+                style={{ padding: "10px 20px", background: "var(--brand)", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
               >
                 {saving ? "Saving…" : "Save AI Configuration"}
               </button>
@@ -677,7 +678,7 @@ export function PlatformSettingsClient({
                 type="button"
                 onClick={handleTestAi}
                 disabled={aiTesting}
-                style={{ padding: "10px 18px", background: "#F4F3FF", color: "#5B4FE8", border: "1px solid #5B4FE8", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
+                style={{ padding: "10px 18px", background: "var(--tint)", color: "var(--brand)", border: "1px solid var(--brand)", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
               >
                 {aiTesting ? "Testing…" : "Test Latency & Ping"}
               </button>
@@ -705,16 +706,16 @@ export function PlatformSettingsClient({
 
       {/* 2. SMS GATEWAY TAB */}
       {activeTab === "sms" && (
-        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: 24 }}>
+        <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: 24 }}>
           <form onSubmit={handleSaveSms} style={{ display: "flex", flexDirection: "column", gap: 20, maxWidth: 680 }}>
             <div>
               <div style={{ fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
                 <span>Platform SMS Gateway</span>
-                <span style={{ fontSize: 11, padding: "2px 8px", background: "#E8F6EE", color: "#15803D", borderRadius: 12, fontWeight: 700 }}>
+                <span style={{ fontSize: 12, padding: "2px 8px", background: "#E8F6EE", color: "#15803D", borderRadius: 12, fontWeight: 700 }}>
                   Database-Driven
                 </span>
               </div>
-              <div style={{ fontSize: 13, color: "#6B6B8D", marginTop: 4 }}>
+              <div style={{ fontSize: 13, color: "var(--ink-3)", marginTop: 4 }}>
                 Shared platform gateway used for customer OTPs, order updates, and delivery alerts. Credentials are stored securely in the database so you can add multiple providers and switch between them anytime.
               </div>
             </div>
@@ -738,23 +739,23 @@ export function PlatformSettingsClient({
                       style={{
                         padding: "12px 14px",
                         textAlign: "left",
-                        border: isSelected ? "2px solid #5B4FE8" : "1px solid #E2E8F0",
+                        border: isSelected ? "2px solid var(--brand)" : "1px solid var(--line)",
                         borderRadius: 10,
-                        background: isSelected ? "#F4F3FF" : "#F8FAFC",
+                        background: isSelected ? "var(--tint)" : "var(--bg)",
                         cursor: "pointer",
                         display: "flex",
                         flexDirection: "column",
                         gap: 4,
                       }}
                     >
-                      <div style={{ fontSize: 13, fontWeight: 700, color: isSelected ? "#5B4FE8" : "#1E293B" }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: isSelected ? "var(--brand)" : "#1E293B" }}>
                         {p.name}
                       </div>
                       <div
                         style={{
-                          fontSize: 11,
+                          fontSize: 12,
                           fontWeight: 600,
-                          color: p.badge.startsWith("Ready") ? "#15803D" : "#64748B",
+                          color: p.badge.startsWith("Ready") ? "#15803D" : "var(--ink-3)",
                         }}
                       >
                         {p.badge}
@@ -807,24 +808,24 @@ export function PlatformSettingsClient({
               <>
                 <div>
                   <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Endpoint URL</label>
-                  <input
+                  <input aria-label="Endpoint URL"
                     type="url"
                     value={customEndpoint}
                     onChange={(e) => setCustomEndpoint(e.target.value)}
                     placeholder="https://api.gateway.com/sms/send or https://...?to={to}&msg={message}"
-                    style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
+                    style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
                   />
-                  <span style={{ fontSize: 11, color: "#64748B", marginTop: 4, display: "block" }}>
+                  <span style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 4, display: "block" }}>
                     Supports POST with JSON or GET with placeholders ({String.fromCharCode(123)}to{String.fromCharCode(125)}, {String.fromCharCode(123)}message{String.fromCharCode(125)}, {String.fromCharCode(123)}sender_id{String.fromCharCode(125)}).
                   </span>
                 </div>
 
                 <div>
                   <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>HTTP Method</label>
-                  <select
+                  <select aria-label="HTTP Method"
                     value={customMethod}
                     onChange={(e) => setCustomMethod(e.target.value as "GET" | "POST")}
-                    style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
+                    style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
                   >
                     <option value="POST">POST (JSON Body: to, message, sender_id, api_key)</option>
                     <option value="GET">GET (Query Parameters in URL)</option>
@@ -847,16 +848,14 @@ export function PlatformSettingsClient({
                     ? `Current: ${smsConfig.providers[smsProvider as keyof typeof smsConfig.providers]?.maskedApiKey} (Enter new key to change)`
                     : `Enter ${smsProvider} API key / token`
                 }
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               />
             </div>
 
             {smsProvider !== "greenweb" && (
               <div>
-                <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>
-                  Sender ID (Masking Header / Number)
-                </label>
-                <input
+                <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Sender ID (Masking Header / Number)</label>
+                <input aria-label="Sender ID (Masking Header / Number)"
                   type="text"
                   value={smsSenderId}
                   onChange={(e) => setSmsSenderId(e.target.value)}
@@ -865,7 +864,7 @@ export function PlatformSettingsClient({
                       ? "e.g. 8809612... or Brand Masking ID approved on BulkSMSBD"
                       : "e.g. Approved alphanumeric or numeric sender ID"
                   }
-                  style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
+                  style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
                 />
               </div>
             )}
@@ -877,7 +876,7 @@ export function PlatformSettingsClient({
                 disabled={saving}
                 style={{
                   padding: "10px 22px",
-                  background: "#5B4FE8",
+                  background: "var(--brand)",
                   color: "#fff",
                   border: "none",
                   borderRadius: 8,
@@ -890,13 +889,13 @@ export function PlatformSettingsClient({
 
               {smsBalance && smsBalance.balance !== null && (
                 <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
-                  <span style={{ color: "#64748B" }}>Remaining Balance:</span>
+                  <span style={{ color: "var(--ink-3)" }}>Remaining Balance:</span>
                   <strong style={{ color: "#15803D" }}>৳ {smsBalance.balance.toLocaleString("en-BD")}</strong>
                   <button
                     type="button"
                     onClick={handleRefreshBalance}
                     disabled={refreshingBalance}
-                    style={{ background: "none", border: "none", color: "#5B4FE8", cursor: "pointer", fontSize: 12, textDecoration: "underline" }}
+                    style={{ background: "none", border: "none", color: "var(--brand)", cursor: "pointer", fontSize: 12, textDecoration: "underline" }}
                   >
                     {refreshingBalance ? "..." : "Refresh"}
                   </button>
@@ -905,9 +904,9 @@ export function PlatformSettingsClient({
             </div>
 
             {/* Test SMS Block */}
-            <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid #E7E7F0" }}>
+            <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--line)" }}>
               <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Send Diagnostic SMS</div>
-              <div style={{ fontSize: 12, color: "#64748B", marginBottom: 8 }}>
+              <div style={{ fontSize: 12, color: "var(--ink-3)", marginBottom: 8 }}>
                 Test the currently active provider ({smsProvider}) with a real SMS to verify credentials and latency.
               </div>
               <div style={{ display: "flex", gap: 10 }}>
@@ -916,7 +915,7 @@ export function PlatformSettingsClient({
                   value={smsTestPhone}
                   onChange={(e) => setSmsTestPhone(e.target.value)}
                   placeholder="017xxxxxxxx"
-                  style={{ flex: 1, padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
+                  style={{ flex: 1, padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
                 />
                 <button
                   type="button"
@@ -924,9 +923,9 @@ export function PlatformSettingsClient({
                   disabled={smsTesting}
                   style={{
                     padding: "10px 20px",
-                    background: "#F4F3FF",
-                    color: "#5B4FE8",
-                    border: "1px solid #5B4FE8",
+                    background: "var(--tint)",
+                    color: "var(--brand)",
+                    border: "1px solid var(--brand)",
                     borderRadius: 8,
                     fontWeight: 700,
                     cursor: "pointer",
@@ -957,11 +956,11 @@ export function PlatformSettingsClient({
 
       {/* 3. COURIERS TAB */}
       {activeTab === "couriers" && (
-        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: 24 }}>
+        <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: 24 }}>
           <form onSubmit={handleSaveCouriers} style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 680 }}>
             <div>
               <div style={{ fontSize: 16, fontWeight: 700 }}>Free Courier Fraud Shield Master Keys</div>
-              <div style={{ fontSize: 13, color: "#6B6B8D", marginTop: 4 }}>
+              <div style={{ fontSize: 13, color: "var(--ink-3)", marginTop: 4 }}>
                 Master API credentials powering the platform-wide Free Courier Fraud Lead Magnet REST API (Steadfast, Pathao, RedX, CarryBee, Paperfly).
               </div>
             </div>
@@ -969,64 +968,64 @@ export function PlatformSettingsClient({
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div>
                 <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 4 }}>Steadfast API Key</label>
-                <input
+                <input aria-label="Steadfast API Key"
                   type="password"
                   value={sfApiKey}
                   onChange={(e) => setSfApiKey(e.target.value)}
                   placeholder={initialCourierConfig.steadfastApiKey || "Enter key..."}
-                  style={{ width: "100%", padding: "8px 10px", border: "1px solid #D5D5E4", borderRadius: 6, fontSize: 13 }}
+                  style={{ width: "100%", padding: "8px 10px", border: "1px solid var(--line-2)", borderRadius: 6, fontSize: 13 }}
                 />
               </div>
               <div>
                 <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 4 }}>Steadfast Secret Key</label>
-                <input
+                <input aria-label="Steadfast Secret Key"
                   type="password"
                   value={sfSecretKey}
                   onChange={(e) => setSfSecretKey(e.target.value)}
                   placeholder={initialCourierConfig.steadfastSecretKey || "Enter secret..."}
-                  style={{ width: "100%", padding: "8px 10px", border: "1px solid #D5D5E4", borderRadius: 6, fontSize: 13 }}
+                  style={{ width: "100%", padding: "8px 10px", border: "1px solid var(--line-2)", borderRadius: 6, fontSize: 13 }}
                 />
               </div>
 
               <div>
                 <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 4 }}>Pathao Client ID</label>
-                <input
+                <input aria-label="Pathao Client ID"
                   type="password"
                   value={pathaoClientId}
                   onChange={(e) => setPathaoClientId(e.target.value)}
                   placeholder={initialCourierConfig.pathaoClientId || "Enter client id..."}
-                  style={{ width: "100%", padding: "8px 10px", border: "1px solid #D5D5E4", borderRadius: 6, fontSize: 13 }}
+                  style={{ width: "100%", padding: "8px 10px", border: "1px solid var(--line-2)", borderRadius: 6, fontSize: 13 }}
                 />
               </div>
               <div>
                 <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 4 }}>Pathao Client Secret</label>
-                <input
+                <input aria-label="Pathao Client Secret"
                   type="password"
                   value={pathaoClientSecret}
                   onChange={(e) => setPathaoClientSecret(e.target.value)}
                   placeholder={initialCourierConfig.pathaoClientSecret || "Enter secret..."}
-                  style={{ width: "100%", padding: "8px 10px", border: "1px solid #D5D5E4", borderRadius: 6, fontSize: 13 }}
+                  style={{ width: "100%", padding: "8px 10px", border: "1px solid var(--line-2)", borderRadius: 6, fontSize: 13 }}
                 />
               </div>
 
               <div>
                 <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 4 }}>RedX API Key</label>
-                <input
+                <input aria-label="RedX API Key"
                   type="password"
                   value={redxKey}
                   onChange={(e) => setRedxKey(e.target.value)}
                   placeholder={initialCourierConfig.redxApiKey || "Enter key..."}
-                  style={{ width: "100%", padding: "8px 10px", border: "1px solid #D5D5E4", borderRadius: 6, fontSize: 13 }}
+                  style={{ width: "100%", padding: "8px 10px", border: "1px solid var(--line-2)", borderRadius: 6, fontSize: 13 }}
                 />
               </div>
               <div>
                 <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 4 }}>CarryBee API Key</label>
-                <input
+                <input aria-label="CarryBee API Key"
                   type="password"
                   value={carrybeeKey}
                   onChange={(e) => setCarrybeeKey(e.target.value)}
                   placeholder={initialCourierConfig.carrybeeApiKey || "Enter key..."}
-                  style={{ width: "100%", padding: "8px 10px", border: "1px solid #D5D5E4", borderRadius: 6, fontSize: 13 }}
+                  style={{ width: "100%", padding: "8px 10px", border: "1px solid var(--line-2)", borderRadius: 6, fontSize: 13 }}
                 />
               </div>
             </div>
@@ -1035,7 +1034,7 @@ export function PlatformSettingsClient({
               <button
                 type="submit"
                 disabled={saving}
-                style={{ padding: "10px 20px", background: "#5B4FE8", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
+                style={{ padding: "10px 20px", background: "var(--brand)", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
               >
                 {saving ? "Saving…" : "Save Courier Credentials"}
               </button>
@@ -1043,20 +1042,20 @@ export function PlatformSettingsClient({
                 type="button"
                 onClick={handleTestCouriers}
                 disabled={couriersTesting}
-                style={{ padding: "10px 18px", background: "#F4F3FF", color: "#5B4FE8", border: "1px solid #5B4FE8", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
+                style={{ padding: "10px 18px", background: "var(--tint)", color: "var(--brand)", border: "1px solid var(--brand)", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
               >
                 {couriersTesting ? "Pinging…" : "Ping Courier Networks"}
               </button>
             </div>
 
             {courierTestResult && (
-              <div style={{ marginTop: 12, padding: 14, background: "#FAFAFC", borderRadius: 8, border: "1px solid #E7E7F0" }}>
+              <div style={{ marginTop: 12, padding: 14, background: "var(--bg)", borderRadius: 8, border: "1px solid var(--line)" }}>
                 <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>Courier Networks Status:</div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 8 }}>
                   {Object.entries(courierTestResult.providers).map(([k, v]) => (
-                    <div key={k} style={{ padding: "6px 10px", borderRadius: 6, background: "#fff", border: "1px solid #E7E7F0", fontSize: 12 }}>
+                    <div key={k} style={{ padding: "6px 10px", borderRadius: 6, background: "#fff", border: "1px solid var(--line)", fontSize: 12 }}>
                       <div style={{ fontWeight: 600, textTransform: "capitalize" }}>{k}</div>
-                      <div style={{ color: v.status === "UP" ? "#15803D" : v.status === "DOWN" ? "#DC2626" : "#6B6B8D", fontWeight: 700, marginTop: 2 }}>
+                      <div style={{ color: v.status === "UP" ? "#15803D" : v.status === "DOWN" ? "#DC2626" : "var(--ink-3)", fontWeight: 700, marginTop: 2 }}>
                         {v.status} {v.latencyMs > 0 && `(${v.latencyMs}ms)`}
                       </div>
                     </div>
@@ -1070,11 +1069,11 @@ export function PlatformSettingsClient({
 
       {/* 4. UDDOKTAPAY TAB */}
       {activeTab === "payments" && (
-        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: 24 }}>
+        <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: 24 }}>
           <form onSubmit={handleSaveUddoktaPay} style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 640 }}>
             <div>
               <div style={{ fontSize: 16, fontWeight: 700 }}>UddoktaPay Platform Account</div>
-              <div style={{ fontSize: 13, color: "#6B6B8D", marginTop: 4 }}>
+              <div style={{ fontSize: 13, color: "var(--ink-3)", marginTop: 4 }}>
                 Automates merchant subscription renewals, recurring plan charges, and instant invoice settlements.
               </div>
             </div>
@@ -1082,17 +1081,17 @@ export function PlatformSettingsClient({
             {(() => {
               const urls = planPaymentUrls;
               return (
-                <div style={{ padding: 14, border: "1px solid #E7E7F0", borderRadius: 10, background: "#FAFAFC" }} data-testid="plan-payment-urls">
+                <div style={{ padding: 14, border: "1px solid var(--line)", borderRadius: 10, background: "var(--bg)" }} data-testid="plan-payment-urls">
                   <div style={{ fontSize: 14, fontWeight: 700 }}>Plan payment addresses</div>
-                  <div style={{ fontSize: 12.5, color: "#6B6B8D", margin: "4px 0 10px" }}>
+                  <div style={{ fontSize: 12.5, color: "var(--ink-3)", margin: "4px 0 10px" }}>
                     Sent to UddoktaPay with every plan payment, so nothing has to be set in its panel. Paste them as the panel&apos;s default Webhook (IPN) and Redirect URLs only if you want a fallback.
                   </div>
                   {([["Webhook (IPN) URL", urls.webhook, "uddokta-webhook"], ["Redirect (return) URL", urls.returnUrl, "uddokta-return"]] as const).map(([label, value, id]) => (
                     <div key={id} style={{ marginBottom: 10 }}>
                       <div style={{ fontSize: 12.5, fontWeight: 600, marginBottom: 4 }}>{label}</div>
                       <div style={{ display: "flex", gap: 8 }}>
-                        <input type="text" readOnly value={value} onFocus={(e) => e.currentTarget.select()} aria-label={label} style={{ flex: 1, padding: "8px 10px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 13, fontFamily: "monospace" }} />
-                        <button type="button" onClick={() => copyToClipboard(value, id)} style={{ padding: "8px 14px", border: "1px solid #D5D5E4", borderRadius: 8, background: "#fff", fontWeight: 600, cursor: "pointer" }}>
+                        <input type="text" readOnly value={value} onFocus={(e) => e.currentTarget.select()} aria-label={label} style={{ flex: 1, padding: "8px 10px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 13, fontFamily: "monospace" }} />
+                        <button type="button" onClick={() => copyToClipboard(value, id)} style={{ padding: "8px 14px", border: "1px solid var(--line-2)", borderRadius: 8, background: "#fff", fontWeight: 600, cursor: "pointer" }}>
                           {copiedField === id ? "Copied!" : "Copy"}
                         </button>
                       </div>
@@ -1103,41 +1102,41 @@ export function PlatformSettingsClient({
             })()}
 
             {uddoktaMasked && (
-              <div style={{ padding: "8px 12px", background: "#F4F3FF", borderRadius: 8, fontSize: 13, color: "#5B4FE8", fontWeight: 600 }}>
+              <div style={{ padding: "8px 12px", background: "var(--tint)", borderRadius: 8, fontSize: 13, color: "var(--brand)", fontWeight: 600 }}>
                 Active API Key: <code>{uddoktaMasked}</code>
               </div>
             )}
 
             <div>
               <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>UddoktaPay Base URL</label>
-              <input
+              <input aria-label="UddoktaPay Base URL"
                 type="text"
                 value={uddoktaBaseUrl}
                 onChange={(e) => setUddoktaBaseUrl(e.target.value)}
                 placeholder="https://pay.biztrack.bd"
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               />
             </div>
 
             <div>
               <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>API Key</label>
-              <input
+              <input aria-label="API Key"
                 type="password"
                 value={uddoktaApiKey}
                 onChange={(e) => setUddoktaApiKey(e.target.value)}
                 placeholder="Enter API key..."
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               />
             </div>
 
             <div>
               <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Webhook Signature Secret</label>
-              <input
+              <input aria-label="Webhook Signature Secret"
                 type="password"
                 value={uddoktaSecret}
                 onChange={(e) => setUddoktaSecret(e.target.value)}
                 placeholder="Enter webhook secret..."
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               />
             </div>
 
@@ -1145,7 +1144,7 @@ export function PlatformSettingsClient({
               <button
                 type="submit"
                 disabled={saving}
-                style={{ padding: "10px 20px", background: "#5B4FE8", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
+                style={{ padding: "10px 20px", background: "var(--brand)", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
               >
                 {saving ? "Saving…" : "Save UddoktaPay Settings"}
               </button>
@@ -1153,7 +1152,7 @@ export function PlatformSettingsClient({
                 type="button"
                 onClick={handleTestUddoktaPay}
                 disabled={uddoktaTesting}
-                style={{ padding: "10px 18px", background: "#F4F3FF", color: "#5B4FE8", border: "1px solid #5B4FE8", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
+                style={{ padding: "10px 18px", background: "var(--tint)", color: "var(--brand)", border: "1px solid var(--brand)", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
               >
                 {uddoktaTesting ? "Testing…" : "Ping Gateway"}
               </button>
@@ -1179,11 +1178,11 @@ export function PlatformSettingsClient({
 
       {/* 5. MAIL TAB */}
       {activeTab === "mail" && (
-        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: 24 }}>
+        <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: 24 }}>
           <form onSubmit={handleSaveMail} style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 640 }}>
             <div>
               <div style={{ fontSize: 16, fontWeight: 700 }}>Platform Mail & Sender Identity</div>
-              <div style={{ fontSize: 13, color: "#6B6B8D", marginTop: 4 }}>
+              <div style={{ fontSize: 13, color: "var(--ink-3)", marginTop: 4 }}>
                 Emails sent for staff invites, platform announcements, and payment verification receipts.
               </div>
             </div>
@@ -1191,56 +1190,56 @@ export function PlatformSettingsClient({
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div>
                 <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>From Email</label>
-                <input
+                <input aria-label="From Email"
                   type="email"
                   value={fromEmail}
                   onChange={(e) => setFromEmail(e.target.value)}
                   placeholder="support@biztrack.bd"
-                  style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
+                  style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
                 />
               </div>
               <div>
                 <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Sender Display Name</label>
-                <input
+                <input aria-label="Sender Display Name"
                   type="text"
                   value={fromName}
                   onChange={(e) => setFromName(e.target.value)}
                   placeholder="BizTrackBD Platform"
-                  style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
+                  style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
                 />
               </div>
             </div>
 
             <div>
               <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Resend API Key</label>
-              <input
+              <input aria-label="Resend API Key"
                 type="password"
                 value={resendKey}
                 onChange={(e) => setResendKey(e.target.value)}
                 placeholder={initialMailConfig.maskedResendKey || "re_..."}
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               />
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 12 }}>
               <div>
                 <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Custom SMTP Host (Optional)</label>
-                <input
+                <input aria-label="Custom SMTP Host (Optional)"
                   type="text"
                   value={smtpHost}
                   onChange={(e) => setSmtpHost(e.target.value)}
                   placeholder="smtp.resend.com"
-                  style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
+                  style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
                 />
               </div>
               <div>
                 <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Port</label>
-                <input
+                <input aria-label="Port"
                   type="number"
                   value={smtpPort}
                   onChange={(e) => setSmtpPort(e.target.value)}
                   placeholder="587"
-                  style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 }}
+                  style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
                 />
               </div>
             </div>
@@ -1249,7 +1248,7 @@ export function PlatformSettingsClient({
               <button
                 type="submit"
                 disabled={saving}
-                style={{ padding: "10px 20px", background: "#5B4FE8", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
+                style={{ padding: "10px 20px", background: "var(--brand)", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
               >
                 {saving ? "Saving…" : "Save Mail Settings"}
               </button>
@@ -1264,48 +1263,48 @@ export function PlatformSettingsClient({
 
       {/* 7. GOOGLE CLOUD SUITE TAB */}
       {activeTab === "google" && (
-        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: 24 }}>
+        <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: 24 }}>
           <form onSubmit={handleSaveGoogle} style={{ display: "flex", flexDirection: "column", gap: 24, maxWidth: 760 }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                <div style={{ fontSize: 18, fontWeight: 700, color: "#1F1F38" }}>Google Cloud Platform & Console Suite</div>
-                <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 12, background: "#E8F0FE", color: "#1A73E8" }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: "var(--ink)" }}>Google Cloud Platform & Console Suite</div>
+                <span style={{ fontSize: 12, fontWeight: 700, padding: "3px 8px", borderRadius: 12, background: "#E8F0FE", color: "#1A73E8" }}>
                   GCP Enterprise
                 </span>
               </div>
-              <div style={{ fontSize: 13, color: "#6B6B8D", marginTop: 4 }}>
+              <div style={{ fontSize: 13, color: "var(--ink-3)", marginTop: 4 }}>
                 Google Cloud infrastructure: Google Search Console site verification, Merchant Center Shopping catalog feed, and Google Cloud Storage (GCS) assets.
               </div>
             </div>
 
             {/* Service Status Badges */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10 }}>
-              <div style={{ padding: "10px 14px", background: "#F8F8FD", border: "1px solid #E7E7F0", borderRadius: 8 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "#6B6B8D", textTransform: "uppercase" }}>Search Console</div>
-                <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4, color: googleSiteVerification ? "#15803D" : "#6B6B8D" }}>
+              <div style={{ padding: "10px 14px", background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 8 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase" }}>Search Console</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4, color: googleSiteVerification ? "#15803D" : "var(--ink-3)" }}>
                   {googleSiteVerification ? "● Verified" : "○ Not Set"}
                 </div>
               </div>
-              <div style={{ padding: "10px 14px", background: "#F8F8FD", border: "1px solid #E7E7F0", borderRadius: 8 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "#6B6B8D", textTransform: "uppercase" }}>Merchant Center</div>
-                <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4, color: googleMerchantId ? "#15803D" : "#6B6B8D" }}>
+              <div style={{ padding: "10px 14px", background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 8 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase" }}>Merchant Center</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4, color: googleMerchantId ? "#15803D" : "var(--ink-3)" }}>
                   {googleMerchantId ? "● Linked" : "○ Not Set"}
                 </div>
               </div>
-              <div style={{ padding: "10px 14px", background: "#F8F8FD", border: "1px solid #E7E7F0", borderRadius: 8 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "#6B6B8D", textTransform: "uppercase" }}>GCS Storage</div>
-                <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4, color: googleGcsEnabled && (googleGcsBucket || googleGcsMaskedKey) ? "#15803D" : "#6B6B8D" }}>
+              <div style={{ padding: "10px 14px", background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 8 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase" }}>GCS Storage</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4, color: googleGcsEnabled && (googleGcsBucket || googleGcsMaskedKey) ? "#15803D" : "var(--ink-3)" }}>
                   {googleGcsEnabled && (googleGcsBucket || googleGcsMaskedKey) ? "● Active" : "○ Inactive"}
                 </div>
               </div>
             </div>
 
             {/* 1. Google Cloud Storage (GCS) */}
-            <div style={{ border: "1px solid #E7E7F0", borderRadius: 10, padding: 18, background: "#FAFAFD" }}>
+            <div style={{ border: "1px solid var(--line)", borderRadius: 10, padding: 18, background: "var(--bg)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
                 <div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#1F1F38" }}>1. Google Cloud Storage (GCS Bucket)</div>
-                  <div style={{ fontSize: 12.5, color: "#6B6B8D" }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: "var(--ink)" }}>1. Google Cloud Storage (GCS Bucket)</div>
+                  <div style={{ fontSize: 12.5, color: "var(--ink-3)" }}>
                     Store merchant media, invoices, product images, and automated platform backups on Google Cloud.
                   </div>
                 </div>
@@ -1324,22 +1323,22 @@ export function PlatformSettingsClient({
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
                     <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>GCP Project ID</label>
-                    <input
+                    <input aria-label="GCP Project ID"
                       type="text"
                       value={googleGcsProject}
                       onChange={(e) => setGoogleGcsProject(e.target.value)}
                       placeholder="e.g. biztrackbd-production"
-                      style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 13.5 }}
+                      style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 13.5 }}
                     />
                   </div>
                   <div>
                     <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>GCS Bucket Name</label>
-                    <input
+                    <input aria-label="GCS Bucket Name"
                       type="text"
                       value={googleGcsBucket}
                       onChange={(e) => setGoogleGcsBucket(e.target.value)}
                       placeholder="e.g. biztrackbd-media"
-                      style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 13.5 }}
+                      style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 13.5 }}
                     />
                   </div>
                 </div>
@@ -1353,9 +1352,9 @@ export function PlatformSettingsClient({
                     value={googleGcsKey}
                     onChange={(e) => setGoogleGcsKey(e.target.value)}
                     placeholder={googleGcsMaskedKey ? "Leave blank to retain active Service Account Key JSON, or paste replacement JSON..." : '{\n  "type": "service_account",\n  "project_id": "...",\n  "private_key": "..."\n}'}
-                    style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 12, fontFamily: "monospace" }}
+                    style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 12, fontFamily: "monospace" }}
                   />
-                  <div style={{ fontSize: 11.5, color: "#6B6B8D", marginTop: 4 }}>
+                  <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 4 }}>
                     Requires role: <code style={{ background: "#F0F0F8", padding: "2px 4px", borderRadius: 4 }}>Storage Object Admin (roles/storage.objectAdmin)</code>
                   </div>
                 </div>
@@ -1363,20 +1362,18 @@ export function PlatformSettingsClient({
             </div>
 
             {/* 2. Search Console & Merchant Center */}
-            <div style={{ border: "1px solid #E7E7F0", borderRadius: 10, padding: 18, background: "#FAFAFD" }}>
-              <div style={{ fontSize: 15, fontWeight: 700, color: "#1F1F38", marginBottom: 4 }}>
+            <div style={{ border: "1px solid var(--line)", borderRadius: 10, padding: 18, background: "var(--bg)" }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--ink)", marginBottom: 4 }}>
                 2. Search Console &amp; Merchant Center Catalog Feed
               </div>
-              <div style={{ fontSize: 12.5, color: "#6B6B8D", marginBottom: 14 }}>
+              <div style={{ fontSize: 12.5, color: "var(--ink-3)", marginBottom: 14 }}>
                 Master domain verification tag and Google Merchant Center product catalog feed.
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 <div>
-                  <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>
-                    Google Search Console Site Verification (biztrack.bd website only)
-                  </label>
-                  <input
+                  <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>Google Search Console Site Verification (biztrack.bd website only)</label>
+                  <input aria-label="Google Search Console Site Verification (biztrack.bd website only)"
                     type="text"
                     value={googleSiteVerification}
                     onChange={(e) => {
@@ -1393,29 +1390,27 @@ export function PlatformSettingsClient({
                       }
                     }}
                     placeholder='e.g. abc123xyz or <meta name="google-site-verification" content="..." />'
-                    style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 13.5 }}
+                    style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 13.5 }}
                   />
                   {googleSiteVerification && (
                     <div style={{ marginTop: 8, padding: "8px 12px", background: "#E8F6EE", borderRadius: 6, fontSize: 12, color: "#15803D" }}>
                       ✓ Generated Meta Tag: <code style={{ color: "#15803D" }}>&lt;meta name="google-site-verification" content="{googleSiteVerification}" /&gt;</code>
                     </div>
                   )}
-                  <div style={{ fontSize: 11.5, color: "#6B6B8D", marginTop: 4 }}>
+                  <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 4 }}>
                     Injected into the HTML &lt;head&gt; of the main biztrack.bd website. Merchants verify their individual store domains separately in their merchant admin panel.
                   </div>
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
-                    <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>
-                      Merchant Center ID
-                    </label>
-                    <input
+                    <label style={{ fontSize: 12.5, fontWeight: 600, display: "block", marginBottom: 5 }}>Merchant Center ID</label>
+                    <input aria-label="Merchant Center ID"
                       type="text"
                       value={googleMerchantId}
                       onChange={(e) => setGoogleMerchantId(e.target.value)}
                       placeholder="e.g. 539120384"
-                      style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 13.5 }}
+                      style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 13.5 }}
                     />
                   </div>
                   <div>
@@ -1427,12 +1422,12 @@ export function PlatformSettingsClient({
                         type="text"
                         readOnly
                         value="https://biztrack.bd/api/feed/google.xml"
-                        style={{ width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 12, background: "#F5F5F9" }}
+                        style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 12, background: "#F5F5F9" }}
                       />
                       <button
                         type="button"
                         onClick={() => copyToClipboard("https://biztrack.bd/api/feed/google.xml", "feed-url")}
-                        style={{ padding: "8px 12px", background: "#F4F3FF", color: "#5B4FE8", border: "1px solid #5B4FE8", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
+                        style={{ padding: "8px 12px", background: "var(--tint)", color: "var(--brand)", border: "1px solid var(--brand)", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
                       >
                         {copiedField === "feed-url" ? "Copied!" : "Copy Feed URL"}
                       </button>
@@ -1471,7 +1466,7 @@ export function PlatformSettingsClient({
                 disabled={saving}
                 style={{
                   padding: "11px 24px",
-                  background: "#5B4FE8",
+                  background: "var(--brand)",
                   color: "#fff",
                   border: "none",
                   borderRadius: 8,
@@ -1488,9 +1483,9 @@ export function PlatformSettingsClient({
                 disabled={googleTesting}
                 style={{
                   padding: "11px 20px",
-                  background: "#F4F3FF",
-                  color: "#5B4FE8",
-                  border: "1px solid #5B4FE8",
+                  background: "var(--tint)",
+                  color: "var(--brand)",
+                  border: "1px solid var(--brand)",
                   borderRadius: 8,
                   fontWeight: 700,
                   fontSize: 14,
@@ -1506,23 +1501,23 @@ export function PlatformSettingsClient({
 
       {/* TAB 8: Platform SEO & Sitemaps (biztrack.bd) */}
       {activeTab === "seo" && (
-        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: 24 }}>
+        <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: 24 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>
                   Platform SEO & Dynamic Sitemaps (biztrack.bd)
                 </h2>
-                <span style={{ fontSize: 11, fontWeight: 700, background: "#EEF2FF", color: "#4F46E5", padding: "3px 8px", borderRadius: 6, textTransform: "uppercase" }}>
+                <span style={{ fontSize: 12, fontWeight: 700, background: "var(--brand-light)", color: "var(--brand)", padding: "3px 8px", borderRadius: 6, textTransform: "uppercase" }}>
                   Apex Website
                 </span>
               </div>
-              <p style={{ color: "#4B4B73", margin: "4px 0 0 0", fontSize: 13.5 }}>
+              <p style={{ color: "var(--ink-2)", margin: "4px 0 0 0", fontSize: 13.5 }}>
                 Configure global search engine optimization, meta tags, OpenGraph social cards, search console verification, and live XML sitemaps for the <strong>biztrack.bd</strong> root landing website.
               </p>
             </div>
             {initialSeoConfig.updatedAt && (
-              <span style={{ fontSize: 12, color: "#64748B", background: "#F1F5F9", padding: "4px 8px", borderRadius: 6 }}>
+              <span style={{ fontSize: 12, color: "var(--ink-3)", background: "var(--chip)", padding: "4px 8px", borderRadius: 6 }}>
                 Last updated {new Date(initialSeoConfig.updatedAt).toLocaleDateString()} {initialSeoConfig.updatedBy ? `by ${initialSeoConfig.updatedBy}` : ""}
               </span>
             )}
@@ -1530,16 +1525,16 @@ export function PlatformSettingsClient({
 
           {/* Quick-Access Live Sitemaps & Robots */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14, marginBottom: 24 }}>
-            <div style={{ padding: 14, borderRadius: 8, background: "#F8FAFC", border: "1px solid #E2E8F0" }}>
+            <div style={{ padding: 14, borderRadius: 8, background: "var(--bg)", border: "1px solid var(--line)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: "#0F172A", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
                   Live XML Sitemap
                 </span>
                 <a
                   href={seoSitemapUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ fontSize: 12, color: "#5B4FE8", textDecoration: "none", fontWeight: 600 }}
+                  style={{ fontSize: 12, color: "var(--brand)", textDecoration: "none", fontWeight: 600 }}
                 >
                   Inspect XML ↗
                 </a>
@@ -1549,7 +1544,7 @@ export function PlatformSettingsClient({
                   type="text"
                   readOnly
                   value={seoSitemapUrl}
-                  style={{ flex: 1, padding: "8px 10px", fontSize: 12.5, fontFamily: "monospace", background: "#fff", border: "1px solid #CBD5E1", borderRadius: 6 }}
+                  style={{ flex: 1, padding: "8px 10px", fontSize: 12.5, fontFamily: "monospace", background: "#fff", border: "1px solid var(--line-2)", borderRadius: 6 }}
                 />
                 <button
                   type="button"
@@ -1558,26 +1553,26 @@ export function PlatformSettingsClient({
                     setCopiedField("sitemap");
                     setTimeout(() => setCopiedField(null), 2500);
                   }}
-                  style={{ padding: "8px 14px", fontSize: 12.5, fontWeight: 600, background: "#fff", border: "1px solid #CBD5E1", borderRadius: 6, cursor: "pointer" }}
+                  style={{ padding: "8px 14px", fontSize: 12.5, fontWeight: 600, background: "#fff", border: "1px solid var(--line-2)", borderRadius: 6, cursor: "pointer" }}
                 >
                   {copiedField === "sitemap" ? "Copied! ✓" : "Copy"}
                 </button>
               </div>
-              <p style={{ margin: "6px 0 0", fontSize: 11.5, color: "#64748B" }}>
+              <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--ink-3)" }}>
                 Submit this URL to Google Search Console to index all biztrack.bd landing pages, tools, and blog.
               </p>
             </div>
 
-            <div style={{ padding: 14, borderRadius: 8, background: "#F8FAFC", border: "1px solid #E2E8F0" }}>
+            <div style={{ padding: 14, borderRadius: 8, background: "var(--bg)", border: "1px solid var(--line)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: "#0F172A", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
                   Robots.txt Crawler Directives
                 </span>
                 <a
                   href={seoRobotsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ fontSize: 12, color: "#5B4FE8", textDecoration: "none", fontWeight: 600 }}
+                  style={{ fontSize: 12, color: "var(--brand)", textDecoration: "none", fontWeight: 600 }}
                 >
                   View Robots.txt ↗
                 </a>
@@ -1587,7 +1582,7 @@ export function PlatformSettingsClient({
                   type="text"
                   readOnly
                   value={seoRobotsUrl}
-                  style={{ flex: 1, padding: "8px 10px", fontSize: 12.5, fontFamily: "monospace", background: "#fff", border: "1px solid #CBD5E1", borderRadius: 6 }}
+                  style={{ flex: 1, padding: "8px 10px", fontSize: 12.5, fontFamily: "monospace", background: "#fff", border: "1px solid var(--line-2)", borderRadius: 6 }}
                 />
                 <button
                   type="button"
@@ -1596,12 +1591,12 @@ export function PlatformSettingsClient({
                     setCopiedField("robots");
                     setTimeout(() => setCopiedField(null), 2500);
                   }}
-                  style={{ padding: "8px 14px", fontSize: 12.5, fontWeight: 600, background: "#fff", border: "1px solid #CBD5E1", borderRadius: 6, cursor: "pointer" }}
+                  style={{ padding: "8px 14px", fontSize: 12.5, fontWeight: 600, background: "#fff", border: "1px solid var(--line-2)", borderRadius: 6, cursor: "pointer" }}
                 >
                   {copiedField === "robots" ? "Copied! ✓" : "Copy"}
                 </button>
               </div>
-              <p style={{ margin: "6px 0 0", fontSize: 11.5, color: "#64748B" }}>
+              <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--ink-3)" }}>
                 Contains crawler allow/disallow instructions and points Googlebot directly to the sitemap index.
               </p>
             </div>
@@ -1612,10 +1607,10 @@ export function PlatformSettingsClient({
             {/* Meta Title */}
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <label style={{ fontSize: 13, fontWeight: 700, color: "#1F1F38" }}>
+                <label style={{ fontSize: 13, fontWeight: 700, color: "var(--ink)" }}>
                   Root Meta Title (Homepage Title)
                 </label>
-                <span style={{ fontSize: 12, color: seoTitle.length > 60 ? "#DC2626" : "#64748B" }}>
+                <span style={{ fontSize: 12, color: seoTitle.length > 60 ? "#DC2626" : "var(--ink-3)" }}>
                   {seoTitle.length} / 60 characters (Recommended: 50-60)
                 </span>
               </div>
@@ -1624,9 +1619,9 @@ export function PlatformSettingsClient({
                 value={seoTitle}
                 onChange={(e) => setSeoTitle(e.target.value)}
                 placeholder="BizTrackBD: Online Store Software for Bangladesh"
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid #D6D6E7", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               />
-              <p style={{ margin: "4px 0 0", fontSize: 12, color: "#64748B" }}>
+              <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--ink-3)" }}>
                 The clickable headline displayed on Google search results for biztrack.bd.
               </p>
             </div>
@@ -1634,10 +1629,10 @@ export function PlatformSettingsClient({
             {/* Meta Description */}
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <label style={{ fontSize: 13, fontWeight: 700, color: "#1F1F38" }}>
+                <label style={{ fontSize: 13, fontWeight: 700, color: "var(--ink)" }}>
                   Root Meta Description
                 </label>
-                <span style={{ fontSize: 12, color: seoDescription.length > 160 ? "#DC2626" : "#64748B" }}>
+                <span style={{ fontSize: 12, color: seoDescription.length > 160 ? "#DC2626" : "var(--ink-3)" }}>
                   {seoDescription.length} / 160 characters (Recommended: 140-160)
                 </span>
               </div>
@@ -1646,48 +1641,44 @@ export function PlatformSettingsClient({
                 value={seoDescription}
                 onChange={(e) => setSeoDescription(e.target.value)}
                 placeholder="Launch your online store in a day. Sell with bKash, Nagad, and Cash on Delivery..."
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid #D6D6E7", borderRadius: 8, fontSize: 13.5, resize: "vertical" }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 13.5, resize: "vertical" }}
               />
-              <p style={{ margin: "4px 0 0", fontSize: 12, color: "#64748B" }}>
+              <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--ink-3)" }}>
                 A compelling summary shown under your title in Google search results and shared social links.
               </p>
             </div>
 
             {/* Meta Keywords */}
             <div>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1F1F38", marginBottom: 6 }}>
-                Meta Keywords (Comma-separated)
-              </label>
-              <input
+              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "var(--ink)", marginBottom: 6 }}>Meta Keywords (Comma-separated)</label>
+              <input aria-label="Meta Keywords (Comma-separated)"
                 type="text"
                 value={seoKeywords}
                 onChange={(e) => setSeoKeywords(e.target.value)}
                 placeholder="online store bangladesh, ecommerce website builder bangladesh, bkash payment gateway, steadfast courier integration"
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid #D6D6E7", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               />
-              <p style={{ margin: "4px 0 0", fontSize: 12, color: "#64748B" }}>
+              <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--ink-3)" }}>
                 Search indexing terms prioritized by search engines for regional ecommerce queries in Bangladesh.
               </p>
             </div>
 
             {/* OpenGraph Social Image URL */}
             <div>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1F1F38", marginBottom: 6 }}>
-                Social Share Image (OpenGraph / Twitter Card Banner)
-              </label>
-              <input
+              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "var(--ink)", marginBottom: 6 }}>Social Share Image (OpenGraph / Twitter Card Banner)</label>
+              <input aria-label="Social Share Image (OpenGraph / Twitter Card Banner)"
                 type="url"
                 value={seoOgImage}
                 onChange={(e) => setSeoOgImage(e.target.value)}
                 placeholder="https://biztrack.bd/opengraph-image"
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid #D6D6E7", borderRadius: 8, fontSize: 14 }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
               />
-              <p style={{ margin: "4px 0 0", fontSize: 12, color: "#64748B" }}>
+              <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--ink-3)" }}>
                 Preview image generated when biztrack.bd is shared on Facebook, WhatsApp, LinkedIn, or Twitter (1200x630px).
               </p>
               {seoOgImage && (
-                <div style={{ marginTop: 8, padding: 8, background: "#F8FAFC", borderRadius: 8, display: "inline-block", border: "1px solid #E2E8F0" }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: "#64748B", display: "block", marginBottom: 4 }}>Banner Preview:</span>
+                <div style={{ marginTop: 8, padding: 8, background: "var(--bg)", borderRadius: 8, display: "inline-block", border: "1px solid var(--line)" }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-3)", display: "block", marginBottom: 4 }}>Banner Preview:</span>
                   <img
                     src={seoOgImage}
                     alt="OpenGraph Banner Preview"
@@ -1699,8 +1690,8 @@ export function PlatformSettingsClient({
             </div>
 
             {/* Google Search Console Verification */}
-            <div style={{ borderTop: "1px solid #E7E7F0", paddingTop: 16 }}>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1F1F38", marginBottom: 6 }}>
+            <div style={{ borderTop: "1px solid var(--line)", paddingTop: 16 }}>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "var(--ink)", marginBottom: 6 }}>
                 Google Search Console Verification (biztrack.bd)
               </label>
               <div style={{ display: "flex", gap: 8 }}>
@@ -1709,10 +1700,10 @@ export function PlatformSettingsClient({
                   value={seoSiteVerification}
                   onChange={(e) => setSeoSiteVerification(e.target.value)}
                   placeholder='google0668054f248577b1 or <meta name="google-site-verification" content="..." />'
-                  style={{ flex: 1, padding: "10px 12px", border: "1px solid #D6D6E7", borderRadius: 8, fontSize: 13.5, fontFamily: "monospace" }}
+                  style={{ flex: 1, padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 13.5, fontFamily: "monospace" }}
                 />
               </div>
-              <p style={{ margin: "6px 0 0", fontSize: 12, color: "#64748B" }}>
+              <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--ink-3)" }}>
                 Paste either the raw token or the full HTML verification meta tag provided by Google Search Console. It will be injected dynamically into the <code>&lt;head&gt;</code> of biztrack.bd.
               </p>
             </div>
@@ -1724,7 +1715,7 @@ export function PlatformSettingsClient({
                 disabled={saving}
                 style={{
                   padding: "11px 24px",
-                  background: "#5B4FE8",
+                  background: "var(--brand)",
                   color: "#fff",
                   border: "none",
                   borderRadius: 8,
@@ -1741,16 +1732,16 @@ export function PlatformSettingsClient({
       )}
       {/* TAB 9: Public contact details (biztrack.bd) */}
       {activeTab === "contact" && (
-        <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: 24 }}>
+        <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: 24 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
             <div>
               <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Contact &amp; Social (biztrack.bd)</h2>
-              <p style={{ color: "#4B4B73", margin: "4px 0 0 0", fontSize: 13.5 }}>
+              <p style={{ color: "var(--ink-2)", margin: "4px 0 0 0", fontSize: 13.5 }}>
                 These appear in the website footer, on the contact page and in search-engine data. Clear a field and save to go back to the built-in default.
               </p>
             </div>
             {initialContactConfig.updatedAt && (
-              <span style={{ fontSize: 12, color: "#64748B", background: "#F1F5F9", padding: "4px 8px", borderRadius: 6 }}>
+              <span style={{ fontSize: 12, color: "var(--ink-3)", background: "var(--chip)", padding: "4px 8px", borderRadius: 6 }}>
                 Last updated {new Date(initialContactConfig.updatedAt).toLocaleDateString()} {initialContactConfig.updatedBy ? `by ${initialContactConfig.updatedBy}` : ""}
               </span>
             )}
@@ -1765,7 +1756,7 @@ export function PlatformSettingsClient({
               { icon: "instagram", label: "Instagram", value: contactInstagram, set: setContactInstagram, placeholder: "https://www.instagram.com/biztrackbd/", type: "text", testid: "contact-instagram" },
             ] as { icon: ContactIconName; label: string; value: string; set: (v: string) => void; placeholder: string; type: string; testid: string }[]).map((f) => (
               <div key={f.testid}>
-                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 700, color: "#1F1F38", marginBottom: 6 }}>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 700, color: "var(--ink)", marginBottom: 6 }}>
                   <ContactIcon name={f.icon} size={16} />
                   {f.label}
                 </label>
@@ -1775,18 +1766,18 @@ export function PlatformSettingsClient({
                   onChange={(e) => f.set(e.target.value)}
                   placeholder={f.placeholder}
                   data-testid={f.testid}
-                  style={{ width: "100%", padding: "10px 12px", border: "1px solid #D6D6E7", borderRadius: 8, fontSize: 14 }}
+                  style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 16 }}
                 />
               </div>
             ))}
-            <p style={{ margin: 0, fontSize: 12, color: "#64748B" }}>
+            <p style={{ margin: 0, fontSize: 12, color: "var(--ink-3)" }}>
               Phone and WhatsApp accept 01XXXXXXXXX or +8801XXXXXXXXX and are saved in international form. Facebook and Instagram must be addresses on those sites.
             </p>
             <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
               <button
                 type="submit"
                 disabled={saving}
-                style={{ padding: "11px 24px", background: "#5B4FE8", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: "pointer" }}
+                style={{ padding: "11px 24px", background: "var(--brand)", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: "pointer" }}
               >
                 {saving ? "Saving…" : "Save Contact Details"}
               </button>

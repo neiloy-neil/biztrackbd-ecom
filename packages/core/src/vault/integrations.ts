@@ -1,4 +1,6 @@
 import { assertNotInDemo } from "../demo/guard";
+import { PlanFeatureError } from "../errors";
+import { tenantPlanFeatures } from "../platform/plan-source";
 import { randomBytes } from "node:crypto";
 import { getBasePrisma, withTenant } from "@biztrackbd/db";
 import { audit } from "../audit/service";
@@ -93,6 +95,9 @@ function toView(row: IntegrationRow, ring: KeyRing): IntegrationView {
   };
 }
 
+/** The integrations that take a customer's money online. */
+const PAYMENT_GATEWAYS = new Set<string>(["SSLCOMMERZ", "BKASH_DIRECT", "UDDOKTAPAY"]);
+
 /** Creates or updates one integration for a store. Secrets are encrypted before they touch the database. */
 export async function saveIntegration(tenantId: string, input: SaveIntegrationInput, ring: KeyRing = loadKeyRing(), actor?: StaffActor): Promise<IntegrationView> {
   await assertNotInDemo(tenantId, "Changing integration keys");
@@ -116,6 +121,8 @@ export async function saveIntegration(tenantId: string, input: SaveIntegrationIn
       }
       secrets = { ...current, ...incomingSecrets };
     }
+    // Connecting a payment gateway is a plan feature. A gateway a store already has stays connected, even on a smaller plan.
+    if (!existing && PAYMENT_GATEWAYS.has(provider) && (await tenantPlanFeatures(tx)).features.paymentGateway !== true) throw new PlanFeatureError("paymentGateway");
     const missing = spec.secrets.filter((f) => !secrets[f]);
     if (missing.length) throw new ValidationError(`Missing: ${missing.join(", ")}`, { fields: missing });
 

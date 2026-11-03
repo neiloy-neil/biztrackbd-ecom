@@ -594,7 +594,7 @@ export function WhatsAppManagerClient({
                               style={{
                                 background: op.bg,
                                 color: op.color,
-                                fontSize: 11.5,
+                                fontSize: 12,
                                 fontWeight: 700,
                                 padding: "2px 8px",
                                 borderRadius: 6,
@@ -701,7 +701,7 @@ export function WhatsAppManagerClient({
                             style={{
                               background: op.bg,
                               color: op.color,
-                              fontSize: 11.5,
+                              fontSize: 12,
                               fontWeight: 700,
                               padding: "2px 8px",
                               borderRadius: 6,
@@ -1185,7 +1185,7 @@ export function WhatsAppManagerClient({
                 <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>
                   Send Test Message
                 </h3>
-                <span className="pill green" style={{ fontSize: 11, fontWeight: 700 }}>
+                <span className="pill green" style={{ fontSize: 12, fontWeight: 700 }}>
                   Direct Send
                 </span>
               </div>
@@ -1213,8 +1213,8 @@ export function WhatsAppManagerClient({
                         style={{
                           background: "none",
                           border: "none",
-                          color: "var(--primary, #0284C7)",
-                          fontSize: 11.5,
+                          color: "var(--brand)",
+                          fontSize: 12,
                           cursor: "pointer",
                           fontWeight: 600,
                           padding: 0,
@@ -1275,7 +1275,7 @@ export function WhatsAppManagerClient({
                     >
                       {isSendingTest ? "Testing Gateway…" : "Test Background Gateway"}
                     </button>
-                    <span className="muted" style={{ fontSize: 11.5 }}>
+                    <span className="muted" style={{ fontSize: 12 }}>
                       {config.gatewayUrl ? "Gateway configured" : "No gateway connected (requires URL or SMS)"}
                     </span>
                   </div>
@@ -1338,7 +1338,7 @@ export function WhatsAppManagerClient({
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>
                 Gateway Server Settings (Optional)
               </h3>
-              <span className="pill" style={{ fontSize: 11.5 }}>Advanced</span>
+              <span className="pill" style={{ fontSize: 12 }}>Advanced</span>
             </div>
             <p className="muted" style={{ fontSize: 13, margin: "0 0 14px" }}>
               Self-hosting an Evolution API, Baileys, or WAHA container? Enter your gateway endpoint URL below. If left empty, BizTrack uses instant zero-setup direct relay.
@@ -1624,7 +1624,7 @@ export function WhatsAppManagerClient({
                           border: "1px solid #CBD5E1",
                           borderRadius: 6,
                           padding: "3px 8px",
-                          fontSize: 11.5,
+                          fontSize: 12,
                           cursor: "pointer",
                           fontFamily: "monospace",
                         }}
@@ -1697,7 +1697,7 @@ export function WhatsAppManagerClient({
                     <div
                       style={{
                         textAlign: "right",
-                        fontSize: 10.5,
+                        fontSize: 12,
                         color: "#9CA3AF",
                         marginTop: 4,
                         display: "flex",
@@ -1811,7 +1811,7 @@ export function WhatsAppManagerClient({
                             {log.phone}
                           </td>
                           <td style={{ padding: "10px 16px" }}>
-                            <span className={`pill ${log.direction === "INBOUND" ? "info" : "grey"}`} style={{ fontSize: 11 }}>
+                            <span className={`pill ${log.direction === "INBOUND" ? "info" : "grey"}`} style={{ fontSize: 12 }}>
                               {log.direction}
                             </span>
                           </td>
@@ -1829,7 +1829,7 @@ export function WhatsAppManagerClient({
                                   ? "bad"
                                   : "grey"
                               }`}
-                              style={{ fontSize: 11 }}
+                              style={{ fontSize: 12 }}
                             >
                               {log.status}
                             </span>
@@ -1843,7 +1843,7 @@ export function WhatsAppManagerClient({
                               target="_blank"
                               rel="noopener noreferrer"
                               className="btn btn-secondary btn-sm"
-                              style={{ fontSize: 11.5, padding: "3px 9px", display: "inline-flex", alignItems: "center", gap: 4 }}
+                              style={{ fontSize: 12, padding: "3px 9px", display: "inline-flex", alignItems: "center", gap: 4 }}
                               title="Open and send directly via WhatsApp"
                             >
                               <span>Open in WhatsApp</span>
@@ -1878,7 +1878,7 @@ export function WhatsAppManagerClient({
                   <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#065F46" }}>
                     WhatsApp Broadcast Campaigns
                   </h3>
-                  <span className="pill ok" style={{ fontSize: 11, fontWeight: 700 }}>
+                  <span className="pill ok" style={{ fontSize: 12, fontWeight: 700 }}>
                     DIRECT MESSAGING
                   </span>
                 </div>
@@ -1928,7 +1928,7 @@ export function WhatsAppManagerClient({
                 <div style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginTop: 4 }}>
                   4-12s Randomized Delay
                 </div>
-                <div style={{ fontSize: 11.5, color: "#10B981", marginTop: 2 }}>
+                <div style={{ fontSize: 12, color: "#10B981", marginTop: 2 }}>
                   Natural sending rhythm
                 </div>
               </div>
@@ -1947,7 +1947,7 @@ export function WhatsAppManagerClient({
                 <div style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginTop: 4 }}>
                   60 - 120 msgs / hr
                 </div>
-                <div style={{ fontSize: 11.5, color: "#10B981", marginTop: 2 }}>
+                <div style={{ fontSize: 12, color: "#10B981", marginTop: 2 }}>
                   Prevents account restrictions
                 </div>
               </div>
@@ -1966,7 +1966,7 @@ export function WhatsAppManagerClient({
                 <div style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginTop: 4 }}>
                   {config.status === "CONNECTED" ? (config.phoneNumber || "Connected") : "Disconnected"}
                 </div>
-                <div style={{ fontSize: 11.5, color: config.status === "CONNECTED" ? "#10B981" : "#EF4444", marginTop: 2 }}>
+                <div style={{ fontSize: 12, color: config.status === "CONNECTED" ? "#10B981" : "#EF4444", marginTop: 2 }}>
                   {config.status === "CONNECTED" ? "Active" : "Connect in Tab 1"}
                 </div>
               </div>
@@ -2066,7 +2066,7 @@ export function WhatsAppManagerClient({
                         <td style={{ padding: "10px 16px" }}>
                           <div style={{ fontWeight: 600 }}>{c.name}</div>
                           {c.couponCode && (
-                            <span style={{ fontSize: 11, color: "#059669", fontWeight: 600 }}>
+                            <span style={{ fontSize: 12, color: "#059669", fontWeight: 600 }}>
                               {c.couponCode}
                             </span>
                           )}
@@ -2082,7 +2082,7 @@ export function WhatsAppManagerClient({
                             className={`pill ${
                               c.status === "SENT" ? "ok" : c.status === "SCHEDULED" ? "warn" : "grey"
                             }`}
-                            style={{ fontSize: 11, fontWeight: 600 }}
+                            style={{ fontSize: 12, fontWeight: 600 }}
                           >
                             {c.status}
                           </span>

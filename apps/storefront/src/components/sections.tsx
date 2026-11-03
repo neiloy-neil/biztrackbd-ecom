@@ -3,6 +3,7 @@ import type { PageData, PageJson, PageSection } from "@biztrackbd/core";
 import { parseEndsAt, productKey, youtubeId, SECTION_GRADIENT_PRESETS } from "@biztrackbd/core/builder-client";
 import { money, type Lang, type T } from "@/lib/i18n-core";
 import { Countdown } from "./countdown";
+import { SmartImage } from "./smart-image";
 import { LandingMotion } from "./landing-motion";
 import { SectionMotion } from "./section-motion";
 import { mark, markImg } from "./edit-marks";
@@ -49,10 +50,11 @@ const str = (v: unknown) => (typeof v === "string" ? v : "");
 /** The Bangla twin when the visitor reads Bangla and the owner wrote one, else the English text. */
 const L = (s: S, key: string, lang: Lang) => (lang === "bn" && str(s[`${key}Bn`]) ? str(s[`${key}Bn`]) : str(s[key]));
 
-function Img({ src, alt = "", className }: { src: string; alt?: string; className?: string }) {
-  // A plain tag on purpose: the address was checked at save time, and an owner's picture host need not be known to the image optimiser.
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={src} alt={alt} className={className} loading="lazy" decoding="async" />;
+// SmartImage serves our own and Supabase pictures through the optimiser and leaves any other host as the plain tag, so an owner's picture host
+// the optimiser does not know still loads. The CSS sizes these by width or aspect ratio, hence the automatic height.
+const AUTO_HEIGHT = { height: "auto" } as const;
+function Img({ src, alt = "", className, sizes = "(max-width: 768px) 100vw, 50vw", priority = false }: { src: string; alt?: string; className?: string; sizes?: string; priority?: boolean }) {
+  return <SmartImage src={src} alt={alt} sizes={sizes} className={className} style={AUTO_HEIGHT} priority={priority} />;
 }
 
 function Cta({ href, className, children, attrs, style }: { href: string; className: string; children: React.ReactNode; attrs?: Record<string, string>; style?: React.CSSProperties }) {
@@ -116,7 +118,7 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
               {(L(s, "text", lang) || editing) && <p {...ed("text")}>{L(s, "text", lang)}</p>}
               <div className="ctas"><Cta href={str(s.ctaLink)} className="btn btn-primary" attrs={ed("ctaText")}>{L(s, "ctaText", lang)}</Cta></div>
             </div>
-            {img ? <div className="b-hero-img" {...edImg("image")}><Img src={img} /></div> : editing ? <div className="b-hero-img lp-pick" {...edImg("image")}>+ Picture</div> : null}
+            {img ? <div className="b-hero-img" {...edImg("image")}><Img src={img} priority /></div> : editing ? <div className="b-hero-img lp-pick" {...edImg("image")}>+ Picture</div> : null}
           </div>
         </section>
       );
@@ -275,7 +277,7 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
               <a href="#order" className={`btn btn-primary btn-round${pro ? " lp-pulse" : ""}`} {...ed("ctaText")}>{L(s, "ctaText", lang)}</a>
               {pro && ticks.length > 0 && <ul className="lp-ticks">{ticks.map((x) => <li key={x.n} {...ed(`tick${x.n}`)}>{L(s, `tick${x.n}`, lang)}</li>)}</ul>}
             </div>
-            {img ? <div className="lp-hero-img" {...edImg("image")}><Img src={img} alt={L(s, "headline", lang)} /></div> : editing ? <div className="lp-hero-img lp-pick" {...edImg("image")}>+ Picture</div> : null}
+            {img ? <div className="lp-hero-img" {...edImg("image")}><Img src={img} alt={L(s, "headline", lang)} priority /></div> : editing ? <div className="lp-hero-img lp-pick" {...edImg("image")}>+ Picture</div> : null}
           </div>
         </section>
       );
@@ -288,7 +290,7 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
       return (
         <header className="lp-head" data-section={id}>
           <div className="wrap lp-head-in">
-            <a href="#top" className="lp-brand" aria-label={name || "Home"}>{logo ? <Img src={logo} alt={name} /> : <span>{name}</span>}</a>
+            <a href="#top" className="lp-brand" aria-label={name || "Home"}>{logo ? <Img src={logo} alt={name} sizes="160px" /> : <span>{name}</span>}</a>
             <div className="lp-head-act">
               {s.showPhone !== false && phone && <a href={`tel:${phone}`} className="lp-chip" aria-label={phone}><PhoneIcon /><span className="t">{phone}</span></a>}
               {s.showWhatsapp !== false && wa && <a href={`https://wa.me/88${wa}`} rel="noopener noreferrer" className="lp-chip wa" aria-label="WhatsApp"><WaIcon /><span className="t">WhatsApp</span></a>}
@@ -340,7 +342,7 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
         <section className="lp-block" data-section={id}>
           <div className="wrap">
             <h2 {...ed("title")}>{L(s, "title", lang)}</h2>
-            <div className="lp-screens">{items.length === 0 ? <div className="lp-pick" {...edImg("items.0.image")}>+ Picture</div> : items.map(({ it, i }) => <span key={i} style={{ display: "contents" }} {...edImg(`items.${i}.image`)}><Img src={str(it.image)} alt={str(it.alt)} /></span>)}</div>
+            <div className="lp-screens">{items.length === 0 ? <div className="lp-pick" {...edImg("items.0.image")}>+ Picture</div> : items.map(({ it, i }) => <span key={i} style={{ display: "contents" }} {...edImg(`items.${i}.image`)}><Img src={str(it.image)} alt={str(it.alt)} sizes="(max-width: 768px) 50vw, 25vw" /></span>)}</div>
           </div>
         </section>
       );
@@ -364,7 +366,7 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
         <section className="lp-block" data-section={id}>
           <div className="wrap">
             {(L(s, "title", lang) || editing) && <h2 {...ed("title")}>{L(s, "title", lang)}</h2>}
-            <div className="lp-gallery">{items.length === 0 ? <div className="lp-pick" {...edImg("items.0.image")}>+ Picture</div> : items.map(({ it, i }) => <span key={i} style={{ display: "contents" }} {...edImg(`items.${i}.image`)}><Img src={str(it.image)} alt={str(it.alt)} /></span>)}</div>
+            <div className="lp-gallery">{items.length === 0 ? <div className="lp-pick" {...edImg("items.0.image")}>+ Picture</div> : items.map(({ it, i }) => <span key={i} style={{ display: "contents" }} {...edImg(`items.${i}.image`)}><Img src={str(it.image)} alt={str(it.alt)} sizes="(max-width: 768px) 50vw, 25vw" /></span>)}</div>
           </div>
         </section>
       );
@@ -575,8 +577,8 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
       const subhead = L(s, "subhead", lang);
       const badge = L(s, "badge", lang);
       const ctaText = L(s, "ctaText", lang);
-      const bgColor = str(s.bgColor) || "#1E1B4B";
-      const textColor = str(s.textColor) || "#FFFFFF";
+      const bgColor = str(s.bgColor) || "var(--accent)";
+      const textColor = str(s.textColor) || "var(--accent-ink, #FFFFFF)";
       const link = str(s.ctaLink);
 
       return (
@@ -639,8 +641,8 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
       if (!text && !editing) return null;
       const speed = str(s.speed) || "normal";
       const speedClass = speed === "fast" ? "bt-marquee-fast" : speed === "slow" ? "bt-marquee-slow" : "";
-      const bgColor = str(s.bgColor) || "#4F46E5";
-      const textColor = str(s.textColor) || "#FFFFFF";
+      const bgColor = str(s.bgColor) || "var(--accent)";
+      const textColor = str(s.textColor) || "var(--accent-ink, #FFFFFF)";
       const icon = str(s.icon) || "lightning";
       const renderIcon = () => {
         if (icon === "truck") {

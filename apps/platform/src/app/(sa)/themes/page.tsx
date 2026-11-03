@@ -30,7 +30,7 @@ export const metadata: Metadata = { title: "Themes and modules" };
 const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
   PUBLISHED: { bg: "#E8F6EE", color: "#15803D", label: "Live" },
   DRAFT: { bg: "#FEF3E2", color: "#92400E", label: "Draft" },
-  ARCHIVED: { bg: "#EFEFF6", color: "#5B5B7B", label: "Hidden" },
+  ARCHIVED: { bg: "var(--chip)", color: "#5B5B7B", label: "Hidden" },
 };
 
 export default async function ThemesPage({
@@ -321,7 +321,7 @@ export default async function ThemesPage({
                   <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
                     {m.label}
                     {m.badge && (
-                      <span style={{ fontSize: 10, padding: "2px 6px", borderRadius: 6, background: "var(--tint)", color: "var(--brand)", fontWeight: 700 }}>
+                      <span style={{ fontSize: 12, padding: "2px 6px", borderRadius: 6, background: "var(--tint)", color: "var(--brand)", fontWeight: 700 }}>
                         {m.badge}
                       </span>
                     )}
@@ -356,11 +356,11 @@ export default async function ThemesPage({
 
                 <div>
                   {m.isGloballyDisabled ? (
-                    <span style={{ padding: "3px 8px", borderRadius: 8, fontSize: 11.5, fontWeight: 700, background: "#FEF3E2", color: "#92400E" }}>
+                    <span style={{ padding: "3px 8px", borderRadius: 8, fontSize: 12, fontWeight: 700, background: "#FEF3E2", color: "#92400E" }}>
                       Maintenance
                     </span>
                   ) : (
-                    <span style={{ padding: "3px 8px", borderRadius: 8, fontSize: 11.5, fontWeight: 700, background: "#E8F6EE", color: "#15803D" }}>
+                    <span style={{ padding: "3px 8px", borderRadius: 8, fontSize: 12, fontWeight: 700, background: "#E8F6EE", color: "#15803D" }}>
                       Operational
                     </span>
                   )}
@@ -373,7 +373,7 @@ export default async function ThemesPage({
                       <input type="hidden" name="isUnderMaintenance" value={m.isGloballyDisabled ? "false" : "true"} />
                       <SubmitButton
                         className={`btn btn-sm ${m.isGloballyDisabled ? "btn-primary" : "btn-secondary"}`}
-                        style={{ fontSize: 11.5 }}
+                        style={{ fontSize: 12 }}
                        pending="Working…">
                         {m.isGloballyDisabled ? "Lift Maintenance" : "Kill-Switch"}
                       </SubmitButton>

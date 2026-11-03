@@ -4,6 +4,7 @@ import Link from "next/link";
 import { BD_GEO, addDays, can, listConnectedCouriers, listOrderTags, listOrders, orderTabCounts, type OrderTab } from "@biztrackbd/core";
 import { PageHeader } from "@biztrackbd/ui";
 import { BulkBar, SelectAllCheckbox } from "@/components/bulk";
+import { FilterDisclosure } from "@/components/filter-disclosure";
 import { ChipFilter, LiveSearch, SelectFilter } from "@/components/live-filters";
 import { QuickViewButton, QuickViewHost } from "@/components/quick-view";
 import { Pager, SubmitButton, Tabs } from "@/components/ui";
@@ -68,7 +69,7 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
 
   return (
     <>
-      <PageHeader title="Orders" actions={<><Link href="/orders/drafts" className="btn btn-secondary" prefetch={false} data-testid="open-drafts">Draft orders</Link><a href={`/orders/export${qs(base)}`} className="btn btn-secondary" data-testid="export-orders">Export CSV</a>{canEdit && <Link href="/orders/new" className="btn btn-primary" prefetch={false}>Create order</Link>}</>} />
+      <PageHeader title="Orders" actions={<><Link href="/orders/drafts" className="btn btn-secondary" prefetch={false} data-testid="open-drafts">Draft orders</Link><a href={`/orders/export${qs(base)}`} className="btn btn-secondary" data-testid="export-orders">Export CSV</a>{canEdit && <Link href="/orders/new" className="btn btn-primary hide-on-phone" prefetch={false}>Create order</Link>}</>} />
 
       {packedMsg && <div className="notice good mb-md" role="status">{packedMsg[1]} marked as packed{packedMsg[2] ? `. ${packedMsg[2]} could not be packed (they must be confirmed first).` : "."}</div>}
       {bookedMsg && <div className="notice good mb-md" role="status" data-testid="booked-msg">{bookedMsg[1]} booked with the courier{bookedMsg[2] ? `. ${bookedMsg[2]} could not be booked${why ? `: ${why}` : ""}.` : "."}</div>}
@@ -87,16 +88,18 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
       <form className="toolbar" method="get" role="search">
         {tab !== "all" && <input type="hidden" name="tab" value={tab} />}
         <LiveSearch name="q" label="Search orders" placeholder="Order number, name or phone" defaultValue={q} />
+        <FilterDisclosure activeCount={[payment, courier, range, tag, district].filter(Boolean).length}>
         <ChipFilter name="payment" label="Payment" value={payment ?? ""} options={PAYMENTS} />
         {couriers.length > 0 && <ChipFilter name="courier" label="Courier" value={courier} options={couriers.map((c) => ({ value: c.provider, label: c.provider.charAt(0) + c.provider.slice(1).toLowerCase() }))} />}
         <ChipFilter name="range" label="Date" value={range} options={RANGES.map(([value, label]) => ({ value, label }))} />
         {knownTags.length > 0 && <SelectFilter name="tag" label="Label" value={tag} options={[{ value: "", label: "Label: all" }, ...knownTags.map((t) => ({ value: t.tag, label: `${t.tag} (${t.count})` }))]} />}
         <SelectFilter name="district" label="District" value={district} options={[{ value: "", label: "District: all" }, ...DISTRICTS.map((d) => ({ value: d, label: d }))]} />
+        </FilterDisclosure>
         <button className="sr-only" type="submit">Search</button>
       </form>
 
       {list.rows.length === 0 ? (
-        <div className="card empty" data-testid="orders-empty">{filtered ? "No orders match. Try clearing the filters." : tab === "check" ? "No payments waiting for you. Nice." : tab === "risk" ? "No high risk orders. All clean." : "Nothing here yet."}</div>
+        <div className="card empty" data-testid="orders-empty">{filtered ? "No orders match. Try clearing the filters." : tab === "check" ? "No payments waiting for you. Nice." : tab === "risk" ? "No high risk orders. All clean." : tab === "all" && canEdit ? <>No orders yet. Orders from your store land here. <Link href="/orders/new" className="link" prefetch={false}>Key in your first order</Link>, for example one from Messenger or WhatsApp.</> : "Nothing here yet."}</div>
       ) : (
         <QuickViewHost>
           <form>

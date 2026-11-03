@@ -115,6 +115,7 @@ model Tenant {
   // Platform Relations
   subscription  Subscription?
   paymentProofs PaymentProof[]
+  themePurchases ThemePurchase[]
   auditLogs     AuditLog[]
 
   // Tenant Scoped Relations
@@ -225,6 +226,30 @@ model Subscription {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([status])
+}
+
+/// A premium storefront theme bought by a store with a mobile-money payment, the same way a plan is paid (PaymentProof). Once APPROVED the store
+/// owns the theme for good: there is no period and no renewal. A store can insert a row (its own claim) but only the platform role approves it.
+model ThemePurchase {
+  id            String             @id @default(cuid())
+  tenantId      String
+  themeId       String // a premium theme id, see PREMIUM_THEMES in packages/core
+  amount        Decimal            @db.Decimal(12, 2)
+  mfsProvider   MfsProvider
+  senderNumber  String // 01XXXXXXXXX
+  trxId         String             @unique
+  status        PaymentProofStatus @default(PENDING)
+
+  approvedBy      String? // Platform user ID that approved or rejected it
+  approvedAt      DateTime?
+  rejectionReason String?
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, themeId])
   @@index([status])
 }
 
@@ -1029,7 +1054,7 @@ model IdempotencyRecord {
 model ThemeInstall {
   id        String  @id @default(cuid())
   tenantId  String
-  themeId   String // "kapor" | "gadgetstudio" | "mini-bunny" | "axionwear" | "bindu" | "berber", see docs/06 for display names
+  themeId   String // "kapor" | "gadgetstudio" | "mini-bunny" | "axionwear" | "bindu" | "berber" | "freshbasket" | "bazaar" | "nakshi", see docs/06 for display names
   isActive  Boolean @default(false)
   settings  Json // Custom color/font/banner tokens
   pagesJson Json // Sections & block trees per route
@@ -1387,6 +1412,23 @@ model Plan {
   features        Json
   // products: hard limit. ordersPerMonth: soft, +10% grace with warning, checkout never blocked (docs/05)
   overagePolicy   Json     @default("{\"products\":\"hard\",\"ordersPerMonth\":\"soft_10pct\"}")
+  updatedAt       DateTime @updatedAt
+}
+
+/// The Business-website plans (Starter, Pro, Plus), edited by the platform admin like Plan. Portfolio and hybrid stores follow these;
+/// online shops follow Plan. Same tier names: STARTER = Business Starter, PRO = Business Pro, BUSINESS = Business Plus.
+model SitePlan {
+  tier            PlanTier @id
+  name            String
+  priceMonthlyBdt Decimal  @db.Decimal(12, 2)
+  priceYearlyBdt  Decimal  @db.Decimal(12, 2)
+  trialDays       Int      @default(14)
+  isPublic        Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  // { "products": 10, "ordersPerMonth": 0, "staff": 1, "storageGb": 5, "landingPages": 5, "customPages": 5, "downloads": 5, "contentItems": 15 }  (null = unlimited)
+  limits          Json
+  // { "customDomain": true, "sectionBuilder": "home", "headerFooterEditing": false, "bookingRequests": false, "teamProfiles": false, "hybridStore": false, "courierBooking": "manual", "modules": 0, ... }
+  features        Json
   updatedAt       DateTime @updatedAt
 }
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BagIcon } from "@/components/mode-icon";
 import Link from "next/link";
 import { demoAdminUrl } from "@/lib/demo-admin";
 import { TcoCalculator } from "@/components/tco-calculator";
@@ -422,7 +423,7 @@ export default function CompareWooCommercePage() {
                   <th style={{ width: "26%" }}>Capability</th>
                   <th className="cell-highlight-primary" style={{ width: "28%" }}>
                     <div className="flex items-center gap-1.5" style={{ color: "#0B4D3B", fontWeight: 800 }}>
-                      <span>🛍️ BizTrackBD</span>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><BagIcon /> BizTrackBD</span>
                     </div>
                   </th>
                   <th style={{ width: "26%" }}>WooCommerce (WordPress)</th>

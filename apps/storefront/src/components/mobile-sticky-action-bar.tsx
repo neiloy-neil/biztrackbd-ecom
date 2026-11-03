@@ -81,7 +81,7 @@ export function MobileStickyActionBar({
             padding: "11px 16px",
             borderRadius: "var(--radius, 10px)",
             background: "#25D366",
-            color: "#ffffff",
+            color: "#05290f",
             fontWeight: 700,
             fontSize: "0.92rem",
             textDecoration: "none",

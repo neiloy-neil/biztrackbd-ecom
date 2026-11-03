@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 import type { TenantTx } from "@biztrackbd/db";
 import { withTenant } from "@biztrackbd/db";
 import { PlanLimitError } from "../errors";
+import { planFor } from "../platform/plan-source";
+import { usesPortfolioPlans, type PortfolioFeatures } from "../platform/portfolio-plans";
 
 /** Plan.limits as stored. null means unlimited. Prices and limits live in the Plan table, never in code. */
 export interface PlanLimits {
@@ -20,21 +22,49 @@ export type UsageState = "ok" | "warning" | "at_limit" | "over" | "exceeded" | "
 
 const num = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
 
-export async function getPlanLimits(tx: TenantTx): Promise<PlanLimits & { timezone: string; tier: string }> {
-  const tenant = await tx.tenant.findFirstOrThrow({ select: { planTier: true, timezone: true } });
-  const plan = await tx.plan.findUnique({ where: { tier: tenant.planTier } });
-  const limits = (plan?.limits ?? {}) as Record<string, unknown>;
+/** The caps a store's plan puts on pages and content, beyond the four metered limits. null means unlimited. */
+export interface ContentLimits {
+  landingPages: number | null;
+  customPages: number | null;
+  downloads: number | null;
+  contentItems: number | null;
+}
 
+export type EffectivePlan = PlanLimits & ContentLimits & { timezone: string; tier: string; siteMode: string; portfolioFeatures: PortfolioFeatures | null };
+
+/** Custom-page cap for a commerce plan that does not set its own. */
+const DEFAULT_CUSTOM_PAGES: Record<string, number> = { STARTER: 3, PRO: 10, BUSINESS: 50 };
+
+/**
+ * What this store's plan allows. Online shops read the Plan table (operators edit it); Business-website and hybrid
+ * stores follow the Business plans, which are what their pricing page promises.
+ */
+export async function getEffectivePlan(tx: TenantTx): Promise<EffectivePlan> {
+  const tenant = await tx.tenant.findFirstOrThrow({ select: { planTier: true, timezone: true, siteMode: true } });
   const adjustments = await tx.tenantQuotaAdjustment.findMany({
     where: { type: "PRODUCT_LIMIT" },
     select: { amount: true },
   }).catch(() => []);
   const extraProducts = adjustments.reduce((acc, a) => acc + a.amount, 0);
 
+  const { limits, features } = await planFor(tx, tenant.planTier, tenant.siteMode);
+  const portfolio = usesPortfolioPlans(tenant.siteMode);
   const baseProducts = num(limits.products);
-  const products = baseProducts !== null ? baseProducts + extraProducts : null;
+  return {
+    timezone: tenant.timezone, tier: tenant.planTier, siteMode: tenant.siteMode,
+    products: baseProducts !== null ? baseProducts + extraProducts : null,
+    ordersPerMonth: num(limits.ordersPerMonth), staff: num(limits.staff), storageGb: num(limits.storageGb),
+    landingPages: num(limits.landingPages),
+    customPages: "customPages" in limits || portfolio ? num(limits.customPages) : (DEFAULT_CUSTOM_PAGES[tenant.planTier] ?? 3),
+    downloads: portfolio ? num(limits.downloads) : null,
+    contentItems: portfolio ? num(limits.contentItems) : null,
+    portfolioFeatures: portfolio ? (features as unknown as PortfolioFeatures) : null,
+  };
+}
 
-  return { products, ordersPerMonth: num(limits.ordersPerMonth), staff: num(limits.staff), storageGb: num(limits.storageGb), timezone: tenant.timezone, tier: tenant.planTier };
+export async function getPlanLimits(tx: TenantTx): Promise<PlanLimits & { timezone: string; tier: string }> {
+  const { products, ordersPerMonth, staff, storageGb, timezone, tier } = await getEffectivePlan(tx);
+  return { products, ordersPerMonth, staff, storageGb, timezone, tier };
 }
 
 /** First day of the current month in the store's own timezone, as YYYY-MM-01. A store in Dhaka rolls over at Dhaka midnight. */
@@ -113,7 +143,7 @@ export function productState(used: number, limit: number | null): UsageState {
 }
 
 export function orderState(used: number, limit: number | null): UsageState {
-  if (limit == null) return "unlimited";
+  if (limit == null || limit === 0) return "unlimited";
   const grace = Math.floor(limit * 1.1);
   if (used > grace) return "exceeded";
   if (used >= limit) return "over";

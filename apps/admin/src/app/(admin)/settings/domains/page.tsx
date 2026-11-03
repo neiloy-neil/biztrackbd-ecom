@@ -94,10 +94,10 @@ export default async function Domains({ searchParams }: { searchParams: Promise<
                     <table className="table border" style={{ width: "100%", fontSize: 13, background: "var(--surface)", borderCollapse: "collapse" }}>
                       <thead>
                         <tr>
-                          <th style={{ padding: "8px 12px", textAlign: "left", background: "var(--bg)", color: "var(--ink-2)", fontSize: 11.5, fontWeight: 700, textTransform: "uppercase" }}>Type</th>
-                          <th style={{ padding: "8px 12px", textAlign: "left", background: "var(--bg)", color: "var(--ink-2)", fontSize: 11.5, fontWeight: 700, textTransform: "uppercase" }}>Host / Name</th>
-                          <th style={{ padding: "8px 12px", textAlign: "left", background: "var(--bg)", color: "var(--ink-2)", fontSize: 11.5, fontWeight: 700, textTransform: "uppercase" }}>Value / Target</th>
-                          <th style={{ padding: "8px 12px", textAlign: "left", background: "var(--bg)", color: "var(--ink-2)", fontSize: 11.5, fontWeight: 700, textTransform: "uppercase" }}>TTL</th>
+                          <th style={{ padding: "8px 12px", textAlign: "left", background: "var(--bg)", color: "var(--ink-2)", fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>Type</th>
+                          <th style={{ padding: "8px 12px", textAlign: "left", background: "var(--bg)", color: "var(--ink-2)", fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>Host / Name</th>
+                          <th style={{ padding: "8px 12px", textAlign: "left", background: "var(--bg)", color: "var(--ink-2)", fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>Value / Target</th>
+                          <th style={{ padding: "8px 12px", textAlign: "left", background: "var(--bg)", color: "var(--ink-2)", fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>TTL</th>
                         </tr>
                       </thead>
                       <tbody>

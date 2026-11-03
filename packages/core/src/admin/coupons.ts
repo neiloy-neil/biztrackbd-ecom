@@ -34,15 +34,39 @@ export const CouponInput = z
   });
 export type CouponInput = z.input<typeof CouponInput>;
 
+export const COUPONS_PAGE_SIZE = 50;
+
+function couponRow(c: Prisma.CouponGetPayload<object>) {
+  return {
+    id: c.id, code: c.code, type: c.type, value: Number(c.value), minOrderValue: c.minOrderValue != null ? Number(c.minOrderValue) : null,
+    usageLimit: c.usageLimit, usageCount: c.usageCount, perCustomerLimit: c.perCustomerLimit, startsAt: c.startsAt, expiresAt: c.expiresAt,
+    isActive: c.isActive, status: couponStatus(c),
+  };
+}
+
+/** Every coupon. For the marketing overview, which counts and ranks across all of them; the discounts page pages instead. */
 export async function listCoupons(tenantId: string, actor: StaffActor) {
   assertCan(actor, "marketing", "view");
+  return withTenant(tenantId, async (tx) => (await tx.coupon.findMany({ orderBy: { createdAt: "desc" } })).map(couponRow));
+}
+
+export async function listCouponsPage(tenantId: string, actor: StaffActor, page = 1, pageSize = COUPONS_PAGE_SIZE) {
+  assertCan(actor, "marketing", "view");
   return withTenant(tenantId, async (tx) => {
-    const rows = await tx.coupon.findMany({ orderBy: { createdAt: "desc" } });
-    return rows.map((c) => ({
-      id: c.id, code: c.code, type: c.type, value: Number(c.value), minOrderValue: c.minOrderValue != null ? Number(c.minOrderValue) : null,
-      usageLimit: c.usageLimit, usageCount: c.usageCount, perCustomerLimit: c.perCustomerLimit, startsAt: c.startsAt, expiresAt: c.expiresAt,
-      isActive: c.isActive, status: couponStatus(c),
-    }));
+    const [rows, total] = await Promise.all([
+      tx.coupon.findMany({ orderBy: [{ createdAt: "desc" }, { id: "desc" }], skip: (Math.max(1, page) - 1) * pageSize, take: pageSize }),
+      tx.coupon.count(),
+    ]);
+    return { rows: rows.map(couponRow), total };
+  });
+}
+
+/** One coupon by id, so the edit form works for a coupon that is not on the page being shown. */
+export async function getCoupon(tenantId: string, actor: StaffActor, id: string) {
+  assertCan(actor, "marketing", "view");
+  return withTenant(tenantId, async (tx) => {
+    const c = await tx.coupon.findFirst({ where: { id } });
+    return c ? couponRow(c) : null;
   });
 }
 

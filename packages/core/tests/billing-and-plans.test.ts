@@ -27,6 +27,10 @@ const mockTx = {
   plan: {
     findUnique: vi.fn(),
   },
+  // No edited row: the built-in Business-website plans apply.
+  sitePlan: {
+    findUnique: vi.fn().mockResolvedValue(null),
+  },
   domain: {
     count: vi.fn().mockResolvedValue(0),
     create: vi.fn().mockResolvedValue({ id: "dom_1", domain: "custombrand.com" }),

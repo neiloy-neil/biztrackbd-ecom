@@ -112,6 +112,30 @@ const THEME_COPY: Record<ThemeId, Partial<KaporSettings>> = {
     heroText: "Modern formalwear for the unapologetic individual.", heroTextBn: "আত্মবিশ্বাসী মানুষের জন্য আধুনিক ফরমালওয়্যার।",
     heroCta: "Shop now", heroCtaBn: "এখনই কিনুন", newArrivalsTitle: "New arrivals", newArrivalsTitleBn: "নতুন পণ্য",
   },
+  maison: {
+    heroEyebrow: "THE NEW EDIT", heroEyebrowBn: "নতুন সংগ্রহ",
+    heroTitle: "Dressed for the occasion.", heroTitleBn: "প্রতিটি উপলক্ষের পোশাক।",
+    heroText: "Considered cuts and honest fabrics, from our atelier to your wardrobe.", heroTextBn: "যত্নে কাটা পোশাক, খাঁটি কাপড়, আমাদের কারখানা থেকে আপনার ওয়ার্ডরোবে।",
+    heroCta: "Shop the lookbook", heroCtaBn: "লুকবুক দেখুন", newArrivalsTitle: "New this season", newArrivalsTitleBn: "এই মৌসুমের নতুন",
+  },
+  freshbasket: {
+    heroEyebrow: "FRESH FROM THE SOURCE", heroEyebrowBn: "সরাসরি উৎস থেকে",
+    heroTitle: "Honest food, packed with care.", heroTitleBn: "খাঁটি খাবার, যত্নে প্যাক করা।",
+    heroText: "Honey, ghee, spices and pantry staples, with the weight and price in plain sight.", heroTextBn: "মধু, ঘি, মসলা ও মুদি পণ্য, ওজন ও দাম স্পষ্ট করে লেখা।",
+    heroCta: "Fill your basket", heroCtaBn: "ঝুড়ি ভরুন", newArrivalsTitle: "Fresh in this week", newArrivalsTitleBn: "এ সপ্তাহে নতুন",
+  },
+  bazaar: {
+    heroEyebrow: "TODAY'S DEALS", heroEyebrowBn: "আজকের অফার",
+    heroTitle: "Everything you need, one bazaar.", heroTitleBn: "যা দরকার সবই, এক বাজারে।",
+    heroText: "Daily essentials, gadgets, home and gifts at prices that make sense.", heroTextBn: "দৈনন্দিন প্রয়োজন, গ্যাজেট, ঘর ও উপহার, ন্যায্য দামে।",
+    heroCta: "Browse the deals", heroCtaBn: "অফার দেখুন", newArrivalsTitle: "Just in", newArrivalsTitleBn: "নতুন এসেছে",
+  },
+  nakshi: {
+    heroEyebrow: "FESTIVE EDIT", heroEyebrowBn: "উৎসবের সংগ্রহ",
+    heroTitle: "Woven with heritage.", heroTitleBn: "ঐতিহ্যে বোনা।",
+    heroText: "Sarees, three-pieces and dupattas for weddings, Eid and every celebration.", heroTextBn: "বিয়ে, ঈদ ও প্রতিটি উৎসবের জন্য শাড়ি, থ্রি-পিস ও ওড়না।",
+    heroCta: "Explore the edit", heroCtaBn: "কালেকশন দেখুন", newArrivalsTitle: "New to the loom", newArrivalsTitleBn: "তাঁত থেকে নতুন",
+  },
   bindu: {
     heroEyebrow: "A RITUAL OF YOUR OWN", heroEyebrowBn: "আপনার নিজের যত্ন",
     heroTitle: "Everyday beauty, thoughtfully selected.", heroTitleBn: "প্রতিদিনের সৌন্দর্য, যত্নে বাছাই করা।",

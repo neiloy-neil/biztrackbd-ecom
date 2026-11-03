@@ -3,6 +3,7 @@ import { audit } from "../audit/service";
 import { landingKey } from "../builder/versions";
 import { defaultLandingPage, validatePage, type PageJson } from "../builder/registry";
 import { NotFoundError, PlanLimitError, ValidationError } from "../errors";
+import { getEffectivePlan } from "../limits/plan";
 import { createOrder } from "../orders/service";
 import { assertCan, type StaffActor } from "../permissions";
 import { getProductBySlug, type ProductDetail } from "../storefront/catalog";
@@ -68,9 +69,7 @@ export async function createLandingPage(tenantId: string, actor: StaffActor, inp
   return withTenant(tenantId, async (tx) => {
     const product = await tx.product.findFirst({ where: { id: input.productId, deletedAt: null }, select: { id: true } });
     if (!product) throw new ValidationError("Pick the product this page sells", { field: "productId" });
-    const tenant = await tx.tenant.findFirstOrThrow({ select: { planTier: true } });
-    const plan = await tx.plan.findUnique({ where: { tier: tenant.planTier } });
-    const cap = (plan?.limits as Record<string, unknown> | null)?.landingPages;
+    const { landingPages: cap } = await getEffectivePlan(tx);
     if (typeof cap === "number") {
       const used = await tx.landingPage.count();
       if (used >= cap) throw new PlanLimitError("landing pages", cap, used);

@@ -1,5 +1,6 @@
 "use client";
 
+import { BagIcon, BriefcaseIcon } from "@/components/mode-icon";
 import { useState } from "react";
 import Link from "next/link";
 import { demoAdminUrl } from "@/lib/demo-admin";
@@ -51,7 +52,7 @@ export function DualHero({
               className={`goal-btn ${mode === "commerce" ? "active-commerce" : ""}`}
               data-testid="goal-commerce-btn"
             >
-              <span aria-hidden="true">🛍️</span>
+              <BagIcon />
               <span>Sell Products (Commerce)</span>
             </button>
             <button
@@ -65,7 +66,7 @@ export function DualHero({
               className={`goal-btn ${mode === "business" ? "active-business" : ""}`}
               data-testid="goal-business-btn"
             >
-              <span aria-hidden="true">💼</span>
+              <BriefcaseIcon />
               <span>Win Enquiries &amp; Clients (Business)</span>
             </button>
           </div>
@@ -236,11 +237,11 @@ export function DualHero({
                 >
                   {mode === "commerce" ? "Interactive Order Journey" : "Interactive Lead Journey"}
                 </span>
-                <h3 style={{ margin: "2px 0 0", fontSize: 16, fontWeight: 700, color: "var(--ink-ledger)" }}>
+                <h2 style={{ margin: "2px 0 0", fontSize: 16, fontWeight: 700, color: "var(--ink-ledger)" }}>
                   {mode === "commerce"
                     ? "See how BizTrackBD automates an order from click to payout"
                     : "See how a prospective client becomes a verified booking or quote"}
-                </h3>
+                </h2>
               </div>
 
               {/* In-rail Toggles */}
@@ -426,9 +427,9 @@ export function DualHero({
                           <span className="status-stamp stamp-paid">NEW ORDER #BD-4820</span>
                           <span style={{ fontSize: 12, color: "var(--ink-3)" }}>Placed 2 mins ago via Storefront</span>
                         </div>
-                        <h4 style={{ margin: 0, fontSize: 17, color: "var(--ink-ledger)" }}>
+                        <h3 style={{ fontFamily: "var(--font)", margin: 0, fontSize: 17, fontWeight: 700, color: "var(--ink-ledger)" }}>
                           Premium Wireless Earbuds (Matte Black) × 1
-                        </h4>
+                        </h3>
                         <p style={{ margin: "6px 0 0", fontSize: 13.5, color: "var(--ink-2)" }}>
                           Customer: <strong>Tanzimul Haque</strong> (01712-345678) · House 14, Road 7, Sector 4, Uttara, Dhaka
                         </p>
@@ -449,11 +450,11 @@ export function DualHero({
                           <span className="status-stamp stamp-paid">PAYMENT VERIFIED</span>
                           <span style={{ fontSize: 12, color: "var(--ink-3)" }}>Direct Wallet Settlement</span>
                         </div>
-                        <h4 style={{ margin: 0, fontSize: 17, color: "var(--ink-ledger)" }}>
+                        <h3 style={{ fontFamily: "var(--font)", margin: 0, fontSize: 17, fontWeight: 700, color: "var(--ink-ledger)" }}>
                           {commercePayment === "cod"
                             ? "Cash on Delivery Order — Advance Delivery Fee Verified"
                             : "bKash TrxID #9LK7129A Verified Direct to Merchant Wallet"}
-                        </h4>
+                        </h3>
                         <p style={{ margin: "6px 0 0", fontSize: 13.5, color: "var(--ink-2)" }}>
                           {commercePayment === "cod"
                             ? "Customer paid ৳120 courier booking charge in advance to confirm intent. Zero escrow, zero middleman delay."
@@ -475,9 +476,9 @@ export function DualHero({
                           <span className="status-stamp stamp-paid">SAFE TO SHIP (96% DELIVERY RATE)</span>
                           <span style={{ fontSize: 12, color: "var(--ink-3)" }}>Cross-Courier History Check</span>
                         </div>
-                        <h4 style={{ margin: 0, fontSize: 17, color: "var(--ink-ledger)" }}>
+                        <h3 style={{ fontFamily: "var(--font)", margin: 0, fontSize: 17, fontWeight: 700, color: "var(--ink-ledger)" }}>
                           Phone 01712-345678 checked across Steadfast &amp; Pathao logs
-                        </h4>
+                        </h3>
                         <p style={{ margin: "6px 0 0", fontSize: 13.5, color: "var(--ink-2)" }}>
                           Customer has completed <strong>24 of 25 deliveries</strong> in the past 6 months. Low return risk. No fake address flags.
                         </p>
@@ -502,9 +503,9 @@ export function DualHero({
                           <span className="status-stamp stamp-courier">STEADFAST BOOKED · CONSIGNMENT #ST-99821</span>
                           <span style={{ fontSize: 12, color: "var(--ink-3)" }}>1-Click Automated API Dispatch</span>
                         </div>
-                        <h4 style={{ margin: 0, fontSize: 17, color: "var(--ink-ledger)" }}>
+                        <h3 style={{ fontFamily: "var(--font)", margin: 0, fontSize: 17, fontWeight: 700, color: "var(--ink-ledger)" }}>
                           Shipping label generated with barcode &amp; Bangla SMS dispatched
-                        </h4>
+                        </h3>
                         <p style={{ margin: "6px 0 0", fontSize: 13.5, color: "var(--ink-2)" }}>
                           Pickup requested at Dhanmondi Hub for tomorrow 11:00 AM. Tracking link sent to customer via SMS.
                         </p>
@@ -524,9 +525,9 @@ export function DualHero({
                           <span className="status-stamp stamp-paid">PARCEL DELIVERED · PAYOUT RECONCILED</span>
                           <span style={{ fontSize: 12, color: "var(--ink-3)" }}>Bank Account Settled</span>
                         </div>
-                        <h4 style={{ margin: 0, fontSize: 17, color: "var(--ink-ledger)" }}>
+                        <h3 style={{ fontFamily: "var(--font)", margin: 0, fontSize: 17, fontWeight: 700, color: "var(--ink-ledger)" }}>
                           Sale: ৳ 2,450 · Courier Fee: ৳ 70 · Product Cost: ৳ 1,400
-                        </h4>
+                        </h3>
                         <p style={{ margin: "6px 0 0", fontSize: 13.5, color: "var(--ink-2)" }}>
                           Steadfast deposited <strong>৳ 2,380</strong> into your BRAC Bank account. True net profit: <strong style={{ color: "#11795A" }}>+৳ 980</strong>.
                         </p>
@@ -547,9 +548,9 @@ export function DualHero({
                           <span className="status-stamp stamp-lead">ORGANIC DISCOVERY</span>
                           <span style={{ fontSize: 12, color: "var(--ink-3)" }}>Search Intent: banani clinic doctor</span>
                         </div>
-                        <h4 style={{ margin: 0, fontSize: 17, color: "var(--ink-ledger)" }}>
+                        <h3 style={{ fontFamily: "var(--font)", margin: 0, fontSize: 17, fontWeight: 700, color: "var(--ink-ledger)" }}>
                           Local patient finds your custom domain (modernclinic.com.bd)
-                        </h4>
+                        </h3>
                         <p style={{ margin: "6px 0 0", fontSize: 13.5, color: "var(--ink-2)" }}>
                           Fast mobile performance on 4G networks. Clean Bangla and English navigation with chamber hours &amp; verified BMDC registration visible immediately.
                         </p>
@@ -567,9 +568,9 @@ export function DualHero({
                           <span className="status-stamp stamp-lead">SERVICES &amp; CREDENTIALS</span>
                           <span style={{ fontSize: 12, color: "var(--ink-3)" }}>Structured Page Content</span>
                         </div>
-                        <h4 style={{ margin: 0, fontSize: 17, color: "var(--ink-ledger)" }}>
+                        <h3 style={{ fontFamily: "var(--font)", margin: 0, fontSize: 17, fontWeight: 700, color: "var(--ink-ledger)" }}>
                           Visitor reviews consultations, medical credentials, and chamber schedules
-                        </h4>
+                        </h3>
                         <p style={{ margin: "6px 0 0", fontSize: 13.5, color: "var(--ink-2)" }}>
                           Includes interactive map directions to Popular Diagnostic Banani, consultation fees, and emergency helpline.
                         </p>
@@ -589,13 +590,13 @@ export function DualHero({
                           </span>
                           <span style={{ fontSize: 12, color: "var(--ink-3)" }}>Direct Customer Action</span>
                         </div>
-                        <h4 style={{ margin: 0, fontSize: 17, color: "var(--ink-ledger)" }}>
+                        <h3 style={{ fontFamily: "var(--font)", margin: 0, fontSize: 17, fontWeight: 700, color: "var(--ink-ledger)" }}>
                           {businessAction === "booking"
                             ? "Patient requested Saturday 6:30 PM slot for Diabetes Follow-up"
                             : businessAction === "whatsapp"
                             ? "Customer tapped WhatsApp button with pre-filled service inquiry"
                             : "Client submitted corporate project requirements via quote form"}
-                        </h4>
+                        </h3>
                         <p style={{ margin: "6px 0 0", fontSize: 13.5, color: "var(--ink-2)" }}>
                           No lost inquiries across personal phones. Contact details and requirements securely captured.
                         </p>
@@ -620,9 +621,9 @@ export function DualHero({
                           <span className="status-stamp stamp-lead">ORGANIZED LEAD INBOX</span>
                           <span style={{ fontSize: 12, color: "var(--ink-3)" }}>Staff Dispatch &amp; Notes</span>
                         </div>
-                        <h4 style={{ margin: 0, fontSize: 17, color: "var(--ink-ledger)" }}>
+                        <h3 style={{ fontFamily: "var(--font)", margin: 0, fontSize: 17, fontWeight: 700, color: "var(--ink-ledger)" }}>
                           Clinic assistant reviews inquiry from smartphone and assigns to Chamber Secretary
-                        </h4>
+                        </h3>
                         <p style={{ margin: "6px 0 0", fontSize: 13.5, color: "var(--ink-2)" }}>
                           Internal notes, status flags (Pending → Confirmed), and customer contact history in one structured panel.
                         </p>
@@ -640,9 +641,9 @@ export function DualHero({
                           <span className="status-stamp stamp-paid">CONVERSION COMPLETE</span>
                           <span style={{ fontSize: 12, color: "var(--ink-3)" }}>Appointment Confirmed</span>
                         </div>
-                        <h4 style={{ margin: 0, fontSize: 17, color: "var(--ink-ledger)" }}>
+                        <h3 style={{ fontFamily: "var(--font)", margin: 0, fontSize: 17, fontWeight: 700, color: "var(--ink-ledger)" }}>
                           Automated confirmation SMS sent to patient with serial number #14
-                        </h4>
+                        </h3>
                         <p style={{ margin: "6px 0 0", fontSize: 13.5, color: "var(--ink-2)" }}>
                           Turned a casual search into a confirmed consulting appointment without paying third-party lead generation fees.
                         </p>

@@ -26,7 +26,7 @@ function make(header: Partial<Chrome["header"]>, bar: { bgColor: string; textCol
   return templateChrome({ ...d, header: { ...d.header, ...header, announcement: { ...d.header.announcement, mode: "settings", ...bar } }, footer: { columns: cols(...types), copyright: "", copyrightBn: "" } });
 }
 
-/** One header and footer for each of the six original templates, matched to the look. */
+/** One header and footer for each of the original templates, matched to the look. */
 export const BUILT_IN_CHROMES: Record<string, Chrome> = {
   kapor: make({ logo: "center", search: "icon" }, { bgColor: "#2B2118", textColor: "#FFFFFF" }, "about", "shop", "help", "social"),
   gadgetstudio: make({ logo: "left", search: "bar" }, { bgColor: "#101828", textColor: "#FFFFFF" }, "shop", "help", "contact", "payments"),
@@ -34,4 +34,8 @@ export const BUILT_IN_CHROMES: Record<string, Chrome> = {
   axionwear: make({ logo: "left", search: "icon" }, { bgColor: "#D7FF3F", textColor: "#0B0D0F" }, "shop", "help", "social"),
   bindu: make({ logo: "center", search: "icon" }, { bgColor: "#8A2855", textColor: "#FFFFFF" }, "about", "shop", "contact", "social"),
   berber: make({ logo: "stacked", search: "icon" }, { bgColor: "#C9A24B", textColor: "#0D121E" }, "about", "shop", "contact", "payments"),
+  freshbasket: make({ logo: "left", search: "bar" }, { bgColor: "#B4421C", textColor: "#FFFFFF" }, "shop", "help", "contact", "payments"),
+  bazaar: make({ logo: "left", search: "bar" }, { bgColor: "#C2410C", textColor: "#FFFFFF" }, "shop", "help", "contact", "payments"),
+  maison: make({ logo: "center", search: "icon" }, { bgColor: "#1C1917", textColor: "#FFFFFF" }, "about", "shop", "help", "social"),
+  nakshi: make({ logo: "center", search: "icon" }, { bgColor: "#7A1F2E", textColor: "#FFFFFF" }, "about", "shop", "contact", "social"),
 };

@@ -1,4 +1,5 @@
 import { isDemoSessionId } from "../demo/guard";
+import { tenantPlanFeatures } from "../platform/plan-source";
 import { createDemoCourier } from "./demo";
 import { createHash } from "node:crypto";
 import { Prisma, getBasePrisma, withTenant, type TenantTx } from "@biztrackbd/db";
@@ -90,9 +91,7 @@ export async function testCourierConnection(tenantId: string, actor: StaffActor,
 
 /** Automatic booking is a plan feature (Starter books by hand). Hand-entered tracking codes are always allowed. */
 async function assertPlanAllowsBooking(tx: TenantTx): Promise<void> {
-  const t = await tx.tenant.findFirstOrThrow({ select: { planTier: true } });
-  const plan = await tx.plan.findUnique({ where: { tier: t.planTier } });
-  const f = (plan?.features ?? {}) as Record<string, unknown>;
+  const { features: f } = await tenantPlanFeatures(tx);
   if (f.courierBooking !== "auto") throw new PlanFeatureError("courierBooking");
 }
 

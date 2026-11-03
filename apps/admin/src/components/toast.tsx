@@ -85,7 +85,7 @@ const BORDER_COLORS: Record<ToastType, string> = {
   success: "#10b981",
   error: "#ef4444",
   info: "#3b82f6",
-  loading: "#6366f1",
+  loading: "var(--brand)",
 };
 
 export function ToastContainer() {

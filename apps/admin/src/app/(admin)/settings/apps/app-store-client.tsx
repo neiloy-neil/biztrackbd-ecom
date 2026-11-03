@@ -133,7 +133,7 @@ function AppIcon({ icon }: { icon: string }) {
       );
     case "gift":
       return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{ color: "var(--brand)" }} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <polyline points="20 12 20 22 4 22 4 12" />
           <rect x="2" y="7" width="20" height="5" />
           <line x1="12" y1="22" x2="12" y2="7" />
@@ -166,7 +166,7 @@ function AppIcon({ icon }: { icon: string }) {
       );
     case "credit-card":
       return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{ color: "var(--brand)" }} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
           <line x1="1" y1="10" x2="23" y2="10" />
         </svg>
@@ -180,7 +180,7 @@ function AppIcon({ icon }: { icon: string }) {
       );
     case "layout":
       return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{ color: "var(--brand)" }} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <rect x="3" y="3" width="18" height="18" rx="2" />
           <line x1="3" y1="9" x2="21" y2="9" />
           <line x1="9" y1="21" x2="9" y2="9" />
@@ -282,12 +282,12 @@ export function AppStoreClient({
           alignItems: "center",
           flexWrap: "wrap",
           gap: 16,
-          background: "linear-gradient(135deg, var(--card-bg, #fff) 0%, rgba(124, 58, 237, 0.05) 100%)",
+          background: "linear-gradient(135deg, var(--card-bg, #fff) 0%, color-mix(in srgb, var(--brand) 5%, transparent) 100%)",
           border: "1px solid var(--border, #e5e7eb)",
         }}
       >
         <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--primary, #6366f1)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--brand)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
             Unified Ecosystem
           </div>
           <div style={{ fontSize: 20, fontWeight: 700, marginTop: 2 }}>
@@ -341,7 +341,7 @@ export function AppStoreClient({
                 style={{
                   cursor: "pointer",
                   fontWeight: active ? 700 : 500,
-                  background: active ? "var(--primary, #6366f1)" : undefined,
+                  background: active ? "var(--brand)" : undefined,
                   color: active ? "#fff" : undefined,
                 }}
               >
@@ -455,16 +455,16 @@ export function AppStoreClient({
                   {/* Badge & Tier */}
                   <div className="row" style={{ gap: 6, marginBottom: 16 }}>
                     {app.badge && (
-                      <span className="pill grey" style={{ fontSize: 11, fontWeight: 600 }}>
+                      <span className="pill grey" style={{ fontSize: 12, fontWeight: 600 }}>
                         {app.badge}
                       </span>
                     )}
                     <span
                       className="pill grey"
                       style={{
-                        fontSize: 11,
-                        background: app.tier === "INCLUDED" ? "rgba(16, 185, 129, 0.1)" : "rgba(124, 58, 237, 0.1)",
-                        color: app.tier === "INCLUDED" ? "#059669" : "#7C3AED",
+                        fontSize: 12,
+                        background: app.tier === "INCLUDED" ? "color-mix(in srgb, var(--success) 10%, transparent)" : "color-mix(in srgb, var(--gold-dark) 10%, transparent)",
+                        color: app.tier === "INCLUDED" ? "var(--success)" : "var(--gold-dark)",
                       }}
                     >
                       {app.tierLabel}
@@ -671,7 +671,7 @@ export function AppStoreClient({
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
                       <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 14 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                          <span style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "#1E293B" }}>
+                          <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "#1E293B" }}>
                             Dynamic XML Sitemap
                           </span>
                           <a
@@ -704,14 +704,14 @@ export function AppStoreClient({
                             {copiedSitemap ? "Copied! ✓" : "Copy"}
                           </button>
                         </div>
-                        <span className="muted" style={{ fontSize: 11, display: "block", marginTop: 4 }}>
+                        <span className="muted" style={{ fontSize: 12, display: "block", marginTop: 4 }}>
                           Includes products, images, categories, and landing pages.
                         </span>
                       </div>
 
                       <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 14 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                          <span style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "#1E293B" }}>
+                          <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "#1E293B" }}>
                             Robots.txt Directives
                           </span>
                           <a
@@ -744,7 +744,7 @@ export function AppStoreClient({
                             {copiedRobots ? "Copied! ✓" : "Copy"}
                           </button>
                         </div>
-                        <span className="muted" style={{ fontSize: 11, display: "block", marginTop: 4 }}>
+                        <span className="muted" style={{ fontSize: 12, display: "block", marginTop: 4 }}>
                           Crawler allow/disallow rules pointing to your sitemap.
                         </span>
                       </div>
@@ -1003,7 +1003,7 @@ export function AppStoreClient({
                             {copiedWebhook ? "Copied! ✓" : "Copy"}
                           </button>
                         </div>
-                        <span className="muted" style={{ fontSize: 11.5, marginTop: 4, display: "block" }}>
+                        <span className="muted" style={{ fontSize: 12, marginTop: 4, display: "block" }}>
                           Paste this in your Steadfast merchant portal under API Webhook settings.
                         </span>
                       </div>
@@ -1367,7 +1367,7 @@ export function AppStoreClient({
                       className="input"
                       style={{ width: "100%" }}
                     />
-                    <span className="hint" style={{ fontSize: 12, color: "var(--ink-3, #6B6B8D)", marginTop: 4, display: "block" }}>
+                    <span className="hint" style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 4, display: "block" }}>
                       Paste the Google Search Console HTML tag / token here to inject it into your store &lt;head&gt;. If using the HTML file method, your store handles it automatically—just click Verify in Search Console.
                     </span>
                   </div>
@@ -1382,7 +1382,7 @@ export function AppStoreClient({
                       className="input"
                       style={{ width: "100%" }}
                     />
-                    <span className="hint" style={{ fontSize: 12, color: "var(--ink-3, #6B6B8D)", marginTop: 4, display: "block" }}>
+                    <span className="hint" style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 4, display: "block" }}>
                       Feed URL: <code>{storefrontOrigin}/api/feed/google.xml</code>
                     </span>
                   </div>
@@ -1541,7 +1541,7 @@ export function AppStoreClient({
                   className="stack"
                   style={{ gap: 16 }}
                 >
-                  <div className="card" style={{ background: "rgba(124, 58, 237, 0.04)", border: "1px solid rgba(124, 58, 237, 0.2)", padding: 14 }}>
+                  <div className="card" style={{ background: "color-mix(in srgb, var(--brand) 4%, transparent)", border: "1px solid color-mix(in srgb, var(--brand) 20%, transparent)", padding: 14 }}>
                     <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontWeight: 700, fontSize: 15 }}>
                       <input
                         type="checkbox"
@@ -1627,7 +1627,7 @@ export function AppStoreClient({
                           className="input"
                           style={{ width: "100%", fontSize: 13 }}
                         />
-                        <span className="muted" style={{ fontSize: 11 }}>1.25x points</span>
+                        <span className="muted" style={{ fontSize: 12 }}>1.25x points</span>
                       </div>
                       <div>
                         <label className="label" style={{ fontSize: 12 }}>Gold Min (৳)</label>
@@ -1639,7 +1639,7 @@ export function AppStoreClient({
                           style={{ width: "100%", fontSize: 13 }}
                         />
                         <input type="hidden" name="vipGoldDiscount" value={storeSettings?.vipGoldDiscount ?? 5} />
-                        <span className="muted" style={{ fontSize: 11 }}>1.5x pts + 5% off</span>
+                        <span className="muted" style={{ fontSize: 12 }}>1.5x pts + 5% off</span>
                       </div>
                       <div>
                         <label className="label" style={{ fontSize: 12 }}>Platinum Min (৳)</label>
@@ -1651,7 +1651,7 @@ export function AppStoreClient({
                           style={{ width: "100%", fontSize: 13 }}
                         />
                         <input type="hidden" name="vipPlatinumDiscount" value={storeSettings?.vipPlatinumDiscount ?? 10} />
-                        <span className="muted" style={{ fontSize: 11 }}>2x + 10% + Free Ship</span>
+                        <span className="muted" style={{ fontSize: 12 }}>2x + 10% + Free Ship</span>
                       </div>
                     </div>
                   </div>
@@ -2139,8 +2139,8 @@ export function AppStoreClient({
                     </Link>
                   </div>
 
-                  <div className="card" style={{ border: "1px solid rgba(139, 92, 246, 0.25)", background: "rgba(139, 92, 246, 0.04)", padding: 16 }}>
-                    <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "#7C3AED" }}>
+                  <div className="card" style={{ border: "1px solid color-mix(in srgb, var(--brand) 25%, transparent)", background: "color-mix(in srgb, var(--brand) 4%, transparent)", padding: 16 }}>
+                    <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "var(--brand)" }}>
                       Conversion Highlights:
                     </h4>
                     <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.6 }}>
@@ -2271,8 +2271,8 @@ export function AppStoreClient({
                     </Link>
                   </div>
 
-                  <div className="card" style={{ border: "1px solid rgba(79, 70, 229, 0.25)", background: "rgba(79, 70, 229, 0.04)", padding: 16 }}>
-                    <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "#4F46E5" }}>
+                  <div className="card" style={{ border: "1px solid color-mix(in srgb, var(--brand) 25%, transparent)", background: "color-mix(in srgb, var(--brand) 4%, transparent)", padding: 16 }}>
+                    <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "var(--brand)" }}>
                       B2B Suite Capabilities:
                     </h4>
                     <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.6 }}>
@@ -2365,8 +2365,8 @@ export function AppStoreClient({
                     </Link>
                   </div>
 
-                  <div className="card" style={{ border: "1px solid rgba(139, 92, 246, 0.25)", background: "rgba(139, 92, 246, 0.04)", padding: 16 }}>
-                    <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "#7C3AED" }}>
+                  <div className="card" style={{ border: "1px solid color-mix(in srgb, var(--brand) 25%, transparent)", background: "color-mix(in srgb, var(--brand) 4%, transparent)", padding: 16 }}>
+                    <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "var(--brand)" }}>
                       Included Features:
                     </h4>
                     <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.6 }}>

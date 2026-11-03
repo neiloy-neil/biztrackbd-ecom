@@ -1,9 +1,10 @@
+import { planFor } from "./plan-source";
 import { notifyOwner } from "../mail/send";
 import { copyKeptPage, copyKeptPictures, finishKeep, keptPageJson, keptPictureUrls, readKeptStore, writeKeptCatalog, type KeptStore } from "../demo/keep";
 import { randomUUID } from "node:crypto";
 import { Prisma, getBasePrisma, withTenant, type TenantTx } from "@biztrackbd/db";
 import { z } from "zod";
-import { STORE_THEMES } from "../builder/theme";
+import { CATEGORY_THEMES, STORE_THEMES } from "../builder/theme";
 import { installTemplateForNewStore, resolveTemplateForSignup } from "./templates";
 import { audit } from "../audit/service";
 import { DomainError, ValidationError } from "../errors";
@@ -51,8 +52,9 @@ export const SignupInput = z.object({
   password: z.string().min(8, "Use at least 8 characters").max(72).optional(),
   subdomain: z.string().trim().toLowerCase(),
   plan: z.enum(["STARTER", "PRO", "BUSINESS"]).default("PRO"),
-  // A template id: one of the original six, or any template staff have published (docs/46 stage 5). Checked against the published list below.
-  theme: z.string().trim().toLowerCase().min(2).max(40).default("kapor"),
+  // A template id: one of the original themes, or any template staff have published (docs/46 stage 5). Checked against the published list below.
+  // Left out (or blank), the theme follows the category (CATEGORY_THEMES); it is no longer defaulted to Kapor for everyone.
+  theme: z.preprocess((v) => (typeof v === "string" && v.trim() === "" ? undefined : v), z.string().trim().toLowerCase().min(2).max(40).optional()),
   tagline: z.string().trim().max(120).optional(),
   locale: z.enum(["bn-BD", "en-US"]).default("bn-BD"),
   demoData: z.boolean().default(true),
@@ -176,8 +178,9 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
   } catch {
     throw new ValidationError("Enter a valid Bangladeshi mobile number, like 01712345678", { field: "phone" });
   }
-  let requestedTheme = input.theme;
-  if (input.siteMode === "PORTFOLIO" && input.businessVertical && (requestedTheme === "kapor" || !requestedTheme)) {
+  const categoryTheme: string = CATEGORY_THEMES[input.category];
+  let requestedTheme: string = input.theme ?? categoryTheme;
+  if (input.siteMode === "PORTFOLIO" && input.businessVertical && (requestedTheme === "kapor" || !input.theme)) {
     const vertTemplate = getBusinessTemplateByVertical(input.businessVertical as any);
     if (vertTemplate) {
       requestedTheme = vertTemplate.id;
@@ -190,7 +193,7 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
   if (!sub.ok) throw new ValidationError(SUBDOMAIN_MESSAGES[sub.reason]!, { field: "subdomain" });
 
   const base = getBasePrisma();
-  const plan = await base.plan.findUnique({ where: { tier: input.plan } });
+  const plan = await planFor(base, input.plan, input.siteMode);
   if (!plan || !plan.isPublic) throw new ValidationError("Choose a plan", { field: "plan" });
   const brand = scanBrandRisk(input.storeName, sub.label);
 
@@ -277,7 +280,9 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
         keptCount = await writeKeptCatalog(tx, id, kept, keptPictures);
       } else if (input.demoData && input.siteMode !== "PORTFOLIO") {
         const hasExplicitCategory = Boolean((raw as Record<string, unknown>)?.category);
-        if (hasExplicitCategory) {
+        // A theme the visitor picked on purpose (a template link) beats the category's starter catalog: the samples follow the look they chose.
+        const themeOverridesCategory = Boolean(input.theme) && input.theme !== categoryTheme && Boolean(template);
+        if (hasExplicitCategory && !themeOverridesCategory) {
           keptCount = await seedCategoryCatalog(tx, id, categoryPreset);
         } else if (samples) {
           await seedCatalog(tx, id, samples.template, samples.urls, { sample: true });

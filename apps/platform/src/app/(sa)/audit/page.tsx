@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { AutoSubmitSelect } from "@/components/auto-submit-select";
 import Link from "next/link";
 import {
-  listPlatformAudit,
+  AUDIT_PAGE_SIZE,
+  listPlatformAuditPage,
   listPlatformUsers,
   canPlatform,
   type PlatformUserView,
@@ -16,7 +17,7 @@ import {
   updateStaffRoleAction,
   toggleStaffActiveAction,
 } from "./actions";
-import { SubmitButton } from "@/components/ui";
+import { Pager, SubmitButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Team and audit log" };
@@ -42,9 +43,10 @@ export default async function AuditPage({
 
   const canEditTeam = canPlatform(s.actor.role, "audit", "edit") || s.actor.role === "OWNER";
 
-  const [staffUsers, auditRows] = await Promise.all([
+  const page = Math.max(1, Math.floor(Number(one(sp.page))) || 1);
+  const [staffUsers, { rows: auditRows, total: auditTotal }] = await Promise.all([
     listPlatformUsers(s.actor),
-    listPlatformAudit(s.actor, { action, limit: 200 }),
+    listPlatformAuditPage(s.actor, { action, page }),
   ]);
 
   return (
@@ -57,14 +59,14 @@ export default async function AuditPage({
       {done && <div className="notice good" role="status">{done}</div>}
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 10, borderBottom: "1px solid #E7E7F0", paddingBottom: 2 }}>
+      <div style={{ display: "flex", gap: 10, borderBottom: "1px solid var(--line)", paddingBottom: 2 }}>
         <Link
           href="/audit?tab=team"
           prefetch={false}
           style={{
             padding: "8px 16px",
-            borderBottom: tab === "team" ? "3px solid #5B4FE8" : "3px solid transparent",
-            color: tab === "team" ? "#5B4FE8" : "#4B4B73",
+            borderBottom: tab === "team" ? "3px solid var(--brand)" : "3px solid transparent",
+            color: tab === "team" ? "var(--brand)" : "var(--ink-2)",
             fontWeight: 700,
             fontSize: 14,
             textDecoration: "none",
@@ -77,14 +79,14 @@ export default async function AuditPage({
           prefetch={false}
           style={{
             padding: "8px 16px",
-            borderBottom: tab === "audit" ? "3px solid #5B4FE8" : "3px solid transparent",
-            color: tab === "audit" ? "#5B4FE8" : "#4B4B73",
+            borderBottom: tab === "audit" ? "3px solid var(--brand)" : "3px solid transparent",
+            color: tab === "audit" ? "var(--brand)" : "var(--ink-2)",
             fontWeight: 700,
             fontSize: 14,
             textDecoration: "none",
           }}
         >
-          Audit Trail ({auditRows.length})
+          Audit Trail ({auditTotal})
         </Link>
       </div>
 
@@ -161,7 +163,7 @@ export default async function AuditPage({
                         style={{
                           padding: "3px 8px",
                           borderRadius: 8,
-                          fontSize: 11.5,
+                          fontSize: 12,
                           fontWeight: 700,
                           background: u.isActive ? "#E8F6EE" : "#FCEBEB",
                           color: u.isActive ? "#15803D" : "#DC2626",
@@ -180,7 +182,7 @@ export default async function AuditPage({
                         <form action={toggleStaffActiveAction.bind(null, u.id)} style={{ margin: 0 }}>
                           <SubmitButton
                             className={`btn btn-sm ${u.isActive ? "btn-secondary" : "btn-primary"}`}
-                            style={{ fontSize: 11.5 }}
+                            style={{ fontSize: 12 }}
                            pending="Working…">
                             {u.isActive ? "Deactivate" : "Activate"}
                           </SubmitButton>
@@ -293,6 +295,7 @@ export default async function AuditPage({
               </table>
             </div>
           )}
+          <Pager page={page} pageSize={AUDIT_PAGE_SIZE} total={auditTotal} path="/audit" params={{ tab: "audit", action }} />
         </div>
       )}
     </div>

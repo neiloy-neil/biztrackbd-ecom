@@ -51,13 +51,13 @@ export function CrmTemplatesSettings({ initialTemplates }: { initialTemplates: C
   };
 
   return (
-    <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
+    <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "20px 24px" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
         <div>
-          <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: "#1A1A4E" }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: "var(--ink)" }}>
             WhatsApp & Outreach CRM Templates
           </h2>
-          <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6B6B8D" }}>
+          <p style={{ margin: "4px 0 0", fontSize: 13, color: "var(--ink-3)" }}>
             Customize default greeting scripts used by platform sales and support when messaging new store owners.
           </p>
         </div>
@@ -96,36 +96,36 @@ export function CrmTemplatesSettings({ initialTemplates }: { initialTemplates: C
       {/* Available Placeholders Callout */}
       <div
         style={{
-          background: "#F8FAFC",
-          border: "1px solid #E2E8F0",
+          background: "var(--bg)",
+          border: "1px solid var(--line)",
           borderRadius: 8,
           padding: "10px 14px",
           fontSize: 12,
-          color: "#475569",
+          color: "var(--ink-2)",
           marginBottom: 16,
           lineHeight: 1.5,
         }}
       >
         <strong>Dynamic Tokens:</strong> You can use{" "}
-        <code style={{ background: "#EEF2FF", color: "#4338CA", padding: "1px 5px", borderRadius: 4 }}>
+        <code style={{ background: "var(--brand-light)", color: "var(--brand-hover)", padding: "1px 5px", borderRadius: 4 }}>
           {"{ownerName}"}
         </code>
         ,{" "}
-        <code style={{ background: "#EEF2FF", color: "#4338CA", padding: "1px 5px", borderRadius: 4 }}>
+        <code style={{ background: "var(--brand-light)", color: "var(--brand-hover)", padding: "1px 5px", borderRadius: 4 }}>
           {"{storeName}"}
         </code>
         ,{" "}
-        <code style={{ background: "#EEF2FF", color: "#4338CA", padding: "1px 5px", borderRadius: 4 }}>
+        <code style={{ background: "var(--brand-light)", color: "var(--brand-hover)", padding: "1px 5px", borderRadius: 4 }}>
           {"{subdomain}"}
         </code>
         , and{" "}
-        <code style={{ background: "#EEF2FF", color: "#4338CA", padding: "1px 5px", borderRadius: 4 }}>
+        <code style={{ background: "var(--brand-light)", color: "var(--brand-hover)", padding: "1px 5px", borderRadius: 4 }}>
           {"{storeUrl}"}
         </code>{" "}
         inside template bodies. They are automatically replaced with real merchant info.
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "220px minmax(0, 1fr)", gap: 20 }}>
+      <div className="crm-tpl-grid">
         {/* Template List Selector */}
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {templates.map((t) => {
@@ -138,9 +138,9 @@ export function CrmTemplatesSettings({ initialTemplates }: { initialTemplates: C
                 style={{
                   padding: "10px 12px",
                   borderRadius: 8,
-                  border: isSelected ? "1.5px solid #4F46E5" : "1px solid #E2E8F0",
-                  background: isSelected ? "#EEF2FF" : "#fff",
-                  color: isSelected ? "#4338CA" : "#334155",
+                  border: isSelected ? "1.5px solid var(--brand)" : "1px solid var(--line)",
+                  background: isSelected ? "var(--brand-light)" : "#fff",
+                  color: isSelected ? "var(--brand-hover)" : "var(--ink-2)",
                   fontSize: 13,
                   fontWeight: isSelected ? 700 : 500,
                   textAlign: "left",
@@ -148,7 +148,7 @@ export function CrmTemplatesSettings({ initialTemplates }: { initialTemplates: C
                 }}
               >
                 <div>{t.title}</div>
-                <div style={{ fontSize: 11, color: isSelected ? "#6366F1" : "#94A3B8", marginTop: 2 }}>
+                <div style={{ fontSize: 12, color: isSelected ? "var(--brand)" : "#94A3B8", marginTop: 2 }}>
                   Key: {t.key} · {t.language.toUpperCase()}
                 </div>
               </button>
@@ -161,8 +161,8 @@ export function CrmTemplatesSettings({ initialTemplates }: { initialTemplates: C
           <form
             onSubmit={handleSave}
             style={{
-              background: "#FAFAFC",
-              border: "1px solid #E2E8F0",
+              background: "var(--bg)",
+              border: "1px solid var(--line)",
               borderRadius: 8,
               padding: "16px",
               display: "flex",
@@ -171,10 +171,8 @@ export function CrmTemplatesSettings({ initialTemplates }: { initialTemplates: C
             }}
           >
             <div>
-              <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 4 }}>
-                Template Title
-              </label>
-              <input
+              <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--ink-2)", marginBottom: 4 }}>Template Title</label>
+              <input aria-label="Template Title"
                 type="text"
                 value={current.title}
                 onChange={(e) => setEditingTemplate({ ...current, title: e.target.value })}
@@ -184,17 +182,15 @@ export function CrmTemplatesSettings({ initialTemplates }: { initialTemplates: C
                   boxSizing: "border-box",
                   padding: "7px 10px",
                   borderRadius: 6,
-                  border: "1px solid #CBD5E1",
-                  fontSize: 13,
+                  border: "1px solid var(--line-2)",
+                  fontSize: 16,
                 }}
               />
             </div>
 
             <div>
-              <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 4 }}>
-                Message Text (WhatsApp Body)
-              </label>
-              <textarea
+              <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--ink-2)", marginBottom: 4 }}>Message Text (WhatsApp Body)</label>
+              <textarea aria-label="Message Text (WhatsApp Body)"
                 value={current.body}
                 onChange={(e) => setEditingTemplate({ ...current, body: e.target.value })}
                 required
@@ -204,8 +200,8 @@ export function CrmTemplatesSettings({ initialTemplates }: { initialTemplates: C
                   boxSizing: "border-box",
                   padding: "10px",
                   borderRadius: 6,
-                  border: "1px solid #CBD5E1",
-                  fontSize: 13,
+                  border: "1px solid var(--line-2)",
+                  fontSize: 16,
                   lineHeight: 1.5,
                   fontFamily: "inherit",
                 }}
@@ -219,7 +215,7 @@ export function CrmTemplatesSettings({ initialTemplates }: { initialTemplates: C
                 style={{
                   padding: "7px 16px",
                   borderRadius: 6,
-                  background: "#4F46E5",
+                  background: "var(--brand)",
                   color: "#fff",
                   border: "none",
                   fontSize: 13,

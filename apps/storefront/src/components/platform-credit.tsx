@@ -1,3 +1,4 @@
+import { BrandSymbol } from "@biztrackbd/ui";
 import type { T } from "@/lib/i18n";
 
 const MARKETING = (process.env.NEXT_PUBLIC_MARKETING_URL ?? "https://biztrack.bd").replace(/\/$/, "");
@@ -9,7 +10,10 @@ const MARKETING = (process.env.NEXT_PUBLIC_MARKETING_URL ?? "https://biztrack.bd
 export function PlatformCredit({ t }: { t: T }) {
   return (
     <p className="credit" data-testid="platform-credit">
-      <a href={MARKETING} target="_blank" rel="noopener">{t("poweredBy")}</a>
+      <a href={MARKETING} target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+        <BrandSymbol size={14} tile={false} mono title="" />
+        {t("poweredBy")}
+      </a>
       <span aria-hidden="true"> · </span>
       {t("sisterOf")} <a href="https://digitaldude.co.uk" target="_blank" rel="noopener noreferrer">The Digital Dude</a>
     </p>

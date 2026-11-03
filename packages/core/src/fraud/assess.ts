@@ -1,5 +1,5 @@
 import type { TenantTx } from "@biztrackbd/db";
-import { lookupTrust, type TrustScore } from "./trust";
+import { lookupTrustForPlan, type TrustScore } from "./trust";
 
 export type RiskLevel = "LOW" | "MEDIUM" | "HIGH";
 
@@ -137,7 +137,7 @@ export function computeUnifiedFraudScore(params: {
 
 /** Scores a new order. Runs inside the order's own transaction, so the score always matches the order that was saved. */
 export async function assessOrderRisk(tx: TenantTx, input: RiskInput, courierStats: CourierFraudStats | null = null): Promise<RiskAssessment> {
-  const trust = await lookupTrust(tx, input.phone);
+  const trust = await lookupTrustForPlan(tx, input.phone, true);
   const flags: string[] = [];
   const isCod = input.paymentMethod === "COD";
 

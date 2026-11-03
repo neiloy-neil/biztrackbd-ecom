@@ -1,9 +1,9 @@
 /* Admin shell (docs/37 phase 2): grouped dark sidebar, desktop top bar, command palette, bell. Loaded after admin.css.
    The sidebar colours are variables: set --sb-* under html[data-sidebar="light"] to switch it to the canvas' light version. */
 :root {
-  --sb-bg: #14142F; --sb-line: #25254F; --sb-ink: #C9C9E4; --sb-ink-2: #8F8FB8; --sb-hover: #1E1E44; --sb-active: #2B2A6B; --sb-active-ink: #fff; --sb-chip: #1E1E44;
+  --sb-bg: #0B4D3B; --sb-line: #1B6450; --sb-ink: #D6E9E0; --sb-ink-2: #B3D6C8; --sb-hover: #0F5C47; --sb-active: #11795A; --sb-active-ink: #fff; --sb-chip: #0F5C47;
 }
-html[data-sidebar="light"] { --sb-bg: #fff; --sb-line: #E7E7F0; --sb-ink: #4B4B73; --sb-ink-2: #6B6B8D; --sb-hover: #FAFAFC; --sb-active: #F4F3FF; --sb-active-ink: #5B4FE8; --sb-chip: #FAFAFC; }
+html[data-sidebar="light"] { --sb-bg: #fff; --sb-line: var(--line); --sb-ink: var(--ink-2); --sb-ink-2: var(--ink-3); --sb-hover: var(--bg); --sb-active: var(--brand-light); --sb-active-ink: var(--brand-hover); --sb-chip: var(--bg); }
 
 .main-col { min-width: 0; display: flex; flex-direction: column; }
 .main-col > .content { width: 100%; min-width: 0; } /* auto side margins would otherwise shrink it to its content's width */
@@ -39,11 +39,11 @@ html[data-sidebar="light"] { --sb-bg: #fff; --sb-line: #E7E7F0; --sb-ink: #4B4B7
   .side .who .btn-secondary { background: var(--sb-hover); border-color: var(--sb-line); color: var(--sb-ink); }
   .side .who .select { background: var(--sb-hover); border-color: var(--sb-line); color: var(--sb-ink); }
   .side .plan-card { margin: 14px 0 6px; padding: 12px 14px; border-radius: 12px; background: var(--sb-chip); border: 1px solid var(--sb-line); }
-  .side .plan-card .k { font-size: 12px; font-weight: 700; color: #A9A3FF; }
+  .side .plan-card .k { font-size: 12px; font-weight: 700; color: var(--marigold-light); }
   .side .plan-card .v { font-size: 15px; font-weight: 700; color: #fff; margin: 2px 0 8px; }
   html[data-sidebar="light"] .side .plan-card .v { color: var(--ink); }
   .side .plan-card .meter { background: var(--sb-line); }
-  .side .plan-card a { display: inline-flex; margin-top: 8px; font-size: 12.5px; font-weight: 700; color: #A9A3FF; }
+  .side .plan-card a { display: inline-flex; margin-top: 8px; font-size: 12.5px; font-weight: 700; color: var(--marigold-light); }
 
   .dtop { display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 30; height: 60px; padding: 0 36px; background: var(--surface); border-bottom: 1px solid var(--line); }
 }
@@ -59,7 +59,7 @@ html[data-sidebar="light"] { --sb-bg: #fff; --sb-line: #E7E7F0; --sb-ink: #4B4B7
 .tact > .lang { margin-left: 0; }
 .lang { display: inline-flex; padding: 3px; border-radius: 19px; background: var(--chip); gap: 2px; }
 .lang button { min-height: 30px; padding: 0 12px; border: 0; border-radius: 16px; background: transparent; font: 600 13px var(--font); color: var(--ink-2); cursor: pointer; }
-.lang button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(26, 26, 78, .15); }
+.lang button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(11, 77, 59, .15); }
 .icon-btn { position: relative; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 10px; background: transparent; color: var(--ink-2); cursor: pointer; }
 .icon-btn:hover { background: var(--chip); }
 .bell-dot { position: absolute; top: 8px; right: 9px; width: 9px; height: 9px; border-radius: 50%; background: var(--danger-solid); border: 2px solid var(--surface); }
@@ -166,7 +166,7 @@ div.tabs[role="tablist"] { overflow-x: auto; margin: 0 0 14px; padding: 0; } div
 .inv-frame { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
 
 /* The demo banner (docs/41) */
-.demo-banner { position: sticky; top: 0; z-index: 99998; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 8px 16px; background: #EEF2FF; border-bottom: 1px solid #C7D2FE; color: #1A1A4E; font-size: 13.5px; }
+.demo-banner { position: sticky; top: 0; z-index: 99998; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 8px 16px; background: var(--brand-light); border-bottom: 1px solid var(--line-2); color: #1A1A4E; font-size: 13.5px; }
 .demo-banner .demo-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .demo-banner .btn { min-height: 40px; }
 

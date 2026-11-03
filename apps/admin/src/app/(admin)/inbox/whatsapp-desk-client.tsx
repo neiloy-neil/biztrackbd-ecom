@@ -515,7 +515,7 @@ export function WhatsAppDeskClient({
                       border: "none",
                       padding: "6px 4px",
                       borderRadius: 6,
-                      fontSize: 11.5,
+                      fontSize: 12,
                       fontWeight: isActive ? 700 : 500,
                       background: isActive ? "#FFF" : "transparent",
                       color: isActive ? "#0F172A" : "#64748B",
@@ -548,7 +548,7 @@ export function WhatsAppDeskClient({
                   type="button"
                   onClick={() => setStatusFilter(st)}
                   style={{
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: 600,
                     padding: "3px 8px",
                     borderRadius: 6,
@@ -606,7 +606,7 @@ export function WhatsAppDeskClient({
                       <div style={{ fontWeight: 700, fontSize: 13.5, color: "#0F172A" }}>
                         {c.customerName || c.customerPhone}
                       </div>
-                      <span style={{ fontSize: 10.5, color: "#94A3B8" }}>
+                      <span style={{ fontSize: 12, color: "#94A3B8" }}>
                         {new Date(c.lastMessageAt).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -640,7 +640,7 @@ export function WhatsAppDeskClient({
                             color: "#FFF",
                             borderRadius: 10,
                             padding: "1px 6px",
-                            fontSize: 10,
+                            fontSize: 12,
                             fontWeight: 700,
                           }}
                         >
@@ -663,7 +663,7 @@ export function WhatsAppDeskClient({
                       {assignedName ? (
                         <span
                           style={{
-                            fontSize: 10,
+                            fontSize: 12,
                             background: isAssignedToMe ? "#DCFCE7" : "#F1F5F9",
                             color: isAssignedToMe ? "#15803D" : "#475569",
                             padding: "1px 6px",
@@ -676,7 +676,7 @@ export function WhatsAppDeskClient({
                       ) : (
                         <span
                           style={{
-                            fontSize: 10,
+                            fontSize: 12,
                             background: "#FEF3C7",
                             color: "#B45309",
                             padding: "1px 6px",
@@ -716,7 +716,7 @@ export function WhatsAppDeskClient({
                   <div style={{ fontWeight: 700, fontSize: 14.5, color: "#111827" }}>
                     {activeChat?.customer?.name || selectedConv.customerName || selectedConv.customerPhone}
                   </div>
-                  <div style={{ fontSize: 11.5, color: "#64748B" }}>
+                  <div style={{ fontSize: 12, color: "#64748B" }}>
                     WhatsApp: <code>{selectedConv.customerPhone}</code>
                   </div>
                 </div>
@@ -730,7 +730,7 @@ export function WhatsAppDeskClient({
                         onClick={() => handleAssignStaff(currentUserId)}
                         disabled={!canEdit}
                         className="btn btn-secondary btn-sm"
-                        style={{ fontSize: 11, padding: "3px 8px" }}
+                        style={{ fontSize: 12, padding: "3px 8px" }}
                         title="Assign this conversation to yourself"
                       >
                         Claim
@@ -742,7 +742,7 @@ export function WhatsAppDeskClient({
                       onChange={(e) => handleAssignStaff(e.target.value ? e.target.value : null)}
                       disabled={!canEdit}
                       className="input"
-                      style={{ fontSize: 11.5, padding: "3px 8px", width: "auto" }}
+                      style={{ fontSize: 12, padding: "3px 8px", width: "auto" }}
                     >
                       <option value="">(Unassigned)</option>
                       {staffUsers.map((u) => (
@@ -760,7 +760,7 @@ export function WhatsAppDeskClient({
                     disabled={!canEdit}
                     className="btn btn-secondary btn-sm"
                     style={{
-                      fontSize: 11.5,
+                      fontSize: 12,
                       padding: "3px 8px",
                       background: isBotPaused ? "#FEF3C7" : "#EFF6FF",
                       borderColor: isBotPaused ? "#F59E0B" : "#3B82F6",
@@ -778,7 +778,7 @@ export function WhatsAppDeskClient({
                     onChange={(e) => handleStatusChange(e.target.value as WhatsAppConversationStatus)}
                     disabled={!canEdit}
                     className="input"
-                    style={{ fontSize: 11.5, padding: "3px 8px", width: "auto" }}
+                    style={{ fontSize: 12, padding: "3px 8px", width: "auto" }}
                   >
                     <option value="OPEN">Open (Staff Action)</option>
                     <option value="BOT_HANDLED">Bot Handled</option>
@@ -790,7 +790,7 @@ export function WhatsAppDeskClient({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn btn-secondary btn-sm"
-                    style={{ fontSize: 11.5, background: "#25D366", color: "#FFF", borderColor: "#25D366" }}
+                    style={{ fontSize: 12, background: "#25D366", color: "#FFF", borderColor: "#25D366" }}
                   >
                     WA ↗
                   </a>
@@ -838,7 +838,7 @@ export function WhatsAppDeskClient({
                         {!isCustomer && (
                           <div
                             style={{
-                              fontSize: 10,
+                              fontSize: 12,
                               fontWeight: 700,
                               color: isBot ? "#2563EB" : "#15803D",
                               marginBottom: 2,
@@ -892,7 +892,7 @@ export function WhatsAppDeskClient({
                       padding: "6px 12px",
                       background: "#F8FAFC",
                       borderBottom: "1px solid #E2E8F0",
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: 700,
                       color: "#64748B",
                       display: "flex",
@@ -925,7 +925,7 @@ export function WhatsAppDeskClient({
                         </span>
                         <div
                           style={{
-                            fontSize: 11.5,
+                            fontSize: 12,
                             color: "#64748B",
                             whiteSpace: "nowrap",
                             overflow: "hidden",
@@ -966,7 +966,7 @@ export function WhatsAppDeskClient({
                     border: "none",
                     borderRadius: 14,
                     padding: "3px 10px",
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: 700,
                     cursor: "pointer",
                     display: "flex",
@@ -987,7 +987,7 @@ export function WhatsAppDeskClient({
                       border: "1px solid #CBD5E1",
                       borderRadius: 14,
                       padding: "3px 10px",
-                      fontSize: 11.5,
+                      fontSize: 12,
                       cursor: "pointer",
                       color: "#334155",
                     }}
@@ -1091,7 +1091,7 @@ export function WhatsAppDeskClient({
                   {selectedConv.customerPhone}
                 </div>
 
-                <div style={{ display: "flex", gap: 12, marginTop: 6, fontSize: 11.5 }}>
+                <div style={{ display: "flex", gap: 12, marginTop: 6, fontSize: 12 }}>
                   <div>
                     <span className="muted">Orders:</span>{" "}
                     <b>{activeChat?.customer?.totalOrders ?? 0}</b>
@@ -1153,13 +1153,13 @@ export function WhatsAppDeskClient({
                         </span>
                       </div>
 
-                      <div className="muted" style={{ fontSize: 11.5, marginTop: 3 }}>
+                      <div className="muted" style={{ fontSize: 12, marginTop: 3 }}>
                         ৳ {Number(ord.totalAmount).toLocaleString("en-IN")} ·{" "}
                         {new Date(ord.createdAt).toLocaleDateString()}
                       </div>
 
                       {ord.trackingCode && (
-                        <div style={{ fontSize: 10.5, color: "#1E40AF", marginTop: 3 }}>
+                        <div style={{ fontSize: 12, color: "#1E40AF", marginTop: 3 }}>
                           {ord.courierProvider}: <code>{ord.trackingCode}</code>
                         </div>
                       )}
@@ -1181,7 +1181,7 @@ export function WhatsAppDeskClient({
                             onClick={() => handleQuickConfirmOrder(ord.id)}
                             disabled={!canEdit}
                             className="btn btn-secondary btn-sm"
-                            style={{ fontSize: 10.5, padding: "2px 4px", fontWeight: 600 }}
+                            style={{ fontSize: 12, padding: "2px 4px", fontWeight: 600 }}
                             title="Confirm order & notify customer"
                           >
                             Confirm
@@ -1193,7 +1193,7 @@ export function WhatsAppDeskClient({
                           onClick={() => handleSendOrderTracking(ord.id)}
                           disabled={!canEdit}
                           className="btn btn-secondary btn-sm"
-                          style={{ fontSize: 10.5, padding: "2px 4px" }}
+                          style={{ fontSize: 12, padding: "2px 4px" }}
                           title="Send courier tracking details"
                         >
                           Tracking
@@ -1204,7 +1204,7 @@ export function WhatsAppDeskClient({
                           onClick={() => handleSendOrderPayment(ord.id)}
                           disabled={!canEdit}
                           className="btn btn-secondary btn-sm"
-                          style={{ fontSize: 10.5, padding: "2px 4px" }}
+                          style={{ fontSize: 12, padding: "2px 4px" }}
                           title="Send bKash/Nagad payment info"
                         >
                           Payment
@@ -1213,7 +1213,7 @@ export function WhatsAppDeskClient({
                         <Link
                           href={`/orders/${ord.id}`}
                           className="btn btn-secondary btn-sm"
-                          style={{ fontSize: 10.5, padding: "2px 4px", textAlign: "center" }}
+                          style={{ fontSize: 12, padding: "2px 4px", textAlign: "center" }}
                         >
                           View
                         </Link>
@@ -1467,7 +1467,7 @@ export function WhatsAppDeskClient({
                       <button
                         type="button"
                         className="btn btn-secondary btn-sm"
-                        style={{ fontSize: 11, padding: "2px 8px" }}
+                        style={{ fontSize: 12, padding: "2px 8px" }}
                         onClick={() => setEditingSnippet(qr)}
                       >
                         Edit
@@ -1475,7 +1475,7 @@ export function WhatsAppDeskClient({
                       <button
                         type="button"
                         className="btn btn-secondary btn-sm"
-                        style={{ fontSize: 11, padding: "2px 8px", color: "#DC2626" }}
+                        style={{ fontSize: 12, padding: "2px 8px", color: "#DC2626" }}
                         onClick={() => handleDeleteSnippet(qr.id)}
                       disabled={snippetBusy !== null}
                       >

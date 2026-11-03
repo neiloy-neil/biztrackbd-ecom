@@ -1,4 +1,5 @@
 import { previewInvite, ROLE_LABELS } from "@biztrackbd/core";
+import { AuthBrand } from "@/components/auth-brand";
 import { authMode } from "@/lib/auth";
 import { JoinForm } from "./form";
 
@@ -8,7 +9,8 @@ export default async function Join({ params }: { params: Promise<{ token: string
   const { token } = await params;
   const invite = await previewInvite(token);
   return (
-    <div className="card" style={{ margin: "64px auto", maxWidth: 440 }}>
+    <div role="main" className="card" style={{ margin: "64px auto", maxWidth: 440 }}>
+      <AuthBrand />
       {invite ? (
         <>
           <h1 style={{ marginTop: 0 }}>Join {invite.storeName}</h1>

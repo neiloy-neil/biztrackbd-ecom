@@ -46,6 +46,7 @@ export async function withTenant<T>(
 // Platform-level models: never reachable through a tenant client.
 const PLATFORM_MODELS = new Set([
   "Plan",
+  "SitePlan",
   "Announcement",
   "PlatformUser",
   "PlatformAuditLog",

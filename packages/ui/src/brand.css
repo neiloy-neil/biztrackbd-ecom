@@ -1,0 +1,14 @@
+/* Wordmark for BrandWordmark / BrandLockup (brand.tsx). Self-contained: each value falls back to the brand hex, so it renders the same
+   in an app that has not loaded tokens.css. Lowercase `biztrack.bd`; ".bd" is dark gold on light grounds and marigold on dark. */
+.brand-wordmark {
+  font-family: var(--font-display, var(--font-baloo, "Baloo Da 2"), system-ui, sans-serif);
+  font-weight: 800;
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: -0.2px;
+  text-transform: none;
+}
+.brand-wordmark-light { color: var(--green-deep, #0B4D3B); }
+.brand-wordmark-light .brand-wordmark-bd { color: var(--gold-dark, #946300); }
+.brand-wordmark-dark { color: #FFFFFF; }
+.brand-wordmark-dark .brand-wordmark-bd { color: var(--marigold, #F2A900); }
