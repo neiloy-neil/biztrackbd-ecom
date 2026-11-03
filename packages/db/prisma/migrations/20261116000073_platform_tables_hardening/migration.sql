@@ -10,6 +10,8 @@ REVOKE ALL ON "PlatformNotifyRecipient" FROM biztrack_app;
 -- (the marketing signup and admin actions push to them). FORCE makes the rule bind the table owner too.
 ALTER TABLE "MobileDeviceToken" FORCE ROW LEVEL SECURITY;
 
+-- 067 created the first policy and 071 replaced it; drop all three names so the result is the same whichever of them ran.
+DROP POLICY IF EXISTS mobile_device_token_tenant_isolation ON "MobileDeviceToken";
 DROP POLICY IF EXISTS mobile_device_token_tenant_select ON "MobileDeviceToken";
 DROP POLICY IF EXISTS mobile_device_token_tenant_modify ON "MobileDeviceToken";
 
