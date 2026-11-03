@@ -134,8 +134,8 @@ export {
   type PlanView, type BillingOverview, type ProofView, type PayTo, type PlanChargeQuote,
 } from "./platform/billing";
 export {
-  getOverview, listTenants, getTenantDetail, addTenantNote, listTenantNotes, listPayments, approveSubscriptionPayment, rejectSubscriptionPayment, suspendTenant, reactivateTenant, extendTrial, changePlan, reviewQuarantine,
-  listPlans, updatePlan, listPlatformAudit, runBillingLifecycle, assertPlatformCan, canPlatform, PLATFORM_PERMISSIONS,
+  getOverview, listTenants, getTenantDetail, addTenantNote, listTenantNotes, listPayments, listPaymentsPage, PAYMENTS_PAGE_SIZE, approveSubscriptionPayment, rejectSubscriptionPayment, suspendTenant, reactivateTenant, extendTrial, changePlan, reviewQuarantine,
+  listPlans, updatePlan, listPlatformAudit, listPlatformAuditPage, AUDIT_PAGE_SIZE, runBillingLifecycle, assertPlatformCan, canPlatform, PLATFORM_PERMISSIONS,
   recordTenantCrmActivity, updateTenantLeadStage, scheduleTenantFollowUp, listPlatformCrmTemplates, upsertPlatformCrmTemplate,
   type PlatformActor, type PlatformRole, type PlatformArea, type PlatformOverview, type TenantRow, type TenantCounts, type TenantDetail, type TenantNoteRow, type TenantFilter, type PaymentRow, type Approved, type PlanPatch, type LifecycleResult,
   type TenantCrmActivityRow, type RecordCrmActivityInput,
@@ -225,7 +225,7 @@ export * from "./landing/offers";
 export * from "./landing/templates";
 export * from "./landing/stats";
 export { checkDomain, recheckDomain, sweepDomains, dnsInstruction, setDnsResolver, setVercelClient, vercelFromEnv, type DnsResolver, type VercelDomainClient, type DnsInstruction, type DnsRecordItem, type CheckOutcome, type SweepSummary } from "./domains/verify";
-export { listPlatformDomains, checkPlatformDomain, type PlatformDomainRow, type DomainFilter } from "./platform/domains";
+export { listPlatformDomains, listPlatformDomainsPage, DOMAINS_PAGE_SIZE, checkPlatformDomain, type PlatformDomainRow, type DomainFilter } from "./platform/domains";
 
 // Phase 9: loyalty points, VIP tiers and referrals
 export { TIERS, tiersOf, tierFor, tierOf, nextTier, pointsFor, pointsValue, priceLoyalty, hashClient, REFERRAL_CODE, type LoyaltySettings, type LoyaltyPricing, type Tier, type TierLevel } from "./loyalty/engine";

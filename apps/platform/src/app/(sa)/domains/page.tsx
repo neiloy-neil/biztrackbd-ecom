@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listPlatformDomains, type DomainFilter } from "@biztrackbd/core";
-import { SubmitButton } from "@/components/ui";
+import { DOMAINS_PAGE_SIZE, listPlatformDomainsPage, type DomainFilter } from "@biztrackbd/core";
+import { Pager, SubmitButton } from "@/components/ui";
 import { dateTime } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
@@ -16,7 +16,8 @@ export default async function Domains({ searchParams }: { searchParams: Promise<
   const sp = await searchParams;
   const s = await requireAccess("tenants");
   const tab = (TABS.find((t) => t[0] === one(sp.tab))?.[0] ?? "connecting") as DomainFilter;
-  const rows = await listPlatformDomains(s.actor, tab);
+  const page = Math.max(1, Math.floor(Number(one(sp.page))) || 1);
+  const { rows, total } = await listPlatformDomainsPage(s.actor, tab, page);
   const err = one(sp.err);
   const done = one(sp.done);
   const label = (r: (typeof rows)[number]) => (r.connected ? "Connected" : r.verified ? "Getting certificate" : r.dnsStatus === "found" ? "Record found" : r.dnsStatus === "wrong_record" ? "Wrong record" : "Waiting for DNS");
@@ -55,6 +56,7 @@ export default async function Domains({ searchParams }: { searchParams: Promise<
           ))}
         </div>
       )}
+      <Pager page={page} pageSize={DOMAINS_PAGE_SIZE} total={total} path="/domains" params={{ tab }} />
     </>
   );
 }

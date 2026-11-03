@@ -2,8 +2,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createBaseClient, setBasePrisma, setPlatformPrisma, withTenant, type PrismaClient } from "@biztrackbd/db";
 import { createOwnerClient, resetDatabase, seedPlans, testUrls } from "@biztrackbd/db/testing";
 import {
-  DEMO_TEMPLATES, DomainError, accessState, addDomain, addPeriod, approveSubscriptionPayment, cancelPendingProof, changePlan, checkSubdomain, extendTrial, getBillingOverview, getOverview, getStoreAccess,
-  getTenantDetail, listPayments, listPlans, listPlatformAudit, listPublicPlans, listTenants, reactivateTenant, rejectSubscriptionPayment, reviewQuarantine, runBillingLifecycle, scanBrandRisk,
+  AUDIT_PAGE_SIZE, DEMO_TEMPLATES, DOMAINS_PAGE_SIZE, DomainError, PAYMENTS_PAGE_SIZE, accessState, addDomain, addPeriod, approveSubscriptionPayment, cancelPendingProof, changePlan, checkSubdomain, extendTrial, getBillingOverview, getOverview, getStoreAccess,
+  getTenantDetail, listPayments, listPaymentsPage, listPlans, listPlatformAudit, listPlatformAuditPage, listPlatformDomainsPage, listPublicPlans, listTenants, reactivateTenant, rejectSubscriptionPayment, reviewQuarantine, runBillingLifecycle, scanBrandRisk,
   setEventPublisher, signupStore, statusFor, submitPaymentProof, suspendTenant, updatePlan, type PlatformActor, type PlatformRole, type StaffActor,
 } from "../src";
 
@@ -602,5 +602,60 @@ describe("the daily sweep", () => {
     expect(kind(overdue4.tenantId)).toEqual(["READ_ONLY_STARTED"]);
     expect(kind(overdue15.tenantId)).toEqual(["LOCKED"]);
     expect(kind(quiet.tenantId)).toEqual([]);
+  });
+});
+
+describe("paged platform lists", () => {
+  it("payments: pages of 25, no overlap, a total for the tab and the pending count alongside", async () => {
+    const s = await signup();
+    const before = await listPaymentsPage(fin, "REJECTED", 1);
+    await owner.paymentProof.createMany({
+      data: Array.from({ length: 27 }, (_, i) => ({
+        tenantId: s.tenantId, planTier: "PRO" as const, billingPeriod: "MONTHLY" as const, amount: 500, mfsProvider: "BKASH" as const, senderNumber: "01712345678",
+        trxId: `PG${String(++seq).padStart(7, "0")}${i}`.slice(0, 11), status: "REJECTED" as const, createdAt: new Date(Date.now() - i * 1000),
+      })),
+    });
+    const p1 = await listPaymentsPage(fin, "REJECTED", 1);
+    const p2 = await listPaymentsPage(fin, "REJECTED", 2);
+    expect(p1.total).toBe(before.total + 27);
+    expect(p1.rows).toHaveLength(PAYMENTS_PAGE_SIZE);
+    expect(p2.rows.length).toBe(Math.min(PAYMENTS_PAGE_SIZE, p1.total - PAYMENTS_PAGE_SIZE));
+    expect(new Set([...p1.rows, ...p2.rows].map((r) => r.id)).size).toBe(p1.rows.length + p2.rows.length);
+    expect(p1.rows[0]!.createdAt.getTime()).toBeGreaterThanOrEqual(p1.rows[1]!.createdAt.getTime()); // newest first once handled
+    expect(p1.pending).toBe((await listPayments(fin, "PENDING")).length);
+    await expect(listPaymentsPage(support, "REJECTED", 1)).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+
+  it("domains: the connected and connecting split covers every row, not only the newest fetched", async () => {
+    const s = await signup();
+    const before = { connecting: (await listPlatformDomainsPage(boss, "connecting")).total, connected: (await listPlatformDomainsPage(boss, "connected")).total };
+    await owner.domain.createMany({
+      data: [
+        ...Array.from({ length: 27 }, (_, i) => ({ tenantId: s.tenantId, domain: `pending-${seq}-${i}.example`, createdAt: new Date(Date.now() - i * 1000) })),
+        { tenantId: s.tenantId, domain: `live-${seq}.example`, verified: true, sslStatus: "issued", dnsStatus: "verified", createdAt: new Date(Date.now() - 10 * DAY) },
+      ],
+    });
+    const connecting = await listPlatformDomainsPage(boss, "connecting", 1);
+    const connected = await listPlatformDomainsPage(boss, "connected", 1);
+    expect(connecting.total).toBe(before.connecting + 27);
+    expect(connected.total).toBe(before.connected + 1);
+    expect(connecting.rows).toHaveLength(DOMAINS_PAGE_SIZE);
+    expect(connecting.rows.every((r) => !r.connected)).toBe(true);
+    expect(connected.rows.some((r) => r.domain === `live-${seq}.example` && r.connected)).toBe(true);
+    expect((await listPlatformDomainsPage(boss, "all", 1)).total).toBe(connecting.total + connected.total);
+  });
+
+  it("audit: reaches back past a single page, newest first, and keeps the action filter", async () => {
+    await owner.platformAuditLog.createMany({
+      data: Array.from({ length: 27 }, (_, i) => ({ action: "TEST_PAGED", actorId: "SYSTEM", details: { i }, createdAt: new Date(Date.now() - i * 1000) })),
+    });
+    const p1 = await listPlatformAuditPage(boss, { action: "TEST_PAGED", page: 1 });
+    const p2 = await listPlatformAuditPage(boss, { action: "TEST_PAGED", page: 2 });
+    expect(p1.total).toBe(27);
+    expect(p1.rows).toHaveLength(AUDIT_PAGE_SIZE > 27 ? 27 : AUDIT_PAGE_SIZE);
+    expect(p1.rows.every((r) => r.action === "TEST_PAGED")).toBe(true);
+    expect(p1.rows[0]!.details).toMatchObject({ i: 0 });
+    expect(p2.rows).toHaveLength(AUDIT_PAGE_SIZE >= 27 ? 0 : 27 - AUDIT_PAGE_SIZE);
+    await expect(listPlatformAuditPage(support, {})).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 });

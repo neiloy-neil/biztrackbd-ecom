@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { AutoSubmitSelect } from "@/components/auto-submit-select";
 import Link from "next/link";
 import {
-  listPlatformAudit,
+  AUDIT_PAGE_SIZE,
+  listPlatformAuditPage,
   listPlatformUsers,
   canPlatform,
   type PlatformUserView,
@@ -16,7 +17,7 @@ import {
   updateStaffRoleAction,
   toggleStaffActiveAction,
 } from "./actions";
-import { SubmitButton } from "@/components/ui";
+import { Pager, SubmitButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Team and audit log" };
@@ -42,9 +43,10 @@ export default async function AuditPage({
 
   const canEditTeam = canPlatform(s.actor.role, "audit", "edit") || s.actor.role === "OWNER";
 
-  const [staffUsers, auditRows] = await Promise.all([
+  const page = Math.max(1, Math.floor(Number(one(sp.page))) || 1);
+  const [staffUsers, { rows: auditRows, total: auditTotal }] = await Promise.all([
     listPlatformUsers(s.actor),
-    listPlatformAudit(s.actor, { action, limit: 200 }),
+    listPlatformAuditPage(s.actor, { action, page }),
   ]);
 
   return (
@@ -84,7 +86,7 @@ export default async function AuditPage({
             textDecoration: "none",
           }}
         >
-          Audit Trail ({auditRows.length})
+          Audit Trail ({auditTotal})
         </Link>
       </div>
 
@@ -293,6 +295,7 @@ export default async function AuditPage({
               </table>
             </div>
           )}
+          <Pager page={page} pageSize={AUDIT_PAGE_SIZE} total={auditTotal} path="/audit" params={{ tab: "audit", action }} />
         </div>
       )}
     </div>

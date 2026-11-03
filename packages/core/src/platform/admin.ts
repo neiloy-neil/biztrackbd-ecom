@@ -845,6 +845,30 @@ export async function listPayments(actor: PlatformActor, status: "PENDING" | "AP
   assertPlatformCan(actor, "payments", "view");
   const db = dbOf(deps);
   const rows = await db.paymentProof.findMany({ where: status === "ALL" ? {} : { status }, orderBy: { createdAt: status === "PENDING" ? "asc" : "desc" }, take: 200, include: { tenant: { select: { name: true, subdomain: true } } } });
+  return toPaymentRows(db, rows);
+}
+
+export const PAYMENTS_PAGE_SIZE = 25;
+
+/** One page of proofs, oldest first while pending and newest first otherwise, with the total for the tab and the count still waiting. */
+export async function listPaymentsPage(actor: PlatformActor, status: "PENDING" | "APPROVED" | "REJECTED" | "ALL" = "PENDING", page = 1, deps?: Deps): Promise<{ rows: PaymentRow[]; total: number; pending: number }> {
+  assertPlatformCan(actor, "payments", "view");
+  const db = dbOf(deps);
+  const where = status === "ALL" ? {} : { status };
+  const [rows, total, pending] = await Promise.all([
+    db.paymentProof.findMany({
+      where, orderBy: [{ createdAt: status === "PENDING" ? "asc" : "desc" }, { id: "asc" }], skip: (Math.max(1, page) - 1) * PAYMENTS_PAGE_SIZE, take: PAYMENTS_PAGE_SIZE,
+      include: { tenant: { select: { name: true, subdomain: true } } },
+    }),
+    db.paymentProof.count({ where }),
+    status === "PENDING" ? Promise.resolve(null) : db.paymentProof.count({ where: { status: "PENDING" } }),
+  ]);
+  return { rows: await toPaymentRows(db, rows), total, pending: pending ?? total };
+}
+
+type ProofWithStore = Prisma.PaymentProofGetPayload<{ include: { tenant: { select: { name: true; subdomain: true } } } }>;
+
+async function toPaymentRows(db: PrismaClient, rows: ProofWithStore[]): Promise<PaymentRow[]> {
   const senders = [...new Set(rows.map((r) => r.senderNumber))];
   const others = senders.length ? await db.paymentProof.groupBy({ by: ["senderNumber", "tenantId"], where: { senderNumber: { in: senders } } }) : [];
   return rows.map((p) => ({
@@ -1050,6 +1074,20 @@ export async function listPlatformAudit(actor: PlatformActor, opts: { tenantId?:
     where: { ...(opts.tenantId ? { tenantId: opts.tenantId } : {}), ...(opts.action ? { action: opts.action } : {}) }, orderBy: { createdAt: "desc" }, take: Math.min(opts.limit ?? 100, 500),
   });
   return rows.map((r) => ({ id: r.id, action: r.action, actorId: r.actorId, tenantId: r.tenantId, details: r.details, createdAt: r.createdAt }));
+}
+
+export const AUDIT_PAGE_SIZE = 50;
+
+/** One page of the audit trail, newest first, with the total for the filter. The plain list above stops at its limit; this one reaches back as far as the log goes. */
+export async function listPlatformAuditPage(actor: PlatformActor, opts: { tenantId?: string; action?: string; page?: number } = {}, deps?: Deps) {
+  assertPlatformCan(actor, "audit", "view");
+  const db = dbOf(deps);
+  const where = { ...(opts.tenantId ? { tenantId: opts.tenantId } : {}), ...(opts.action ? { action: opts.action } : {}) };
+  const [rows, total] = await Promise.all([
+    db.platformAuditLog.findMany({ where, orderBy: [{ createdAt: "desc" }, { id: "desc" }], skip: (Math.max(1, opts.page ?? 1) - 1) * AUDIT_PAGE_SIZE, take: AUDIT_PAGE_SIZE }),
+    db.platformAuditLog.count({ where }),
+  ]);
+  return { rows: rows.map((r) => ({ id: r.id, action: r.action, actorId: r.actorId, tenantId: r.tenantId, details: r.details, createdAt: r.createdAt })), total };
 }
 
 // ---- The sweep -----------------------------------------------------------------------------------------------------

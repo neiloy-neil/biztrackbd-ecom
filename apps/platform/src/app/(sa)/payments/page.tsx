@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { canPlatform, listPayments } from "@biztrackbd/core";
-import { SubmitButton } from "@/components/ui";
+import { redirect } from "next/navigation";
+import { PAYMENTS_PAGE_SIZE, canPlatform, listPaymentsPage } from "@biztrackbd/core";
+import { Pager, SubmitButton } from "@/components/ui";
 import { dateTime, prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
@@ -47,15 +48,16 @@ export default async function Payments({
   const s = await requireAccess("payments");
   const tabRaw = one(sp.tab) ?? "PENDING";
   const tab = (TABS.find((t) => t.id === tabRaw)?.id ?? "PENDING") as "PENDING" | "APPROVED" | "REJECTED" | "ALL";
-  const rows = await listPayments(s.actor, tab);
+  const page = Math.max(1, Math.floor(Number(one(sp.page))) || 1);
+  const { rows, total, pending: pendingCount } = await listPaymentsPage(s.actor, tab, page);
+  // Approving or rejecting the last row on the last page leaves that page empty while earlier ones still have rows.
+  if (rows.length === 0 && total > 0) redirect(`/payments?tab=${tab}&page=${Math.ceil(total / PAYMENTS_PAGE_SIZE)}`);
   const canEdit = canPlatform(s.user.role, "payments", "edit");
   const err = one(sp.err);
   const done = one(sp.done);
 
   const selectedId = one(sp.id) ?? rows[0]?.id;
   const selected = rows.find((r) => r.id === selectedId) ?? rows[0];
-
-  const pendingCount = tab === "PENDING" ? rows.length : (await listPayments(s.actor, "PENDING")).length;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -142,7 +144,7 @@ export default async function Payments({
               return (
                 <Link
                   key={p.id}
-                  href={`/payments?tab=${tab}&id=${p.id}`}
+                  href={`/payments?tab=${tab}&page=${page}&id=${p.id}`}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -393,6 +395,7 @@ export default async function Payments({
           )}
         </div>
       )}
+      <Pager page={page} pageSize={PAYMENTS_PAGE_SIZE} total={total} path="/payments" params={{ tab }} />
     </div>
   );
 }
