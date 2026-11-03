@@ -68,6 +68,8 @@ export function DropsManagerClient({ initialDrops, availableProducts }: Props) {
   const [activeWaitlistDrop, setActiveWaitlistDrop] = useState<DropRow | null>(null);
   const [waitlistSubscribers, setWaitlistSubscribers] = useState<{ id: string; phone: string; name?: string | null; createdAt: string; notifiedAt?: string | null }[]>([]);
   const [waitlistLoading, setWaitlistLoading] = useState(false);
+  const [waitlistTotal, setWaitlistTotal] = useState(0);
+  const [waitlistPage, setWaitlistPage] = useState(1);
 
   // Form states
   const [title, setTitle] = useState("");
@@ -217,10 +219,33 @@ export function DropsManagerClient({ initialDrops, availableProducts }: Props) {
     setActiveWaitlistDrop(drop);
     setWaitlistOpen(true);
     setWaitlistLoading(true);
+    setWaitlistSubscribers([]);
+    setWaitlistPage(1);
     try {
-      const res = await getDropSubscribersAction(drop.id);
-      if (res.ok && Array.isArray(res.data)) {
-        setWaitlistSubscribers(res.data as any);
+      const res = await getDropSubscribersAction(drop.id, 1);
+      if (res.ok && res.data) {
+        const d = res.data as { rows: typeof waitlistSubscribers; total: number };
+        setWaitlistSubscribers(d.rows);
+        setWaitlistTotal(d.total);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setWaitlistLoading(false);
+    }
+  }
+
+  async function handleLoadMoreWaitlist() {
+    if (!activeWaitlistDrop) return;
+    setWaitlistLoading(true);
+    try {
+      const next = waitlistPage + 1;
+      const res = await getDropSubscribersAction(activeWaitlistDrop.id, next);
+      if (res.ok && res.data) {
+        const d = res.data as { rows: typeof waitlistSubscribers; total: number };
+        setWaitlistSubscribers((prev) => [...prev, ...d.rows]);
+        setWaitlistTotal(d.total);
+        setWaitlistPage(next);
       }
     } catch (err) {
       console.error(err);
@@ -683,7 +708,7 @@ export function DropsManagerClient({ initialDrops, availableProducts }: Props) {
                   Waitlist Subscribers
                 </h3>
                 <div className="muted text-sm mt-xs">
-                  {activeWaitlistDrop.title} ({waitlistSubscribers.length} total)
+                  {activeWaitlistDrop.title} ({waitlistTotal} total)
                 </div>
               </div>
               <button
@@ -695,7 +720,7 @@ export function DropsManagerClient({ initialDrops, availableProducts }: Props) {
               </button>
             </div>
 
-            {waitlistLoading ? (
+            {waitlistLoading && waitlistSubscribers.length === 0 ? (
               <div className="p-xl text-center muted">
                 Loading waitlist subscribers…
               </div>
@@ -733,6 +758,11 @@ export function DropsManagerClient({ initialDrops, availableProducts }: Props) {
                     </tbody>
                   </table>
                 </div>
+                {waitlistSubscribers.length < waitlistTotal && (
+                  <button type="button" className="btn btn-secondary btn-sm" onClick={handleLoadMoreWaitlist} disabled={waitlistLoading}>
+                    Load more ({waitlistTotal - waitlistSubscribers.length} remaining)
+                  </button>
+                )}
 
                 <div className="flex-between items-center">
                   <span className="muted text-xs">

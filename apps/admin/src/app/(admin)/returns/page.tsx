@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { can, exchangeOptions, getModuleStatus, getReturnMetrics, listReturns, returnTabCounts, type ReturnRow, type ReturnTab } from "@biztrackbd/core";
+import { RETURNS_PAGE_SIZE, can, exchangeOptions, getModuleStatus, getReturnMetrics, listReturns, returnTabCounts, type ReturnRow, type ReturnTab } from "@biztrackbd/core";
 import { PageHeader } from "@biztrackbd/ui";
-import { SubmitButton } from "@/components/ui";
+import { Pager, SubmitButton } from "@/components/ui";
 import { AppDisabledNotice } from "@/components/app-disabled-notice";
 import { dateOnly, prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
@@ -130,8 +130,9 @@ export default async function Returns({ searchParams }: { searchParams: Promise<
 
   const tab = (TABS.find((t) => t.key === one(sp.tab))?.key ?? "requested") as ReturnTab;
   const canEdit = can(s.user.role, "orders", "edit");
+  const page = Math.max(1, Math.floor(Number(one(sp.page))) || 1);
   const [rows, counts, metrics, options] = await Promise.all([
-    listReturns(s.tenantId, s.actor, tab), returnTabCounts(s.tenantId, s.actor), getReturnMetrics(s.tenantId, s.actor), exchangeOptions(s.tenantId, s.actor),
+    listReturns(s.tenantId, s.actor, tab, page), returnTabCounts(s.tenantId, s.actor), getReturnMetrics(s.tenantId, s.actor), exchangeOptions(s.tenantId, s.actor),
   ]);
   const err = one(sp.err);
   const done = one(sp.done);
@@ -163,6 +164,7 @@ export default async function Returns({ searchParams }: { searchParams: Promise<
       {done && DONE[done] && <div className="notice good mb-md" role="status">{DONE[done]}</div>}
 
       {rows.length === 0 ? <div className="card empty" data-testid="returns-empty">Nothing here.</div> : <div className="stack">{rows.map((r) => <Card key={r.id} r={r} tab={tab} canEdit={canEdit} options={options} />)}</div>}
+      <Pager page={page} pageSize={RETURNS_PAGE_SIZE} total={counts[tab]} path="/returns" params={{ tab }} />
     </>
   );
 }
