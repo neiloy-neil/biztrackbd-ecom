@@ -1390,6 +1390,23 @@ model Plan {
   updatedAt       DateTime @updatedAt
 }
 
+/// The Business-website plans (Starter, Pro, Plus), edited by the platform admin like Plan. Portfolio and hybrid stores follow these;
+/// online shops follow Plan. Same tier names: STARTER = Business Starter, PRO = Business Pro, BUSINESS = Business Plus.
+model SitePlan {
+  tier            PlanTier @id
+  name            String
+  priceMonthlyBdt Decimal  @db.Decimal(12, 2)
+  priceYearlyBdt  Decimal  @db.Decimal(12, 2)
+  trialDays       Int      @default(14)
+  isPublic        Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  // { "products": 10, "ordersPerMonth": 0, "staff": 1, "storageGb": 5, "landingPages": 5, "customPages": 5, "downloads": 5, "contentItems": 15 }  (null = unlimited)
+  limits          Json
+  // { "customDomain": true, "sectionBuilder": "home", "headerFooterEditing": false, "bookingRequests": false, "teamProfiles": false, "hybridStore": false, "courierBooking": "manual", "modules": 0, ... }
+  features        Json
+  updatedAt       DateTime @updatedAt
+}
+
 model UsageCounter {
   id          String   @id @default(cuid())
   tenantId    String

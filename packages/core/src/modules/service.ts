@@ -1,4 +1,5 @@
 import { withTenant, type TenantTx } from "@biztrackbd/db";
+import { tenantPlanFeatures } from "../platform/plan-source";
 import { audit } from "../audit/service";
 import { ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
@@ -45,12 +46,11 @@ export function isAddonModule(key: string): boolean {
 
 /** How many modules the plan allows: a number, or Infinity for "all". */
 async function allowance(tx: TenantTx): Promise<number> {
-  const t = await tx.tenant.findFirstOrThrow({ select: { planTier: true } });
-  const plan = await tx.plan.findUnique({ where: { tier: t.planTier } });
-  const v = (plan?.features as Record<string, unknown> | null)?.modules;
+  const { tier, features } = await tenantPlanFeatures(tx);
+  const v = features.modules;
   if (v === "all") return Infinity;
   if (typeof v === "number") return v;
-  return t.planTier === "PRO" || t.planTier === "BUSINESS" ? Infinity : 0;
+  return tier === "PRO" || tier === "BUSINESS" ? Infinity : 0;
 }
 
 /** Is this module on for the store? Built modules are on by default when the plan includes modules, until the owner switches them off. */

@@ -8,7 +8,8 @@ import { assertCan, type StaffActor } from "../permissions";
 import { normalizeBdPhone } from "../phone";
 import { accessState, addPeriod, type Access } from "./lifecycle";
 import { notifyPlatform } from "./notify";
-import { PORTFOLIO_PLAN_DEFS } from "./portfolio-plans";
+import { usesPortfolioPlans } from "./portfolio-plans";
+import { PORTFOLIO_FALLBACKS, planFromRow, type PlanData } from "./plan-source";
 
 /** What a store sees of its own subscription (AdmBilling, AdmLimit, AdmReadOnly). Everything here is read with the store's own context. */
 
@@ -72,20 +73,19 @@ const FALLBACK_PUBLIC_PLANS: PlanView[] = [
   },
 ];
 
-export const FALLBACK_PORTFOLIO_PLANS: PlanView[] = PORTFOLIO_PLAN_DEFS.map((d) => ({
-  tier: d.tier,
-  name: d.name,
-  priceMonthly: d.priceMonthly,
-  priceYearly: d.priceYearly,
-  yearlyMonthsFree: 2,
-  trialDays: 14,
-  limits: { products: d.limits.products, ordersPerMonth: d.limits.ordersPerMonth, staff: d.limits.staff, storageGb: d.limits.storageGb, smsCredits: 0, landingPages: d.limits.landingPages },
-  features: {
-    customDomain: true, sectionBuilder: d.sectionBuilder, leadCapture: true, whatsappAlerts: true, mode: "PORTFOLIO",
-    downloadsLimit: d.limits.downloads ?? "unlimited", contentItemsLimit: d.limits.contentItems ?? "unlimited",
-    ...d.features,
-  },
-}));
+/** A Business-website plan as the pricing page and upgrade screen show it. */
+export function toSitePlanView(p: PlanData): PlanView {
+  const l = p.limits;
+  return {
+    tier: p.tier, name: p.name, priceMonthly: p.priceMonthly, priceYearly: p.priceYearly, trialDays: p.trialDays,
+    yearlyMonthsFree: p.priceMonthly > 0 ? Math.max(0, Math.round(12 - p.priceYearly / p.priceMonthly)) : 0,
+    // SMS follows the online-shop plan, so it is not part of a Business-website plan.
+    limits: { products: numOrNull(l.products), ordersPerMonth: numOrNull(l.ordersPerMonth), staff: numOrNull(l.staff), storageGb: numOrNull(l.storageGb), smsCredits: 0, landingPages: numOrNull(l.landingPages) },
+    features: { ...p.features, downloadsLimit: numOrNull(l.downloads) ?? "unlimited", contentItemsLimit: numOrNull(l.contentItems) ?? "unlimited", mode: "PORTFOLIO" },
+  };
+}
+
+export const FALLBACK_PORTFOLIO_PLANS: PlanView[] = PORTFOLIO_FALLBACKS.map(toSitePlanView);
 
 /** The plans on the pricing page and the upgrade screen. Prices and limits come from the Plan table, falling back to defaults if DB is unreachable. */
 export async function listPublicPlans(): Promise<PlanView[]> {
@@ -99,11 +99,17 @@ export async function listPublicPlans(): Promise<PlanView[]> {
 }
 
 export async function listPublicPortfolioPlans(): Promise<PlanView[]> {
+  try {
+    const rows = await getBasePrisma().sitePlan.findMany({ where: { isPublic: true }, orderBy: { sortOrder: "asc" } });
+    if (rows && rows.length > 0) return rows.map((r) => toSitePlanView(planFromRow(r)));
+  } catch {
+    // fall back to the built-in Business-website plans if the database is not ready
+  }
   return FALLBACK_PORTFOLIO_PLANS;
 }
 
 export async function listPublicPlansForSiteMode(siteMode: string | null | undefined): Promise<PlanView[]> {
-  return siteMode === "PORTFOLIO" ? listPublicPortfolioPlans() : listPublicPlans();
+  return usesPortfolioPlans(siteMode) ? listPublicPortfolioPlans() : listPublicPlans();
 }
 
 export interface ProofView {

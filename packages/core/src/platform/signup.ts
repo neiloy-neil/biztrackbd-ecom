@@ -1,3 +1,4 @@
+import { planFor } from "./plan-source";
 import { notifyOwner } from "../mail/send";
 import { copyKeptPage, copyKeptPictures, finishKeep, keptPageJson, keptPictureUrls, readKeptStore, writeKeptCatalog, type KeptStore } from "../demo/keep";
 import { randomUUID } from "node:crypto";
@@ -190,7 +191,7 @@ export async function signupStore(raw: unknown, opts: { now?: Date; /** Draws an
   if (!sub.ok) throw new ValidationError(SUBDOMAIN_MESSAGES[sub.reason]!, { field: "subdomain" });
 
   const base = getBasePrisma();
-  const plan = await base.plan.findUnique({ where: { tier: input.plan } });
+  const plan = await planFor(base, input.plan, input.siteMode);
   if (!plan || !plan.isPublic) throw new ValidationError("Choose a plan", { field: "plan" });
   const brand = scanBrandRisk(input.storeName, sub.label);
 

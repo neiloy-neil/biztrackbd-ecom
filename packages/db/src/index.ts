@@ -5,6 +5,7 @@ export type {
   PrismaClient,
   Tenant,
   Plan,
+  SitePlan,
   Subscription,
   PaymentProof,
   PlatformUser,

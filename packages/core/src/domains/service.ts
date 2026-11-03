@@ -1,4 +1,5 @@
 import { assertNotInDemo } from "../demo/guard";
+import { tenantPlanFeatures } from "../platform/plan-source";
 import { getBasePrisma, Prisma, withTenant, type TenantTx } from "@biztrackbd/db";
 import { audit } from "../audit/service";
 import { NotFoundError, PlanFeatureError, ValidationError } from "../errors";
@@ -39,11 +40,8 @@ async function lockTenant(tx: TenantTx, tenantId: string) {
 }
 
 async function customDomainsAllowed(tx: TenantTx): Promise<boolean> {
-  const tenant = await tx.tenant.findFirstOrThrow({ select: { planTier: true, siteMode: true } });
-  // All Business & Portfolio Website plans (including Business Starter ৳399) include custom domain with free SSL
-  if (tenant.siteMode === "PORTFOLIO") return true;
-  const plan = await tx.plan.findUnique({ where: { tier: tenant.planTier } });
-  return (plan?.features as Record<string, unknown> | null)?.customDomain === true;
+  const { features } = await tenantPlanFeatures(tx);
+  return features.customDomain === true;
 }
 
 /**

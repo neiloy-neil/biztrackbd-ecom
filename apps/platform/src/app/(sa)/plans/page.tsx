@@ -4,6 +4,9 @@ import {
   canPlatform,
   listPlans,
   listSubscriptionPromos,
+  PLAN_FEATURE_FIELDS,
+  PLAN_LIMIT_FIELDS,
+  type PlanFamily,
   type SubscriptionPromoView,
 } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
@@ -20,15 +23,6 @@ import {
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Plans and promo codes" };
 
-const LIMITS: [string, string][] = [
-  ["products", "Products"],
-  ["ordersPerMonth", "Orders a month"],
-  ["staff", "Staff"],
-  ["storageGb", "Photo storage (GB)"],
-  ["smsCredits", "SMS credits"],
-  ["landingPages", "Landing pages"],
-];
-
 export default async function PlansPage({
   searchParams,
 }: {
@@ -39,8 +33,11 @@ export default async function PlansPage({
   const tab = one(sp.tab) ?? "plans";
   const canEdit = canPlatform(s.actor.role, "plans", "edit");
 
-  const [plans, promos] = await Promise.all([
-    listPlans(s.actor),
+  const family: PlanFamily = tab === "site" ? "SITE" : "SHOP";
+  const [plans, sitePlans, shopPlans, promos] = await Promise.all([
+    listPlans(s.actor, family),
+    listPlans(s.actor, "SITE"),
+    listPlans(s.actor, "SHOP"),
     listSubscriptionPromos(s.actor),
   ]);
 
@@ -72,7 +69,21 @@ export default async function PlansPage({
             textDecoration: "none",
           }}
         >
-          Subscription Plans ({plans.length})
+          Online shop plans ({shopPlans.length})
+        </Link>
+        <Link
+          href="/plans?tab=site"
+          prefetch={false}
+          style={{
+            padding: "8px 16px",
+            borderBottom: tab === "site" ? "3px solid var(--brand)" : "3px solid transparent",
+            color: tab === "site" ? "var(--brand)" : "var(--ink-2)",
+            fontWeight: 700,
+            fontSize: 14,
+            textDecoration: "none",
+          }}
+        >
+          Business website plans ({sitePlans.length})
         </Link>
         <Link
           href="/plans?tab=promos"
@@ -90,18 +101,21 @@ export default async function PlansPage({
         </Link>
       </div>
 
-      {/* TAB 1: PLANS */}
-      {tab === "plans" && (
+      {/* TAB 1 and 2: PLANS (online shop, Business website) */}
+      {(tab === "plans" || tab === "site") && (
         <div className="stack">
           <p className="page-sub" style={{ margin: 0 }}>
-            Prices and limits live here, not in code. A change applies at once to every store on the plan. Leave a limit blank for unlimited.
+            {family === "SITE"
+              ? "These plans apply to Business website stores. Prices, limits and features live here, not in code, and a change applies at once to every store on the plan."
+              : "These plans apply to online shops and hybrid stores. Prices, limits and features live here, not in code, and a change applies at once to every store on the plan."}{" "}
+            Leave a limit blank for unlimited.
           </p>
           {plans.map((p) => (
             <form
               key={p.tier}
-              action={savePlanAction.bind(null, p.tier)}
+              action={savePlanAction.bind(null, family, p.tier)}
               className="card stack"
-              data-testid={`plan-${p.tier}`}
+              data-testid={`plan-${family}-${p.tier}`}
             >
               <div className="card-head">
                 <h2>{p.name}</h2>
@@ -109,6 +123,10 @@ export default async function PlansPage({
                   {p.stores} {p.stores === 1 ? "store" : "stores"}
                 </span>
               </div>
+              <label className="field" style={{ marginBottom: 0 }}>
+                <span className="label">Plan name</span>
+                <input className="input" name="name" defaultValue={p.name} disabled={!canEdit} required />
+              </label>
               <div className="row-3">
                 <label className="field" style={{ marginBottom: 0 }}>
                   <span className="label">Monthly price (৳)</span>
@@ -119,24 +137,49 @@ export default async function PlansPage({
                   <input className="input" name="priceYearly" inputMode="decimal" defaultValue={p.priceYearly} disabled={!canEdit} required />
                 </label>
                 <label className="field" style={{ marginBottom: 0 }}>
-                  <span className="label">Trial days</span>
+                  <span className="label">Trial days (new signups)</span>
                   <input className="input" name="trialDays" inputMode="numeric" defaultValue={p.trialDays} disabled={!canEdit} required />
                 </label>
               </div>
               <div className="row-3">
-                {LIMITS.map(([k, l]) => (
-                  <label key={k} className="field" style={{ marginBottom: 0 }}>
-                    <span className="label">{l}</span>
+                {PLAN_LIMIT_FIELDS[family].map((f) => (
+                  <label key={f.key} className="field" style={{ marginBottom: 0 }}>
+                    <span className="label">{f.label}</span>
                     <input
                       className="input"
-                      name={k}
+                      name={`l_${f.key}`}
                       inputMode="numeric"
-                      defaultValue={(p.limits as Record<string, number | null>)[k] ?? ""}
+                      defaultValue={p.allLimits[f.key] ?? ""}
                       placeholder="Unlimited"
                       disabled={!canEdit}
                     />
                   </label>
                 ))}
+              </div>
+              <div className="row-3">
+                {PLAN_FEATURE_FIELDS[family].map((f) => {
+                  const v = p.features[f.key];
+                  if (f.kind === "bool") {
+                    return (
+                      <label key={f.key} className="row" style={{ flexWrap: "nowrap", gap: 8 }}>
+                        <input type="checkbox" name={`f_${f.key}`} defaultChecked={v === true} disabled={!canEdit} style={{ width: 20, height: 20 }} />
+                        {f.label}
+                      </label>
+                    );
+                  }
+                  return (
+                    <label key={f.key} className="field" style={{ marginBottom: 0 }}>
+                      <span className="label">{f.label}</span>
+                      {f.kind === "choice" ? (
+                        <select className="input" name={`f_${f.key}`} defaultValue={typeof v === "string" ? v : f.options[0]} disabled={!canEdit}>
+                          {f.options.map((o) => <option key={o} value={o}>{o}</option>)}
+                        </select>
+                      ) : (
+                        <input className="input" name={`f_${f.key}`} defaultValue={v === "all" ? "all" : typeof v === "number" ? v : 0} disabled={!canEdit} placeholder='A number, or "all"' required />
+                      )}
+                    </label>
+                  );
+                })}
               </div>
               <label className="row" style={{ flexWrap: "nowrap", gap: 8 }}>
                 <input

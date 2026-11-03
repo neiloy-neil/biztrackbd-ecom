@@ -137,7 +137,7 @@ export {
   getOverview, listTenants, getTenantDetail, addTenantNote, listTenantNotes, listPayments, listPaymentsPage, PAYMENTS_PAGE_SIZE, approveSubscriptionPayment, rejectSubscriptionPayment, suspendTenant, reactivateTenant, extendTrial, changePlan, reviewQuarantine,
   listPlans, updatePlan, listPlatformAudit, listPlatformAuditPage, AUDIT_PAGE_SIZE, runBillingLifecycle, assertPlatformCan, canPlatform, PLATFORM_PERMISSIONS,
   recordTenantCrmActivity, updateTenantLeadStage, scheduleTenantFollowUp, listPlatformCrmTemplates, upsertPlatformCrmTemplate,
-  type PlatformActor, type PlatformRole, type PlatformArea, type PlatformOverview, type TenantRow, type TenantCounts, type TenantDetail, type TenantNoteRow, type TenantFilter, type PaymentRow, type Approved, type PlanPatch, type LifecycleResult,
+  type PlatformActor, type PlatformRole, type PlatformArea, type PlatformOverview, type TenantRow, type TenantCounts, type TenantDetail, type TenantNoteRow, type TenantFilter, type PaymentRow, type Approved, type PlanPatch, type PlanAdminView, type LifecycleResult,
   type TenantCrmActivityRow, type RecordCrmActivityInput,
 } from "./platform/admin";
 export {
@@ -536,3 +536,4 @@ export * from "./platform/notify";
 export * from "./platform/native-analytics";
 export * from "./notifications/push-service";
 export { sealField, openField, isSealed } from "./vault/field-secret";
+export { PLAN_LIMIT_FIELDS, PLAN_FEATURE_FIELDS, type PlanFamily, type FeatureField } from "./platform/plan-schema";

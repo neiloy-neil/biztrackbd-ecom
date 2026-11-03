@@ -3,7 +3,7 @@ import { createBaseClient, setBasePrisma, setPlatformPrisma, withTenant, type Pr
 import { createOwnerClient, resetDatabase, seedPlans, testUrls } from "@biztrackbd/db/testing";
 import {
   AUDIT_PAGE_SIZE, DEMO_TEMPLATES, DOMAINS_PAGE_SIZE, DomainError, PAYMENTS_PAGE_SIZE, accessState, addDomain, addPeriod, approveSubscriptionPayment, cancelPendingProof, changePlan, checkSubdomain, extendTrial, getBillingOverview, getOverview, getStoreAccess,
-  getTenantDetail, listPayments, listPaymentsPage, listPlans, listPlatformAudit, listPlatformAuditPage, listPlatformDomainsPage, listPublicPlans, listTenants, reactivateTenant, rejectSubscriptionPayment, reviewQuarantine, runBillingLifecycle, scanBrandRisk,
+  getTenantDetail, listPayments, listPaymentsPage, listPlans, listPlatformAudit, listPlatformAuditPage, listPlatformDomainsPage, listPublicPlans, listPublicPlansForSiteMode, listTenants, reactivateTenant, rejectSubscriptionPayment, reviewQuarantine, runBillingLifecycle, scanBrandRisk,
   setEventPublisher, signupStore, statusFor, submitPaymentProof, suspendTenant, updatePlan, type PlatformActor, type PlatformRole, type StaffActor,
 } from "../src";
 
@@ -441,6 +441,37 @@ describe("store controls", () => {
     await fails(changePlan(boss, s.tenantId, "ENTERPRISE" as never), "VALIDATION_ERROR");
     await fails(changePlan(boss, "no-such-store", "PRO"), "NOT_FOUND");
     expect((await owner.platformAuditLog.findFirstOrThrow({ where: { tenantId: s.tenantId, action: "PLAN_CHANGED" } })).details).toMatchObject({ from: "STARTER", to: "BUSINESS" });
+  });
+});
+
+describe("business website plans", () => {
+  it("are listed apart from the shop plans, edited with their features, and apply at once", async () => {
+    const site = await listPlans(boss, "SITE");
+    expect(site.map((p) => p.tier)).toEqual(["STARTER", "PRO", "BUSINESS"]);
+    expect(site[0]).toMatchObject({ family: "SITE", name: "Business Starter", priceMonthly: 399 });
+    expect(site[0]!.allLimits).toMatchObject({ products: 10, downloads: 5, contentItems: 15 });
+    expect((await listPlans(boss)).map((p) => p.family)).toEqual(["SHOP", "SHOP", "SHOP"]);
+
+    await fails(updatePlan(fin, "STARTER", { priceMonthlyBdt: 1 }, "SITE"), "FORBIDDEN");
+    await fails(updatePlan(boss, "STARTER", { limits: { smsCredits: 5 } }, "SITE"), "VALIDATION_ERROR");
+    await fails(updatePlan(boss, "STARTER", { features: { fraud: "full" } }, "SITE"), "VALIDATION_ERROR");
+    await fails(updatePlan(boss, "STARTER", { features: { sectionBuilder: "everything" } }, "SITE"), "VALIDATION_ERROR");
+    await fails(updatePlan(boss, "ENTERPRISE", { trialDays: 7 }, "SITE"), "NOT_FOUND");
+
+    await updatePlan(boss, "STARTER", { name: "Site Starter", priceMonthlyBdt: 449, limits: { downloads: 9, contentItems: null }, features: { bookingRequests: true } }, "SITE");
+    const edited = (await listPublicPlansForSiteMode("PORTFOLIO")).find((p) => p.tier === "STARTER")!;
+    expect(edited).toMatchObject({ name: "Site Starter", priceMonthly: 449 });
+    expect(edited.features).toMatchObject({ bookingRequests: true, downloadsLimit: 9, contentItemsLimit: "unlimited" });
+    // Shop plans are untouched, and a hybrid store keeps the shop price list.
+    expect((await listPublicPlans()).find((p) => p.tier === "STARTER")).toMatchObject({ priceMonthly: 699 });
+    expect((await listPublicPlansForSiteMode("HYBRID")).find((p) => p.tier === "STARTER")).toMatchObject({ priceMonthly: 699 });
+    expect((await owner.platformAuditLog.findFirstOrThrow({ where: { action: "PLAN_EDITED" }, orderBy: { createdAt: "desc" } })).details).toMatchObject({ tier: "STARTER", family: "SITE" });
+
+    // A shop plan can have its features edited too.
+    await updatePlan(boss, "PRO", { features: { fraud: "basic", modules: "all" } });
+    expect((await listPlans(boss)).find((p) => p.tier === "PRO")!.features).toMatchObject({ fraud: "basic", modules: "all", courierBooking: "auto" });
+    await updatePlan(boss, "PRO", { features: { fraud: "full", modules: 3 } });
+    await updatePlan(boss, "STARTER", { name: "Business Starter", priceMonthlyBdt: 399, limits: { downloads: 5, contentItems: 15 }, features: { bookingRequests: false } }, "SITE");
   });
 });
 

@@ -1,4 +1,6 @@
 import { withTenant } from "@biztrackbd/db";
+import { tenantPlanFeatures } from "../platform/plan-source";
+import { usesPortfolioPlans } from "../platform/portfolio-plans";
 import { audit } from "../audit/service";
 import { NotFoundError, PlanFeatureError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
@@ -21,12 +23,9 @@ type Tx = Parameters<Parameters<typeof withTenant>[1]>[0];
 
 /** Header and footer editing is part of the Pro plan and above (the "sectionBuilder" feature at "home" or "all"). */
 async function allowedByPlan(tx: Tx): Promise<boolean> {
-  const t = await tx.tenant.findFirstOrThrow({ select: { planTier: true, siteMode: true } });
-  if (t.siteMode === "PORTFOLIO") {
-    return t.planTier !== "STARTER";
-  }
-  const plan = await tx.plan.findUnique({ where: { tier: t.planTier } });
-  const v = (plan?.features as Record<string, unknown> | null)?.sectionBuilder;
+  const { siteMode, features } = await tenantPlanFeatures(tx);
+  if (usesPortfolioPlans(siteMode)) return features.headerFooterEditing === true;
+  const v = features.sectionBuilder;
   return v === "home" || v === "all";
 }
 

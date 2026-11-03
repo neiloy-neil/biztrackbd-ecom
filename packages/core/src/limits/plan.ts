@@ -2,7 +2,8 @@ import { randomUUID } from "node:crypto";
 import type { TenantTx } from "@biztrackbd/db";
 import { withTenant } from "@biztrackbd/db";
 import { PlanLimitError } from "../errors";
-import { portfolioPlanDef, usesPortfolioPlans, type PortfolioFeatures } from "../platform/portfolio-plans";
+import { planFor } from "../platform/plan-source";
+import { usesPortfolioPlans, type PortfolioFeatures } from "../platform/portfolio-plans";
 
 /** Plan.limits as stored. null means unlimited. Prices and limits live in the Plan table, never in code. */
 export interface PlanLimits {
@@ -45,24 +46,19 @@ export async function getEffectivePlan(tx: TenantTx): Promise<EffectivePlan> {
     select: { amount: true },
   }).catch(() => []);
   const extraProducts = adjustments.reduce((acc, a) => acc + a.amount, 0);
-  const base = { timezone: tenant.timezone, tier: tenant.planTier, siteMode: tenant.siteMode };
 
-  if (usesPortfolioPlans(tenant.siteMode)) {
-    const def = portfolioPlanDef(tenant.planTier);
-    const l = def.limits;
-    return { ...base, products: l.products + extraProducts, ordersPerMonth: l.ordersPerMonth, staff: l.staff, storageGb: l.storageGb, landingPages: l.landingPages, customPages: l.customPages, downloads: l.downloads, contentItems: l.contentItems, portfolioFeatures: def.features };
-  }
-
-  const plan = await tx.plan.findUnique({ where: { tier: tenant.planTier } });
-  const limits = (plan?.limits ?? {}) as Record<string, unknown>;
+  const { limits, features } = await planFor(tx, tenant.planTier, tenant.siteMode);
+  const portfolio = usesPortfolioPlans(tenant.siteMode);
   const baseProducts = num(limits.products);
   return {
-    ...base,
+    timezone: tenant.timezone, tier: tenant.planTier, siteMode: tenant.siteMode,
     products: baseProducts !== null ? baseProducts + extraProducts : null,
     ordersPerMonth: num(limits.ordersPerMonth), staff: num(limits.staff), storageGb: num(limits.storageGb),
     landingPages: num(limits.landingPages),
-    customPages: "customPages" in limits ? num(limits.customPages) : (DEFAULT_CUSTOM_PAGES[tenant.planTier] ?? 3),
-    downloads: null, contentItems: null, portfolioFeatures: null,
+    customPages: "customPages" in limits || portfolio ? num(limits.customPages) : (DEFAULT_CUSTOM_PAGES[tenant.planTier] ?? 3),
+    downloads: portfolio ? num(limits.downloads) : null,
+    contentItems: portfolio ? num(limits.contentItems) : null,
+    portfolioFeatures: portfolio ? (features as unknown as PortfolioFeatures) : null,
   };
 }
 

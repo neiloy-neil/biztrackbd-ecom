@@ -8,11 +8,12 @@ import { upsertContentItem } from "../src/site/content-items";
 import { PlanLimitError } from "../src/errors";
 
 const tenant = { planTier: "STARTER", siteMode: "PORTFOLIO", timezone: "Asia/Dhaka" };
-const state = { downloads: 0, contentItems: 0 };
+const state = { downloads: 0, contentItems: 0, siteRow: null as null | Record<string, unknown> };
 
 const mockTx = {
   tenant: { findFirstOrThrow: vi.fn(async () => tenant) },
   tenantQuotaAdjustment: { findMany: vi.fn(async () => []) },
+  sitePlan: { findUnique: vi.fn(async () => state.siteRow) },
   plan: { findUnique: vi.fn(async () => ({ limits: { products: 300, ordersPerMonth: 500, staff: 2, storageGb: 5, landingPages: 3, customPages: 7 } })) },
   siteDownload: { count: vi.fn(async () => state.downloads), create: vi.fn(async () => ({ id: "d1" })), findFirst: vi.fn(), update: vi.fn() },
   siteContentItem: { findUnique: vi.fn(async () => null), count: vi.fn(async () => state.contentItems), create: vi.fn(async () => ({ id: "c1" })), findFirst: vi.fn(), update: vi.fn() },
@@ -31,6 +32,7 @@ beforeEach(() => {
   tenant.siteMode = "PORTFOLIO";
   state.downloads = 0;
   state.contentItems = 0;
+  state.siteRow = null;
 });
 
 describe("portfolio plan definitions", () => {
@@ -56,6 +58,12 @@ describe("getEffectivePlan", () => {
     tenant.planTier = "BUSINESS";
     const p = await getEffectivePlan(mockTx as never);
     expect(p).toMatchObject({ products: 200, ordersPerMonth: 1000, staff: 10, downloads: null, contentItems: null, customPages: null });
+  });
+
+  it("an edit made by the platform admin to the Business plan takes effect", async () => {
+    state.siteRow = { tier: "STARTER", name: "Business Starter", priceMonthlyBdt: 399, priceYearlyBdt: 3990, trialDays: 14, isPublic: true, limits: { products: 25, staff: 2, storageGb: 5, landingPages: 5, customPages: 5, downloads: 8, contentItems: null }, features: {} };
+    const p = await getEffectivePlan(mockTx as never);
+    expect(p).toMatchObject({ products: 25, staff: 2, downloads: 8, contentItems: null });
   });
 
   it("an online shop still reads the Plan table", async () => {
@@ -98,8 +106,13 @@ describe("plan-gated capabilities", () => {
   const restaurant = { siteMode: "PORTFOLIO", vertical: "RESTAURANT" };
 
   it("booking requests and team profiles come with Pro, not Starter", () => {
-    expect(resolveTenantCapabilities({ ...restaurant, planTier: "STARTER" })).toMatchObject({ booking_requests: false, team_profiles: false });
-    expect(resolveTenantCapabilities({ ...restaurant, planTier: "PRO" })).toMatchObject({ booking_requests: true, team_profiles: true });
+    const starter = PORTFOLIO_PLAN_DEFS[0]!.features, pro = PORTFOLIO_PLAN_DEFS[1]!.features;
+    expect(resolveTenantCapabilities({ ...restaurant, planTier: "STARTER", planFeatures: starter })).toMatchObject({ booking_requests: false, team_profiles: false });
+    expect(resolveTenantCapabilities({ ...restaurant, planTier: "PRO", planFeatures: pro })).toMatchObject({ booking_requests: true, team_profiles: true });
+  });
+
+  it("follows the features the plan has switched on", () => {
+    expect(resolveTenantCapabilities({ ...restaurant, planTier: "STARTER", planFeatures: { bookingRequests: true, teamProfiles: false } })).toMatchObject({ booking_requests: true, team_profiles: false });
   });
 
   it("without a plan nothing is held back", () => {

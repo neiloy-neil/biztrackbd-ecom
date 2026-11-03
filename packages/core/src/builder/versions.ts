@@ -1,4 +1,5 @@
 import { Prisma, withTenant, type TenantTx } from "@biztrackbd/db";
+import { tenantPlanFeatures } from "../platform/plan-source";
 import { audit } from "../audit/service";
 import { DomainError, NotFoundError, PlanFeatureError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
@@ -65,13 +66,8 @@ const asTheme = (v: unknown, themeId: ThemeId): ThemeSettings => {
 /** What the plan allows in the builder: "settings" (colours and style only), "home" (home sections too), "all". */
 export type SectionBuilderTier = "settings" | "home" | "all";
 async function builderTier(tx: TenantTx): Promise<SectionBuilderTier> {
-  const t = await tx.tenant.findFirstOrThrow({ select: { planTier: true, siteMode: true } });
-  // Business Website & Portfolio: Starter (৳399) allows home sections, Pro (৳799) & Business Plus (৳1,499) allow all pages
-  if (t.siteMode === "PORTFOLIO") {
-    return t.planTier === "STARTER" ? "home" : "all";
-  }
-  const plan = await tx.plan.findUnique({ where: { tier: t.planTier } });
-  const v = (plan?.features as Record<string, unknown> | null)?.sectionBuilder;
+  const { features } = await tenantPlanFeatures(tx);
+  const v = features.sectionBuilder;
   return v === "all" || v === "home" ? v : "settings";
 }
 

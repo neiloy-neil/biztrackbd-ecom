@@ -1,5 +1,6 @@
 import { withTenant } from "@biztrackbd/db";
-import { portfolioPlanDef } from "../platform/portfolio-plans";
+import { planFor } from "../platform/plan-source";
+import { usesPortfolioPlans } from "../platform/portfolio-plans";
 import { normalizeBusinessVertical, normalizeSiteMode, type BusinessVertical, type SiteMode } from "./mode";
 
 export interface TenantCapabilities {
@@ -43,6 +44,8 @@ export interface ResolveCapabilitiesParams {
   siteMode: string | null | undefined;
   vertical?: string | null;
   planTier?: string | null;
+  /** What the store's Business-website plan switches on. Left out, nothing is held back. */
+  planFeatures?: { bookingRequests?: unknown; teamProfiles?: unknown } | null;
   activeModules?: Record<string, boolean>;
   maintenance?: boolean;
 }
@@ -52,8 +55,8 @@ export function resolveTenantCapabilities(params: ResolveCapabilitiesParams): Te
   const vertical = normalizeBusinessVertical(params.vertical);
   const modules = params.activeModules ?? {};
   // Booking requests and team profiles are Pro features of the Business plans. Without a plan, nothing is held back.
-  const planFeatures = params.planTier ? portfolioPlanDef(params.planTier).features : null;
-  const planAllows = (f: "bookingRequests" | "teamProfiles") => planFeatures === null || planFeatures[f];
+  const planFeatures = params.planFeatures ?? null;
+  const planAllows = (f: "bookingRequests" | "teamProfiles") => planFeatures === null || planFeatures[f] === true;
 
   // Ecommerce mode: full commerce, portfolio features optional via modules
   if (mode === "ECOMMERCE") {
@@ -154,6 +157,7 @@ export async function getTenantCapabilities(tenantId: string): Promise<TenantCap
       siteMode: tenant?.siteMode,
       vertical: tenant?.businessVertical,
       planTier: tenant?.planTier,
+      planFeatures: tenant && usesPortfolioPlans(tenant.siteMode) ? (await planFor(tx, tenant.planTier, tenant.siteMode)).features : null,
       activeModules,
     });
   });
