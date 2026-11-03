@@ -102,6 +102,7 @@ const GROUPS: Group[] = [
     icon: <StoreIcon />,
     items: [
       { href: "/design", label: "Store design", area: "design" },
+      { href: "/themes", label: "Themes", area: "design" },
       { href: "/menu", label: "Menu", area: "design", capability: "menu" },
       { href: "/services", label: "Services", area: "design", capability: "services" },
       { href: "/portfolio", label: "Portfolio", area: "design", capability: "portfolio_items" },
@@ -114,7 +115,7 @@ const GROUPS: Group[] = [
       { href: "/pages", label: "Pages built from sections", area: "design" },
       { href: "/content", label: "Pages and blog", area: "design" },
     ],
-    activePrefixes: ["/design", "/menu", "/services", "/portfolio", "/team", "/credentials", "/publications", "/events", "/downloads", "/content-items", "/landing", "/pages", "/content"],
+    activePrefixes: ["/design", "/themes", "/menu", "/services", "/portfolio", "/team", "/credentials", "/publications", "/events", "/downloads", "/content-items", "/landing", "/pages", "/content"],
   },
   {
     id: "reports",

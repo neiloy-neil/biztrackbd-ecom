@@ -96,6 +96,95 @@ body[data-store-theme="berber"] .trust > div { border-color: var(--accent); }
 body[data-store-theme="berber"] .footer { background: #05080F; color: var(--ink-2); border-top: 1px solid var(--line); }
 body[data-store-theme="berber"] .footer b, body[data-store-theme="berber"] .footer .brand { color: var(--ink); }
 
+/* Fresh Basket, Bazaar and Nakshi: the grocery, general-store and heritage-fashion looks. None uses the BizTrackBD green. */
+body[data-store-theme="freshbasket"] {
+  --bg: #FFF8EC; --surface: #FFFFFF; --ink: #2E2218; --ink-2: #55422F; --muted: #6B5742; --faint: #7F6A55;
+  --accent: #B4421C; --accent-strong: #8E3115; --accent-ink: #FFFFFF; --hero: #FCE9C8;
+  --line: #F0E1C8; --line-2: #E6D3B3; --field: #A58B68; --tint-1: #FDEFD3; --tint-2: #EAF3DC; --tint-3: #F6EBDD; --tint-4: #FBE4DB;
+  --radius: 12px;
+}
+body[data-store-theme="freshbasket"] .announce { background: #4A2E17; font-weight: 600; }
+body[data-store-theme="freshbasket"] .header { background: rgba(255,248,236,.96); box-shadow: 0 1px 0 var(--line-2); }
+body[data-store-theme="freshbasket"] .logo { font-weight: 800; letter-spacing: -.3px; }
+body[data-store-theme="freshbasket"] .hero { background: radial-gradient(circle at 88% 18%,#F6D58E 0 13%,transparent 14%),radial-gradient(circle at 78% 74%,#F2B993 0 8%,transparent 9%),linear-gradient(120deg,#FFF3DC,#FCE3B4); }
+body[data-store-theme="freshbasket"] .hero h1 { letter-spacing: -1px; font-weight: 800; }
+body[data-store-theme="freshbasket"] .eyebrow { color: var(--accent-strong); }
+body[data-store-theme="freshbasket"] .btn { border-radius: 999px; font-weight: 700; }
+body[data-store-theme="freshbasket"] .pimg { aspect-ratio: 1 / 1; background: var(--tint-1); border-radius: 16px; }
+body[data-store-theme="freshbasket"] .pcard { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 10px 10px 14px; }
+body[data-store-theme="freshbasket"] .cat { border: 1px solid var(--line-2); background: var(--tint-1); }
+body[data-store-theme="freshbasket"] .trust > div { border-color: var(--line-2); background: var(--surface); }
+body[data-store-theme="freshbasket"] .footer { background: #3A2412; color: #F5E7D0; }
+body[data-store-theme="freshbasket"] .footer b, body[data-store-theme="freshbasket"] .footer .brand { color: #FFFFFF; }
+
+body[data-store-theme="bazaar"] {
+  --bg: #F8F6F1; --surface: #FFFFFF; --ink: #14213D; --ink-2: #34405E; --muted: #4A5675; --faint: #5B6786;
+  --accent: #C2410C; --accent-strong: #9A3412; --accent-ink: #FFFFFF; --hero: #FFE4CC;
+  --line: #E5E1D8; --line-2: #D5CFC2; --field: #8F8A7E; --tint-1: #FFEBD9; --tint-2: #E6F2EA; --tint-3: #E9EDF7; --tint-4: #FDE8E3;
+  --radius: 8px;
+}
+body[data-store-theme="bazaar"] .announce { background: var(--accent); color: #FFFFFF; font-weight: 700; letter-spacing: .02em; }
+body[data-store-theme="bazaar"] .header { background: #FFFFFF; border-bottom: 3px solid #14213D; }
+body[data-store-theme="bazaar"] .logo { font-weight: 900; letter-spacing: -.5px; text-transform: uppercase; }
+body[data-store-theme="bazaar"] .hero { background: repeating-linear-gradient(135deg,rgba(194,65,12,.07) 0 14px,transparent 14px 28px),linear-gradient(120deg,#FFEBD9,#FFD9B8); border-bottom: 4px solid var(--accent); }
+body[data-store-theme="bazaar"] .hero h1 { font-weight: 900; letter-spacing: -1.5px; }
+body[data-store-theme="bazaar"] .eyebrow { color: var(--accent-strong); font-weight: 800; }
+body[data-store-theme="bazaar"] .btn { font-weight: 800; border-radius: 6px; }
+body[data-store-theme="bazaar"] .pimg { aspect-ratio: 1 / 1; background: #FFFFFF; border: 1px solid var(--line); }
+body[data-store-theme="bazaar"] .pcard { background: var(--surface); border: 1px solid var(--line-2); border-radius: 10px; padding: 8px 8px 12px; transition: transform .15s,box-shadow .15s; }
+body[data-store-theme="bazaar"] .pcard:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(20,33,61,.12); }
+body[data-store-theme="bazaar"] .cat { border: 2px solid var(--ink); font-weight: 800; }
+body[data-store-theme="bazaar"] .section-head h2 { font-weight: 900; letter-spacing: -.5px; }
+body[data-store-theme="bazaar"] .footer { background: #14213D; color: #D9DEEC; }
+body[data-store-theme="bazaar"] .footer b, body[data-store-theme="bazaar"] .footer .brand { color: #FFFFFF; }
+
+body[data-store-theme="nakshi"] {
+  --bg: #FBF6EE; --surface: #FFFFFF; --ink: #2B1418; --ink-2: #4D2F34; --muted: #664A4F; --faint: #7D6165;
+  --accent: #7A1F2E; --accent-strong: #5C1521; --accent-ink: #FFFFFF; --hero: #F3E4D6;
+  --line: #E9DCCB; --line-2: #DCC9AE; --field: #A8916F; --tint-1: #F8ECDD; --tint-2: #EFF2E6; --tint-3: #F4EAF0; --tint-4: #F9E5E3;
+  --radius: 4px; --font: Georgia,"Noto Serif Bengali","Times New Roman",serif;
+}
+body[data-store-theme="nakshi"] .announce { background: #4A1220; letter-spacing: .06em; }
+body[data-store-theme="nakshi"] .header { background: rgba(251,246,238,.96); border-bottom: 1px solid var(--line-2); box-shadow: 0 1px 0 #B8893A inset; }
+body[data-store-theme="nakshi"] .logo { font-weight: 600; letter-spacing: .18em; text-transform: uppercase; }
+body[data-store-theme="nakshi"] .hero { background: linear-gradient(110deg,#F8EBDD,#EFD6C2); border-bottom: 3px double #B8893A; }
+body[data-store-theme="nakshi"] .hero h1, body[data-store-theme="nakshi"] .section-head h2 { font-weight: 500; letter-spacing: -.01em; }
+body[data-store-theme="nakshi"] .eyebrow { color: var(--accent-strong); letter-spacing: .26em; }
+body[data-store-theme="nakshi"] .btn { border-radius: 2px; letter-spacing: .06em; }
+body[data-store-theme="nakshi"] .pimg { aspect-ratio: 3 / 4; border-radius: 2px; border: 1px solid var(--line-2); outline: 1px solid #B8893A; outline-offset: -6px; }
+body[data-store-theme="nakshi"] .pcard { padding-bottom: 14px; }
+body[data-store-theme="nakshi"] .cat { border: 1px solid #B8893A; border-radius: 2px; text-align: center; justify-content: center; }
+body[data-store-theme="nakshi"] .trust > div { border: 0; border-top: 1px solid #B8893A; text-align: center; }
+body[data-store-theme="nakshi"] .footer { background: #3B0F1A; color: #EBD9CC; border-top: 3px double #B8893A; }
+body[data-store-theme="nakshi"] .footer b, body[data-store-theme="nakshi"] .footer .brand { color: #FFFFFF; }
+
+/* Maison (premium): an editorial fashion flagship. Black and copper on warm white, sharp corners, portrait cards, a sticky header. */
+body[data-store-theme="maison"] {
+  --bg: #FAF7F2; --surface: #FFFFFF; --ink: #1C1917; --ink-2: #44403C; --muted: #57534E; --faint: #6B655F;
+  --accent: #8F4A2B; --accent-strong: #6E3318; --accent-ink: #FFFFFF; --hero: #EFE6DA;
+  --line: #E7DFD3; --line-2: #D6CBBB; --field: #9A8F80; --tint-1: #F3EBDF; --tint-2: #ECEFE4; --tint-3: #F0EAF0; --tint-4: #F7E6E0;
+  --radius: 0px; --font: var(--font-playfair),"Hind Siliguri",Georgia,"Noto Serif Bengali",serif;
+}
+body[data-store-theme="maison"] .announce { background: #1C1917; color: #F5EFE6; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+body[data-store-theme="maison"] .header { position: sticky; top: 0; background: rgba(250,247,242,.94); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line-2); }
+body[data-store-theme="maison"] .logo { font-weight: 500; letter-spacing: .32em; text-transform: uppercase; }
+body[data-store-theme="maison"] .hero { min-height: min(78vh, 640px); display: flex; align-items: center; background: linear-gradient(100deg,#F4ECE0 0 56%,#E8D9C7 56%); border-bottom: 1px solid var(--line-2); }
+body[data-store-theme="maison"] .hero h1 { font-weight: 500; letter-spacing: -.02em; line-height: 1.05; }
+body[data-store-theme="maison"] .eyebrow { color: var(--accent-strong); letter-spacing: .34em; font-size: 12px; }
+body[data-store-theme="maison"] .btn { border-radius: 0; text-transform: uppercase; letter-spacing: .14em; font-size: 13px; }
+body[data-store-theme="maison"] .section-head h2 { font-weight: 500; letter-spacing: -.01em; }
+body[data-store-theme="maison"] .pimg { aspect-ratio: 3 / 4; border-radius: 0; background: var(--tint-1); transition: transform .5s ease; }
+body[data-store-theme="maison"] .pcard { border: 0; padding-bottom: 16px; overflow: hidden; }
+body[data-store-theme="maison"] .pcard:hover .pimg { transform: scale(1.03); }
+body[data-store-theme="maison"] .pname { font-weight: 500; letter-spacing: .01em; }
+body[data-store-theme="maison"] .cat { border-radius: 0; border: 1px solid var(--ink); text-transform: uppercase; letter-spacing: .16em; font-size: 13px; min-height: 120px; }
+body[data-store-theme="maison"] .trust > div { border: 0; border-top: 1px solid var(--ink); text-align: left; }
+body[data-store-theme="maison"] .footer { background: #1C1917; color: #D9D1C5; }
+body[data-store-theme="maison"] .footer b, body[data-store-theme="maison"] .footer .brand { color: #FFFFFF; }
+@media (max-width: 720px) {
+  body[data-store-theme="maison"] .hero { min-height: 70vh; background: linear-gradient(180deg,#F4ECE0 0 62%,#E8D9C7 62%); }
+}
+
 /* Orders paused by the owner */
 .paused-banner { background: var(--ink, #1A1A1A); color: #fff; text-align: center; padding: 10px 16px; font-size: 14px; font-weight: 600; }
 

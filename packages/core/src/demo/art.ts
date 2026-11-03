@@ -9,7 +9,8 @@ export type ArtKind =
   | "teddy" | "blocks" | "toycar" | "onesie" | "puzzle" | "bottle"
   | "blazer" | "waistcoat" | "tie"
   | "tee" | "hoodie" | "joggers" | "cap" | "sneaker" | "shorts"
-  | "serum" | "jar" | "lipstick" | "tube" | "perfume" | "palette";
+  | "serum" | "jar" | "lipstick" | "tube" | "perfume" | "palette"
+  | "saree" | "sack" | "box";
 
 export interface Palette { bg: string; main: string; accent: string; ink: string }
 
@@ -53,6 +54,9 @@ const SHAPES: Record<ArtKind, Draw> = {
   lipstick: (k) => p("M175 90 L225 90 L225 220 L175 220 Z", k.main) + p("M175 90 Q200 40 225 90 Z", k.main) + r(160, 220, 80, 40, k.accent, 6) + r(150, 260, 100, 150, k.ink, 10) + l("M175 300 L225 300", k.accent, 4),
   tube: (k) => p("M150 90 L250 90 L240 360 L160 360 Z", k.main) + r(160, 360, 80, 50, k.accent, 8) + r(165, 160, 70, 90, k.bg, 8) + l("M150 90 L250 90", k.accent, 10),
   perfume: (k) => r(170, 60, 60, 60, k.ink, 8) + r(185, 120, 30, 30, k.accent) + r(115, 150, 170, 250, k.main, 36) + r(145, 220, 110, 90, k.bg, 8) + c(200, 265, 20, k.accent),
+  saree: (k) => p("M110 80 Q200 50 290 80 L310 420 L90 420 Z", k.main) + p("M110 80 Q150 70 190 72 L235 420 L90 420 Z", k.accent) + l("M96 396 L304 396", k.ink, 6) + l("M100 372 L300 372", k.bg, 3),
+  sack: (k) => p("M130 120 L270 120 L300 400 Q200 430 100 400 Z", k.main) + p("M130 120 Q200 80 270 120 Z", k.accent) + r(150, 230, 100, 80, k.bg, 10) + l("M170 270 L230 270", k.ink, 6),
+  box: (k) => r(110, 150, 180, 230, k.main, 10) + r(110, 150, 180, 46, k.accent, 10) + r(150, 250, 100, 70, k.bg, 8) + c(200, 285, 18, k.ink),
   palette: (k) => r(90, 130, 220, 250, k.ink, 24) + c(150, 200, 34, k.main) + c(250, 200, 34, k.accent) + c(150, 300, 34, k.accent) + c(250, 300, 34, k.main),
 };
 

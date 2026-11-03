@@ -56,7 +56,7 @@ const fails = async (p: Promise<unknown>, code?: string, msg?: RegExp) => {
 };
 
 describe("store templates published without a deploy (docs/46 stage 5)", () => {
-  it("starts with the six originals, and a store made from one remembers it", async () => {
+  it("starts with the original themes, and a store made from one remembers it", async () => {
     const list = await listPublishedTemplates();
     // The business templates (restaurant, clinic, ...) are built in too; the store originals come first and use the built-in layouts.
     const stores = list.filter((t) => !t.siteMode);

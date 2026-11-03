@@ -143,7 +143,7 @@ describe("drafts, publishing and rollback", () => {
     await saveDraft(s.f.tenantId, s.owner, "home", kapor);
     await publish(s.f.tenantId, s.owner, "home");
 
-    expect(STORE_THEMES.map((theme) => theme.id)).toEqual(["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu", "berber"]);
+    expect(STORE_THEMES.map((theme) => theme.id)).toEqual(["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu", "berber", "freshbasket", "bazaar", "nakshi"]);
     await activateTheme(s.f.tenantId, s.owner, "axionwear");
     expect(await loadForEdit(s.f.tenantId, s.owner, "home")).toMatchObject({ themeId: "axionwear", publishedVersion: null, theme: { accent: "#D7FF3F", background: "#0B0D0F" } });
     expect(await getLive(s.f.tenantId, "home")).toBeNull();

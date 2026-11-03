@@ -213,7 +213,7 @@ export const FONT_LABELS: Record<FontPair, string> = {
 
 export const DEFAULT_THEME: ThemeSettings = { accent: "#8C5A3C", background: "#FBF8F3", text: "#2B2118", radius: "soft", font: "sans" };
 
-export const THEME_IDS = ["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu", "berber"] as const;
+export const THEME_IDS = ["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu", "berber", "freshbasket", "bazaar", "nakshi", "maison"] as const;
 export type ThemeId = (typeof THEME_IDS)[number];
 
 export interface ThemeDefinition {
@@ -222,6 +222,8 @@ export interface ThemeDefinition {
   blurb: string;
   audience: string;
   defaults: ThemeSettings;
+  /** Set on the paid family: a store must own the theme (PREMIUM_THEME_PRICE, once) before it can use it. */
+  premium?: true;
 }
 
 /** The installed storefront templates. Domain features remain separate modules. */
@@ -232,7 +234,40 @@ export const STORE_THEMES: readonly ThemeDefinition[] = [
   { id: "axionwear", name: "Axion Wear", blurb: "A dark, high-contrast streetwear storefront.", audience: "Sportswear and streetwear", defaults: { accent: "#D7FF3F", background: "#0B0D0F", text: "#F5F7F8", radius: "sharp", font: "sans" } },
   { id: "bindu", name: "Bindu", blurb: "Polished, calm and premium with jewel-toned accents.", audience: "Beauty and lifestyle", defaults: { accent: "#8A2855", background: "#FFF9F7", text: "#321E28", radius: "round", font: "serif" } },
   { id: "berber", name: "Berber", blurb: "Dark, editorial and tailored: serif headings, navy and gold, and a made-to-measure section.", audience: "Formalwear and tailoring", defaults: { accent: "#C9A24B", background: "#0D121E", text: "#F1EDE4", radius: "sharp", font: "serif" } },
+  { id: "freshbasket", name: "Fresh Basket", blurb: "Warm and appetising: cream, turmeric and terracotta, with clear weights and prices.", audience: "Grocery, organics and food", defaults: { accent: "#B4421C", background: "#FFF8EC", text: "#2E2218", radius: "soft", font: "friendly" } },
+  { id: "bazaar", name: "Bazaar", blurb: "Bright and busy: deal-led cards, orange on navy, built for a wide catalogue.", audience: "General stores and mixed catalogues", defaults: { accent: "#C2410C", background: "#F8F6F1", text: "#14213D", radius: "subtle", font: "sans" } },
+  { id: "nakshi", name: "Nakshi", blurb: "Heritage ivory and maroon with serif headings and fine gold rules.", audience: "Sarees, ethnic and festive wear", defaults: { accent: "#7A1F2E", background: "#FBF6EE", text: "#2B1418", radius: "subtle", font: "bangla-serif" } },
 ] as const;
+
+/**
+ * The theme a new store starts on for each business category the signup wizard offers. The wizard, the signup action and signupStore all read
+ * this one table, so a category can no longer point at a theme that does not exist. Fashion stays on Kapor; Nakshi is the heritage alternative a merchant (or a template link) can pick.
+ */
+export const CATEGORY_THEMES = {
+  FASHION: "kapor",
+  BEAUTY: "bindu",
+  ELECTRONICS: "gadgetstudio",
+  GROCERY: "freshbasket",
+  GENERAL: "bazaar",
+} as const satisfies Record<string, ThemeId>;
+export type StoreCategory = keyof typeof CATEGORY_THEMES;
+
+/** What one premium theme costs, in taka, paid once. The store then owns it for life. */
+export const PREMIUM_THEME_PRICE = 49;
+
+/**
+ * The premium family: richer layouts and polish, sold one by one. They are not in STORE_THEMES, so they are never offered at signup or as a
+ * free template; a store can only switch to one it has bought (see activateTheme and the themes page in the admin).
+ */
+export const PREMIUM_THEMES: readonly ThemeDefinition[] = [
+  { id: "maison", name: "Maison", blurb: "An editorial fashion flagship: a full-bleed lookbook home, portrait cards, a size and fit guide and a sticky add-to-cart.", audience: "Fashion and apparel brands", premium: true, defaults: { accent: "#8F4A2B", background: "#FAF7F2", text: "#1C1917", radius: "sharp", font: "editorial" } },
+] as const;
+
+export const ALL_THEMES: readonly ThemeDefinition[] = [...STORE_THEMES, ...PREMIUM_THEMES];
+
+export const isPremiumTheme = (value: unknown): boolean => PREMIUM_THEMES.some((t) => t.id === value);
+/** A theme every store can use: the original family, not the paid one. */
+export const isFreeThemeId = (value: unknown): value is ThemeId => isThemeId(value) && !isPremiumTheme(value);
 
 export const isThemeId = (value: unknown): value is ThemeId => typeof value === "string" && (THEME_IDS as readonly string[]).includes(value);
 
@@ -241,7 +276,7 @@ export function validateThemeId(value: unknown): ThemeId {
   return value;
 }
 
-export const themeDefinition = (id: unknown): ThemeDefinition => STORE_THEMES.find((theme) => theme.id === id) ?? STORE_THEMES[0]!;
+export const themeDefinition = (id: unknown): ThemeDefinition => ALL_THEMES.find((theme) => theme.id === id) ?? STORE_THEMES[0]!;
 export const themeDefaults = (id: unknown): ThemeSettings => ({ ...themeDefinition(id).defaults });
 
 export const RADIUS_PX: Record<ThemeRadius, number> = {
