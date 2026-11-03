@@ -1,5 +1,6 @@
 "use client";
 
+import { BagIcon, BriefcaseIcon } from "@/components/mode-icon";
 import { useState } from "react";
 import Link from "next/link";
 import { demoAdminUrl } from "@/lib/demo-admin";
@@ -51,7 +52,7 @@ export function DualHero({
               className={`goal-btn ${mode === "commerce" ? "active-commerce" : ""}`}
               data-testid="goal-commerce-btn"
             >
-              <span aria-hidden="true">🛍️</span>
+              <BagIcon />
               <span>Sell Products (Commerce)</span>
             </button>
             <button
@@ -65,7 +66,7 @@ export function DualHero({
               className={`goal-btn ${mode === "business" ? "active-business" : ""}`}
               data-testid="goal-business-btn"
             >
-              <span aria-hidden="true">💼</span>
+              <BriefcaseIcon />
               <span>Win Enquiries &amp; Clients (Business)</span>
             </button>
           </div>

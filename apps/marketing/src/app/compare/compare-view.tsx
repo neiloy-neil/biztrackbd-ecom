@@ -1,5 +1,6 @@
 "use client";
 
+import { BagIcon, BriefcaseIcon } from "@/components/mode-icon";
 import Link from "next/link";
 import { useState } from "react";
 import { TcoCalculator } from "@/components/tco-calculator";
@@ -103,7 +104,7 @@ export function CompareView({
               transition: "all 0.15s ease",
             }}
           >
-            <span aria-hidden="true">🛍️</span> Online Storefronts
+            <BagIcon /> Online Storefronts
             <span
               style={{
                 fontSize: "12px",
@@ -141,7 +142,7 @@ export function CompareView({
               transition: "all 0.15s ease",
             }}
           >
-            <span aria-hidden="true">💼</span> Business &amp; Service Websites
+            <BriefcaseIcon /> Business &amp; Service Websites
             <span
               style={{
                 fontSize: "12px",
@@ -330,7 +331,7 @@ export function CompareView({
                   style={{ width: "24%" }}
                 >
                   <div className="flex items-center gap-1.5">
-                    <span>{isStore ? "🛍️ BizTrackBD" : "💼 BizTrackBD"}</span>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>{isStore ? <BagIcon /> : <BriefcaseIcon />} BizTrackBD</span>
                   </div>
                 </th>
                 <th style={{ width: "16%" }}>

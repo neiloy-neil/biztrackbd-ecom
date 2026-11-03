@@ -1,5 +1,6 @@
 "use client";
 
+import { BagIcon } from "@/components/mode-icon";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { PlanCards, type PlanCardData } from "@/components/plan-cards";
@@ -100,7 +101,7 @@ export function PricingView({
               transition: "all 0.2s ease",
             }}
           >
-            <span aria-hidden="true">🛍️</span> Online Store Plans <span style={{ fontSize: 11, opacity: 1, fontWeight: 600 }}>(From ৳699/mo)</span>
+            <BagIcon /> Online Store Plans <span style={{ fontSize: 11, opacity: 1, fontWeight: 600 }}>(From ৳699/mo)</span>
           </button>
 
           <button
