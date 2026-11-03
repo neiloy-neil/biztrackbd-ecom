@@ -34,7 +34,7 @@ body { background: #fff; }
 .toolbar-print { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--bg); position: sticky; top: 0; }
 .toolbar-print .group { display: flex; gap: 4px; }
 .toolbar-print a { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--line-2); font-weight: 600; font-size: 13px; background: #fff; }
-.toolbar-print a[aria-current="true"] { background: var(--brand); border-color: var(--brand); color: #fff; }
+.toolbar-print a[aria-current="true"] { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
 .sheet { max-width: ${size === "a4" ? "210mm" : size === "a5" ? "148mm" : "80mm"}; margin: 16px auto; padding: ${size === "thermal" ? "4mm" : "12mm"}; background: #fff; border: 1px solid var(--line); border-radius: 6px; page-break-after: always; break-after: page; color: #111; font-family: var(--font); }
 .sheet:last-child { page-break-after: auto; break-after: auto; }
 .doc h1 { font-size: 1.5em; margin: 0; letter-spacing: 0.5px; }
@@ -258,7 +258,7 @@ function B2bInvoice({ o, st }: { o: OrderDetail; st: StoreSettingsView }) {
       <div className="head">
         <Biz st={st} />
         <div style={{ textAlign: "right" }}>
-          <h1 style={{ fontSize: "1.4em", color: "#1e1b4b" }}>COMMERCIAL TAX INVOICE</h1>
+          <h1 style={{ fontSize: "1.4em", color: "#0B4D3B" }}>COMMERCIAL TAX INVOICE</h1>
           <div style={{ fontSize: "0.9em", color: "#666" }}>বাণিজ্যিক চালান ও বিল</div>
           <div style={{ marginTop: 4 }}><b>Inv #{o.orderNumber}</b></div>
           <div>Date: {dateOnly(o.createdAt)}</div>

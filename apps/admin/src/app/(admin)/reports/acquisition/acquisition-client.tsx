@@ -270,12 +270,12 @@ export function AcquisitionClient({
                   <span className="font-mono text-bold">{taka(ch.grossRevenue)}</span>
                 </div>
                 {/* Visual bar */}
-                <div className="progress-bar-bg" style={{ height: "6px", background: "var(--border, #e2e8f0)", borderRadius: "3px", overflow: "hidden" }}>
+                <div className="progress-bar-bg" style={{ height: "6px", background: "var(--line)", borderRadius: "3px", overflow: "hidden" }}>
                   <div
                     style={{
                       height: "100%",
                       width: `${Math.min(100, ch.sharePercent)}%`,
-                      background: "var(--primary, #0284c7)",
+                      background: "var(--brand)",
                     }}
                   />
                 </div>

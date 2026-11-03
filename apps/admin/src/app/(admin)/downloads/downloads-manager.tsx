@@ -215,15 +215,15 @@ export function DownloadsManager({ initialDownloads, storeOrigin }: Props) {
 
       {/* Metrics Cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 20 }}>
-        <div className="card" style={{ padding: "14px 18px", border: "1px solid var(--border, #e2e8f0)", borderRadius: 8 }}>
+        <div className="card" style={{ padding: "14px 18px", border: "1px solid var(--line)", borderRadius: 8 }}>
           <div className="muted" style={{ fontSize: "0.8rem", textTransform: "uppercase", fontWeight: 600 }}>Total Assets</div>
           <div style={{ fontSize: "1.5rem", fontWeight: 700, marginTop: 4 }}>{downloads.length}</div>
         </div>
-        <div className="card" style={{ padding: "14px 18px", border: "1px solid var(--border, #e2e8f0)", borderRadius: 8 }}>
+        <div className="card" style={{ padding: "14px 18px", border: "1px solid var(--line)", borderRadius: 8 }}>
           <div className="muted" style={{ fontSize: "0.8rem", textTransform: "uppercase", fontWeight: 600 }}>Lead Magnets (Gated)</div>
-          <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#7c3aed", marginTop: 4 }}>{gatedCount}</div>
+          <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--brand)", marginTop: 4 }}>{gatedCount}</div>
         </div>
-        <div className="card" style={{ padding: "14px 18px", border: "1px solid var(--border, #e2e8f0)", borderRadius: 8 }}>
+        <div className="card" style={{ padding: "14px 18px", border: "1px solid var(--line)", borderRadius: 8 }}>
           <div className="muted" style={{ fontSize: "0.8rem", textTransform: "uppercase", fontWeight: 600 }}>Total Visitor Downloads</div>
           <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#16a34a", marginTop: 4 }}>{totalDownloadsCount}</div>
         </div>
@@ -249,7 +249,7 @@ export function DownloadsManager({ initialDownloads, storeOrigin }: Props) {
             padding: 40,
             textAlign: "center",
             backgroundColor: "var(--card-bg, #fff)",
-            border: "1px dashed var(--border, #e2e8f0)",
+            border: "1px dashed var(--line)",
             borderRadius: 8,
           }}
         >
@@ -263,10 +263,10 @@ export function DownloadsManager({ initialDownloads, storeOrigin }: Props) {
           </button>
         </div>
       ) : (
-        <div className="card" style={{ overflow: "hidden", border: "1px solid var(--border, #e2e8f0)", borderRadius: 8 }}>
+        <div className="card" style={{ overflow: "hidden", border: "1px solid var(--line)", borderRadius: 8 }}>
           <table className="table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
             <thead>
-              <tr style={{ background: "var(--bg-muted, #f8fafc)", borderBottom: "1px solid var(--border, #e2e8f0)", textAlign: "left" }}>
+              <tr style={{ background: "var(--bg-muted, #f8fafc)", borderBottom: "1px solid var(--line)", textAlign: "left" }}>
                 <th style={{ padding: "10px 14px", width: 40 }}>#</th>
                 <th style={{ padding: "10px 14px" }}>Asset Title & File</th>
                 <th style={{ padding: "10px 14px", width: 120 }}>Kind</th>
@@ -317,9 +317,9 @@ export function DownloadsManager({ initialDownloads, storeOrigin }: Props) {
                             borderRadius: 12,
                             fontSize: "0.75rem",
                             fontWeight: 600,
-                            backgroundColor: "#f5f3ff",
-                            color: "#7c3aed",
-                            border: "1px solid #ddd6fe",
+                            backgroundColor: "var(--brand-light)",
+                            color: "var(--brand)",
+                            border: "1px solid var(--line-2)",
                           }}
                         >
                           Lead Magnet (Gated)
@@ -563,8 +563,8 @@ export function DownloadsManager({ initialDownloads, storeOrigin }: Props) {
               {/* GRILL-ME DECISION 3: CONFIGURABLE LEAD GATE */}
               <div
                 style={{
-                  background: requiresLead ? "#f5f3ff" : "#f0fdf4",
-                  border: `1px solid ${requiresLead ? "#c4b5fd" : "#bbf7d0"}`,
+                  background: requiresLead ? "color-mix(in srgb, var(--marigold) 14%, var(--surface))" : "#f0fdf4",
+                  border: `1px solid ${requiresLead ? "color-mix(in srgb, var(--marigold) 45%, transparent)" : "#bbf7d0"}`,
                   borderRadius: 8,
                   padding: 16,
                   marginBottom: 20,
@@ -602,7 +602,7 @@ export function DownloadsManager({ initialDownloads, storeOrigin }: Props) {
                       style={{ marginTop: 3 }}
                     />
                     <div>
-                      <div style={{ fontWeight: 600, fontSize: "0.88rem", color: "#6b21a8" }}>
+                      <div style={{ fontWeight: 600, fontSize: "0.88rem", color: "var(--gold-dark)" }}>
                         Require Visitor Contact Before Download (Lead Magnet Mode)
                       </div>
                       <div className="muted" style={{ fontSize: "0.8rem", marginTop: 2 }}>

@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { BrandLockup, BrandSymbol } from "@biztrackbd/ui";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { ROLE_LABELS, can, getAdminShellContext, type Area, type TenantCapabilities } from "@biztrackbd/core";
@@ -240,7 +241,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <div className="shell">
         <PwaRegister />
         <header className="topbar">
-          <span className="logo-mark" aria-hidden="true">B</span>
+          <span className="brand-symbol"><BrandSymbol size={30} title="BizTrackBD" /></span>
           <div className="store" style={{ minWidth: 0 }}>
             <BusinessSwitcher
               businesses={businesses}
@@ -257,7 +258,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </header>
 
         <aside className="side">
-          <div className="brand"><span className="logo-mark" aria-hidden="true">B</span> BizTrackBD</div>
+          <div className="brand"><BrandLockup tone="dark" size={30} /></div>
           <BusinessSwitcher
             businesses={businesses}
             currentTenantId={s.tenantId}

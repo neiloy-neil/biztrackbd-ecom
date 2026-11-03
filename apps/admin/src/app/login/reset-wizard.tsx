@@ -212,7 +212,7 @@ export function PasswordResetWizard({ next }: { next: string }) {
           borderRadius: 8,
           fontSize: 13,
           fontWeight: 600,
-          border: "1px solid var(--border, #e2e8f0)",
+          border: "1px solid var(--line)",
           color: "var(--text-muted, #64748b)",
         }}
       >
@@ -220,7 +220,7 @@ export function PasswordResetWizard({ next }: { next: string }) {
           style={{
             color:
               step === "identifier" || step === "account_choice" || step === "channel_choice"
-                ? "var(--primary, #5B4FE8)"
+                ? "var(--brand)"
                 : "#10b981",
           }}
         >
@@ -229,7 +229,7 @@ export function PasswordResetWizard({ next }: { next: string }) {
         <span>→</span>
         <span
           style={{
-            color: step === "otp" ? "var(--primary, #5B4FE8)" : step === "password" ? "#10b981" : "inherit",
+            color: step === "otp" ? "var(--brand)" : step === "password" ? "#10b981" : "inherit",
           }}
         >
           {step === "password" ? "✓ 2. Verify Code" : "2. Verify Code"}
@@ -237,7 +237,7 @@ export function PasswordResetWizard({ next }: { next: string }) {
         <span>→</span>
         <span
           style={{
-            color: step === "password" ? "var(--primary, #5B4FE8)" : "inherit",
+            color: step === "password" ? "var(--brand)" : "inherit",
           }}
         >
           3. New Password
@@ -320,8 +320,8 @@ export function PasswordResetWizard({ next }: { next: string }) {
                     gap: 12,
                     padding: "12px 14px",
                     borderRadius: 8,
-                    border: `2px solid ${isSelected ? "var(--primary, #5B4FE8)" : "var(--border, #e2e8f0)"}`,
-                    background: isSelected ? "var(--primary-subtle, #f5f3ff)" : "var(--surface, #ffffff)",
+                    border: `2px solid ${isSelected ? "var(--brand)" : "var(--line)"}`,
+                    background: isSelected ? "var(--brand-light)" : "var(--surface)",
                     cursor: "pointer",
                     transition: "all 0.15s ease",
                   }}
@@ -386,7 +386,7 @@ export function PasswordResetWizard({ next }: { next: string }) {
                   padding: "6px 10px",
                   background: "var(--surface-sunken, #f8fafc)",
                   borderRadius: 6,
-                  border: "1px solid var(--border, #e2e8f0)",
+                  border: "1px solid var(--line)",
                   fontSize: 12,
                   color: "var(--text-muted, #64748b)",
                 }}
@@ -406,8 +406,8 @@ export function PasswordResetWizard({ next }: { next: string }) {
                   gap: 12,
                   padding: "12px 14px",
                   borderRadius: 8,
-                  border: `2px solid ${chosenChannel === "sms" ? "var(--primary, #5B4FE8)" : "var(--border, #e2e8f0)"}`,
-                  background: chosenChannel === "sms" ? "var(--primary-subtle, #f5f3ff)" : "var(--surface, #ffffff)",
+                  border: `2px solid ${chosenChannel === "sms" ? "var(--brand)" : "var(--line)"}`,
+                  background: chosenChannel === "sms" ? "var(--brand-light)" : "var(--surface)",
                   cursor: "pointer",
                 }}
               >
@@ -435,8 +435,8 @@ export function PasswordResetWizard({ next }: { next: string }) {
                   gap: 12,
                   padding: "12px 14px",
                   borderRadius: 8,
-                  border: `2px solid ${chosenChannel === "email" ? "var(--primary, #5B4FE8)" : "var(--border, #e2e8f0)"}`,
-                  background: chosenChannel === "email" ? "var(--primary-subtle, #f5f3ff)" : "var(--surface, #ffffff)",
+                  border: `2px solid ${chosenChannel === "email" ? "var(--brand)" : "var(--line)"}`,
+                  background: chosenChannel === "email" ? "var(--brand-light)" : "var(--surface)",
                   cursor: "pointer",
                 }}
               >
@@ -540,7 +540,7 @@ export function PasswordResetWizard({ next }: { next: string }) {
                 style={{
                   background: "none",
                   border: "none",
-                  color: "var(--primary, #5B4FE8)",
+                  color: "var(--brand)",
                   cursor: "pointer",
                   fontWeight: 600,
                   padding: 0,
@@ -605,7 +605,7 @@ export function PasswordResetWizard({ next }: { next: string }) {
                 style={{
                   background: "none",
                   border: "none",
-                  color: "var(--primary, #5B4FE8)",
+                  color: "var(--brand)",
                   fontSize: 12,
                   cursor: "pointer",
                   padding: 0,

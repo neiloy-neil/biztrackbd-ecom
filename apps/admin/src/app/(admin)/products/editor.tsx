@@ -208,7 +208,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                     setAiError("");
                     setShowAiModal(true);
                   }}
-                  style={{ borderColor: "#818CF8", color: "#4F46E5", background: "#EEF2FF", fontWeight: 700 }}
+                  style={{ borderColor: "var(--brand)", color: "var(--brand)", background: "var(--brand-light)", fontWeight: 700 }}
                 >
                   Auto-Fill Listing
                 </button>
@@ -266,7 +266,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                         setAltBusy(false);
                       }
                     }}
-                    style={{ borderColor: "#818CF8", color: "#4F46E5", background: "#EEF2FF", fontWeight: 700, fontSize: 12 }}
+                    style={{ borderColor: "var(--brand)", color: "var(--brand)", background: "var(--brand-light)", fontWeight: 700, fontSize: 12 }}
                   >
                     {altBusy ? "Generating Alts…" : "✨ AI Alt-Tags"}
                   </button>
@@ -976,7 +976,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                 </label>
 
                 {p.images.length > 0 && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", background: "#EEF2FF", border: "1px solid #C7D2FE", borderRadius: 8, fontSize: 12.5, color: "#3730A3" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", background: "var(--brand-light)", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 12.5, color: "var(--brand-hover)" }}>
                     <span>📸</span>
                     <span><strong>{p.images.length} gallery photo(s) detected.</strong> Gemini will inspect images to detect attributes and generate SEO alt-tags.</span>
                   </div>
@@ -1046,7 +1046,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                     >
                       {t.label}
                       {t.badge && (
-                        <span style={{ fontSize: 10, background: "#E0E7FF", color: "#3730A3", padding: "1px 5px", borderRadius: 4 }}>
+                        <span style={{ fontSize: 10, background: "var(--brand-light)", color: "var(--brand-hover)", padding: "1px 5px", borderRadius: 4 }}>
                           {t.badge}
                         </span>
                       )}
@@ -1304,7 +1304,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                         setShowAiModal(false);
                         setTimeout(() => setAiNotice(""), 6000);
                       }}
-                      style={{ background: "#4F46E5", fontWeight: 700 }}
+                      style={{ background: "var(--brand)", fontWeight: 700 }}
                     >
                       ✓ Apply All to Product
                     </button>

@@ -90,8 +90,8 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
                 fontWeight: 700,
                 padding: "3px 8px",
                 borderRadius: 6,
-                backgroundColor: b.siteMode === "PORTFOLIO" ? "rgba(249,115,22,0.12)" : b.siteMode === "HYBRID" ? "rgba(99,102,241,0.12)" : "rgba(16,185,129,0.12)",
-                color: b.siteMode === "PORTFOLIO" ? "#ea580c" : b.siteMode === "HYBRID" ? "#6366f1" : "#059669",
+                backgroundColor: b.siteMode === "PORTFOLIO" ? "rgba(249,115,22,0.12)" : b.siteMode === "HYBRID" ? "color-mix(in srgb, var(--gold-dark) 12%, transparent)" : "color-mix(in srgb, var(--brand) 12%, transparent)",
+                color: b.siteMode === "PORTFOLIO" ? "#ea580c" : b.siteMode === "HYBRID" ? "var(--gold-dark)" : "var(--brand)",
               }}
             >
               {b.siteMode === "PORTFOLIO" ? "Business & Dining Plan" : b.siteMode === "HYBRID" ? "Hybrid Dual-Engine Plan" : "Online Store Plan"}

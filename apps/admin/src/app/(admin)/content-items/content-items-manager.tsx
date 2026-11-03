@@ -497,7 +497,7 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
             padding: 40,
             textAlign: "center",
             backgroundColor: "var(--card-bg, #fff)",
-            border: "1px dashed var(--border, #e2e8f0)",
+            border: "1px dashed var(--line)",
             borderRadius: 8,
           }}
         >
@@ -517,10 +517,10 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
           </button>
         </div>
       ) : (
-        <div className="card" style={{ overflow: "hidden", border: "1px solid var(--border, #e2e8f0)", borderRadius: 8 }}>
+        <div className="card" style={{ overflow: "hidden", border: "1px solid var(--line)", borderRadius: 8 }}>
           <table className="table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
             <thead>
-              <tr style={{ background: "var(--bg-muted, #f8fafc)", borderBottom: "1px solid var(--border, #e2e8f0)", textAlign: "left" }}>
+              <tr style={{ background: "var(--bg-muted, #f8fafc)", borderBottom: "1px solid var(--line)", textAlign: "left" }}>
                 <th style={{ padding: "10px 14px", width: 40 }}>#</th>
                 <th style={{ padding: "10px 14px" }}>Title & Details</th>
                 {!lockedKind && <th style={{ padding: "10px 14px", width: 120 }}>Kind</th>}
@@ -595,7 +595,7 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
                               </span>
                             )}
                             {it.kind === "PUBLICATION" && (data.publisher || data.publishedAt) && (
-                              <span style={{ marginLeft: 8, color: "#7c3aed", fontWeight: 500 }}>
+                              <span style={{ marginLeft: 8, color: "var(--brand)", fontWeight: 500 }}>
                                 {data.publisher}{data.publishedAt ? ` · ${data.publishedAt}` : ""}
                               </span>
                             )}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AuthBrand } from "@/components/auth-brand";
 import { redirect } from "next/navigation";
 import { ROLE_LABELS } from "@biztrackbd/core";
 import { safeNext } from "@/lib/auth";
@@ -19,6 +20,7 @@ export default async function ChooseStore({ searchParams }: { searchParams: Prom
   const stores = a.stores;
   return (
     <div className="card" style={{ margin: "64px auto", maxWidth: 460 }}>
+      <AuthBrand />
       <h1 style={{ marginTop: 0 }}>Which store?</h1>
       <p className="muted">You work in more than one store. Signed in as {a.user.email}.</p>
       <div className="stack" data-testid="store-choices">

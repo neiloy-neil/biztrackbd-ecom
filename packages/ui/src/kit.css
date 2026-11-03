@@ -51,7 +51,7 @@
 .kpi-d.down { color: var(--danger); }
 
 /* ---- Sticky save bar: stays in view while a long form scrolls; sits above the phone tab bar */
-.savebar { position: sticky; bottom: calc(var(--nav-h, 0px) + 8px); z-index: 25; display: flex; align-items: center; gap: 10px; margin-top: 16px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--line-2); border-radius: 14px; box-shadow: 0 6px 24px rgba(26, 26, 78, .12); }
+.savebar { position: sticky; bottom: calc(var(--nav-h, 0px) + 8px); z-index: 25; display: flex; align-items: center; gap: 10px; margin-top: 16px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--line-2); border-radius: 14px; box-shadow: 0 6px 24px rgba(11, 77, 59, .12); }
 .savebar-msg { flex: 1; min-width: 0; font-size: 13.5px; color: var(--ink-3); }
 .savebar.dirty .savebar-msg { color: var(--warning); font-weight: 600; }
 .savebar .btn { flex: none; }
@@ -95,7 +95,7 @@
 .adv-body { padding: 4px 14px 14px; }
 .seg { display: inline-flex; padding: 3px; border-radius: 10px; background: var(--chip); gap: 2px; }
 .seg button { min-height: 40px; padding: 0 14px; border: 0; border-radius: 8px; background: transparent; font-weight: 600; font-size: 13.5px; color: var(--ink-2); cursor: pointer; }
-.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(26, 26, 78, .15); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(11, 77, 59, .15); }
 
 /* ---- Typography & Text utilities */
 .text-display { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.25; }
@@ -304,7 +304,7 @@
 
 /* Timeline utilities */
 .timeline-badge { width: 32px; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex: 0 0 32px; font-size: 10px; font-weight: 700; margin-top: 2px; }
-.timeline-badge-order { background: #EEF2FF; color: #5B4FE8; }
+.timeline-badge-order { background: var(--brand-light); color: var(--brand-hover); }
 .timeline-badge-sms { background: #EFF6FF; color: #2563EB; }
 .timeline-badge-review { background: #FEF3C7; color: #D97706; }
 .timeline-badge-loyalty { background: #ECFDF5; color: #059669; }
@@ -362,12 +362,12 @@
 .provider-wa { background: #10B981; }
 
 /* Advisory banner */
-.advisory-box { background: #FDF3E3; border-radius: 12px; padding: 14px 18px; display: flex; gap: 12px; align-items: flex-start; color: #4B4B73; font-size: 13.5px; line-height: 1.55; }
+.advisory-box { background: var(--warning-bg); border-radius: 12px; padding: 14px 18px; display: flex; gap: 12px; align-items: flex-start; color: var(--ink-2); font-size: 13.5px; line-height: 1.55; }
 .advisory-box-amber { border: 1px solid rgba(245, 158, 11, 0.3); }
 
 /* Monospace input and token vault box */
-.input-mono { font-family: var(--font-mono, monospace); font-size: 12.5px; background: var(--bg-subtle, #FAFAFC); }
-.token-box { display: flex; height: 40px; border: 1px solid var(--border-color, #D5D5E4); border-radius: 8px; padding: 0 12px; align-items: center; background: var(--bg-subtle, #FAFAFC); font-size: 14px; }
+.input-mono { font-family: var(--font-mono, monospace); font-size: 12.5px; background: var(--bg); }
+.token-box { display: flex; height: 40px; border: 1px solid var(--line-2); border-radius: 8px; padding: 0 12px; align-items: center; background: var(--bg); font-size: 14px; }
 
 /* Micro stat cards */
 .stat-box-sm { background: #F1F5F9; padding: 12px 14px; border-radius: 8px; }

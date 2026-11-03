@@ -77,7 +77,7 @@ export function PortfolioCommandCenter({
         className="card"
         style={{
           padding: "20px 24px",
-          background: "linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%)",
+          background: "linear-gradient(135deg, var(--green-deep) 0%, var(--green-fresh) 100%)",
           color: "#ffffff",
           borderRadius: 12,
           boxShadow: "0 10px 15px -3px rgba(30, 27, 75, 0.25)",
@@ -88,7 +88,7 @@ export function PortfolioCommandCenter({
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span
                 style={{
-                  background: "rgba(99, 102, 241, 0.35)",
+                  background: "color-mix(in srgb, var(--brand) 35%, transparent)",
                   border: "1px solid rgba(165, 180, 252, 0.4)",
                   padding: "3px 10px",
                   borderRadius: 12,
@@ -96,19 +96,19 @@ export function PortfolioCommandCenter({
                   fontWeight: 700,
                   textTransform: "uppercase",
                   letterSpacing: "0.06em",
-                  color: "#E0E7FF",
+                  color: "#D6E9E0",
                 }}
               >
                 {verticalTitle}
               </span>
-              <span style={{ fontSize: "0.85rem", color: "#C7D2FE", fontWeight: 500 }}>
+              <span style={{ fontSize: "0.85rem", color: "var(--line-2)", fontWeight: 500 }}>
                 {siteMode === "HYBRID" ? "Hybrid Store & Services Hub" : "BizTrack Business Command Center"}
               </span>
             </div>
             <h2 style={{ margin: "8px 0 0", fontSize: "1.45rem", fontWeight: 800, letterSpacing: "-0.02em" }}>
               {storeName || "Your Business"} Operations Desk
             </h2>
-            <p style={{ margin: "4px 0 0", fontSize: "0.9rem", color: "#E0E7FF", opacity: 0.9 }}>
+            <p style={{ margin: "4px 0 0", fontSize: "0.9rem", color: "#D6E9E0", opacity: 0.9 }}>
               Live on <strong style={{ color: "#ffffff" }}>{domainName || storeOrigin.replace(/^https?:\/\//, "")}</strong> • Dhaka Edge CDN &lt;85ms
             </p>
           </div>
@@ -117,7 +117,7 @@ export function PortfolioCommandCenter({
             <Link
               href={vertical === "RESTAURANT" ? "/menu" : "/services"}
               className="btn btn-sm"
-              style={{ background: "#ffffff", color: "#1E1B4B", fontWeight: 700, padding: "8px 14px", borderRadius: 8 }}
+              style={{ background: "#ffffff", color: "#0B4D3B", fontWeight: 700, padding: "8px 14px", borderRadius: 8 }}
               prefetch={false}
             >
               + {vertical === "RESTAURANT" ? "Menu Items" : "Services"}
@@ -143,7 +143,7 @@ export function PortfolioCommandCenter({
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-sm"
-              style={{ background: "#6366F1", color: "#ffffff", fontWeight: 700, padding: "8px 14px", borderRadius: 8 }}
+              style={{ background: "var(--brand)", color: "var(--brand-ink)", fontWeight: 700, padding: "8px 14px", borderRadius: 8 }}
             >
               View Live Website ↗
             </a>
@@ -157,7 +157,7 @@ export function PortfolioCommandCenter({
         style={{
           padding: "16px 20px",
           background: "var(--card, #ffffff)",
-          border: "1px solid var(--border, #e2e8f0)",
+          border: "1px solid var(--line)",
           borderRadius: 10,
         }}
       >
@@ -179,7 +179,7 @@ export function PortfolioCommandCenter({
             style={{
               width: `${percentComplete}%`,
               height: "100%",
-              background: percentComplete === 100 ? "#16a34a" : "linear-gradient(90deg, #4f46e5, #7c3aed)",
+              background: percentComplete === 100 ? "#16a34a" : "linear-gradient(90deg, var(--green-fresh), var(--green-deep))",
               transition: "width 0.4s ease",
             }}
           />
@@ -217,7 +217,7 @@ export function PortfolioCommandCenter({
 
       {/* Operational Telemetry KPI Grid */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 14 }}>
-        <div className="card" style={{ padding: "16px 18px", border: "1px solid var(--border, #e2e8f0)", borderRadius: 10 }}>
+        <div className="card" style={{ padding: "16px 18px", border: "1px solid var(--line)", borderRadius: 10 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span className="muted" style={{ fontSize: "0.78rem", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>
               Total Inquiries
@@ -232,7 +232,7 @@ export function PortfolioCommandCenter({
           </div>
         </div>
 
-        <div className="card" style={{ padding: "16px 18px", border: "1px solid var(--border, #e2e8f0)", borderRadius: 10 }}>
+        <div className="card" style={{ padding: "16px 18px", border: "1px solid var(--line)", borderRadius: 10 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span className="muted" style={{ fontSize: "0.78rem", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>
               Appointments / Bookings
@@ -247,7 +247,7 @@ export function PortfolioCommandCenter({
           </div>
         </div>
 
-        <div className="card" style={{ padding: "16px 18px", border: "1px solid var(--border, #e2e8f0)", borderRadius: 10 }}>
+        <div className="card" style={{ padding: "16px 18px", border: "1px solid var(--line)", borderRadius: 10 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span className="muted" style={{ fontSize: "0.78rem", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>
               Downloads Delivered
@@ -262,14 +262,14 @@ export function PortfolioCommandCenter({
           </div>
         </div>
 
-        <div className="card" style={{ padding: "16px 18px", border: "1px solid var(--border, #e2e8f0)", borderRadius: 10 }}>
+        <div className="card" style={{ padding: "16px 18px", border: "1px solid var(--line)", borderRadius: 10 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span className="muted" style={{ fontSize: "0.78rem", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>
               Content Entities
             </span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#7c3aed" }}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--brand)" }}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           </div>
-          <div style={{ fontSize: "1.85rem", fontWeight: 800, marginTop: 6, color: "#7c3aed" }}>
+          <div style={{ fontSize: "1.85rem", fontWeight: 800, marginTop: 6, color: "var(--brand)" }}>
             {totalContentItems}
           </div>
           <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: 4, fontWeight: 500 }}>
@@ -281,11 +281,11 @@ export function PortfolioCommandCenter({
       {/* Main Grid: Unattended Inquiries Queue + System & Integration Health */}
       <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16, alignItems: "start" }}>
         {/* Unattended Inquiries & Reservations Queue */}
-        <div className="card" style={{ border: "1px solid var(--border, #e2e8f0)", borderRadius: 10, overflow: "hidden" }}>
+        <div className="card" style={{ border: "1px solid var(--line)", borderRadius: 10, overflow: "hidden" }}>
           <div
             style={{
               padding: "16px 20px",
-              borderBottom: "1px solid var(--border, #e2e8f0)",
+              borderBottom: "1px solid var(--line)",
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
@@ -352,8 +352,8 @@ export function PortfolioCommandCenter({
                           <span
                             className="badge"
                             style={{
-                              background: "#e0e7ff",
-                              color: "#3730a3",
+                              background: "var(--brand-light)",
+                              color: "var(--brand-hover)",
                               padding: "2px 7px",
                               borderRadius: 4,
                               fontSize: "0.7rem",
@@ -419,7 +419,7 @@ export function PortfolioCommandCenter({
 
         {/* System & Integration Health Widget */}
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <div className="card" style={{ padding: 18, border: "1px solid var(--border, #e2e8f0)", borderRadius: 10 }}>
+          <div className="card" style={{ padding: 18, border: "1px solid var(--line)", borderRadius: 10 }}>
             <h3 style={{ margin: "0 0 12px", fontSize: "0.95rem", fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
               System &amp; Integration Health
             </h3>
@@ -470,7 +470,7 @@ export function PortfolioCommandCenter({
           </div>
 
           {/* Quick Shortcuts */}
-          <div className="card" style={{ padding: 18, border: "1px solid var(--border, #e2e8f0)", borderRadius: 10 }}>
+          <div className="card" style={{ padding: 18, border: "1px solid var(--line)", borderRadius: 10 }}>
             <h3 style={{ margin: "0 0 10px", fontSize: "0.95rem", fontWeight: 700 }}>
               Operational Shortcuts
             </h3>

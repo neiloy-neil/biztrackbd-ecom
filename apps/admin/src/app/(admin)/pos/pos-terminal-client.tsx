@@ -668,8 +668,8 @@ export function PosTerminalClient({ initialData }: Props) {
         }
         .pos-product-card:hover {
           transform: translateY(-2px);
-          border-color: #6366f1;
-          box-shadow: 0 6px 12px rgba(99, 102, 241, 0.12);
+          border-color: var(--brand);
+          box-shadow: 0 6px 12px color-mix(in srgb, var(--brand) 12%, transparent);
         }
         .pos-product-card:active {
           transform: scale(0.98);
@@ -815,8 +815,8 @@ export function PosTerminalClient({ initialData }: Props) {
                   type="button"
                   className={`chip ${activeCategory === cat ? "active" : ""}`}
                   style={{
-                    background: activeCategory === cat ? "#6366f1" : "var(--card-subtle, #f3f4f6)",
-                    color: activeCategory === cat ? "#ffffff" : "var(--ink-1, #1f2937)",
+                    background: activeCategory === cat ? "var(--brand)" : "var(--card-subtle, #f3f4f6)",
+                    color: activeCategory === cat ? "var(--brand-ink)" : "var(--ink)",
                     border: "none",
                     borderRadius: 20,
                     padding: "5px 12px",
@@ -857,7 +857,7 @@ export function PosTerminalClient({ initialData }: Props) {
                           position: "absolute",
                           top: 6,
                           right: 6,
-                          background: "#6366f1",
+                          background: "var(--brand)",
                           color: "#fff",
                           borderRadius: "50%",
                           width: 22,
@@ -890,7 +890,7 @@ export function PosTerminalClient({ initialData }: Props) {
                       )}
                     </div>
                     <div style={{ marginTop: 6, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                      <span style={{ fontWeight: 700, fontSize: 13, color: "var(--brand, #4f46e5)" }}>
+                      <span style={{ fontWeight: 700, fontSize: 13, color: "var(--brand)" }}>
                         {taka(p.price)}
                       </span>
                       <span style={{ fontSize: 10.5, color: p.stockQuantity <= 5 ? "#d97706" : "#6b7280" }}>
@@ -1049,7 +1049,7 @@ export function PosTerminalClient({ initialData }: Props) {
 
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", fontSize: 18, fontWeight: 800, margin: "8px 0 12px" }}>
                 <span>Net Total</span>
-                <span style={{ color: "#4f46e5" }}>{taka(netPayable)}</span>
+                <span style={{ color: "var(--brand)" }}>{taka(netPayable)}</span>
               </div>
 
               <button
@@ -1100,7 +1100,7 @@ export function PosTerminalClient({ initialData }: Props) {
               <div>
                 <h2 style={{ margin: 0, fontSize: 18 }}>Checkout & Settle</h2>
                 <div style={{ fontSize: 12.5, color: "#6b7280" }}>
-                  Payable: <strong style={{ color: "#4f46e5" }}>{taka(netPayable)}</strong>
+                  Payable: <strong style={{ color: "var(--brand)" }}>{taka(netPayable)}</strong>
                 </div>
               </div>
               <button

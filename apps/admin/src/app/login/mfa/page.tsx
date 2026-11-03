@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AuthBrand } from "@/components/auth-brand";
 import { redirect } from "next/navigation";
 import { safeNext } from "@/lib/auth";
 import { one } from "@/lib/query";
@@ -17,6 +18,7 @@ export default async function Mfa({ searchParams }: { searchParams: Promise<Reco
   if (a.state !== "mfa") redirect(next);
   return (
     <div className="card" style={{ margin: "64px auto", maxWidth: 420 }}>
+      <AuthBrand />
       <h1 style={{ marginTop: 0 }}>Enter your code</h1>
       <p className="muted">Open your authenticator app and type the 6-digit code for BizTrackBD.</p>
       <MfaForm next={next} />

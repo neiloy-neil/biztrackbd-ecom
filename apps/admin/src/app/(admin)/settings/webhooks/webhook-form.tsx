@@ -182,7 +182,7 @@ const AUTOMATION_PRESETS: AutomationPreset[] = [
     id: "make",
     name: "Make.com (Integromat)",
     badge: "Make",
-    badgeColor: "#6D28D9",
+    badgeColor: "var(--brand)",
     adapter: "generic",
     urlPlaceholder: "https://hook.eu1.make.com/abcdef1234567890",
     recommendedEvents: ["order.created", "order.delivered", "lead.created", "booking.created", "customer.registered"],
@@ -513,7 +513,7 @@ export function WebhookForm({
                 : cleanUrl.includes("zapier.com")
                 ? "#FF4A00"
                 : cleanUrl.includes("make.com")
-                ? "#6D28D9"
+                ? "var(--brand)"
                 : "#64748B";
 
             const platformLabel =

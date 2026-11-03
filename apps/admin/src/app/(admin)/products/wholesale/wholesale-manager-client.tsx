@@ -229,7 +229,7 @@ export function WholesaleManagerClient({ initialData, registerUrl }: Props) {
       <div className="grid grid-4" style={{ gap: 14 }}>
         <div className="card" style={{ padding: 16 }}>
           <div className="muted" style={{ fontSize: 13, fontWeight: 600 }}>Active Resellers</div>
-          <div style={{ fontSize: 26, fontWeight: 700, marginTop: 4, color: "var(--brand, #4f46e5)" }}>
+          <div style={{ fontSize: 26, fontWeight: 700, marginTop: 4, color: "var(--brand)" }}>
             {initialData.overview.totalApproved}
           </div>
           <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>
@@ -459,7 +459,7 @@ export function WholesaleManagerClient({ initialData, registerUrl }: Props) {
                 <div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div style={{ fontSize: 18, fontWeight: 700 }}>{t.name}</div>
-                    <span className="badge" style={{ background: "#e0e7ff", color: "#3730a3", fontSize: 13 }}>
+                    <span className="badge" style={{ background: "var(--brand-light)", color: "var(--brand-hover)", fontSize: 13 }}>
                       {t.discountPercent}% Off
                     </span>
                   </div>
@@ -585,7 +585,7 @@ export function WholesaleManagerClient({ initialData, registerUrl }: Props) {
                       </td>
                       <td style={{ padding: "12px 14px" }}>
                         {p.tier ? (
-                          <span className="badge" style={{ background: "#e0e7ff", color: "#3730a3" }}>
+                          <span className="badge" style={{ background: "var(--brand-light)", color: "var(--brand-hover)" }}>
                             {p.tier.name}
                           </span>
                         ) : (

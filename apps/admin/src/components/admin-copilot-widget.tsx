@@ -100,6 +100,7 @@ export function AdminCopilotWidget({ lang = "en" }: { lang?: string }) {
       {/* Floating Launcher Button */}
       <button
         type="button"
+        className="copilot-fab"
         onClick={() => setIsOpen(!isOpen)}
         style={{
           position: "fixed",
@@ -109,11 +110,11 @@ export function AdminCopilotWidget({ lang = "en" }: { lang?: string }) {
           display: "flex",
           alignItems: "center",
           gap: "8px",
-          background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
+          background: "linear-gradient(135deg, var(--green-fresh) 0%, var(--green-deep) 100%)",
           color: "#FFFFFF",
           padding: "12px 20px",
           borderRadius: "9999px",
-          boxShadow: "0 10px 25px -5px rgba(79, 70, 229, 0.45), 0 8px 10px -6px rgba(79, 70, 229, 0.3)",
+          boxShadow: "0 10px 25px -5px rgba(11, 77, 59, 0.45), 0 8px 10px -6px rgba(11, 77, 59, 0.3)",
           border: "1px solid rgba(255, 255, 255, 0.2)",
           cursor: "pointer",
           fontWeight: 700,
@@ -123,8 +124,9 @@ export function AdminCopilotWidget({ lang = "en" }: { lang?: string }) {
         aria-label="Toggle AI Business Copilot"
       >
         <span style={{ fontSize: "16px" }}>✨</span>
-        <span>{lang === "bn" ? (isOpen ? "কো-পাইলট বন্ধ করুন" : "AI কো-পাইলট") : isOpen ? "Close co-pilot" : "AI Co-pilot"}</span>
+        <span className="copilot-fab-label">{lang === "bn" ? (isOpen ? "কো-পাইলট বন্ধ করুন" : "AI কো-পাইলট") : isOpen ? "Close co-pilot" : "AI Co-pilot"}</span>
         <span
+          className="copilot-fab-dot"
           style={{
             width: "8px",
             height: "8px",
@@ -160,7 +162,7 @@ export function AdminCopilotWidget({ lang = "en" }: { lang?: string }) {
           <div
             style={{
               padding: "16px 20px",
-              background: "linear-gradient(135deg, #1E1B4B 0%, #312E81 100%)",
+              background: "linear-gradient(135deg, var(--green-deep) 0%, var(--green-fresh) 100%)",
               color: "#FFFFFF",
               display: "flex",
               justifyContent: "space-between",
@@ -254,8 +256,8 @@ export function AdminCopilotWidget({ lang = "en" }: { lang?: string }) {
                   style={{
                     padding: "12px 14px",
                     borderRadius: m.role === "user" ? "14px 14px 2px 14px" : "14px 14px 14px 2px",
-                    background: m.role === "user" ? "#4F46E5" : "#FFFFFF",
-                    color: m.role === "user" ? "#FFFFFF" : "#1E293B",
+                    background: m.role === "user" ? "var(--brand)" : "#FFFFFF",
+                    color: m.role === "user" ? "var(--brand-ink)" : "#1E293B",
                     fontSize: "13.5px",
                     lineHeight: "1.55",
                     whiteSpace: "pre-wrap",
@@ -282,10 +284,10 @@ export function AdminCopilotWidget({ lang = "en" }: { lang?: string }) {
                           fontSize: "12px",
                           fontWeight: 600,
                           padding: "4px 10px",
-                          background: "#EEF2FF",
-                          color: "#4338CA",
+                          background: "var(--brand-light)",
+                          color: "var(--brand-hover)",
                           borderRadius: "6px",
-                          border: "1px solid #C7D2FE",
+                          border: "1px solid var(--line-2)",
                           textDecoration: "none",
                         }}
                       >
@@ -385,8 +387,8 @@ export function AdminCopilotWidget({ lang = "en" }: { lang?: string }) {
               type="submit"
               disabled={loading || !input.trim()}
               style={{
-                background: "#4F46E5",
-                color: "#FFFFFF",
+                background: "var(--brand)",
+                color: "var(--brand-ink)",
                 border: "none",
                 borderRadius: "8px",
                 padding: "0 16px",

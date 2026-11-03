@@ -688,7 +688,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid var(--line)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: "#8B5CF6" }} aria-hidden="true">
+                  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: "var(--brand)" }} aria-hidden="true">
                     <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
                   </svg>
                   <div>

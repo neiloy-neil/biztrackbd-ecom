@@ -1213,7 +1213,7 @@ export function WhatsAppManagerClient({
                         style={{
                           background: "none",
                           border: "none",
-                          color: "var(--primary, #0284C7)",
+                          color: "var(--brand)",
                           fontSize: 11.5,
                           cursor: "pointer",
                           fontWeight: 600,

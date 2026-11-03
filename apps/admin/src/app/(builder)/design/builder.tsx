@@ -1328,7 +1328,7 @@ function ThemePanel({ theme, onChange, disabled }: { theme: ThemeSettings; onCha
       <div className="bld-group" data-testid="brand-palettes-group">
         <div className="bld-gh" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <span>Curated Brand Palettes</span>
-          <span className="pill" style={{ fontSize: 10, padding: "2px 6px", background: "var(--accent, #5B4FE8)", color: "#FFF" }}>1-Click Apply</span>
+          <span className="pill" style={{ fontSize: 10, padding: "2px 6px", background: "var(--brand)", color: "var(--brand-ink)" }}>1-Click Apply</span>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, padding: "6px 0" }}>
           {THEME_PALETTES.map((p) => {
@@ -1348,8 +1348,8 @@ function ThemePanel({ theme, onChange, disabled }: { theme: ThemeSettings; onCha
                   textAlign: "left",
                   padding: "8px 10px",
                   borderRadius: 8,
-                  border: isSelected ? "2px solid var(--accent, #5B4FE8)" : "1px solid var(--line)",
-                  background: isSelected ? "color-mix(in srgb, var(--accent, #5B4FE8) 6%, transparent)" : "var(--surface)",
+                  border: isSelected ? "2px solid var(--brand)" : "1px solid var(--line)",
+                  background: isSelected ? "color-mix(in srgb, var(--brand) 6%, transparent)" : "var(--surface)",
                   cursor: disabled ? "not-allowed" : "pointer",
                   position: "relative",
                   transition: "all 0.15s ease",
@@ -1374,7 +1374,7 @@ function ThemePanel({ theme, onChange, disabled }: { theme: ThemeSettings; onCha
                     <span style={{ fontSize: 9, fontWeight: 700, color: p.text }}>Aa</span>
                   </div>
                   {isSelected && (
-                    <span style={{ marginLeft: "auto", fontSize: 10, color: "var(--accent, #5B4FE8)", fontWeight: 700 }}>✓</span>
+                    <span style={{ marginLeft: "auto", fontSize: 10, color: "var(--brand)", fontWeight: 700 }}>✓</span>
                   )}
                 </div>
                 <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", lineHeight: 1.2 }}>{p.name}</div>
@@ -1453,14 +1453,14 @@ function ThemePanel({ theme, onChange, disabled }: { theme: ThemeSettings; onCha
                   style={{
                     padding: "6px 2px",
                     borderRadius: 6,
-                    border: active ? "2px solid var(--accent, #5B4FE8)" : "1px solid var(--line)",
-                    background: active ? "color-mix(in srgb, var(--accent, #5B4FE8) 8%, transparent)" : "var(--surface)",
+                    border: active ? "2px solid var(--brand)" : "1px solid var(--line)",
+                    background: active ? "color-mix(in srgb, var(--brand) 8%, transparent)" : "var(--surface)",
                     cursor: disabled ? "not-allowed" : "pointer",
                     textAlign: "center",
                     transition: "all 0.15s ease",
                   }}
                 >
-                  <div style={{ fontSize: 11, fontWeight: 700, color: active ? "var(--accent, #5B4FE8)" : "var(--ink)" }}>{r.name}</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: active ? "var(--brand)" : "var(--ink)" }}>{r.name}</div>
                   <div style={{ fontSize: 9, color: "var(--ink-muted)" }}>{r.label}</div>
                 </button>
               );

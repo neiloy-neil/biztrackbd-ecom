@@ -754,7 +754,7 @@ export function BundlesManagerClient({
 
             <div className="card">
               <h3 style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 600 }}>Bundle Items Volume</h3>
-              <div style={{ fontSize: 26, fontWeight: 800, color: "#7c3aed", margin: "8px 0" }}>
+              <div style={{ fontSize: 26, fontWeight: 800, color: "var(--brand)", margin: "8px 0" }}>
                 {analytics.totalBundleItemsSold} units
               </div>
               <p className="muted" style={{ margin: 0, fontSize: 12.5 }}>
@@ -1026,7 +1026,7 @@ export function BundlesManagerClient({
                   padding: "12px 14px",
                   borderRadius: 8,
                   border: "1px solid var(--border, #e5e7eb)",
-                  backgroundColor: "rgba(99, 102, 241, 0.04)",
+                  backgroundColor: "color-mix(in srgb, var(--brand) 4%, transparent)",
                 }}
               >
                 <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", margin: 0 }}>
