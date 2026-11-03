@@ -26,6 +26,8 @@ const env = {
   NEXT_PUBLIC_ADMIN_URL: "http://localhost:3001",
   CRON_SECRET: "qa-cron-secret-0123456789",
   CUSTOMER_AUTH_SECRET: process.env.CUSTOMER_AUTH_SECRET || "qa-customer-auth-secret-0123456789",
+  // A throwaway key, only so the integrations pages (Settings, Apps) open against the private test database; nothing real is encrypted with it.
+  INTEGRATION_VAULT_SECRET: process.env.INTEGRATION_VAULT_SECRET || "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
 };
 const only = process.argv[2] ? process.argv[2].split(",") : null;
 const kids = [["storefront", 3000], ["admin", 3001], ["marketing", 3002], ["platform", 3003]].filter(([n]) => !only || only.includes(n)).map(([name, port]) => {
