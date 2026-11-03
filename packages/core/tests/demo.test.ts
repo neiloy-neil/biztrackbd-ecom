@@ -35,8 +35,8 @@ afterAll(async () => {
 });
 
 describe("the template demo content", () => {
-  it("covers all six templates, each with its own address, products in both languages and a drawing for every product", () => {
-    expect(DEMO_TEMPLATES.map((t) => t.id).sort()).toEqual(["axionwear", "berber", "bindu", "gadgetstudio", "kapor", "mini-bunny"]);
+  it("covers all nine templates, each with its own address, products in both languages and a drawing for every product", () => {
+    expect(DEMO_TEMPLATES.map((t) => t.id).sort()).toEqual(["axionwear", "bazaar", "berber", "bindu", "freshbasket", "gadgetstudio", "kapor", "mini-bunny", "nakshi"]);
     for (const t of DEMO_TEMPLATES) {
       expect(DEMO_SUBDOMAINS.has(t.host), `${t.id} host is reserved from signup`).toBe(true);
       expect(t.products.length).toBeGreaterThanOrEqual(8);

@@ -48,6 +48,7 @@ export interface DemoTemplate {
 
 const sizes = (list: string[]): DemoVariant[] => list.map((s) => ({ title: s, options: { Size: s } }));
 const colours = (list: string[]): DemoVariant[] => list.map((s) => ({ title: s, options: { Colour: s } }));
+const weights = (list: string[]): DemoVariant[] => list.map((s) => ({ title: s, options: { Weight: s } }));
 const one: DemoVariant[] = [{ title: "Default", options: {} }];
 
 // Berber range: three garments in four named colours, sizes in even inches (docs/38).
@@ -186,6 +187,63 @@ export const DEMO_TEMPLATES: readonly DemoTemplate[] = [
       ...berberRange("blazer"), ...berberRange("trouser"), ...berberRange("waistcoat"),
       { slug: "classic-white-formal-shirt", title: "Classic White Formal Shirt", titleBn: "ক্লাসিক হোয়াইট ফরমাল শার্ট", text: "A crisp cotton shirt with a semi-spread collar. The base of every outfit.", textBn: "ক্রিস্প সুতির শার্ট, সেমি-স্প্রেড কলার। প্রতিটি পোশাকের ভিত্তি।", price: 1450, cost: 760, category: "essentials", art: "shirt", colour: { main: "#F4F2EC", accent: "#CFC9B8" }, variants: sizes(["S", "M", "L", "XL"]), stock: 40 },
       { slug: "midnight-navy-silk-tie", title: "Silk Tie, Midnight Navy", titleBn: "সিল্ক টাই, মিডনাইট নেভি", text: "A woven silk tie with a fine texture. 7 cm blade.", textBn: "সূক্ষ্ম টেক্সচারের বোনা সিল্ক টাই। ৭ সেমি চওড়া।", price: 650, cost: 280, category: "essentials", art: "tie", colour: { main: "#1B2A4A", accent: "#C9A24B" }, variants: one, stock: 50 },
+    ],
+  },
+  {
+    id: "freshbasket", host: "freshbasket", storeName: "Fresh Basket", storeNameBn: "ফ্রেশ বাস্কেট", tagline: "Honest food from trusted farms",
+    palette: { bg: "#FBEBCB", main: "#B4421C", accent: "#E3A93B", ink: "#2E2218" },
+    announcement: { text: "Demo store: free delivery in Dhaka over ৳ 1,500", textBn: "ডেমো স্টোর: ঢাকায় ৳ ১,৫০০ এর উপরে ফ্রি ডেলিভারি" },
+    hero: { eyebrow: "FRESH FROM THE SOURCE", eyebrowBn: "সরাসরি উৎস থেকে", title: "Honest food, packed with care", titleBn: "খাঁটি খাবার, যত্নে প্যাক করা", text: "Honey, ghee, spices and pantry staples with the weight and price in plain sight.", textBn: "মধু, ঘি, মসলা ও মুদি পণ্য, ওজন ও দাম স্পষ্ট করে লেখা।", ctaText: "Fill your basket", ctaTextBn: "ঝুড়ি ভরুন", art: ["jar", "sack", "bottle"] },
+    banner: { heading: "Winter honey is in", headingBn: "শীতের মধু এসেছে", text: "Mustard flower and litchi honey, bottled where it was made.", textBn: "সরিষা ফুল ও লিচুর মধু, যেখানে তৈরি সেখানেই বোতলবন্দী।", ctaText: "See honey", ctaTextBn: "মধু দেখুন", art: ["jar", "bottle"] },
+    about: { heading: "Know where it comes from", headingBn: "জানুন কোথা থেকে আসে", body: "We buy from small farms and pack in clean, sealed pouches. This is a demo store: products are samples.", bodyBn: "আমরা ছোট খামার থেকে কিনি এবং পরিষ্কার সিল করা প্যাকেটে দিই। এটি একটি ডেমো স্টোর: পণ্যগুলো নমুনা।" },
+    categories: [{ slug: "honey-ghee", name: "Honey" }, { slug: "spices", name: "Spices" }, { slug: "staples", name: "Staples" }, { slug: "tea-snacks", name: "Tea" }],
+    products: [
+      { slug: "mustard-flower-honey", title: "Mustard Flower Honey", titleBn: "সরিষা ফুলের মধু", text: "Light, sweet honey from Sirajganj mustard fields.", textBn: "সিরাজগঞ্জের সরিষা ক্ষেতের হালকা মিষ্টি মধু।", price: 650, compareAt: 780, cost: 380, category: "honey-ghee", art: "jar", variants: weights(["250 g", "500 g"]), stock: 40, featured: true },
+      { slug: "sundarban-honey", title: "Sundarban Wild Honey", titleBn: "সুন্দরবনের খাঁটি মধু", text: "Dark, rich wild honey with a gentle smoky note.", textBn: "গাঢ়, ঘন বুনো মধু, হালকা ধোঁয়াটে স্বাদ।", price: 980, cost: 600, category: "honey-ghee", art: "jar", tone: "accent", variants: weights(["250 g", "500 g"]), stock: 28, featured: true },
+      { slug: "desi-ghee", title: "Desi Cow Ghee", titleBn: "দেশি গরুর ঘি", text: "Slow-cooked ghee with a warm, nutty aroma.", textBn: "ধীরে জ্বালানো ঘি, উষ্ণ ও বাদামি সুবাস।", price: 1350, cost: 900, category: "honey-ghee", art: "jar", variants: weights(["250 g", "500 g"]), stock: 30 },
+      { slug: "turmeric-powder", title: "Turmeric Powder", titleBn: "হলুদ গুঁড়া", text: "Stone-ground turmeric with deep colour and no added dye.", textBn: "পাথরে পেষা হলুদ, গাঢ় রঙ, কোনো রং মেশানো নেই।", price: 180, cost: 95, category: "spices", art: "box", tone: "accent", variants: weights(["200 g", "500 g"]), stock: 80, featured: true },
+      { slug: "red-chilli-powder", title: "Red Chilli Powder", titleBn: "লাল মরিচ গুঁড়া", text: "Bright, hot and freshly ground in small batches.", textBn: "ঝাল ও উজ্জ্বল, অল্প অল্প করে তাজা পেষা।", price: 220, compareAt: 260, cost: 120, category: "spices", art: "box", variants: weights(["200 g", "500 g"]), stock: 70 },
+      { slug: "miniket-rice", title: "Miniket Rice", titleBn: "মিনিকেট চাল", text: "Polished, even grains that cook fluffy and separate.", textBn: "পরিষ্কার, সমান দানা, রান্নায় ঝরঝরে।", price: 1450, cost: 1180, category: "staples", art: "sack", variants: weights(["5 kg", "10 kg"]), stock: 55, featured: true },
+      { slug: "masoor-dal", title: "Masoor Dal", titleBn: "মসুর ডাল", text: "Clean red lentils that cook down in twenty minutes.", textBn: "পরিষ্কার লাল মসুর, বিশ মিনিটে সেদ্ধ।", price: 150, cost: 105, category: "staples", art: "sack", tone: "accent", variants: weights(["1 kg", "2 kg"]), stock: 90 },
+      { slug: "sylhet-black-tea", title: "Sylhet Black Tea", titleBn: "সিলেটের কালো চা", text: "Strong, brisk leaf tea from Sylhet gardens.", textBn: "সিলেটের বাগানের কড়া, তাজা পাতার চা।", price: 320, cost: 190, category: "tea-snacks", art: "bag", variants: weights(["200 g", "500 g"]), stock: 60 },
+    ],
+  },
+  {
+    id: "bazaar", host: "bazaar", storeName: "Bazaar", storeNameBn: "বাজার", tagline: "Everything you need, one bazaar",
+    palette: { bg: "#FFE4CC", main: "#14213D", accent: "#C2410C", ink: "#14213D" },
+    announcement: { text: "Demo store: cash on delivery and 7-day returns", textBn: "ডেমো স্টোর: ক্যাশ অন ডেলিভারি ও ৭ দিনের রিটার্ন" },
+    hero: { eyebrow: "TODAY'S DEALS", eyebrowBn: "আজকের অফার", title: "Everything you need, one bazaar", titleBn: "যা দরকার সবই, এক বাজারে", text: "Daily essentials, gadgets, home and gifts at prices that make sense.", textBn: "দৈনন্দিন প্রয়োজন, গ্যাজেট, ঘর ও উপহার, ন্যায্য দামে।", ctaText: "Browse the deals", ctaTextBn: "অফার দেখুন", art: ["bag", "speaker", "bottle"] },
+    banner: { heading: "Home picks under ৳ 999", headingBn: "৳ ৯৯৯ এর নিচে ঘরের সেরা বাছাই", text: "Bottles, storage and kitchen helpers for every room.", textBn: "প্রতিটি ঘরের জন্য বোতল, স্টোরেজ ও রান্নাঘরের সহায়ক।", ctaText: "Shop home", ctaTextBn: "ঘর দেখুন", art: ["bottle", "box"] },
+    about: { heading: "A little of everything", headingBn: "সবকিছু একটু একটু", body: "One shop for the things a household actually buys, with honest prices. This is a demo store: products are samples.", bodyBn: "ঘরের আসলে যা দরকার, তার জন্য একটি দোকান, ন্যায্য দামে। এটি একটি ডেমো স্টোর: পণ্যগুলো নমুনা।" },
+    categories: [{ slug: "home", name: "Home" }, { slug: "gadgets", name: "Gadgets" }, { slug: "everyday", name: "Wear" }, { slug: "gifts", name: "Gifts" }],
+    products: [
+      { slug: "steel-water-bottle", title: "Steel Water Bottle, 750 ml", titleBn: "স্টিলের পানির বোতল, ৭৫০ মি.লি.", text: "Keeps drinks cold for twelve hours. Leak-proof lid.", textBn: "বারো ঘণ্টা ঠান্ডা রাখে। লিক-প্রুফ ঢাকনা।", price: 690, compareAt: 890, cost: 380, category: "home", art: "bottle", variants: colours(["Navy", "Orange"]), stock: 60, featured: true },
+      { slug: "storage-box-set", title: "Storage Box Set of 3", titleBn: "স্টোরেজ বক্স সেট (৩টি)", text: "Stackable boxes with snap lids for the kitchen and wardrobe.", textBn: "রান্নাঘর ও আলমারির জন্য ঢাকনাসহ স্ট্যাক করা বক্স।", price: 540, cost: 290, category: "home", art: "box", tone: "accent", variants: one, stock: 45 },
+      { slug: "glass-jar-set", title: "Glass Jar Set", titleBn: "কাচের জার সেট", text: "Airtight jars for spices, tea and dry food.", textBn: "মসলা, চা ও শুকনো খাবারের জন্য বায়ুনিরোধী জার।", price: 780, cost: 430, category: "home", art: "jar", variants: one, stock: 38 },
+      { slug: "bluetooth-speaker-mini", title: "Mini Bluetooth Speaker", titleBn: "মিনি ব্লুটুথ স্পিকার", text: "Loud for its size, with eight hours of battery.", textBn: "ছোট হলেও জোরালো, আট ঘণ্টা ব্যাটারি।", price: 1190, compareAt: 1490, cost: 700, category: "gadgets", art: "speaker", variants: colours(["Black", "Blue"]), stock: 34, featured: true },
+      { slug: "fast-charging-cable", title: "Fast Charging Cable", titleBn: "ফাস্ট চার্জিং ক্যাবল", text: "Braided, 1.5 metres, with a six-month warranty.", textBn: "বেণি করা, ১.৫ মিটার, ছয় মাসের ওয়ারেন্টি।", price: 320, cost: 150, category: "gadgets", art: "cable", variants: one, stock: 120 },
+      { slug: "everyday-cotton-tee", title: "Everyday Cotton Tee", titleBn: "এভরিডে সুতির টি-শার্ট", text: "Soft combed cotton in a regular fit.", textBn: "নরম কম্বড সুতি, রেগুলার ফিট।", price: 490, cost: 250, category: "everyday", art: "tee", tone: "accent", variants: sizes(["M", "L", "XL"]), stock: 70, featured: true },
+      { slug: "canvas-tote", title: "Canvas Tote Bag", titleBn: "ক্যানভাস টোট ব্যাগ", text: "A sturdy shopping bag that folds flat.", textBn: "মজবুত শপিং ব্যাগ, ভাঁজ করা যায়।", price: 390, cost: 190, category: "everyday", art: "bag", variants: one, stock: 80, featured: true },
+      { slug: "wooden-puzzle", title: "Wooden Puzzle", titleBn: "কাঠের পাজল", text: "A 48-piece puzzle, smooth-edged and child-safe.", textBn: "৪৮ টুকরার পাজল, মসৃণ কিনারা, শিশুদের জন্য নিরাপদ।", price: 450, compareAt: 560, cost: 240, category: "gifts", art: "puzzle", variants: one, stock: 42 },
+    ],
+  },
+  {
+    id: "nakshi", host: "nakshi", storeName: "Nakshi", storeNameBn: "নকশী", tagline: "Sarees and festive wear, woven with heritage",
+    palette: { bg: "#F3E4D6", main: "#7A1F2E", accent: "#B8893A", ink: "#2B1418" },
+    announcement: { text: "Demo store: free delivery on festive orders over ৳ 5,000", textBn: "ডেমো স্টোর: ৳ ৫,০০০ এর উপরে উৎসবের অর্ডারে ফ্রি ডেলিভারি" },
+    hero: { eyebrow: "FESTIVE EDIT", eyebrowBn: "উৎসবের সংগ্রহ", title: "Woven with heritage", titleBn: "ঐতিহ্যে বোনা", text: "Sarees, three-pieces and dupattas for weddings, Eid and every celebration.", textBn: "বিয়ে, ঈদ ও প্রতিটি উৎসবের জন্য শাড়ি, থ্রি-পিস ও ওড়না।", ctaText: "Explore the edit", ctaTextBn: "কালেকশন দেখুন", art: ["saree", "dress", "scarf"] },
+    banner: { heading: "Jamdani, handwoven", headingBn: "জামদানি, হাতে বোনা", text: "Each saree takes weeks on the loom in Rupganj.", textBn: "রূপগঞ্জের তাঁতে প্রতিটি শাড়ি বুনতে কয়েক সপ্তাহ লাগে।", ctaText: "See sarees", ctaTextBn: "শাড়ি দেখুন", art: ["saree", "scarf"] },
+    about: { heading: "Cloth with a story", headingBn: "গল্প বোনা কাপড়", body: "We work with weaving families and embroiderers, and pay them fairly. This is a demo store: products are samples.", bodyBn: "আমরা তাঁতি ও নকশা শিল্পী পরিবারের সঙ্গে কাজ করি এবং ন্যায্য মজুরি দিই। এটি একটি ডেমো স্টোর: পণ্যগুলো নমুনা।" },
+    categories: [{ slug: "sarees", name: "Sarees" }, { slug: "three-piece", name: "Three-piece" }, { slug: "dupattas", name: "Dupattas" }, { slug: "accessories", name: "Accessories" }],
+    products: [
+      { slug: "jamdani-saree-maroon", title: "Jamdani Saree, Maroon", titleBn: "জামদানি শাড়ি, মেরুন", text: "Fine handwoven cotton jamdani with a gold border.", textBn: "সোনালি পাড়সহ সূক্ষ্ম হাতে বোনা সুতি জামদানি।", price: 6800, compareAt: 7800, cost: 4400, category: "sarees", art: "saree", variants: one, stock: 12, featured: true },
+      { slug: "tangail-saree-gold", title: "Tangail Saree, Gold", titleBn: "টাঙ্গাইল শাড়ি, গোল্ড", text: "Soft Tangail cotton with a woven buti pattern.", textBn: "বুটি নকশার নরম টাঙ্গাইল সুতি।", price: 3200, cost: 1900, category: "sarees", art: "saree", tone: "accent", variants: one, stock: 20, featured: true },
+      { slug: "silk-saree-ivory", title: "Katan Silk Saree, Ivory", titleBn: "কাতান সিল্ক শাড়ি, আইভরি", text: "A graceful katan silk saree for weddings.", textBn: "বিয়ের জন্য মার্জিত কাতান সিল্ক শাড়ি।", price: 9800, cost: 6500, category: "sarees", art: "saree", colour: { main: "#F1E6D2", accent: "#B8893A" }, variants: one, stock: 8 },
+      { slug: "block-print-three-piece", title: "Block Print Three-piece", titleBn: "ব্লক প্রিন্ট থ্রি-পিস", text: "Cotton kameez, salwar and dupatta in a hand block print.", textBn: "হাতে ব্লক প্রিন্ট করা সুতির কামিজ, সালোয়ার ও ওড়না।", price: 2850, compareAt: 3400, cost: 1650, category: "three-piece", art: "dress", variants: sizes(["S", "M", "L"]), stock: 26, featured: true },
+      { slug: "embroidered-three-piece", title: "Embroidered Festive Three-piece", titleBn: "এমব্রয়ডারি উৎসবের থ্রি-পিস", text: "Thread embroidery on soft georgette.", textBn: "নরম জর্জেটে সুতার এমব্রয়ডারি।", price: 4600, cost: 2900, category: "three-piece", art: "dress", tone: "accent", variants: sizes(["S", "M", "L"]), stock: 18 },
+      { slug: "muslin-dupatta", title: "Muslin Dupatta", titleBn: "মসলিন ওড়না", text: "A light, sheer dupatta with a fine woven edge.", textBn: "সূক্ষ্ম বোনা পাড়ের হালকা স্বচ্ছ ওড়না।", price: 1450, cost: 780, category: "dupattas", art: "scarf", variants: one, stock: 30, featured: true },
+      { slug: "nakshi-kantha-shawl", title: "Nakshi Kantha Shawl", titleBn: "নকশী কাঁথা শাল", text: "Hand-stitched kantha shawl for cool evenings.", textBn: "ঠান্ডা সন্ধ্যার জন্য হাতে সেলাই করা কাঁথা শাল।", price: 2400, cost: 1400, category: "dupattas", art: "scarf", tone: "accent", variants: one, stock: 22 },
+      { slug: "embroidered-clutch", title: "Embroidered Clutch", titleBn: "এমব্রয়ডারি ক্লাচ", text: "A small festive clutch with zari work.", textBn: "জরির কাজ করা ছোট উৎসবের ক্লাচ।", price: 1250, cost: 640, category: "accessories", art: "bag", variants: one, stock: 28 },
     ],
   },
 ] as const;

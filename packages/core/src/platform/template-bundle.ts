@@ -17,7 +17,7 @@ export const TEMPLATE_BUNDLE_FORMAT = "biztrack-template";
 export const TEMPLATE_BUNDLE_VERSION = 1;
 export const MAX_TEMPLATE_BUNDLE_BYTES = 1_000_000;
 
-export const BUNDLE_CATEGORIES = ["fashion", "electronics", "kids", "streetwear", "beauty", "other"] as const;
+export const BUNDLE_CATEGORIES = ["fashion", "electronics", "kids", "streetwear", "beauty", "grocery", "general", "other"] as const;
 export const BUNDLE_SITE_MODES = ["ECOMMERCE", "PORTFOLIO", "HYBRID"] as const;
 export const BUNDLE_VERTICALS = ["RESTAURANT", "DOCTOR_CLINIC", "PUBLIC_FIGURE", "BUSINESS_COMPANY", "SERVICE_PROVIDER", "PERSONAL_PORTFOLIO"] as const;
 
@@ -77,7 +77,7 @@ export function parseTemplateBundle(text: string): TemplateBundle {
     throw new ValidationError(`Template file: ${i.path.join(".") || "file"} ${i.message}`);
   }
   const b = head.data;
-  if (!isThemeId(b.baseLook)) throw new ValidationError("baseLook: choose one of the original looks (kapor, gadgetstudio, mini-bunny, axionwear, bindu, berber)");
+  if (!isThemeId(b.baseLook)) throw new ValidationError("baseLook: choose one of the original looks (kapor, gadgetstudio, mini-bunny, axionwear, bindu, berber, freshbasket, bazaar, nakshi)");
   if (b.siteMode === "ECOMMERCE" && b.vertical) throw new ValidationError("vertical: a store template has no business vertical");
   if (b.siteMode !== "ECOMMERCE" && !b.vertical) throw new ValidationError("vertical: a business template needs one (for example RESTAURANT)");
 

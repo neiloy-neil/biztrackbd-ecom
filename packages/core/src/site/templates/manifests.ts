@@ -19,7 +19,7 @@ export interface BusinessTemplateManifest {
   blurb: string;
   audience: string;
   baseLook: ThemeId;
-  category: "other" | "fashion" | "electronics" | "kids" | "streetwear" | "beauty";
+  category: "other" | "fashion" | "electronics" | "kids" | "streetwear" | "beauty" | "grocery" | "general";
   tags: string[];
   siteMode: SiteMode;
   vertical: BusinessVertical;

@@ -117,6 +117,9 @@ const THEME_NAMES: Record<string, string> = {
   axionwear: "Axionwear",
   bindu: "Bindu",
   berber: "Berber",
+  freshbasket: "Fresh Basket",
+  bazaar: "Bazaar",
+  nakshi: "Nakshi",
 };
 
 export async function getOverview(actor: PlatformActor, deps?: Deps): Promise<PlatformOverview> {

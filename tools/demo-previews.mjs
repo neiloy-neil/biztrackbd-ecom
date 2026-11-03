@@ -15,9 +15,10 @@ const pattern = args.includes("--base") ? args[args.indexOf("--base") + 1] : "ht
 const out = join(root, "apps/marketing/public/templates");
 mkdirSync(out, { recursive: true });
 
-const DEMOS = [["kapor", "kapor"], ["gadgetstudio", "gadgetstudio"], ["mini-bunny", "minibunny"], ["axionwear", "axionwear"], ["bindu", "bindu"], ["berber", "berber"]];
+const DEMOS = [["kapor", "kapor"], ["gadgetstudio", "gadgetstudio"], ["mini-bunny", "minibunny"], ["axionwear", "axionwear"], ["bindu", "bindu"], ["berber", "berber"], ["freshbasket", "freshbasket"], ["bazaar", "bazaar"], ["nakshi", "nakshi"]];
 const browser = await chromium.launch({ channel: "chrome" });
-for (const [id, host] of DEMOS) {
+const only = process.env.ONLY ? process.env.ONLY.split(",") : null; // ONLY=freshbasket,bazaar re-takes just those
+for (const [id, host] of DEMOS.filter(([id]) => !only || only.includes(id))) {
   const url = pattern.replace("{host}", host);
   for (const [suffix, viewport, width] of [["", { width: 1440, height: 900 }, 960], ["-phone", { width: 390, height: 844 }, 390]]) {
     const ctx = await browser.newContext({ viewport, deviceScaleFactor: suffix ? 2 : 1, isMobile: Boolean(suffix), hasTouch: Boolean(suffix) });

@@ -128,7 +128,7 @@ describe("signing up a store", () => {
     const s = await signup({ plan: "PRO", tagline: "Handloom from Narayanganj" });
     expect(s.quarantined).toBe(false);
     const t = await tenant(s.tenantId);
-    expect(t).toMatchObject({ status: "TRIAL", planTier: "PRO", subdomain: s.subdomain, themeId: "kapor", ownerEmail: s.input.email, productCount: 8 }); // the Kapor template's sample products (docs/38)
+    expect(t).toMatchObject({ status: "TRIAL", planTier: "PRO", subdomain: s.subdomain, themeId: "bazaar", ownerEmail: s.input.email, productCount: 8 }); // no category means General, so the Bazaar template's sample products (docs/38)
     expect(Math.round((t.trialEndsAt.getTime() - t.trialStartsAt.getTime()) / DAY)).toBe(14);
     expect(t.subscription).toMatchObject({ status: "TRIALING", planTier: "PRO" });
     expect(Number(t.subscription!.amount)).toBe(0);
@@ -138,10 +138,10 @@ describe("signing up a store", () => {
     expect(users[0]).toMatchObject({ role: "STORE_OWNER", passwordHash: "EXTERNAL_AUTH" });
     expect(await owner.storeSettings.findFirstOrThrow({ where: { tenantId: s.tenantId } })).toMatchObject({ storeName: s.input.storeName, tagline: "Handloom from Narayanganj" });
     expect(await owner.shippingZone.count({ where: { tenantId: s.tenantId } })).toBe(2);
-    expect(await owner.themeInstall.count({ where: { tenantId: s.tenantId, themeId: "kapor", isActive: true } })).toBe(1);
-    const kapor = DEMO_TEMPLATES.find((x) => x.id === "kapor")!;
-    expect(await owner.product.count({ where: { tenantId: s.tenantId, status: "ACTIVE" } })).toBe(kapor.products.length);
-    expect(await owner.productVariant.count({ where: { tenantId: s.tenantId } })).toBe(kapor.products.reduce((n, p) => n + p.variants.length, 0));
+    expect(await owner.themeInstall.count({ where: { tenantId: s.tenantId, themeId: "bazaar", isActive: true } })).toBe(1);
+    const bazaar = DEMO_TEMPLATES.find((x) => x.id === "bazaar")!;
+    expect(await owner.product.count({ where: { tenantId: s.tenantId, status: "ACTIVE" } })).toBe(bazaar.products.length);
+    expect(await owner.productVariant.count({ where: { tenantId: s.tenantId } })).toBe(bazaar.products.reduce((n, p) => n + p.variants.length, 0));
     expect((await owner.auditLog.findFirstOrThrow({ where: { tenantId: s.tenantId } })).action).toBe("store.created");
     // The owner can use the store straight away: access is the trial.
     expect(await getStoreAccess(s.tenantId)).toMatchObject({ state: "TRIAL" });

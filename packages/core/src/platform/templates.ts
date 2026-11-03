@@ -23,7 +23,7 @@ import { parseTemplateBundle, exportTemplateBundle, BUNDLE_SITE_MODES, BUNDLE_VE
  */
 
 export type TemplateStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
-export const TEMPLATE_CATEGORIES = ["fashion", "electronics", "kids", "streetwear", "beauty", "other"] as const;
+export const TEMPLATE_CATEGORIES = ["fashion", "electronics", "kids", "streetwear", "beauty", "grocery", "general", "other"] as const;
 export type TemplateCategory = (typeof TEMPLATE_CATEGORIES)[number];
 export const TEMPLATE_PAGE_KINDS = STORE_PAGE_KINDS;
 export type TemplatePages = Partial<Record<PageKind, PageJson>>;
@@ -54,7 +54,7 @@ export interface TemplateInfo {
   previews?: { desktop?: string; mobile?: string };
 }
 
-const BUILT_IN_CATEGORY: Record<string, TemplateCategory> = { kapor: "fashion", gadgetstudio: "electronics", "mini-bunny": "kids", axionwear: "streetwear", bindu: "beauty", berber: "fashion" };
+const BUILT_IN_CATEGORY: Record<string, TemplateCategory> = { kapor: "fashion", gadgetstudio: "electronics", "mini-bunny": "kids", axionwear: "streetwear", bindu: "beauty", berber: "fashion", freshbasket: "grocery", bazaar: "general", nakshi: "fashion" };
 const ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 const builtIns = (): TemplateInfo[] =>

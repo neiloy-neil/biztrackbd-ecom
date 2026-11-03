@@ -8,6 +8,9 @@ const swatch: Record<ThemeId, string> = {
   axionwear: "linear-gradient(135deg,#0B0D0F 0 50%,#D7FF3F 50%)",
   bindu: "linear-gradient(135deg,#FFF2F5 0 50%,#8A2855 50%)",
   berber: "linear-gradient(135deg,#0D121E 0 50%,#C9A24B 50%)",
+  freshbasket: "linear-gradient(135deg,#FFF8EC 0 50%,#B4421C 50%)",
+  bazaar: "linear-gradient(135deg,#F8F6F1 0 50%,#C2410C 50%)",
+  nakshi: "linear-gradient(135deg,#FBF6EE 0 50%,#7A1F2E 50%)",
 };
 
 export function ThemePicker({ active, canEdit }: { active: ThemeId; canEdit: boolean }) {

@@ -38,8 +38,8 @@ const themeOf = async (tenantId: string) => {
 describe("the theme a new store starts on follows its category", () => {
   it("has a real, installed theme for every category the wizard offers", () => {
     for (const [category, theme] of Object.entries(CATEGORY_THEMES)) expect(isThemeId(theme), `${category} -> ${theme}`).toBe(true);
-    // Not everyone on Kapor: beauty and electronics have looks of their own.
-    expect(new Set(Object.values(CATEGORY_THEMES)).size).toBeGreaterThan(2);
+    // Every category has a look of its own; nobody is lumped onto Kapor.
+    expect(new Set(Object.values(CATEGORY_THEMES)).size).toBe(Object.keys(CATEGORY_THEMES).length);
   });
 
   for (const category of Object.keys(CATEGORY_THEMES) as (keyof typeof CATEGORY_THEMES)[]) {

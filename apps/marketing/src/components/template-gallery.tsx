@@ -13,6 +13,9 @@ const THEME_HOSTS: Record<string, string> = {
   axionwear: "axionwear",
   bindu: "bindu",
   berber: "berber",
+  freshbasket: "freshbasket",
+  bazaar: "bazaar",
+  nakshi: "nakshi",
   "dhaka-bistro": "dhakabistro",
   "modern-clinic": "modernclinic",
   "apex-corporate": "apexcorp",
@@ -24,7 +27,7 @@ const THEME_HOSTS: Record<string, string> = {
 export type GalleryMode = "ecommerce" | "business";
 const GALLERY_MODES: readonly GalleryMode[] = ["ecommerce", "business"];
 
-export type EcommerceCategoryFilter = "all" | "fashion" | "electronics" | "kids" | "streetwear" | "beauty";
+export type EcommerceCategoryFilter = "all" | "fashion" | "electronics" | "kids" | "streetwear" | "beauty" | "grocery" | "general";
 export type BusinessCategoryFilter = "all" | "restaurant" | "doctor" | "corporate" | "services" | "portfolio" | "public-figure";
 
 export interface GalleryTheme {
@@ -111,6 +114,39 @@ export const ECOMMERCE_TEMPLATES: GalleryTheme[] = [
     tag1: "Formalwear",
     tag2: "Tailoring",
     module: "Bespoke ready",
+    mode: "ecommerce",
+  },
+  {
+    id: "freshbasket",
+    name: "Fresh Basket",
+    sub: "Warm, appetising grocery and organic food storefront with clear weights, unit prices and pantry bundles.",
+    category: "grocery",
+    categoryLabel: "Grocery",
+    tag1: "Grocery",
+    tag2: "Organic food",
+    module: "Unit pricing",
+    mode: "ecommerce",
+  },
+  {
+    id: "bazaar",
+    name: "Bazaar",
+    sub: "Bright, deal-led general store for a wide catalogue: bold price tags, fast browsing and a busy home page.",
+    category: "general",
+    categoryLabel: "General store",
+    tag1: "General store",
+    tag2: "Deals",
+    module: "Deal badges",
+    mode: "ecommerce",
+  },
+  {
+    id: "nakshi",
+    name: "Nakshi",
+    sub: "Heritage ivory and maroon storefront for sarees, three-pieces and festive wear, with fine gold rules.",
+    category: "fashion",
+    categoryLabel: "Fashion",
+    tag1: "Sarees",
+    tag2: "Festive wear",
+    module: "Festive edit",
     mode: "ecommerce",
   },
 ];
@@ -209,6 +245,8 @@ const ECOM_CATEGORIES: { id: EcommerceCategoryFilter; label: string }[] = [
   { id: "kids", label: "Kids & Toys" },
   { id: "streetwear", label: "Streetwear" },
   { id: "beauty", label: "Beauty & Cosmetics" },
+  { id: "grocery", label: "Grocery & Organics" },
+  { id: "general", label: "General Store" },
 ];
 
 const BIZ_CATEGORIES: { id: BusinessCategoryFilter; label: string }[] = [
