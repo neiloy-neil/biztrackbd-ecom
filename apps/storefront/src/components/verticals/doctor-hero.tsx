@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { SmartImage } from "@/components/smart-image";
 import Link from "next/link";
 import type { Lang } from "@/lib/i18n-core";
 
@@ -165,8 +166,7 @@ export function DoctorHeroSection({
             }}
           >
             {image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={image} alt={doctorName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <SmartImage src={image} alt={doctorName} sizes="(max-width: 640px) 90vw, 420px" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             ) : (
               <div style={{ fontSize: "5rem" }}>👨‍⚕️</div>
             )}

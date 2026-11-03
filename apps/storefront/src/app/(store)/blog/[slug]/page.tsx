@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPublishedPost } from "@biztrackbd/core";
+import { SmartImage } from "@/components/smart-image";
 import { getLang, makeT } from "@/lib/i18n";
 import { getStore } from "@/lib/tenant";
 
@@ -26,8 +27,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
       <p><Link href="/blog" className="link-btn">← {t("backToBlog")}</Link></p>
       <h1 className="page-title" style={{ paddingTop: 8 }}>{post.title}</h1>
       <p className="post-meta" style={{ marginBottom: 16 }}>{[post.authorName ? t("writtenBy", { name: post.authorName }) : null, new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Dhaka" }).format(post.createdAt)].filter(Boolean).join(" · ")}</p>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      {post.coverImage && <img src={post.coverImage} alt="" style={{ width: "100%", maxWidth: 720, borderRadius: "var(--radius)", display: "block", marginBottom: 20 }} />}
+      {post.coverImage && <SmartImage src={post.coverImage} alt="" priority sizes="(max-width: 720px) 100vw, 720px" style={{ width: "100%", height: "auto", maxWidth: 720, borderRadius: "var(--radius)", display: "block", marginBottom: 20 }} />}
       <div className="prose" dangerouslySetInnerHTML={{ __html: post.contentHtml }} />
     </article>
   );

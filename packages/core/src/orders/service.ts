@@ -523,9 +523,11 @@ export async function transitionOrder(tenantId: string, orderId: string, to: Ord
       }
     } else if (current.status === "CANCELLED" && to === "PENDING") {
       // Reopening order: check stock availability and decrement
+      const variantIds = order.items.flatMap((i) => (i.variantId ? [i.variantId] : []));
+      const variants = new Map((await tx.productVariant.findMany({ where: { id: { in: variantIds } }, select: { id: true, stockQuantity: true, title: true } })).map((v) => [v.id, v]));
       for (const i of order.items) {
         if (i.variantId) {
-          const v = await tx.productVariant.findUnique({ where: { id: i.variantId }, select: { stockQuantity: true, title: true } });
+          const v = variants.get(i.variantId);
           if (v && v.stockQuantity < i.quantity) {
             throw new ValidationError(`Cannot reopen order: "${v.title}" only has ${v.stockQuantity} in stock (needs ${i.quantity}).`);
           }
