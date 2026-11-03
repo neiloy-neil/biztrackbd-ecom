@@ -1,7 +1,7 @@
 /* Admin shell (docs/37 phase 2): grouped dark sidebar, desktop top bar, command palette, bell. Loaded after admin.css.
    The sidebar colours are variables: set --sb-* under html[data-sidebar="light"] to switch it to the canvas' light version. */
 :root {
-  --sb-bg: #0B4D3B; --sb-line: #1B6450; --sb-ink: #D6E9E0; --sb-ink-2: #9CC3B3; --sb-hover: #0F5C47; --sb-active: #11795A; --sb-active-ink: #fff; --sb-chip: #0F5C47;
+  --sb-bg: #0B4D3B; --sb-line: #1B6450; --sb-ink: #D6E9E0; --sb-ink-2: #B3D6C8; --sb-hover: #0F5C47; --sb-active: #11795A; --sb-active-ink: #fff; --sb-chip: #0F5C47;
 }
 html[data-sidebar="light"] { --sb-bg: #fff; --sb-line: var(--line); --sb-ink: var(--ink-2); --sb-ink-2: var(--ink-3); --sb-hover: var(--bg); --sb-active: var(--brand-light); --sb-active-ink: var(--brand-hover); --sb-chip: var(--bg); }
 
@@ -39,11 +39,11 @@ html[data-sidebar="light"] { --sb-bg: #fff; --sb-line: var(--line); --sb-ink: va
   .side .who .btn-secondary { background: var(--sb-hover); border-color: var(--sb-line); color: var(--sb-ink); }
   .side .who .select { background: var(--sb-hover); border-color: var(--sb-line); color: var(--sb-ink); }
   .side .plan-card { margin: 14px 0 6px; padding: 12px 14px; border-radius: 12px; background: var(--sb-chip); border: 1px solid var(--sb-line); }
-  .side .plan-card .k { font-size: 12px; font-weight: 700; color: var(--marigold); }
+  .side .plan-card .k { font-size: 12px; font-weight: 700; color: var(--marigold-light); }
   .side .plan-card .v { font-size: 15px; font-weight: 700; color: #fff; margin: 2px 0 8px; }
   html[data-sidebar="light"] .side .plan-card .v { color: var(--ink); }
   .side .plan-card .meter { background: var(--sb-line); }
-  .side .plan-card a { display: inline-flex; margin-top: 8px; font-size: 12.5px; font-weight: 700; color: var(--marigold); }
+  .side .plan-card a { display: inline-flex; margin-top: 8px; font-size: 12.5px; font-weight: 700; color: var(--marigold-light); }
 
   .dtop { display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 30; height: 60px; padding: 0 36px; background: var(--surface); border-bottom: 1px solid var(--line); }
 }

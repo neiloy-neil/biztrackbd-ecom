@@ -2338,18 +2338,18 @@ body:has(#bt-preview-select) .bt-anim:not(.bt-revealed) {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  color: #059669;
+  color: #047857; /* 5.5:1 on white; the lighter green was 3.8:1 */
   font-weight: 600;
 }
 
 .bt-fomo-time {
-  color: #94a3b8;
+  color: #64748b; /* 4.8:1 on white; the lighter gray was 2.6:1 */
 }
 
 .bt-fomo-close {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: #64748b;
   cursor: pointer;
   padding: 4px;
   border-radius: 6px;
@@ -2377,6 +2377,7 @@ body:has(#bt-preview-select) .bt-anim:not(.bt-revealed) {
     right: 76px !important; /* the chat launcher is a circle in the right-hand corner */
     max-width: calc(100vw - 90px) !important;
   }
+  body:has(.stickybar) .bt-fomo-toast { bottom: 104px !important; }
 }
 
 /* --- 2. In-Canvas: Live Visitor Counter Section --- */

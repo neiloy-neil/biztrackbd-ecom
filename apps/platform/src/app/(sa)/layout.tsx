@@ -74,7 +74,7 @@ export default async function SaLayout({ children }: { children: React.ReactNode
           </div>
           {authMode() === "dev" ? (
             <form action={switchDevUser} style={{ marginTop: 10 }}>
-              <label className="muted" htmlFor="dev_user" style={{ fontSize: 12, color: "#A8A8D8" }}>Dev: act as</label>
+              <label className="muted" htmlFor="dev_user" style={{ fontSize: 12, color: "#B3D6C8" }}>Dev: act as</label>
               <select id="dev_user" name="email" defaultValue={s.user.email} className="select input-sm" style={{ marginTop: 4, width: "100%", background: "#252568", color: "#fff", borderColor: "var(--brand-hover)" }}>
                 {users.map((u) => <option key={u.email} value={u.email}>{u.name} ({ROLE[u.role] ?? u.role})</option>)}
               </select>

@@ -43,7 +43,7 @@ function getVerticalInfo(siteMode: string, vertical?: string | null): VerticalIn
         return { icon: <GlobeIcon width={16} height={16} />, label: "Business Website", labelBn: "ওয়েবসাইট", color: "#cbd5e1", bg: "rgba(100,116,139,0.12)" };
     }
   }
-  return { icon: <StoreIcon width={16} height={16} />, label: "Ecommerce Store", labelBn: "ই-কমার্স শপ", color: "#34d399", bg: "rgba(16,185,129,0.12)" };
+  return { icon: <StoreIcon width={16} height={16} />, label: "Ecommerce Store", labelBn: "ই-কমার্স শপ", color: "#B7E6D3", bg: "rgba(16,185,129,0.12)" };
 }
 
 export function BusinessSwitcher({

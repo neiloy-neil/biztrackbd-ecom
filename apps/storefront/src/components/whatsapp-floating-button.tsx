@@ -57,6 +57,9 @@ export function WhatsAppFloatingButton({ whatsappNumber, greeting }: Props) {
             padding: 8px 12px;
             font-size: 12.5px;
           }
+          /* A page with its own fixed buy bar (product, cart, checkout): both round buttons stack in the right-hand corner above it. */
+          body:has(.stickybar) .bt-wa-float { bottom: 164px; padding: 12px; }
+          body:has(.stickybar) .bt-wa-float > span { display: none; }
         }
       `}</style>
       <a

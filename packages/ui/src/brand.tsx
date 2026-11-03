@@ -8,18 +8,21 @@ const RING = (
 );
 const ARROW = <path d="M534 362L678 527H390z" />;
 
+/** A symbol with a title is an image with that name; one without (next to the wordmark, which already says it) is decoration and is hidden from screen readers. */
+const a11y = (title: string) => (title ? { role: "img" as const, "aria-label": title } : { "aria-hidden": true as const, focusable: "false" as const });
+
 /** Symbol on its deep green rounded square (app icon), or open (no square) for light grounds. */
 export function BrandSymbol({ size = 30, tile = true, onDark = false, mono = false, title = "BizTrackBD" }: { size?: number; tile?: boolean; onDark?: boolean; /** Open symbol only: the "b" takes the surrounding text colour, for a footer of any colour. The arrow stays marigold. */ mono?: boolean; title?: string }) {
   if (!tile) {
     return (
-      <svg width={size * 0.91} height={size} viewBox="370 342 672 740" role="img" aria-label={title}>
+      <svg width={size * 0.91} height={size} viewBox="370 342 672 740" {...a11y(title)}>
         <g fill={mono ? "currentColor" : onDark ? "#FFFFFF" : GREEN_DEEP}>{STEM}{RING}</g>
         <g fill={MARIGOLD}>{ARROW}</g>
       </svg>
     );
   }
   return (
-    <svg width={size} height={size} viewBox="0 0 1440 1440" role="img" aria-label={title}>
+    <svg width={size} height={size} viewBox="0 0 1440 1440" {...a11y(title)}>
       <rect width="1440" height="1440" rx="330" fill={GREEN_DEEP} />
       <g transform="translate(14 8)">
         <g fill="#FFFFFF">{STEM}{RING}</g>
