@@ -2530,3 +2530,12 @@ table.compare tr:last-child th, table.compare tr:last-child td {
 .cp-text small { font-size: 12px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; color: var(--ink-muted); }
 .cp-text strong { font-size: 15px; color: var(--ink); overflow-wrap: anywhere; }
 @media (prefers-reduced-motion: reduce) { .cp-strip a { transition: none; } .cp-strip a:hover { transform: none; } }
+
+/* Skeleton loading screen (route loading.tsx). */
+.sk { display: block; background: linear-gradient(90deg, rgba(128,128,128,.12) 25%, rgba(128,128,128,.22) 37%, rgba(128,128,128,.12) 63%); background-size: 400% 100%; animation: sk-shimmer 1.4s ease infinite; border-radius: 12px; }
+.sk-hero { height: 44px; width: min(520px, 90%); margin: 0 0 20px; }
+.sk-line { height: 18px; margin: 10px 0; }
+.sk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-top: 36px; }
+.sk-card { height: 200px; }
+@keyframes sk-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+@media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
