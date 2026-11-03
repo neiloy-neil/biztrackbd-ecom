@@ -54,7 +54,7 @@ export {
   type CustomerRow, type CustomerSegment, type CustomerActivityItem, type CustomerAddressView,
   type CustomerDetailView, type CreateCustomerInput, type UpdateCustomerInput,
 } from "./admin/customers";
-export { listCoupons, saveCoupon, setCouponActive, deleteCoupon, couponStatus, CouponInput, type CouponStatus } from "./admin/coupons";
+export { COUPONS_PAGE_SIZE, listCoupons, listCouponsPage, getCoupon, saveCoupon, setCouponActive, deleteCoupon, couponStatus, CouponInput, type CouponStatus } from "./admin/coupons";
 export { submitContactMessage, listContactMessages, markContactRead, replyToContact, closeContact, ContactRateLimitError, CONTACT_MESSAGE_MAX, CONTACT_REPLY_MAX, type ContactInput, type ContactRow, type ContactStatus, type ContactTab } from "./admin/contact-inbox";
 export { requestStockAlert, listStockAlerts, notifyRestocked, sweepStockAlerts, removeStockAlerts, type StockAlertRow, type RestockSummary } from "./admin/stock-alerts";
 export { storeOriginFor } from "./storefront/origin";

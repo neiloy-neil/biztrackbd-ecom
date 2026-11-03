@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { can, listCoupons, type CouponStatus } from "@biztrackbd/core";
-import { SubmitButton } from "@/components/ui";
+import { COUPONS_PAGE_SIZE, can, getCoupon, listCouponsPage, type CouponStatus } from "@biztrackbd/core";
+import { Pager, SubmitButton } from "@/components/ui";
 import { PageHeader } from "@biztrackbd/ui";
 import { dateOnly, isoDay, taka } from "@/lib/format";
 import { one } from "@/lib/query";
@@ -18,10 +18,13 @@ export default async function Coupons({ searchParams }: { searchParams: Promise<
   const sp = await searchParams;
   const s = await requireAccess("marketing");
   const canEdit = can(s.user.role, "marketing", "edit");
-  const list = await listCoupons(s.tenantId, s.actor);
+  const page = Math.max(1, Math.floor(Number(one(sp.page))) || 1);
   const editId = one(sp.edit);
+  const [{ rows: list, total }, editing] = await Promise.all([
+    listCouponsPage(s.tenantId, s.actor, page),
+    editId ? getCoupon(s.tenantId, s.actor, editId) : null,
+  ]);
   const creating = one(sp.new) !== undefined;
-  const editing = list.find((c) => c.id === editId);
   const describe = (c: (typeof list)[number]) => (c.type === "PERCENTAGE" ? `${c.value}% off` : c.type === "FIXED_AMOUNT" ? `${taka(c.value)} off` : "Free delivery");
 
   return (
@@ -70,6 +73,7 @@ export default async function Coupons({ searchParams }: { searchParams: Promise<
                   ))}
                 </tbody>
               </table>
+              <Pager page={page} pageSize={COUPONS_PAGE_SIZE} total={total} path="/marketing/coupons" params={{}} />
             </>
           )}
         </div>

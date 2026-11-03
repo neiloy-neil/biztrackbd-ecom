@@ -3,7 +3,7 @@ import { createBaseClient, setBasePrisma, type PrismaClient } from "@biztrackbd/
 import { createOwnerClient, createTenantFixture, resetDatabase, seedPlans, testUrls, type TenantFixture } from "@biztrackbd/db/testing";
 import {
   DomainError, bulkProductAction, importProductsCsv, claimStorage, releaseStorage, adjustStock, couponStatus, createOrder, deleteCategory, deleteCoupon, getProductForEdit, listAdminProducts, listCategoriesAdmin,
-  listCoupons, listInventory, listStockHistory, saveCategory, saveCoupon, saveProduct, setCouponActive, setEventPublisher, setProductStatus, slugify,
+  getCoupon, listCoupons, listCouponsPage, listInventory, listStockHistory, saveCategory, saveCoupon, saveProduct, setCouponActive, setEventPublisher, setProductStatus, slugify,
   updateStockSettings, type StaffActor,
 } from "../src";
 
@@ -284,6 +284,22 @@ describe("coupons", () => {
     expect((await listCoupons(S.f.tenantId, S.owner)).find((c) => c.code === "WELCOME100")!.status).toBe("off");
     await setCouponActive(S.f.tenantId, S.owner, by.WELCOME100!.id, true);
     expect((await listCoupons(S.f.tenantId, S.owner)).find((c) => c.code === "WELCOME100")!.status).toBe("active");
+  });
+
+  it("pages the list newest first, counts the whole set and finds one coupon wherever it sits", async () => {
+    const S = await store("cpage");
+    const ids: string[] = [];
+    for (const code of ["PAGE1", "PAGE2", "PAGE3", "PAGE4", "PAGE5"]) {
+      ids.push((await saveCoupon(S.f.tenantId, S.owner, { code, type: "PERCENTAGE", value: 5 })).id);
+      await new Promise((r) => setTimeout(r, 5));
+    }
+    const first = await listCouponsPage(S.f.tenantId, S.owner, 1, 2);
+    const third = await listCouponsPage(S.f.tenantId, S.owner, 3, 2);
+    expect(first.total).toBe(5);
+    expect(first.rows.map((c) => c.code)).toEqual(["PAGE5", "PAGE4"]);
+    expect(third.rows.map((c) => c.code)).toEqual(["PAGE1"]);
+    expect(await getCoupon(S.f.tenantId, S.owner, ids[0]!)).toMatchObject({ code: "PAGE1", status: "active" });
+    expect(await getCoupon(S.f.tenantId, S.owner, "nope-nope-nope")).toBeNull();
   });
 
   it("validates codes, percentages, dates and duplicates", async () => {
