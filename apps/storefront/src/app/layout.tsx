@@ -7,6 +7,7 @@ import "./kapor.css";
 import "./themes.css";
 import "./landing.css";
 import { DoubleSubmitGuard } from "@biztrackbd/ui";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // Self-hosted by Next at build time: no request to Google when a customer opens the store.
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-jakarta", display: "swap" });
@@ -31,6 +32,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body data-store-theme={themeId}>
         <DoubleSubmitGuard />
         {children}
+        <SpeedInsights />
       </body>
     </html>
   );

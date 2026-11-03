@@ -13,13 +13,14 @@
   "dependencies": {
     "@biztrackbd/core": "workspace:*",
     "@biztrackbd/db": "workspace:*",
+    "@biztrackbd/media": "workspace:*",
     "@biztrackbd/ui": "workspace:*",
     "@vercel/edge-config": "^1.5.1",
+    "@vercel/speed-insights": "^2.0.0",
     "next": "^16.4.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "sharp": "0.35.5",
-    "@biztrackbd/media": "workspace:*"
+    "sharp": "0.35.5"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
