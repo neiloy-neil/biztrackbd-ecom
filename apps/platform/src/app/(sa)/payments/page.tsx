@@ -36,7 +36,7 @@ function providerColor(p: string): { bg: string; name: string } {
   if (upper.includes("BKASH")) return { bg: "#E2136E", name: "bKash" };
   if (upper.includes("NAGAD")) return { bg: "#F6921E", name: "Nagad" };
   if (upper.includes("ROCKET")) return { bg: "#8C5A3C", name: "Rocket" };
-  return { bg: "#1A1A4E", name: p };
+  return { bg: "var(--ink)", name: p };
 }
 
 export default async function Payments({
@@ -64,11 +64,11 @@ export default async function Payments({
       {/* Page Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, flexGrow: 1 }}>Payment approvals</h1>
-        <div style={{ fontSize: 13.5, color: "#4B4B73" }}>Target: approve within 4 working hours</div>
+        <div style={{ fontSize: 13.5, color: "var(--ink-2)" }}>Target: approve within 4 working hours</div>
       </div>
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 28, borderBottom: "1px solid #E7E7F0", overflowX: "auto" }}>
+      <div style={{ display: "flex", gap: 28, borderBottom: "1px solid var(--line)", overflowX: "auto" }}>
         {TABS.map((t) => {
           const active = t.id === tab;
           return (
@@ -77,11 +77,11 @@ export default async function Payments({
               href={`/payments?tab=${t.id}`}
               style={{
                 padding: "6px 0 12px",
-                borderBottom: active ? "2.5px solid #5B4FE8" : "2.5px solid transparent",
+                borderBottom: active ? "2.5px solid var(--brand)" : "2.5px solid transparent",
                 marginBottom: -1,
                 fontSize: 14,
                 fontWeight: active ? 700 : 600,
-                color: active ? "#1A1A4E" : "#6B6B8D",
+                color: active ? "var(--ink)" : "var(--ink-3)",
                 textDecoration: "none",
                 display: "flex",
                 alignItems: "center",
@@ -98,8 +98,8 @@ export default async function Payments({
                     borderRadius: 10,
                     fontSize: 12,
                     fontWeight: 700,
-                    background: active ? "#E9E7FD" : "#EFEFF6",
-                    color: active ? "#5B4FE8" : "#4B4B73",
+                    background: active ? "var(--brand-light)" : "var(--chip)",
+                    color: active ? "var(--brand)" : "var(--ink-2)",
                   }}
                 >
                   {pendingCount}
@@ -120,7 +120,7 @@ export default async function Payments({
 
       {/* Master-Detail 2-Pane Desk */}
       {rows.length === 0 ? (
-        <div className="card empty" style={{ padding: 40, textAlign: "center", color: "#6B6B8D" }} data-testid="payments-empty">
+        <div className="card empty" style={{ padding: 40, textAlign: "center", color: "var(--ink-3)" }} data-testid="payments-empty">
           {tab === "PENDING" ? "No payments waiting for approval. Queue is clear." : "No payments match this status."}
         </div>
       ) : (
@@ -131,7 +131,7 @@ export default async function Payments({
               flex: "1 1 380px",
               minWidth: 0,
               background: "#fff",
-              border: "1px solid #E7E7F0",
+              border: "1px solid var(--line)",
               borderRadius: 12,
               overflow: "hidden",
             }}
@@ -151,11 +151,11 @@ export default async function Payments({
                     gap: 12,
                     padding: "0 20px",
                     height: 72,
-                    borderBottom: "1px solid #F0F0F6",
-                    background: isSel ? "#F4F3FF" : "#fff",
-                    borderLeft: isSel ? "3px solid #5B4FE8" : "3px solid transparent",
+                    borderBottom: "1px solid var(--chip)",
+                    background: isSel ? "var(--tint)" : "#fff",
+                    borderLeft: isSel ? "3px solid var(--brand)" : "3px solid transparent",
                     textDecoration: "none",
-                    color: "#1A1A4E",
+                    color: "var(--ink)",
                   }}
                   prefetch={false}
                 >
@@ -180,7 +180,7 @@ export default async function Payments({
                     <div style={{ fontSize: 14, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {p.storeName}
                     </div>
-                    <div style={{ fontSize: 12.5, color: "#4B4B73", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <div style={{ fontSize: 12.5, color: "var(--ink-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {p.plan} · {p.trxId}
                     </div>
                   </div>
@@ -188,7 +188,7 @@ export default async function Payments({
                     <div style={{ fontSize: 14, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
                       {taka(p.amount)}
                     </div>
-                    <div style={{ fontSize: 12, color: age.isLate ? "#B91C1C" : "#4B4B73", fontWeight: 600 }}>
+                    <div style={{ fontSize: 12, color: age.isLate ? "#B91C1C" : "var(--ink-2)", fontWeight: 600 }}>
                       {age.text}
                     </div>
                   </div>
@@ -204,7 +204,7 @@ export default async function Payments({
                 flex: "1.3 1 480px",
                 minWidth: 0,
                 background: "#fff",
-                border: "1px solid #E7E7F0",
+                border: "1px solid var(--line)",
                 borderRadius: 12,
                 padding: 24,
                 display: "flex",
@@ -217,11 +217,11 @@ export default async function Payments({
               <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
                 <div style={{ flexGrow: 1 }}>
                   <div style={{ fontSize: 18, fontWeight: 700 }}>
-                    <Link href={`/tenants/${selected.tenantId}`} style={{ color: "#1A1A4E", textDecoration: "none", display: "inline-flex", alignItems: "center", minHeight: 40 }} prefetch={false}>
+                    <Link href={`/tenants/${selected.tenantId}`} style={{ color: "var(--ink)", textDecoration: "none", display: "inline-flex", alignItems: "center", minHeight: 40 }} prefetch={false}>
                       {selected.storeName}
                     </Link>
                   </div>
-                  <div style={{ fontSize: 13, color: "#4B4B73", marginTop: 2 }}>
+                  <div style={{ fontSize: 13, color: "var(--ink-2)", marginTop: 2 }}>
                     {selected.plan} plan ({selected.interval.toLowerCase()}) · Submitted {dateTime(selected.createdAt)} · {selected.subdomain}
                   </div>
                 </div>
@@ -241,20 +241,20 @@ export default async function Payments({
 
               {/* 3 Metric Summary Boxes */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12 }}>
-                <div style={{ background: "#FAFAFC", border: "1px solid #E7E7F0", borderRadius: 10, padding: "14px 16px" }}>
-                  <div style={{ fontSize: 12, color: "#6B6B8D", fontWeight: 600 }}>Amount claimed</div>
+                <div style={{ background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 10, padding: "14px 16px" }}>
+                  <div style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>Amount claimed</div>
                   <div style={{ fontSize: 20, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }} data-testid="amount">
                     {taka(selected.amount)}
                   </div>
                 </div>
-                <div style={{ background: "#FAFAFC", border: "1px solid #E7E7F0", borderRadius: 10, padding: "14px 16px" }}>
-                  <div style={{ fontSize: 12, color: "#6B6B8D", fontWeight: 600 }}>Method</div>
+                <div style={{ background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 10, padding: "14px 16px" }}>
+                  <div style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>Method</div>
                   <div style={{ fontSize: 16, fontWeight: 700, marginTop: 6 }}>
                     {providerColor(selected.provider).name}
                   </div>
                 </div>
-                <div style={{ background: "#FAFAFC", border: "1px solid #E7E7F0", borderRadius: 10, padding: "14px 16px" }}>
-                  <div style={{ fontSize: 12, color: "#6B6B8D", fontWeight: 600 }}>TrxID</div>
+                <div style={{ background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 10, padding: "14px 16px" }}>
+                  <div style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>TrxID</div>
                   <div style={{ fontSize: 16, fontWeight: 700, marginTop: 6, fontVariantNumeric: "tabular-nums" }} data-testid="trx">
                     {selected.trxId}
                   </div>
@@ -271,7 +271,7 @@ export default async function Payments({
                       height: 220,
                       borderRadius: 12,
                       background: selected.provider === "NAGAD" ? "#FFF8F2" : "#FFF5FA",
-                      border: "1px solid #E7E7F0",
+                      border: "1px solid var(--line)",
                       padding: 18,
                       boxSizing: "border-box",
                     }}
@@ -279,11 +279,11 @@ export default async function Payments({
                     <div style={{ fontSize: 12, color: selected.provider === "NAGAD" ? "#8F3C06" : "#8A1038", fontWeight: 800 }}>
                       {providerColor(selected.provider).name}
                     </div>
-                    <div style={{ fontSize: 12, color: "#4B4B73", marginTop: 8 }}>Send Money successful</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-2)", marginTop: 8 }}>Send Money successful</div>
                     <div style={{ fontSize: 24, fontWeight: 700, margin: "6px 0", fontVariantNumeric: "tabular-nums" }}>
                       {taka(selected.amount)}.00
                     </div>
-                    <div style={{ fontSize: 11.5, color: "#4B4B73", lineHeight: 1.7 }}>
+                    <div style={{ fontSize: 11.5, color: "var(--ink-2)", lineHeight: 1.7 }}>
                       Sender: {prettyPhone(selected.senderNumber)}<br />
                       TrxID: <code>{selected.trxId}</code><br />
                       {dateTime(selected.createdAt)}
@@ -344,11 +344,11 @@ export default async function Payments({
                         height: 40,
                         width: "100%",
                         boxSizing: "border-box",
-                        border: "1px solid #D5D5E4",
+                        border: "1px solid var(--line-2)",
                         borderRadius: 8,
                         padding: "0 12px",
                         fontSize: 14,
-                        color: "#1A1A4E",
+                        color: "var(--ink)",
                       }}
                     />
                   </div>

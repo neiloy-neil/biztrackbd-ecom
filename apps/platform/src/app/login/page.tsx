@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AuthBrand } from "@/components/auth-brand";
 import { redirect } from "next/navigation";
 import { authMode, safeNext } from "@/lib/auth";
 import { one } from "@/lib/query";
@@ -24,6 +25,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<Re
   const note = NOTES[one(sp.err) ?? ""];
   return (
     <div className="card" style={{ margin: "64px auto", maxWidth: 420 }}>
+      <AuthBrand />
       <h1 style={{ marginTop: 0 }}>Platform sign in</h1>
       <p className="muted">BizTrackBD team only. Two-factor sign-in is required.</p>
       {note && <div className="notice" role="note" style={{ marginBottom: 12 }}>{note}</div>}

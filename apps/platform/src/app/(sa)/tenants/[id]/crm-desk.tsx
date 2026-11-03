@@ -82,7 +82,7 @@ export function TenantCrmDesk({
     <div
       style={{
         background: "#fff",
-        border: "1px solid #E7E7F0",
+        border: "1px solid var(--line)",
         borderRadius: 12,
         padding: "20px 24px",
       }}
@@ -98,11 +98,11 @@ export function TenantCrmDesk({
           gap: 12,
           marginBottom: 16,
           paddingBottom: 14,
-          borderBottom: "1px solid #F1F5F9",
+          borderBottom: "1px solid var(--chip)",
         }}
       >
         <div>
-          <div style={{ fontSize: 16, fontWeight: 700, color: "#1A1A4E", display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ fontSize: 16, fontWeight: 700, color: "var(--ink)", display: "flex", alignItems: "center", gap: 8 }}>
             <span>Merchant Outreach & CRM Desk</span>
             <span
               style={{
@@ -110,14 +110,14 @@ export function TenantCrmDesk({
                 fontWeight: 600,
                 padding: "2px 8px",
                 borderRadius: 6,
-                background: "#EEF2FF",
-                color: "#4338CA",
+                background: "var(--brand-light)",
+                color: "var(--brand-hover)",
               }}
             >
               BD Sales Hub
             </span>
           </div>
-          <div style={{ fontSize: 12.5, color: "#6B6B8D", marginTop: 2 }}>
+          <div style={{ fontSize: 12.5, color: "var(--ink-3)", marginTop: 2 }}>
             Instant WhatsApp greetings, phone logs, and lead pipeline progression.
           </div>
         </div>
@@ -141,8 +141,8 @@ export function TenantCrmDesk({
       {/* Follow-up Scheduler Row */}
       <div
         style={{
-          background: "#F8FAFC",
-          border: "1px solid #E2E8F0",
+          background: "var(--bg)",
+          border: "1px solid var(--line)",
           borderRadius: 8,
           padding: "10px 14px",
           display: "flex",
@@ -156,10 +156,10 @@ export function TenantCrmDesk({
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontSize: 16 }}>⏰</span>
           <div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: "#334155" }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-2)" }}>
               Next Follow-up Reminder:
             </div>
-            <div style={{ fontSize: 11.5, color: "#64748B" }}>
+            <div style={{ fontSize: 11.5, color: "var(--ink-3)" }}>
               {leadNextFollowUpAt
                 ? `Scheduled for: ${new Date(leadNextFollowUpAt).toLocaleString("en-GB")}`
                 : "No follow-up scheduled yet"}
@@ -175,9 +175,9 @@ export function TenantCrmDesk({
             style={{
               padding: "5px 8px",
               borderRadius: 6,
-              border: "1px solid #CBD5E1",
+              border: "1px solid var(--line-2)",
               fontSize: 12,
-              color: "#334155",
+              color: "var(--ink-2)",
             }}
           />
           <button
@@ -187,7 +187,7 @@ export function TenantCrmDesk({
             style={{
               padding: "5px 12px",
               borderRadius: 6,
-              background: "#4F46E5",
+              background: "var(--brand)",
               color: "#fff",
               border: "none",
               fontSize: 12,
@@ -210,8 +210,8 @@ export function TenantCrmDesk({
                 padding: "5px 8px",
                 borderRadius: 6,
                 background: "transparent",
-                color: "#64748B",
-                border: "1px solid #CBD5E1",
+                color: "var(--ink-3)",
+                border: "1px solid var(--line-2)",
                 fontSize: 12,
                 cursor: "pointer",
               }}
@@ -224,7 +224,7 @@ export function TenantCrmDesk({
 
       {/* Activity Timeline */}
       <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 13.5, fontWeight: 700, color: "#1A1A4E", marginBottom: 10 }}>
+        <div style={{ fontSize: 13.5, fontWeight: 700, color: "var(--ink)", marginBottom: 10 }}>
           Outreach & Communication History ({activities.length})
         </div>
 
@@ -233,11 +233,11 @@ export function TenantCrmDesk({
             style={{
               padding: 24,
               textAlign: "center",
-              background: "#FAFAFC",
-              border: "1px dashed #E2E8F0",
+              background: "var(--bg)",
+              border: "1px dashed var(--line)",
               borderRadius: 8,
               fontSize: 13,
-              color: "#64748B",
+              color: "var(--ink-3)",
             }}
           >
             No outreach logged yet. Click the green WhatsApp button above to send a greeting or log a call.
@@ -251,8 +251,8 @@ export function TenantCrmDesk({
               const isFollowUp = act.type === "FOLLOW_UP_SCHEDULED";
 
               const icon = isWa ? "💬" : isCall ? "📞" : isStage ? "🏷️" : isFollowUp ? "⏰" : "📝";
-              const badgeBg = isWa ? "#F0FDF4" : isCall ? "#EFF6FF" : isStage ? "#FEF3C7" : "#F8FAFC";
-              const badgeBorder = isWa ? "#DCFCE7" : isCall ? "#DBEAFE" : isStage ? "#FDE68A" : "#E2E8F0";
+              const badgeBg = isWa ? "#F0FDF4" : isCall ? "#EFF6FF" : isStage ? "#FEF3C7" : "var(--bg)";
+              const badgeBorder = isWa ? "#DCFCE7" : isCall ? "#DBEAFE" : isStage ? "#FDE68A" : "var(--line)";
 
               return (
                 <div
@@ -274,12 +274,12 @@ export function TenantCrmDesk({
                       <span style={{ fontWeight: 700, color: "#1E293B" }}>
                         {isWa ? "WhatsApp Message Sent" : isCall ? "Phone Call" : isStage ? "Pipeline Stage Updated" : isFollowUp ? "Follow-up Scheduled" : "CRM Note"}
                         {act.outcome && (
-                          <span style={{ marginLeft: 6, fontWeight: 600, color: "#475569", fontSize: 11.5 }}>
+                          <span style={{ marginLeft: 6, fontWeight: 600, color: "var(--ink-2)", fontSize: 11.5 }}>
                             ({act.outcome})
                           </span>
                         )}
                       </span>
-                      <span style={{ fontSize: 11, color: "#64748B", whiteSpace: "nowrap" }}>
+                      <span style={{ fontSize: 11, color: "var(--ink-3)", whiteSpace: "nowrap" }}>
                         {new Date(act.createdAt).toLocaleString("en-GB", {
                           day: "numeric",
                           month: "short",
@@ -289,7 +289,7 @@ export function TenantCrmDesk({
                       </span>
                     </div>
                     {act.notes && (
-                      <div style={{ color: "#334155", marginTop: 4, lineHeight: 1.4 }}>
+                      <div style={{ color: "var(--ink-2)", marginTop: 4, lineHeight: 1.4 }}>
                         {act.notes}
                       </div>
                     )}
@@ -308,8 +308,8 @@ export function TenantCrmDesk({
       <form
         onSubmit={handleAddManualLog}
         style={{
-          background: "#FAFAFC",
-          border: "1px solid #E2E8F0",
+          background: "var(--bg)",
+          border: "1px solid var(--line)",
           borderRadius: 8,
           padding: "12px 14px",
           display: "flex",
@@ -317,7 +317,7 @@ export function TenantCrmDesk({
           gap: 8,
         }}
       >
-        <div style={{ fontSize: 12, fontWeight: 700, color: "#334155" }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-2)" }}>
           Log an Interaction or Call Note:
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -327,7 +327,7 @@ export function TenantCrmDesk({
             style={{
               padding: "5px 8px",
               borderRadius: 6,
-              border: "1px solid #CBD5E1",
+              border: "1px solid var(--line-2)",
               fontSize: 12,
               background: "#fff",
             }}
@@ -343,7 +343,7 @@ export function TenantCrmDesk({
             style={{
               padding: "5px 8px",
               borderRadius: 6,
-              border: "1px solid #CBD5E1",
+              border: "1px solid var(--line-2)",
               fontSize: 12,
               background: "#fff",
             }}
@@ -367,7 +367,7 @@ export function TenantCrmDesk({
             boxSizing: "border-box",
             padding: "8px 10px",
             borderRadius: 6,
-            border: "1px solid #CBD5E1",
+            border: "1px solid var(--line-2)",
             fontSize: 12.5,
             fontFamily: "inherit",
             resize: "vertical",

@@ -181,9 +181,9 @@ export function AnalyticsFilterBar({
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 6,
-                  background: "#EFF6FF",
-                  border: "1px solid #BFDBFE",
-                  color: "#1E40AF",
+                  background: "var(--brand-light)",
+                  border: "1px solid var(--line-2)",
+                  color: "var(--brand-hover)",
                   borderRadius: 16,
                   padding: "2px 10px",
                   fontSize: 11.5,
@@ -194,7 +194,7 @@ export function AnalyticsFilterBar({
                 <button
                   type="button"
                   onClick={() => updateParam({ campaign: null })}
-                  style={{ border: "none", background: "none", cursor: "pointer", color: "#1E40AF", fontWeight: 800, padding: 0 }}
+                  style={{ border: "none", background: "none", cursor: "pointer", color: "var(--brand-hover)", fontWeight: 800, padding: 0 }}
                   title="Remove campaign filter"
                 >
                   ✕

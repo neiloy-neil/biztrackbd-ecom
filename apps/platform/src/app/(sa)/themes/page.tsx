@@ -30,7 +30,7 @@ export const metadata: Metadata = { title: "Themes and modules" };
 const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
   PUBLISHED: { bg: "#E8F6EE", color: "#15803D", label: "Live" },
   DRAFT: { bg: "#FEF3E2", color: "#92400E", label: "Draft" },
-  ARCHIVED: { bg: "#EFEFF6", color: "#5B5B7B", label: "Hidden" },
+  ARCHIVED: { bg: "var(--chip)", color: "#5B5B7B", label: "Hidden" },
 };
 
 export default async function ThemesPage({

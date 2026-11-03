@@ -59,14 +59,14 @@ export default async function PlansPage({
       {one(sp.err) && <div className="notice bad" role="alert">{one(sp.err)}</div>}
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 10, borderBottom: "1px solid #E7E7F0", paddingBottom: 2 }}>
+      <div style={{ display: "flex", gap: 10, borderBottom: "1px solid var(--line)", paddingBottom: 2 }}>
         <Link
           href="/plans?tab=plans"
           prefetch={false}
           style={{
             padding: "8px 16px",
-            borderBottom: tab === "plans" ? "3px solid #5B4FE8" : "3px solid transparent",
-            color: tab === "plans" ? "#5B4FE8" : "#4B4B73",
+            borderBottom: tab === "plans" ? "3px solid var(--brand)" : "3px solid transparent",
+            color: tab === "plans" ? "var(--brand)" : "var(--ink-2)",
             fontWeight: 700,
             fontSize: 14,
             textDecoration: "none",
@@ -79,8 +79,8 @@ export default async function PlansPage({
           prefetch={false}
           style={{
             padding: "8px 16px",
-            borderBottom: tab === "promos" ? "3px solid #5B4FE8" : "3px solid transparent",
-            color: tab === "promos" ? "#5B4FE8" : "#4B4B73",
+            borderBottom: tab === "promos" ? "3px solid var(--brand)" : "3px solid transparent",
+            color: tab === "promos" ? "var(--brand)" : "var(--ink-2)",
             fontWeight: 700,
             fontSize: 14,
             textDecoration: "none",
@@ -197,7 +197,7 @@ export default async function PlansPage({
                 </div>
 
                 {promos.length === 0 ? (
-                  <div style={{ padding: 24, color: "#6B6B8D", fontSize: 13.5 }}>
+                  <div style={{ padding: 24, color: "var(--ink-3)", fontSize: 13.5 }}>
                     No subscription promo codes created yet.
                   </div>
                 ) : (
@@ -215,7 +215,7 @@ export default async function PlansPage({
                       }}
                     >
                       <div>
-                        <div style={{ fontWeight: 700, fontFamily: "monospace", fontSize: 14.5, color: "#5B4FE8" }}>
+                        <div style={{ fontWeight: 700, fontFamily: "monospace", fontSize: 14.5, color: "var(--brand)" }}>
                           {pr.code}
                         </div>
                         <div style={{ fontSize: 11.5, color: "var(--ink-3)" }}>

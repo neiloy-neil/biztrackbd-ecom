@@ -24,9 +24,9 @@ export interface OutreachActionsProps {
 }
 
 const STAGE_CONFIG: Record<TenantLeadStage, { label: string; bg: string; color: string; border: string }> = {
-  NEW: { label: "New Lead", bg: "#EEF2FF", color: "#4338CA", border: "#C7D2FE" },
+  NEW: { label: "New Lead", bg: "var(--brand-light)", color: "var(--brand-hover)", border: "var(--line-2)" },
   CONTACTED: { label: "Contacted", bg: "#FEF3C7", color: "#B45309", border: "#FDE68A" },
-  DEMO_IN_PROGRESS: { label: "Demo / Discussing", bg: "#F3E8FF", color: "#6D28D9", border: "#E9D5FF" },
+  DEMO_IN_PROGRESS: { label: "Demo / Discussing", bg: "var(--brand-light)", color: "var(--brand)", border: "var(--line-2)" },
   HOT_LEAD: { label: "Hot Lead 🔥", bg: "#FFEDD5", color: "#C2410C", border: "#FED7AA" },
   CONVERTED: { label: "Converted 🎉", bg: "#D1FAE5", color: "#047857", border: "#A7F3D0" },
   LOST: { label: "Lost / Closed", bg: "#F3F4F6", color: "#4B5563", border: "#E5E7EB" },
@@ -347,7 +347,7 @@ export function TenantOutreachActions({
               width: 520,
               maxWidth: "100%",
               boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)",
-              border: "1px solid #E2E8F0",
+              border: "1px solid var(--line)",
               overflow: "hidden",
             }}
             onClick={(e) => e.stopPropagation()}
@@ -356,11 +356,11 @@ export function TenantOutreachActions({
             <div
               style={{
                 padding: "14px 18px",
-                borderBottom: "1px solid #F1F5F9",
+                borderBottom: "1px solid var(--chip)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                background: "#F8FAFC",
+                background: "var(--bg)",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -381,10 +381,10 @@ export function TenantOutreachActions({
                   </svg>
                 </span>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#0F172A" }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>
                     WhatsApp {tenantName}
                   </div>
-                  <div style={{ fontSize: 11.5, color: "#64748B" }}>
+                  <div style={{ fontSize: 11.5, color: "var(--ink-3)" }}>
                     To: {ownerName || "Merchant"} ({phoneInfo.clean})
                   </div>
                 </div>
@@ -396,7 +396,7 @@ export function TenantOutreachActions({
                   background: "transparent",
                   border: "none",
                   fontSize: 18,
-                  color: "#64748B",
+                  color: "var(--ink-3)",
                   cursor: "pointer",
                   lineHeight: 1,
                 }}
@@ -406,8 +406,8 @@ export function TenantOutreachActions({
             </div>
 
             {/* Template Selector Pills */}
-            <div style={{ padding: "12px 18px", borderBottom: "1px solid #F1F5F9" }}>
-              <div style={{ fontSize: 11.5, fontWeight: 700, color: "#64748B", marginBottom: 8 }}>
+            <div style={{ padding: "12px 18px", borderBottom: "1px solid var(--chip)" }}>
+              <div style={{ fontSize: 11.5, fontWeight: 700, color: "var(--ink-3)", marginBottom: 8 }}>
                 SELECT OUTREACH TEMPLATE:
               </div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -421,9 +421,9 @@ export function TenantOutreachActions({
                       style={{
                         padding: "4px 10px",
                         borderRadius: 6,
-                        border: isSelected ? "1.5px solid #25D366" : "1px solid #E2E8F0",
+                        border: isSelected ? "1.5px solid #25D366" : "1px solid var(--line)",
                         background: isSelected ? "#F0FDF4" : "#fff",
-                        color: isSelected ? "#15803D" : "#334155",
+                        color: isSelected ? "#15803D" : "var(--ink-2)",
                         fontSize: 12,
                         fontWeight: isSelected ? 700 : 500,
                         cursor: "pointer",
@@ -438,7 +438,7 @@ export function TenantOutreachActions({
 
             {/* Message Preview Textarea */}
             <div style={{ padding: "14px 18px" }}>
-              <div style={{ fontSize: 11.5, fontWeight: 700, color: "#64748B", marginBottom: 6 }}>
+              <div style={{ fontSize: 11.5, fontWeight: 700, color: "var(--ink-3)", marginBottom: 6 }}>
                 MESSAGE PREVIEW (EDITABLE):
               </div>
               <textarea
@@ -449,7 +449,7 @@ export function TenantOutreachActions({
                   width: "100%",
                   boxSizing: "border-box",
                   borderRadius: 8,
-                  border: "1px solid #CBD5E1",
+                  border: "1px solid var(--line-2)",
                   padding: "10px 12px",
                   fontSize: 13,
                   lineHeight: 1.5,
@@ -464,14 +464,14 @@ export function TenantOutreachActions({
             <div
               style={{
                 padding: "12px 18px",
-                background: "#F8FAFC",
-                borderTop: "1px solid #F1F5F9",
+                background: "var(--bg)",
+                borderTop: "1px solid var(--chip)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
               }}
             >
-              <div style={{ fontSize: 11.5, color: "#64748B" }}>
+              <div style={{ fontSize: 11.5, color: "var(--ink-3)" }}>
                 Auto-advances to <strong>Contacted</strong>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
@@ -481,9 +481,9 @@ export function TenantOutreachActions({
                   style={{
                     padding: "7px 12px",
                     borderRadius: 6,
-                    border: "1px solid #CBD5E1",
+                    border: "1px solid var(--line-2)",
                     background: "#fff",
-                    color: "#475569",
+                    color: "var(--ink-2)",
                     fontSize: 13,
                     fontWeight: 600,
                     cursor: "pointer",
@@ -541,7 +541,7 @@ export function TenantOutreachActions({
               width: 420,
               maxWidth: "100%",
               boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)",
-              border: "1px solid #E2E8F0",
+              border: "1px solid var(--line)",
               overflow: "hidden",
             }}
             onClick={(e) => e.stopPropagation()}
@@ -549,32 +549,32 @@ export function TenantOutreachActions({
             <div
               style={{
                 padding: "14px 18px",
-                borderBottom: "1px solid #F1F5F9",
-                background: "#F8FAFC",
+                borderBottom: "1px solid var(--chip)",
+                background: "var(--bg)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
               }}
             >
               <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#0F172A" }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>
                   Call Logged: {tenantName}
                 </div>
-                <div style={{ fontSize: 11.5, color: "#64748B" }}>
+                <div style={{ fontSize: 11.5, color: "var(--ink-3)" }}>
                   Dialed: +{phoneInfo.international} ({ownerName || "Merchant"})
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowCallModal(false)}
-                style={{ background: "transparent", border: "none", fontSize: 18, color: "#64748B", cursor: "pointer" }}
+                style={{ background: "transparent", border: "none", fontSize: 18, color: "var(--ink-3)", cursor: "pointer" }}
               >
                 ✕
               </button>
             </div>
 
             <div style={{ padding: "16px 18px" }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 8 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-2)", marginBottom: 8 }}>
                 HOW DID THE CALL GO?
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -594,38 +594,38 @@ export function TenantOutreachActions({
                       alignItems: "flex-start",
                       padding: "8px 12px",
                       borderRadius: 8,
-                      border: "1px solid #E2E8F0",
+                      border: "1px solid var(--line)",
                       background: "#fff",
                       cursor: "pointer",
                       textAlign: "left",
                       transition: "background 0.1s, border-color 0.1s",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "#F8FAFC";
+                      e.currentTarget.style.background = "var(--bg)";
                       e.currentTarget.style.borderColor = "#94A3B8";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.background = "#fff";
-                      e.currentTarget.style.borderColor = "#E2E8F0";
+                      e.currentTarget.style.borderColor = "var(--line)";
                     }}
                   >
-                    <span style={{ fontSize: 12.5, fontWeight: 700, color: "#0F172A" }}>{item.label}</span>
-                    <span style={{ fontSize: 11, color: "#64748B" }}>{item.desc}</span>
+                    <span style={{ fontSize: 12.5, fontWeight: 700, color: "var(--ink)" }}>{item.label}</span>
+                    <span style={{ fontSize: 11, color: "var(--ink-3)" }}>{item.desc}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div style={{ padding: "10px 18px", background: "#F8FAFC", borderTop: "1px solid #F1F5F9", textAlign: "right" }}>
+            <div style={{ padding: "10px 18px", background: "var(--bg)", borderTop: "1px solid var(--chip)", textAlign: "right" }}>
               <button
                 type="button"
                 onClick={() => setShowCallModal(false)}
                 style={{
                   padding: "5px 12px",
                   borderRadius: 6,
-                  border: "1px solid #CBD5E1",
+                  border: "1px solid var(--line-2)",
                   background: "#fff",
-                  color: "#475569",
+                  color: "var(--ink-2)",
                   fontSize: 12,
                   fontWeight: 600,
                   cursor: "pointer",

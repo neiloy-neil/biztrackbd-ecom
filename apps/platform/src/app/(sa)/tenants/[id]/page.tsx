@@ -93,8 +93,8 @@ export default async function TenantDetail({
     ? "Active"
     : ACCESS_LABELS[a.state];
 
-  const statusBg = isSuspended ? "#FCEBEB" : isOverdue ? "#FDF3E3" : isTrial ? "#E9E7FD" : "#E8F6EE";
-  const statusColor = isSuspended ? "#DC2626" : isOverdue ? "#B45309" : isTrial ? "#5B4FE8" : "#15803D";
+  const statusBg = isSuspended ? "#FCEBEB" : isOverdue ? "#FDF3E3" : isTrial ? "var(--brand-light)" : "#E8F6EE";
+  const statusColor = isSuspended ? "#DC2626" : isOverdue ? "#B45309" : isTrial ? "var(--brand)" : "#15803D";
 
   // Limits calculations for meters
   const pLimit = t.planLimits?.products ?? 2000;
@@ -114,8 +114,8 @@ export default async function TenantDetail({
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {/* Back button */}
       <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600 }}>
-        <Link href="/tenants" style={{ display: "flex", alignItems: "center", gap: 6, color: "#4B4B73", textDecoration: "none" }} prefetch={false}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B8D" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <Link href="/tenants" style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--ink-2)", textDecoration: "none" }} prefetch={false}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#55706A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M15 6l-6 6 6 6" />
           </svg>
           Tenants
@@ -166,8 +166,8 @@ export default async function TenantDetail({
               style={{
                 padding: "3px 10px",
                 borderRadius: 11,
-                background: t.siteMode === "PORTFOLIO" ? "#EDE9FE" : t.siteMode === "HYBRID" ? "#FEF9C3" : "#F1F5F9",
-                color: t.siteMode === "PORTFOLIO" ? "#6D28D9" : t.siteMode === "HYBRID" ? "#854D0E" : "#334155",
+                background: t.siteMode === "PORTFOLIO" ? "var(--brand-light)" : t.siteMode === "HYBRID" ? "#FEF9C3" : "var(--chip)",
+                color: t.siteMode === "PORTFOLIO" ? "var(--brand)" : t.siteMode === "HYBRID" ? "#854D0E" : "var(--ink-2)",
                 fontSize: 12,
                 fontWeight: 700,
               }}
@@ -179,11 +179,11 @@ export default async function TenantDetail({
                 style={{
                   padding: "3px 10px",
                   borderRadius: 11,
-                  background: "#F8FAFC",
-                  color: "#475569",
+                  background: "var(--bg)",
+                  color: "var(--ink-2)",
                   fontSize: 12,
                   fontWeight: 600,
-                  border: "1px solid #E2E8F0",
+                  border: "1px solid var(--line)",
                 }}
               >
                 {t.businessVertical.replace("_", " ")}
@@ -191,7 +191,7 @@ export default async function TenantDetail({
             )}
             {t.quarantined && <span style={{ padding: "3px 10px", borderRadius: 11, background: "#FDF3E3", color: "#B45309", fontSize: 12, fontWeight: 600 }}>Flagged for review</span>}
           </div>
-          <div style={{ fontSize: 13, color: "#4B4B73", marginTop: 3 }}>
+          <div style={{ fontSize: 13, color: "var(--ink-2)", marginTop: 3 }}>
             {t.subdomain}.biztrack.bd · Owner {t.ownerName ?? "Unknown"} ({t.ownerEmail ?? "no email"}{t.ownerPhone ? ` · 📞 ${t.ownerPhone}` : ""}) · Joined {dateOnly(t.createdAt)}
           </div>
         </div>
@@ -203,15 +203,15 @@ export default async function TenantDetail({
             style={{
               height: 38,
               padding: "0 14px",
-              border: "1px solid #C7D2FE",
+              border: "1px solid var(--line-2)",
               borderRadius: 8,
-              background: "#EEF2FF",
+              background: "var(--brand-light)",
               fontSize: 13,
               fontWeight: 700,
               display: "flex",
               alignItems: "center",
               gap: 6,
-              color: "#4338CA",
+              color: "var(--brand-hover)",
               textDecoration: "none",
             }}
             prefetch={false}
@@ -225,7 +225,7 @@ export default async function TenantDetail({
             style={{
               height: 38,
               padding: "0 16px",
-              border: "1px solid #D5D5E4",
+              border: "1px solid var(--line-2)",
               borderRadius: 8,
               background: "#fff",
               fontSize: 14,
@@ -233,11 +233,11 @@ export default async function TenantDetail({
               display: "flex",
               alignItems: "center",
               gap: 8,
-              color: "#1A1A4E",
+              color: "var(--ink)",
               textDecoration: "none",
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4B4B73" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3D5A52" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" />
             </svg>
             Open store
@@ -246,7 +246,7 @@ export default async function TenantDetail({
           <form action={impersonateAction.bind(null, t.id)} style={{ margin: 0 }}>
             <SubmitButton
               className="btn btn-primary"
-              style={{ height: 38, padding: "0 16px", borderRadius: 8, background: "#5B4FE8", color: "#fff", fontSize: 14, fontWeight: 700 }}
+              style={{ height: 38, padding: "0 16px", borderRadius: 8, background: "var(--brand)", color: "#fff", fontSize: 14, fontWeight: 700 }}
               pending="Signing in…"
               data-testid="impersonate-btn"
             >
@@ -264,7 +264,7 @@ export default async function TenantDetail({
             ) : (
               <form action={suspendAction.bind(null, t.id)} style={{ margin: 0 }}>
                 <label className="sr-only" htmlFor="suspend-reason">Reason</label>
-                <input id="suspend-reason" name="reason" required minLength={5} placeholder="Reason the owner will see" style={{ height: 38, width: 220, border: "1px solid #D5D5E4", borderRadius: 8, padding: "0 12px", fontSize: 13.5, color: "#1A1A4E", marginRight: 8 }} />
+                <input id="suspend-reason" name="reason" required minLength={5} placeholder="Reason the owner will see" style={{ height: 38, width: 220, border: "1px solid var(--line-2)", borderRadius: 8, padding: "0 12px", fontSize: 13.5, color: "var(--ink)", marginRight: 8 }} />
                 <SubmitButton
                   style={{
                     height: 38,
@@ -288,7 +288,7 @@ export default async function TenantDetail({
       </div>
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 28, borderBottom: "1px solid #E7E7F0", overflowX: "auto" }}>
+      <div style={{ display: "flex", gap: 28, borderBottom: "1px solid var(--line)", overflowX: "auto" }}>
         {TABS.map((item) => {
           const active = item.id === tab;
           return (
@@ -297,11 +297,11 @@ export default async function TenantDetail({
               href={`/tenants/${t.id}?tab=${item.id}`}
               style={{
                 padding: "6px 0 12px",
-                borderBottom: active ? "2.5px solid #5B4FE8" : "2.5px solid transparent",
+                borderBottom: active ? "2.5px solid var(--brand)" : "2.5px solid transparent",
                 marginBottom: -1,
                 fontSize: 14,
                 fontWeight: active ? 700 : 600,
-                color: active ? "#1A1A4E" : "#6B6B8D",
+                color: active ? "var(--ink)" : "var(--ink-3)",
                 textDecoration: "none",
                 whiteSpace: "nowrap",
               }}
@@ -317,26 +317,26 @@ export default async function TenantDetail({
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }} data-testid="usage-card">
         {t.siteMode === "PORTFOLIO" ? (
           <>
-            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
-              <div style={{ fontSize: 13, color: "#4B4B73" }}>Inquiries (Total)</div>
+            <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "16px 20px" }}>
+              <div style={{ fontSize: 13, color: "var(--ink-2)" }}>Inquiries (Total)</div>
               <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
                 {t.leadsCount}
               </div>
             </div>
-            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
-              <div style={{ fontSize: 13, color: "#4B4B73" }}>Inquiries (30 days)</div>
+            <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "16px 20px" }}>
+              <div style={{ fontSize: 13, color: "var(--ink-2)" }}>Inquiries (30 days)</div>
               <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums", color: "#15803D" }}>
                 {t.leads30Days}
               </div>
             </div>
-            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
-              <div style={{ fontSize: 13, color: "#4B4B73" }}>Bookings Confirmed</div>
-              <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums", color: "#4338CA" }}>
+            <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "16px 20px" }}>
+              <div style={{ fontSize: 13, color: "var(--ink-2)" }}>Bookings Confirmed</div>
+              <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums", color: "var(--brand-hover)" }}>
                 {t.bookingsConfirmed}
               </div>
             </div>
-            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
-              <div style={{ fontSize: 13, color: "#4B4B73" }}>Content & Services</div>
+            <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "16px 20px" }}>
+              <div style={{ fontSize: 13, color: "var(--ink-2)" }}>Content & Services</div>
               <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
                 {t.usage.products}
               </div>
@@ -344,26 +344,26 @@ export default async function TenantDetail({
           </>
         ) : (
           <>
-            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
-              <div style={{ fontSize: 13, color: "#4B4B73" }}>Orders (30 days)</div>
+            <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "16px 20px" }}>
+              <div style={{ fontSize: 13, color: "var(--ink-2)" }}>Orders (30 days)</div>
               <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
                 {t.usage.orders30Days}
               </div>
             </div>
-            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
-              <div style={{ fontSize: 13, color: "#4B4B73" }}>Sales (GMV)</div>
+            <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "16px 20px" }}>
+              <div style={{ fontSize: 13, color: "var(--ink-2)" }}>Sales (GMV)</div>
               <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
                 {taka(t.usage.gmv30Days)}
               </div>
             </div>
-            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
-              <div style={{ fontSize: 13, color: "#4B4B73" }}>Products</div>
+            <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "16px 20px" }}>
+              <div style={{ fontSize: 13, color: "var(--ink-2)" }}>Products</div>
               <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
                 {t.usage.products}
               </div>
             </div>
-            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "16px 20px" }}>
-              <div style={{ fontSize: 13, color: "#4B4B73" }}>Customers</div>
+            <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "16px 20px" }}>
+              <div style={{ fontSize: 13, color: "var(--ink-2)" }}>Customers</div>
               <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
                 {t.usage.customers}
               </div>
@@ -379,7 +379,7 @@ export default async function TenantDetail({
           {tab === "overview" && (
             <>
               {/* Usage against limits card */}
-              <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
+              <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "20px 24px" }}>
                 <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>
                   Usage against plan limits ({t.tier.charAt(0) + t.tier.slice(1).toLowerCase()})
                 </div>
@@ -387,60 +387,60 @@ export default async function TenantDetail({
                   <div>
                     <div style={{ display: "flex", fontSize: 13, marginBottom: 6 }}>
                       <span style={{ flexGrow: 1, fontWeight: 600 }}>Products</span>
-                      <span style={{ color: "#4B4B73", fontVariantNumeric: "tabular-nums" }}>
+                      <span style={{ color: "var(--ink-2)", fontVariantNumeric: "tabular-nums" }}>
                         {t.usage.products} of {pLimit.toLocaleString()}
                       </span>
                     </div>
-                    <div style={{ height: 6, borderRadius: 3, background: "#E7E7F0" }}>
-                      <div style={{ width: `${pPct}%`, height: 6, borderRadius: 3, background: "#5B4FE8" }} />
+                    <div style={{ height: 6, borderRadius: 3, background: "var(--line)" }}>
+                      <div style={{ width: `${pPct}%`, height: 6, borderRadius: 3, background: "var(--brand)" }} />
                     </div>
                   </div>
 
                   <div>
                     <div style={{ display: "flex", fontSize: 13, marginBottom: 6 }}>
                       <span style={{ flexGrow: 1, fontWeight: 600 }}>Staff accounts</span>
-                      <span style={{ color: "#4B4B73", fontVariantNumeric: "tabular-nums" }}>
+                      <span style={{ color: "var(--ink-2)", fontVariantNumeric: "tabular-nums" }}>
                         {t.usage.staff} of {staffLimit}
                       </span>
                     </div>
-                    <div style={{ height: 6, borderRadius: 3, background: "#E7E7F0" }}>
-                      <div style={{ width: `${staffPct}%`, height: 6, borderRadius: 3, background: "#5B4FE8" }} />
+                    <div style={{ height: 6, borderRadius: 3, background: "var(--line)" }}>
+                      <div style={{ width: `${staffPct}%`, height: 6, borderRadius: 3, background: "var(--brand)" }} />
                     </div>
                   </div>
 
                   <div>
                     <div style={{ display: "flex", fontSize: 13, marginBottom: 6 }}>
                       <span style={{ flexGrow: 1, fontWeight: 600 }}>SMS credits this month</span>
-                      <span style={{ color: "#4B4B73", fontVariantNumeric: "tabular-nums" }}>
+                      <span style={{ color: "var(--ink-2)", fontVariantNumeric: "tabular-nums" }}>
                         {t.usage.smsUsed} of {smsLimit.toLocaleString()}
                       </span>
                     </div>
-                    <div style={{ height: 6, borderRadius: 3, background: "#E7E7F0" }}>
-                      <div style={{ width: `${smsPct}%`, height: 6, borderRadius: 3, background: smsPct > 80 ? "#B45309" : "#5B4FE8" }} />
+                    <div style={{ height: 6, borderRadius: 3, background: "var(--line)" }}>
+                      <div style={{ width: `${smsPct}%`, height: 6, borderRadius: 3, background: smsPct > 80 ? "#B45309" : "var(--brand)" }} />
                     </div>
                   </div>
 
                   <div>
                     <div style={{ display: "flex", fontSize: 13, marginBottom: 6 }}>
                       <span style={{ flexGrow: 1, fontWeight: 600 }}>Storage</span>
-                      <span style={{ color: "#4B4B73", fontVariantNumeric: "tabular-nums" }}>
+                      <span style={{ color: "var(--ink-2)", fontVariantNumeric: "tabular-nums" }}>
                         {storageUsedGb} of {storageLimitGb} GB
                       </span>
                     </div>
-                    <div style={{ height: 6, borderRadius: 3, background: "#E7E7F0" }}>
-                      <div style={{ width: `${storagePct}%`, height: 6, borderRadius: 3, background: "#5B4FE8" }} />
+                    <div style={{ height: 6, borderRadius: 3, background: "var(--line)" }}>
+                      <div style={{ width: `${storagePct}%`, height: 6, borderRadius: 3, background: "var(--brand)" }} />
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Recent activity card */}
-              <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, overflow: "hidden" }}>
-                <div style={{ padding: "18px 24px", fontSize: 15, fontWeight: 700, borderBottom: "1px solid #E7E7F0" }}>
+              <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, overflow: "hidden" }}>
+                <div style={{ padding: "18px 24px", fontSize: 15, fontWeight: 700, borderBottom: "1px solid var(--line)" }}>
                   Recent activity
                 </div>
                 {t.audit.length === 0 ? (
-                  <div style={{ padding: "20px 24px", color: "#6B6B8D", fontSize: 13.5 }}>No activity recorded yet.</div>
+                  <div style={{ padding: "20px 24px", color: "var(--ink-3)", fontSize: 13.5 }}>No activity recorded yet.</div>
                 ) : (
                   t.audit.slice(0, 8).map((aItem) => (
                     <div
@@ -451,15 +451,15 @@ export default async function TenantDetail({
                         gap: 14,
                         padding: "0 24px",
                         height: 52,
-                        borderBottom: "1px solid #F0F0F6",
+                        borderBottom: "1px solid var(--chip)",
                         fontSize: 13.5,
                       }}
                     >
-                      <div style={{ width: 8, height: 8, borderRadius: 4, background: "#5B4FE8", flexShrink: 0 }} />
+                      <div style={{ width: 8, height: 8, borderRadius: 4, background: "var(--brand)", flexShrink: 0 }} />
                       <div style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {aItem.action.replace(/_/g, " ").toLowerCase()}
                       </div>
-                      <div style={{ color: "#6B6B8D", fontSize: 12.5, flexShrink: 0 }}>
+                      <div style={{ color: "var(--ink-3)", fontSize: 12.5, flexShrink: 0 }}>
                         {dateTime(aItem.createdAt)}
                       </div>
                     </div>
@@ -470,7 +470,7 @@ export default async function TenantDetail({
           )}
 
           {tab === "subscription" && (
-            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
+            <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "20px 24px" }}>
               <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 14 }}>Subscription & Plan Management</div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, fontSize: 13.5, marginBottom: 20 }}>
                 <div><strong>Current Plan:</strong> {t.tier}</div>
@@ -480,7 +480,7 @@ export default async function TenantDetail({
               </div>
 
               {canAdjust && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 16, borderTop: "1px solid #E7E7F0", paddingTop: 16 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 16, borderTop: "1px solid var(--line)", paddingTop: 16 }}>
                   <div>
                     <h3 style={{ margin: "0 0 8px", fontSize: 14 }}>Change Store Plan</h3>
                     <form action={planAction.bind(null, t.id)} style={{ display: "flex", gap: 10 }}>
@@ -506,7 +506,7 @@ export default async function TenantDetail({
               <div style={{ marginTop: 24 }}>
                 <h3 style={{ margin: "0 0 12px", fontSize: 14 }}>Past Payment Proofs</h3>
                 {t.proofs.length === 0 ? (
-                  <div style={{ color: "#6B6B8D", fontSize: 13.5 }}>No payment proofs submitted yet.</div>
+                  <div style={{ color: "var(--ink-3)", fontSize: 13.5 }}>No payment proofs submitted yet.</div>
                 ) : (
                   <table className="table" style={{ boxShadow: "none" }}>
                     <thead>
@@ -541,7 +541,7 @@ export default async function TenantDetail({
 
           {tab === "usage" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-              <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
+              <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "20px 24px" }}>
                 <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Detailed Store Usage Metrics</div>
                 <dl className="kv" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <dt>Products in Catalog</dt><dd className="num">{t.usage.products}</dd>
@@ -557,14 +557,14 @@ export default async function TenantDetail({
               </div>
 
               {/* Manual Quota Adjustments Card */}
-              <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
+              <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "20px 24px" }}>
                 <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 8 }}>Manual Quota Top-Ups & Overrides</div>
-                <p style={{ fontSize: 13, color: "#6B6B8D", margin: "0 0 16px 0" }}>
+                <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 16px 0" }}>
                   Grant bonus SMS credits or additional product slots directly without altering the merchant's plan tier.
                 </p>
 
                 {canAdjust && (
-                  <form action={addQuotaAdjustmentAction.bind(null, id)} style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end", paddingBottom: 16, borderBottom: "1px solid #E7E7F0" }}>
+                  <form action={addQuotaAdjustmentAction.bind(null, id)} style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end", paddingBottom: 16, borderBottom: "1px solid var(--line)" }}>
                     <div>
                       <label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>Quota Type</label>
                       <select name="type" className="select" defaultValue="SMS_CREDITS" style={{ height: 38, fontSize: 13 }}>
@@ -593,16 +593,16 @@ export default async function TenantDetail({
                 <div style={{ marginTop: 14 }}>
                   <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>Granted Overrides History:</div>
                   {quotaAdjustments.length === 0 ? (
-                    <div style={{ fontSize: 12.5, color: "#6B6B8D" }}>No custom quota overrides granted to this store.</div>
+                    <div style={{ fontSize: 12.5, color: "var(--ink-3)" }}>No custom quota overrides granted to this store.</div>
                   ) : (
                     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                       {quotaAdjustments.map((q) => (
-                        <div key={q.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "#FAFAFC", borderRadius: 6, fontSize: 12.5 }}>
+                        <div key={q.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "var(--bg)", borderRadius: 6, fontSize: 12.5 }}>
                           <div>
-                            <span style={{ fontWeight: 700, color: "#5B4FE8" }}>+{q.amount} {q.type.replace("_", " ")}</span>
-                            <span style={{ color: "#4B4B73", marginLeft: 8 }}>"{q.reason}"</span>
+                            <span style={{ fontWeight: 700, color: "var(--brand)" }}>+{q.amount} {q.type.replace("_", " ")}</span>
+                            <span style={{ color: "var(--ink-2)", marginLeft: 8 }}>"{q.reason}"</span>
                           </div>
-                          <span style={{ color: "#6B6B8D", fontSize: 11.5 }}>{dateTime(q.createdAt)} · {q.actorId}</span>
+                          <span style={{ color: "var(--ink-3)", fontSize: 11.5 }}>{dateTime(q.createdAt)} · {q.actorId}</span>
                         </div>
                       ))}
                     </div>
@@ -615,13 +615,13 @@ export default async function TenantDetail({
           {tab === "leads" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               {/* Snapshot metrics */}
-              <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
+              <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "20px 24px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1A1A4E" }}>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "var(--ink)" }}>
                       Operational Health Snapshot
                     </h3>
-                    <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6B6B8D" }}>
+                    <p style={{ margin: "4px 0 0", fontSize: 13, color: "var(--ink-3)" }}>
                       Telemetry for incoming leads, quotes, table reservations, and clinic appointments.
                     </p>
                   </div>
@@ -631,8 +631,8 @@ export default async function TenantDetail({
                       borderRadius: 9999,
                       fontSize: 11.5,
                       fontWeight: 700,
-                      background: "#EDE9FE",
-                      color: "#6D28D9",
+                      background: "var(--brand-light)",
+                      color: "var(--brand)",
                     }}
                   >
                     MODE: {t.siteMode}
@@ -640,26 +640,26 @@ export default async function TenantDetail({
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14 }}>
-                  <div style={{ padding: "14px", background: "#FAFAFC", borderRadius: 8, border: "1px solid #E7E7F0" }}>
-                    <div style={{ fontSize: 12, color: "#6B6B8D", fontWeight: 600 }}>Total Inquiries (All-Time)</div>
-                    <div style={{ fontSize: 24, fontWeight: 800, color: "#1A1A4E", marginTop: 4 }}>
+                  <div style={{ padding: "14px", background: "var(--bg)", borderRadius: 8, border: "1px solid var(--line)" }}>
+                    <div style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>Total Inquiries (All-Time)</div>
+                    <div style={{ fontSize: 24, fontWeight: 800, color: "var(--ink)", marginTop: 4 }}>
                       {t.leadsCount}
                     </div>
                   </div>
-                  <div style={{ padding: "14px", background: "#FAFAFC", borderRadius: 8, border: "1px solid #E7E7F0" }}>
-                    <div style={{ fontSize: 12, color: "#6B6B8D", fontWeight: 600 }}>Inquiries (Last 30 Days)</div>
+                  <div style={{ padding: "14px", background: "var(--bg)", borderRadius: 8, border: "1px solid var(--line)" }}>
+                    <div style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>Inquiries (Last 30 Days)</div>
                     <div style={{ fontSize: 24, fontWeight: 800, color: "#15803D", marginTop: 4 }}>
                       {t.leads30Days}
                     </div>
                   </div>
-                  <div style={{ padding: "14px", background: "#FAFAFC", borderRadius: 8, border: "1px solid #E7E7F0" }}>
-                    <div style={{ fontSize: 12, color: "#6B6B8D", fontWeight: 600 }}>Bookings Confirmed</div>
-                    <div style={{ fontSize: 24, fontWeight: 800, color: "#4338CA", marginTop: 4 }}>
+                  <div style={{ padding: "14px", background: "var(--bg)", borderRadius: 8, border: "1px solid var(--line)" }}>
+                    <div style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>Bookings Confirmed</div>
+                    <div style={{ fontSize: 24, fontWeight: 800, color: "var(--brand-hover)", marginTop: 4 }}>
                       {t.bookingsConfirmed}
                     </div>
                   </div>
-                  <div style={{ padding: "14px", background: "#FAFAFC", borderRadius: 8, border: "1px solid #E7E7F0" }}>
-                    <div style={{ fontSize: 12, color: "#6B6B8D", fontWeight: 600 }}>PII Redaction Status</div>
+                  <div style={{ padding: "14px", background: "var(--bg)", borderRadius: 8, border: "1px solid var(--line)" }}>
+                    <div style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>PII Redaction Status</div>
                     <div style={{ fontSize: 13, fontWeight: 700, color: "#15803D", marginTop: 8 }}>
                       Active (Masked)
                     </div>
@@ -668,30 +668,30 @@ export default async function TenantDetail({
               </div>
 
               {/* Redacted Inquiry Audit Table */}
-              <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, overflow: "hidden" }}>
-                <div style={{ padding: "18px 24px", borderBottom: "1px solid #E7E7F0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, overflow: "hidden" }}>
+                <div style={{ padding: "18px 24px", borderBottom: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#1A1A4E" }}>
+                    <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "var(--ink)" }}>
                       Redacted Leads & Inquiry Audit
                     </h3>
-                    <p style={{ margin: "4px 0 0", fontSize: 12.5, color: "#6B6B8D" }}>
+                    <p style={{ margin: "4px 0 0", fontSize: 12.5, color: "var(--ink-3)" }}>
                       High-level audit trail with end-customer privacy protections active.
                     </p>
                   </div>
-                  <span style={{ fontSize: 12, color: "#6B6B8D" }}>
+                  <span style={{ fontSize: 12, color: "var(--ink-3)" }}>
                     Showing latest {t.recentLeads.length} inquiries
                   </span>
                 </div>
 
                 {t.recentLeads.length === 0 ? (
-                  <div style={{ padding: "32px 24px", textAlign: "center", color: "#6B6B8D", fontSize: 13.5 }}>
+                  <div style={{ padding: "32px 24px", textAlign: "center", color: "var(--ink-3)", fontSize: 13.5 }}>
                     No leads or booking inquiries have been captured yet for this tenant.
                   </div>
                 ) : (
                   <div style={{ overflowX: "auto" }}>
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                       <thead>
-                        <tr style={{ borderBottom: "1px solid #E7E7F0", color: "#6B6B8D", textAlign: "left", background: "#FAFAFC" }}>
+                        <tr style={{ borderBottom: "1px solid var(--line)", color: "var(--ink-3)", textAlign: "left", background: "var(--bg)" }}>
                           <th style={{ padding: "10px 14px", fontWeight: 600 }}>Inquiry ID</th>
                           <th style={{ padding: "10px 14px", fontWeight: 600 }}>Type</th>
                           <th style={{ padding: "10px 14px", fontWeight: 600 }}>Submitted At</th>
@@ -702,7 +702,7 @@ export default async function TenantDetail({
                       </thead>
                       <tbody>
                         {t.recentLeads.map((lead) => (
-                          <tr key={lead.id} style={{ borderBottom: "1px solid #F1F1F6" }}>
+                          <tr key={lead.id} style={{ borderBottom: "1px solid var(--chip)" }}>
                             <td style={{ padding: "12px 14px", fontFamily: "monospace", fontWeight: 600 }}>
                               #LD-{lead.id.slice(-6)}
                             </td>
@@ -713,14 +713,14 @@ export default async function TenantDetail({
                                   borderRadius: 4,
                                   fontSize: 11,
                                   fontWeight: 700,
-                                  background: lead.type === "RESERVATION" || lead.type === "APPOINTMENT" ? "#EDE9FE" : "#F1F5F9",
-                                  color: lead.type === "RESERVATION" || lead.type === "APPOINTMENT" ? "#6D28D9" : "#334155",
+                                  background: lead.type === "RESERVATION" || lead.type === "APPOINTMENT" ? "var(--brand-light)" : "var(--chip)",
+                                  color: lead.type === "RESERVATION" || lead.type === "APPOINTMENT" ? "var(--brand)" : "var(--ink-2)",
                                 }}
                               >
                                 {lead.type}
                               </span>
                             </td>
-                            <td style={{ padding: "12px 14px", color: "#4B4B73" }}>
+                            <td style={{ padding: "12px 14px", color: "var(--ink-2)" }}>
                               {dateTime(lead.createdAt)}
                             </td>
                             <td style={{ padding: "12px 14px" }}>
@@ -730,18 +730,18 @@ export default async function TenantDetail({
                                   borderRadius: 9999,
                                   fontSize: 11,
                                   fontWeight: 700,
-                                  background: lead.status === "NEW" ? "#FEF3C7" : lead.status === "WON" ? "#DCFCE7" : "#F1F5F9",
-                                  color: lead.status === "NEW" ? "#92400E" : lead.status === "WON" ? "#15803D" : "#475569",
+                                  background: lead.status === "NEW" ? "#FEF3C7" : lead.status === "WON" ? "#DCFCE7" : "var(--chip)",
+                                  color: lead.status === "NEW" ? "#92400E" : lead.status === "WON" ? "#15803D" : "var(--ink-2)",
                                 }}
                               >
                                 {lead.status}
                               </span>
                             </td>
                             <td style={{ padding: "12px 14px" }}>
-                              <div style={{ fontWeight: 600, color: "#1A1A4E" }}>{lead.name}</div>
-                              <div style={{ fontSize: 11.5, color: "#6B6B8D", fontFamily: "monospace" }}>{lead.phone}</div>
+                              <div style={{ fontWeight: 600, color: "var(--ink)" }}>{lead.name}</div>
+                              <div style={{ fontSize: 11.5, color: "var(--ink-3)", fontFamily: "monospace" }}>{lead.phone}</div>
                             </td>
-                            <td style={{ padding: "12px 14px", color: "#6B6B8D" }}>
+                            <td style={{ padding: "12px 14px", color: "var(--ink-3)" }}>
                               <code>{lead.sourcePage || "/"}</code>
                             </td>
                           </tr>
@@ -751,7 +751,7 @@ export default async function TenantDetail({
                   </div>
                 )}
 
-                <div style={{ padding: "14px 20px", background: "#F8FAFC", borderTop: "1px solid #E7E7F0", fontSize: 12, color: "#64748B" }}>
+                <div style={{ padding: "14px 20px", background: "var(--bg)", borderTop: "1px solid var(--line)", fontSize: 12, color: "var(--ink-3)" }}>
                   🔒 <strong>Privacy Policy Enforcement:</strong> Platform staff and operators cannot view patient symptom details, consultation medical notes, or unredacted phone numbers without temporary elevated authorization.
                 </div>
               </div>
@@ -760,26 +760,26 @@ export default async function TenantDetail({
 
           {tab === "transition" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-              <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
+              <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "20px 24px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1A1A4E" }}>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "var(--ink)" }}>
                       Guarded Mode Transition Engine
                     </h3>
-                    <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6B6B8D" }}>
+                    <p style={{ margin: "4px 0 0", fontSize: 13, color: "var(--ink-3)" }}>
                       Safely convert this tenant between ECOMMERCE, PORTFOLIO (BizTrack Business), and HYBRID dual modes.
                     </p>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 12, color: "#6B6B8D" }}>Current Mode:</span>
+                    <span style={{ fontSize: 12, color: "var(--ink-3)" }}>Current Mode:</span>
                     <span
                       style={{
                         padding: "3px 8px",
                         borderRadius: 6,
                         fontSize: 12,
                         fontWeight: 700,
-                        background: t.siteMode === "PORTFOLIO" ? "#EDE9FE" : t.siteMode === "HYBRID" ? "#FEF9C3" : "#F1F5F9",
-                        color: t.siteMode === "PORTFOLIO" ? "#6D28D9" : t.siteMode === "HYBRID" ? "#854D0E" : "#334155",
+                        background: t.siteMode === "PORTFOLIO" ? "var(--brand-light)" : t.siteMode === "HYBRID" ? "#FEF9C3" : "var(--chip)",
+                        color: t.siteMode === "PORTFOLIO" ? "var(--brand)" : t.siteMode === "HYBRID" ? "#854D0E" : "var(--ink-2)",
                       }}
                     >
                       {t.siteMode}
@@ -789,10 +789,10 @@ export default async function TenantDetail({
 
                 {/* Dry Run Pre-flight Analysis */}
                 {dryRun && (
-                  <div style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, padding: 18, marginBottom: 20 }}>
+                  <div style={{ background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 18, marginBottom: 20 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                       <span style={{ fontSize: 16 }}>🔍</span>
-                      <strong style={{ fontSize: 14, color: "#0F172A" }}>
+                      <strong style={{ fontSize: 14, color: "var(--ink)" }}>
                         Pre-Flight Dry-Run Impact Analysis
                       </strong>
                       <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 9999, background: "#DCFCE7", color: "#15803D" }}>
@@ -814,7 +814,7 @@ export default async function TenantDetail({
                             ))}
                           </div>
                         ) : (
-                          <span style={{ color: "#64748B", fontSize: 12 }}>None</span>
+                          <span style={{ color: "var(--ink-3)", fontSize: 12 }}>None</span>
                         )}
                       </div>
 
@@ -836,7 +836,7 @@ export default async function TenantDetail({
                       </div>
 
                       <div>
-                        <span style={{ color: "#4338CA", fontWeight: 700, display: "block", marginBottom: 4 }}>
+                        <span style={{ color: "var(--brand-hover)", fontWeight: 700, display: "block", marginBottom: 4 }}>
                           Recommended Plan Tier:
                         </span>
                         <span style={{ fontWeight: 700, color: "#1E293B" }}>
@@ -846,7 +846,7 @@ export default async function TenantDetail({
                     </div>
 
                     {/* Preserved Data Summary */}
-                    <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px dashed #CBD5E1", fontSize: 12.5, color: "#334155" }}>
+                    <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px dashed var(--line-2)", fontSize: 12.5, color: "var(--ink-2)" }}>
                       🛡️ <strong>Zero Data Loss Guarantee:</strong> All existing {dryRun.preservedDataSummary.productsCount} products, {dryRun.preservedDataSummary.ordersCount} orders, and {dryRun.preservedDataSummary.leadsCount} leads remain <strong>100% PRESERVED</strong> in the database.
                     </div>
 
@@ -864,7 +864,7 @@ export default async function TenantDetail({
                 <form action={modeTransitionExecuteAction.bind(null, t.id)} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                     <div>
-                      <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1A1A4E", marginBottom: 6 }}>
+                      <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "var(--ink)", marginBottom: 6 }}>
                         Target Site Mode
                       </label>
                       <select
@@ -874,7 +874,7 @@ export default async function TenantDetail({
                           width: "100%",
                           padding: "8px 12px",
                           borderRadius: 8,
-                          border: "1px solid #CBD5E1",
+                          border: "1px solid var(--line-2)",
                           fontSize: 13.5,
                           background: "#fff",
                         }}
@@ -886,7 +886,7 @@ export default async function TenantDetail({
                     </div>
 
                     <div>
-                      <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1A1A4E", marginBottom: 6 }}>
+                      <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "var(--ink)", marginBottom: 6 }}>
                         Business Vertical (Optional)
                       </label>
                       <select
@@ -896,7 +896,7 @@ export default async function TenantDetail({
                           width: "100%",
                           padding: "8px 12px",
                           borderRadius: 8,
-                          border: "1px solid #CBD5E1",
+                          border: "1px solid var(--line-2)",
                           fontSize: 13.5,
                           background: "#fff",
                         }}
@@ -912,7 +912,7 @@ export default async function TenantDetail({
                   </div>
 
                   <div>
-                    <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1A1A4E", marginBottom: 6 }}>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "var(--ink)", marginBottom: 6 }}>
                       Reason for Mode Transition (Required for audit log)
                     </label>
                     <input
@@ -924,14 +924,14 @@ export default async function TenantDetail({
                         width: "100%",
                         padding: "8px 12px",
                         borderRadius: 8,
-                        border: "1px solid #CBD5E1",
+                        border: "1px solid var(--line-2)",
                         fontSize: 13.5,
                         boxSizing: "border-box",
                       }}
                     />
                   </div>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#334155" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--ink-2)" }}>
                     <input type="checkbox" name="confirmedConsent" id="consentCheck" required />
                     <label htmlFor="consentCheck" style={{ cursor: "pointer", fontWeight: 600 }}>
                       I verify that the merchant requested this mode transition and understand that storefront routing will update immediately.
@@ -939,7 +939,7 @@ export default async function TenantDetail({
                   </div>
 
                   <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
-                    <SubmitButton style={{ background: "#5B4FE8", color: "#fff", padding: "9px 20px", borderRadius: 8, fontSize: 13.5, fontWeight: 700, border: "none", cursor: "pointer" }}>
+                    <SubmitButton style={{ background: "var(--brand)", color: "#fff", padding: "9px 20px", borderRadius: 8, fontSize: 13.5, fontWeight: 700, border: "none", cursor: "pointer" }}>
                       🚀 Execute Atomic Mode Transition (Safe)
                     </SubmitButton>
                   </div>
@@ -949,18 +949,18 @@ export default async function TenantDetail({
           )}
 
           {tab === "domains" && (
-            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
+            <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "20px 24px" }}>
               <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Configured Domains</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 8, background: "#FAFAFC", border: "1px solid #E7E7F0" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 8, background: "var(--bg)", border: "1px solid var(--line)" }}>
                   <div style={{ flex: 1, fontWeight: 600 }}>{t.subdomain}.biztrack.bd (System Subdomain)</div>
                   <span style={{ padding: "3px 10px", borderRadius: 10, background: "#E8F6EE", color: "#15803D", fontSize: 12, fontWeight: 600 }}>Active</span>
                 </div>
                 {t.domains.map((d) => (
-                  <div key={d.domain} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 8, background: "#FAFAFC", border: "1px solid #E7E7F0" }}>
+                  <div key={d.domain} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 8, background: "var(--bg)", border: "1px solid var(--line)" }}>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 600 }}>{d.domain}</div>
-                      <div style={{ fontSize: 12, color: "#6B6B8D" }}>SSL: {d.sslStatus} {d.isPrimary && "· Primary"}</div>
+                      <div style={{ fontSize: 12, color: "var(--ink-3)" }}>SSL: {d.sslStatus} {d.isPrimary && "· Primary"}</div>
                     </div>
                     <span style={{ padding: "3px 10px", borderRadius: 10, background: d.verified ? "#E8F6EE" : "#FDF3E3", color: d.verified ? "#15803D" : "#B45309", fontSize: 12, fontWeight: 600 }}>
                       {d.verified ? "Active" : "Waiting for DNS"}
@@ -972,9 +972,9 @@ export default async function TenantDetail({
           )}
 
           {tab === "modules" && (
-            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
+            <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "20px 24px" }}>
               <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 6 }}>Module Entitlements & Overrides</div>
-              <p style={{ fontSize: 13, color: "#6B6B8D", margin: "0 0 16px 0" }}>
+              <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 16px 0" }}>
                 Super Admin can grant explicit VIP overrides to activate specialized apps regardless of the merchant's plan tier.
               </p>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14 }}>
@@ -982,15 +982,15 @@ export default async function TenantDetail({
                   const currentMod = t.modules.find((m) => m.key === app.key);
                   const isEnabled = currentMod ? currentMod.isEnabled : false;
                   return (
-                    <div key={app.key} style={{ padding: 16, borderRadius: 8, border: isEnabled ? "1.5px solid #5B4FE8" : "1px solid #E7E7F0", background: isEnabled ? "#F4F3FF" : "#FAFAFC", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                    <div key={app.key} style={{ padding: 16, borderRadius: 8, border: isEnabled ? "1.5px solid var(--brand)" : "1px solid var(--line)", background: isEnabled ? "var(--tint)" : "var(--bg)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                       <div>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <span style={{ fontWeight: 700, fontSize: 14, color: isEnabled ? "#5B4FE8" : "#1A1A4E" }}>{app.label}</span>
-                          <span style={{ padding: "2px 8px", borderRadius: 8, fontSize: 11, fontWeight: 700, background: isEnabled ? "#E8F6EE" : "#EFEFF6", color: isEnabled ? "#15803D" : "#5B5B7B" }}>
+                          <span style={{ fontWeight: 700, fontSize: 14, color: isEnabled ? "var(--brand)" : "var(--ink)" }}>{app.label}</span>
+                          <span style={{ padding: "2px 8px", borderRadius: 8, fontSize: 11, fontWeight: 700, background: isEnabled ? "#E8F6EE" : "var(--chip)", color: isEnabled ? "#15803D" : "#5B5B7B" }}>
                             {isEnabled ? "Active" : "Disabled"}
                           </span>
                         </div>
-                        <div style={{ fontSize: 12, color: "#6B6B8D", marginTop: 4 }}>
+                        <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 4 }}>
                           Tier: {app.tierLabel} {app.minPlan ? `(Min: ${app.minPlan})` : ""}
                         </div>
                       </div>
@@ -1013,19 +1013,19 @@ export default async function TenantDetail({
           )}
 
           {tab === "support" && (
-            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
+            <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "20px 24px" }}>
               <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Support Tickets from this Store</div>
               {t.tickets.length === 0 ? (
-                <div style={{ color: "#6B6B8D", fontSize: 13.5 }}>No support tickets filed by this store.</div>
+                <div style={{ color: "var(--ink-3)", fontSize: 13.5 }}>No support tickets filed by this store.</div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {t.tickets.map((tk) => (
-                    <div key={tk.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 8, border: "1px solid #E7E7F0", background: "#fff" }}>
+                    <div key={tk.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 8, border: "1px solid var(--line)", background: "#fff" }}>
                       <div style={{ flex: 1 }}>
-                        <Link href={`/tickets?id=${tk.id}`} style={{ fontWeight: 600, color: "#1A1A4E", textDecoration: "none" }} prefetch={false}>
+                        <Link href={`/tickets?id=${tk.id}`} style={{ fontWeight: 600, color: "var(--ink)", textDecoration: "none" }} prefetch={false}>
                           {tk.subject}
                         </Link>
-                        <div style={{ fontSize: 12, color: "#6B6B8D" }}>#{tk.code} · {dateOnly(tk.createdAt)}</div>
+                        <div style={{ fontSize: 12, color: "var(--ink-3)" }}>#{tk.code} · {dateOnly(tk.createdAt)}</div>
                       </div>
                       <span className={`pill ${tk.status === "OPEN" ? "warn" : tk.status === "RESOLVED" ? "ok" : "grey"}`}>
                         {tk.status}
@@ -1038,16 +1038,16 @@ export default async function TenantDetail({
           )}
 
           {tab === "audit" && (
-            <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
+            <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "20px 24px" }}>
               <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Platform Audit Log & Impersonations</div>
               {t.audit.length === 0 ? (
-                <div style={{ color: "#6B6B8D", fontSize: 13.5 }}>No audit log entries recorded.</div>
+                <div style={{ color: "var(--ink-3)", fontSize: 13.5 }}>No audit log entries recorded.</div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {t.audit.map((al) => {
                     const isImpersonate = al.action === "IMPERSONATE";
                     return (
-                      <div key={al.id} style={{ padding: "12px 14px", borderRadius: 8, background: isImpersonate ? "#FFF8F0" : "#FAFAFC", border: isImpersonate ? "1.5px solid #F59E0B" : "1px solid #E7E7F0", fontSize: 13 }}>
+                      <div key={al.id} style={{ padding: "12px 14px", borderRadius: 8, background: isImpersonate ? "#FFF8F0" : "var(--bg)", border: isImpersonate ? "1.5px solid #F59E0B" : "1px solid var(--line)", fontSize: 13 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontWeight: 600 }}>
                           <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             {al.action}
@@ -1057,9 +1057,9 @@ export default async function TenantDetail({
                               </span>
                             )}
                           </span>
-                          <span style={{ color: "#6B6B8D", fontSize: 12 }}>{dateTime(al.createdAt)}</span>
+                          <span style={{ color: "var(--ink-3)", fontSize: 12 }}>{dateTime(al.createdAt)}</span>
                         </div>
-                        <div style={{ color: "#4B4B73", marginTop: 4 }}>
+                        <div style={{ color: "var(--ink-2)", marginTop: 4 }}>
                           Actor: <b>{al.actorId}</b>
                         </div>
                       </div>
@@ -1074,23 +1074,23 @@ export default async function TenantDetail({
         {/* Right Column (Sidebar Rails) */}
         <div style={{ flex: "1 1 320px", minWidth: 0, display: "flex", flexDirection: "column", gap: 20 }}>
           {/* Subscription Box */}
-          <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }} data-testid="subscription-card">
+          <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "20px 24px" }} data-testid="subscription-card">
             <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 14 }}>Subscription</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13.5 }}>
               <div style={{ display: "flex" }}>
-                <span style={{ flexGrow: 1, color: "#4B4B73" }}>Plan</span>
+                <span style={{ flexGrow: 1, color: "var(--ink-2)" }}>Plan</span>
                 <b>{t.tier.charAt(0) + t.tier.slice(1).toLowerCase()} {isTrial ? "(trial)" : ""}</b>
               </div>
               <div style={{ display: "flex" }}>
-                <span style={{ flexGrow: 1, color: "#4B4B73" }}>{isTrial ? "Trial ends" : "Renewal due"}</span>
+                <span style={{ flexGrow: 1, color: "var(--ink-2)" }}>{isTrial ? "Trial ends" : "Renewal due"}</span>
                 <b>{dateOnly(t.subscription?.periodEnd ?? t.trialEndsAt)}</b>
               </div>
               <div style={{ display: "flex" }}>
-                <span style={{ flexGrow: 1, color: "#4B4B73" }}>Payment method</span>
+                <span style={{ flexGrow: 1, color: "var(--ink-2)" }}>Payment method</span>
                 <b>{t.subscription && t.subscription.amount > 0 ? "bKash / Nagad" : "None yet"}</b>
               </div>
               <div style={{ display: "flex" }}>
-                <span style={{ flexGrow: 1, color: "#4B4B73" }}>Next invoice</span>
+                <span style={{ flexGrow: 1, color: "var(--ink-2)" }}>Next invoice</span>
                 <b>{t.subscription && t.subscription.amount > 0 ? taka(t.subscription.amount) : "৳ 1,499"}</b>
               </div>
             </div>
@@ -1101,13 +1101,13 @@ export default async function TenantDetail({
                 style={{
                   height: 36,
                   padding: "0 14px",
-                  border: "1px solid #D5D5E4",
+                  border: "1px solid var(--line-2)",
                   borderRadius: 8,
                   fontSize: 13,
                   fontWeight: 600,
                   display: "flex",
                   alignItems: "center",
-                  color: "#1A1A4E",
+                  color: "var(--ink)",
                   textDecoration: "none",
                 }}
                 prefetch={false}
@@ -1121,7 +1121,7 @@ export default async function TenantDetail({
                     style={{
                       height: 36,
                       padding: "0 14px",
-                      border: "1px solid #D5D5E4",
+                      border: "1px solid var(--line-2)",
                       borderRadius: 8,
                       fontSize: 13,
                       fontWeight: 600,
@@ -1138,7 +1138,7 @@ export default async function TenantDetail({
           </div>
 
           {/* Domains Card */}
-          <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
+          <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "20px 24px" }}>
             <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 14 }}>Domains</div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13.5, marginBottom: 10 }}>
               <div style={{ flex: 1, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -1157,11 +1157,11 @@ export default async function TenantDetail({
           </div>
 
           {/* Modules Card */}
-          <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }}>
+          <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "20px 24px" }}>
             <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 14 }}>Modules</div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {t.modules.filter((m) => m.isEnabled).length === 0 ? (
-                <span style={{ color: "#6B6B8D", fontSize: 13 }}>Standard core features</span>
+                <span style={{ color: "var(--ink-3)", fontSize: 13 }}>Standard core features</span>
               ) : (
                 t.modules.filter((m) => m.isEnabled).map((m) => (
                   <span
@@ -1169,8 +1169,8 @@ export default async function TenantDetail({
                     style={{
                       padding: "4px 12px",
                       borderRadius: 14,
-                      background: "#F4F3FF",
-                      color: "#5B4FE8",
+                      background: "var(--tint)",
+                      color: "var(--brand)",
                       fontSize: 12.5,
                       fontWeight: 600,
                     }}
@@ -1198,16 +1198,16 @@ export default async function TenantDetail({
           />
 
           {/* Internal Notes Card */}
-          <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: "20px 24px" }} data-testid="internal-notes-card">
+          <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "20px 24px" }} data-testid="internal-notes-card">
             <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 10 }}>Internal notes</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }}>
               {t.notes.length === 0 ? (
-                <div style={{ fontSize: 13.5, color: "#6B6B8D" }}>No internal notes yet. Leave context for teammates below.</div>
+                <div style={{ fontSize: 13.5, color: "var(--ink-3)" }}>No internal notes yet. Leave context for teammates below.</div>
               ) : (
                 t.notes.map((n) => (
-                  <div key={n.id} style={{ padding: "10px 12px", borderRadius: 8, background: "#FAFAFC", border: "1px solid #E7E7F0", fontSize: 13 }}>
-                    <div style={{ color: "#1A1A4E", lineHeight: 1.5 }}>{n.body}</div>
-                    <div style={{ fontSize: 11.5, color: "#6B6B8D", marginTop: 4 }}>
+                  <div key={n.id} style={{ padding: "10px 12px", borderRadius: 8, background: "var(--bg)", border: "1px solid var(--line)", fontSize: 13 }}>
+                    <div style={{ color: "var(--ink)", lineHeight: 1.5 }}>{n.body}</div>
+                    <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 4 }}>
                       {n.authorName ?? "Staff"} · {dateTime(n.createdAt)}
                     </div>
                   </div>
@@ -1226,7 +1226,7 @@ export default async function TenantDetail({
                   boxSizing: "border-box",
                   padding: "8px 10px",
                   borderRadius: 6,
-                  border: "1px solid #D5D5E4",
+                  border: "1px solid var(--line-2)",
                   fontSize: 13,
                   fontFamily: "inherit",
                   resize: "vertical",
@@ -1243,7 +1243,7 @@ export default async function TenantDetail({
           {t.quarantined && canSuspend && (
             <div style={{ background: "#fff", border: "1px solid #FCD34D", borderRadius: 12, padding: "20px 24px" }} data-testid="quarantine-card">
               <div style={{ fontSize: 15, fontWeight: 700, color: "#B45309", marginBottom: 8 }}>Brand review hold</div>
-              <p style={{ margin: "0 0 12px", fontSize: 13, color: "#6B6B8D" }}>{t.quarantineReason}</p>
+              <p style={{ margin: "0 0 12px", fontSize: 13, color: "var(--ink-3)" }}>{t.quarantineReason}</p>
               <form style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <input className="input" name="note" aria-label="Review note" required minLength={3} maxLength={200} placeholder="What you checked (e.g. verified trade license)" />
                 <div style={{ display: "flex", gap: 8, marginTop: 4 }}>

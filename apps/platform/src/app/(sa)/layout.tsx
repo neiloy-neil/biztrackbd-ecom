@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLockup, BrandSymbol } from "@biztrackbd/ui";
 import { canPlatform, getOverview, type PlatformArea } from "@biztrackbd/core";
 import { getPlatformPrisma } from "@biztrackbd/db";
 import { NavLink } from "@/components/nav";
@@ -42,18 +43,12 @@ export default async function SaLayout({ children }: { children: React.ReactNode
   return (
     <div className="shell">
       <header className="topbar">
-        <span className="logo-mark" aria-hidden="true">B</span>
+        <span className="brand-symbol"><BrandSymbol size={30} title="BizTrackBD" /></span>
         <span className="store">BizTrackBD Platform</span>
       </header>
       <aside className="side">
         <div className="sa-brand-block">
-          <div className="brand">
-            <svg width="28" height="28" viewBox="0 0 44 44" role="img" aria-label="BizTrackBD">
-              <rect width="44" height="44" rx="12" fill="#5B4FE8" />
-              <path d="M13 32V22M22 32V14M31 32V19" stroke="#fff" strokeWidth="4.4" strokeLinecap="round" />
-            </svg>
-            <div>BizTrack<span className="brand-accent">BD</span></div>
-          </div>
+          <div className="brand"><BrandLockup tone="dark" size={30} /></div>
           <div className="sa-tag">PLATFORM ADMIN</div>
         </div>
         <nav aria-label="Main">
@@ -80,14 +75,14 @@ export default async function SaLayout({ children }: { children: React.ReactNode
           {authMode() === "dev" ? (
             <form action={switchDevUser} style={{ marginTop: 10 }}>
               <label className="muted" htmlFor="dev_user" style={{ fontSize: 12, color: "#A8A8D8" }}>Dev: act as</label>
-              <select id="dev_user" name="email" defaultValue={s.user.email} className="select input-sm" style={{ marginTop: 4, width: "100%", background: "#252568", color: "#fff", borderColor: "#34347F" }}>
+              <select id="dev_user" name="email" defaultValue={s.user.email} className="select input-sm" style={{ marginTop: 4, width: "100%", background: "#252568", color: "#fff", borderColor: "var(--brand-hover)" }}>
                 {users.map((u) => <option key={u.email} value={u.email}>{u.name} ({ROLE[u.role] ?? u.role})</option>)}
               </select>
-              <SubmitButton className="btn btn-secondary btn-sm btn-block" style={{ marginTop: 6, width: "100%", background: "#34347F", color: "#fff", borderColor: "#4E4E9E" }} pending={false}>Switch</SubmitButton>
+              <SubmitButton className="btn btn-secondary btn-sm btn-block" style={{ marginTop: 6, width: "100%", background: "#0F5C47", color: "#fff", borderColor: "#1B6450" }} pending={false}>Switch</SubmitButton>
             </form>
           ) : (
             <form action={logoutAction} style={{ marginTop: 10 }}>
-              <SubmitButton className="btn btn-secondary btn-sm btn-block" data-testid="sign-out" style={{ width: "100%", background: "#34347F", color: "#fff", borderColor: "#4E4E9E" }} pending={false}>Sign out</SubmitButton>
+              <SubmitButton className="btn btn-secondary btn-sm btn-block" data-testid="sign-out" style={{ width: "100%", background: "#0F5C47", color: "#fff", borderColor: "#1B6450" }} pending={false}>Sign out</SubmitButton>
             </form>
           )}
         </div>

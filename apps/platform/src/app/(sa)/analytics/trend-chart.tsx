@@ -68,7 +68,7 @@ export function AnalyticsTrendChart({
               <div
                 style={{
                   height: `${heightPercent}%`,
-                  background: point.signups > 0 ? "#60A5FA" : "#E2E8F0",
+                  background: point.signups > 0 ? "#60A5FA" : "var(--line)",
                   borderRadius: "3px 3px 0 0",
                   position: "relative",
                   overflow: "hidden",

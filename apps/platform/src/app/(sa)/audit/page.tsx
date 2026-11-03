@@ -59,14 +59,14 @@ export default async function AuditPage({
       {done && <div className="notice good" role="status">{done}</div>}
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 10, borderBottom: "1px solid #E7E7F0", paddingBottom: 2 }}>
+      <div style={{ display: "flex", gap: 10, borderBottom: "1px solid var(--line)", paddingBottom: 2 }}>
         <Link
           href="/audit?tab=team"
           prefetch={false}
           style={{
             padding: "8px 16px",
-            borderBottom: tab === "team" ? "3px solid #5B4FE8" : "3px solid transparent",
-            color: tab === "team" ? "#5B4FE8" : "#4B4B73",
+            borderBottom: tab === "team" ? "3px solid var(--brand)" : "3px solid transparent",
+            color: tab === "team" ? "var(--brand)" : "var(--ink-2)",
             fontWeight: 700,
             fontSize: 14,
             textDecoration: "none",
@@ -79,8 +79,8 @@ export default async function AuditPage({
           prefetch={false}
           style={{
             padding: "8px 16px",
-            borderBottom: tab === "audit" ? "3px solid #5B4FE8" : "3px solid transparent",
-            color: tab === "audit" ? "#5B4FE8" : "#4B4B73",
+            borderBottom: tab === "audit" ? "3px solid var(--brand)" : "3px solid transparent",
+            color: tab === "audit" ? "var(--brand)" : "var(--ink-2)",
             fontWeight: 700,
             fontSize: 14,
             textDecoration: "none",

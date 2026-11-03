@@ -8,7 +8,7 @@ export function AutoSubmitSelect({ name, defaultValue, options }: { name: string
       defaultValue={defaultValue}
       onChange={(e) => e.target.form?.requestSubmit()}
       aria-label={name}
-      style={{ padding: "4px 8px", fontSize: 12, borderRadius: 6, border: "1px solid #D5D5E4" }}
+      style={{ padding: "4px 8px", fontSize: 12, borderRadius: 6, border: "1px solid var(--line-2)" }}
     >
       {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>

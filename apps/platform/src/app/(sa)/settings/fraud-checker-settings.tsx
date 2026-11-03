@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { PlatformFraudConfigView } from "@biztrackbd/core";
 import { savePlatformFraudConfigAction, testPlatformFraudCheckerAction } from "./actions";
 
-const input = { width: "100%", padding: "10px 12px", border: "1px solid #D5D5E4", borderRadius: 8, fontSize: 14 } as const;
+const input = { width: "100%", padding: "10px 12px", border: "1px solid var(--line-2)", borderRadius: 8, fontSize: 14 } as const;
 
 /** The courier fraud screening service key and address. Used by the free fraud checker on the marketing site and by the fraud check on every store's orders. */
 export function FraudCheckerSettings({ initial }: { initial: PlatformFraudConfigView }) {
@@ -45,11 +45,11 @@ export function FraudCheckerSettings({ initial }: { initial: PlatformFraudConfig
   }
 
   return (
-    <div style={{ background: "#fff", border: "1px solid #E7E7F0", borderRadius: 12, padding: 24 }} data-testid="fraud-settings">
+    <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: 24 }} data-testid="fraud-settings">
       <form onSubmit={save} style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 640 }}>
         <div>
           <div style={{ fontSize: 16, fontWeight: 700 }}>Courier fraud screening service</div>
-          <div style={{ fontSize: 13, color: "#6B6B8D", marginTop: 4 }}>
+          <div style={{ fontSize: 13, color: "var(--ink-3)", marginTop: 4 }}>
             The key for the 5-courier fraud check (Steadfast, Pathao, RedX, CarryBee, Paperfly). It powers the free fraud checker on the marketing site and the delivery trust check on every store&apos;s orders. Without a key, both show no result.
           </div>
         </div>
@@ -57,14 +57,14 @@ export function FraudCheckerSettings({ initial }: { initial: PlatformFraudConfig
         {notice?.good && <div role="status" style={{ padding: "8px 12px", background: "#ECFDF3", borderRadius: 8, fontSize: 13, color: "#067647", fontWeight: 600 }}>{notice.good}</div>}
         {notice?.bad && <div role="alert" style={{ padding: "8px 12px", background: "#FEF3F2", borderRadius: 8, fontSize: 13, color: "#B42318", fontWeight: 600 }}>{notice.bad}</div>}
 
-        <div style={{ padding: "8px 12px", background: "#F4F3FF", borderRadius: 8, fontSize: 13, color: "#5B4FE8", fontWeight: 600 }} data-testid="fraud-active">
+        <div style={{ padding: "8px 12px", background: "var(--tint)", borderRadius: 8, fontSize: 13, color: "var(--brand)", fontWeight: 600 }} data-testid="fraud-active">
           {masked ? <>Active key: <code>{masked}</code> ({source === "DATABASE" ? "saved here" : "from the server environment"})</> : "No key is set. The fraud checker is switched off."}
         </div>
 
         <div>
           <label htmlFor="fraud-key" style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>API key</label>
           <input id="fraud-key" type="password" autoComplete="off" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder={masked ? "Enter a new key to replace the saved one" : "Paste the API key"} style={input} data-testid="fraud-key-input" />
-          <div style={{ fontSize: 12, color: "#6B6B8D", marginTop: 4 }}>Stored on the platform, never shown again in full, and never written to the audit log.</div>
+          <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 4 }}>Stored on the platform, never shown again in full, and never written to the audit log.</div>
         </div>
 
         <div>
@@ -79,14 +79,14 @@ export function FraudCheckerSettings({ initial }: { initial: PlatformFraudConfig
         )}
 
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 4 }}>
-          <button type="submit" disabled={saving} style={{ padding: "10px 20px", background: "#5B4FE8", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer" }} data-testid="fraud-save">
+          <button type="submit" disabled={saving} style={{ padding: "10px 20px", background: "var(--brand)", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer" }} data-testid="fraud-save">
             {saving ? "Saving…" : "Save"}
           </button>
-          <button type="button" onClick={runTest} disabled={testing} style={{ padding: "10px 20px", background: "#fff", color: "#5B4FE8", border: "1px solid #5B4FE8", borderRadius: 8, fontWeight: 700, cursor: "pointer" }} data-testid="fraud-test">
+          <button type="button" onClick={runTest} disabled={testing} style={{ padding: "10px 20px", background: "#fff", color: "var(--brand)", border: "1px solid var(--brand)", borderRadius: 8, fontWeight: 700, cursor: "pointer" }} data-testid="fraud-test">
             {testing ? "Testing…" : "Test the key"}
           </button>
           {source === "DATABASE" && (
-            <button type="button" onClick={remove} disabled={saving} style={{ padding: "10px 20px", background: "#fff", color: "#B42318", border: "1px solid #D5D5E4", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}>
+            <button type="button" onClick={remove} disabled={saving} style={{ padding: "10px 20px", background: "#fff", color: "#B42318", border: "1px solid var(--line-2)", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}>
               Remove saved key
             </button>
           )}
