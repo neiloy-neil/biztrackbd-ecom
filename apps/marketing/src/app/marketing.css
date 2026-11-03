@@ -110,18 +110,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   letter-spacing: -0.3px;
   color: var(--ink);
 }
-.brand-wordmark {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 22px;
-  line-height: 1;
-  letter-spacing: -0.2px;
-  text-transform: none;
-}
-.brand-wordmark-light { color: var(--green-deep); }
-.brand-wordmark-light .brand-wordmark-bd { color: var(--gold-dark); }
-.brand-wordmark-dark { color: #FFFFFF; }
-.brand-wordmark-dark .brand-wordmark-bd { color: var(--marigold); }
+/* The wordmark (.brand-wordmark) is styled in @biztrackbd/ui/brand.css. */
 .site-nav { display: flex; align-items: center; gap: 8px; }
 .nav-menu-toggle { display: none; }
 .site-nav > a:not(.btn) {

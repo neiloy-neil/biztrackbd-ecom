@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Baloo_Da_2, Hind_Siliguri } from "next/font/google";
 import Link from "next/link";
-import { BrandLockup } from "@/components/brand-logo";
-import { ContactIcon } from "@biztrackbd/ui";
+import { BrandLockup, ContactIcon, DoubleSubmitGuard } from "@biztrackbd/ui";
+import "@biztrackbd/ui/brand.css";
 import { getContact, type Contact } from "@/lib/contact";
 import "./marketing.css";
 import "./site.css";
@@ -146,7 +146,6 @@ import { PlatformTracker } from "@/components/platform-tracker";
 import { NativeAnalyticsTracker } from "@/components/native-analytics-tracker";
 import { PostHogProvider } from "@/components/posthog-provider";
 import { SiteNavigation } from "@/components/site-navigation";
-import { DoubleSubmitGuard } from "@biztrackbd/ui";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

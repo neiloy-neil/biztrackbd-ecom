@@ -22,4 +22,7 @@ Growth b: white "b" with a marigold arrow on a deep green rounded square. Wordma
 - Running text and page titles use `BizTrackBD`. The lowercase wordmark appears only in the logo.
 
 ## Files
-`symbol-tile.svg` (app icon), `symbol-open.svg` (no square, for light grounds), `symbol-mono.svg`, `symbol-mono-reversed.svg`. Wordmark is live Baloo Da 2 text in `apps/marketing/src/components/brand-logo.tsx` (not outlined; outline it in a design tool before using as a standalone file).
+`symbol-tile.svg` (app icon), `symbol-open.svg` (no square, for light grounds), `symbol-mono.svg`, `symbol-mono-reversed.svg`. Wordmark is live Baloo Da 2 text in `packages/ui/src/brand.tsx` (`BrandSymbol`, `BrandWordmark`, `BrandLockup`; styles in `packages/ui/src/brand.css`; not outlined, so outline it in a design tool before using as a standalone file).
+
+## Tokens and icons
+`packages/ui/src/tokens.css` holds the palette as CSS variables (light and dark, contrast checked). `node tools/brand-icons.mjs` regenerates the admin, platform and marketing icons from `symbol-tile.svg`. The storefront icon is not generated: a merchant's store carries the merchant's mark.

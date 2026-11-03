@@ -1,24 +1,48 @@
-/* Design tokens from the canvas (docs/29). One sans family, Bangla fallback. */
+/* BizTrackBD design tokens, the one source for the admin and platform apps (brand: design/brand/BRAND.md, "Growth b").
+   Light is the default; dark applies with html[data-theme="dark"], or by the system setting when no theme is chosen.
+   Colour pairs are checked for contrast: --ink, --ink-2 and --ink-3 on --bg, --surface and --tint all reach 4.5:1,
+   and --brand-ink on --brand reaches 4.5:1. Marigold is an accent for the logo arrow and badges, never body text on white. */
 :root {
-  --brand: #5B4FE8;
-  --brand-hover: #4C40D4;
-  --brand-light: #ECEBFE;
-  --ink: #1A1A4E;
-  --ink-2: #4B4B73;
-  --ink-3: #6B6B8D;
-  --tint: #F4F3FF;
-  --surface: #FFFFFF;
-  --bg: #FAFAFC;
-  --line: #E7E7F0;
-  --line-2: #D9D9E8;
+  /* Brand palette, named as in BRAND.md */
+  --green-deep: #0B4D3B;
+  --green-fresh: #11795A;
+  --marigold: #F2A900;
+  --gold-dark: #946300;
+  --cream: #FBF7EC;
+  --mint: #E3F1EA;
+
+  /* Roles */
+  --brand: #11795A;
+  --brand-hover: #0B4D3B;
+  --brand-light: #E3F1EA;
+  --brand-ink: #fff;
+  --ink: #0B4D3B;
+  --ink-2: #3D5A52;
+  --ink-3: #55706A;
+  --tint: #EEF6F1;
+  --bg: #FBF7EC;
+  --surface: #fff;
+  --line: #DCE7E1;
+  --line-2: #C7D8CF;
+  --chip: #E8F0EB;
+  --row-hover: #F6FAF7;
+
+  /* Status. Meaning, not brand: kept apart from the green so a pill never reads as a button. */
   --success: #15803D;
   --success-bg: #E8F6EE;
+  --success-solid: #15803D; /* buttons and badges keep a dark fill with white text in both themes */
   --warning: #B45309;
   --warning-bg: #FDF3E3;
-  --danger: #DC2626;
+  --notice-ink: #7A3E00;
+  --danger: #B91C1C;
   --danger-bg: #FDECEC;
+  --danger-ink: #B91C1C; /* text on the pale red: 6:1, where a lighter red is only 4.3:1 */
+  --danger-solid: #DC2626;
   --info: #0369A1;
   --info-bg: #E6F2F9;
+  --tint-info: #EEF4FF;
+
+  /* Shape, space, depth */
   --radius-sm: 6px;
   --radius: 10px;
   --radius-lg: 14px;
@@ -30,13 +54,46 @@
   --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
-  --shadow-sm: 0 1px 2px 0 rgba(26, 26, 78, 0.05);
-  --shadow-md: 0 4px 12px 0 rgba(26, 26, 78, 0.08);
-  --shadow-lg: 0 12px 28px -4px rgba(26, 26, 78, 0.12);
-  --shadow-card: 0 1px 3px 0 rgba(26, 26, 78, 0.04), 0 1px 2px -1px rgba(26, 26, 78, 0.04);
-  --font: "Plus Jakarta Sans", "Hind Siliguri", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --shadow-sm: 0 1px 2px 0 rgba(11, 77, 59, 0.06);
+  --shadow-md: 0 4px 12px 0 rgba(11, 77, 59, 0.09);
+  --shadow-lg: 0 12px 28px -4px rgba(11, 77, 59, 0.14);
+  --shadow-card: 0 1px 3px 0 rgba(11, 77, 59, 0.05), 0 1px 2px -1px rgba(11, 77, 59, 0.05);
+
+  /* Type: Baloo Da 2 (800) for headlines and the wordmark, Hind Siliguri for text. Both cover Bangla and English.
+     An app loads them with next/font and sets --font-baloo and --font-hind; the names after them are the fallback. */
+  --font-display: var(--font-baloo), "Baloo Da 2", var(--font-hind), "Hind Siliguri", system-ui, sans-serif;
+  --font: var(--font-hind), "Hind Siliguri", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  color-scheme: light;
 }
-* { box-sizing: border-box; }
-html, body { margin: 0; }
-body { font-family: var(--font); color: var(--ink); background: var(--bg); font-size: 15px; line-height: 1.5; }
-a { color: inherit; }
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --brand: #3FB68B; --brand-hover: #55C79C; --brand-light: #153A2E; --brand-ink: #06140F;
+  --ink: #E8F3EE; --ink-2: #BCD3C9; --ink-3: #92B0A3;
+  --tint: #14302A; --bg: #0A1713; --surface: #10231D; --line: #1E3A31; --line-2: #2B4A3F;
+  --chip: #173229; --row-hover: #14291F;
+  --success: #4ADE80; --success-bg: #12301F; --warning: #FBBF24; --warning-bg: #33260C;
+  --danger: #F87171; --danger-bg: #3A1717; --danger-ink: #FCA5A5; --info: #7DD3FC; --info-bg: #102A3A;
+  --notice-ink: #FCD9A0; --tint-info: #1F2A55;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px 0 rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 28px -4px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+}
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]):not([data-theme="dark"]) {
+    color-scheme: dark;
+    --brand: #3FB68B; --brand-hover: #55C79C; --brand-light: #153A2E; --brand-ink: #06140F;
+    --ink: #E8F3EE; --ink-2: #BCD3C9; --ink-3: #92B0A3;
+    --tint: #14302A; --bg: #0A1713; --surface: #10231D; --line: #1E3A31; --line-2: #2B4A3F;
+    --chip: #173229; --row-hover: #14291F;
+    --success: #4ADE80; --success-bg: #12301F; --warning: #FBBF24; --warning-bg: #33260C;
+    --danger: #F87171; --danger-bg: #3A1717; --danger-ink: #FCA5A5; --info: #7DD3FC; --info-bg: #102A3A;
+    --notice-ink: #FCD9A0; --tint-info: #1F2A55;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px 0 rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 12px 28px -4px rgba(0, 0, 0, 0.5);
+    --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+  }
+}

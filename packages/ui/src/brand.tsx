@@ -1,4 +1,4 @@
-/** Growth b logo (design/brand/BRAND.md). Geometry is shared with design/brand/symbol-*.svg. */
+/** Growth b logo (design/brand/BRAND.md). Geometry is shared with design/brand/symbol-*.svg. Wordmark styling is in brand.css. */
 const GREEN_DEEP = "#0B4D3B";
 const MARIGOLD = "#F2A900";
 
