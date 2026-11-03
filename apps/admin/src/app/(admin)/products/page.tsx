@@ -6,6 +6,7 @@ import { BulkBar, SelectAllCheckbox } from "@/components/bulk";
 import { LiveSearch, SelectFilter } from "@/components/live-filters";
 import { PlusIcon } from "@/components/icons";
 import { Pager, SubmitButton, Tabs } from "@/components/ui";
+import { AdminImage } from "@/components/admin-image";
 import { taka } from "@/lib/format";
 import { limitNote, Meter } from "@/lib/usage";
 import { pageOf, one, qs } from "@/lib/query";
@@ -22,8 +23,7 @@ const TABS: { key: ProductTab; label: string }[] = [{ key: "all", label: "All" }
 const VERBS: Record<string, string> = { publish: "published", unpublish: "moved to draft", archive: "archived", unarchive: "restored to draft", delete: "deleted" };
 
 function Thumb({ url, title, size = 44 }: { url: string | null; title: string; size?: number }) {
-  // eslint-disable-next-line @next/next/no-img-element
-  return <span className="thumb" style={size === 44 ? undefined : { width: size, height: size }}>{url ? <img src={url} alt="" width={size} height={size} className="thumb-img" /> : title.slice(0, 1).toUpperCase()}</span>;
+  return <span className="thumb" style={size === 44 ? undefined : { width: size, height: size }}>{url ? <AdminImage src={url} alt="" width={size} height={size} className="thumb-img" /> : title.slice(0, 1).toUpperCase()}</span>;
 }
 
 function StockPill({ p }: { p: AdminProductRow }) {
@@ -122,7 +122,7 @@ export default async function Products({ searchParams }: { searchParams: Promise
                 <div key={p.id} className="pcard" data-testid="product-row">
                   {canEdit && <input type="checkbox" name="ids" value={p.id} aria-label={`Select ${p.title}`} className="pick" />}
                   <Link href={`/products/${p.id}`} prefetch={false} className="pcard-link">
-                    <span className="pcard-img">{p.imageUrl ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={p.imageUrl} alt="" /> : <span className="ph">{p.title.slice(0, 1).toUpperCase()}</span>}</span>
+                    <span className="pcard-img">{p.imageUrl ? <AdminImage src={p.imageUrl} alt="" fill sizes="(max-width: 640px) 45vw, 200px" /> : <span className="ph">{p.title.slice(0, 1).toUpperCase()}</span>}</span>
                     <b className="pcard-title">{p.title}</b>
                     <span className="num">{taka(p.price)}</span>
                   </Link>
