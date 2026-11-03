@@ -9,7 +9,9 @@ let report: RlsReport;
 // secret row stays hidden (the core test "reads only the public settings, never a secret" proves it with real rows).
 // PublicToolUsage: the free courier fraud checker's per-visitor counter, written and read by the marketing site.
 // PlatformBlogPost: guides written in Platform Admin; the marketing site reads only published, due rows (row-level security hides drafts).
-const PLATFORM_READABLE = ["Plan", "Announcement", "Template", "Tenant", "PlatformConfig", "PublicToolUsage", "PlatformBlogPost"];
+// PlatformVisitorSession, PlatformVisitorEvent, PlatformClientError: the marketing site records visits and browser errors as the app role (migration 064),
+// so the app role has an open policy on them. This is the platform's own analytics, not store data; tighten it if a store ever gets a query path to them.
+const PLATFORM_READABLE = ["Plan", "Announcement", "Template", "Tenant", "PlatformConfig", "PublicToolUsage", "PlatformBlogPost", "PlatformVisitorSession", "PlatformVisitorEvent", "PlatformClientError"];
 const urls = testUrls();
 
 beforeAll(async () => {
