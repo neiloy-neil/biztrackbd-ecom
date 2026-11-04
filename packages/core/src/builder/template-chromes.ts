@@ -37,5 +37,8 @@ export const BUILT_IN_CHROMES: Record<string, Chrome> = {
   freshbasket: make({ logo: "left", search: "bar" }, { bgColor: "#B4421C", textColor: "#FFFFFF" }, "shop", "help", "contact", "payments"),
   bazaar: make({ logo: "left", search: "bar" }, { bgColor: "#C2410C", textColor: "#FFFFFF" }, "shop", "help", "contact", "payments"),
   maison: make({ logo: "center", search: "icon" }, { bgColor: "#1C1917", textColor: "#FFFFFF" }, "about", "shop", "help", "social"),
+  voltedge: make({ logo: "left", search: "bar" }, { bgColor: "#38BDF8", textColor: "#04121F" }, "shop", "help", "contact", "payments"),
+  lumiere: make({ logo: "center", search: "icon" }, { bgColor: "#3B1F52", textColor: "#FFFFFF" }, "about", "shop", "contact", "social"),
+  harvest: make({ logo: "left", search: "bar" }, { bgColor: "#3A2410", textColor: "#FFF3D6" }, "shop", "help", "contact", "payments"),
   nakshi: make({ logo: "center", search: "icon" }, { bgColor: "#7A1F2E", textColor: "#FFFFFF" }, "about", "shop", "contact", "social"),
 };

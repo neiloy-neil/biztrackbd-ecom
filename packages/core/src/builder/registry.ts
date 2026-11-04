@@ -50,6 +50,8 @@ export interface SectionDef {
   required?: boolean;
   /** At most this many of the section on one page. */
   max?: number;
+  /** A premium tool: only offered in the editor to a store that owns a premium theme (see hasPremiumTools). */
+  premium?: boolean;
   fields: Field[];
   list?: ListSpec;
   defaults: Record<string, unknown>;
@@ -179,6 +181,67 @@ export const SECTIONS: SectionDef[] = [
     type: "cart-main", label: "Cart", description: "The items, the totals and the checkout button. The cart page needs it.", page: "cart", required: true, max: 1,
     fields: [t("title", "Heading", 60), tb("title", "Heading", 60)],
     defaults: { title: "Your cart", titleBn: "আপনার কার্ট" },
+  },
+
+  // ---- Premium tools: working sections that come with the premium themes (a store that owns one can add them to its pages)
+  {
+    type: "size-chart", label: "Size chart with size finder", description: "A size table in inches. Shoppers type their chest size and the closest size is highlighted.", page: "product", pages: ["custom"], max: 1, premium: true,
+    fields: [t("title", "Heading", 60), tb("title", "Heading", 60), t("hint", "Finder hint", 120), tb("hint", "Finder hint", 120)],
+    list: { key: "rows", label: "Sizes", itemLabel: "Size", min: 2, max: 12, fields: [t("size", "Size", 12), { key: "chest", label: "Chest (inches)", type: "number", min: 20, max: 70 }, { key: "waist", label: "Waist (inches)", type: "number", min: 20, max: 70 }, { key: "length", label: "Length (inches)", type: "number", min: 10, max: 80 }], defaultItem: { size: "M", chest: 40, waist: 34, length: 28 } },
+    defaults: { title: "Size guide", titleBn: "সাইজ গাইড", hint: "Type your chest size in inches to find your size", hintBn: "আপনার বুকের মাপ ইঞ্চিতে লিখে সাইজ খুঁজুন", rows: [{ size: "S", chest: 36, waist: 30, length: 27 }, { size: "M", chest: 38, waist: 32, length: 28 }, { size: "L", chest: 40, waist: 34, length: 29 }, { size: "XL", chest: 42, waist: 36, length: 30 }] },
+  },
+  {
+    type: "spec-table", label: "Specifications table", description: "Key facts in a clean table: battery, warranty, size, what is in the box.", page: "product", pages: ["custom"], max: 1, premium: true,
+    fields: [t("title", "Heading", 60), tb("title", "Heading", 60)],
+    list: { key: "rows", label: "Specifications", itemLabel: "Row", min: 1, max: 16, fields: [t("label", "Name", 40), tb("label", "Name", 40), t("value", "Value", 120), tb("value", "Value", 120)], defaultItem: { label: "", labelBn: "", value: "", valueBn: "" } },
+    defaults: { title: "Specifications", titleBn: "স্পেসিফিকেশন", rows: [{ label: "Warranty", labelBn: "ওয়ারেন্টি", value: "1 year", valueBn: "১ বছর" }, { label: "Battery", labelBn: "ব্যাটারি", value: "Up to 10 days", valueBn: "১০ দিন পর্যন্ত" }, { label: "In the box", labelBn: "বক্সে", value: "Device, cable, manual", valueBn: "ডিভাইস, ক্যাবল, ম্যানুয়াল" }] },
+  },
+  {
+    type: "instalment-calc", label: "Instalment calculator", description: "Shows the monthly amount for this product over 3, 6 or 12 months, with your own fee.", page: "product", pages: ["custom"], max: 1, premium: true,
+    fields: [
+      t("title", "Heading", 60), tb("title", "Heading", 60),
+      t("months", "Months to offer", 30, { hint: "Numbers from 2 to 36, separated by commas, like 3,6,12" }),
+      { key: "feePercent", label: "Instalment fee (% of the price)", type: "number", min: 0, max: 30, hint: "0 for interest-free" },
+      t("note", "Note under the amount", 160), tb("note", "Note under the amount", 160),
+    ],
+    defaults: { title: "Pay in instalments", titleBn: "কিস্তিতে পরিশোধ", months: "3,6,12", feePercent: 0, note: "Pay by card in easy monthly instalments.", noteBn: "কার্ডে সহজ মাসিক কিস্তিতে পরিশোধ করুন।" },
+    check: (s) => {
+      const list = String(s.months ?? "").split(",").map((x) => Number(x.trim()));
+      return list.length >= 1 && list.length <= 6 && list.every((n) => Number.isInteger(n) && n >= 2 && n <= 36) ? null : "Months: up to six whole numbers from 2 to 36, like 3,6,12";
+    },
+  },
+  {
+    type: "shade-finder", label: "Shade finder", description: "Shoppers pick their skin tone and undertone and see the shades that suit them.", page: "product", pages: ["home", "custom", "collection"], max: 1, premium: true,
+    fields: [t("title", "Heading", 60), tb("title", "Heading", 60), t("hint", "Hint", 120), tb("hint", "Hint", 120)],
+    list: {
+      key: "shades", label: "Shades", itemLabel: "Shade", min: 2, max: 16,
+      fields: [
+        t("name", "Shade name", 40), tb("name", "Shade name", 40),
+        { key: "tone", label: "Skin tone", type: "select", options: [{ value: "fair", label: "Fair" }, { value: "light", label: "Light" }, { value: "medium", label: "Medium" }, { value: "tan", label: "Tan" }, { value: "deep", label: "Deep" }] },
+        { key: "undertone", label: "Undertone", type: "select", options: [{ value: "warm", label: "Warm" }, { value: "cool", label: "Cool" }, { value: "neutral", label: "Neutral" }] },
+        { key: "hex", label: "Swatch colour", type: "color" }, link("link", "Where to buy it"),
+      ],
+      defaultItem: { name: "", nameBn: "", tone: "medium", undertone: "neutral", hex: "#C68E6B", link: "" },
+    },
+    defaults: {
+      title: "Find your shade", titleBn: "আপনার শেড খুঁজুন", hint: "Pick your skin tone and undertone", hintBn: "ত্বকের রঙ ও আন্ডারটোন বেছে নিন",
+      shades: [
+        { name: "Porcelain", nameBn: "পোর্সেলিন", tone: "fair", undertone: "cool", hex: "#F3D9CF", link: "/search" },
+        { name: "Sand", nameBn: "স্যান্ড", tone: "light", undertone: "neutral", hex: "#E6C1A3", link: "/search" },
+        { name: "Honey", nameBn: "হানি", tone: "medium", undertone: "warm", hex: "#C98F63", link: "/search" },
+        { name: "Cocoa", nameBn: "কোকো", tone: "deep", undertone: "warm", hex: "#8A5A3C", link: "/search" },
+      ],
+    },
+  },
+  {
+    type: "delivery-slot", label: "Delivery slot and weekly repeat", description: "Shoppers choose a delivery day and a morning or evening slot, and can ask for the same basket every week. It goes in the order note.", page: "cart", pages: ["product", "custom"], max: 1, premium: true,
+    fields: [
+      t("title", "Heading", 60), tb("title", "Heading", 60),
+      t("morning", "Morning slot", 40), tb("morning", "Morning slot", 40), t("evening", "Evening slot", 40), tb("evening", "Evening slot", 40),
+      { key: "days", label: "Days ahead to offer", type: "number", min: 2, max: 7 },
+      { key: "repeat", label: "Offer a weekly repeat", type: "checkbox" }, t("repeatLabel", "Repeat label", 80), tb("repeatLabel", "Repeat label", 80),
+    ],
+    defaults: { title: "Choose your delivery slot", titleBn: "ডেলিভারির সময় বেছে নিন", morning: "Morning, 9am to 1pm", morningBn: "সকাল, ৯টা থেকে ১টা", evening: "Evening, 4pm to 8pm", eveningBn: "সন্ধ্যা, ৪টা থেকে ৮টা", days: 4, repeat: true, repeatLabel: "Repeat this order every week", repeatLabelBn: "প্রতি সপ্তাহে এই অর্ডার আবার দিন" },
   },
 
   // ---- Landing page
@@ -2638,6 +2701,8 @@ export interface SectionFilterOptions {
   mode?: SiteMode;
   vertical?: BusinessVertical;
   capabilities?: Partial<Record<keyof TenantCapabilities | string, boolean>>;
+  /** Whether the store owns a premium theme. Without it the premium tools are not offered. Left out (no filter), they are listed. */
+  premiumTools?: boolean;
 }
 
 export const sectionDef = (type: string): SectionDef | undefined => SECTIONS.find((s) => s.type === type);
@@ -2651,6 +2716,10 @@ const COMMERCE_SECTIONS = new Set([
   "collection-header",
   "collection-products",
   "cart-main",
+  "size-chart",
+  "spec-table",
+  "instalment-calc",
+  "delivery-slot",
   "lp-order-form",
   "drop-spotlight",
   "visitor-counter",
@@ -2665,6 +2734,7 @@ export const allowedOn = (def: SectionDef, kind: PageKind, filter?: SectionFilte
   const pageAllowed = def.page === kind || (def.pages?.includes(kind) ?? false);
   if (!pageAllowed) return false;
   if (!filter) return true;
+  if (def.premium && filter.premiumTools === false) return false;
 
   if (filter.mode && def.modes && !def.modes.includes(filter.mode)) {
     return false;

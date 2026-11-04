@@ -123,6 +123,9 @@ const THEME_NAMES: Record<string, string> = {
   bazaar: "Bazaar",
   nakshi: "Nakshi",
   maison: "Maison",
+  voltedge: "Voltedge",
+  lumiere: "Lumière",
+  harvest: "Harvest",
 };
 
 export async function getOverview(actor: PlatformActor, deps?: Deps): Promise<PlatformOverview> {
