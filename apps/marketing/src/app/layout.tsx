@@ -10,7 +10,8 @@ import "./site.css";
 const baloo = Baloo_Da_2({ subsets: ["bengali", "latin"], weight: ["800"], variable: "--font-baloo", display: "swap" });
 const hind = Hind_Siliguri({ subsets: ["bengali", "latin"], weight: ["400", "600"], variable: "--font-hind", display: "swap" });
 
-import { getPlatformSeoConfig, getPlatformSiteVerificationCode } from "@biztrackbd/core";
+import { connection } from "next/server";
+import { cspMode, getPlatformSeoConfig, getPlatformSiteVerificationCode } from "@biztrackbd/core";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_MARKETING_URL ??
@@ -149,6 +150,10 @@ import { SiteNavigation } from "@/components/site-navigation";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // A script nonce exists only on a page rendered per request. Most marketing pages are prerendered (and cached for minutes), so they carry no
+  // nonce and the nonce policy in src/proxy.ts would flag Next's own inline scripts on every one of them. Once CSP_MODE=enforce is set (at build
+  // and at runtime) every page is rendered per request instead. In report-only mode pages stay prerendered, so expect violations on those.
+  if (cspMode() === "enforce") await connection();
   const CONTACT = await getContact();
   const whatsappLink = CONTACT.whatsappLink;
   const globalJsonLd = buildGlobalJsonLd(CONTACT);

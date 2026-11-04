@@ -539,6 +539,8 @@ export * from "./messaging/chat-adapters";
 
 // Public Developer REST API & Keys (DEV-API-001)
 export * from "./api-keys";
+export { buildCspPolicy, createCsp, cspMode, generateNonce, type CspMode, type RequestCsp } from "./security/csp";
+export { consumeRateLimit, purgeExpiredRateLimits, rateLimitKey, clientIpFromHeaders, type RateLimitDb, type RateLimitDecision, type RateLimitOptions } from "./ratelimit/shared-rate-limit";
 
 // Analytics & Real-Time Performance Studio (ANALYTICS-001)
 export * from "./analytics";

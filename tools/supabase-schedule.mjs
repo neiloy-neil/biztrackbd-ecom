@@ -40,6 +40,7 @@ const JOBS = [
   ["biztrack-demo-axionwear", "6 22 * * *", "admin", "/api/cron/demo-reset?template=axionwear"],
   ["biztrack-demo-bindu", "8 22 * * *", "admin", "/api/cron/demo-reset?template=bindu"],
   ["biztrack-demo-berber", "10 22 * * *", "admin", "/api/cron/demo-reset?template=berber"],
+  ["biztrack-rate-limit-cleanup", "17 * * * *", "admin", "/api/cron/rate-limit-cleanup"], // expired shared rate limit counters
   ["biztrack-demo-sweep", "*/15 * * * *", "admin", "/api/cron/demo-sweep"], // visitor demo copies past their 3 hours (docs/41)
 ];
 

@@ -1,7 +1,8 @@
 import { createHmac, randomBytes } from "node:crypto";
 import { withTenant, getBasePrisma } from "@biztrackbd/db";
 import { ForbiddenError, ValidationError } from "../errors";
-import { assertPublicHttpUrl, checkPublicHttpUrl } from "../net/safe-url";
+import { checkPublicHttpUrl } from "../net/safe-url";
+import { safeFetch } from "../net/pinned-fetch";
 import { assertCan, can, type StaffActor } from "../permissions";
 import { enqueueNotificationJob } from "./queue";
 import {
@@ -891,16 +892,14 @@ export async function dispatchOutboundWebhook(
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    // Re-check at send time: a stored URL may predate the check, and a hostname can resolve to an internal address.
-    await assertPublicHttpUrl(cleanUrl, { field: "targetUrl" });
-    const response = await fetch(cleanUrl, {
+    // Re-check at send time (a stored URL may predate the check) and connect to the address that was checked, so DNS cannot answer
+    // differently between the check and the connection. Redirects are not followed: a 3xx counts as a failed delivery.
+    const response = await safeFetch(cleanUrl, {
       method: "POST",
       headers,
       body: payloadString,
       signal: controller.signal,
-      // A redirect to an internal address would sidestep the check above, so redirects are not followed.
-      redirect: "manual",
-    });
+    }, { field: "targetUrl" });
 
     clearTimeout(timeout);
 

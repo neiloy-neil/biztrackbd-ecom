@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { HEADERS, TRUSTED_HEADER_PREFIX, decideRoute, demoTemplate, findBusinessDemoTemplate, normalizeHost } from "@biztrackbd/core";
+import { HEADERS, TRUSTED_HEADER_PREFIX, createCsp, type RequestCsp, decideRoute, demoTemplate, findBusinessDemoTemplate, normalizeHost } from "@biztrackbd/core";
 import { getDirectory } from "@/lib/directory";
 
 /**
@@ -14,7 +14,13 @@ export const config = {
   matcher: ["/((?!_next/|_static/|.*\\.(?:png|jpe?g|gif|webp|avif|svg|ico|css|js|map|woff2?|ttf|html)$).*)"],
 };
 
+/** Every response carries the per-request CSP (nonce policy, report-only unless CSP_MODE=enforce); the nonce also goes to the page via the request headers. */
 export async function proxy(req: NextRequest): Promise<NextResponse> {
+  const csp = createCsp();
+  return csp.apply(await route(req, csp));
+}
+
+async function route(req: NextRequest, csp: RequestCsp): Promise<NextResponse> {
   // 0. Google Site Verification files (e.g. /google0668054f248577b1.html)
   const googleVerifyMatch = req.nextUrl.pathname.match(/^\/(google[a-zA-Z0-9_-]+\.html)$/i);
   if (googleVerifyMatch) {
@@ -47,7 +53,7 @@ export async function proxy(req: NextRequest): Promise<NextResponse> {
         console.error("[proxy] demo host lookup failed", e instanceof Error ? e.name : "unknown");
       }
       if (demoEntry) {
-        const headers = new Headers(req.headers);
+        const headers = csp.requestHeaders(req.headers);
         for (const name of [...headers.keys()]) if (name.startsWith(TRUSTED_HEADER_PREFIX)) headers.delete(name);
         headers.set(HEADERS.tenantId, demoEntry.tenantId);
         headers.set(HEADERS.subdomain, demoEntry.subdomain);
@@ -117,7 +123,7 @@ export async function proxy(req: NextRequest): Promise<NextResponse> {
   }
 
   // Anything a client sent under the trusted prefix is thrown away before we add our own.
-  const headers = new Headers(req.headers);
+  const headers = csp.requestHeaders(req.headers);
   for (const name of [...headers.keys()]) if (name.startsWith(TRUSTED_HEADER_PREFIX)) headers.delete(name);
 
   switch (decision.action) {

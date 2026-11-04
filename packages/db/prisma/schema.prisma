@@ -3382,3 +3382,17 @@ model MobileDeviceToken {
   @@index([appType, lastActiveAt])
 }
 
+
+// ==========================================
+// 43. SHARED RATE LIMIT COUNTERS (audit finding F6)
+// ==========================================
+// Fixed-window counters kept in Postgres so a limit holds across serverless instances. "key" is a salted hash (never a raw IP).
+model RateLimitBucket {
+  key         String
+  windowStart DateTime
+  count       Int      @default(0)
+  expiresAt   DateTime
+
+  @@id([key, windowStart])
+  @@index([expiresAt])
+}
