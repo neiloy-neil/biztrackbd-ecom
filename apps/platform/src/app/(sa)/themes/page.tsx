@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { AutoSubmitSelect } from "@/components/auto-submit-select";
 import {
   TEMPLATE_CATEGORIES,
@@ -66,6 +67,10 @@ export default async function ThemesPage({
 
       {one(sp.err) && <div className="notice bad" role="alert">{one(sp.err)}</div>}
       {one(sp.done) && <div className="notice good" role="status">{one(sp.done)}</div>}
+
+      {canSee && (
+        <div className="notice" data-testid="offers-link">Discount codes and theme bundles: <Link href="/themes/offers" className="link">manage offers</Link>.</div>
+      )}
 
       {/* Storefront theme pricing */}
       {canSee && (

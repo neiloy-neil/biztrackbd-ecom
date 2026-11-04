@@ -122,6 +122,7 @@ export { accessState, statusFor, addPeriod, ACCESS_LABELS, GRACE_DAYS, READ_ONLY
 export { scanBrandRisk } from "./platform/brand";
 export * from "./platform/templates";
 export * from "./platform/theme-store";
+export * from "./platform/theme-pricing";
 export * from "./platform/theme-catalogue";
 export * from "./modules/purchases";
 export * from "./platform/revenue";

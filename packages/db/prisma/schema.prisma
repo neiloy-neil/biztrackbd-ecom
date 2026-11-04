@@ -247,6 +247,14 @@ model ThemePurchase {
   rejectionReason String?
   /// Set for a monthly theme: access ends here unless renewed with a new purchase. Null means owned for life.
   expiresAt       DateTime?
+  /// One payment can unlock several themes (a bundle): every row of that payment shares groupId and bundleId. Only the lead row carries the
+  /// real TrxID (the others get "<trx>:<n>" so the unique index still holds) and the platform approves or rejects the whole group at once.
+  bundleId        String?
+  groupId         String?
+  leadRow         Boolean  @default(true)
+  /// The code applied at checkout and this row's share of the taka taken off. `amount` is always what was actually charged for the row.
+  discountCode    String?
+  discountAmount  Decimal  @default(0) @db.Decimal(12, 2)
 
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
@@ -254,6 +262,40 @@ model ThemePurchase {
 
   @@index([tenantId, themeId])
   @@index([status])
+  @@index([groupId])
+  @@index([discountCode])
+}
+
+/// A discount code for theme checkout, made in Platform Admin. A store can read active codes (to price a purchase) but only redeems one through
+/// the theme_discount_redeem function, which counts the use atomically. Only the platform role writes.
+model ThemeDiscount {
+  id        String    @id @default(cuid())
+  code      String    @unique // upper case, for example "EID25"
+  kind      String // "PERCENT" | "FIXED" (taka)
+  value     Decimal   @db.Decimal(12, 2)
+  expiresAt DateTime?
+  maxUses   Int?
+  usedCount Int       @default(0)
+  /// Theme ids the code is limited to; empty means every theme and bundle.
+  themeIds  String[]  @default([])
+  active    Boolean   @default(true)
+  note      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+/// A named set of premium themes sold together for one price. Buying it makes one ThemePurchase row per theme.
+model ThemeBundle {
+  id         String   @id // slug
+  name       String
+  blurb      String   @default("")
+  themeIds   String[] @default([])
+  priceModel String   @default("ONE_TIME") // "ONE_TIME" | "MONTHLY"
+  priceBdt   Decimal  @db.Decimal(12, 2)
+  active     Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 /// The theme catalogue, edited by the platform admin. A row decides whether a theme is free or premium, its price and which plans include it.

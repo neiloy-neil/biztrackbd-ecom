@@ -128,7 +128,7 @@ export default async function Payments({
             {themePurchases.map((p) => (
               <form key={p.id} style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", paddingTop: 10, borderTop: "1px solid #E5E5F0" }}>
                 <div style={{ flex: "1 1 260px", fontSize: 14 }}>
-                  <b>{p.storeName}</b> ({p.subdomain}) bought <b>{p.themeName}</b> for ৳ {p.amount}<br />
+                  <b>{p.storeName}</b> ({p.subdomain}) bought <b>{p.themeName}</b> for ৳ {p.amount}{p.discountCode ? ` (code ${p.discountCode})` : ""}<br />
                   <span style={{ color: "#4B4B73" }}>{p.provider} from {p.senderNumber}, TrxID {p.trxId}</span>
                 </div>
                 {canEdit && (

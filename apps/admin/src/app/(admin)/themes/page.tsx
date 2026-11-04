@@ -59,6 +59,35 @@ export default async function Themes({ searchParams }: { searchParams: Promise<R
       {one(sp.sent) && <div className="notice good" role="status" style={{ marginBottom: 12 }} data-testid="purchase-sent">Thank you. We will check your payment and unlock the theme, usually within a few hours.</div>}
       {one(sp.err) && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{one(sp.err)}</div>}
 
+      {store.bundles.length > 0 && (
+        <section aria-labelledby="bundles-h" style={{ marginBottom: 28 }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap", marginBottom: 12 }}>
+            <h2 id="bundles-h" style={{ margin: 0 }}>Theme bundles</h2>
+            <span className="muted" style={{ fontSize: 14 }}>Several premium themes for one price.</span>
+          </div>
+          <div className="theme-grid" data-testid="theme-bundles">
+            {store.bundles.map((b) => (
+              <article key={b.id} className="theme-card" data-testid={`bundle-${b.id}`}>
+                <div className="theme-body">
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                    <h3>{b.name}</h3>
+                    {b.state === "OWNED" && <span className="pill ok" style={{ fontSize: 12 }}>You have all of these</span>}
+                    {b.state === "PENDING" && <span className="pill warn" style={{ fontSize: 12 }}>Payment being checked</span>}
+                  </div>
+                  {b.blurb && <p className="muted" style={{ margin: 0, fontSize: 14 }}>{b.blurb}</p>}
+                  <p style={{ margin: 0, fontSize: 14 }}>{b.themes.map((t) => t.name).join(" + ")}</p>
+                  <p className="muted" style={{ margin: 0, fontSize: 13 }}>{b.listPrice > b.price ? <>Separately <s>{taka(b.listPrice)}</s>. </> : null}{b.priceModel === "MONTHLY" ? "Per month." : "Paid once."}</p>
+                  {b.lastRejection && b.state === "AVAILABLE" && <p className="notice bad" role="alert" style={{ margin: 0, fontSize: 13 }}>Your last payment was not accepted: {b.lastRejection}</p>}
+                  {b.state === "AVAILABLE" && (canBuy
+                    ? <BuyForm bundleId={b.id} name={b.name} price={b.price} monthly={b.priceModel === "MONTHLY"} renew={b.renew} payTo={store.payTo} online={store.online} />
+                    : <p className="muted" style={{ margin: 0, fontSize: 13 }}>Ask the store owner to buy this bundle.</p>)}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section aria-labelledby="premium-h" style={{ marginBottom: 28 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap", marginBottom: 12 }}>
           <h2 id="premium-h" style={{ margin: 0 }}>Premium themes</h2>
@@ -117,7 +146,7 @@ function ThemeCard({ t, canEdit, canBuy, payTo, online }: { t: ThemeStoreItem; c
           )}
         </div>
         {t.state === "LOCKED" && (canBuy
-          ? <BuyForm themeId={t.id} themeName={t.name} price={t.price} monthly={t.priceModel === "MONTHLY"} renew={t.expired} payTo={payTo} online={online} />
+          ? <BuyForm themeId={t.id} name={t.name} price={t.price} monthly={t.priceModel === "MONTHLY"} renew={t.expired} payTo={payTo} online={online} />
           : <p className="muted" style={{ margin: 0, fontSize: 13 }}>Ask the store owner to buy this theme.</p>)}
       </div>
     </article>
