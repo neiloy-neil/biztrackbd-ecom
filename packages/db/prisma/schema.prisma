@@ -244,6 +244,8 @@ model ThemePurchase {
   approvedBy      String? // Platform user ID that approved or rejected it
   approvedAt      DateTime?
   rejectionReason String?
+  /// Set for a monthly theme: access ends here unless renewed with a new purchase. Null means owned for life.
+  expiresAt       DateTime?
 
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
@@ -251,6 +253,28 @@ model ThemePurchase {
 
   @@index([tenantId, themeId])
   @@index([status])
+}
+
+/// The theme catalogue, edited by the platform admin. A row decides whether a theme is free or premium, its price and which plans include it.
+/// The built-in themes are written here from the code (syncBuiltinThemes); a theme without a row falls back to the code's own definition.
+/// Stores may read every row (the catalogue code hides DRAFT and ARCHIVED ones); only the platform role writes.
+model Theme {
+  id            String   @id // slug, for example "maison"; the built-in themes keep the ids they have always had
+  name          String
+  blurb         String
+  audience      String
+  source        String   @default("BUILTIN") // "BUILTIN" | "PACKAGE" (an uploaded package)
+  status        String   @default("PUBLISHED") // "DRAFT" | "PUBLISHED" | "ARCHIVED"
+  priceModel    String   @default("FREE") // "FREE" | "ONE_TIME" | "MONTHLY"
+  priceBdt      Decimal  @default(0) @db.Decimal(12, 2)
+  /// Plan tiers that get the theme without paying, for example ["PRO","BUSINESS"].
+  includedPlans String[] @default([])
+  defaults      Json     @default("{}")
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status, sortOrder])
 }
 
 model PaymentProof {

@@ -6,7 +6,7 @@ import { handleDigitalOrderPaymentSuccess, dispatchDigitalOrderDeliveryNotificat
 import { loadCredentials } from "../vault/integrations";
 import { enqueueNotificationJob } from "../messaging/queue";
 import { addPeriod } from "../platform/lifecycle";
-import { PREMIUM_THEME_PRICE, isPremiumTheme } from "../builder/theme";
+import { catalogTheme, mergeCatalogue, purchaseExpiry } from "../platform/theme-catalogue";
 
 // The shared sandbox address and its public test key exist for development only. In production a store without its own keys must not be
 // offered online payment, or shoppers would be sent to a sandbox where any made-up transaction id marks the order paid.
@@ -537,9 +537,10 @@ async function grantPremiumThemeFromPayment(invoiceId: string, verified: Uddokta
   const tenantId = verified.metadata?.tenantId ?? "";
   const themeId = verified.metadata?.themeId ?? "";
   if (!tenantId) throw new ValidationError("Missing tenantId in theme payment metadata");
-  if (!isPremiumTheme(themeId)) throw new ValidationError("That is not a premium theme");
-  if (!(Number(verified.amount) >= PREMIUM_THEME_PRICE)) throw new ValidationError("The amount paid is less than the theme price");
   const db = getPlatformPrisma();
+  const theme = catalogTheme(mergeCatalogue(await db.theme.findMany()), themeId);
+  if (!theme || !theme.premium) throw new ValidationError("That is not a premium theme");
+  if (!(Number(verified.amount) >= theme.price)) throw new ValidationError("The amount paid is less than the theme price");
   const tenant = await db.tenant.findUnique({ where: { id: tenantId }, select: { id: true } });
   if (!tenant) throw new NotFoundError("Tenant");
   const trxId = verified.transactionId || invoiceId;
@@ -549,7 +550,9 @@ async function grantPremiumThemeFromPayment(invoiceId: string, verified: Uddokta
   try {
     await db.$transaction(async (tx) => {
       if (await tx.themePurchase.findUnique({ where: { trxId } })) return;
-      await tx.themePurchase.create({ data: { tenantId, themeId, amount: PREMIUM_THEME_PRICE, mfsProvider, senderNumber, trxId, status: "APPROVED", approvedAt: new Date() } });
+      const now = new Date();
+      const current = await tx.themePurchase.findFirst({ where: { tenantId, themeId, status: "APPROVED", expiresAt: { not: null } }, orderBy: { expiresAt: "desc" }, select: { expiresAt: true } });
+      await tx.themePurchase.create({ data: { tenantId, themeId, amount: theme.price, mfsProvider, senderNumber, trxId, status: "APPROVED", approvedAt: now, expiresAt: purchaseExpiry(theme.priceModel, now, current?.expiresAt ?? null) } });
       await tx.platformAuditLog.create({ data: { actorId: "SYSTEM", action: "theme.purchase_online", tenantId, details: { themeId, invoiceId, trxId, amount: Number(verified.amount), method: verified.paymentMethod ?? null } } });
     });
   } catch (err) {

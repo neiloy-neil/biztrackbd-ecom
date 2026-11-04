@@ -4,6 +4,7 @@ import { audit } from "../audit/service";
 import { DomainError, NotFoundError, PlanFeatureError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
 import { STORE_PAGE_KINDS, defaultPageFor, validatePage, type PageJson, type PageKind } from "./registry";
+import { canUseState, themeAccess } from "../platform/theme-catalogue";
 import { isPremiumTheme, themeDefaults, validateTheme, validateThemeId, type ThemeId, type ThemeSettings } from "./theme";
 import { premiumPagesFor } from "./premium-pages";
 
@@ -443,8 +444,9 @@ export async function activateTheme(tenantId: string, actor: StaffActor, rawThem
     const firstUse = premium && !(await tx.themeInstall.findFirst({ where: { themeId } }));
     // The template demo stores show every theme, premium included, so visitors can preview before they buy.
     const demo = premium && (await tx.tenant.findFirst({ select: { isDemo: true } }))?.isDemo === true;
-    if (premium && !demo && (await tx.themePurchase.count({ where: { themeId, status: "APPROVED" } })) === 0) {
-      throw new ValidationError("Buy this premium theme first, then you can apply it.", { field: "themeId" });
+    const access = demo ? null : await themeAccess(tx, themeId);
+    if (!demo && !(access && canUseState(access.state))) {
+      throw new ValidationError(access?.expired ? "Your access to this theme has ended. Renew it first, then you can apply it." : "Buy this premium theme first, then you can apply it.", { field: "themeId" });
     }
     await tx.themeInstall.updateMany({ where: { isActive: true }, data: { isActive: false } });
     await tx.themeInstall.upsert({
