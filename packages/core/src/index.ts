@@ -124,6 +124,7 @@ export * from "./platform/templates";
 export * from "./platform/theme-store";
 export * from "./platform/theme-catalogue";
 export * from "./modules/purchases";
+export * from "./platform/revenue";
 export { notExpired } from "./modules/expiry";
 export { premiumPagesFor } from "./builder/premium-pages";
 export * from "./platform/template-bundle";
