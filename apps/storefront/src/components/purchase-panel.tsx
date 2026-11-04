@@ -37,6 +37,15 @@ export interface PurchaseText {
   priceLabel: Record<string, string>;
 }
 
+/** Common colour names a variant can be called, so premium themes can show a colour dot beside the name. Anything else shows no dot. */
+const SWATCHES: Record<string, string> = {
+  black: "#1C1917", white: "#F5F5F4", "off-white": "#F1EBDD", ivory: "#F1E6D2", cream: "#F3E9D2", bone: "#E9E2D3", sand: "#D8C3A5", beige: "#D9C7A7", tan: "#B98B5E", brown: "#7A4B2A", camel: "#C19A6B",
+  grey: "#8A8F98", gray: "#8A8F98", silver: "#C0C5CE", graphite: "#3F444C", charcoal: "#36393F", midnight: "#14213D", navy: "#1F2A5A", blue: "#2563EB", "sky blue": "#7DB7F0", teal: "#0F766E",
+  red: "#C0262D", maroon: "#7A1F2E", rust: "#A4472A", copper: "#A8562F", orange: "#E8720C", gold: "#C9A24B", yellow: "#EAB308", pink: "#E87AA6", rose: "#D9748F", berry: "#8E2A5B", orchid: "#9A5BC0", purple: "#6D3FB0",
+  olive: "#6B7A2E", sage: "#9CAF88", mint: "#A8D8C0", ink: "#1B1F3B",
+};
+const swatchFor = (title: string): string | null => SWATCHES[title.trim().toLowerCase()] ?? null;
+
 const LOW_STOCK = 5;
 const MAX_QTY = 10;
 
@@ -95,6 +104,7 @@ export function PurchasePanel({ variants, text, hasChoices }: { variants: Purcha
           <div className="sizes" role="group" aria-label={text.size}>
             {variants.map((x) => (
               <button key={x.id} type="button" className="size" aria-pressed={x.id === variantId} disabled={x.stock <= 0} onClick={() => choose(x.id)} data-testid={`size-${x.title}`}>
+                {swatchFor(x.title) && <i className="sw-dot" style={{ background: swatchFor(x.title)! }} aria-hidden="true" />}
                 {x.title}
               </button>
             ))}

@@ -53,6 +53,8 @@ interface Props {
   initialTab?: "theme";
   siteMode?: SiteMode;
   businessVertical?: BusinessVertical;
+  /** Whether the store owns a premium theme, which unlocks the premium tools (size chart, shade finder and the rest) in the section list. */
+  premiumTools?: boolean;
 }
 
 const DEVICE_WIDTH: Record<Device, number | null> = { desktop: null, tablet: 768, phone: 390 };
@@ -2450,7 +2452,7 @@ export function Builder(props: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [undo, redo, selected, locked, canEdit, flush]);
 
-  const defs = sectionsFor(kind, { mode: props.siteMode, vertical: props.businessVertical });
+  const defs = sectionsFor(kind, { mode: props.siteMode, vertical: props.businessVertical, premiumTools: props.premiumTools });
   const count = (type: string) => page.sections.filter((s) => s.type === type).length;
   const full = (type: string) => { const d = sectionDef(type); return page.sections.length >= 30 || (!!d?.max && count(type) >= d.max); };
   const current = page.sections.find((s) => s.id === selected) ?? null;

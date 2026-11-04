@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { getBasePrisma, resolveTenantByHost, withTenant, type TenantTx } from "@biztrackbd/db";
 import { activateTheme, publish, saveDraft } from "../builder/versions";
-import { themeDefaults } from "../builder/theme";
+import { premiumPagesFor } from "../builder/premium-pages";
+import { isPremiumTheme, themeDefaults } from "../builder/theme";
 import type { StaffActor } from "../permissions";
 import { bannerSvg, productSvg, type Palette } from "./art";
 import { DEMO_TEMPLATES, demoTemplate, type DemoProduct, type DemoTemplate } from "./templates";
@@ -172,8 +173,17 @@ export async function resetDemoStore(templateId: string, deps: DemoDeps): Promis
       { id: "trust1", type: "trust-strip", settings: {} },
     ],
   };
+  // A premium theme's demo also shows its working tools: its tool sections on the home page, and its own product and cart layouts.
+  const premium = isPremiumTheme(t.id) ? premiumPagesFor(t.id) : null;
+  if (premium?.home) page.sections.splice(3, 0, ...premium.home.sections.filter((x) => x.type === "shade-finder") as typeof page.sections);
   await saveDraft(id, actor, "home", page, themeDefaults(t.id));
   await publish(id, actor, "home", "Demo layout");
+  for (const kind of ["product", "cart"] as const) {
+    const layout = premium?.[kind];
+    if (!layout) continue;
+    await saveDraft(id, actor, kind, layout, undefined);
+    await publish(id, actor, kind, "Demo layout");
+  }
 
   return { template: t.id, tenantId: id, subdomain: t.host, products: t.products.length, pictures };
 }

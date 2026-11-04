@@ -46,6 +46,14 @@ export async function ownsPremiumTheme(tx: TenantTx, themeId: string): Promise<b
   return (await tx.themePurchase.count({ where: { themeId, status: "APPROVED" } })) > 0;
 }
 
+/** Whether a store may add the premium tools (size chart, shade finder and the rest) to its pages: it owns at least one premium theme. */
+export async function hasPremiumTools(tenantId: string): Promise<boolean> {
+  return withTenant(tenantId, async (tx) => {
+    if ((await tx.tenant.findFirst({ select: { isDemo: true } }))?.isDemo) return true;
+    return (await tx.themePurchase.count({ where: { status: "APPROVED" } })) > 0;
+  });
+}
+
 export async function listThemeStore(tenantId: string, actor: StaffActor): Promise<ThemeStoreView> {
   assertCan(actor, "design", "view");
   const { tenant, purchases } = await withTenant(tenantId, async (tx) => ({

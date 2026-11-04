@@ -461,3 +461,42 @@ body[data-store-theme="harvest"] .footer b, body[data-store-theme="harvest"] .fo
   body[data-store-theme="harvest"] .hero { min-height: 70vh; }
   body[data-store-theme="harvest"] .hero::before { width: 40vmin; height: 40vmin; right: -8vmin; top: 4vmin; }
 }
+
+/* ================================================================ Premium tools */
+/* The working pieces that come with the premium themes: size finder, specs, instalments, shade finder, delivery slot. They use each theme's own colours. */
+.pt-card { background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--radius); padding: 20px; }
+.pt-card h2 { margin: 0 0 12px; }
+.pt-sub { margin: 4px 0 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.pt-result { margin: 8px 0 12px; font-size: 15px; color: var(--ink); min-height: 24px; }
+.pt-result b { color: var(--accent-strong); font-size: 1.15em; }
+.pt-big { margin: 10px 0 2px; font-size: 18px; color: var(--ink); }
+.pt-big b { font-size: 34px; letter-spacing: -.02em; color: var(--accent-strong); }
+.pt-find { display: grid; gap: 6px; max-width: 320px; font-size: 14px; color: var(--ink-2); }
+.pt-find .input { min-height: 44px; font-size: 16px; }
+.pt-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.pt-table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 280px; }
+.pt-table th, .pt-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); color: var(--ink); }
+.pt-table thead th { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.pt-table tbody th { font-weight: 700; }
+.pt-table tr[data-match="true"] { background: var(--tint-1); box-shadow: inset 3px 0 0 var(--accent); }
+.pt-table tr[data-match="true"] th, .pt-table tr[data-match="true"] td { font-weight: 800; color: var(--accent-strong); }
+.pt-specs th { width: 38%; color: var(--ink-2); font-weight: 600; }
+.pt-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0; }
+.pt-label { flex: 0 0 100%; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.pt-chip { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform .2s, background .2s, border-color .2s, color .2s; }
+.pt-chip:hover { transform: translateY(-2px); border-color: var(--accent); }
+.pt-chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.pt-chip:focus-visible, .pt-check input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pt-months { display: flex; flex-wrap: wrap; gap: 8px; }
+.pt-check { display: flex; gap: 10px; align-items: center; min-height: 44px; margin-top: 6px; font-size: 15px; cursor: pointer; color: var(--ink); }
+.pt-check input { width: 22px; height: 22px; accent-color: var(--accent); }
+.pt-shades { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 10px; }
+.pt-shades li { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: calc(var(--radius) * .75); background: var(--tint-1); }
+.pt-dot { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--line-2), 0 6px 14px -6px rgba(0, 0, 0, .35); }
+.pt-view { margin-left: auto; min-height: 44px; display: inline-flex; align-items: center; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+/* Colour dots beside the colour options of a product: only the premium themes show them. */
+.sw-dot { display: none; }
+body[data-store-theme="maison"] .sw-dot, body[data-store-theme="lumiere"] .sw-dot, body[data-store-theme="voltedge"] .sw-dot, body[data-store-theme="harvest"] .sw-dot { display: inline-block; width: 14px; height: 14px; margin-right: 8px; border-radius: 50%; vertical-align: -2px; box-shadow: 0 0 0 1px rgba(0, 0, 0, .25); }
+@media (prefers-reduced-motion: reduce) { .pt-chip { transition: none; } }

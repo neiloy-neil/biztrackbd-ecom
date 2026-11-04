@@ -20,7 +20,7 @@ const MAISON_HOME = page([
 
 const MAISON_PRODUCT = page([
   section("product-main", 1),
-  section("rich-text", 1, { heading: "Size and fit guide", headingBn: "সাইজ ও ফিট গাইড", body: "Measure your chest, waist and hip in inches and compare with the sizes listed above. Between sizes, choose the larger for a relaxed fit. Not sure? Message us on WhatsApp with your measurements and we will recommend a size before you order.", bodyBn: "বুক, কোমর ও হিপ ইঞ্চিতে মেপে উপরের সাইজের সঙ্গে মিলিয়ে নিন। দুই সাইজের মাঝে হলে ঢিলেঢালা ফিটের জন্য বড়টি নিন। নিশ্চিত না হলে মাপসহ হোয়াটসঅ্যাপে জানান, অর্ডারের আগেই সাইজ বলে দেব।" }),
+  section("size-chart", 1, { title: "Size and fit guide", titleBn: "সাইজ ও ফিট গাইড", hint: "Type your chest size in inches to find your size", hintBn: "আপনার বুকের মাপ ইঞ্চিতে লিখে সাইজ খুঁজুন" }),
   section("product-reviews", 1),
   section("product-related", 1, { title: "Complete the look", titleBn: "লুক সম্পূর্ণ করুন", limit: 4 }),
 ]);
@@ -37,6 +37,8 @@ const VOLTEDGE_HOME = page([
 
 const VOLTEDGE_PRODUCT = page([
   section("product-main", 1),
+  section("instalment-calc", 1),
+  section("spec-table", 1),
   section("rich-text", 1, { heading: "Specifications and warranty", headingBn: "স্পেসিফিকেশন ও ওয়ারেন্টি", body: "Battery life, charging speed, connectivity and in-the-box items are listed in the description above. Every device has a 1-year warranty from the date on your receipt and a 7-day replacement for a faulty unit. Need help choosing? Message us on WhatsApp and we will compare two models for you.", bodyBn: "ব্যাটারি লাইফ, চার্জিং গতি, কানেক্টিভিটি ও বক্সে কী কী আছে তা উপরের বিবরণে দেওয়া আছে। রসিদের তারিখ থেকে ১ বছরের ওয়ারেন্টি এবং ত্রুটিপূর্ণ হলে ৭ দিনের রিপ্লেসমেন্ট। বাছাইয়ে সাহায্য লাগলে হোয়াটসঅ্যাপে জানান, দুটি মডেলের তুলনা করে দেব।" }),
   section("product-reviews", 1),
   section("product-related", 1, { title: "Pairs well with", titleBn: "যার সাথে ভালো মানায়", limit: 4 }),
@@ -45,6 +47,7 @@ const VOLTEDGE_PRODUCT = page([
 const LUMIERE_HOME = page([
   section("hero", 1, { eyebrow: "THE GLOW EDIT", eyebrowBn: "গ্লো এডিট", title: "Skin that glows from within", titleBn: "ভেতর থেকে উজ্জ্বল ত্বক", text: "Skincare, makeup and fragrance, matched to your routine.", textBn: "ত্বকের যত্ন, মেকআপ ও সুগন্ধি, আপনার রুটিন অনুযায়ী বাছাই করা।", ctaText: "Find your routine", ctaTextBn: "আপনার রুটিন খুঁজুন", ctaLink: "/search", align: "left" }),
   section("category-grid", 1, { title: "Shop by ritual", titleBn: "রিচুয়াল অনুযায়ী কিনুন", limit: 4 }),
+  section("shade-finder", 1),
   section("featured-products", 1, { title: "New in", titleBn: "নতুন এসেছে", source: "new", limit: 8, columns: "4" }),
   section("banner", 1, { heading: "The 3-step glow routine", headingBn: "৩ ধাপের গ্লো রুটিন", text: "Cleanse, treat and protect: bundle all three and save 15%.", textBn: "পরিষ্কার, চিকিৎসা ও সুরক্ষা: তিনটি একসাথে নিলে ১৫% ছাড়।", ctaText: "Shop the routine", ctaTextBn: "রুটিন দেখুন", ctaLink: "/search?sale=1", height: "tall" }),
   section("featured-products", 2, { title: "Most loved", titleBn: "সবচেয়ে পছন্দের", source: "featured", limit: 4, columns: "4" }),
@@ -54,6 +57,7 @@ const LUMIERE_HOME = page([
 
 const LUMIERE_PRODUCT = page([
   section("product-main", 1),
+  section("shade-finder", 1),
   section("rich-text", 1, { heading: "Ingredients and how to use", headingBn: "উপাদান ও ব্যবহারবিধি", body: "The key ingredients and the full list are in the description above. Apply to clean skin, morning or night as directed. Patch-test first, avoid the eye area, and use sun protection in the daytime. Not sure where to start? Message us on WhatsApp and we will build a routine for your skin.", bodyBn: "মূল উপাদান ও পূর্ণ তালিকা উপরের বিবরণে আছে। পরিষ্কার ত্বকে সকালে বা রাতে নির্দেশমতো লাগান। আগে প্যাচ-টেস্ট করুন, চোখের চারপাশ এড়িয়ে চলুন এবং দিনে সানস্ক্রিন ব্যবহার করুন। কোথা থেকে শুরু করবেন বুঝতে না পারলে হোয়াটসঅ্যাপে জানান, আপনার ত্বকের রুটিন সাজিয়ে দেব।" }),
   section("product-reviews", 1),
   section("product-related", 1, { title: "Complete the routine", titleBn: "রুটিন সম্পূর্ণ করুন", limit: 4 }),
@@ -76,11 +80,16 @@ const HARVEST_PRODUCT = page([
   section("product-related", 1, { title: "Fill the basket", titleBn: "ঝুড়ি ভরুন", limit: 4 }),
 ]);
 
+const HARVEST_CART = page([
+  section("delivery-slot", 1),
+  section("cart-main", 1),
+]);
+
 const PREMIUM_PAGES: Partial<Record<ThemeId, Partial<Record<PageKind, PageJson>>>> = {
   maison: { home: MAISON_HOME, product: MAISON_PRODUCT },
   voltedge: { home: VOLTEDGE_HOME, product: VOLTEDGE_PRODUCT },
   lumiere: { home: LUMIERE_HOME, product: LUMIERE_PRODUCT },
-  harvest: { home: HARVEST_HOME, product: HARVEST_PRODUCT },
+  harvest: { home: HARVEST_HOME, product: HARVEST_PRODUCT, cart: HARVEST_CART },
 };
 
 /** The layout a premium theme starts with, one entry per page kind. The pages it does not list use the standard layouts. */

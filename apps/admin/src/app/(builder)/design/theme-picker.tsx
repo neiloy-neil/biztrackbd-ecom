@@ -1,4 +1,5 @@
-import { STORE_THEMES, type ThemeId } from "@biztrackbd/core";
+import Link from "next/link";
+import { STORE_THEMES, type ThemeId, type ThemeStoreItem } from "@biztrackbd/core";
 import { activateThemeAction } from "./actions";
 
 const swatch: Record<ThemeId, string> = {
@@ -17,12 +18,19 @@ const swatch: Record<ThemeId, string> = {
   harvest: "linear-gradient(135deg,#FFFBF0 0 50%,#B45309 50%)",
 };
 
-export function ThemePicker({ active, canEdit }: { active: ThemeId; canEdit: boolean }) {
+export function ThemePicker({ active, canEdit, themes }: { active: ThemeId; canEdit: boolean; themes?: ThemeStoreItem[] | null }) {
+  // Every free theme, and each premium theme: owned ones can be applied here, the others point to the Themes page to buy.
+  const list = themes && themes.length > 0 ? themes : STORE_THEMES.map((t) => ({ id: t.id, name: t.name, audience: t.audience, premium: false, state: "FREE" as const, price: 0 }));
   return (
     <section className="card" data-testid="theme-picker">
       <div style={{ marginBottom: 10 }}><b>Storefront template</b><div className="muted" style={{ fontSize: 13 }}>Changing the template keeps products, orders and content. Each template keeps its own design history.</div></div>
       <div style={{ display: "grid", gap: 8 }}>
-        {STORE_THEMES.map((theme) => (
+        {list.map((theme) => (theme.state === "LOCKED" || theme.state === "PENDING" ? (
+          <Link key={theme.id} href="/themes" className="btn btn-secondary" prefetch={false} data-testid={`store-theme-${theme.id}`} style={{ width: "100%", minHeight: 58, justifyContent: "flex-start", textAlign: "left", padding: 8 }}>
+            <span aria-hidden="true" style={{ width: 42, height: 42, flex: "0 0 auto", borderRadius: 8, background: swatch[theme.id], border: "1px solid var(--line)" }} />
+            <span style={{ display: "block", lineHeight: 1.25 }}><b>{theme.name}</b> <span className="pill warn" style={{ fontSize: 11 }}>Premium</span><br /><span className="muted" style={{ fontSize: 12 }}>{theme.state === "PENDING" ? "Payment being checked" : `Get it for ৳${theme.price} on the Themes page`}</span></span>
+          </Link>
+        ) : (
           <form action={activateThemeAction} key={theme.id}>
             <input type="hidden" name="themeId" value={theme.id} />
             <button
@@ -35,10 +43,11 @@ export function ThemePicker({ active, canEdit }: { active: ThemeId; canEdit: boo
             >
               <span aria-hidden="true" style={{ width: 42, height: 42, flex: "0 0 auto", borderRadius: 8, background: swatch[theme.id], border: "1px solid var(--line)" }} />
               <span style={{ display: "block", lineHeight: 1.25 }}><b>{theme.name}</b><br /><span className="muted" style={{ fontSize: 12 }}>{theme.audience}</span></span>
+              {theme.premium && <span className="pill ok" style={{ fontSize: 11 }}>Premium</span>}
               {active === theme.id && <span className="pill ok" style={{ marginLeft: "auto" }}>Active</span>}
             </button>
           </form>
-        ))}
+        )))}
       </div>
     </section>
   );

@@ -3,7 +3,7 @@ import { createBaseClient, setBasePrisma, setPlatformPrisma, withTenant, type Pr
 import { createOwnerClient, resetDatabase, seedPlans, testUrls } from "@biztrackbd/db/testing";
 import {
   DomainError, PREMIUM_THEMES, PREMIUM_THEME_PRICE, STORE_THEMES, activateTheme, approveThemePurchase, isFreeThemeId, listPendingThemePurchases, listThemeStore, rejectThemePurchase,
-  processUddoktaPaySubscriptionSuccess, resolveTemplateForSignup, setEventPublisher, setUddoktaPayFetchForTests, signupStore, startThemeCheckout, submitThemePurchase, type PlatformActor, type StaffActor,
+  processUddoktaPaySubscriptionSuccess, hasPremiumTools, premiumPagesFor, resolveTemplateForSignup, sectionsFor, setEventPublisher, validatePage, setUddoktaPayFetchForTests, signupStore, startThemeCheckout, submitThemePurchase, type PlatformActor, type StaffActor,
 } from "../src";
 
 let owner: PrismaClient;
@@ -172,6 +172,42 @@ describe("premium themes (49 taka, once, for life)", () => {
       gateway({ amount: "49", transaction_id: "ONLINETRX04", metadata: { ...meta, themeId: "kapor" } });
       await expect(processUddoktaPaySubscriptionSuccess("INV-B3")).rejects.toThrow(/not a premium theme/);
       expect(await owner.themePurchase.count({ where: { tenantId: s.tenantId, status: "APPROVED" } })).toBe(0);
+    });
+  });
+  describe("premium tools (size chart, specs, instalments, shade finder, delivery slot)", () => {
+    const TOOLS = ["size-chart", "spec-table", "instalment-calc", "shade-finder", "delivery-slot"];
+    it("are offered in the editor only to a store that owns a premium theme", async () => {
+      for (const kind of ["product", "home", "cart"] as const) {
+        expect(sectionsFor(kind, { premiumTools: false }).some((d) => TOOLS.includes(d.type))).toBe(false);
+      }
+      expect(sectionsFor("product", { premiumTools: true }).map((d) => d.type)).toEqual(expect.arrayContaining(["size-chart", "spec-table", "instalment-calc", "shade-finder"]));
+      expect(sectionsFor("cart", { premiumTools: true }).map((d) => d.type)).toContain("delivery-slot");
+      const s = await store();
+      expect(await hasPremiumTools(s.tenantId)).toBe(false);
+      await submitThemePurchase(s.tenantId, s.actor, pay());
+      const id = (await owner.themePurchase.findFirstOrThrow({ where: { tenantId: s.tenantId } })).id;
+      expect(await hasPremiumTools(s.tenantId)).toBe(false); // waiting is not owning
+      await approveThemePurchase(boss, id, owner);
+      expect(await hasPremiumTools(s.tenantId)).toBe(true);
+    });
+
+    it("come in every premium theme's own layouts, and those layouts are valid pages", () => {
+      for (const t of PREMIUM_THEMES) {
+        const pages = premiumPagesFor(t.id);
+        for (const [kind, page] of Object.entries(pages)) expect(() => validatePage(kind as never, page), `${t.id}/${kind}`).not.toThrow();
+      }
+      const types = (id: never, kind: never) => (premiumPagesFor(id)[kind] as { sections: { type: string }[] }).sections.map((x) => x.type);
+      expect(types("maison" as never, "product" as never)).toContain("size-chart");
+      expect(types("voltedge" as never, "product" as never)).toEqual(expect.arrayContaining(["spec-table", "instalment-calc"]));
+      expect(types("lumiere" as never, "home" as never)).toContain("shade-finder");
+      expect(types("harvest" as never, "cart" as never)).toEqual(expect.arrayContaining(["delivery-slot", "cart-main"]));
+    });
+
+    it("refuse instalment months that are not whole numbers from 2 to 36", () => {
+      const page = (months: string) => ({ version: 1, sections: [{ id: "product_main_1", type: "product-main", settings: {} }, { id: "instalment_calc_1", type: "instalment-calc", settings: { months } }] });
+      expect(() => validatePage("product", page("3,6,12"))).not.toThrow();
+      expect(() => validatePage("product", page("1,6"))).toThrow(/Months/);
+      expect(() => validatePage("product", page("3,abc"))).toThrow(/Months/);
     });
   });
 });

@@ -12,6 +12,12 @@ import { fmt, money, productTitle, type Lang } from "@/lib/i18n-core";
 import type { CHECKOUT_STRINGS, LOYALTY_STRINGS } from "@/lib/strings";
 import { useCart } from "./cart-provider";
 import { trackEvent } from "./tracker";
+import { deliveryNote } from "./premium-tools";
+
+/** The order note, with the delivery day, slot and weekly repeat the shopper chose on the cart page put in front (the order note holds 200 characters). */
+function withDelivery(note: string): string | undefined {
+  return [deliveryNote(), note.trim()].filter(Boolean).join(" ").slice(0, 200) || undefined;
+}
 
 
 export interface PayInfo {
@@ -325,8 +331,8 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
       bumpIds: selectedBumpIds,
       customer: { name: name.trim(), phone: full(phone), email: email.trim() || undefined },
       shipping: isDigitalOrder
-        ? { division: "Digital", district: "Digital", upazila: "Digital", address: "Digital Delivery", note: note.trim() || undefined }
-        : { division, district, upazila, address: address.trim(), note: note.trim() || undefined },
+        ? { division: "Digital", district: "Digital", upazila: "Digital", address: "Digital Delivery", note: withDelivery(note) }
+        : { division, district, upazila, address: address.trim(), note: withDelivery(note) },
       paymentMethod: method,
       isDigital: isDigitalOrder,
       mfs:

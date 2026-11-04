@@ -9,6 +9,7 @@ import { mark, markImg } from "./edit-marks";
 import type { PageCtx } from "@/lib/page-ctx";
 import { renderPageBlock } from "./page-blocks";
 import { ProductCard } from "./product-card";
+import { DeliverySlot, InstalmentCalc, ShadeFinder, SizeChart } from "./premium-tools";
 import { tintFor } from "./product-image";
 import { GuaranteeStrip } from "./guarantee-strip";
 import { SocialProofTicker } from "./social-proof-ticker";
@@ -176,6 +177,39 @@ function Section({ section, data, lang, t, orderForm, ctx, landing, editing, sit
           </section>
         </div>
       );
+    case "size-chart": {
+      const rows = ((s.rows as S[] | undefined) ?? []).map((r) => ({ size: str(r.size), chest: Number(r.chest) || 0, waist: Number(r.waist) || 0, length: Number(r.length) || 0 })).filter((r) => r.size);
+      return <div data-section={id}><SizeChart title={L(s, "title", lang)} hint={L(s, "hint", lang)} rows={rows} lang={lang === "bn" ? "bn" : "en"} /></div>;
+    }
+    case "spec-table": {
+      const rows = ((s.rows as S[] | undefined) ?? []).filter((r) => str(r.label));
+      return (
+        <div className="wrap" data-section={id} data-testid="spec-table">
+          <section className="section pt-card">
+            <h2>{L(s, "title", lang)}</h2>
+            <div className="pt-scroll">
+              <table className="pt-table pt-specs">
+                <caption className="sr-only">{L(s, "title", lang)}</caption>
+                <tbody>{rows.map((r, i) => <tr key={i}><th scope="row">{L(r, "label", lang)}</th><td>{L(r, "value", lang)}</td></tr>)}</tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      );
+    }
+    case "instalment-calc": {
+      const price = ctx?.product?.p.price ?? 0;
+      const months = str(s.months).split(",").map((x) => Number(x.trim())).filter((n) => Number.isInteger(n) && n >= 2 && n <= 36);
+      // Without a product (the editor's other pages) there is no price to divide: nothing is drawn rather than a misleading zero.
+      if (!price || months.length === 0) return editing ? <div className="wrap" data-section={id}><p className="muted">Instalment calculator: shown on the product page.</p></div> : null;
+      return <div data-section={id}><InstalmentCalc title={L(s, "title", lang)} note={L(s, "note", lang)} price={price} months={months} fee={Number(s.feePercent) || 0} lang={lang === "bn" ? "bn" : "en"} /></div>;
+    }
+    case "shade-finder": {
+      const shades = ((s.shades as S[] | undefined) ?? []).filter((x) => str(x.name)).map((x) => ({ name: L(x, "name", lang), tone: str(x.tone), undertone: str(x.undertone), hex: /^#[0-9a-fA-F]{6}$/.test(str(x.hex)) ? str(x.hex) : "#C68E6B", link: str(x.link) }));
+      return <div data-section={id}><ShadeFinder title={L(s, "title", lang)} hint={L(s, "hint", lang)} shades={shades} lang={lang === "bn" ? "bn" : "en"} /></div>;
+    }
+    case "delivery-slot":
+      return <div data-section={id}><DeliverySlot title={L(s, "title", lang)} morning={L(s, "morning", lang)} evening={L(s, "evening", lang)} days={Math.min(7, Math.max(2, Number(s.days) || 4))} repeat={s.repeat !== false} repeatLabel={L(s, "repeatLabel", lang)} lang={lang === "bn" ? "bn" : "en"} /></div>;
     case "trust-strip":
       return (
         <div className="wrap" data-section={id}>

@@ -3,7 +3,7 @@ import Link from "next/link";
 import {
   can, createPreviewToken, getBuilderAccess, listCategories, listCustomPages,
   listPublishedTemplates, listChromeVersions, listFooterPages, listVersions,
-  loadChromeForEdit, loadForEdit, templateUpdateAvailable
+  loadChromeForEdit, loadForEdit, templateUpdateAvailable, hasPremiumTools, listThemeStore
 } from "@biztrackbd/core";
 import type { SiteMode, BusinessVertical } from "@biztrackbd/core/builder-client";
 import { withTenant } from "@biztrackbd/db";
@@ -82,7 +82,7 @@ export default async function Design({ searchParams }: { searchParams: Promise<{
     );
   }
 
-  const [state, versions, access, tenantData, customPages] = await Promise.all([
+  const [state, versions, access, tenantData, customPages, premiumTools, themeStore] = await Promise.all([
     loadForEdit(s.tenantId, s.actor, pageKey),
     listVersions(s.tenantId, s.actor, pageKey),
     getBuilderAccess(s.tenantId),
@@ -92,6 +92,8 @@ export default async function Design({ searchParams }: { searchParams: Promise<{
       })
     ).catch(() => ({ templateId: null, siteMode: "ECOMMERCE", businessVertical: null })),
     listCustomPages(s.tenantId, s.actor).catch(() => []),
+    hasPremiumTools(s.tenantId).catch(() => false),
+    listThemeStore(s.tenantId, s.actor).catch(() => null),
   ]);
 
   const origin = storefrontOrigin(s.tenantSubdomain);
@@ -155,11 +157,12 @@ export default async function Design({ searchParams }: { searchParams: Promise<{
       initialTab={update || note ? "theme" : undefined}
       siteMode={siteMode}
       businessVertical={businessVertical}
+      premiumTools={premiumTools}
       header={pageKey === "home"
         ? (
             <>
               {notice}
-              {siteMode === "ECOMMERCE" && <ThemePicker active={state.themeId} canEdit={canEdit} />}
+              {siteMode === "ECOMMERCE" && <ThemePicker active={state.themeId} canEdit={canEdit} themes={themeStore?.themes ?? null} />}
               <TemplateSwitcher
                 templates={templates}
                 currentLook={state.themeId}
