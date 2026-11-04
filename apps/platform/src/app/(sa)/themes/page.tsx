@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { AutoSubmitSelect } from "@/components/auto-submit-select";
 import {
   TEMPLATE_CATEGORIES,
@@ -66,6 +67,10 @@ export default async function ThemesPage({
 
       {one(sp.err) && <div className="notice bad" role="alert">{one(sp.err)}</div>}
       {one(sp.done) && <div className="notice good" role="status">{one(sp.done)}</div>}
+
+      {canSee && (
+        <div className="notice" data-testid="offers-link">Discount codes and theme bundles: <Link href="/themes/offers" className="link">manage offers</Link>.</div>
+      )}
 
       {/* Storefront theme pricing */}
       {canSee && (
@@ -165,10 +170,13 @@ export default async function ThemesPage({
                       fontSize: 13.5,
                     }}
                   >
-                    <div>
-                      <div style={{ fontWeight: 700 }}>{t.name}</div>
-                      <div style={{ fontSize: 12, color: "var(--ink-3)" }}>
-                        {t.id} {t.moduleLabel && `· ${t.moduleLabel}`}
+                    <div style={{ display: "flex", gap: 10, alignItems: "center", minWidth: 0 }}>
+                      {t.previews?.desktop && <div role="img" aria-label={`${t.name} preview`} data-testid={`template-preview-${t.id}`} style={{ width: 64, height: 40, flex: "none", borderRadius: 6, border: "1px solid var(--line)", backgroundImage: `url("${t.previews.desktop}")`, backgroundSize: "cover", backgroundPosition: "top" }} />}
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontWeight: 700 }}>{t.name}</div>
+                        <div style={{ fontSize: 12, color: "var(--ink-3)" }}>
+                          {t.id} {t.moduleLabel && `· ${t.moduleLabel}`}
+                        </div>
                       </div>
                     </div>
                     <div>{t.baseLook}</div>
@@ -266,6 +274,27 @@ export default async function ThemesPage({
             <SubmitButton className="btn btn-primary" data-testid="create-workshop-go" pending="Working…">Create workshop</SubmitButton>
           </form>
         </div>
+      )}
+
+      {canEdit && (
+        <form action="/themes/package" method="post" encType="multipart/form-data" className="card stack" style={{ padding: 24 }} data-testid="upload-package">
+          <h2 style={{ fontSize: 16 }}>Upload a theme package (.zip)</h2>
+          <p className="muted" style={{ fontSize: 13.5 }}>
+            A .zip with <b>theme.json</b> (the same file as above) at the top and the pictures it uses: png, jpg, webp or avif, up to 2 MB each, 4 MB for the whole zip, 40 files.
+            In theme.json, name a picture by its path in the zip, for example <code>images/hero.jpg</code>, in any picture field or in <code>previews</code>. Pictures are stored here and the
+            names are swapped for their addresses, so the theme needs nothing from outside. The theme's CSS still cannot use url(): pictures come from the JSON only.
+          </p>
+          <label className="field" style={{ margin: 0 }}>
+            <span className="label">Theme package</span>
+            <input className="input" type="file" name="file" accept="application/zip,.zip" required />
+          </label>
+          <label className="row" style={{ gap: 8, fontSize: 13.5 }}>
+            <input type="checkbox" name="draft" /> Save as a draft (do not show it yet)
+          </label>
+          <div>
+            <SubmitButton className="btn btn-primary" data-testid="upload-package-go" pending="Working…">Upload package</SubmitButton>
+          </div>
+        </form>
       )}
 
       {canEdit && (

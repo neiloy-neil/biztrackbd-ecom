@@ -162,7 +162,9 @@ export async function saveImage(tenantId: string, input: Buffer, where: string |
   } catch {
     throw new MediaError("That file is not a photo we can read. Use a JPG, PNG or WebP image.", "NOT_AN_IMAGE");
   }
-  if (!meta.format || !ALLOWED.has(meta.format)) throw new MediaError("Use a JPG, PNG or WebP image.", "UNSUPPORTED");
+  // sharp reports an AVIF file as format "heif" with AV1 compression; other HEIF files (HEIC from a phone) are not accepted.
+  const isAvif = meta.format === "heif" && meta.compression === "av1";
+  if (!meta.format || !(ALLOWED.has(meta.format) || isAvif)) throw new MediaError("Use a JPG, PNG, WebP or AVIF image.", "UNSUPPORTED");
   if (!meta.width || !meta.height || meta.width * meta.height > MAX_PIXELS) throw new MediaError("That photo is too large in pixels.", "TOO_BIG_DIMENSIONS");
 
   // rotate() applies the camera's orientation; sharp drops all metadata (EXIF, GPS location) unless asked to keep it.

@@ -3,7 +3,7 @@
 import { cookies, headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { DomainError, activateTheme, applyTemplateToStore, isThemeId, platformOriginFor, startThemeCheckout, submitThemePurchase } from "@biztrackbd/core";
+import { DomainError, activateTheme, applyTemplateToStore, isThemeId, platformOriginFor, quoteThemeCheckout, startThemeCheckout, submitThemePurchase, type ThemeQuoteView } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 import { resolveAdminOrigin } from "@/lib/origin";
 
@@ -32,7 +32,7 @@ export async function buyThemeAction(_prev: BuyState, form: FormData): Promise<B
   const s = await requireAction("billing", "edit", { allowReadOnly: true });
   try {
     await submitThemePurchase(s.tenantId, s.actor, {
-      themeId: String(form.get("themeId") ?? ""), provider: String(form.get("provider") ?? ""),
+      themeId: String(form.get("themeId") ?? ""), bundleId: String(form.get("bundleId") ?? ""), code: String(form.get("code") ?? ""), provider: String(form.get("provider") ?? ""),
       senderNumber: String(form.get("senderNumber") ?? ""), trxId: String(form.get("trxId") ?? ""),
     });
   } catch (e) {
@@ -44,7 +44,7 @@ export async function buyThemeAction(_prev: BuyState, form: FormData): Promise<B
 }
 
 /** Pay online with UddoktaPay (bKash, Nagad, Rocket, cards). The theme unlocks as soon as the gateway confirms, with nothing to check by hand. */
-export async function payThemeOnlineAction(themeId: string): Promise<{ paymentUrl?: string; error?: string }> {
+export async function payThemeOnlineAction(themeId: string, bundleId = "", code = ""): Promise<{ paymentUrl?: string; error?: string }> {
   const s = await requireAction("billing", "edit", { allowReadOnly: true });
   try {
     const h = await headers();
@@ -54,10 +54,22 @@ export async function payThemeOnlineAction(themeId: string): Promise<{ paymentUr
       platformOrigin: platformOriginFor(process.env.NEXT_PUBLIC_ROOT_DOMAIN),
       fbp: jar.get("_fbp")?.value, fbc: jar.get("_fbc")?.value,
       ip: h.get("x-forwarded-for")?.split(",")[0]?.trim(), ua: h.get("user-agent") ?? undefined,
-    });
+    }, { bundleId, code });
   } catch (e) {
     if (e instanceof DomainError) return { error: e.message };
     console.error("payThemeOnlineAction error", e);
     return { error: "Could not start the online payment. Please try again or pay by bKash or Nagad." };
+  }
+}
+
+/** What the theme or bundle costs with this code, worked out on the server, so the owner sees the real price before paying. */
+export async function quoteThemeAction(themeId: string, bundleId: string, code: string): Promise<{ quote?: ThemeQuoteView; error?: string }> {
+  const s = await requireAction("billing", "edit", { allowReadOnly: true });
+  try {
+    return { quote: await quoteThemeCheckout(s.tenantId, s.actor, { themeId, bundleId, code }) };
+  } catch (e) {
+    if (e instanceof DomainError) return { error: e.message };
+    console.error("quoteThemeAction error", e);
+    return { error: "Could not check the code. Please try again." };
   }
 }

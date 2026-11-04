@@ -1,7 +1,7 @@
 import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import sharp from "sharp";
+import sharp, { type Sharp } from "sharp";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { MAX_UPLOAD_BYTES, MediaError, readImage, saveImage } from "../src";
 
@@ -77,5 +77,19 @@ describe("reading photos", () => {
 
   it("returns null for a file that does not exist", async () => {
     expect(await readImage([TENANT, "00000000-0000-0000-0000-000000000000.webp"], root)).toBeNull();
+  });
+});
+
+describe("theme package pictures", () => {
+  it("stores a picture under the platform's own theme folder, as WebP, for every allowed type", async () => {
+    for (const make of [(s: Sharp) => s.png(), (s: Sharp) => s.jpeg(), (s: Sharp) => s.webp(), (s: Sharp) => s.avif({ effort: 0 })]) {
+      const input = await make(sharp({ create: { width: 40, height: 30, channels: 3, background: "#336699" } })).toBuffer();
+      const r = await saveImage("platform-themes", input, root);
+      expect(r.url).toMatch(/^\/media\/platform-themes\/[0-9a-f-]{36}\.webp$/);
+    }
+  });
+  it("still refuses SVG and a picture that is really something else", async () => {
+    await fails(saveImage("platform-themes", Buffer.from("<svg xmlns='http://www.w3.org/2000/svg'/>"), root), "NOT_AN_IMAGE");
+    await fails(saveImage("platform-themes", Buffer.from("PK not a picture"), root), "NOT_AN_IMAGE");
   });
 });
