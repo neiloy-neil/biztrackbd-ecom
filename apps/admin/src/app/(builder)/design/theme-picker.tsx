@@ -12,6 +12,7 @@ const swatch: Record<ThemeId, string> = {
   bazaar: "linear-gradient(135deg,#F8F6F1 0 50%,#C2410C 50%)",
   nakshi: "linear-gradient(135deg,#FBF6EE 0 50%,#7A1F2E 50%)",
   maison: "linear-gradient(135deg,#FAF7F2 0 50%,#8F4A2B 50%)",
+  voltedge: "linear-gradient(135deg,#0A1020 0 50%,#38BDF8 50%)",
 };
 
 export function ThemePicker({ active, canEdit }: { active: ThemeId; canEdit: boolean }) {

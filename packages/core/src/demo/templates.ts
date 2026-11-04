@@ -265,6 +265,25 @@ export const DEMO_TEMPLATES: readonly DemoTemplate[] = [
       { slug: "everyday-tee-bone", title: "Everyday Tee, Bone", titleBn: "এভরিডে টি, বোন", text: "A heavyweight cotton tee with a relaxed shoulder.", textBn: "ভারী সুতির টি-শার্ট, ঢিলেঢালা কাঁধ।", price: 1250, cost: 600, category: "men", art: "tee", colour: { main: "#E9E2D3", accent: "#8F4A2B" }, variants: sizes(["S", "M", "L", "XL"]), stock: 60 },
     ],
   },
+  {
+    id: "voltedge", host: "voltedge", storeName: "Voltedge", storeNameBn: "ভোল্টএজ", tagline: "Premium gadgets, tested and warranted",
+    palette: { bg: "#16224A", main: "#38BDF8", accent: "#A78BFA", ink: "#0B1B3A" },
+    announcement: { text: "Demo store: 1-year warranty on every device. Pay in 3 easy instalments.", textBn: "ডেমো স্টোর: প্রতিটি ডিভাইসে ১ বছরের ওয়ারেন্টি। সহজ ৩ কিস্তিতে পরিশোধ।" },
+    hero: { eyebrow: "NEXT GENERATION", eyebrowBn: "পরবর্তী প্রজন্ম", title: "Power your everyday", titleBn: "প্রতিদিনের শক্তি", text: "Flagship audio, fast charging and smart wearables, each one tested before it ships.", textBn: "ফ্ল্যাগশিপ অডিও, ফাস্ট চার্জিং ও স্মার্ট ওয়্যারেবল, প্রতিটি পাঠানোর আগে পরীক্ষা করা।", ctaText: "Shop the drop", ctaTextBn: "নতুন ড্রপ দেখুন", art: ["earbuds", "watch", "powerbank"] },
+    banner: { heading: "Charge once, go all week", headingBn: "একবার চার্জে পুরো সপ্তাহ", text: "20,000 mAh power banks with 65 W fast charging and a 1-year warranty.", textBn: "২০,০০০ mAh পাওয়ার ব্যাংক, ৬৫ ওয়াট ফাস্ট চার্জিং ও ১ বছরের ওয়ারেন্টি।", ctaText: "See power", ctaTextBn: "পাওয়ার দেখুন", art: ["powerbank", "cable"] },
+    about: { heading: "Tested before it ships", headingBn: "পাঠানোর আগে পরীক্ষা করা", body: "We open, test and seal every device, and keep the receipt for your warranty. This is a demo store: products are samples.", bodyBn: "আমরা প্রতিটি ডিভাইস খুলে পরীক্ষা করে সিল করি এবং ওয়ারেন্টির জন্য রসিদ রাখি। এটি একটি ডেমো স্টোর: পণ্যগুলো নমুনা।" },
+    categories: [{ slug: "audio", name: "Audio" }, { slug: "power", name: "Power" }, { slug: "wearables", name: "Wearables" }, { slug: "accessories", name: "Add-ons" }],
+    products: [
+      { slug: "aero-anc-earbuds", title: "Aero ANC Earbuds", titleBn: "অ্যারো এএনসি ইয়ারবাডস", text: "Active noise cancelling, 32 hours with the case, IPX5.", textBn: "অ্যাকটিভ নয়েজ ক্যানসেলিং, কেসসহ ৩২ ঘণ্টা, IPX5।", price: 4290, compareAt: 4990, cost: 2600, category: "audio", art: "earbuds", variants: colours(["Black", "Silver"]), stock: 40, featured: true },
+      { slug: "pulse-smartwatch", title: "Pulse Smartwatch", titleBn: "পালস স্মার্টওয়াচ", text: "AMOLED display, heart-rate and sleep tracking, 10-day battery.", textBn: "অ্যামোলেড ডিসপ্লে, হার্ট-রেট ও ঘুম ট্র্যাকিং, ১০ দিনের ব্যাটারি।", price: 5990, compareAt: 6990, cost: 3700, category: "wearables", art: "watch", variants: colours(["Graphite", "Silver"]), stock: 26, featured: true },
+      { slug: "titan-powerbank-20000", title: "Titan Power Bank 20,000 mAh", titleBn: "টাইটান পাওয়ার ব্যাংক ২০,০০০ mAh", text: "65 W fast charging for phones and laptops, with a digital display.", textBn: "ফোন ও ল্যাপটপের জন্য ৬৫ ওয়াট ফাস্ট চার্জিং, ডিজিটাল ডিসপ্লেসহ।", price: 3490, cost: 2100, category: "power", art: "powerbank", tone: "accent", variants: one, stock: 32, featured: true },
+      { slug: "braided-usb-c-cable", title: "Braided USB-C Cable, 1.5 m", titleBn: "ব্রেইডেড ইউএসবি-সি ক্যাবল, ১.৫ মি.", text: "100 W rated, braided nylon, bends 10,000 times.", textBn: "১০০ ওয়াট রেটেড, ব্রেইডেড নাইলন, ১০,০০০ বার বাঁকানো যায়।", price: 650, cost: 280, category: "accessories", art: "cable", variants: one, stock: 150 },
+      { slug: "orbit-speaker", title: "Orbit Bluetooth Speaker", titleBn: "অরবিট ব্লুটুথ স্পিকার", text: "360-degree sound, 14 hours of playtime, waterproof.", textBn: "৩৬০ ডিগ্রি সাউন্ড, ১৪ ঘণ্টা প্লেটাইম, ওয়াটারপ্রুফ।", price: 3890, compareAt: 4490, cost: 2300, category: "audio", art: "speaker", tone: "accent", variants: colours(["Midnight", "Sand"]), stock: 22, featured: true },
+      { slug: "magsafe-phone-stand", title: "Magnetic Phone Stand", titleBn: "ম্যাগনেটিক ফোন স্ট্যান্ড", text: "Aluminium stand with a magnetic grip and adjustable angle.", textBn: "ম্যাগনেটিক গ্রিপ ও অ্যাডজাস্টেবল অ্যাঙ্গেলসহ অ্যালুমিনিয়াম স্ট্যান্ড।", price: 1190, cost: 520, category: "accessories", art: "phonestand", variants: one, stock: 55 },
+      { slug: "slim-powerbank-10000", title: "Slim Power Bank 10,000 mAh", titleBn: "স্লিম পাওয়ার ব্যাংক ১০,০০০ mAh", text: "Pocket-slim, 30 W fast charging, two ports.", textBn: "পকেট-স্লিম, ৩০ ওয়াট ফাস্ট চার্জিং, দুটি পোর্ট।", price: 1990, cost: 1050, category: "power", art: "powerbank", variants: colours(["Black", "Blue"]), stock: 48 },
+      { slug: "fit-band-lite", title: "Fit Band Lite", titleBn: "ফিট ব্যান্ড লাইট", text: "Steps, heart rate and sleep in a featherweight band.", textBn: "হালকা ব্যান্ডে স্টেপ, হার্ট-রেট ও ঘুমের হিসাব।", price: 2290, cost: 1300, category: "wearables", art: "watch", tone: "accent", variants: colours(["Black", "Navy"]), stock: 38 },
+    ],
+  },
 ] as const;
 
 export const demoTemplate = (id: string): DemoTemplate | undefined =>

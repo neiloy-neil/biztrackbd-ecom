@@ -7,6 +7,7 @@ import { normalizeBdPhone } from "../phone";
 import { ALL_THEMES, PREMIUM_THEME_PRICE, isPremiumTheme, themeDefinition, type ThemeId } from "../builder/theme";
 import { assertNotInDemo } from "../demo/guard";
 import { paymentTargets, type PayTo } from "./billing";
+import { createUddoktaPayCharge, getPlatformUddoktaPayCredentials, uddoktaPayPlanUrls } from "../payments/uddoktapay";
 import { assertPlatformCan, type PlatformActor } from "./admin";
 
 /**
@@ -34,6 +35,8 @@ export interface ThemeStoreView {
   themes: ThemeStoreItem[];
   payTo: PayTo[];
   price: number;
+  /** Whether the platform has UddoktaPay set up, so the owner can pay online and unlock the theme at once. */
+  online: boolean;
 }
 
 const TRX = /^[A-Z0-9]{8,12}$/;
@@ -55,7 +58,7 @@ export async function listThemeStore(tenantId: string, actor: StaffActor): Promi
     const rejected = mine.find((p) => p.status === "REJECTED");
     return { id: t.id, name: t.name, blurb: t.blurb, audience: t.audience, premium: Boolean(t.premium), price: t.premium ? PREMIUM_THEME_PRICE : 0, state, active: tenant.themeId === t.id, lastRejection: state === "LOCKED" ? rejected?.rejectionReason ?? null : null };
   });
-  return { active: themeDefinition(tenant.themeId).id, themes, payTo: paymentTargets(), price: PREMIUM_THEME_PRICE };
+  return { active: themeDefinition(tenant.themeId).id, themes, payTo: paymentTargets(), price: PREMIUM_THEME_PRICE, online: Boolean(await getPlatformUddoktaPayCredentials().catch(() => null)) };
 }
 
 export const ThemePurchaseInput = z.object({
@@ -89,6 +92,33 @@ export async function submitThemePurchase(tenantId: string, actor: StaffActor, r
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") throw new ValidationError("That transaction ID has already been used.", { field: "trxId" });
     throw e;
   }
+}
+
+/**
+ * Starts an online payment for a premium theme and returns the UddoktaPay page to send the owner to. The amount is the theme's own price. When
+ * the gateway reports the payment completed, the platform webhook (or the return page asking it) unlocks the theme: see grantPremiumThemeFromPayment.
+ */
+export async function startThemeCheckout(
+  tenantId: string, actor: StaffActor, themeId: string,
+  ctx: { adminOrigin: string; platformOrigin: string; fbp?: string; fbc?: string; ip?: string; ua?: string },
+): Promise<{ paymentUrl: string }> {
+  await assertNotInDemo(tenantId, "Buying a theme");
+  assertCan(actor, "billing", "edit");
+  const id = themeId.trim().toLowerCase();
+  if (!isPremiumTheme(id)) throw new ValidationError("That theme is free. Just apply it.", { field: "themeId" });
+  if (await withTenant(tenantId, (tx) => ownsPremiumTheme(tx, id))) throw new ValidationError("You already own this theme.");
+  const platform = await getPlatformUddoktaPayCredentials();
+  if (!platform) throw new ValidationError("Online payment is not available right now. Please pay by bKash or Nagad and send the TrxID.");
+  const urls = uddoktaPayPlanUrls(ctx.adminOrigin, ctx.platformOrigin);
+  const charge = await createUddoktaPayCharge({
+    apiKey: platform.apiKey, baseUrl: platform.baseUrl, fullName: actor.name || "Merchant", email: actor.email || "billing@biztrack.bd", amount: PREMIUM_THEME_PRICE,
+    metadata: { tenantId, themeId: id, type: "theme", ...(ctx.fbp ? { fbp: ctx.fbp.slice(0, 100) } : {}), ...(ctx.fbc ? { fbc: ctx.fbc.slice(0, 500) } : {}), ...(ctx.ip ? { ip: ctx.ip.slice(0, 64) } : {}), ...(ctx.ua ? { ua: ctx.ua.slice(0, 300) } : {}) },
+    redirectUrl: `${ctx.adminOrigin.replace(/\/+$/, "")}/api/themes/uddoktapay/callback`,
+    webhookUrl: urls.webhook,
+    cancelUrl: `${ctx.adminOrigin.replace(/\/+$/, "")}/themes?cancelled=1`,
+    returnType: "GET",
+  });
+  return { paymentUrl: charge.paymentUrl };
 }
 
 // ---- Platform side -------------------------------------------------------------------------------------------------------

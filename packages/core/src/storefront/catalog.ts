@@ -112,6 +112,12 @@ const THEME_COPY: Record<ThemeId, Partial<KaporSettings>> = {
     heroText: "Modern formalwear for the unapologetic individual.", heroTextBn: "আত্মবিশ্বাসী মানুষের জন্য আধুনিক ফরমালওয়্যার।",
     heroCta: "Shop now", heroCtaBn: "এখনই কিনুন", newArrivalsTitle: "New arrivals", newArrivalsTitleBn: "নতুন পণ্য",
   },
+  voltedge: {
+    heroEyebrow: "NEXT GENERATION", heroEyebrowBn: "পরবর্তী প্রজন্ম",
+    heroTitle: "Power your everyday.", heroTitleBn: "প্রতিদিনের শক্তি।",
+    heroText: "Flagship audio, fast charging and smart wearables, each one tested before it ships.", heroTextBn: "ফ্ল্যাগশিপ অডিও, ফাস্ট চার্জিং ও স্মার্ট ওয়্যারেবল, প্রতিটি পাঠানোর আগে পরীক্ষা করা।",
+    heroCta: "Shop the drop", heroCtaBn: "নতুন ড্রপ দেখুন", newArrivalsTitle: "Just landed", newArrivalsTitleBn: "নতুন এসেছে",
+  },
   maison: {
     heroEyebrow: "THE NEW EDIT", heroEyebrowBn: "নতুন সংগ্রহ",
     heroTitle: "Dressed for the occasion.", heroTitleBn: "প্রতিটি উপলক্ষের পোশাক।",

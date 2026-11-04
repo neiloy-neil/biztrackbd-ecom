@@ -1,0 +1,257 @@
+/*
+ * Premium themes: motion, gradients and micro-interactions.
+ *
+ * Everything here is CSS only (no extra JavaScript to ship) and only animates transform, opacity and gradient position, so it stays smooth on
+ * a mid-range phone. Moving effects sit inside `prefers-reduced-motion: no-preference`; with reduced motion the same gradients are shown
+ * still. Scroll-linked effects sit inside @supports (animation-timeline) and simply do not run where it is missing, never hiding content.
+ * Text always sits on a still, light or dark ground that passes 4.5:1; only decoration moves.
+ */
+
+@property --pm-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@property --pm-shift { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
+
+@keyframes pm-rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+@keyframes pm-float-a { 0%, 100% { transform: translate3d(0, 0, 0) scale(1); } 50% { transform: translate3d(34px, -26px, 0) scale(1.08); } }
+@keyframes pm-float-b { 0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); } 50% { transform: translate3d(-30px, 22px, 0) rotate(14deg); } }
+@keyframes pm-bob { 0%, 100% { transform: translateY(0) rotate(-.6deg); } 50% { transform: translateY(-14px) rotate(.8deg); } }
+@keyframes pm-spin-rot { to { transform: rotate(360deg); } }
+@keyframes pm-shimmer { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+@keyframes pm-sheen { from { transform: translateX(-130%) skewX(-18deg); } to { transform: translateX(260%) skewX(-18deg); } }
+@keyframes pm-pulse { 0%, 100% { box-shadow: 0 0 0 0 var(--pm-glow, rgba(143,74,43,.45)); } 70% { box-shadow: 0 0 0 9px rgba(143,74,43,0); } }
+@keyframes pm-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes pm-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes pm-header-shadow { from { box-shadow: 0 0 0 rgba(28,25,23,0); } to { box-shadow: 0 10px 30px rgba(28,25,23,.12); } }
+@keyframes pm-gradient-pan { from { background-position: 0% 50%; } to { background-position: 200% 50%; } }
+
+/* ================================================================== Maison */
+
+body[data-store-theme="maison"] {
+  --pm-glow: rgba(143, 74, 43, .45);
+}
+
+/* The page never jumps: a thin copper progress line fills as you scroll (where scroll-linked animation exists). */
+@supports (animation-timeline: scroll()) {
+  body[data-store-theme="maison"]::before {
+    content: ""; position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 60; transform-origin: 0 50%; transform: scaleX(0);
+    background: linear-gradient(90deg, #8F4A2B, #D9A066, #8F4A2B); animation: pm-progress linear both; animation-timeline: scroll(root block);
+  }
+  body[data-store-theme="maison"] .header { animation: pm-header-shadow linear both; animation-timeline: scroll(root block); animation-range: 0 140px; }
+}
+
+/* ---- Hero: a slow living gradient, drifting light and a floating picture */
+body[data-store-theme="maison"] .hero {
+  position: relative; isolation: isolate; overflow: hidden;
+  background:
+    radial-gradient(60% 80% at 82% 18%, #F2D9BE 0, transparent 60%),
+    radial-gradient(50% 70% at 8% 92%, #EBCFB4 0, transparent 62%),
+    linear-gradient(115deg, #F8F1E7, #EBDCC9 55%, #F3E6D6);
+  background-size: 140% 140%, 140% 140%, 100% 100%;
+}
+body[data-store-theme="maison"] .hero::before,
+body[data-store-theme="maison"] .hero::after { content: ""; position: absolute; z-index: -1; pointer-events: none; border-radius: 50%; }
+body[data-store-theme="maison"] .hero::before { width: 44vmin; height: 44vmin; right: -8vmin; top: -10vmin; background: radial-gradient(circle at 30% 30%, #F0C99A, #C98B57 70%); opacity: .5; filter: blur(2px); }
+body[data-store-theme="maison"] .hero::after { width: 26vmin; height: 26vmin; left: 38%; bottom: -8vmin; background: conic-gradient(from 0deg, #8F4A2B, #E7B98A, #8F4A2B); opacity: .22; }
+body[data-store-theme="maison"] .hero .wrap { position: relative; z-index: 1; }
+body[data-store-theme="maison"] .b-hero-img img { box-shadow: 0 30px 60px -20px rgba(70, 40, 20, .45); }
+body[data-store-theme="maison"] .hero .ctas { gap: 14px; }
+
+/* ---- Buttons: a light sweeps across, the button lifts and glows, and presses in */
+body[data-store-theme="maison"] .btn { position: relative; overflow: hidden; transition: transform .25s cubic-bezier(.2, .8, .2, 1), box-shadow .25s, background-position .6s; }
+body[data-store-theme="maison"] .btn-primary { background-image: linear-gradient(110deg, #8F4A2B 0%, #A85C36 45%, #8F4A2B 100%); background-size: 220% 100%; }
+body[data-store-theme="maison"] .btn::after { content: ""; position: absolute; inset: 0 auto 0 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.38), transparent); transform: translateX(-130%) skewX(-18deg); pointer-events: none; }
+body[data-store-theme="maison"] .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 26px -10px rgba(143, 74, 43, .65); background-position: 100% 0; }
+body[data-store-theme="maison"] .btn:hover::after { animation: pm-sheen .9s ease; }
+body[data-store-theme="maison"] .btn:active { transform: translateY(0) scale(.97); box-shadow: 0 4px 10px -6px rgba(143, 74, 43, .6); }
+body[data-store-theme="maison"] .btn:focus-visible, body[data-store-theme="maison"] a:focus-visible { outline: 2px solid #8F4A2B; outline-offset: 3px; }
+
+/* ---- Navigation: the underline grows from the centre, the logo opens up */
+body[data-store-theme="maison"] .nav-desktop a { position: relative; transition: color .2s; }
+body[data-store-theme="maison"] .nav-desktop a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -4px; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: 50% 50%; transition: transform .3s cubic-bezier(.2, .8, .2, 1); }
+body[data-store-theme="maison"] .nav-desktop a:hover::after, body[data-store-theme="maison"] .nav-desktop a:focus-visible::after { transform: scaleX(1); }
+body[data-store-theme="maison"] .logo { transition: letter-spacing .5s cubic-bezier(.2, .8, .2, 1); }
+body[data-store-theme="maison"] .logo:hover { letter-spacing: .42em; }
+
+/* ---- Product cards: the picture breathes, a copper rule draws under the name, the price slides */
+body[data-store-theme="maison"] .pcard { position: relative; transition: transform .35s cubic-bezier(.2, .8, .2, 1); }
+body[data-store-theme="maison"] .pcard:hover { transform: translateY(-6px); }
+body[data-store-theme="maison"] .pimg { position: relative; overflow: hidden; }
+body[data-store-theme="maison"] .pimg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(143, 74, 43, .18)); opacity: 0; transition: opacity .35s; pointer-events: none; }
+body[data-store-theme="maison"] .pcard:hover .pimg::after { opacity: 1; }
+body[data-store-theme="maison"] .pname { position: relative; display: inline-block; }
+body[data-store-theme="maison"] .pname::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px; background: #8F4A2B; transform: scaleX(0); transform-origin: 0 50%; transition: transform .4s cubic-bezier(.2, .8, .2, 1); }
+body[data-store-theme="maison"] .pcard:hover .pname::after { transform: scaleX(1); }
+body[data-store-theme="maison"] .price-row { transition: transform .35s cubic-bezier(.2, .8, .2, 1); }
+body[data-store-theme="maison"] .pcard:hover .price-row { transform: translateX(4px); }
+body[data-store-theme="maison"] .tag { font-size: 12px; letter-spacing: .08em; border-radius: 0; background-image: linear-gradient(110deg, #8F4A2B, #B26A3F, #8F4A2B); background-size: 200% 100%; }
+
+/* ---- Categories: a gradient floods up from the bottom */
+body[data-store-theme="maison"] .cat { isolation: isolate; transition: color .35s, transform .35s cubic-bezier(.2, .8, .2, 1); }
+body[data-store-theme="maison"] .cat::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(0deg, #8F4A2B, #B87348 70%, #C98B57); transform: translateY(101%); transition: transform .5s cubic-bezier(.2, .8, .2, 1); }
+body[data-store-theme="maison"] .cat:hover { color: #fff; transform: translateY(-3px); }
+body[data-store-theme="maison"] .cat:hover::before { transform: none; }
+
+/* ---- Headings: a rule draws in beneath each section title */
+body[data-store-theme="maison"] .section-head h2 { position: relative; display: inline-block; padding-bottom: 10px; }
+body[data-store-theme="maison"] .section-head h2::after { content: ""; position: absolute; left: 0; bottom: 0; width: 56px; height: 2px; background: linear-gradient(90deg, #8F4A2B, #D9A066); transform-origin: 0 50%; }
+body[data-store-theme="maison"] .trust > div { transition: transform .3s cubic-bezier(.2, .8, .2, 1), border-color .3s; }
+body[data-store-theme="maison"] .trust > div:hover { transform: translateY(-4px); border-top-color: #8F4A2B; }
+
+/* ---- Footer: a slow copper line */
+body[data-store-theme="maison"] .footer { position: relative; }
+body[data-store-theme="maison"] .footer::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 2px; background: linear-gradient(90deg, transparent, #D9A066, #8F4A2B, #D9A066, transparent); background-size: 200% 100%; }
+
+/* ---- Moving things: only when the visitor has not asked for less motion */
+@media (prefers-reduced-motion: no-preference) {
+  body[data-store-theme="maison"] .hero { animation: pm-gradient-pan 26s linear infinite alternate; }
+  body[data-store-theme="maison"] .hero::before { animation: pm-float-a 14s ease-in-out infinite; }
+  body[data-store-theme="maison"] .hero::after { animation: pm-spin-rot 38s linear infinite, pm-float-b 18s ease-in-out infinite; }
+  body[data-store-theme="maison"] .b-hero-img { animation: pm-bob 7s ease-in-out infinite; }
+  body[data-store-theme="maison"] .hero .eyebrow { animation: pm-rise .8s .05s cubic-bezier(.2, .8, .2, 1) both; }
+  body[data-store-theme="maison"] .hero h1 { animation: pm-rise .9s .15s cubic-bezier(.2, .8, .2, 1) both; }
+  /* A band of copper light slides through the headline. Only where text can be clipped to a gradient; otherwise it stays plain ink. */
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    body[data-store-theme="maison"] .hero h1 {
+      background-image: linear-gradient(100deg, #1C1917 0 38%, #8F4A2B 50%, #1C1917 62% 100%); background-size: 260% 100%;
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #1C1917;
+      animation: pm-rise .9s .15s cubic-bezier(.2, .8, .2, 1) both, pm-shimmer 9s 1.2s linear infinite;
+    }
+  }
+  body[data-store-theme="maison"] .hero p { animation: pm-rise .9s .3s cubic-bezier(.2, .8, .2, 1) both; }
+  body[data-store-theme="maison"] .hero .ctas { animation: pm-rise .9s .45s cubic-bezier(.2, .8, .2, 1) both; }
+  body[data-store-theme="maison"] .btn-primary { animation: pm-pulse 3.2s 2s ease-out infinite; }
+  body[data-store-theme="maison"] .tag { animation: pm-gradient-pan 5s linear infinite; }
+  body[data-store-theme="maison"] .footer::before { animation: pm-gradient-pan 8s linear infinite; }
+  body[data-store-theme="maison"] .announce { background-image: linear-gradient(100deg, #1C1917 0 40%, #3A2A20 50%, #1C1917 60% 100%); background-size: 250% 100%; animation: pm-gradient-pan 12s linear infinite; }
+
+  /* Scroll-linked reveals: cards, tiles and rules arrive as they enter the screen. */
+  @supports (animation-timeline: view()) {
+    body[data-store-theme="maison"] .pcard,
+    body[data-store-theme="maison"] .cat,
+    body[data-store-theme="maison"] .trust > div { animation: pm-rise linear both; animation-timeline: view(); animation-range: entry 0% entry 55%; }
+    body[data-store-theme="maison"] .section-head h2::after { animation: pm-draw linear both; animation-timeline: view(); animation-range: entry 10% entry 60%; }
+    body[data-store-theme="maison"] .pimg img { animation: pm-parallax linear both; animation-timeline: view(); }
+  }
+}
+@keyframes pm-parallax { from { transform: scale(1.12) translateY(-3%); } to { transform: scale(1) translateY(3%); } }
+
+/* Reduced motion: the same look, standing still (the shimmer text falls back to plain ink). */
+@media (prefers-reduced-motion: reduce) {
+  body[data-store-theme="maison"] .hero h1 { -webkit-text-fill-color: currentColor; background: none; }
+}
+
+@media (max-width: 720px) {
+  body[data-store-theme="maison"] .hero::before { width: 60vmin; height: 60vmin; right: -22vmin; }
+  body[data-store-theme="maison"] .hero::after { display: none; }
+}
+
+/* ================================================================ Voltedge */
+@keyframes pm-spin { to { --pm-angle: 360deg; } }
+@keyframes pm-aurora-a { 0%, 100% { transform: translate3d(-8%, -4%, 0) scale(1); } 50% { transform: translate3d(10%, 8%, 0) scale(1.25); } }
+@keyframes pm-aurora-b { 0%, 100% { transform: translate3d(6%, 6%, 0) scale(1.1); } 50% { transform: translate3d(-12%, -6%, 0) scale(.9); } }
+@keyframes pm-grid { from { background-position: 0 0, 0 0; } to { background-position: 0 56px, 56px 0; } }
+@keyframes pm-scan { 0% { transform: translateY(-120%); } 100% { transform: translateY(520%); } }
+@keyframes pm-orbit { to { transform: rotate(360deg); } }
+@keyframes pm-blink { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
+body[data-store-theme="voltedge"] {
+  color-scheme: dark;
+  --bg: #0A1020; --surface: #111A33; --ink: #E6ECFF; --ink-2: #C3CCE8; --muted: #A3AECF; --faint: #8F9BC0;
+  --accent: #38BDF8; --accent-strong: #7DD3FC; --accent-ink: #04121F; --hero: #0C1530;
+  --line: #1F2B4D; --line-2: #2B3A63; --field: #5A6A99; --tint-1: #131E3D; --tint-2: #10261F; --tint-3: #1B1A3F; --tint-4: #2A1730;
+  --success-bg: #123524; --radius: 14px; --pm-glow: rgba(56, 189, 248, .5);
+}
+body[data-store-theme="voltedge"] .announce { background: linear-gradient(100deg, #0B1B3A, #14305F 50%, #0B1B3A); color: #E6ECFF; font-size: 12px; letter-spacing: .08em; }
+body[data-store-theme="voltedge"] .header { position: sticky; top: 0; background: rgba(10, 16, 32, .82); backdrop-filter: blur(16px) saturate(1.4); border-bottom: 1px solid var(--line-2); }
+body[data-store-theme="voltedge"] .logo { font-weight: 800; letter-spacing: -.02em; background: linear-gradient(100deg, #E6ECFF, #7DD3FC 55%, #C4B5FD); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #E6ECFF; }
+body[data-store-theme="voltedge"] .hero {
+  position: relative; isolation: isolate; overflow: hidden; min-height: min(80vh, 660px); display: flex; align-items: center;
+  background: radial-gradient(70% 90% at 80% 10%, #14306A 0, transparent 60%), radial-gradient(60% 80% at 5% 100%, #1B1B52 0, transparent 60%), #0A1020;
+  border-bottom: 1px solid var(--line-2);
+}
+/* A fine grid floats up behind everything, and two aurora lights drift through it. */
+body[data-store-theme="voltedge"] .hero::before {
+  content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none;
+  background-image: linear-gradient(rgba(125, 211, 252, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(125, 211, 252, .07) 1px, transparent 1px);
+  background-size: 56px 56px; -webkit-mask-image: radial-gradient(80% 70% at 60% 40%, #000 30%, transparent 85%); mask-image: radial-gradient(80% 70% at 60% 40%, #000 30%, transparent 85%);
+}
+body[data-store-theme="voltedge"] .hero::after {
+  content: ""; position: absolute; z-index: -1; pointer-events: none; width: 70vmin; height: 70vmin; right: -14vmin; top: -18vmin; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(56, 189, 248, .55), rgba(129, 140, 248, .35) 45%, transparent 70%); filter: blur(30px);
+}
+body[data-store-theme="voltedge"] .hero .wrap { position: relative; z-index: 1; }
+body[data-store-theme="voltedge"] .hero h1 { font-weight: 800; letter-spacing: -.03em; line-height: 1.04; }
+body[data-store-theme="voltedge"] .eyebrow { color: var(--accent-strong); letter-spacing: .24em; font-size: 12px; }
+body[data-store-theme="voltedge"] .eyebrow::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #38BDF8; margin-right: 10px; box-shadow: 0 0 12px #38BDF8; vertical-align: middle; }
+body[data-store-theme="voltedge"] .b-hero-img img { border-radius: 24px; border: 1px solid var(--line-2); box-shadow: 0 0 0 1px rgba(56, 189, 248, .2), 0 40px 80px -30px rgba(56, 189, 248, .45); }
+body[data-store-theme="voltedge"] .btn-primary { background-image: linear-gradient(110deg, #38BDF8, #818CF8 60%, #38BDF8); background-size: 220% 100%; color: #04121F; font-weight: 800; border: 0; }
+body[data-store-theme="voltedge"] .btn { position: relative; overflow: hidden; border-radius: 12px; transition: transform .25s cubic-bezier(.2, .8, .2, 1), box-shadow .25s, background-position .6s; }
+body[data-store-theme="voltedge"] .btn::after { content: ""; position: absolute; inset: 0 auto 0 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent); transform: translateX(-130%) skewX(-18deg); pointer-events: none; }
+body[data-store-theme="voltedge"] .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 34px -10px rgba(56, 189, 248, .75); background-position: 100% 0; }
+body[data-store-theme="voltedge"] .btn:hover::after { animation: pm-sheen .9s ease; }
+body[data-store-theme="voltedge"] .btn:active { transform: translateY(0) scale(.97); }
+body[data-store-theme="voltedge"] .btn:focus-visible, body[data-store-theme="voltedge"] a:focus-visible { outline: 2px solid #7DD3FC; outline-offset: 3px; }
+body[data-store-theme="voltedge"] .section-head h2 { font-weight: 800; letter-spacing: -.02em; }
+body[data-store-theme="voltedge"] .section-head h2::after { content: ""; display: block; width: 56px; height: 3px; margin-top: 10px; border-radius: 3px; background: linear-gradient(90deg, #38BDF8, #818CF8); transform-origin: 0 50%; }
+
+/* Cards: a spec-sheet panel with a light that travels around its edge when you point at it. */
+body[data-store-theme="voltedge"] .pcard {
+  position: relative; padding: 10px 10px 16px; border: 1px solid var(--line-2); border-radius: 18px; background: var(--surface); transition: transform .35s cubic-bezier(.2, .8, .2, 1), box-shadow .35s, border-color .35s;
+}
+/* The travelling edge light: a conic gradient clipped to a 1px ring, turned by animating its angle. */
+body[data-store-theme="voltedge"] .pcard::before {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none; opacity: 0; transition: opacity .3s;
+  background: conic-gradient(from var(--pm-angle), transparent 0 55%, #38BDF8 72%, #818CF8 86%, transparent);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+body[data-store-theme="voltedge"] .pcard:hover::before { opacity: 1; }
+body[data-store-theme="voltedge"] .pcard:hover { transform: translateY(-6px); box-shadow: 0 24px 50px -24px rgba(56, 189, 248, .55); }
+body[data-store-theme="voltedge"] .pimg { aspect-ratio: 1 / 1; border-radius: 12px; background: radial-gradient(circle at 50% 38%, #1B2B57, #0F1832 70%); overflow: hidden; position: relative; }
+body[data-store-theme="voltedge"] .pimg img { transition: transform .6s cubic-bezier(.2, .8, .2, 1); }
+body[data-store-theme="voltedge"] .pcard:hover .pimg img { transform: scale(1.08) rotate(-1.5deg); }
+body[data-store-theme="voltedge"] .pname { font-weight: 700; }
+body[data-store-theme="voltedge"] .price { color: #7DD3FC; font-weight: 800; }
+body[data-store-theme="voltedge"] .tag { font-size: 12px; background: linear-gradient(110deg, #38BDF8, #818CF8); color: #04121F; border-radius: 8px; font-weight: 800; }
+body[data-store-theme="voltedge"] .tag.out { background: #2B3A63; color: #E6ECFF; }
+body[data-store-theme="voltedge"] .cat { border: 1px solid var(--line-2); background: linear-gradient(145deg, #131E3D, #0E1731); isolation: isolate; transition: transform .35s cubic-bezier(.2, .8, .2, 1), border-color .35s, box-shadow .35s; }
+body[data-store-theme="voltedge"] .cat::before { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(120% 100% at 100% 100%, rgba(56, 189, 248, .35), transparent 60%); opacity: 0; transition: opacity .4s; }
+body[data-store-theme="voltedge"] .cat:hover { transform: translateY(-4px); border-color: #38BDF8; box-shadow: 0 18px 40px -22px rgba(56, 189, 248, .6); }
+body[data-store-theme="voltedge"] .cat:hover::before { opacity: 1; }
+body[data-store-theme="voltedge"] .trust > div { border: 1px solid var(--line-2); border-radius: 16px; padding: 18px; background: linear-gradient(145deg, #121D3E, #0E1731); transition: transform .3s cubic-bezier(.2, .8, .2, 1), border-color .3s; }
+body[data-store-theme="voltedge"] .trust > div:hover { transform: translateY(-4px); border-color: #38BDF8; }
+body[data-store-theme="voltedge"] .footer { background: #060B18; color: #B7C2E2; border-top: 1px solid var(--line-2); }
+body[data-store-theme="voltedge"] .footer b, body[data-store-theme="voltedge"] .footer .brand { color: #FFFFFF; }
+
+@media (prefers-reduced-motion: no-preference) {
+  body[data-store-theme="voltedge"] .hero::before { animation: pm-grid 6s linear infinite; }
+  body[data-store-theme="voltedge"] .hero::after { animation: pm-aurora-a 16s ease-in-out infinite; }
+  body[data-store-theme="voltedge"] .hero .wrap::before { content: ""; position: absolute; z-index: -1; left: -10%; bottom: -30%; width: 55vmin; height: 55vmin; border-radius: 50%; background: radial-gradient(circle, rgba(129, 140, 248, .4), transparent 65%); filter: blur(28px); animation: pm-aurora-b 19s ease-in-out infinite; pointer-events: none; }
+  body[data-store-theme="voltedge"] .b-hero-img { animation: pm-bob 6s ease-in-out infinite; }
+  body[data-store-theme="voltedge"] .eyebrow::before { animation: pm-blink 2.2s ease-in-out infinite; }
+  body[data-store-theme="voltedge"] .hero .eyebrow { animation: pm-rise .7s .05s cubic-bezier(.2, .8, .2, 1) both; }
+  body[data-store-theme="voltedge"] .hero h1 { animation: pm-rise .9s .15s cubic-bezier(.2, .8, .2, 1) both; }
+  body[data-store-theme="voltedge"] .hero p { animation: pm-rise .9s .3s cubic-bezier(.2, .8, .2, 1) both; }
+  body[data-store-theme="voltedge"] .hero .ctas { animation: pm-rise .9s .45s cubic-bezier(.2, .8, .2, 1) both; }
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    body[data-store-theme="voltedge"] .logo { background-size: 220% 100%; animation: pm-shimmer 7s linear infinite; }
+  }
+  body[data-store-theme="voltedge"] .btn-primary { animation: pm-pulse 3s 2s ease-out infinite; }
+  body[data-store-theme="voltedge"] .pcard:hover::before { animation: pm-spin 2.8s linear infinite; }
+  body[data-store-theme="voltedge"] .tag { background-size: 200% 100%; animation: pm-gradient-pan 4s linear infinite; }
+  body[data-store-theme="voltedge"] .announce { background-size: 250% 100%; animation: pm-gradient-pan 14s linear infinite; }
+  @supports (animation-timeline: scroll()) {
+    body[data-store-theme="voltedge"]::before {
+      content: ""; position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 60; transform-origin: 0 50%; transform: scaleX(0);
+      background: linear-gradient(90deg, #38BDF8, #818CF8, #38BDF8); animation: pm-progress linear both; animation-timeline: scroll(root block);
+    }
+  }
+  @supports (animation-timeline: view()) {
+    body[data-store-theme="voltedge"] .pcard,
+    body[data-store-theme="voltedge"] .cat,
+    body[data-store-theme="voltedge"] .trust > div { animation: pm-rise linear both; animation-timeline: view(); animation-range: entry 0% entry 55%; }
+    body[data-store-theme="voltedge"] .section-head h2::after { animation: pm-draw linear both; animation-timeline: view(); animation-range: entry 10% entry 60%; }
+  }
+}
+@media (max-width: 720px) {
+  body[data-store-theme="voltedge"] .hero { min-height: 72vh; }
+  body[data-store-theme="voltedge"] .hero::after { width: 90vmin; height: 90vmin; right: -40vmin; }
+}

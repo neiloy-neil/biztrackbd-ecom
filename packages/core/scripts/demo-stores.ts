@@ -1,5 +1,5 @@
 // Builds or rebuilds the template demo stores (docs/38). Run from the repository root:
-//   pnpm --filter @biztrackbd/core exec tsx scripts/demo-stores.ts [kapor|gadgetstudio|mini-bunny|axionwear|bindu|berber|freshbasket|bazaar|nakshi|maison|all] [--target local|supabase]
+//   pnpm --filter @biztrackbd/core exec tsx scripts/demo-stores.ts [kapor|gadgetstudio|mini-bunny|axionwear|bindu|berber|freshbasket|bazaar|nakshi|maison|voltedge|all] [--target local|supabase]
 // Local needs the local database and writes pictures to .uploads. For Supabase it reads the restricted app login and the storage keys from
 // .env.local and sets MEDIA_DRIVER=supabase. Safe to run again: each run starts from a clean slate and refuses to touch a store that is not a demo.
 import { createRequire } from "node:module";

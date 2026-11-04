@@ -3,7 +3,7 @@ import { createBaseClient, setBasePrisma, setPlatformPrisma, withTenant, type Pr
 import { createOwnerClient, resetDatabase, seedPlans, testUrls } from "@biztrackbd/db/testing";
 import {
   DomainError, PREMIUM_THEMES, PREMIUM_THEME_PRICE, STORE_THEMES, activateTheme, approveThemePurchase, isFreeThemeId, listPendingThemePurchases, listThemeStore, rejectThemePurchase,
-  resolveTemplateForSignup, setEventPublisher, signupStore, submitThemePurchase, type PlatformActor, type StaffActor,
+  processUddoktaPaySubscriptionSuccess, resolveTemplateForSignup, setEventPublisher, setUddoktaPayFetchForTests, signupStore, startThemeCheckout, submitThemePurchase, type PlatformActor, type StaffActor,
 } from "../src";
 
 let owner: PrismaClient;
@@ -127,5 +127,51 @@ describe("premium themes (49 taka, once, for life)", () => {
     const id = (await owner.themePurchase.findFirstOrThrow({ where: { tenantId: s.tenantId } })).id;
     await expect(withTenant(s.tenantId, (tx) => tx.themePurchase.update({ where: { id }, data: { status: "APPROVED" } }))).rejects.toThrow();
     expect((await owner.themePurchase.findUniqueOrThrow({ where: { id } })).status).toBe("PENDING");
+  });
+  describe("paying online with UddoktaPay", () => {
+    const ctx = { adminOrigin: "http://localhost:3001", platformOrigin: "http://localhost:3003" };
+    let charged: Record<string, unknown> | null = null;
+    const gateway = (verify: Record<string, unknown>) => setUddoktaPayFetchForTests((async (url: string, init: { body: string }) => {
+      const body = JSON.parse(init.body);
+      if (String(url).endsWith("/api/checkout-v2")) {
+        charged = body;
+        return new Response(JSON.stringify({ status: true, payment_url: "https://pay.example.test/invoice/INV1" }), { status: 200 });
+      }
+      return new Response(JSON.stringify({ status: "COMPLETED", invoice_id: body.invoice_id, payment_method: "bkash", sender_number: "01712345678", ...verify }), { status: 200 });
+    }) as unknown as typeof fetch);
+    afterAll(() => setUddoktaPayFetchForTests(undefined));
+
+    it("charges the theme price (never a browser amount) and carries what was bought in the charge", async () => {
+      gateway({});
+      const s = await store();
+      const r = await startThemeCheckout(s.tenantId, s.actor, "maison", ctx);
+      expect(r.paymentUrl).toContain("pay.example.test");
+      expect(charged).toMatchObject({ amount: "49", metadata: { tenantId: s.tenantId, themeId: "maison", type: "theme" }, webhook_url: "http://localhost:3003/api/webhooks/uddoktapay", redirect_url: "http://localhost:3001/api/themes/uddoktapay/callback" });
+      await fails(startThemeCheckout(s.tenantId, s.actor, "kapor", ctx), /free/);
+    });
+
+    it("unlocks the theme at once when the gateway says completed, once however often it is reported", async () => {
+      const s = await store();
+      const meta = { tenantId: s.tenantId, themeId: "maison", type: "theme" };
+      gateway({ amount: "49", transaction_id: "ONLINETRX01", metadata: meta });
+      expect(await processUddoktaPaySubscriptionSuccess("INV-A1")).toMatchObject({ ok: true, tenantId: s.tenantId, plan: "maison" });
+      await processUddoktaPaySubscriptionSuccess("INV-A1");
+      expect(await owner.themePurchase.count({ where: { tenantId: s.tenantId, themeId: "maison", status: "APPROVED" } })).toBe(1);
+      expect((await listThemeStore(s.tenantId, s.actor)).themes.find((t) => t.id === "maison")!.state).toBe("OWNED");
+      await activateTheme(s.tenantId, s.actor, "maison");
+      await fails(startThemeCheckout(s.tenantId, s.actor, "maison", ctx), /already own/);
+    });
+
+    it("does not unlock on a pending payment, an amount that is too low, or an unknown theme", async () => {
+      const s = await store();
+      const meta = { tenantId: s.tenantId, themeId: "maison", type: "theme" };
+      gateway({ status: "PENDING", amount: "49", transaction_id: "ONLINETRX02", metadata: meta });
+      expect(await processUddoktaPaySubscriptionSuccess("INV-B1")).toMatchObject({ ok: false });
+      gateway({ amount: "1", transaction_id: "ONLINETRX03", metadata: meta });
+      await expect(processUddoktaPaySubscriptionSuccess("INV-B2")).rejects.toThrow(/less than the theme price/);
+      gateway({ amount: "49", transaction_id: "ONLINETRX04", metadata: { ...meta, themeId: "kapor" } });
+      await expect(processUddoktaPaySubscriptionSuccess("INV-B3")).rejects.toThrow(/not a premium theme/);
+      expect(await owner.themePurchase.count({ where: { tenantId: s.tenantId, status: "APPROVED" } })).toBe(0);
+    });
   });
 });
