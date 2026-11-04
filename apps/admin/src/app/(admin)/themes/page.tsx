@@ -120,7 +120,7 @@ export default async function Themes({ searchParams }: { searchParams: Promise<R
 }
 
 function ThemeCard({ t, canEdit, canBuy, payTo, online }: { t: ThemeStoreItem; canEdit: boolean; canBuy: boolean; online: boolean; payTo: { provider: "BKASH" | "NAGAD"; number: string; kind: string }[] }) {
-  const shot = HAS_PREVIEW.has(t.id) ? `url(/theme-previews/${t.id}.webp)` : SWATCH[t.id] ?? (t.accent && t.background ? `linear-gradient(135deg,${t.background} 0 50%,${t.accent} 50%)` : undefined);
+  const shot = t.preview ? `url("${t.preview}")` : HAS_PREVIEW.has(t.id) ? `url(/theme-previews/${t.id}.webp)` : SWATCH[t.id] ?? (t.accent && t.background ? `linear-gradient(135deg,${t.background} 0 50%,${t.accent} 50%)` : undefined);
   return (
     <article className="theme-card" data-active={t.active} data-testid={`theme-${t.id}`}>
       <div className="theme-shot" style={{ backgroundImage: shot ?? SWATCH.kapor }} role="img" aria-label={`${t.name} preview`} />

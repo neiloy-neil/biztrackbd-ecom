@@ -10,6 +10,7 @@ import { assertNotInDemo } from "../demo/guard";
 import { paymentTargets, type PayTo } from "./billing";
 import { createUddoktaPayCharge, getPlatformUddoktaPayCredentials, uddoktaPayPlanUrls } from "../payments/uddoktapay";
 import { assertPlatformCan, type PlatformActor } from "./admin";
+import { isPreviewAddress } from "./template-bundle";
 import { groupTrxId, loadBundles, newPaymentGroup, purchaseShares, quoteThemePurchase, type BundleItem, type ThemeQuote } from "./theme-pricing";
 
 /**
@@ -37,6 +38,8 @@ export interface ThemeStoreItem {
   active: boolean;
   /** The reason the last payment for this theme was turned down, shown so the owner can try again. */
   lastRejection: string | null;
+  /** A picture of the theme uploaded with its package (a zip), or null: the card then falls back to its built-in picture or colours. */
+  preview: string | null;
 }
 
 export interface ThemeStoreBundle extends BundleItem {
@@ -76,9 +79,22 @@ export async function hasPremiumTools(tenantId: string): Promise<boolean> {
   });
 }
 
+/** The desktop picture of each uploaded theme (source PACKAGE), from the template it was made from. */
+async function packagePreviews(tx: TenantTx, catalogue: { id: string; source: string }[]): Promise<Map<string, string>> {
+  const ids = catalogue.filter((t) => t.source === "PACKAGE").map((t) => t.id);
+  const out = new Map<string, string>();
+  if (ids.length === 0) return out;
+  for (const r of await tx.template.findMany({ where: { id: { in: ids } }, select: { id: true, pagesJson: true } })) {
+    const pv = (((r.pagesJson as Record<string, unknown> | null)?._meta ?? null) as { previews?: { desktop?: unknown; mobile?: unknown } } | null)?.previews;
+    const pick = [pv?.desktop, pv?.mobile].find((v): v is string => typeof v === "string" && isPreviewAddress(v));
+    if (pick) out.set(r.id, pick);
+  }
+  return out;
+}
+
 export async function listThemeStore(tenantId: string, actor: StaffActor): Promise<ThemeStoreView> {
   assertCan(actor, "design", "view");
-  const { tenant, purchases, catalogue, planTier, bundles } = await withTenant(tenantId, async (tx) => {
+  const { tenant, purchases, catalogue, planTier, bundles, previews } = await withTenant(tenantId, async (tx) => {
     const catalogue = await loadCatalogue(tx);
     return {
       tenant: await tx.tenant.findFirstOrThrow({ select: { themeId: true } }),
@@ -86,13 +102,14 @@ export async function listThemeStore(tenantId: string, actor: StaffActor): Promi
       catalogue,
       planTier: await currentPlanTier(tx),
       bundles: await loadBundles(tx, catalogue),
+      previews: await packagePreviews(tx, catalogue),
     };
   });
   const themes = catalogue.map((t): ThemeStoreItem => {
     const mine = purchases.filter((p) => p.themeId === t.id);
     const access = themeAccessFor(t, planTier, mine);
     const rejected = mine.find((p) => p.status === "REJECTED");
-    return { id: t.id, name: t.name, blurb: t.blurb, audience: t.audience, premium: t.premium, price: t.price, priceModel: t.priceModel, accent: t.accent, background: t.background, expiresAt: access.expiresAt, expired: access.expired, state: access.state, active: tenant.themeId === t.id, lastRejection: access.state === "LOCKED" ? rejected?.rejectionReason ?? null : null };
+    return { id: t.id, name: t.name, blurb: t.blurb, audience: t.audience, premium: t.premium, price: t.price, priceModel: t.priceModel, accent: t.accent, background: t.background, expiresAt: access.expiresAt, expired: access.expired, state: access.state, active: tenant.themeId === t.id, lastRejection: access.state === "LOCKED" ? rejected?.rejectionReason ?? null : null, preview: previews.get(t.id) ?? null };
   });
   const byId = new Map(themes.map((t) => [t.id, t]));
   const bundleItems = bundles.map((b): ThemeStoreBundle => {

@@ -129,6 +129,7 @@ export * from "./platform/revenue";
 export { notExpired } from "./modules/expiry";
 export { premiumPagesFor } from "./builder/premium-pages";
 export * from "./platform/template-bundle";
+export * from "./platform/template-zip";
 export * from "./platform/template-studio";
 export * from "./platform/template-previews";
 export { installTemplatePages } from "./builder/versions";

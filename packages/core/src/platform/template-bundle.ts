@@ -23,7 +23,9 @@ export const BUNDLE_SITE_MODES = ["ECOMMERCE", "PORTFOLIO", "HYBRID"] as const;
 export const BUNDLE_VERTICALS = ["RESTAURANT", "DOCTOR_CLINIC", "PUBLIC_FIGURE", "BUSINESS_COMPANY", "SERVICE_PROVIDER", "PERSONAL_PORTFOLIO"] as const;
 
 const TEMPLATE_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const httpsUrl = z.string().url().max(500).refine((u) => u.startsWith("https://"), "Preview pictures must be https:// links");
+/** A preview picture is an https:// link, or one stored by a zip package upload (the platform's own media folder). */
+export const isPreviewAddress = (u: string): boolean => u.startsWith("https://") || /^\/media\/platform-themes\/[A-Za-z0-9_-]{8,64}\.webp$/.test(u);
+const httpsUrl = z.string().max(500).refine((u) => isPreviewAddress(u) && (u.startsWith("/") || URL.canParse(u)), "Preview pictures must be https:// links");
 
 const Header = z.object({
   format: z.literal(TEMPLATE_BUNDLE_FORMAT),
