@@ -284,6 +284,25 @@ export const DEMO_TEMPLATES: readonly DemoTemplate[] = [
       { slug: "fit-band-lite", title: "Fit Band Lite", titleBn: "ফিট ব্যান্ড লাইট", text: "Steps, heart rate and sleep in a featherweight band.", textBn: "হালকা ব্যান্ডে স্টেপ, হার্ট-রেট ও ঘুমের হিসাব।", price: 2290, cost: 1300, category: "wearables", art: "watch", tone: "accent", variants: colours(["Black", "Navy"]), stock: 38 },
     ],
   },
+  {
+    id: "lumiere", host: "lumiere", storeName: "Lumière", storeNameBn: "লুমিয়ের", tagline: "Glow, considered",
+    palette: { bg: "#F6E7F1", main: "#7B3FA0", accent: "#E9A8C8", ink: "#2D1B3A" },
+    announcement: { text: "Demo store: free sample with every order. Free delivery over ৳ 2,000.", textBn: "ডেমো স্টোর: প্রতিটি অর্ডারে ফ্রি স্যাম্পল। ৳ ২,০০০ এর উপরে ফ্রি ডেলিভারি।" },
+    hero: { eyebrow: "THE GLOW EDIT", eyebrowBn: "গ্লো এডিট", title: "Skin that glows from within", titleBn: "ভেতর থেকে উজ্জ্বল ত্বক", text: "Clinically considered skincare, makeup and fragrance, matched to your routine.", textBn: "ত্বকের যত্ন, মেকআপ ও সুগন্ধি, আপনার রুটিন অনুযায়ী বাছাই করা।", ctaText: "Find your routine", ctaTextBn: "আপনার রুটিন খুঁজুন", art: ["serum", "lipstick", "perfume"] },
+    banner: { heading: "The 3-step glow routine", headingBn: "৩ ধাপের গ্লো রুটিন", text: "Cleanse, treat and protect, bundled and 15% off.", textBn: "পরিষ্কার, চিকিৎসা ও সুরক্ষা, একসাথে ১৫% ছাড়ে।", ctaText: "Shop the routine", ctaTextBn: "রুটিন দেখুন", art: ["tube", "serum", "jar"] },
+    about: { heading: "Ingredients you can read", headingBn: "যে উপাদান আপনি পড়তে পারেন", body: "Short ingredient lists, fragrance-light formulas and honest claims. This is a demo store: products are samples.", bodyBn: "ছোট উপাদান তালিকা, কম সুগন্ধির ফর্মুলা ও সৎ দাবি। এটি একটি ডেমো স্টোর: পণ্যগুলো নমুনা।" },
+    categories: [{ slug: "skincare", name: "Skin" }, { slug: "makeup", name: "Makeup" }, { slug: "fragrance", name: "Scent" }, { slug: "body", name: "Body" }],
+    products: [
+      { slug: "glow-vitamin-c-serum", title: "Glow Vitamin C Serum", titleBn: "গ্লো ভিটামিন সি সিরাম", text: "A brightening 10% vitamin C serum for dull skin. 30 ml.", textBn: "নিস্তেজ ত্বকের জন্য ১০% ভিটামিন সি উজ্জ্বলতার সিরাম। ৩০ মি.লি.।", price: 1890, compareAt: 2290, cost: 900, category: "skincare", art: "serum", variants: one, stock: 36, featured: true },
+      { slug: "barrier-night-cream", title: "Barrier Night Cream", titleBn: "ব্যারিয়ার নাইট ক্রিম", text: "A rich ceramide night cream that repairs while you sleep. 50 ml.", textBn: "ঘুমের সময় মেরামত করে এমন ঘন সিরামাইড নাইট ক্রিম। ৫০ মি.লি.।", price: 1590, cost: 780, category: "skincare", art: "jar", tone: "accent", variants: one, stock: 30, featured: true },
+      { slug: "gentle-gel-cleanser", title: "Gentle Gel Cleanser", titleBn: "জেন্টল জেল ক্লিনজার", text: "A soap-free gel that cleans without tightness. 150 ml.", textBn: "টান না ধরানো সাবানমুক্ত জেল। ১৫০ মি.লি.।", price: 990, cost: 420, category: "skincare", art: "tube", variants: one, stock: 60 },
+      { slug: "velvet-matte-lipstick", title: "Velvet Matte Lipstick, Orchid", titleBn: "ভেলভেট ম্যাট লিপস্টিক, অর্কিড", text: "A comfortable matte lipstick that lasts through lunch.", textBn: "দুপুরের খাবার পর্যন্ত টেকে এমন আরামদায়ক ম্যাট লিপস্টিক।", price: 1190, compareAt: 1390, cost: 520, category: "makeup", art: "lipstick", tone: "accent", variants: [{ title: "Orchid", options: { Shade: "Orchid" } }, { title: "Rose", options: { Shade: "Rose" } }, { title: "Berry", options: { Shade: "Berry" } }], stock: 44, featured: true },
+      { slug: "pearl-eyeshadow-palette", title: "Pearl Eyeshadow Palette", titleBn: "পার্ল আইশ্যাডো প্যালেট", text: "Four pearlescent shades from champagne to plum.", textBn: "শ্যাম্পেন থেকে প্লাম, চারটি পার্ল শেড।", price: 1790, cost: 860, category: "makeup", art: "palette", variants: one, stock: 28, featured: true },
+      { slug: "lumiere-eau-de-parfum", title: "Lumière Eau de Parfum", titleBn: "লুমিয়ের ইউ দ্য পারফিউম", text: "Iris, pear and white musk, 50 ml. Soft enough for every day.", textBn: "আইরিস, পিয়ার ও হোয়াইট মাস্ক, ৫০ মি.লি.। প্রতিদিনের জন্য নরম।", price: 3290, cost: 1700, category: "fragrance", art: "perfume", variants: one, stock: 20 },
+      { slug: "silk-body-lotion", title: "Silk Body Lotion", titleBn: "সিল্ক বডি লোশন", text: "A fast-absorbing lotion with shea and almond oil. 250 ml.", textBn: "শিয়া ও আমন্ড অয়েলের দ্রুত শোষিত লোশন। ২৫০ মি.লি.।", price: 890, cost: 380, category: "body", art: "tube", tone: "accent", variants: one, stock: 54 },
+      { slug: "rose-hand-balm", title: "Rose Hand Balm", titleBn: "রোজ হ্যান্ড বাম", text: "A rich hand balm in a travel jar. 40 ml.", textBn: "ট্রাভেল জারে ঘন হ্যান্ড বাম। ৪০ মি.লি.।", price: 650, cost: 270, category: "body", art: "jar", variants: one, stock: 70 },
+    ],
+  },
 ] as const;
 
 export const demoTemplate = (id: string): DemoTemplate | undefined =>

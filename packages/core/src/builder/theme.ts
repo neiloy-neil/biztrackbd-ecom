@@ -213,7 +213,7 @@ export const FONT_LABELS: Record<FontPair, string> = {
 
 export const DEFAULT_THEME: ThemeSettings = { accent: "#8C5A3C", background: "#FBF8F3", text: "#2B2118", radius: "soft", font: "sans" };
 
-export const THEME_IDS = ["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu", "berber", "freshbasket", "bazaar", "nakshi", "maison", "voltedge"] as const;
+export const THEME_IDS = ["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu", "berber", "freshbasket", "bazaar", "nakshi", "maison", "voltedge", "lumiere"] as const;
 export type ThemeId = (typeof THEME_IDS)[number];
 
 export interface ThemeDefinition {
@@ -262,6 +262,7 @@ export const PREMIUM_THEME_PRICE = 49;
 export const PREMIUM_THEMES: readonly ThemeDefinition[] = [
   { id: "maison", name: "Maison", blurb: "An editorial fashion flagship: a full-bleed lookbook home, portrait cards, a size and fit guide and a sticky add-to-cart.", audience: "Fashion and apparel brands", premium: true, defaults: { accent: "#8F4A2B", background: "#FAF7F2", text: "#1C1917", radius: "sharp", font: "editorial" } },
   { id: "voltedge", name: "Voltedge", blurb: "A dark, glowing electronics flagship: animated aurora hero, glowing spec cards, warranty and instalment messaging.", audience: "Electronics, gadgets and accessories", premium: true, defaults: { accent: "#38BDF8", background: "#0A1020", text: "#E6ECFF", radius: "soft", font: "sans" } },
+  { id: "lumiere", name: "Lumière", blurb: "A pearly beauty flagship: iridescent animated hero, rising glass bubbles, soft glass cards, routine bundles and an ingredients guide.", audience: "Beauty, skincare and cosmetics", premium: true, defaults: { accent: "#7B3FA0", background: "#FDF7FB", text: "#2D1B3A", radius: "round", font: "editorial" } },
 ] as const;
 
 export const ALL_THEMES: readonly ThemeDefinition[] = [...STORE_THEMES, ...PREMIUM_THEMES];

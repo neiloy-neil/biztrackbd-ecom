@@ -42,9 +42,27 @@ const VOLTEDGE_PRODUCT = page([
   section("product-related", 1, { title: "Pairs well with", titleBn: "যার সাথে ভালো মানায়", limit: 4 }),
 ]);
 
+const LUMIERE_HOME = page([
+  section("hero", 1, { eyebrow: "THE GLOW EDIT", eyebrowBn: "গ্লো এডিট", title: "Skin that glows from within", titleBn: "ভেতর থেকে উজ্জ্বল ত্বক", text: "Skincare, makeup and fragrance, matched to your routine.", textBn: "ত্বকের যত্ন, মেকআপ ও সুগন্ধি, আপনার রুটিন অনুযায়ী বাছাই করা।", ctaText: "Find your routine", ctaTextBn: "আপনার রুটিন খুঁজুন", ctaLink: "/search", align: "left" }),
+  section("category-grid", 1, { title: "Shop by ritual", titleBn: "রিচুয়াল অনুযায়ী কিনুন", limit: 4 }),
+  section("featured-products", 1, { title: "New in", titleBn: "নতুন এসেছে", source: "new", limit: 8, columns: "4" }),
+  section("banner", 1, { heading: "The 3-step glow routine", headingBn: "৩ ধাপের গ্লো রুটিন", text: "Cleanse, treat and protect: bundle all three and save 15%.", textBn: "পরিষ্কার, চিকিৎসা ও সুরক্ষা: তিনটি একসাথে নিলে ১৫% ছাড়।", ctaText: "Shop the routine", ctaTextBn: "রুটিন দেখুন", ctaLink: "/search?sale=1", height: "tall" }),
+  section("featured-products", 2, { title: "Most loved", titleBn: "সবচেয়ে পছন্দের", source: "featured", limit: 4, columns: "4" }),
+  section("rich-text", 1, { heading: "Ingredients you can read", headingBn: "যে উপাদান আপনি পড়তে পারেন", body: "Short ingredient lists, fragrance-light formulas and honest claims. Patch-test new products on your inner arm for 24 hours, and introduce one active at a time. Every order ships with a free sample.", bodyBn: "ছোট উপাদান তালিকা, কম সুগন্ধির ফর্মুলা ও সৎ দাবি। নতুন পণ্য ২৪ ঘণ্টা বাহুর ভেতরের দিকে প্যাচ-টেস্ট করুন এবং একবারে একটি অ্যাকটিভ শুরু করুন। প্রতিটি অর্ডারে একটি ফ্রি স্যাম্পল।" }),
+  section("trust-strip", 1),
+]);
+
+const LUMIERE_PRODUCT = page([
+  section("product-main", 1),
+  section("rich-text", 1, { heading: "Ingredients and how to use", headingBn: "উপাদান ও ব্যবহারবিধি", body: "The key ingredients and the full list are in the description above. Apply to clean skin, morning or night as directed. Patch-test first, avoid the eye area, and use sun protection in the daytime. Not sure where to start? Message us on WhatsApp and we will build a routine for your skin.", bodyBn: "মূল উপাদান ও পূর্ণ তালিকা উপরের বিবরণে আছে। পরিষ্কার ত্বকে সকালে বা রাতে নির্দেশমতো লাগান। আগে প্যাচ-টেস্ট করুন, চোখের চারপাশ এড়িয়ে চলুন এবং দিনে সানস্ক্রিন ব্যবহার করুন। কোথা থেকে শুরু করবেন বুঝতে না পারলে হোয়াটসঅ্যাপে জানান, আপনার ত্বকের রুটিন সাজিয়ে দেব।" }),
+  section("product-reviews", 1),
+  section("product-related", 1, { title: "Complete the routine", titleBn: "রুটিন সম্পূর্ণ করুন", limit: 4 }),
+]);
+
 const PREMIUM_PAGES: Partial<Record<ThemeId, Partial<Record<PageKind, PageJson>>>> = {
   maison: { home: MAISON_HOME, product: MAISON_PRODUCT },
   voltedge: { home: VOLTEDGE_HOME, product: VOLTEDGE_PRODUCT },
+  lumiere: { home: LUMIERE_HOME, product: LUMIERE_PRODUCT },
 };
 
 /** The layout a premium theme starts with, one entry per page kind. The pages it does not list use the standard layouts. */

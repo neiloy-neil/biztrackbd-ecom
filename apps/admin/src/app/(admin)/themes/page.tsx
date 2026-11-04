@@ -27,9 +27,10 @@ const SWATCH: Record<string, string> = {
   nakshi: "linear-gradient(135deg,#FBF6EE 0 50%,#7A1F2E 50%)",
   maison: "linear-gradient(135deg,#FAF7F2 0 50%,#8F4A2B 50%)",
   voltedge: "linear-gradient(135deg,#0A1020 0 50%,#38BDF8 50%)",
+  lumiere: "linear-gradient(135deg,#FDF7FB 0 50%,#7B3FA0 50%)",
 };
 /** Themes that have a picture of their demo store in /theme-previews. */
-const HAS_PREVIEW = new Set(["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu", "berber", "freshbasket", "bazaar", "nakshi", "maison", "voltedge"]);
+const HAS_PREVIEW = new Set(["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu", "berber", "freshbasket", "bazaar", "nakshi", "maison", "voltedge", "lumiere"]);
 const DEMO_HOST: Record<string, string> = { "mini-bunny": "minibunny" };
 
 /** Where a theme's live demo store is: <name>.<root domain>. */
