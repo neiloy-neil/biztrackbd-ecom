@@ -48,7 +48,7 @@ const FALLBACK_PUBLIC_PLANS: PlanView[] = [
     priceYearly: 6990,
     yearlyMonthsFree: 2,
     trialDays: 14,
-    limits: { products: 300, ordersPerMonth: 500, staff: 2, storageGb: 5, smsCredits: 200, landingPages: 3 },
+    limits: { products: 300, ordersPerMonth: 500, staff: 2, storageGb: 5, smsCredits: 100, landingPages: 3 },
     features: { customDomain: false, courierBooking: "manual", fraud: "basic", sectionBuilder: "settings", modules: 0, paymentGateway: false, capi: true },
   },
   {
@@ -58,7 +58,7 @@ const FALLBACK_PUBLIC_PLANS: PlanView[] = [
     priceYearly: 14990,
     yearlyMonthsFree: 2,
     trialDays: 14,
-    limits: { products: 2000, ordersPerMonth: 3000, staff: 5, storageGb: 20, smsCredits: 1000, landingPages: 20 },
+    limits: { products: 2000, ordersPerMonth: 3000, staff: 5, storageGb: 20, smsCredits: 500, landingPages: 20 },
     features: { customDomain: true, courierBooking: "auto", fraud: "full", sectionBuilder: "home", modules: 3, paymentGateway: false, capi: true },
   },
   {

@@ -124,6 +124,7 @@ export * from "./platform/templates";
 export * from "./platform/theme-store";
 export * from "./platform/theme-catalogue";
 export * from "./modules/purchases";
+export * from "./messaging/sms-credits";
 export * from "./platform/revenue";
 export { notExpired } from "./modules/expiry";
 export { premiumPagesFor } from "./builder/premium-pages";
@@ -171,7 +172,7 @@ export {
 } from "./platform/tickets";
 export {
   captureCheckout, markRecoveredByOrder, resolveRecovery, listAbandoned, getAbandoned, abandonedTabCounts, getAbandonedMetrics, logCallOutcome, recoveryText,
-  consumeSmsCredit, sendRecoveryMessages, sweepRecoveryMessages, RECOVERY_WAIT_MINUTES,
+  consumeSmsCredit, takeSmsCredit, giveBackSmsCredit, type SmsCreditSource, sendRecoveryMessages, sweepRecoveryMessages, RECOVERY_WAIT_MINUTES,
   type AbandonedRow, type AbandonedTab, type AbandonedMetrics, type CallOutcome, type RecoverySummary, type CartSnapshotLine,
 } from "./growth/abandoned";
 export {

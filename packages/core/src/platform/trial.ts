@@ -6,7 +6,7 @@ import { accessState } from "./lifecycle";
  * (a text message, an AI draft, a cross-store fraud lookup) that a throwaway signup could otherwise burn through.
  * Everything else follows the plan's full limits. Per month, and only until the store pays.
  */
-export const TRIAL_CAPS = { smsCredits: 20, aiGenerations: 15, fraudLookups: 30 } as const;
+export const TRIAL_CAPS = { smsCredits: 10, aiGenerations: 15, fraudLookups: 30 } as const;
 
 /** Is this store on its free trial right now (not paying, not demo, not locked or lapsed)? */
 export async function isOnTrial(tx: TenantTx, now: Date = new Date()): Promise<boolean> {

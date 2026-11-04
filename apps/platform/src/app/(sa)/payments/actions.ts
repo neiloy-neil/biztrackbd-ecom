@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { DomainError, approveModulePurchase, approveSubscriptionPayment, approveThemePurchase, rejectModulePurchase, rejectSubscriptionPayment, rejectThemePurchase } from "@biztrackbd/core";
+import { DomainError, approveModulePurchase, approveSmsPurchase, approveSubscriptionPayment, approveThemePurchase, rejectModulePurchase, rejectSmsPurchase, rejectSubscriptionPayment, rejectThemePurchase } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 
 export async function approveAction(id: string): Promise<void> {
@@ -75,4 +75,28 @@ export async function rejectModuleAction(id: string, form: FormData): Promise<vo
   }
   revalidatePath("/payments");
   redirect("/payments?done=module-rejected");
+}
+
+export async function approveSmsAction(id: string): Promise<void> {
+  const s = await requireAction("payments", "edit");
+  try {
+    await approveSmsPurchase(s.actor, id);
+  } catch (e) {
+    if (e instanceof DomainError) redirect(`/payments?err=${encodeURIComponent(e.message)}`);
+    throw e;
+  }
+  revalidatePath("/payments");
+  redirect("/payments?done=sms-approved");
+}
+
+export async function rejectSmsAction(id: string, form: FormData): Promise<void> {
+  const s = await requireAction("payments", "edit");
+  try {
+    await rejectSmsPurchase(s.actor, id, String(form.get("reason") ?? ""));
+  } catch (e) {
+    if (e instanceof DomainError) redirect(`/payments?err=${encodeURIComponent(e.message)}`);
+    throw e;
+  }
+  revalidatePath("/payments");
+  redirect("/payments?done=sms-rejected");
 }

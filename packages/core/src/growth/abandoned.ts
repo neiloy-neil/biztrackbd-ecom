@@ -10,6 +10,7 @@ import { getPlanLimits, monthStart } from "../limits/plan";
 import { money } from "../orders/pricing";
 import { assertCan, type StaffActor } from "../permissions";
 import { normalizeBdPhone } from "../phone";
+import { SMS_PREPAID_METRIC, SMS_PREPAID_PERIOD } from "../messaging/sms-credits";
 
 /**
  * Abandoned checkouts (docs/07 section 3). The moment a customer types a valid mobile number at checkout, the cart is kept
@@ -221,12 +222,19 @@ function storeOrigin(subdomain: string, primaryDomain: string | null): string {
   return `http://${subdomain}.${root || "localhost:3000"}`;
 }
 
-/** Takes one SMS credit from this month's allowance. False when the plan's allowance is used up. Atomic, so two sweeps cannot overspend. */
-export async function consumeSmsCredit(tx: TenantTx, tenantId: string, now: Date = new Date()): Promise<boolean> {
+/** Where a credit came from, so a failed send can give it back to the same place. */
+export type SmsCreditSource = "monthly" | "prepaid";
+
+/**
+ * Takes one SMS credit: first from this month's allowance (the plan's, or the trial cap while on trial), then, for a paying store, from
+ * the SMS it bought. Null when both are used up. Atomic, so two sweeps cannot overspend.
+ */
+export async function takeSmsCredit(tx: TenantTx, tenantId: string, now: Date = new Date()): Promise<SmsCreditSource | null> {
   const plan = await getPlanLimits(tx);
   const limits = (await tx.plan.findUnique({ where: { tier: plan.tier as never } }))?.limits as Record<string, unknown> | undefined;
   const planLimit = typeof limits?.smsCredits === "number" ? limits.smsCredits : null;
-  const limit = withTrialCap(planLimit, await isOnTrial(tx, now), TRIAL_CAPS.smsCredits);
+  const trial = await isOnTrial(tx, now);
+  const limit = withTrialCap(planLimit, trial, TRIAL_CAPS.smsCredits);
   const period = monthStart(now, plan.timezone);
   const rows = await tx.$queryRaw<{ v: number }[]>`
     INSERT INTO "UsageCounter" ("id", "tenantId", "metric", "periodStart", "value", "updatedAt")
@@ -234,7 +242,29 @@ export async function consumeSmsCredit(tx: TenantTx, tenantId: string, now: Date
     ON CONFLICT ("tenantId", "metric", "periodStart") DO UPDATE SET "value" = "UsageCounter"."value" + 1, "updatedAt" = now()
       WHERE ${limit}::int IS NULL OR "UsageCounter"."value" < ${limit}::int
     RETURNING "value"::int AS v`;
-  return rows.length > 0;
+  if (rows.length > 0) return "monthly";
+  // A store still on its free trial has a hard cap of its own; it buys SMS only after it pays for a plan.
+  if (trial) return null;
+  const prepaid = await tx.$queryRaw<{ v: number }[]>`
+    UPDATE "UsageCounter" SET "value" = "value" - 1, "updatedAt" = now()
+    WHERE "tenantId" = ${tenantId} AND "metric" = ${SMS_PREPAID_METRIC} AND "periodStart" = ${SMS_PREPAID_PERIOD}::date AND "value" >= 1
+    RETURNING "value"::int AS v`;
+  return prepaid.length > 0 ? "prepaid" : null;
+}
+
+/** Gives a credit back after a send failed. */
+export async function giveBackSmsCredit(tx: TenantTx, tenantId: string, source: SmsCreditSource, now: Date = new Date()): Promise<void> {
+  if (source === "prepaid") {
+    await tx.$executeRaw`UPDATE "UsageCounter" SET "value" = "value" + 1, "updatedAt" = now() WHERE "tenantId" = ${tenantId} AND "metric" = ${SMS_PREPAID_METRIC} AND "periodStart" = ${SMS_PREPAID_PERIOD}::date`;
+    return;
+  }
+  const plan = await getPlanLimits(tx);
+  await tx.$executeRaw`UPDATE "UsageCounter" SET "value" = GREATEST("value" - 1, 0) WHERE "tenantId" = ${tenantId} AND metric = 'sms' AND "periodStart" = ${monthStart(now, plan.timezone)}::date`;
+}
+
+/** Takes one SMS credit from the allowance or the prepaid balance. False when there is none left. */
+export async function consumeSmsCredit(tx: TenantTx, tenantId: string, now: Date = new Date()): Promise<boolean> {
+  return (await takeSmsCredit(tx, tenantId, now)) !== null;
 }
 
 export interface RecoverySummary {
@@ -271,6 +301,7 @@ export async function sendRecoveryMessages(tenantId: string, opts: { now?: Date;
 
   for (const row of waiting.rows) {
     sum.checked++;
+    let source: SmsCreditSource = "monthly";
     const claim = await withTenant(tenantId, async (tx): Promise<"send" | "skip"> => {
       const n = await tx.abandonedCheckout.updateMany({ where: { id: row.id, status: "CAPTURED", smsClaimedAt: null }, data: { smsClaimedAt: now } });
       if (n.count === 0) return "skip"; // someone else has it, or the customer ordered meanwhile
@@ -278,7 +309,9 @@ export async function sendRecoveryMessages(tenantId: string, opts: { now?: Date;
       if (await tx.smsOptOut.findFirst({ where: { phone: row.phone } })) return (await mark("SKIPPED_OPTOUT"), "skip");
       const sentToday = await tx.abandonedCheckout.count({ where: { phone: row.phone, smsStatus: "SENT", smsSentAt: { gt: new Date(now.getTime() - 86_400_000) } } });
       if (sentToday >= SMS_PER_PHONE_PER_DAY) return (await mark("SKIPPED_LIMIT"), "skip");
-      if (!(await consumeSmsCredit(tx, tenantId, now))) return (await mark("SKIPPED_NO_CREDITS"), "skip");
+      const taken = await takeSmsCredit(tx, tenantId, now);
+      if (!taken) return (await mark("SKIPPED_NO_CREDITS"), "skip");
+      source = taken;
       return "send";
     });
     if (claim === "skip") { sum.skipped++; continue; }
@@ -299,7 +332,7 @@ export async function sendRecoveryMessages(tenantId: string, opts: { now?: Date;
       // Give the credit back and note the failure. The row stays claimed, so a broken provider cannot cause a retry storm.
       await withTenant(tenantId, async (tx) => {
         await tx.abandonedCheckout.update({ where: { id: row.id }, data: { smsStatus: "FAILED" } });
-        await tx.$executeRaw`UPDATE "UsageCounter" SET "value" = GREATEST("value" - 1, 0) WHERE "tenantId" = ${tenantId} AND metric = 'sms' AND "periodStart" = ${monthStart(now, "Asia/Dhaka")}::date`;
+        await giveBackSmsCredit(tx, tenantId, source, now);
       });
       sum.failed++;
     }

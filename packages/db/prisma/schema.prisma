@@ -116,6 +116,7 @@ model Tenant {
   subscription  Subscription?
   paymentProofs PaymentProof[]
   modulePurchases ModulePurchase[]
+  smsPurchases    SmsPurchase[]
   themePurchases ThemePurchase[]
   auditLogs     AuditLog[]
 
@@ -1521,6 +1522,30 @@ model ModulePurchase {
   updatedAt DateTime @updatedAt
 
   @@index([tenantId, moduleKey])
+  @@index([status])
+}
+
+/// A pack of prepaid SMS a store bought by mobile money. On approval the quantity is added to the store's prepaid balance
+/// (UsageCounter metric "sms_prepaid"), which is spent only after the plan's monthly allowance is used up.
+model SmsPurchase {
+  id           String             @id @default(cuid())
+  tenantId     String
+  quantity     Int
+  amount       Decimal            @db.Decimal(12, 2)
+  mfsProvider  MfsProvider
+  senderNumber String
+  trxId        String             @unique
+  status       PaymentProofStatus @default(PENDING)
+
+  approvedBy      String?
+  approvedAt      DateTime?
+  rejectionReason String?
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
   @@index([status])
 }
 
