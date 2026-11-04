@@ -288,10 +288,12 @@ export async function processSslCommerzOrderSuccess(
     // Safety check amount
     const orderTotal = Number(order.totalAmount);
     const paidAmount = Number(verified.amount);
-    if (Math.abs(orderTotal - paidAmount) > 1.0) {
+    // A payment that does not cover the order must not mark it paid (a cheap transaction replayed against a dearer order).
+    if (!Number.isFinite(paidAmount) || orderTotal - paidAmount > 1.0) {
       console.warn(
         `SSLCommerz amount mismatch for order ${orderId}: expected ${orderTotal}, received ${paidAmount}`,
       );
+      throw new ValidationError("The amount paid does not match the order total");
     }
 
     if (order.paymentStatus !== "PAID") {
