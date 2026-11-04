@@ -504,7 +504,8 @@ export function AppStoreClient({
                     {isLocked ? (
                       <>
                         {(() => {
-                          const offer = sales.items.find((x) => x.moduleKey === app.key);
+                          // The apps screen calls Loyalty "loyalty_vip"; the module price list and purchases call it "loyalty".
+                          const offer = sales.items.find((x) => x.moduleKey === (app.key === "loyalty_vip" ? "loyalty" : app.key));
                           return offer && (offer.state === "FOR_SALE" || offer.state === "PENDING") && canEdit ? <ModuleBuyForm item={offer} payTo={sales.payTo} /> : null;
                         })()}
                         <Link href="/billing" className="btn btn-secondary btn-sm" prefetch={false}>
