@@ -1,4 +1,5 @@
 "use client";
+import { askConfirm } from "@biztrackbd/ui";
 
 import { useActionState, useMemo, useState, useTransition } from "react";
 import {
@@ -84,19 +85,15 @@ export function DeveloperHubClient({
     );
   };
 
-  const handleRevoke = (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to revoke API key "${name}"? This cannot be undone and external clients using it will lose access immediately.`)) {
-      return;
-    }
+  const handleRevoke = async (id: string, name: string) => {
+    if (!(await askConfirm({ message: `Are you sure you want to revoke API key "${name}"? This cannot be undone and external clients using it will lose access immediately.`, confirmLabel: "Revoke", tone: "danger" }))) return;
     startTransition(async () => {
       await revokeApiKeyAction(id);
     });
   };
 
-  const handleDelete = (id: string, name: string) => {
-    if (!confirm(`Permanently delete API key record "${name}"?`)) {
-      return;
-    }
+  const handleDelete = async (id: string, name: string) => {
+    if (!(await askConfirm({ message: `Permanently delete API key record "${name}"?`, confirmLabel: "Delete", tone: "danger" }))) return;
     startTransition(async () => {
       await deleteApiKeyAction(id);
     });

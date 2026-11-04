@@ -623,16 +623,19 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
                 {digitalFields.map((df) => (
                   <label key={df.id} className="field">
                     <span className="label">
-                      {df.label} {df.required ? <span style={{ color: "#dc2626" }}>*</span> : <span className="opt">{s.optional}</span>}
+                      {df.label} {df.required ? <span style={{ color: "var(--danger, #dc2626)" }} aria-hidden="true">*</span> : <span className="opt">{s.optional}</span>}
                     </span>
                     <input
+                      id={`f-${df.id}`}
                       className="input"
+                      aria-invalid={(errors as any)[df.id] ? true : undefined}
+                      aria-describedby={(errors as any)[df.id] ? `e-${df.id}` : undefined}
                       placeholder={df.placeholder || (lang === "bn" ? `${df.label} লিখুন` : `Enter ${df.label}`)}
                       value={customValues[df.id] || ""}
                       onChange={(e) => setCustomValues((prev) => ({ ...prev, [df.id]: e.target.value }))}
                       required={df.required}
                     />
-                    {(errors as any)[df.id] && <div className="error">{(errors as any)[df.id]}</div>}
+                    {(errors as any)[df.id] && <div className="error" id={`e-${df.id}`} role="alert">{(errors as any)[df.id]}</div>}
                   </label>
                 ))}
               </div>

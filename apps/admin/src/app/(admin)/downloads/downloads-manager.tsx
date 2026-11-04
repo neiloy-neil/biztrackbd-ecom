@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import { PageHeader } from "@biztrackbd/ui";
+import { PageHeader, askConfirm } from "@biztrackbd/ui";
 import type { SiteDownload } from "@biztrackbd/db";
 import {
   saveDownloadAction,
@@ -123,8 +123,8 @@ export function DownloadsManager({ initialDownloads, storeOrigin }: Props) {
     });
   };
 
-  const handleDelete = (id: string, itemLabel: string) => {
-    if (!confirm(`Are you sure you want to delete "${itemLabel}"?`)) return;
+  const handleDelete = async (id: string, itemLabel: string) => {
+    if (!(await askConfirm({ message: `Are you sure you want to delete "${itemLabel}"?`, confirmLabel: "Delete", tone: "danger" }))) return;
     startTransition(async () => {
       await deleteDownloadAction(id);
       setDownloads((prev) => prev.filter((x) => x.id !== id));

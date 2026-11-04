@@ -1,5 +1,6 @@
 "use client";
 
+import { askConfirm } from "@biztrackbd/ui";
 import { useState } from "react";
 import Link from "next/link";
 import {
@@ -178,7 +179,7 @@ export function DropsManagerClient({ initialDrops, availableProducts }: Props) {
 
   async function handleDeleteDrop(id: string) {
     if (busy) return;
-    if (!confirm("Are you sure you want to delete this drop campaign?")) return;
+    if (!(await askConfirm({ message: "Are you sure you want to delete this drop campaign?", confirmLabel: "Delete", tone: "danger" }))) return;
     setBusy(true);
     try {
       const res = await deleteDropAction(id);
@@ -194,13 +195,7 @@ export function DropsManagerClient({ initialDrops, availableProducts }: Props) {
 
   async function handleMarkStockReceived(drop: DropRow) {
     if (busy) return;
-    if (
-      !confirm(
-        `Mark stock arrived for "${drop.title}"?\n\nThis will automatically release fulfillment holds on all pre-orders for this drop so they can be dispatched via Steadfast/Pathao.`
-      )
-    ) {
-      return;
-    }
+    if (!(await askConfirm({ message: `Mark stock arrived for "${drop.title}"?\n\nThis will automatically release fulfillment holds on all pre-orders for this drop so they can be dispatched via Steadfast/Pathao.`, confirmLabel: "Confirm" }))) return;
     setBusy(true);
     try {
       const res = await markStockReceivedAction(drop.id);
@@ -256,7 +251,7 @@ export function DropsManagerClient({ initialDrops, availableProducts }: Props) {
 
   async function handleBroadcastAlert() {
     if (!activeWaitlistDrop) return;
-    if (!confirm(`Send instant launch alert to all unnotified waitlist subscribers for "${activeWaitlistDrop.title}"?`)) return;
+    if (!(await askConfirm({ message: `Send instant launch alert to all unnotified waitlist subscribers for "${activeWaitlistDrop.title}"?`, confirmLabel: "Confirm" }))) return;
 
     setBusy(true);
     try {

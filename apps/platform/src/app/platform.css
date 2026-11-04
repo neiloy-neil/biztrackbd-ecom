@@ -13,7 +13,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .num { font-variant-numeric: tabular-nums; }
 .muted { color: var(--ink-3); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 50%, white); outline-offset: 2px; }
+:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
 .only-desktop { display: none; }
 .only-mobile { display: block; }
 
@@ -330,3 +330,4 @@ nav.only-mobile .chip { flex: none; }
 /* CRM message templates: the list and the editor stack on a phone and sit side by side from 900px. */
 .crm-tpl-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
 @media (min-width: 900px) { .crm-tpl-grid { grid-template-columns: 220px minmax(0, 1fr); } }
+main:focus, main:focus-visible { outline: none; }

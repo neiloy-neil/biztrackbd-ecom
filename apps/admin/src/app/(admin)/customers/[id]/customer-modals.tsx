@@ -1,4 +1,5 @@
 "use client";
+import { askConfirm } from "@biztrackbd/ui";
 
 import { useState } from "react";
 import type { CustomerAddressView } from "@biztrackbd/core";
@@ -436,8 +437,10 @@ export function DeleteAddressButton({
       <SubmitButton
         pending="Working…"
         className="link text-danger text-xs cursor-pointer p-0 border-none"
-        onClick={(e) => {
-          if (!confirm("Are you sure you want to remove this address?")) e.preventDefault();
+        onClick={async (e) => {
+          const btn = e.currentTarget;
+          e.preventDefault();
+          if (await askConfirm({ message: "Remove this address from the customer? Orders already placed keep it.", confirmLabel: "Remove", tone: "danger" })) btn.form?.requestSubmit(btn);
         }}
       >
         Remove

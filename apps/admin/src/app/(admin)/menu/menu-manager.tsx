@@ -11,7 +11,7 @@ import {
 } from "./actions";
 import type { PublicMenuCategory, PublicMenuItem } from "@biztrackbd/core";
 import { TableQrStudio } from "./table-qr-studio";
-import { PageHeader } from "@biztrackbd/ui";
+import { PageHeader, askConfirm } from "@biztrackbd/ui";
 import "./menu.css";
 
 const DIETARY_OPTIONS = [
@@ -75,8 +75,8 @@ export function MenuManager({
     });
   };
 
-  const handleDeleteDish = (dish: PublicMenuItem) => {
-    if (!confirm(`Are you sure you want to delete "${dish.name}"?`)) return;
+  const handleDeleteDish = async (dish: PublicMenuItem) => {
+    if (!(await askConfirm({ message: `Are you sure you want to delete "${dish.name}"?`, confirmLabel: "Delete", tone: "danger" }))) return;
 
     setCategories((prev) =>
       prev.map((c) =>
@@ -91,13 +91,8 @@ export function MenuManager({
     });
   };
 
-  const handleDeleteCategory = (cat: PublicMenuCategory) => {
-    if (
-      !confirm(
-        `Are you sure you want to delete category "${cat.name}" and all its ${cat.items.length} items?`
-      )
-    )
-      return;
+  const handleDeleteCategory = async (cat: PublicMenuCategory) => {
+    if (!(await askConfirm({ message: `Are you sure you want to delete category "${cat.name}" and all its ${cat.items.length} items?`, confirmLabel: "Delete", tone: "danger" }))) return;
 
     setCategories((prev) => prev.filter((c) => c.id !== cat.id));
     if (activeCategoryId === cat.id) setActiveCategoryId("all");

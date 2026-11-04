@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { CameraIcon, PlusIcon } from "@/components/icons";
 import { taka } from "@/lib/format";
 import { createQuickCategoryAction, generateProductDescriptionAction, generateImageAltTagsAction, generateBarcodeAction, saveProductAction } from "./actions";
 import type { GeneratedProductListing, AiTonePreset } from "@biztrackbd/core";
-import { useBusyAction } from "@biztrackbd/ui";
+import { useBusyAction, useUnsavedChanges } from "@biztrackbd/ui";
 import { toast } from "@/components/toast";
 
 export interface VariantRow {
@@ -87,6 +87,9 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
   const router = useRouter();
   const [p, setP] = useState(initial);
   const [options, setOptions] = useState<OptionDef[]>(initial.options);
+  // Warn before a reload or tab close throws away edits (not while a save is going through).
+  const startSnapshot = useRef(JSON.stringify({ p: initial, options: initial.options }));
+  const dirty = useMemo(() => JSON.stringify({ p, options }) !== startSnapshot.current, [p, options]);
   const [catList, setCatList] = useState<CategoryOption[]>(categories);
   const [showCatModal, setShowCatModal] = useState(false);
   const [quickCatName, setQuickCatName] = useState("");
@@ -102,6 +105,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
   const [field, setField] = useState("");
   const [limit, setLimit] = useState(false);
   const [busy, setBusy] = useState(false);
+  useUnsavedChanges(dirty && !busy);
   const [showAiModal, setShowAiModal] = useState(false);
   const [aiPromptHint, setAiPromptHint] = useState("");
   const [aiCustomBrandVoice, setAiCustomBrandVoice] = useState("");

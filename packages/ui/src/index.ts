@@ -33,3 +33,7 @@ export { ContactIcon, CONTACT_LABELS, type ContactIconName } from "./contact-ico
 export { DoubleSubmitGuard, shouldBlockSubmit, SUBMIT_LOCK_MS } from "./double-submit";
 export { useBusyAction } from "./use-busy-action";
 export { DataTable, type ColumnDef, type DataTableProps } from "./data-table";
+export { askConfirm, type ConfirmOptions } from "./confirm";
+export { useUnsavedChanges } from "./unsaved";
+export { SkipLink } from "./skip-link";
+export { PasswordInput } from "./password-input";
