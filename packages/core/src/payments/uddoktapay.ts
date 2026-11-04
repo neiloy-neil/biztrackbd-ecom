@@ -280,6 +280,9 @@ export async function getPlatformUddoktaPayCredentials(): Promise<{ apiKey: stri
   return { apiKey, baseUrl: saved.get("uddoktapay_base_url") || DEFAULT_UDDOKTAPAY_BASE_URL };
 }
 
+/** A short payment of up to this many taka is still accepted (rounding), the same tolerance SSLCommerz uses. */
+const AMOUNT_TOLERANCE = 1;
+
 /**
  * Processes a completed shopper payment for a storefront order.
  */
@@ -315,6 +318,14 @@ export async function processUddoktaPayOrderSuccess(
     if (!order) throw new NotFoundError("Order");
 
     if (order.paymentStatus !== "PAID") {
+      // The gateway says COMPLETED, but for what amount? A customer who changes the amount on the payment page (or a mis-set invoice) must not
+      // get the whole order. Paying more than the total is accepted; paying less, or an amount we cannot read, leaves the order unpaid.
+      const paid = Number(verified.amount);
+      const total = Number(order.totalAmount);
+      if (!Number.isFinite(paid) || paid < total - AMOUNT_TOLERANCE) {
+        console.warn(`UddoktaPay amount mismatch for order ${orderId}: expected ${total}, received ${verified.amount ?? "nothing"} (invoice ${invoiceId})`);
+        throw new ValidationError("The amount paid is less than the order total, so the order was not marked as paid. Please contact the store.");
+      }
       await tx.order.update({
         where: { id: orderId },
         data: {
