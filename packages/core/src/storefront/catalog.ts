@@ -124,6 +124,12 @@ const THEME_COPY: Record<ThemeId, Partial<KaporSettings>> = {
     heroText: "Skincare, makeup and fragrance, matched to your routine.", heroTextBn: "ত্বকের যত্ন, মেকআপ ও সুগন্ধি, আপনার রুটিন অনুযায়ী বাছাই করা।",
     heroCta: "Find your routine", heroCtaBn: "আপনার রুটিন খুঁজুন", newArrivalsTitle: "New in", newArrivalsTitleBn: "নতুন এসেছে",
   },
+  harvest: {
+    heroEyebrow: "FARM TO TABLE", heroEyebrowBn: "খামার থেকে টেবিলে",
+    heroTitle: "Fresh food, on your schedule.", heroTitleBn: "তাজা খাবার, আপনার সময়মতো।",
+    heroText: "Honey, ghee, spices and pantry staples from trusted farms.", heroTextBn: "বিশ্বস্ত খামারের মধু, ঘি, মসলা ও মুদি পণ্য।",
+    heroCta: "Fill your basket", heroCtaBn: "ঝুড়ি ভরুন", newArrivalsTitle: "Fresh in", newArrivalsTitleBn: "নতুন এসেছে",
+  },
   maison: {
     heroEyebrow: "THE NEW EDIT", heroEyebrowBn: "নতুন সংগ্রহ",
     heroTitle: "Dressed for the occasion.", heroTitleBn: "প্রতিটি উপলক্ষের পোশাক।",

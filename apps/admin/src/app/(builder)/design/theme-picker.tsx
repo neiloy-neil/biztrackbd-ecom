@@ -14,6 +14,7 @@ const swatch: Record<ThemeId, string> = {
   maison: "linear-gradient(135deg,#FAF7F2 0 50%,#8F4A2B 50%)",
   voltedge: "linear-gradient(135deg,#0A1020 0 50%,#38BDF8 50%)",
   lumiere: "linear-gradient(135deg,#FDF7FB 0 50%,#7B3FA0 50%)",
+  harvest: "linear-gradient(135deg,#FFFBF0 0 50%,#B45309 50%)",
 };
 
 export function ThemePicker({ active, canEdit }: { active: ThemeId; canEdit: boolean }) {

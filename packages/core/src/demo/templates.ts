@@ -303,6 +303,25 @@ export const DEMO_TEMPLATES: readonly DemoTemplate[] = [
       { slug: "rose-hand-balm", title: "Rose Hand Balm", titleBn: "রোজ হ্যান্ড বাম", text: "A rich hand balm in a travel jar. 40 ml.", textBn: "ট্রাভেল জারে ঘন হ্যান্ড বাম। ৪০ মি.লি.।", price: 650, cost: 270, category: "body", art: "jar", variants: one, stock: 70 },
     ],
   },
+  {
+    id: "harvest", host: "harvest", storeName: "Harvest", storeNameBn: "হারভেস্ট", tagline: "Farm-fresh food, delivered in your slot",
+    palette: { bg: "#FDE9B8", main: "#B45309", accent: "#FBBF24", ink: "#231A0F" },
+    announcement: { text: "Demo store: pick your delivery slot at checkout. Free delivery over ৳ 1,500.", textBn: "ডেমো স্টোর: চেকআউটে ডেলিভারির সময় বেছে নিন। ৳ ১,৫০০ এর উপরে ফ্রি ডেলিভারি।" },
+    hero: { eyebrow: "FARM TO TABLE", eyebrowBn: "খামার থেকে টেবিলে", title: "Fresh food, on your schedule", titleBn: "তাজা খাবার, আপনার সময়মতো", text: "Honey, ghee, spices and pantry staples from trusted farms, delivered in the slot you choose.", textBn: "বিশ্বস্ত খামারের মধু, ঘি, মসলা ও মুদি পণ্য, আপনার বেছে নেওয়া সময়ে ডেলিভারি।", ctaText: "Fill your basket", ctaTextBn: "ঝুড়ি ভরুন", art: ["jar", "sack", "bottle"] },
+    banner: { heading: "The weekly basket, 10% off", headingBn: "সাপ্তাহিক ঝুড়ি, ১০% ছাড়ে", text: "Subscribe to your staples and we deliver them every week. Pause or cancel any time.", textBn: "নিয়মিত পণ্যে সাবস্ক্রাইব করুন, প্রতি সপ্তাহে পৌঁছে দেব। যেকোনো সময় থামান বা বাতিল করুন।", ctaText: "Build my basket", ctaTextBn: "আমার ঝুড়ি বানান", art: ["sack", "jar"] },
+    about: { heading: "Know your farmer", headingBn: "আপনার কৃষককে চিনুন", body: "We buy directly from small farms and pack in clean, sealed pouches. This is a demo store: products are samples.", bodyBn: "আমরা ছোট খামার থেকে সরাসরি কিনি এবং পরিষ্কার সিল করা প্যাকেটে দিই। এটি একটি ডেমো স্টোর: পণ্যগুলো নমুনা।" },
+    categories: [{ slug: "honey-ghee", name: "Honey" }, { slug: "spices", name: "Spices" }, { slug: "staples", name: "Staples" }, { slug: "oils-tea", name: "Oils" }],
+    products: [
+      { slug: "litchi-blossom-honey", title: "Litchi Blossom Honey", titleBn: "লিচু ফুলের মধু", text: "Light, floral honey from Dinajpur orchards.", textBn: "দিনাজপুরের বাগানের হালকা, ফুলেল মধু।", price: 720, compareAt: 850, cost: 420, category: "honey-ghee", art: "jar", variants: weights(["250 g", "500 g"]), stock: 40, featured: true },
+      { slug: "forest-wild-honey", title: "Forest Wild Honey", titleBn: "বনের খাঁটি মধু", text: "Dark, rich honey with a gentle smoky note.", textBn: "গাঢ়, ঘন মধু, হালকা ধোঁয়াটে স্বাদ।", price: 1050, cost: 640, category: "honey-ghee", art: "jar", tone: "accent", variants: weights(["250 g", "500 g"]), stock: 26, featured: true },
+      { slug: "a2-desi-ghee", title: "A2 Desi Ghee", titleBn: "এ২ দেশি ঘি", text: "Slow-cooked ghee from grass-fed cows.", textBn: "ঘাস খাওয়া গরুর দুধের ধীরে জ্বালানো ঘি।", price: 1480, cost: 980, category: "honey-ghee", art: "jar", variants: weights(["250 g", "500 g"]), stock: 30 },
+      { slug: "kashmiri-chilli-powder", title: "Kashmiri Chilli Powder", titleBn: "কাশ্মীরি মরিচ গুঁড়া", text: "Deep red colour with a mild heat. Stone-ground.", textBn: "গাঢ় লাল রঙ, মৃদু ঝাল। পাথরে পেষা।", price: 260, cost: 140, category: "spices", art: "box", tone: "accent", variants: weights(["100 g", "250 g"]), stock: 80, featured: true },
+      { slug: "whole-cumin", title: "Whole Cumin", titleBn: "আস্ত জিরা", text: "Aromatic whole cumin, cleaned and sun-dried.", textBn: "সুগন্ধি আস্ত জিরা, পরিষ্কার ও রোদে শুকানো।", price: 210, compareAt: 250, cost: 120, category: "spices", art: "box", variants: weights(["100 g", "250 g"]), stock: 90 },
+      { slug: "basmati-rice-premium", title: "Premium Basmati Rice", titleBn: "প্রিমিয়াম বাসমতি চাল", text: "Long, fragrant grains aged for a year.", textBn: "এক বছর পুরোনো লম্বা সুগন্ধি দানা।", price: 1250, cost: 980, category: "staples", art: "sack", variants: weights(["2 kg", "5 kg"]), stock: 50, featured: true },
+      { slug: "moong-dal-split", title: "Split Moong Dal", titleBn: "মুগ ডাল", text: "Clean, quick-cooking and easy to digest.", textBn: "পরিষ্কার, দ্রুত সেদ্ধ ও সহজে হজম।", price: 190, cost: 130, category: "staples", art: "sack", tone: "accent", variants: weights(["1 kg", "2 kg"]), stock: 90 },
+      { slug: "cold-pressed-mustard-oil", title: "Cold-pressed Mustard Oil", titleBn: "কোল্ড-প্রেসড সরিষার তেল", text: "Pungent, single-pressed mustard oil. 1 litre.", textBn: "ঝাঁঝালো, একবার ঘানিতে পেষা সরিষার তেল। ১ লিটার।", price: 520, cost: 340, category: "oils-tea", art: "bottle", variants: one, stock: 60 },
+    ],
+  },
 ] as const;
 
 export const demoTemplate = (id: string): DemoTemplate | undefined =>

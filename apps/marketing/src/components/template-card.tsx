@@ -15,6 +15,7 @@ const THEME_HOSTS: Record<string, string> = {
   maison: "maison",
   voltedge: "voltedge",
   lumiere: "lumiere",
+  harvest: "harvest",
   "dhaka-bistro": "dhakabistro",
   "modern-clinic": "modernclinic",
   "apex-corporate": "apexcorp",

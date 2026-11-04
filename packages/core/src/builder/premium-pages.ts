@@ -59,10 +59,28 @@ const LUMIERE_PRODUCT = page([
   section("product-related", 1, { title: "Complete the routine", titleBn: "রুটিন সম্পূর্ণ করুন", limit: 4 }),
 ]);
 
+const HARVEST_HOME = page([
+  section("hero", 1, { eyebrow: "FARM TO TABLE", eyebrowBn: "খামার থেকে টেবিলে", title: "Fresh food, on your schedule", titleBn: "তাজা খাবার, আপনার সময়মতো", text: "Honey, ghee, spices and pantry staples from trusted farms, delivered in the slot you choose.", textBn: "বিশ্বস্ত খামারের মধু, ঘি, মসলা ও মুদি পণ্য, আপনার বেছে নেওয়া সময়ে ডেলিভারি।", ctaText: "Fill your basket", ctaTextBn: "ঝুড়ি ভরুন", ctaLink: "/search", align: "left" }),
+  section("trust-strip", 1),
+  section("category-grid", 1, { title: "Shop the pantry", titleBn: "মুদি দেখুন", limit: 4 }),
+  section("featured-products", 1, { title: "Fresh in", titleBn: "নতুন এসেছে", source: "new", limit: 8, columns: "4" }),
+  section("banner", 1, { heading: "The weekly basket, 10% off", headingBn: "সাপ্তাহিক ঝুড়ি, ১০% ছাড়ে", text: "Choose your staples once and we deliver them every week. Pause or cancel any time.", textBn: "একবার পণ্য বেছে নিন, প্রতি সপ্তাহে পৌঁছে দেব। যেকোনো সময় থামান বা বাতিল করুন।", ctaText: "Build my basket", ctaTextBn: "আমার ঝুড়ি বানান", ctaLink: "/search", height: "tall" }),
+  section("featured-products", 2, { title: "Pantry favourites", titleBn: "পছন্দের মুদি", source: "featured", limit: 4, columns: "4" }),
+  section("rich-text", 1, { heading: "Delivery slots and freshness", headingBn: "ডেলিভারির সময় ও তাজাভাব", body: "Choose a morning or evening slot at checkout. Free delivery over 1,500 taka. Everything is packed in clean, sealed pouches, and anything that is not right gets replaced the same week.", bodyBn: "চেকআউটে সকাল বা সন্ধ্যার সময় বেছে নিন। ১,৫০০ টাকার উপরে ফ্রি ডেলিভারি। সবকিছু পরিষ্কার সিল করা প্যাকেটে আসে, কোনো সমস্যা হলে একই সপ্তাহে বদলে দেওয়া হয়।" }),
+]);
+
+const HARVEST_PRODUCT = page([
+  section("product-main", 1),
+  section("rich-text", 1, { heading: "Freshness, storage and delivery", headingBn: "তাজাভাব, সংরক্ষণ ও ডেলিভারি", body: "Weights and unit prices are shown on the options above. Store honey and spices in a cool, dry place and keep ghee sealed. We deliver in the morning or evening slot you pick at checkout, and replace anything that arrives damaged within the week.", bodyBn: "ওজন ও দাম উপরের অপশনে দেখানো আছে। মধু ও মসলা ঠান্ডা, শুকনো জায়গায় রাখুন এবং ঘি সিল করে রাখুন। চেকআউটে বেছে নেওয়া সকাল বা সন্ধ্যার সময়ে ডেলিভারি দিই, ক্ষতিগ্রস্ত হলে সপ্তাহের মধ্যে বদলে দিই।" }),
+  section("product-reviews", 1),
+  section("product-related", 1, { title: "Fill the basket", titleBn: "ঝুড়ি ভরুন", limit: 4 }),
+]);
+
 const PREMIUM_PAGES: Partial<Record<ThemeId, Partial<Record<PageKind, PageJson>>>> = {
   maison: { home: MAISON_HOME, product: MAISON_PRODUCT },
   voltedge: { home: VOLTEDGE_HOME, product: VOLTEDGE_PRODUCT },
   lumiere: { home: LUMIERE_HOME, product: LUMIERE_PRODUCT },
+  harvest: { home: HARVEST_HOME, product: HARVEST_PRODUCT },
 };
 
 /** The layout a premium theme starts with, one entry per page kind. The pages it does not list use the standard layouts. */

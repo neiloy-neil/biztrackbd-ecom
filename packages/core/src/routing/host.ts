@@ -14,7 +14,7 @@ export const RESERVED_SUBDOMAINS = new Set([
 
 /** Addresses of the template demo stores (docs/38). Not in RESERVED_SUBDOMAINS, because those stores must still resolve; only signup may not claim them. */
 export const DEMO_SUBDOMAINS = new Set([
-  "kapor", "gadgetstudio", "minibunny", "mini-bunny", "axionwear", "bindu", "berber", "freshbasket", "bazaar", "nakshi", "maison", "voltedge", "lumiere",
+  "kapor", "gadgetstudio", "minibunny", "mini-bunny", "axionwear", "bindu", "berber", "freshbasket", "bazaar", "nakshi", "maison", "voltedge", "lumiere", "harvest",
   "dhakabistro", "dhaka-bistro", "modernclinic", "modern-clinic", "apexcorp", "apex-corporate",
   "localservice", "local-service-pro", "creativefolio", "portfolio-focus",
   "publicprofile", "public-profile",

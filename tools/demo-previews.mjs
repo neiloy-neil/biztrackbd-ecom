@@ -15,7 +15,7 @@ const pattern = args.includes("--base") ? args[args.indexOf("--base") + 1] : "ht
 const out = join(root, "apps/marketing/public/templates");
 mkdirSync(out, { recursive: true });
 
-const DEMOS = [["kapor", "kapor"], ["gadgetstudio", "gadgetstudio"], ["mini-bunny", "minibunny"], ["axionwear", "axionwear"], ["bindu", "bindu"], ["berber", "berber"], ["freshbasket", "freshbasket"], ["bazaar", "bazaar"], ["nakshi", "nakshi"], ["maison", "maison"], ["voltedge", "voltedge"], ["lumiere", "lumiere"]];
+const DEMOS = [["kapor", "kapor"], ["gadgetstudio", "gadgetstudio"], ["mini-bunny", "minibunny"], ["axionwear", "axionwear"], ["bindu", "bindu"], ["berber", "berber"], ["freshbasket", "freshbasket"], ["bazaar", "bazaar"], ["nakshi", "nakshi"], ["maison", "maison"], ["voltedge", "voltedge"], ["lumiere", "lumiere"], ["harvest", "harvest"]];
 const browser = await chromium.launch({ channel: "chrome" });
 const only = process.env.ONLY ? process.env.ONLY.split(",") : null; // ONLY=freshbasket,bazaar re-takes just those
 for (const [id, host] of DEMOS.filter(([id]) => !only || only.includes(id))) {
