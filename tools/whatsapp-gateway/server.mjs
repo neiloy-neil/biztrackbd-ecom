@@ -1,4 +1,5 @@
 import http from "node:http";
+import { timingSafeEqual } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import makeWASocket, {
@@ -13,6 +14,22 @@ import QRCode from "qrcode";
 const PORT = parseInt(process.env.PORT || process.env.WHATSAPP_GATEWAY_PORT || "5055", 10);
 const AUTH_BASE_DIR = path.resolve(process.cwd(), ".baileys_auth");
 const WEBHOOK_URL = process.env.BIZTRACK_WEBHOOK_URL || "http://localhost:3000/api/webhooks/whatsapp";
+
+// Shared secret with the BizTrack admin app (WHATSAPP_GATEWAY_SECRET). Required in production: without it anyone who can reach
+// this port could send messages as any store or fake inbound messages to the webhook.
+const GATEWAY_SECRET = process.env.WHATSAPP_GATEWAY_SECRET || "";
+if (!GATEWAY_SECRET && process.env.NODE_ENV === "production") {
+  console.error("WHATSAPP_GATEWAY_SECRET must be set when NODE_ENV=production");
+  process.exit(1);
+}
+const webhookHeaders = () => ({ "Content-Type": "application/json", ...(GATEWAY_SECRET ? { "x-gateway-token": GATEWAY_SECRET } : {}) });
+const requestAuthorised = (req) => {
+  if (!GATEWAY_SECRET) return true;
+  const given = String(req.headers["x-gateway-token"] || req.headers["authorization"] || "").replace(/^Bearer\s+/i, "");
+  const a = Buffer.from(given);
+  const b = Buffer.from(GATEWAY_SECRET);
+  return a.length === b.length && timingSafeEqual(a, b);
+};
 
 const logger = pino({ level: process.env.LOG_LEVEL || "warn" });
 
@@ -123,7 +140,7 @@ async function getOrCreateSession(tenantId = "default", phone = null, forceResta
       try {
         await fetch(WEBHOOK_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: webhookHeaders(),
           body: JSON.stringify({
             event: "connection.update",
             tenantId,
@@ -177,7 +194,7 @@ async function getOrCreateSession(tenantId = "default", phone = null, forceResta
       try {
         await fetch(WEBHOOK_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: webhookHeaders(),
           body: JSON.stringify({
             event: "message.inbound",
             tenantId,
@@ -213,11 +230,7 @@ async function getOrCreateSession(tenantId = "default", phone = null, forceResta
 
 // HTTP API Server
 const server = http.createServer(async (req, res) => {
-  // Enable CORS
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-
+  // Server-to-server only: no CORS headers, so a web page in a browser cannot call this gateway.
   if (req.method === "OPTIONS") {
     res.writeHead(204);
     return res.end();
@@ -247,15 +260,12 @@ const server = http.createServer(async (req, res) => {
     });
 
   try {
-    // Health Check
+    // Health Check (reveals nothing but liveness)
     if (pathname === "/health" || pathname === "/") {
-      return sendJson(200, {
-        status: "ok",
-        service: "BizTrack Baileys WhatsApp Gateway",
-        uptimeSeconds: Math.floor(process.uptime()),
-        activeSessions: sessions.size,
-      });
+      return sendJson(200, { status: "ok", service: "BizTrack Baileys WhatsApp Gateway" });
     }
+
+    if (!requestAuthorised(req)) return sendJson(401, { error: "Unauthorized" });
 
     // Start / Connect Session
     if (pathname === "/session/start" && req.method === "POST") {
@@ -401,7 +411,7 @@ const server = http.createServer(async (req, res) => {
     return sendJson(404, { error: "Route not found" });
   } catch (err) {
     logger.error({ err }, "API error");
-    return sendJson(500, { error: err.message || "Internal server error" });
+    return sendJson(500, { error: "Internal server error" });
   }
 });
 

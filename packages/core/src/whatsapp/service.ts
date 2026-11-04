@@ -111,7 +111,8 @@ export function renderWhatsAppText(
   });
 }
 
-import { generateWhatsAppQrSvg, resolveWhatsAppGatewayUrl } from "./session";
+import { generateWhatsAppQrSvg, resolveWhatsAppGatewayUrl, whatsAppGatewayHeaders } from "./session";
+import { checkPublicHttpUrl } from "../net/safe-url";
 
 /**
  * Retrieves the store's WhatsApp configuration.
@@ -138,7 +139,8 @@ export async function getWhatsAppConfig(tenantId: string): Promise<WhatsAppConfi
     let livePhone = activePhone;
 
     try {
-      const res = await fetch(`${gatewayUrl}/session/status?tenantId=${tenantId}`, {
+      const res = await fetch(`${gatewayUrl}/session/status?tenantId=${encodeURIComponent(tenantId)}`, {
+        headers: whatsAppGatewayHeaders(gatewayUrl),
         signal: AbortSignal.timeout(1_500),
       });
       if (res.ok) {
@@ -223,6 +225,8 @@ export async function saveWhatsAppConfig(
   tenantId: string,
   data: Partial<WhatsAppConfigView>
 ): Promise<WhatsAppConfigView> {
+  // The gateway address is fetched by our servers, so a store may only point it at a public https address (SSRF).
+  if (data.gatewayUrl) checkPublicHttpUrl(data.gatewayUrl.trim(), { field: "gatewayUrl", requireHttps: true });
   return withTenant(tenantId, async (tx) => {
     const upserted = await tx.whatsAppConfig.upsert({
       where: { tenantId },
@@ -385,6 +389,7 @@ export async function sendWhatsAppNotification(
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            ...whatsAppGatewayHeaders(gatewayUrl),
             ...(config?.gatewayApiKey ? { Authorization: `Bearer ${config.gatewayApiKey}` } : {}),
           },
           body: JSON.stringify({

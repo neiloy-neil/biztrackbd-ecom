@@ -1,6 +1,7 @@
 import QRCode from "qrcode";
 import { withTenant } from "@biztrackbd/db";
 import { normalizeBdPhone } from "../phone";
+import { checkPublicHttpUrl } from "../net/safe-url";
 import { formatWhatsAppPhone } from "./deep-links";
 import type { WhatsAppConfigView, WhatsAppSessionStatus } from "./types";
 
@@ -9,7 +10,31 @@ import type { WhatsAppConfigView, WhatsAppSessionStatus } from "./types";
  * Defaults to the local Baileys gateway service on port 5055.
  */
 export function resolveWhatsAppGatewayUrl(configUrl?: string | null, customUrl?: string): string {
-  return customUrl || configUrl || process.env.WHATSAPP_GATEWAY_URL || "http://localhost:5055";
+  // A store-supplied address is only honoured when it is a public https address (SSRF); otherwise the platform gateway is used.
+  const usable = (u?: string | null) => {
+    if (!u) return null;
+    try {
+      checkPublicHttpUrl(u, { requireHttps: true });
+      return u.replace(/\/+$/, "");
+    } catch {
+      return null;
+    }
+  };
+  return usable(customUrl) || usable(configUrl) || platformWhatsAppGatewayUrl();
+}
+
+function platformWhatsAppGatewayUrl(): string {
+  return process.env.WHATSAPP_GATEWAY_URL || "http://localhost:5055";
+}
+
+/**
+ * Header that proves to the platform's own gateway that the call comes from us (WHATSAPP_GATEWAY_SECRET).
+ * Only attached for the platform gateway: a store's own gateway address must never receive the platform secret.
+ */
+export function whatsAppGatewayHeaders(gatewayUrl: string): Record<string, string> {
+  const secret = process.env.WHATSAPP_GATEWAY_SECRET;
+  if (!secret || gatewayUrl !== platformWhatsAppGatewayUrl()) return {};
+  return { "x-gateway-token": secret };
 }
 
 /**
@@ -75,7 +100,7 @@ export async function startWhatsAppSession(
       try {
         const res = await fetch(`${gatewayUrl}/session/start`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...whatsAppGatewayHeaders(gatewayUrl) },
           body: JSON.stringify({ tenantId, phone: formattedPhone, forceRestart: true }),
           signal: AbortSignal.timeout(6_000),
         });
@@ -179,7 +204,7 @@ export async function requestWhatsAppPairingCode(
     try {
       const res = await fetch(`${gatewayUrl}/session/pairing-code`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...whatsAppGatewayHeaders(gatewayUrl) },
         body: JSON.stringify({ tenantId, phone: cleanNumber }),
         signal: AbortSignal.timeout(10_000),
       });
@@ -228,7 +253,8 @@ export async function getWhatsAppSessionStatus(tenantId: string): Promise<WhatsA
 
     // Check with live gateway if available
     try {
-      const res = await fetch(`${gatewayUrl}/session/status?tenantId=${tenantId}`, {
+      const res = await fetch(`${gatewayUrl}/session/status?tenantId=${encodeURIComponent(tenantId)}`, {
+        headers: whatsAppGatewayHeaders(gatewayUrl),
         signal: AbortSignal.timeout(2_500),
       });
       if (res.ok) {
@@ -306,7 +332,7 @@ export async function disconnectWhatsAppSession(tenantId: string): Promise<void>
     try {
       await fetch(`${gatewayUrl}/session/disconnect`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...whatsAppGatewayHeaders(gatewayUrl) },
         body: JSON.stringify({ tenantId }),
         signal: AbortSignal.timeout(3_000),
       });

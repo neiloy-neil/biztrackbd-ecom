@@ -1,6 +1,7 @@
 import { createHmac, randomBytes } from "node:crypto";
 import { withTenant, getBasePrisma } from "@biztrackbd/db";
 import { ForbiddenError, ValidationError } from "../errors";
+import { assertPublicHttpUrl, checkPublicHttpUrl } from "../net/safe-url";
 import { assertCan, can, type StaffActor } from "../permissions";
 import { enqueueNotificationJob } from "./queue";
 import {
@@ -254,6 +255,8 @@ export function validateWebhookUrl(urlStr: string): string {
   if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
     throw new ValidationError("Webhook URL must use HTTP or HTTPS protocol", { field: "targetUrl" });
   }
+  // Refuse localhost, private networks and cloud metadata addresses in production (SSRF).
+  checkPublicHttpUrl(cleanPart, { field: "targetUrl" });
   return trimmed;
 }
 
@@ -888,11 +891,15 @@ export async function dispatchOutboundWebhook(
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
+    // Re-check at send time: a stored URL may predate the check, and a hostname can resolve to an internal address.
+    await assertPublicHttpUrl(cleanUrl, { field: "targetUrl" });
     const response = await fetch(cleanUrl, {
       method: "POST",
       headers,
       body: payloadString,
       signal: controller.signal,
+      // A redirect to an internal address would sidestep the check above, so redirects are not followed.
+      redirect: "manual",
     });
 
     clearTimeout(timeout);
