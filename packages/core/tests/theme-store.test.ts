@@ -3,7 +3,7 @@ import { createBaseClient, setBasePrisma, setPlatformPrisma, withTenant, type Pr
 import { createOwnerClient, resetDatabase, seedPlans, testUrls } from "@biztrackbd/db/testing";
 import {
   DomainError, PREMIUM_THEMES, PREMIUM_THEME_PRICE, STORE_THEMES, activateTheme, approveThemePurchase, isFreeThemeId, listPendingThemePurchases, listThemeStore, rejectThemePurchase,
-  resolveTemplateForSignup, setEventPublisher, signupStore, submitThemePurchase, type PlatformActor, type StaffActor,
+  processUddoktaPaySubscriptionSuccess, hasPremiumTools, premiumPagesFor, resolveTemplateForSignup, sectionsFor, setEventPublisher, validatePage, setUddoktaPayFetchForTests, signupStore, startThemeCheckout, submitThemePurchase, type PlatformActor, type StaffActor,
 } from "../src";
 
 let owner: PrismaClient;
@@ -127,5 +127,87 @@ describe("premium themes (49 taka, once, for life)", () => {
     const id = (await owner.themePurchase.findFirstOrThrow({ where: { tenantId: s.tenantId } })).id;
     await expect(withTenant(s.tenantId, (tx) => tx.themePurchase.update({ where: { id }, data: { status: "APPROVED" } }))).rejects.toThrow();
     expect((await owner.themePurchase.findUniqueOrThrow({ where: { id } })).status).toBe("PENDING");
+  });
+  describe("paying online with UddoktaPay", () => {
+    const ctx = { adminOrigin: "http://localhost:3001", platformOrigin: "http://localhost:3003" };
+    let charged: Record<string, unknown> | null = null;
+    const gateway = (verify: Record<string, unknown>) => setUddoktaPayFetchForTests((async (url: string, init: { body: string }) => {
+      const body = JSON.parse(init.body);
+      if (String(url).endsWith("/api/checkout-v2")) {
+        charged = body;
+        return new Response(JSON.stringify({ status: true, payment_url: "https://pay.example.test/invoice/INV1" }), { status: 200 });
+      }
+      return new Response(JSON.stringify({ status: "COMPLETED", invoice_id: body.invoice_id, payment_method: "bkash", sender_number: "01712345678", ...verify }), { status: 200 });
+    }) as unknown as typeof fetch);
+    afterAll(() => setUddoktaPayFetchForTests(undefined));
+
+    it("charges the theme price (never a browser amount) and carries what was bought in the charge", async () => {
+      gateway({});
+      const s = await store();
+      const r = await startThemeCheckout(s.tenantId, s.actor, "maison", ctx);
+      expect(r.paymentUrl).toContain("pay.example.test");
+      expect(charged).toMatchObject({ amount: "49", metadata: { tenantId: s.tenantId, themeId: "maison", type: "theme" }, webhook_url: "http://localhost:3003/api/webhooks/uddoktapay", redirect_url: "http://localhost:3001/api/themes/uddoktapay/callback" });
+      await fails(startThemeCheckout(s.tenantId, s.actor, "kapor", ctx), /free/);
+    });
+
+    it("unlocks the theme at once when the gateway says completed, once however often it is reported", async () => {
+      const s = await store();
+      const meta = { tenantId: s.tenantId, themeId: "maison", type: "theme" };
+      gateway({ amount: "49", transaction_id: "ONLINETRX01", metadata: meta });
+      expect(await processUddoktaPaySubscriptionSuccess("INV-A1")).toMatchObject({ ok: true, tenantId: s.tenantId, plan: "maison" });
+      await processUddoktaPaySubscriptionSuccess("INV-A1");
+      expect(await owner.themePurchase.count({ where: { tenantId: s.tenantId, themeId: "maison", status: "APPROVED" } })).toBe(1);
+      expect((await listThemeStore(s.tenantId, s.actor)).themes.find((t) => t.id === "maison")!.state).toBe("OWNED");
+      await activateTheme(s.tenantId, s.actor, "maison");
+      await fails(startThemeCheckout(s.tenantId, s.actor, "maison", ctx), /already own/);
+    });
+
+    it("does not unlock on a pending payment, an amount that is too low, or an unknown theme", async () => {
+      const s = await store();
+      const meta = { tenantId: s.tenantId, themeId: "maison", type: "theme" };
+      gateway({ status: "PENDING", amount: "49", transaction_id: "ONLINETRX02", metadata: meta });
+      expect(await processUddoktaPaySubscriptionSuccess("INV-B1")).toMatchObject({ ok: false });
+      gateway({ amount: "1", transaction_id: "ONLINETRX03", metadata: meta });
+      await expect(processUddoktaPaySubscriptionSuccess("INV-B2")).rejects.toThrow(/less than the theme price/);
+      gateway({ amount: "49", transaction_id: "ONLINETRX04", metadata: { ...meta, themeId: "kapor" } });
+      await expect(processUddoktaPaySubscriptionSuccess("INV-B3")).rejects.toThrow(/not a premium theme/);
+      expect(await owner.themePurchase.count({ where: { tenantId: s.tenantId, status: "APPROVED" } })).toBe(0);
+    });
+  });
+  describe("premium tools (size chart, specs, instalments, shade finder, delivery slot)", () => {
+    const TOOLS = ["size-chart", "spec-table", "instalment-calc", "shade-finder", "delivery-slot"];
+    it("are offered in the editor only to a store that owns a premium theme", async () => {
+      for (const kind of ["product", "home", "cart"] as const) {
+        expect(sectionsFor(kind, { premiumTools: false }).some((d) => TOOLS.includes(d.type))).toBe(false);
+      }
+      expect(sectionsFor("product", { premiumTools: true }).map((d) => d.type)).toEqual(expect.arrayContaining(["size-chart", "spec-table", "instalment-calc", "shade-finder"]));
+      expect(sectionsFor("cart", { premiumTools: true }).map((d) => d.type)).toContain("delivery-slot");
+      const s = await store();
+      expect(await hasPremiumTools(s.tenantId)).toBe(false);
+      await submitThemePurchase(s.tenantId, s.actor, pay());
+      const id = (await owner.themePurchase.findFirstOrThrow({ where: { tenantId: s.tenantId } })).id;
+      expect(await hasPremiumTools(s.tenantId)).toBe(false); // waiting is not owning
+      await approveThemePurchase(boss, id, owner);
+      expect(await hasPremiumTools(s.tenantId)).toBe(true);
+    });
+
+    it("come in every premium theme's own layouts, and those layouts are valid pages", () => {
+      for (const t of PREMIUM_THEMES) {
+        const pages = premiumPagesFor(t.id);
+        for (const [kind, page] of Object.entries(pages)) expect(() => validatePage(kind as never, page), `${t.id}/${kind}`).not.toThrow();
+      }
+      const types = (id: never, kind: never) => (premiumPagesFor(id)[kind] as { sections: { type: string }[] }).sections.map((x) => x.type);
+      expect(types("maison" as never, "product" as never)).toContain("size-chart");
+      expect(types("voltedge" as never, "product" as never)).toEqual(expect.arrayContaining(["spec-table", "instalment-calc"]));
+      expect(types("lumiere" as never, "home" as never)).toContain("shade-finder");
+      expect(types("harvest" as never, "cart" as never)).toEqual(expect.arrayContaining(["delivery-slot", "cart-main"]));
+    });
+
+    it("refuse instalment months that are not whole numbers from 2 to 36", () => {
+      const page = (months: string) => ({ version: 1, sections: [{ id: "product_main_1", type: "product-main", settings: {} }, { id: "instalment_calc_1", type: "instalment-calc", settings: { months } }] });
+      expect(() => validatePage("product", page("3,6,12"))).not.toThrow();
+      expect(() => validatePage("product", page("1,6"))).toThrow(/Months/);
+      expect(() => validatePage("product", page("3,abc"))).toThrow(/Months/);
+    });
   });
 });

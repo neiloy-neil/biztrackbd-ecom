@@ -5,6 +5,7 @@ import { getLang } from "@/lib/i18n";
 import { findStore } from "@/lib/tenant";
 import "./kapor.css";
 import "./themes.css";
+import "./premium.css";
 import "./landing.css";
 import { DoubleSubmitGuard } from "@biztrackbd/ui";
 import { SpeedInsights } from "@vercel/speed-insights/next";

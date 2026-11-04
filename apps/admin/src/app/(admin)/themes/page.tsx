@@ -26,9 +26,12 @@ const SWATCH: Record<string, string> = {
   bazaar: "linear-gradient(135deg,#F8F6F1 0 50%,#C2410C 50%)",
   nakshi: "linear-gradient(135deg,#FBF6EE 0 50%,#7A1F2E 50%)",
   maison: "linear-gradient(135deg,#FAF7F2 0 50%,#8F4A2B 50%)",
+  voltedge: "linear-gradient(135deg,#0A1020 0 50%,#38BDF8 50%)",
+  lumiere: "linear-gradient(135deg,#FDF7FB 0 50%,#7B3FA0 50%)",
+  harvest: "linear-gradient(135deg,#FFFBF0 0 50%,#B45309 50%)",
 };
 /** Themes that have a picture of their demo store in /theme-previews. */
-const HAS_PREVIEW = new Set(["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu", "berber", "freshbasket", "bazaar", "nakshi", "maison"]);
+const HAS_PREVIEW = new Set(["kapor", "gadgetstudio", "mini-bunny", "axionwear", "bindu", "berber", "freshbasket", "bazaar", "nakshi", "maison", "voltedge", "lumiere", "harvest"]);
 const DEMO_HOST: Record<string, string> = { "mini-bunny": "minibunny" };
 
 /** Where a theme's live demo store is: <name>.<root domain>. */
@@ -51,6 +54,8 @@ export default async function Themes({ searchParams }: { searchParams: Promise<R
     <>
       <PageHeader title="Themes" crumbs={[{ label: "Home", href: "/" }, { label: "Themes" }]} sub="Pick how your store looks. Changing the theme keeps your products, orders and pages." />
       {one(sp.applied) && <div className="notice good" role="status" style={{ marginBottom: 12 }} data-testid="theme-applied">Theme applied. <Link href="/design" className="link">Edit it in the designer</Link></div>}
+      {one(sp.bought) && <div className="notice good" role="status" style={{ marginBottom: 12 }} data-testid="theme-bought">Payment received. Your new theme is unlocked and yours for life. Press Apply on it below.</div>}
+      {one(sp.cancelled) && <div className="notice" role="status" style={{ marginBottom: 12 }}>Payment cancelled. You were not charged.</div>}
       {one(sp.sent) && <div className="notice good" role="status" style={{ marginBottom: 12 }} data-testid="purchase-sent">Thank you. We will check your payment and unlock the theme, usually within a few hours.</div>}
       {one(sp.err) && <div className="notice bad" role="alert" style={{ marginBottom: 12 }}>{one(sp.err)}</div>}
 
@@ -60,14 +65,14 @@ export default async function Themes({ searchParams }: { searchParams: Promise<R
           <span className="muted" style={{ fontSize: 14 }}>{taka(store.price)} each, paid once. Yours for life.</span>
         </div>
         <div className="theme-grid" data-testid="premium-themes">
-          {premium.map((t) => <ThemeCard key={t.id} t={t} canEdit={canEdit} canBuy={canBuy} payTo={store.payTo} />)}
+          {premium.map((t) => <ThemeCard key={t.id} t={t} canEdit={canEdit} canBuy={canBuy} payTo={store.payTo} online={store.online} />)}
         </div>
       </section>
 
       <section aria-labelledby="free-h">
         <h2 id="free-h" style={{ margin: "0 0 12px" }}>Free themes</h2>
         <div className="theme-grid" data-testid="free-themes">
-          {free.map((t) => <ThemeCard key={t.id} t={t} canEdit={canEdit} canBuy={canBuy} payTo={store.payTo} />)}
+          {free.map((t) => <ThemeCard key={t.id} t={t} canEdit={canEdit} canBuy={canBuy} payTo={store.payTo} online={store.online} />)}
         </div>
       </section>
 
@@ -85,7 +90,7 @@ export default async function Themes({ searchParams }: { searchParams: Promise<R
   );
 }
 
-function ThemeCard({ t, canEdit, canBuy, payTo }: { t: ThemeStoreItem; canEdit: boolean; canBuy: boolean; payTo: { provider: "BKASH" | "NAGAD"; number: string; kind: string }[] }) {
+function ThemeCard({ t, canEdit, canBuy, payTo, online }: { t: ThemeStoreItem; canEdit: boolean; canBuy: boolean; online: boolean; payTo: { provider: "BKASH" | "NAGAD"; number: string; kind: string }[] }) {
   const shot = HAS_PREVIEW.has(t.id) ? `url(/theme-previews/${t.id}.webp)` : SWATCH[t.id];
   return (
     <article className="theme-card" data-active={t.active} data-testid={`theme-${t.id}`}>
@@ -111,7 +116,7 @@ function ThemeCard({ t, canEdit, canBuy, payTo }: { t: ThemeStoreItem; canEdit: 
           )}
         </div>
         {t.state === "LOCKED" && (canBuy
-          ? <BuyForm themeId={t.id} themeName={t.name} price={t.price} payTo={payTo} />
+          ? <BuyForm themeId={t.id} themeName={t.name} price={t.price} payTo={payTo} online={online} />
           : <p className="muted" style={{ margin: 0, fontSize: 13 }}>Ask the store owner to buy this theme.</p>)}
       </div>
     </article>

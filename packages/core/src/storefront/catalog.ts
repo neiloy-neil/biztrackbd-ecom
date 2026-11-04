@@ -112,6 +112,24 @@ const THEME_COPY: Record<ThemeId, Partial<KaporSettings>> = {
     heroText: "Modern formalwear for the unapologetic individual.", heroTextBn: "আত্মবিশ্বাসী মানুষের জন্য আধুনিক ফরমালওয়্যার।",
     heroCta: "Shop now", heroCtaBn: "এখনই কিনুন", newArrivalsTitle: "New arrivals", newArrivalsTitleBn: "নতুন পণ্য",
   },
+  voltedge: {
+    heroEyebrow: "NEXT GENERATION", heroEyebrowBn: "পরবর্তী প্রজন্ম",
+    heroTitle: "Power your everyday.", heroTitleBn: "প্রতিদিনের শক্তি।",
+    heroText: "Flagship audio, fast charging and smart wearables, each one tested before it ships.", heroTextBn: "ফ্ল্যাগশিপ অডিও, ফাস্ট চার্জিং ও স্মার্ট ওয়্যারেবল, প্রতিটি পাঠানোর আগে পরীক্ষা করা।",
+    heroCta: "Shop the drop", heroCtaBn: "নতুন ড্রপ দেখুন", newArrivalsTitle: "Just landed", newArrivalsTitleBn: "নতুন এসেছে",
+  },
+  lumiere: {
+    heroEyebrow: "THE GLOW EDIT", heroEyebrowBn: "গ্লো এডিট",
+    heroTitle: "Skin that glows from within.", heroTitleBn: "ভেতর থেকে উজ্জ্বল ত্বক।",
+    heroText: "Skincare, makeup and fragrance, matched to your routine.", heroTextBn: "ত্বকের যত্ন, মেকআপ ও সুগন্ধি, আপনার রুটিন অনুযায়ী বাছাই করা।",
+    heroCta: "Find your routine", heroCtaBn: "আপনার রুটিন খুঁজুন", newArrivalsTitle: "New in", newArrivalsTitleBn: "নতুন এসেছে",
+  },
+  harvest: {
+    heroEyebrow: "FARM TO TABLE", heroEyebrowBn: "খামার থেকে টেবিলে",
+    heroTitle: "Fresh food, on your schedule.", heroTitleBn: "তাজা খাবার, আপনার সময়মতো।",
+    heroText: "Honey, ghee, spices and pantry staples from trusted farms.", heroTextBn: "বিশ্বস্ত খামারের মধু, ঘি, মসলা ও মুদি পণ্য।",
+    heroCta: "Fill your basket", heroCtaBn: "ঝুড়ি ভরুন", newArrivalsTitle: "Fresh in", newArrivalsTitleBn: "নতুন এসেছে",
+  },
   maison: {
     heroEyebrow: "THE NEW EDIT", heroEyebrowBn: "নতুন সংগ্রহ",
     heroTitle: "Dressed for the occasion.", heroTitleBn: "প্রতিটি উপলক্ষের পোশাক।",

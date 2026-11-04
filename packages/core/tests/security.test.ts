@@ -85,6 +85,8 @@ describe("who can call each admin and platform action", () => {
       "apps/platform/src/app/api/webhooks/uddoktapay/route.ts",
       // Where the payer lands after UddoktaPay. It only asks the gateway whether the payment went through and redirects; it writes nothing.
       "apps/admin/src/app/api/billing/uddoktapay/callback/route.ts",
+      // The same for a premium theme paid online: it verifies the invoice with the gateway and asks the platform to unlock the theme; it writes nothing itself.
+      "apps/admin/src/app/api/themes/uddoktapay/callback/route.ts",
       // Client-side analytics and crash error tracking
       "apps/platform/src/app/api/track/error/route.ts",
       "apps/platform/src/app/api/track/native/route.ts",
@@ -103,6 +105,9 @@ describe("who can call each admin and platform action", () => {
     const callback = readFileSync(join(ROOT, "apps/admin/src/app/api/billing/uddoktapay/callback/route.ts"), "utf8");
     expect(callback).toMatch(/checkUddoktaPayPlanInvoice\(/);
     expect(callback).not.toMatch(/processUddoktaPaySubscriptionSuccess/);
+    const themeCallback = readFileSync(join(ROOT, "apps/admin/src/app/api/themes/uddoktapay/callback/route.ts"), "utf8");
+    expect(themeCallback).toMatch(/checkUddoktaPayPlanInvoice\(/);
+    expect(themeCallback).not.toMatch(/processUddoktaPaySubscriptionSuccess|grantPremiumTheme/);
     // The one public route that creates something must be the one that enforces the limits.
     expect(readFileSync(join(ROOT, "apps/admin/src/app/demo/start/route.ts"), "utf8")).toMatch(/createDemoSession\(/);
     expect(readFileSync(join(ROOT, "packages/core/src/demo/session.ts"), "utf8")).toMatch(/DemoLimitError[\s\S]*DemoBusyError/);
