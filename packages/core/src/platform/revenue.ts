@@ -67,7 +67,7 @@ export interface CatalogueRevenue {
   recent: RecentSale[];
 }
 
-interface Sale { key: string; tenantId: string; storeName: string; amount: number; at: Date }
+interface Sale { key: string; tenantId: string; storeName: string; amount: number; at: Date; /** Rows of one bundle payment share it, so the payment is counted once. */ group?: string | null }
 
 function lines(sales: Sale[], nameOf: (id: string) => string): RevenueLine[] {
   const by = new Map<string, { revenue: number; orders: number; stores: Set<string>; last: Date }>();
@@ -87,7 +87,7 @@ const moduleName = (key: string) => MODULES.find((m) => m.key === key)?.label ??
 export async function getCatalogueRevenue(actor: PlatformActor, range: RevenueRange = "30d", db: PrismaClient = getPlatformPrisma(), now: Date = new Date()): Promise<CatalogueRevenue> {
   assertPlatformCan(actor, "payments", "view");
   const [themeRows, moduleRows, themeWaiting, moduleWaiting, themeNames, monthlyThemes, monthlyModules] = await Promise.all([
-    db.themePurchase.findMany({ where: { status: "APPROVED", approvedAt: { not: null } }, select: { themeId: true, tenantId: true, amount: true, approvedAt: true, tenant: { select: { name: true } } } }),
+    db.themePurchase.findMany({ where: { status: "APPROVED", approvedAt: { not: null } }, select: { themeId: true, tenantId: true, amount: true, approvedAt: true, groupId: true, tenant: { select: { name: true } } } }),
     db.modulePurchase.findMany({ where: { status: "APPROVED", approvedAt: { not: null } }, select: { moduleKey: true, tenantId: true, amount: true, approvedAt: true, tenant: { select: { name: true } } } }),
     db.themePurchase.aggregate({ where: { status: "PENDING" }, _count: { _all: true }, _sum: { amount: true } }),
     db.modulePurchase.aggregate({ where: { status: "PENDING" }, _count: { _all: true }, _sum: { amount: true } }),
@@ -98,7 +98,7 @@ export async function getCatalogueRevenue(actor: PlatformActor, range: RevenueRa
   const names = new Map(themeNames.map((t) => [t.id, t.name]));
   const themeName = (id: string) => names.get(id) ?? themeDefinition(id).name;
 
-  const toTheme = (r: (typeof themeRows)[number]): Sale => ({ key: r.themeId, tenantId: r.tenantId, storeName: r.tenant.name, amount: Number(r.amount), at: r.approvedAt! });
+  const toTheme = (r: (typeof themeRows)[number]): Sale => ({ key: r.themeId, tenantId: r.tenantId, storeName: r.tenant.name, amount: Number(r.amount), at: r.approvedAt!, group: r.groupId });
   const toModule = (r: (typeof moduleRows)[number]): Sale => ({ key: r.moduleKey, tenantId: r.tenantId, storeName: r.tenant.name, amount: Number(r.amount), at: r.approvedAt! });
   const allThemes = themeRows.map(toTheme);
   const allModules = moduleRows.map(toModule);
@@ -122,7 +122,7 @@ export async function getCatalogueRevenue(actor: PlatformActor, range: RevenueRa
 
   return {
     range,
-    totals: { themes: sum(themes), modules: sum(modules), total: sum(themes) + sum(modules), orders: themes.length + modules.length },
+    totals: { themes: sum(themes), modules: sum(modules), total: sum(themes) + sum(modules), orders: new Set(themes.map((s, i) => s.group ?? `row${i}`)).size + modules.length },
     pending: { count: themeWaiting._count._all + moduleWaiting._count._all, amount: Number(themeWaiting._sum.amount ?? 0) + Number(moduleWaiting._sum.amount ?? 0) },
     active: { monthlyThemes: new Set(monthlyThemes.map((p) => `${p.tenantId}:${p.themeId}`)).size, monthlyModules },
     byTheme: lines(themes, themeName),

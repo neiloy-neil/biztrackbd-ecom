@@ -46,10 +46,10 @@ export function createOwnerClient(directUrl: string): PrismaClient {
 
 export const PLAN_ROWS = [
   { tier: "STARTER", name: "Starter", priceMonthlyBdt: 699, priceYearlyBdt: 6990, sortOrder: 1,
-    limits: { products: 300, ordersPerMonth: 500, staff: 2, storageGb: 5, smsCredits: 200, landingPages: 3, aiCredits: 50 },
+    limits: { products: 300, ordersPerMonth: 500, staff: 2, storageGb: 5, smsCredits: 100, landingPages: 3, aiCredits: 50 },
     features: { customDomain: false, courierBooking: "manual", fraud: "basic", sectionBuilder: "settings", modules: 0, paymentGateway: false, capi: true } },
   { tier: "PRO", name: "Pro", priceMonthlyBdt: 1499, priceYearlyBdt: 14990, sortOrder: 2,
-    limits: { products: 2000, ordersPerMonth: 3000, staff: 5, storageGb: 20, smsCredits: 1000, landingPages: 20, aiCredits: 250 },
+    limits: { products: 2000, ordersPerMonth: 3000, staff: 5, storageGb: 20, smsCredits: 500, landingPages: 20, aiCredits: 250 },
     features: { customDomain: true, courierBooking: "auto", fraud: "full", sectionBuilder: "home", modules: 3, paymentGateway: false, capi: true } },
   { tier: "BUSINESS", name: "Business", priceMonthlyBdt: 3499, priceYearlyBdt: 34990, sortOrder: 3,
     limits: { products: null, ordersPerMonth: null, staff: 15, storageGb: 100, smsCredits: 3000, landingPages: null, aiCredits: 1000 },

@@ -10,11 +10,14 @@ let report: RlsReport;
 // PublicToolUsage: the free courier fraud checker's per-visitor counter, written and read by the marketing site.
 // ModulePrice: the add-on module price list, read by stores to show what a module costs, written by the platform role.
 // Theme: the theme catalogue, readable by stores (the catalogue code hides draft and archived themes), written by the platform role.
+// ThemeDiscount, ThemeBundle: theme discount codes and bundles (migration 078). Stores read ACTIVE rows only (row policy) to price a checkout; a code is
+// used only through the theme_discount_redeem function, and only the platform role writes.
 // SitePlan: the Business-website plan catalogue, read by every store like Plan (migration 075 grants SELECT only; changes go through the platform role).
 // PlatformBlogPost: guides written in Platform Admin; the marketing site reads only published, due rows (row-level security hides drafts).
+// RateLimitBucket: shared rate limit counters (migration 078), written by the public routes as the app role; the key is a salted hash, never a raw IP.
 // PlatformVisitorSession, PlatformVisitorEvent, PlatformClientError: the marketing site records visits and browser errors as the app role (migration 064),
 // so the app role has an open policy on them. This is the platform's own analytics, not store data; tighten it if a store ever gets a query path to them.
-const PLATFORM_READABLE = ["Plan", "SitePlan", "Theme", "ModulePrice", "Announcement", "Template", "Tenant", "PlatformConfig", "PublicToolUsage", "PlatformBlogPost", "PlatformVisitorSession", "PlatformVisitorEvent", "PlatformClientError"];
+const PLATFORM_READABLE = ["Plan", "SitePlan", "Theme", "ThemeDiscount", "ThemeBundle", "ModulePrice", "Announcement", "Template", "Tenant", "PlatformConfig", "PublicToolUsage", "PlatformBlogPost", "PlatformVisitorSession", "PlatformVisitorEvent", "PlatformClientError", "RateLimitBucket"];
 const urls = testUrls();
 
 beforeAll(async () => {

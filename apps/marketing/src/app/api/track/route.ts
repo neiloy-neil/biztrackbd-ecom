@@ -1,22 +1,9 @@
 import { NextResponse } from "next/server";
-import { PLATFORM_BROWSER_EVENTS, trackPlatformBrowserEventCapi, type PlatformBrowserEvent } from "@biztrackbd/core";
+import { PLATFORM_BROWSER_EVENTS, consumeRateLimit, trackPlatformBrowserEventCapi, type PlatformBrowserEvent } from "@biztrackbd/core";
 
 // Mirrors consented browser funnel events to Meta CAPI. Same shape of guards as /api/contact.
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const MAX_REQUESTS_PER_WINDOW = 60;
-const rateLimitMap = new Map<string, number[]>();
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const stamps = (rateLimitMap.get(ip) || []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-  if (stamps.length >= MAX_REQUESTS_PER_WINDOW) {
-    rateLimitMap.set(ip, stamps);
-    return false;
-  }
-  stamps.push(now);
-  rateLimitMap.set(ip, stamps);
-  return true;
-}
 
 const ALLOWED_DATA_KEYS = new Set(["page_path", "content_name", "content_category", "cta_target", "cta_text", "site_mode"]);
 const EVENT_ID = /^[A-Za-z0-9_-]{6,64}$/;
@@ -40,7 +27,7 @@ export async function POST(req: Request) {
 
   const forwardedFor = req.headers.get("x-forwarded-for");
   const ip = forwardedFor ? forwardedFor.split(",")[0]?.trim() || "unknown" : "unknown";
-  if (!checkRateLimit(ip)) return NextResponse.json({ ok: false }, { status: 429 });
+  if (!(await consumeRateLimit({ scope: "marketing-track", subject: ip, limit: MAX_REQUESTS_PER_WINDOW, windowMs: RATE_LIMIT_WINDOW_MS })).allowed) return NextResponse.json({ ok: false }, { status: 429 });
 
   if (json.consentGiven !== true) return NextResponse.json({ ok: false, error: "consent" }, { status: 400 });
   const name = json.name as PlatformBrowserEvent;

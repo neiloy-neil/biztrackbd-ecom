@@ -111,7 +111,7 @@ export function renderWhatsAppText(
   });
 }
 
-import { generateWhatsAppQrSvg, resolveWhatsAppGatewayUrl, whatsAppGatewayHeaders } from "./session";
+import { generateWhatsAppQrSvg, gatewayFetch, resolveWhatsAppGatewayUrl, whatsAppGatewayHeaders } from "./session";
 import { checkPublicHttpUrl } from "../net/safe-url";
 
 /**
@@ -139,7 +139,7 @@ export async function getWhatsAppConfig(tenantId: string): Promise<WhatsAppConfi
     let livePhone = activePhone;
 
     try {
-      const res = await fetch(`${gatewayUrl}/session/status?tenantId=${encodeURIComponent(tenantId)}`, {
+      const res = await gatewayFetch(gatewayUrl, `/session/status?tenantId=${encodeURIComponent(tenantId)}`, {
         headers: whatsAppGatewayHeaders(gatewayUrl),
         signal: AbortSignal.timeout(1_500),
       });
@@ -385,7 +385,7 @@ export async function sendWhatsAppNotification(
     const gatewayUrl = resolveWhatsAppGatewayUrl(config?.gatewayUrl);
     if (gatewayUrl) {
       try {
-        const res = await fetch(`${gatewayUrl}/message/send`, {
+        const res = await gatewayFetch(gatewayUrl, `/message/send`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

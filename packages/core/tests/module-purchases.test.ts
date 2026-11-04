@@ -2,12 +2,26 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createBaseClient, setBasePrisma, setPlatformPrisma, type PrismaClient } from "@biztrackbd/db";
 import { createOwnerClient, resetDatabase, seedPlans, testUrls } from "@biztrackbd/db/testing";
 import {
-  DomainError, approveModulePurchase, isForSale, listAppStoreCatalog, isModuleActive, listModulePricing, listModuleSales, listPendingModulePurchases, rejectModulePurchase,
+  APP_CATALOG, DomainError, MODULES, approveModulePurchase, isForSale, listAppStoreCatalog, isModuleActive, listModulePricing, listModuleSales, listPendingModulePurchases, rejectModulePurchase,
   setEventPublisher, setModule, signupStore, submitModulePurchase, updateModulePricing, type PlatformActor, type StaffActor,
 } from "../src";
 
 const day = 24 * 60 * 60 * 1000;
 const KEY = "wholesale_b2b";
+
+describe("the apps screen and the module price list agree on keys", () => {
+  // The apps screen looks a module's offer up by its catalogue key, with this one rename (see app-store-client.tsx). If a key drifts,
+  // the Buy form silently disappears for that module, so every add-on in the catalogue must resolve to a module.
+  const toModuleKey = (k: string) => (k === "loyalty_vip" ? "loyalty" : k);
+  it("resolves every built plan add-on in the catalogue to a module", () => {
+    const addons = APP_CATALOG.filter((a) => a.tier === "ADDON" && a.built && MODULES.some((m) => m.key === toModuleKey(a.key)));
+    expect(addons.map((a) => a.key)).toEqual(expect.arrayContaining(["wholesale_b2b", "ai_suite", "pos_barcode", "fraud_shield"]));
+  });
+  it("renames the one key that differs", () => {
+    expect(MODULES.some((m) => m.key === "loyalty_vip")).toBe(false);
+    expect(MODULES.some((m) => m.key === toModuleKey("loyalty_vip"))).toBe(true);
+  });
+});
 
 describe("what makes a module for sale", () => {
   it("needs the admin's yes and a real price", () => {

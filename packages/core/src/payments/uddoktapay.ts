@@ -6,7 +6,7 @@ import { handleDigitalOrderPaymentSuccess, dispatchDigitalOrderDeliveryNotificat
 import { loadCredentials } from "../vault/integrations";
 import { enqueueNotificationJob } from "../messaging/queue";
 import { addPeriod } from "../platform/lifecycle";
-import { catalogTheme, mergeCatalogue, purchaseExpiry } from "../platform/theme-catalogue";
+import { grantThemePurchaseFromPayment } from "../platform/theme-grant";
 
 // The shared sandbox address and its public test key exist for development only. In production a store without its own keys must not be
 // offered online payment, or shoppers would be sent to a sandbox where any made-up transaction id marks the order paid.
@@ -374,7 +374,7 @@ export async function checkUddoktaPayPlanInvoice(invoiceId: string): Promise<{ o
   const platform = await getPlatformUddoktaPayCredentials();
   if (!platform) throw new ValidationError("Online payment is not set up");
   const verified = await verifyUddoktaPayPayment({ apiKey: platform.apiKey, baseUrl: platform.baseUrl, invoiceId });
-  return { ok: verified.status === "COMPLETED", status: verified.status, tenantId: verified.metadata?.tenantId || "", plan: verified.metadata?.plan || "", themeId: verified.metadata?.type === "theme" ? verified.metadata?.themeId || "" : "" };
+  return { ok: verified.status === "COMPLETED", status: verified.status, tenantId: verified.metadata?.tenantId || "", plan: verified.metadata?.plan || "", themeId: verified.metadata?.type === "theme" ? verified.metadata?.themeId || verified.metadata?.bundleId || "" : "" };
 }
 
 /**
@@ -548,28 +548,15 @@ async function grantPremiumThemeFromPayment(invoiceId: string, verified: Uddokta
   const tenantId = verified.metadata?.tenantId ?? "";
   const themeId = verified.metadata?.themeId ?? "";
   if (!tenantId) throw new ValidationError("Missing tenantId in theme payment metadata");
-  const db = getPlatformPrisma();
-  const theme = catalogTheme(mergeCatalogue(await db.theme.findMany()), themeId);
-  if (!theme || !theme.premium) throw new ValidationError("That is not a premium theme");
-  if (!(Number(verified.amount) >= theme.price)) throw new ValidationError("The amount paid is less than the theme price");
-  const tenant = await db.tenant.findUnique({ where: { id: tenantId }, select: { id: true } });
-  if (!tenant) throw new NotFoundError("Tenant");
   const trxId = verified.transactionId || invoiceId;
   const rawMethod = (verified.paymentMethod || "").toUpperCase();
   const mfsProvider: "BKASH" | "NAGAD" | "ROCKET" | "UPAY" = rawMethod.includes("NAGAD") ? "NAGAD" : rawMethod.includes("ROCKET") ? "ROCKET" : rawMethod.includes("UPAY") ? "UPAY" : "BKASH";
   const senderNumber = verified.senderNumber && verified.senderNumber.length >= 11 ? verified.senderNumber : "01700000000";
-  try {
-    await db.$transaction(async (tx) => {
-      if (await tx.themePurchase.findUnique({ where: { trxId } })) return;
-      const now = new Date();
-      const current = await tx.themePurchase.findFirst({ where: { tenantId, themeId, status: "APPROVED", expiresAt: { not: null } }, orderBy: { expiresAt: "desc" }, select: { expiresAt: true } });
-      await tx.themePurchase.create({ data: { tenantId, themeId, amount: theme.price, mfsProvider, senderNumber, trxId, status: "APPROVED", approvedAt: now, expiresAt: purchaseExpiry(theme.priceModel, now, current?.expiresAt ?? null) } });
-      await tx.platformAuditLog.create({ data: { actorId: "SYSTEM", action: "theme.purchase_online", tenantId, details: { themeId, invoiceId, trxId, amount: Number(verified.amount), method: verified.paymentMethod ?? null } } });
-    });
-  } catch (err) {
-    if ((err as { code?: string }).code !== "P2002") throw err;
-  }
-  return { ok: true, tenantId, plan: themeId };
+  // The price (with any discount code and bundle) is worked out again in theme-grant.ts; the amount the gateway reports is only compared with it.
+  await grantThemePurchaseFromPayment(getPlatformPrisma(), {
+    tenantId, themeId, bundleId: verified.metadata?.bundleId ?? "", code: verified.metadata?.code ?? "", paid: Number(verified.amount), trxId, invoiceId, mfsProvider, senderNumber, method: verified.paymentMethod ?? null,
+  });
+  return { ok: true, tenantId, plan: themeId || verified.metadata?.bundleId || "" };
 }
 
 /**

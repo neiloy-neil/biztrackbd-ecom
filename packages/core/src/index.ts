@@ -122,12 +122,15 @@ export { accessState, statusFor, addPeriod, ACCESS_LABELS, GRACE_DAYS, READ_ONLY
 export { scanBrandRisk } from "./platform/brand";
 export * from "./platform/templates";
 export * from "./platform/theme-store";
+export * from "./platform/theme-pricing";
 export * from "./platform/theme-catalogue";
 export * from "./modules/purchases";
+export * from "./messaging/sms-credits";
 export * from "./platform/revenue";
 export { notExpired } from "./modules/expiry";
 export { premiumPagesFor } from "./builder/premium-pages";
 export * from "./platform/template-bundle";
+export * from "./platform/template-zip";
 export * from "./platform/template-studio";
 export * from "./platform/template-previews";
 export { installTemplatePages } from "./builder/versions";
@@ -171,7 +174,7 @@ export {
 } from "./platform/tickets";
 export {
   captureCheckout, markRecoveredByOrder, resolveRecovery, listAbandoned, getAbandoned, abandonedTabCounts, getAbandonedMetrics, logCallOutcome, recoveryText,
-  consumeSmsCredit, sendRecoveryMessages, sweepRecoveryMessages, RECOVERY_WAIT_MINUTES,
+  consumeSmsCredit, takeSmsCredit, giveBackSmsCredit, type SmsCreditSource, sendRecoveryMessages, sweepRecoveryMessages, RECOVERY_WAIT_MINUTES,
   type AbandonedRow, type AbandonedTab, type AbandonedMetrics, type CallOutcome, type RecoverySummary, type CartSnapshotLine,
 } from "./growth/abandoned";
 export {
@@ -536,6 +539,8 @@ export * from "./messaging/chat-adapters";
 
 // Public Developer REST API & Keys (DEV-API-001)
 export * from "./api-keys";
+export { buildCspPolicy, createCsp, cspMode, generateNonce, type CspMode, type RequestCsp } from "./security/csp";
+export { consumeRateLimit, purgeExpiredRateLimits, rateLimitKey, clientIpFromHeaders, type RateLimitDb, type RateLimitDecision, type RateLimitOptions } from "./ratelimit/shared-rate-limit";
 
 // Analytics & Real-Time Performance Studio (ANALYTICS-001)
 export * from "./analytics";

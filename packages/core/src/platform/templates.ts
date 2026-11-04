@@ -13,7 +13,7 @@ import { BUSINESS_TEMPLATES, type CustomPageManifest } from "../site/templates/m
 import type { SiteMode, BusinessVertical } from "../site/mode";
 import { scopeSkinCss } from "../builder/skin-css";
 import { canUseState, themeAccess, loadCatalogue, upsertTemplateTheme } from "./theme-catalogue";
-import { parseTemplateBundle, exportTemplateBundle, BUNDLE_SITE_MODES, BUNDLE_VERTICALS } from "./template-bundle";
+import { parseTemplateBundle, exportTemplateBundle, isPreviewAddress, BUNDLE_SITE_MODES, BUNDLE_VERTICALS } from "./template-bundle";
 
 /**
  * Store templates that platform staff publish without a deploy (docs/46, stage 5).
@@ -117,7 +117,7 @@ function fromRow(r: Row): TemplateInfo {
       if (cps.length) info.customPages = cps;
     }
     const pv = (meta.previews && typeof meta.previews === "object" ? meta.previews : {}) as Record<string, unknown>;
-    const https = (v: unknown) => (typeof v === "string" && v.startsWith("https://") ? v : undefined);
+    const https = (v: unknown) => (typeof v === "string" && isPreviewAddress(v) ? v : undefined);
     const previews = { desktop: https(pv.desktop), mobile: https(pv.mobile) };
     if (previews.desktop || previews.mobile) info.previews = previews;
     const skin = (meta.skin && typeof meta.skin === "object" ? meta.skin : null) as { css?: unknown } | null;

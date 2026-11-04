@@ -1,20 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { DomainError, PlanLimitError, can, claimStorage } from "@biztrackbd/core";
+import { DomainError, PlanLimitError, can, claimStorage, consumeRateLimit } from "@biztrackbd/core";
 import { MediaError, MAX_UPLOAD_BYTES, saveImage } from "@biztrackbd/media";
 import { getSessionOrNull } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
-// Per person, per process. Stops a stuck script from filling the disk; real rate limiting belongs at the edge.
-const recent = new Map<string, number[]>();
+// Per person, shared across serverless instances (Postgres); fails open, logged, if the database is down.
 const LIMIT_PER_MINUTE = 20;
 
-function tooMany(userId: string): boolean {
-  const now = Date.now();
-  const hits = (recent.get(userId) ?? []).filter((t) => now - t < 60_000);
-  hits.push(now);
-  recent.set(userId, hits);
-  return hits.length > LIMIT_PER_MINUTE;
+async function tooMany(userId: string): Promise<boolean> {
+  return !(await consumeRateLimit({ scope: "admin-media-upload", subject: userId, limit: LIMIT_PER_MINUTE, windowMs: 60_000 })).allowed;
 }
 
 /** Uploads one photo. Staff who can edit products or store design may upload. Returns { url } for the page to use. */
@@ -28,7 +23,7 @@ export async function POST(req: NextRequest) {
   if (s.demo) return NextResponse.json({ error: "Uploads are not available in the demo. Your own store can upload photos." }, { status: 403 });
   if (!can(s.user.role, "products", "edit") && !can(s.user.role, "design", "edit")) return NextResponse.json({ error: "You do not have access to this." }, { status: 403 });
   if (s.access.state === "READ_ONLY" || s.access.state === "LOCKED") return NextResponse.json({ error: "Your store is read-only until the plan is paid." }, { status: 403 });
-  if (tooMany(s.user.id)) return NextResponse.json({ error: "Too many uploads. Wait a minute and try again." }, { status: 429 });
+  if (await tooMany(s.user.id)) return NextResponse.json({ error: "Too many uploads. Wait a minute and try again." }, { status: 429 });
 
   const length = Number(req.headers.get("content-length") ?? 0);
   if (length > MAX_UPLOAD_BYTES + 64 * 1024) return NextResponse.json({ error: "That photo is too large. Use one under 8 MB." }, { status: 413 });

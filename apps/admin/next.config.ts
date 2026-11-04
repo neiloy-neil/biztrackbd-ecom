@@ -9,8 +9,9 @@ try {
 }
 
 
-// Baseline hardening for every response (docs/16 Phase 8 security review). A strict script-src is NOT set: the Meta Pixel and
-// Next's own inline bootstrap would need nonces, which is later work. These directives are the ones that are safe today.
+// Baseline hardening for every response (docs/16 Phase 8 security review): framing, object-src, base-uri and form-action are always enforced here.
+// The script policy (per-request nonce + 'strict-dynamic') is set by src/proxy.ts through @biztrackbd/core createCsp, as
+// Content-Security-Policy-Report-Only until CSP_MODE=enforce is set.
 const securityHeaders = (frameAncestors: string) => [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

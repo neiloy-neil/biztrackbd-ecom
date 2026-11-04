@@ -4,6 +4,7 @@ import { PageHeader } from "@biztrackbd/ui";
 import { can, listMessageTemplates, getModuleStatus } from "@biztrackbd/core";
 import { requireAccess } from "@/lib/session";
 import { AppDisabledNotice } from "@/components/app-disabled-notice";
+import { SmsBalanceCard } from "@/components/sms-balance-card";
 import { NotificationCard } from "./notification-card";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +28,7 @@ export default async function MarketingNotificationsPage() {
     );
   }
 
-  const { templates, storeName, smsCredits } = await listMessageTemplates(
+  const { templates, storeName } = await listMessageTemplates(
     s.tenantId,
     s.actor
   );
@@ -35,11 +36,6 @@ export default async function MarketingNotificationsPage() {
 
   const orderMessages = templates.filter((t) => !t.alwaysOn);
   const recoveryMessages = templates.filter((t) => t.alwaysOn);
-
-  const percentUsed =
-    smsCredits.limit && smsCredits.limit > 0
-      ? Math.min(100, Math.round((smsCredits.used / smsCredits.limit) * 100))
-      : 0;
 
   return (
     <>
@@ -54,37 +50,7 @@ export default async function MarketingNotificationsPage() {
         }
       />
 
-      {/* SMS Credits Status Card */}
-      <div className="card p-md mb-lg bg-subtle border">
-        <div className="flex-between items-center flex-wrap gap-md mb-sm">
-          <div>
-            <div className="text-xs font-bold text-primary uppercase">
-              Monthly SMS Balance
-            </div>
-            <div className="text-xl font-bold text-ink">
-              {smsCredits.limit == null
-                ? `${smsCredits.used} SMS sent (Unlimited Tier)`
-                : `${smsCredits.used.toLocaleString()} / ${smsCredits.limit.toLocaleString()} credits used`}
-            </div>
-          </div>
-          {smsCredits.limit != null && (
-            <div className="text-right">
-              <span className={`pill ${percentUsed > 85 ? "warn" : "ok"}`}>
-                {Math.max(0, smsCredits.limit - smsCredits.used).toLocaleString()} credits remaining
-              </span>
-            </div>
-          )}
-        </div>
-
-        {smsCredits.limit != null && (
-          <div className="meter-track">
-            <div
-              className={`meter-fill ${percentUsed > 85 ? "bg-warning" : "bg-primary"}`}
-              style={{ width: `${percentUsed}%` }}
-            />
-          </div>
-        )}
-      </div>
+      <SmsBalanceCard tenantId={s.tenantId} actor={s.actor} canBuy={can(s.user.role, "billing", "edit")} />
 
       {!canEdit && (
         <div className="notice mb-md">

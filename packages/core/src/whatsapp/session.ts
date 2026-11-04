@@ -2,6 +2,7 @@ import QRCode from "qrcode";
 import { withTenant } from "@biztrackbd/db";
 import { normalizeBdPhone } from "../phone";
 import { checkPublicHttpUrl } from "../net/safe-url";
+import { safeFetch } from "../net/pinned-fetch";
 import { formatWhatsAppPhone } from "./deep-links";
 import type { WhatsAppConfigView, WhatsAppSessionStatus } from "./types";
 
@@ -21,6 +22,18 @@ export function resolveWhatsAppGatewayUrl(configUrl?: string | null, customUrl?:
     }
   };
   return usable(customUrl) || usable(configUrl) || platformWhatsAppGatewayUrl();
+}
+
+/**
+ * fetch() for a gateway address. The platform gateway (WHATSAPP_GATEWAY_URL, ours, possibly on a private network) is fetched normally.
+ * Any other address came from a store, so it is fetched with the connection pinned to a checked public address (DNS rebinding) and
+ * without following redirects.
+ */
+export function gatewayFetch(gatewayUrl: string, path: string, init: RequestInit = {}): Promise<Response> {
+  const url = `${gatewayUrl}${path}`;
+  const platform = platformWhatsAppGatewayUrl().replace(/\/+$/, "");
+  if (gatewayUrl.replace(/\/+$/, "") === platform) return fetch(url, init);
+  return safeFetch(url, init, { field: "gatewayUrl", requireHttps: true });
 }
 
 function platformWhatsAppGatewayUrl(): string {
@@ -98,7 +111,7 @@ export async function startWhatsAppSession(
 
     if (gatewayUrl) {
       try {
-        const res = await fetch(`${gatewayUrl}/session/start`, {
+        const res = await gatewayFetch(gatewayUrl, `/session/start`, {
           method: "POST",
           headers: { "Content-Type": "application/json", ...whatsAppGatewayHeaders(gatewayUrl) },
           body: JSON.stringify({ tenantId, phone: formattedPhone, forceRestart: true }),
@@ -202,7 +215,7 @@ export async function requestWhatsAppPairingCode(
     const gatewayUrl = resolveWhatsAppGatewayUrl(existing?.gatewayUrl, customGatewayUrl);
 
     try {
-      const res = await fetch(`${gatewayUrl}/session/pairing-code`, {
+      const res = await gatewayFetch(gatewayUrl, `/session/pairing-code`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...whatsAppGatewayHeaders(gatewayUrl) },
         body: JSON.stringify({ tenantId, phone: cleanNumber }),
@@ -253,7 +266,7 @@ export async function getWhatsAppSessionStatus(tenantId: string): Promise<WhatsA
 
     // Check with live gateway if available
     try {
-      const res = await fetch(`${gatewayUrl}/session/status?tenantId=${encodeURIComponent(tenantId)}`, {
+      const res = await gatewayFetch(gatewayUrl, `/session/status?tenantId=${encodeURIComponent(tenantId)}`, {
         headers: whatsAppGatewayHeaders(gatewayUrl),
         signal: AbortSignal.timeout(2_500),
       });
@@ -330,7 +343,7 @@ export async function disconnectWhatsAppSession(tenantId: string): Promise<void>
 
     // Notify gateway to logout and clean storage
     try {
-      await fetch(`${gatewayUrl}/session/disconnect`, {
+      await gatewayFetch(gatewayUrl, `/session/disconnect`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...whatsAppGatewayHeaders(gatewayUrl) },
         body: JSON.stringify({ tenantId }),

@@ -1,22 +1,9 @@
 import { NextResponse } from "next/server";
-import { DomainError, submitPlatformInquiry } from "@biztrackbd/core";
+import { DomainError, consumeRateLimit, submitPlatformInquiry } from "@biztrackbd/core";
 
-// Simple in-memory sliding window rate limiter: 5 requests per 10 minutes per IP
+// Shared limit (Postgres, so it holds across serverless instances): 5 requests per 10 minutes per IP. Fails open, logged, if the database is down.
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const MAX_REQUESTS_PER_WINDOW = 5;
-const rateLimitMap = new Map<string, number[]>();
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const timestamps = (rateLimitMap.get(ip) || []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-  if (timestamps.length >= MAX_REQUESTS_PER_WINDOW) {
-    rateLimitMap.set(ip, timestamps);
-    return false;
-  }
-  timestamps.push(now);
-  rateLimitMap.set(ip, timestamps);
-  return true;
-}
 
 const ALLOWED_TOPICS = new Set([
   "setup",
@@ -72,7 +59,7 @@ export async function POST(req: Request) {
     const ipAddress = forwardedFor ? forwardedFor.split(",")[0]?.trim() : "127.0.0.1";
 
     // 4. Rate Limiting Check
-    if (ipAddress && !checkRateLimit(ipAddress)) {
+    if (ipAddress && !(await consumeRateLimit({ scope: "contact", subject: ipAddress, limit: MAX_REQUESTS_PER_WINDOW, windowMs: RATE_LIMIT_WINDOW_MS })).allowed) {
       return NextResponse.json(
         { ok: false, error: "Too many messages sent. Please wait a few minutes before trying again or reach us via WhatsApp." },
         { status: 429 }
