@@ -12,6 +12,7 @@ import {
   saveTrackingConfig,
   saveSeoSuiteConfig,
   setModule,
+  submitModulePurchase,
   testCourierConnection,
   type ProviderKey,
 } from "@biztrackbd/core";
@@ -293,4 +294,22 @@ export async function saveSeoSuiteAction(input: {
     console.error("saveSeoSuiteAction failed", e);
     return { error: "Could not save store SEO configuration." };
   }
+}
+
+export interface BuyModuleState { error?: string }
+
+/** The owner says they have sent the money for an add-on module. The platform checks the TrxID and then switches the module on. */
+export async function buyModuleAction(_prev: BuyModuleState, form: FormData): Promise<BuyModuleState> {
+  const s = await requireAction("billing", "edit", { allowReadOnly: true });
+  try {
+    await submitModulePurchase(s.tenantId, s.actor, {
+      moduleKey: String(form.get("moduleKey") ?? ""), provider: String(form.get("provider") ?? ""),
+      senderNumber: String(form.get("senderNumber") ?? ""), trxId: String(form.get("trxId") ?? ""),
+    });
+  } catch (e) {
+    if (e instanceof DomainError) return { error: e.message };
+    throw e;
+  }
+  revalidatePath("/settings/apps");
+  redirect("/settings/apps?sent=1");
 }

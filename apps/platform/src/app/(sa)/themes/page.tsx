@@ -9,6 +9,10 @@ import {
   type WorkshopStore,
   getAppCatalogWithTelemetry,
   type StaffTemplateRow,
+  listThemeCatalogue,
+  listModulePricing,
+  type ModulePricingRow,
+  type PlatformThemeRow,
   type ManagedAppCatalogItem,
 } from "@biztrackbd/core";
 import { requireAccess } from "@/lib/session";
@@ -21,6 +25,8 @@ import {
   setTemplateStatusAction,
   toggleModuleMaintenanceAction,
   setModulePlanOverrideAction,
+  updateThemePricingAction,
+  updateModulePricingAction,
 } from "./actions";
 import { SubmitButton } from "@/components/ui";
 
@@ -44,10 +50,12 @@ export default async function ThemesPage({
   const canSee = canPlatform(s.actor.role, "plans", "view");
   const canEdit = canPlatform(s.actor.role, "plans", "edit");
 
-  const [templates, modules, workshops]: [StaffTemplateRow[], ManagedAppCatalogItem[], WorkshopStore[]] = await Promise.all([
+  const [templates, modules, workshops, themePricing, modulePricing]: [StaffTemplateRow[], ManagedAppCatalogItem[], WorkshopStore[], PlatformThemeRow[], ModulePricingRow[]] = await Promise.all([
     canSee ? listTemplatesForStaff(s.actor) : Promise.resolve([]),
     getAppCatalogWithTelemetry(s.actor),
     canSee ? listWorkshopStores(s.actor).catch(() => []) : Promise.resolve([]),
+    canSee ? listThemeCatalogue(s.actor).catch(() => []) : Promise.resolve([]),
+    canSee ? listModulePricing(s.actor).catch(() => []) : Promise.resolve([]),
   ]);
 
   return (
@@ -58,6 +66,58 @@ export default async function ThemesPage({
 
       {one(sp.err) && <div className="notice bad" role="alert">{one(sp.err)}</div>}
       {one(sp.done) && <div className="notice good" role="status">{one(sp.done)}</div>}
+
+      {/* Storefront theme pricing */}
+      {canSee && (
+        <div className="card" style={{ padding: 0, overflow: "hidden" }} data-testid="theme-pricing">
+          <div style={{ padding: "18px 24px", fontSize: 16, fontWeight: 700, borderBottom: "1px solid var(--line)" }}>Storefront theme pricing</div>
+          <p className="muted" style={{ margin: 0, padding: "12px 24px", fontSize: 13.5 }}>Free or paid, one-time or monthly, and which plans get a theme without paying. A change applies to the next purchase; stores that already own a theme keep it. A template you upload below appears here as a free theme until you price it.</p>
+          <div style={{ display: "grid" }}>
+            {themePricing.map((t) => (
+              <form key={t.id} action={updateThemePricingAction} data-testid={`theme-price-${t.id}`} style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", padding: "12px 24px", borderTop: "1px solid var(--line)" }}>
+                <input type="hidden" name="themeId" value={t.id} />
+                <div style={{ flex: "1 1 160px", minWidth: 140 }}><b>{t.name}</b><div className="muted" style={{ fontSize: 12 }}>{t.id}{t.saved ? "" : " · default"}</div></div>
+                <select name="priceModel" defaultValue={t.priceModel} aria-label={`${t.name} price type`} disabled={!canEdit} style={{ minHeight: 40 }}>
+                  <option value="FREE">Free</option><option value="ONE_TIME">One-time</option><option value="MONTHLY">Monthly</option>
+                </select>
+                <input name="priceBdt" type="number" min={0} step="1" defaultValue={t.price} aria-label={`${t.name} price in taka`} disabled={!canEdit} style={{ width: 90, minHeight: 40 }} />
+                <fieldset style={{ border: 0, margin: 0, padding: 0, display: "flex", gap: 10, flexWrap: "wrap" }} disabled={!canEdit}>
+                  <legend className="muted" style={{ fontSize: 12, padding: 0 }}>Included in</legend>
+                  {(["STARTER", "PRO", "BUSINESS", "ENTERPRISE"] as const).map((p) => (
+                    <label key={p} style={{ display: "flex", gap: 4, alignItems: "center", fontSize: 13 }}><input type="checkbox" name="includedPlans" value={p} defaultChecked={t.includedPlans.includes(p)} />{p[0] + p.slice(1).toLowerCase()}</label>
+                  ))}
+                </fieldset>
+                <select name="status" defaultValue={t.status} aria-label={`${t.name} visibility`} disabled={!canEdit} style={{ minHeight: 40 }}>
+                  <option value="PUBLISHED">Shown</option><option value="DRAFT">Draft</option><option value="ARCHIVED">Hidden</option>
+                </select>
+                {canEdit && <SubmitButton pending="Saving…">Save</SubmitButton>}
+              </form>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Add-on module pricing */}
+      {canSee && (
+        <div className="card" style={{ padding: 0, overflow: "hidden" }} data-testid="module-pricing">
+          <div style={{ padding: "18px 24px", fontSize: 16, fontWeight: 700, borderBottom: "1px solid var(--line)" }}>Add-on module pricing</div>
+          <p className="muted" style={{ margin: 0, padding: "12px 24px", fontSize: 13.5 }}>Let a store whose plan does not include an add-on buy it anyway. Free, one-time or monthly. A monthly module switches itself off when the month ends. Stores on a plan that includes add-ons never see a price.</p>
+          <div style={{ display: "grid" }}>
+            {modulePricing.map((m) => (
+              <form key={m.moduleKey} action={updateModulePricingAction} data-testid={`module-price-${m.moduleKey}`} style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", padding: "12px 24px", borderTop: "1px solid var(--line)" }}>
+                <input type="hidden" name="moduleKey" value={m.moduleKey} />
+                <div style={{ flex: "1 1 220px", minWidth: 160 }}><b>{m.label}</b><div className="muted" style={{ fontSize: 12 }}>{m.moduleKey}{(m as ModulePricingRow).saved ? "" : " · not priced"}</div></div>
+                <select name="priceModel" defaultValue={m.priceModel} aria-label={`${m.label} price type`} disabled={!canEdit} style={{ minHeight: 40 }}>
+                  <option value="FREE">Free</option><option value="ONE_TIME">One-time</option><option value="MONTHLY">Monthly</option>
+                </select>
+                <input name="priceBdt" type="number" min={0} step="1" defaultValue={m.price} aria-label={`${m.label} price in taka`} disabled={!canEdit} style={{ width: 90, minHeight: 40 }} />
+                <label style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 13, minHeight: 40 }}><input type="checkbox" name="sellable" defaultChecked={m.sellable} disabled={!canEdit} />For sale</label>
+                {canEdit && <SubmitButton pending="Saving…">Save</SubmitButton>}
+              </form>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Store Templates Card */}
       <div className="card" style={{ padding: 0, overflow: "hidden" }} data-testid="templates-table">

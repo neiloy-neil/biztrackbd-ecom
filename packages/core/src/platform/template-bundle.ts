@@ -4,6 +4,7 @@ import { isFreeThemeId, validateTheme, type ThemeId, type ThemeSettings } from "
 import { templateChrome } from "../builder/template-chromes";
 import type { Chrome } from "../builder/chrome";
 import { ValidationError } from "../errors";
+import { scopeSkinCss, MAX_SKIN_CSS_BYTES } from "../builder/skin-css";
 import type { CustomPageManifest } from "../site/templates/manifests";
 import type { SiteMode, BusinessVertical } from "../site/mode";
 
@@ -42,6 +43,7 @@ const Header = z.object({
   pages: z.record(z.string(), z.unknown()).default({}),
   chrome: z.unknown().optional(),
   customPages: z.array(z.unknown()).max(12).default([]),
+  skin: z.object({ css: z.string().max(MAX_SKIN_CSS_BYTES).default("") }).optional(),
 });
 
 export interface TemplateBundle {
@@ -60,6 +62,8 @@ export interface TemplateBundle {
   pages: Partial<Record<PageKind, PageJson>>;
   chrome: Chrome | null;
   customPages: CustomPageManifest[];
+  /** Extra CSS that gives the theme its own look on top of baseLook. Checked on upload and again when drawn; empty for none. */
+  skinCss: string;
 }
 
 const where = (label: string, fn: () => unknown): unknown => {
@@ -81,6 +85,8 @@ export function parseTemplateBundle(text: string): TemplateBundle {
   if (b.siteMode === "ECOMMERCE" && b.vertical) throw new ValidationError("vertical: a store template has no business vertical");
   if (b.siteMode !== "ECOMMERCE" && !b.vertical) throw new ValidationError("vertical: a business template needs one (for example RESTAURANT)");
 
+  const skinCss = (b.skin?.css ?? "").trim();
+  where("skin.css", () => scopeSkinCss(b.id, skinCss));
   const settings = where("settings", () => validateTheme(b.settings)) as ThemeSettings;
   const pages: TemplateBundle["pages"] = {};
   for (const [key, value] of Object.entries(b.pages)) {
@@ -107,16 +113,17 @@ export function parseTemplateBundle(text: string): TemplateBundle {
 
   return {
     id: b.id, name: b.name, blurb: b.blurb, audience: b.audience, category: b.category, tags: b.tags, moduleLabel: b.moduleLabel,
-    baseLook: b.baseLook, siteMode: b.siteMode, vertical: b.vertical, previews: b.previews, settings, pages, chrome, customPages,
+    baseLook: b.baseLook, siteMode: b.siteMode, vertical: b.vertical, previews: b.previews, settings, pages, chrome, customPages, skinCss,
   };
 }
 
 /** The file form of a template, ready to download, edit and upload again. */
-export function exportTemplateBundle(t: Omit<TemplateBundle, "chrome" | "customPages"> & { chrome?: Chrome | null; customPages?: CustomPageManifest[] }): string {
+export function exportTemplateBundle(t: Omit<TemplateBundle, "chrome" | "customPages" | "skinCss"> & { chrome?: Chrome | null; customPages?: CustomPageManifest[]; skinCss?: string }): string {
   return JSON.stringify({
     format: TEMPLATE_BUNDLE_FORMAT, formatVersion: TEMPLATE_BUNDLE_VERSION,
     id: t.id, name: t.name, blurb: t.blurb, audience: t.audience, category: t.category, tags: t.tags, moduleLabel: t.moduleLabel,
     baseLook: t.baseLook, siteMode: t.siteMode, ...(t.vertical ? { vertical: t.vertical } : {}), previews: t.previews,
     settings: t.settings, pages: t.pages, ...(t.chrome ? { chrome: t.chrome } : {}), customPages: t.customPages ?? [],
+    ...(t.skinCss ? { skin: { css: t.skinCss } } : {}),
   }, null, 2);
 }

@@ -1,4 +1,5 @@
-import { describe, expect, it, beforeEach, afterEach } from "vitest";
+import { describe, expect, it, beforeAll, beforeEach, afterEach } from "vitest";
+import { createOwnerClient, seedPlans, testUrls } from "@biztrackbd/db/testing";
 import {
   grantBkashToken,
   createBkashPayment,
@@ -12,6 +13,13 @@ import { saveIntegration } from "../src";
 import { randomUUID } from "node:crypto";
 
 describe("Direct bKash Tokenized Checkout Integration Engine", () => {
+  // These tests build their own tenants but read the plan table, which an earlier test file may have left changed: put the standard plans back.
+  beforeAll(async () => {
+    const owner = createOwnerClient(testUrls().direct);
+    await seedPlans(owner);
+    await owner.$disconnect();
+  }, 60_000);
+
   beforeEach(() => {
     setBkashFetchForTests(undefined);
   });

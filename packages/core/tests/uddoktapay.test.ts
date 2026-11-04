@@ -9,11 +9,19 @@ import {
   DEFAULT_UDDOKTAPAY_BASE_URL,
 } from "../src/payments/uddoktapay";
 import { withTenant } from "@biztrackbd/db";
+import { createOwnerClient, seedPlans, testUrls } from "@biztrackbd/db/testing";
 import { randomBytes, randomUUID } from "node:crypto";
 import { getStoreUddoktaPayConfig, saveIntegration, getPlatformUddoktaPayCredentials } from "../src";
 import { getPlatformPrisma } from "@biztrackbd/db";
 
 describe("UddoktaPay Automated Payment Engine", () => {
+  // These tests build their own tenants but read the plan table, which an earlier test file may have left changed: put the standard plans back.
+  beforeAll(async () => {
+    const owner = createOwnerClient(testUrls().direct);
+    await seedPlans(owner);
+    await owner.$disconnect();
+  }, 60_000);
+
   beforeAll(() => {
     process.env.INTEGRATION_VAULT_SECRET = randomBytes(32).toString("hex");
   });

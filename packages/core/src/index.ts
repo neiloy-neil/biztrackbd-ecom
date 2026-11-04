@@ -122,6 +122,10 @@ export { accessState, statusFor, addPeriod, ACCESS_LABELS, GRACE_DAYS, READ_ONLY
 export { scanBrandRisk } from "./platform/brand";
 export * from "./platform/templates";
 export * from "./platform/theme-store";
+export * from "./platform/theme-catalogue";
+export * from "./modules/purchases";
+export * from "./platform/revenue";
+export { notExpired } from "./modules/expiry";
 export { premiumPagesFor } from "./builder/premium-pages";
 export * from "./platform/template-bundle";
 export * from "./platform/template-studio";
@@ -213,6 +217,7 @@ export {
 export * from "./builder/registry";
 export * from "./builder/patterns";
 export * from "./builder/theme";
+export * from "./builder/skin-css";
 export * from "./builder/versions";
 export * from "./builder/preview";
 export * from "./builder/data";

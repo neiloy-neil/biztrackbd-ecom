@@ -62,7 +62,7 @@ export default async function Themes({ searchParams }: { searchParams: Promise<R
       <section aria-labelledby="premium-h" style={{ marginBottom: 28 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap", marginBottom: 12 }}>
           <h2 id="premium-h" style={{ margin: 0 }}>Premium themes</h2>
-          <span className="muted" style={{ fontSize: 14 }}>{taka(store.price)} each, paid once. Yours for life.</span>
+          <span className="muted" style={{ fontSize: 14 }}>Each theme has its own price. Some are included in your plan.</span>
         </div>
         <div className="theme-grid" data-testid="premium-themes">
           {premium.map((t) => <ThemeCard key={t.id} t={t} canEdit={canEdit} canBuy={canBuy} payTo={store.payTo} online={store.online} />)}
@@ -91,7 +91,7 @@ export default async function Themes({ searchParams }: { searchParams: Promise<R
 }
 
 function ThemeCard({ t, canEdit, canBuy, payTo, online }: { t: ThemeStoreItem; canEdit: boolean; canBuy: boolean; online: boolean; payTo: { provider: "BKASH" | "NAGAD"; number: string; kind: string }[] }) {
-  const shot = HAS_PREVIEW.has(t.id) ? `url(/theme-previews/${t.id}.webp)` : SWATCH[t.id];
+  const shot = HAS_PREVIEW.has(t.id) ? `url(/theme-previews/${t.id}.webp)` : SWATCH[t.id] ?? (t.accent && t.background ? `linear-gradient(135deg,${t.background} 0 50%,${t.accent} 50%)` : undefined);
   return (
     <article className="theme-card" data-active={t.active} data-testid={`theme-${t.id}`}>
       <div className="theme-shot" style={{ backgroundImage: shot ?? SWATCH.kapor }} role="img" aria-label={`${t.name} preview`} />
@@ -100,15 +100,16 @@ function ThemeCard({ t, canEdit, canBuy, payTo, online }: { t: ThemeStoreItem; c
           <h3>{t.name}</h3>
           {t.premium && <span className="pill warn" style={{ fontSize: 12 }}>Premium</span>}
           {t.active && <span className="pill ok" style={{ fontSize: 12 }}>In use</span>}
-          {t.state === "OWNED" && !t.active && <span className="pill ok" style={{ fontSize: 12 }}>Owned</span>}
+          {t.state === "OWNED" && !t.active && <span className="pill ok" style={{ fontSize: 12 }}>{t.priceModel === "MONTHLY" && t.expiresAt ? `Active until ${t.expiresAt.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : "Owned"}</span>}
+          {t.state === "INCLUDED" && !t.active && <span className="pill ok" style={{ fontSize: 12 }}>Included in your plan</span>}
           {t.state === "PENDING" && <span className="pill warn" style={{ fontSize: 12 }}>Payment being checked</span>}
         </div>
         <p className="muted" style={{ margin: 0, fontSize: 14 }}>{t.blurb}</p>
         <p className="muted" style={{ margin: 0, fontSize: 13 }}>Best for: {t.audience}</p>
         {t.lastRejection && <p className="notice bad" role="alert" style={{ margin: 0, fontSize: 13 }}>Your last payment was not accepted: {t.lastRejection}</p>}
         <div className="theme-actions">
-          <a className="btn btn-secondary" href={previewUrl(t.id)} target="_blank" rel="noopener noreferrer" data-testid={`preview-${t.id}`}>Live preview</a>
-          {(t.state === "FREE" || t.state === "OWNED") && !t.active && canEdit && (
+          {HAS_PREVIEW.has(t.id) && <a className="btn btn-secondary" href={previewUrl(t.id)} target="_blank" rel="noopener noreferrer" data-testid={`preview-${t.id}`}>Live preview</a>}
+          {(t.state === "FREE" || t.state === "OWNED" || t.state === "INCLUDED") && !t.active && canEdit && (
             <form action={applyThemeAction}>
               <input type="hidden" name="themeId" value={t.id} />
               <SubmitButton pending="Applying…" data-testid={`apply-${t.id}`}>Apply</SubmitButton>
@@ -116,7 +117,7 @@ function ThemeCard({ t, canEdit, canBuy, payTo, online }: { t: ThemeStoreItem; c
           )}
         </div>
         {t.state === "LOCKED" && (canBuy
-          ? <BuyForm themeId={t.id} themeName={t.name} price={t.price} payTo={payTo} online={online} />
+          ? <BuyForm themeId={t.id} themeName={t.name} price={t.price} monthly={t.priceModel === "MONTHLY"} renew={t.expired} payTo={payTo} online={online} />
           : <p className="muted" style={{ margin: 0, fontSize: 13 }}>Ask the store owner to buy this theme.</p>)}
       </div>
     </article>

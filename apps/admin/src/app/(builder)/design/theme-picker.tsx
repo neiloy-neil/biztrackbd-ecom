@@ -27,7 +27,7 @@ export function ThemePicker({ active, canEdit, themes }: { active: ThemeId; canE
       <div style={{ display: "grid", gap: 8 }}>
         {list.map((theme) => (theme.state === "LOCKED" || theme.state === "PENDING" ? (
           <Link key={theme.id} href="/themes" className="btn btn-secondary" prefetch={false} data-testid={`store-theme-${theme.id}`} style={{ width: "100%", minHeight: 58, justifyContent: "flex-start", textAlign: "left", padding: 8 }}>
-            <span aria-hidden="true" style={{ width: 42, height: 42, flex: "0 0 auto", borderRadius: 8, background: swatch[theme.id], border: "1px solid var(--line)" }} />
+            <span aria-hidden="true" style={{ width: 42, height: 42, flex: "0 0 auto", borderRadius: 8, background: swatch[theme.id as ThemeId] ?? swatch.kapor, border: "1px solid var(--line)" }} />
             <span style={{ display: "block", lineHeight: 1.25 }}><b>{theme.name}</b> <span className="pill warn" style={{ fontSize: 11 }}>Premium</span><br /><span className="muted" style={{ fontSize: 12 }}>{theme.state === "PENDING" ? "Payment being checked" : `Get it for ৳${theme.price} on the Themes page`}</span></span>
           </Link>
         ) : (
@@ -41,7 +41,7 @@ export function ThemePicker({ active, canEdit, themes }: { active: ThemeId; canE
               data-testid={`store-theme-${theme.id}`}
               style={{ width: "100%", minHeight: 58, justifyContent: "flex-start", textAlign: "left", padding: 8 }}
             >
-              <span aria-hidden="true" style={{ width: 42, height: 42, flex: "0 0 auto", borderRadius: 8, background: swatch[theme.id], border: "1px solid var(--line)" }} />
+              <span aria-hidden="true" style={{ width: 42, height: 42, flex: "0 0 auto", borderRadius: 8, background: swatch[theme.id as ThemeId] ?? swatch.kapor, border: "1px solid var(--line)" }} />
               <span style={{ display: "block", lineHeight: 1.25 }}><b>{theme.name}</b><br /><span className="muted" style={{ fontSize: 12 }}>{theme.audience}</span></span>
               {theme.premium && <span className="pill ok" style={{ fontSize: 11 }}>Premium</span>}
               {active === theme.id && <span className="pill ok" style={{ marginLeft: "auto" }}>Active</span>}

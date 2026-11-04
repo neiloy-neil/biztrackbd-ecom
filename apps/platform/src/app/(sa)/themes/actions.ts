@@ -14,6 +14,8 @@ import {
   createImpersonationTicket,
   MAX_TEMPLATE_BUNDLE_BYTES,
   setTemplateStatus,
+  updateThemePricing,
+  updateModulePricing,
   toggleGlobalModuleMaintenance,
   setModulePlanOverride,
   type TemplateStatus,
@@ -135,6 +137,43 @@ export async function setTemplateStatusAction(id: string, status: string): Promi
   }
   revalidatePath("/themes");
   back({ done: status === "ARCHIVED" ? `${id} is hidden from new stores and the public gallery.` : `${id} is ${status === "PUBLISHED" ? "shown" : "set aside"}.` });
+}
+
+/** Sets a storefront theme's price, whether it is one-time or monthly, the plans that include it, and whether it is shown. */
+export async function updateThemePricingAction(form: FormData): Promise<void> {
+  const s = await requireAction("plans", "edit");
+  const themeId = String(form.get("themeId") ?? "");
+  try {
+    await updateThemePricing(s.actor, themeId, {
+      status: form.get("status"),
+      priceModel: form.get("priceModel"),
+      priceBdt: form.get("priceBdt") || 0,
+      includedPlans: form.getAll("includedPlans").map(String),
+    });
+  } catch (e) {
+    if (e instanceof DomainError) back({ err: e.message });
+    throw e;
+  }
+  revalidatePath("/themes");
+  back({ done: `${themeId} pricing saved.` });
+}
+
+/** Sets whether stores below the plan can buy an add-on module, and for how much. */
+export async function updateModulePricingAction(form: FormData): Promise<void> {
+  const s = await requireAction("plans", "edit");
+  const moduleKey = String(form.get("moduleKey") ?? "");
+  try {
+    await updateModulePricing(s.actor, moduleKey, {
+      priceModel: form.get("priceModel"),
+      priceBdt: form.get("priceBdt") || 0,
+      sellable: form.get("sellable") === "on",
+    });
+  } catch (e) {
+    if (e instanceof DomainError) back({ err: e.message });
+    throw e;
+  }
+  revalidatePath("/themes");
+  back({ done: `${moduleKey} pricing saved.` });
 }
 
 /** Global Module Maintenance Kill-Switch */

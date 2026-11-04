@@ -56,7 +56,6 @@ describe("premium themes (49 taka, once, for life)", () => {
   it("lists every theme with its state, and refuses to apply a premium theme that is not owned", async () => {
     const s = await store();
     const view = await listThemeStore(s.tenantId, s.actor);
-    expect(view.price).toBe(49);
     expect(view.themes.filter((t) => !t.premium).every((t) => t.state === "FREE")).toBe(true);
     expect(view.themes.find((t) => t.id === "maison")).toMatchObject({ premium: true, state: "LOCKED", price: 49, active: false });
     await fails(activateTheme(s.tenantId, s.actor, "maison"), /Buy this premium theme/);

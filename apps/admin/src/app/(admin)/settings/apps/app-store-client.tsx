@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
-import type { AppCategory, AppStoreItemView, AppStoreOverview, IntegrationView } from "@biztrackbd/core";
+import type { AppCategory, AppStoreItemView, AppStoreOverview, IntegrationView, ModuleSaleView } from "@biztrackbd/core";
 import { SubmitButton } from "@/components/ui";
 import {
   removeIntegrationAction,
@@ -17,6 +17,7 @@ import {
   saveSeoSuiteAction,
 } from "./actions";
 import { CopyButton } from "@/components/copy-button";
+import { ModuleBuyForm } from "./module-buy-form";
 
 export interface StoreSettingsData {
   whatsappNumber?: string | null;
@@ -57,6 +58,8 @@ export interface StoreSettingsData {
 
 interface Props {
   overview: AppStoreOverview;
+  /** What a store below the plan can buy, with the payment numbers. */
+  sales: ModuleSaleView;
   canEdit: boolean;
   storeSettings?: StoreSettingsData | null;
   integrations: IntegrationView[];
@@ -204,6 +207,7 @@ function AppIcon({ icon }: { icon: string }) {
 
 export function AppStoreClient({
   overview,
+  sales,
   canEdit,
   storeSettings,
   integrations,
@@ -498,9 +502,15 @@ export function AppStoreClient({
                     )}
 
                     {isLocked ? (
-                      <Link href="/billing" className="btn btn-secondary btn-sm" prefetch={false}>
-                        Upgrade
-                      </Link>
+                      <>
+                        {(() => {
+                          const offer = sales.items.find((x) => x.moduleKey === app.key);
+                          return offer && (offer.state === "FOR_SALE" || offer.state === "PENDING") && canEdit ? <ModuleBuyForm item={offer} payTo={sales.payTo} /> : null;
+                        })()}
+                        <Link href="/billing" className="btn btn-secondary btn-sm" prefetch={false}>
+                          Upgrade
+                        </Link>
+                      </>
                     ) : app.built ? (
                       app.configureHref && !app.configureHref.startsWith("/settings/apps") ? (
                         <Link

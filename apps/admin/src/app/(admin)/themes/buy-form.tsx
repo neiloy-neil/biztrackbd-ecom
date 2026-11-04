@@ -10,7 +10,8 @@ const taka = (n: number) => `৳ ${n.toLocaleString("en-IN")}`;
 const KIND: Record<string, string> = { PERSONAL: "personal", AGENT: "agent", MERCHANT: "merchant" };
 
 /** Pay once by mobile money, then tell us the TrxID. The price shown is only for the owner: the server uses the theme's own. */
-export function BuyForm({ themeId, themeName, price, payTo, online }: { themeId: string; themeName: string; price: number; payTo: PayTo[]; online: boolean }) {
+export function BuyForm({ themeId, themeName, price, monthly = false, renew = false, payTo, online }: { themeId: string; themeName: string; price: number; monthly?: boolean; renew?: boolean; payTo: PayTo[]; online: boolean }) {
+  const terms = monthly ? "per month. Pay again each month to keep it." : "paid once. It is yours for life.";
   const [open, setOpen] = useState(false);
   const [manual, setManual] = useState(!online);
   const [busy, setBusy] = useState(false);
@@ -30,12 +31,12 @@ export function BuyForm({ themeId, themeName, price, payTo, online }: { themeId:
   }
 
   if (!open) {
-    return <button type="button" className="btn btn-primary" onClick={() => setOpen(true)} data-testid={`buy-${themeId}`}>Buy for {taka(price)}</button>;
+    return <button type="button" className="btn btn-primary" onClick={() => setOpen(true)} data-testid={`buy-${themeId}`}>{renew ? "Renew" : "Buy"} for {taka(price)}</button>;
   }
   if (online && !manual) {
     return (
       <div style={{ display: "grid", gap: 8, marginTop: 8 }}>
-        <p style={{ margin: 0, fontSize: 14 }}><b>{themeName}</b> is {taka(price)}, paid once. It is yours for life.</p>
+        <p style={{ margin: 0, fontSize: 14 }}><b>{themeName}</b> is {taka(price)}, {terms}</p>
         <button type="button" className="btn btn-primary" style={{ minHeight: 44 }} onClick={payOnline} disabled={busy} aria-busy={busy} data-testid={`pay-online-${themeId}`}>{busy ? "Opening payment…" : `Pay ${taka(price)} online`}</button>
         <p className="muted" style={{ margin: 0, fontSize: 13 }}>bKash, Nagad, Rocket or card. The theme unlocks the moment the payment is confirmed.</p>
         {onlineError && <p className="notice bad" role="alert" style={{ margin: 0 }}>{onlineError}</p>}
@@ -49,7 +50,7 @@ export function BuyForm({ themeId, themeName, price, payTo, online }: { themeId:
   return (
     <form action={action} className="stack" style={{ display: "grid", gap: 10, marginTop: 8 }} data-testid={`buy-form-${themeId}`}>
       <input type="hidden" name="themeId" value={themeId} />
-      <p style={{ margin: 0, fontSize: 14 }}><b>{themeName}</b> is {taka(price)}, paid once. It is yours for life.</p>
+      <p style={{ margin: 0, fontSize: 14 }}><b>{themeName}</b> is {taka(price)}, {terms}</p>
       {payTo.length === 0 ? (
         <p className="notice bad" role="alert" style={{ margin: 0 }}>Payment numbers are not set up yet. Please contact support.</p>
       ) : (
