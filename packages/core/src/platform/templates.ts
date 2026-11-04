@@ -11,6 +11,8 @@ import { assertCan, type StaffActor } from "../permissions";
 import { assertPlatformCan, type PlatformActor } from "./admin";
 import { BUSINESS_TEMPLATES, type CustomPageManifest } from "../site/templates/manifests";
 import type { SiteMode, BusinessVertical } from "../site/mode";
+import { scopeSkinCss } from "../builder/skin-css";
+import { canUseState, themeAccess, loadCatalogue, upsertTemplateTheme } from "./theme-catalogue";
 import { parseTemplateBundle, exportTemplateBundle, BUNDLE_SITE_MODES, BUNDLE_VERTICALS } from "./template-bundle";
 
 /**
@@ -52,6 +54,8 @@ export interface TemplateInfo {
   customPages?: CustomPageManifest[];
   /** Pictures for the gallery cards (https links), from an uploaded template file. */
   previews?: { desktop?: string; mobile?: string };
+  /** The theme's own CSS (unscoped, already checked). Drawn only on stores that use this template with its own look. */
+  skinCss?: string;
 }
 
 const BUILT_IN_CATEGORY: Record<string, TemplateCategory> = { kapor: "fashion", gadgetstudio: "electronics", "mini-bunny": "kids", axionwear: "streetwear", bindu: "beauty", berber: "fashion", freshbasket: "grocery", bazaar: "general", nakshi: "fashion" };
@@ -116,6 +120,10 @@ function fromRow(r: Row): TemplateInfo {
     const https = (v: unknown) => (typeof v === "string" && v.startsWith("https://") ? v : undefined);
     const previews = { desktop: https(pv.desktop), mobile: https(pv.mobile) };
     if (previews.desktop || previews.mobile) info.previews = previews;
+    const skin = (meta.skin && typeof meta.skin === "object" ? meta.skin : null) as { css?: unknown } | null;
+    if (skin && typeof skin.css === "string" && skin.css.trim()) {
+      try { scopeSkinCss(r.id, skin.css); info.skinCss = skin.css; } catch { /* a damaged skin is dropped: the store keeps the plain look */ }
+    }
   }
   return info;
 }
@@ -226,12 +234,13 @@ export async function publishTemplateFromStore(actor: PlatformActor, input: Publ
   const saved = await db.$transaction(async (tx) => {
     const existing = await tx.template.findUnique({ where: { id } });
     // Preview pictures belong to the template, not the workshop: a new version keeps the ones it has until new ones are made.
-    const oldMeta = ((existing?.pagesJson as Record<string, unknown> | null)?._meta ?? null) as { previews?: unknown } | null;
-    if (isBusiness || oldMeta?.previews) (data.pagesJson as Record<string, unknown>)._meta = { siteMode: isBusiness ? tenant.siteMode : "ECOMMERCE", vertical: isBusiness ? tenant.businessVertical : null, customPages, previews: oldMeta?.previews ?? {} };
+    const oldMeta = ((existing?.pagesJson as Record<string, unknown> | null)?._meta ?? null) as { previews?: unknown; skin?: unknown } | null;
+    if (isBusiness || oldMeta?.previews || oldMeta?.skin) (data.pagesJson as Record<string, unknown>)._meta = { siteMode: isBusiness ? tenant.siteMode : "ECOMMERCE", vertical: isBusiness ? tenant.businessVertical : null, customPages, previews: oldMeta?.previews ?? {}, ...(oldMeta?.skin ? { skin: oldMeta.skin } : {}) };
     const row = existing
       ? await tx.template.update({ where: { id }, data: { ...data, status: "PUBLISHED", version: existing.version + 1, publishedAt: new Date() } })
       // An original template is version 1, so a published replacement starts at 2 and is offered to the stores made from the original.
       : await tx.template.create({ data: { id, ...data, status: "PUBLISHED", version: STORE_THEMES.some((t) => t.id === id) ? 2 : 1, publishedAt: new Date() } });
+    if (!isBusiness) await upsertTemplateTheme(tx, { id, name, blurb: data.blurb, audience: data.audience, status: "PUBLISHED", baseLook, defaults: settings });
     await tx.platformAuditLog.create({ data: { actorId: actor.id, action: "template.published", tenantId: tenant.id, details: { id, version: row.version, baseLook }, ipAddress: actor.ip ?? null } });
     return row;
   });
@@ -252,8 +261,8 @@ export async function importTemplateBundle(actor: PlatformActor, text: string, o
   const pages: Record<string, unknown> = { ...b.pages };
   for (const kind of STORE_PAGE_KINDS) if (!pages[kind]) pages[kind] = defaultPageFor(kind);
   if (b.chrome) pages._chrome = b.chrome;
-  if (b.siteMode !== "ECOMMERCE" || b.customPages.length || b.previews.desktop || b.previews.mobile) {
-    pages._meta = { siteMode: b.siteMode, vertical: b.vertical ?? null, customPages: b.customPages, previews: b.previews };
+  if (b.siteMode !== "ECOMMERCE" || b.customPages.length || b.previews.desktop || b.previews.mobile || b.skinCss) {
+    pages._meta = { siteMode: b.siteMode, vertical: b.vertical ?? null, customPages: b.customPages, previews: b.previews, ...(b.skinCss ? { skin: { css: b.skinCss } } : {}) };
   }
   const data = { name: b.name, blurb: b.blurb, audience: b.audience, baseLook: b.baseLook, category: b.category, tags: b.tags, moduleLabel: b.moduleLabel, settingsJson: b.settings as object, pagesJson: pages as object };
   const isOriginal = STORE_THEMES.some((t) => t.id === b.id) || BUSINESS_TEMPLATES.some((t) => t.id === b.id);
@@ -263,6 +272,7 @@ export async function importTemplateBundle(actor: PlatformActor, text: string, o
     const row = existing
       ? await tx.template.update({ where: { id: b.id }, data: { ...data, status, version: existing.version + 1, ...(opts.publish ? { publishedAt: new Date() } : {}) } })
       : await tx.template.create({ data: { id: b.id, ...data, status, version: isOriginal ? 2 : 1, ...(opts.publish ? { publishedAt: new Date() } : {}) } });
+    if (b.siteMode === "ECOMMERCE") await upsertTemplateTheme(tx, { id: b.id, name: b.name, blurb: b.blurb, audience: b.audience, status, baseLook: b.baseLook, defaults: b.settings });
     await tx.platformAuditLog.create({ data: { actorId: actor.id, action: "template.uploaded", details: { id: b.id, version: row.version, status, siteMode: b.siteMode }, ipAddress: actor.ip ?? null } });
     return { row, created: !existing };
   });
@@ -274,7 +284,7 @@ export function templateToFile(t: TemplateInfo): string {
   return exportTemplateBundle({
     id: t.id, name: t.name, blurb: t.blurb, audience: t.audience, category: t.category, tags: t.tags, moduleLabel: t.moduleLabel, baseLook: t.baseLook,
     siteMode: t.siteMode ?? "ECOMMERCE", vertical: t.vertical, previews: t.previews ?? {}, settings: t.settings,
-    pages: t.pages ?? Object.fromEntries(STORE_PAGE_KINDS.map((k) => [k, defaultPageFor(k)])), chrome: t.chrome, customPages: t.customPages,
+    pages: t.pages ?? Object.fromEntries(STORE_PAGE_KINDS.map((k) => [k, defaultPageFor(k)])), chrome: t.chrome, customPages: t.customPages, skinCss: t.skinCss,
   });
 }
 
@@ -291,6 +301,7 @@ export async function setTemplateStatus(actor: PlatformActor, id: string, status
       // An original template that has no row yet: one is made from its built-in defaults, so it can be hidden (or shown again) like any other.
       await tx.template.create({ data: { id, name: original.name, blurb: original.blurb, audience: original.audience, baseLook: original.id, category: BUILT_IN_CATEGORY[id] ?? "other", tags: [original.audience], settingsJson: original.defaults as object, pagesJson: { ...Object.fromEntries(STORE_PAGE_KINDS.map((k) => [k, defaultPageFor(k)])), ...(BUILT_IN_CHROMES[id] ? { _chrome: BUILT_IN_CHROMES[id] } : {}) } as object, status, version: 1, publishedAt: new Date() } });
     }
+    await tx.theme.updateMany({ where: { id, source: "PACKAGE" }, data: { status } });
     await tx.platformAuditLog.create({ data: { actorId: actor.id, action: "template.status", details: { id, status }, ipAddress: actor.ip ?? null } });
   });
 }
@@ -303,6 +314,9 @@ export interface ResolvedTemplate { info: TemplateInfo; baseLook: ThemeId }
 export async function resolveTemplateForSignup(id: string, db?: PrismaClient): Promise<ResolvedTemplate> {
   const info = await getTemplate(id, db);
   if (!info) throw new ValidationError("Choose a storefront template that is available", { field: "theme" });
+  // A paid theme is bought from the store's own admin, never handed out at signup.
+  const listed = (await loadCatalogue(db ?? getBasePrisma())).find((t) => t.id === info.id);
+  if (listed?.premium) throw new ValidationError("That theme is a paid theme. Pick it from your admin after you sign up.", { field: "theme" });
   return { info, baseLook: info.baseLook };
 }
 
@@ -368,7 +382,7 @@ export interface ApplyTemplateResult { pages: string[]; version: number; /** The
  * template is drawn with a different look, the store switches to it at once (the screen says so first), and its pages start from that look's
  * own layouts until the drafts are published. Products, categories and content are never touched. `keep` lists pages whose layout stays.
  */
-export async function applyTemplateToStore(tenantId: string, actor: StaffActor, templateId: string, keep: readonly PageKind[] = [], takeChrome = true): Promise<ApplyTemplateResult> {
+export async function applyTemplateToStore(tenantId: string, actor: StaffActor, templateId: string, keep: readonly PageKind[] = [], takeChrome = true, mode: "draft" | "publish" = "draft"): Promise<ApplyTemplateResult> {
   assertCan(actor, "design", "edit");
   const info = await getTemplate(templateId);
   if (!info) throw new ValidationError("Choose a template that is available", { field: "templateId" });
@@ -376,19 +390,25 @@ export async function applyTemplateToStore(tenantId: string, actor: StaffActor, 
   const only = STORE_PAGE_KINDS.filter((k) => !keep.includes(k));
   return withTenant(tenantId, async (tx) => {
     await tx.$queryRaw`SELECT "id" FROM "Tenant" WHERE "id" = ${tenantId} FOR UPDATE`;
-    const tenant = await tx.tenant.findFirstOrThrow({ select: { themeId: true } });
+    const tenant = await tx.tenant.findFirstOrThrow({ select: { themeId: true, isDemo: true } });
+    // A paid theme (one with a price in the catalogue) needs a purchase, an included plan, or a demo store. Free ones and the business templates pass.
+    const listing = tenant.isDemo ? null : await tx.theme.findUnique({ where: { id: info.id }, select: { status: true } });
+    if (listing && listing.status !== "PUBLISHED") throw new ValidationError("That theme is not available right now.", { field: "templateId" });
+    const access = tenant.isDemo ? null : await themeAccess(tx, info.id);
+    if (access && !canUseState(access.state)) throw new ValidationError(access.expired ? "Your access to this theme has ended. Renew it first, then you can apply it." : "Buy this theme first, then you can apply it.", { field: "templateId" });
+    const paid = access !== null && access.state !== "FREE";
     const lookChanged = tenant.themeId !== info.baseLook;
     if (lookChanged) {
       await tx.themeInstall.updateMany({ where: { isActive: true }, data: { isActive: false } });
       await tx.themeInstall.upsert({ where: { tenantId_themeId: { tenantId, themeId: info.baseLook } }, update: { isActive: true }, create: { tenantId, themeId: info.baseLook, isActive: true, settings: {}, pagesJson: {} } });
       await tx.tenant.update({ where: { id: tenantId }, data: { themeId: info.baseLook } });
     }
-    const written = await installTemplatePages(tx, tenantId, info.baseLook, { settings: info.settings, pages }, "draft", actor.userId, only);
+    const written = await installTemplatePages(tx, tenantId, info.baseLook, { settings: info.settings, pages }, mode, actor.userId, only, paid);
     // Asked for: the header and footer of the template go into the draft too, in place of whatever draft there is.
-    const chrome = takeChrome && info.chrome ? await installTemplateChrome(tx, tenantId, info.chrome, "draft", actor.userId, info.id, info.version) : false;
+    const chrome = takeChrome && info.chrome ? await installTemplateChrome(tx, tenantId, info.chrome, mode, actor.userId, info.id, info.version) : false;
     if (info.customPages && info.customPages.length > 0) {
       for (const cp of info.customPages) {
-        await installCustomPage(tx, tenantId, info.baseLook, cp, "draft", actor.userId, info.settings);
+        await installCustomPage(tx, tenantId, info.baseLook, cp, mode, actor.userId, info.settings);
       }
     }
     await tx.tenant.update({

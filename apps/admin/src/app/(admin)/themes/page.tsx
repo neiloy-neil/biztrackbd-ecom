@@ -91,7 +91,7 @@ export default async function Themes({ searchParams }: { searchParams: Promise<R
 }
 
 function ThemeCard({ t, canEdit, canBuy, payTo, online }: { t: ThemeStoreItem; canEdit: boolean; canBuy: boolean; online: boolean; payTo: { provider: "BKASH" | "NAGAD"; number: string; kind: string }[] }) {
-  const shot = HAS_PREVIEW.has(t.id) ? `url(/theme-previews/${t.id}.webp)` : SWATCH[t.id];
+  const shot = HAS_PREVIEW.has(t.id) ? `url(/theme-previews/${t.id}.webp)` : SWATCH[t.id] ?? (t.accent && t.background ? `linear-gradient(135deg,${t.background} 0 50%,${t.accent} 50%)` : undefined);
   return (
     <article className="theme-card" data-active={t.active} data-testid={`theme-${t.id}`}>
       <div className="theme-shot" style={{ backgroundImage: shot ?? SWATCH.kapor }} role="img" aria-label={`${t.name} preview`} />
@@ -108,7 +108,7 @@ function ThemeCard({ t, canEdit, canBuy, payTo, online }: { t: ThemeStoreItem; c
         <p className="muted" style={{ margin: 0, fontSize: 13 }}>Best for: {t.audience}</p>
         {t.lastRejection && <p className="notice bad" role="alert" style={{ margin: 0, fontSize: 13 }}>Your last payment was not accepted: {t.lastRejection}</p>}
         <div className="theme-actions">
-          <a className="btn btn-secondary" href={previewUrl(t.id)} target="_blank" rel="noopener noreferrer" data-testid={`preview-${t.id}`}>Live preview</a>
+          {HAS_PREVIEW.has(t.id) && <a className="btn btn-secondary" href={previewUrl(t.id)} target="_blank" rel="noopener noreferrer" data-testid={`preview-${t.id}`}>Live preview</a>}
           {(t.state === "FREE" || t.state === "OWNED" || t.state === "INCLUDED") && !t.active && canEdit && (
             <form action={applyThemeAction}>
               <input type="hidden" name="themeId" value={t.id} />

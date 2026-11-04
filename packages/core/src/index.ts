@@ -214,6 +214,7 @@ export {
 export * from "./builder/registry";
 export * from "./builder/patterns";
 export * from "./builder/theme";
+export * from "./builder/skin-css";
 export * from "./builder/versions";
 export * from "./builder/preview";
 export * from "./builder/data";

@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { getPlatformPrisma, type Prisma, type PrismaClient, type TenantTx } from "@biztrackbd/db";
+import { getBasePrisma, getPlatformPrisma, withTenant, type Prisma, type PrismaClient, type TenantTx } from "@biztrackbd/db";
+import { scopeSkinCss } from "../builder/skin-css";
 import { ALL_THEMES, PREMIUM_THEME_PRICE, isPremiumTheme } from "../builder/theme";
 import { ValidationError, NotFoundError } from "../errors";
 import { assertPlatformCan, type PlatformActor } from "./admin";
@@ -32,6 +33,9 @@ export interface CatalogTheme {
   /** Plan tiers that get the theme without paying. */
   includedPlans: string[];
   premium: boolean;
+  /** The theme's main colours, for a card swatch. Empty for a theme the code does not know. */
+  accent: string | null;
+  background: string | null;
 }
 
 export interface ThemeRow {
@@ -44,7 +48,11 @@ export interface ThemeRow {
   priceModel: string;
   priceBdt: { toString(): string } | number;
   includedPlans: string[];
+  defaults?: unknown;
 }
+
+const HEX = /^#[0-9a-fA-F]{6}$/;
+const hex = (v: unknown): string | null => (typeof v === "string" && HEX.test(v) ? v : null);
 
 const asModel = (v: string): ThemePriceModel => (THEME_PRICE_MODELS as readonly string[]).includes(v) ? (v as ThemePriceModel) : "FREE";
 const asStatus = (v: string): ThemeStatus => (THEME_STATUSES as readonly string[]).includes(v) ? (v as ThemeStatus) : "PUBLISHED";
@@ -52,13 +60,13 @@ const asStatus = (v: string): ThemeStatus => (THEME_STATUSES as readonly string[
 /** What the code says about a built-in theme, used until the platform admin saves a row for it. */
 function fromCode(t: (typeof ALL_THEMES)[number]): CatalogTheme {
   const premium = isPremiumTheme(t.id);
-  return { id: t.id, name: t.name, blurb: t.blurb, audience: t.audience, source: "BUILTIN", status: "PUBLISHED", priceModel: premium ? "ONE_TIME" : "FREE", price: premium ? PREMIUM_THEME_PRICE : 0, includedPlans: [], premium };
+  return { id: t.id, name: t.name, blurb: t.blurb, audience: t.audience, source: "BUILTIN", status: "PUBLISHED", priceModel: premium ? "ONE_TIME" : "FREE", price: premium ? PREMIUM_THEME_PRICE : 0, includedPlans: [], premium, accent: t.defaults.accent, background: t.defaults.background };
 }
 
 function fromRow(r: ThemeRow): CatalogTheme {
   const priceModel = asModel(r.priceModel);
   const price = priceModel === "FREE" ? 0 : Number(r.priceBdt.toString());
-  return { id: r.id, name: r.name, blurb: r.blurb, audience: r.audience, source: r.source === "PACKAGE" ? "PACKAGE" : "BUILTIN", status: asStatus(r.status), priceModel, price, includedPlans: r.includedPlans, premium: priceModel !== "FREE" };
+  return { id: r.id, name: r.name, blurb: r.blurb, audience: r.audience, source: r.source === "PACKAGE" ? "PACKAGE" : "BUILTIN", status: asStatus(r.status), priceModel, price, includedPlans: r.includedPlans, premium: priceModel !== "FREE", accent: hex((r.defaults as { accent?: unknown } | null)?.accent), background: hex((r.defaults as { background?: unknown } | null)?.background) };
 }
 
 /**
@@ -156,7 +164,7 @@ export async function listThemeCatalogue(actor: PlatformActor, db: PrismaClient 
   return out;
 }
 
-/** Writes a row for every built-in theme that has none, from the code's definition. Never overwrites a row the admin has edited. */
+/** Writes a row for every built-in theme and uploaded template that has none. Never overwrites a row the admin has edited. Returns how many it made. */
 export async function syncBuiltinThemes(db: PrismaClient = getPlatformPrisma()): Promise<number> {
   const have = new Set((await db.theme.findMany({ select: { id: true } })).map((r) => r.id));
   let made = 0;
@@ -166,7 +174,8 @@ export async function syncBuiltinThemes(db: PrismaClient = getPlatformPrisma()):
     await db.theme.create({ data: { id: t.id, name: t.name, blurb: t.blurb, audience: t.audience, source: "BUILTIN", status: "PUBLISHED", priceModel: c.priceModel, priceBdt: c.price, includedPlans: [], defaults: t.defaults as unknown as Prisma.InputJsonValue, sortOrder: i } });
     made++;
   }
-  return made;
+  // Store templates uploaded before the catalogue existed get their rows too.
+  return made + (await syncTemplateThemes(db));
 }
 
 export const ThemePricingInput = z.object({
@@ -192,4 +201,69 @@ export async function updateThemePricing(actor: PlatformActor, themeId: string, 
     else await tx.theme.create({ data: { id: themeId, name: builtin!.name, blurb: builtin!.blurb, audience: builtin!.audience, source: "BUILTIN", defaults: builtin!.defaults as unknown as Prisma.InputJsonValue, ...data } });
     await tx.platformAuditLog.create({ data: { actorId: actor.id, action: "theme.pricing_updated", details: { themeId, ...data }, ipAddress: actor.ip ?? null } });
   });
+}
+
+// ---- Uploaded themes (template packages) -----------------------------------------------------------------------------------
+
+type ThemeWriter = { theme: { findUnique(args: object): Promise<{ id: string } | null>; create(args: object): Promise<unknown>; update(args: object): Promise<unknown> } };
+const TEMPLATE_STATUS_TO_THEME: Record<string, ThemeStatus> = { PUBLISHED: "PUBLISHED", DRAFT: "DRAFT", ARCHIVED: "ARCHIVED" };
+
+/**
+ * Keeps the catalogue in step with an uploaded template: the template becomes a theme of source PACKAGE, free until the platform admin prices
+ * it. Name, blurb and visibility follow the template; the price, billing type and plans the admin set are never touched here.
+ */
+export async function upsertTemplateTheme(
+  db: ThemeWriter, t: { id: string; name: string; blurb: string; audience: string; status: string; baseLook: string; defaults: unknown },
+): Promise<void> {
+  const status = TEMPLATE_STATUS_TO_THEME[t.status] ?? "DRAFT";
+  const existing = await db.theme.findUnique({ where: { id: t.id } });
+  if (existing) await db.theme.update({ where: { id: t.id }, data: { name: t.name, blurb: t.blurb, audience: t.audience, status } });
+  else await db.theme.create({ data: { id: t.id, name: t.name, blurb: t.blurb, audience: t.audience, source: "PACKAGE", status, priceModel: "FREE", priceBdt: 0, includedPlans: [], defaults: t.defaults as Prisma.InputJsonValue, sortOrder: 100 } });
+}
+
+/** Writes a catalogue row for every published store template that has none (templates uploaded before the catalogue existed). Returns how many. */
+export async function syncTemplateThemes(db: PrismaClient = getPlatformPrisma()): Promise<number> {
+  const have = new Set((await db.theme.findMany({ select: { id: true } })).map((r) => r.id));
+  const builtIn = new Set(ALL_THEMES.map((t) => t.id as string));
+  const rows = await db.template.findMany({ where: { status: { not: "DRAFT" } } });
+  let made = 0;
+  for (const r of rows) {
+    if (have.has(r.id) || builtIn.has(r.id)) continue;
+    const meta = ((r.pagesJson as Record<string, unknown> | null)?._meta ?? null) as { siteMode?: string } | null;
+    if (meta?.siteMode && meta.siteMode !== "ECOMMERCE") continue;
+    await upsertTemplateTheme(db, { id: r.id, name: r.name, blurb: r.blurb, audience: r.audience, status: r.status, baseLook: r.baseLook, defaults: r.settingsJson });
+    made++;
+  }
+  return made;
+}
+
+// ---- The look a store is drawn with ---------------------------------------------------------------------------------------
+
+export interface ActiveSkin { id: string; css: string }
+const skinCache = new Map<string, { at: number; value: ActiveSkin | null }>();
+const SKIN_TTL_MS = 60_000;
+
+/**
+ * The scoped CSS of the uploaded theme the store is using, or null for a store on a plain built-in look. It is checked again here, on the way
+ * out, so even a damaged row can never put unchecked CSS on a page. Cached for a minute per store.
+ */
+export async function getActiveSkin(tenantId: string, db: PrismaClient = getBasePrisma()): Promise<ActiveSkin | null> {
+  const hit = skinCache.get(tenantId);
+  if (hit && Date.now() - hit.at < SKIN_TTL_MS) return hit.value;
+  let value: ActiveSkin | null = null;
+  try {
+    const t = await withTenant(tenantId, (tx) => tx.tenant.findFirst({ select: { templateId: true, themeId: true } }));
+    if (t?.templateId) {
+      const row = await db.template.findFirst({ where: { id: t.templateId, status: { not: "DRAFT" } }, select: { id: true, baseLook: true, pagesJson: true } });
+      const skin = (((row?.pagesJson as Record<string, unknown> | null)?._meta ?? null) as { skin?: { css?: unknown } } | null)?.skin;
+      // The skin only goes on the look it was made for: a store that has since moved to another look does not wear it.
+      if (row && row.baseLook === t.themeId && typeof skin?.css === "string" && skin.css.trim()) {
+        const css = scopeSkinCss(row.id, skin.css);
+        if (css) value = { id: row.id, css };
+      }
+    }
+  } catch { value = null; }
+  skinCache.set(tenantId, { at: Date.now(), value });
+  if (skinCache.size > 2000) skinCache.clear();
+  return value;
 }

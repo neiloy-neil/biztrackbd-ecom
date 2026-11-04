@@ -26,6 +26,8 @@ export interface ThemeStoreItem {
   premium: boolean;
   price: number;
   priceModel: ThemePriceModel;
+  accent: string | null;
+  background: string | null;
   /** For a monthly theme the store owns, when the month ends. */
   expiresAt: Date | null;
   /** The store bought it before but the month has run out. */
@@ -76,7 +78,7 @@ export async function listThemeStore(tenantId: string, actor: StaffActor): Promi
     const mine = purchases.filter((p) => p.themeId === t.id);
     const access = themeAccessFor(t, planTier, mine);
     const rejected = mine.find((p) => p.status === "REJECTED");
-    return { id: t.id, name: t.name, blurb: t.blurb, audience: t.audience, premium: t.premium, price: t.price, priceModel: t.priceModel, expiresAt: access.expiresAt, expired: access.expired, state: access.state, active: tenant.themeId === t.id, lastRejection: access.state === "LOCKED" ? rejected?.rejectionReason ?? null : null };
+    return { id: t.id, name: t.name, blurb: t.blurb, audience: t.audience, premium: t.premium, price: t.price, priceModel: t.priceModel, accent: t.accent, background: t.background, expiresAt: access.expiresAt, expired: access.expired, state: access.state, active: tenant.themeId === t.id, lastRejection: access.state === "LOCKED" ? rejected?.rejectionReason ?? null : null };
   });
   return { active: themeDefinition(tenant.themeId).id, themes, payTo: paymentTargets(), online: Boolean(await getPlatformUddoktaPayCredentials().catch(() => null)) };
 }

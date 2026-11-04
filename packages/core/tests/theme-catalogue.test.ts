@@ -7,7 +7,7 @@ import {
 } from "../src";
 
 const day = 24 * 60 * 60 * 1000;
-const theme = (over: Partial<CatalogTheme> = {}): CatalogTheme => ({ id: "x", name: "X", blurb: "", audience: "", source: "BUILTIN", status: "PUBLISHED", priceModel: "ONE_TIME", price: 49, includedPlans: [], premium: true, ...over });
+const theme = (over: Partial<CatalogTheme> = {}): CatalogTheme => ({ id: "x", name: "X", blurb: "", audience: "", source: "BUILTIN", status: "PUBLISHED", priceModel: "ONE_TIME", price: 49, includedPlans: [], premium: true, accent: null, background: null, ...over });
 
 describe("theme access rule (no database)", () => {
   const now = new Date("2026-11-04T00:00:00Z");

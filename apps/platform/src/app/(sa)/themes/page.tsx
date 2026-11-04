@@ -67,7 +67,7 @@ export default async function ThemesPage({
       {canSee && (
         <div className="card" style={{ padding: 0, overflow: "hidden" }} data-testid="theme-pricing">
           <div style={{ padding: "18px 24px", fontSize: 16, fontWeight: 700, borderBottom: "1px solid var(--line)" }}>Storefront theme pricing</div>
-          <p className="muted" style={{ margin: 0, padding: "12px 24px", fontSize: 13.5 }}>Free or paid, one-time or monthly, and which plans get a theme without paying. A change applies to the next purchase; stores that already own a theme keep it.</p>
+          <p className="muted" style={{ margin: 0, padding: "12px 24px", fontSize: 13.5 }}>Free or paid, one-time or monthly, and which plans get a theme without paying. A change applies to the next purchase; stores that already own a theme keep it. A template you upload below appears here as a free theme until you price it.</p>
           <div style={{ display: "grid" }}>
             {themePricing.map((t) => (
               <form key={t.id} action={updateThemePricingAction} data-testid={`theme-price-${t.id}`} style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", padding: "12px 24px", borderTop: "1px solid var(--line)" }}>

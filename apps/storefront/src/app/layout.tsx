@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Baloo_Da_2, Hind_Siliguri, Noto_Sans_Bengali, Noto_Serif_Bengali, Playfair_Display, Plus_Jakarta_Sans, Poppins } from "next/font/google";
-import { getActiveThemeId } from "@biztrackbd/core";
+import { getActiveSkin, getActiveThemeId } from "@biztrackbd/core";
 import { getLang } from "@/lib/i18n";
 import { findStore } from "@/lib/tenant";
 import "./kapor.css";
@@ -27,10 +27,12 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1, them
 /** Shell only. The store header lives in (store)/layout.tsx so marketing, offline and unknown-host pages stay separate. */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const store = await findStore();
-  const [lang, themeId] = await Promise.all([getLang(store?.locale ?? "en"), store ? getActiveThemeId(store.id) : Promise.resolve("kapor" as const)]);
+  const [lang, themeId, skin] = await Promise.all([getLang(store?.locale ?? "en"), store ? getActiveThemeId(store.id) : Promise.resolve("kapor" as const), store ? getActiveSkin(store.id) : Promise.resolve(null)]);
   return (
     <html lang={lang} className={`${jakarta.variable} ${hind.variable} ${playfair.variable} ${poppins.variable} ${notoSerifBn.variable} ${baloo.variable} ${notoSansBn.variable}`}>
-      <body data-store-theme={themeId}>
+      <body data-store-theme={themeId} data-skin={skin?.id}>
+        {/* An uploaded theme's own CSS. It was checked and scoped to this theme in core, and cannot contain a < sign, so it cannot close the tag. */}
+        {skin && <style data-skin-css={skin.id} dangerouslySetInnerHTML={{ __html: skin.css }} />}
         <DoubleSubmitGuard />
         {children}
         <SpeedInsights />

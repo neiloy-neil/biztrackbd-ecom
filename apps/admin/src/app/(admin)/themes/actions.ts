@@ -3,7 +3,7 @@
 import { cookies, headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { DomainError, activateTheme, platformOriginFor, startThemeCheckout, submitThemePurchase } from "@biztrackbd/core";
+import { DomainError, activateTheme, applyTemplateToStore, isThemeId, platformOriginFor, startThemeCheckout, submitThemePurchase } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 import { resolveAdminOrigin } from "@/lib/origin";
 
@@ -13,7 +13,10 @@ export interface BuyState { error?: string }
 export async function applyThemeAction(form: FormData): Promise<void> {
   const s = await requireAction("design", "edit");
   try {
-    await activateTheme(s.tenantId, s.actor, form.get("themeId"));
+    const themeId = String(form.get("themeId") ?? "");
+    // A built-in look switches at once. An uploaded theme is a template: it brings its pages and style, and goes live straight away because the owner chose it here.
+    if (isThemeId(themeId)) await activateTheme(s.tenantId, s.actor, themeId);
+    else await applyTemplateToStore(s.tenantId, s.actor, themeId, [], true, "publish");
   } catch (e) {
     if (e instanceof DomainError) redirect(`/themes?err=${encodeURIComponent(e.message)}`);
     throw e;
