@@ -129,7 +129,7 @@ export const VERTICAL_OPTIONS: BusinessVerticalOption[] = [
   },
 ];
 
-const COMMERCE_STEPS = ["Business & Category", "Selling Channel", "Web Address & Plan", "Account & Launch"] as const;
+const COMMERCE_STEPS = ["Business & Category", "How you sell", "Web Address & Plan", "Account & Launch"] as const;
 const BUSINESS_STEPS = ["Business & Category", "Website Type", "Web Address & Plan", "Account & Launch"] as const;
 
 const FIELD_STEP: Record<string, number> = {
@@ -495,7 +495,7 @@ export function Wizard({
                   placeholder={
                     isPortfolio
                       ? "e.g. Dhaka Bistro, Dr. Sarah Clinic, Apex Legal"
-                      : "e.g. Aarohi Fashion, Gadget Pulse, Dhaka Organics"
+                      : "e.g. Aarohi Fashion"
                   }
                   value={v.storeName}
                   onChange={(e) => set("storeName", e.target.value)}
@@ -1289,7 +1289,7 @@ export function Wizard({
                   boxShadow: "0 4px 12px rgba(17, 121, 90, 0.25)",
                 }}
               >
-                Continue to {steps[step + 1]} →
+                Next: {steps[step + 1]} →
               </button>
             ) : (
               <button

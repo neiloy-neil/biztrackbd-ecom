@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { BrandLockup, BrandSymbol } from "@biztrackbd/ui";
+import { BrandLockup, BrandSymbol, SkipLink } from "@biztrackbd/ui";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { ROLE_LABELS, can, getAdminShellContext, type Area, type TenantCapabilities } from "@biztrackbd/core";
@@ -47,7 +47,7 @@ const GROUPS: Group[] = [
       { href: "/abandoned", label: "Abandoned checkouts", area: "customers" },
       { href: "/fraud", label: "Fraud check", area: "orders", moduleKey: "fraud_shield" },
     ],
-    activePrefixes: ["/orders", "/pos", "/returns", "/fraud"],
+    activePrefixes: ["/orders", "/pos", "/returns", "/fraud", "/abandoned"],
   },
   {
     id: "products",
@@ -72,9 +72,8 @@ const GROUPS: Group[] = [
       { href: "/customers", label: "Customers", area: "customers", capability: "commerce" },
       { href: "/inbox", label: "Inbox", area: "customers" },
       { href: "/reviews", label: "Reviews", area: "marketing", moduleKey: "product_reviews", capability: "commerce" },
-      { href: "/marketing/loyalty", label: "Loyalty and referrals", area: "marketing", moduleKey: "loyalty", capability: "commerce" },
     ],
-    activePrefixes: ["/leads", "/customers", "/inbox"],
+    activePrefixes: ["/leads", "/customers", "/inbox", "/reviews"],
   },
   {
     id: "marketing",
@@ -91,10 +90,9 @@ const GROUPS: Group[] = [
       { href: "/marketing/notifications", label: "Notifications", area: "marketing", moduleKey: "marketing_campaigns" },
       { href: "/marketing/banner", label: "Banner & Flash sale", area: "marketing", moduleKey: "marketing_campaigns" },
       { href: "/marketing/pixels", label: "Pixels & CAPI", area: "marketing" },
-      { href: "/marketing/loyalty", label: "Loyalty & Referrals", area: "marketing", moduleKey: "loyalty", capability: "commerce" },
-      { href: "/abandoned", label: "Abandoned checkouts", area: "customers", capability: "commerce" },
+      { href: "/marketing/loyalty", label: "Loyalty and referrals", area: "marketing", moduleKey: "loyalty", capability: "commerce" },
     ],
-    activePrefixes: ["/marketing", "/abandoned"],
+    activePrefixes: ["/marketing"],
   },
   {
     id: "store",
@@ -106,7 +104,7 @@ const GROUPS: Group[] = [
       { href: "/menu", label: "Menu", area: "design", capability: "menu" },
       { href: "/services", label: "Services", area: "design", capability: "services" },
       { href: "/portfolio", label: "Portfolio", area: "design", capability: "portfolio_items" },
-      { href: "/team", label: "Team", area: "design", capability: "team_profiles" },
+      { href: "/team", label: "Team profiles", area: "design", capability: "team_profiles" },
       { href: "/credentials", label: "Credentials", area: "design", capability: "credentials" },
       { href: "/publications", label: "Publications", area: "design", capability: "credentials" },
       { href: "/events", label: "Events", area: "design", capability: "public_events" },
@@ -135,7 +133,7 @@ const GROUPS: Group[] = [
   {
     id: "settings", label: "Settings", icon: <GearIcon />,
     items: [
-      { href: "/settings/store", label: "Settings", area: "design" },
+      { href: "/settings/store", label: "Store details", area: "design" },
       { href: "/settings/import", label: "Import content", area: "design" },
       { href: "/support", label: "Help and support", area: "design" },
     ],
@@ -240,6 +238,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         />
       )}
       <div className="shell">
+        <SkipLink />
         <PwaRegister />
         <header className="topbar">
           <span className="brand-symbol"><BrandSymbol size={30} title="BizTrackBD" /></span>
@@ -272,7 +271,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           {trialPct !== null && can(role, "billing") && (
             <div className="plan-card" data-testid="plan-card">
               <div className="k">{tr(lang, "Free trial")}</div>
-              <div className="v">{a.daysLeft} {a.daysLeft === 1 ? "day" : "days"} left</div>
+              <div className="v">{lang === "bn" ? `${a.daysLeft} দিন বাকি` : `${a.daysLeft} ${a.daysLeft === 1 ? "day" : "days"} left`}</div>
               <div className="meter" aria-hidden><i style={{ width: `${trialPct}%` }} /></div>
               <Link href="/billing" prefetch={false}>{tr(lang, "Choose a plan")}</Link>
             </div>
@@ -304,7 +303,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
         <div className="main-col">
           <div className="dtop"><TopActions storeHref={storeHref} lang={lang} /></div>
-          <main className="content" id="main">
+          <main className="content" id="main" tabIndex={-1}>
             <AnnouncementBanner announcements={announcements} lang={lang} />
             {banner && can(role, "billing") && (
               <div className={`notice ${banner.tone}`} role="status" style={{ marginBottom: 14 }} data-testid="billing-banner">{banner.text} <Link href="/billing" className="link" prefetch={false}>See plans and pay</Link></div>

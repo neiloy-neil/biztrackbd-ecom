@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import { PageHeader } from "@biztrackbd/ui";
+import { PageHeader, askConfirm } from "@biztrackbd/ui";
 import type { SiteContentItem, SiteContentKind } from "@biztrackbd/db";
 import {
   saveContentItemAction,
@@ -352,8 +352,8 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
   };
 
   // Delete Handler
-  const handleDelete = (id: string, title: string) => {
-    if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
+  const handleDelete = async (id: string, title: string) => {
+    if (!(await askConfirm({ message: `Are you sure you want to delete "${title}"?`, confirmLabel: "Delete", tone: "danger" }))) return;
     startTransition(async () => {
       await deleteContentItemAction(id);
       setItems((prev) => prev.filter((x) => x.id !== id));

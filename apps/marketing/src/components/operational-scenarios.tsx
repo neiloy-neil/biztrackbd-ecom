@@ -25,7 +25,7 @@ const SCENARIOS: Scenario[] = [
       "All orders funnel into one BizTrackBD desk. Phone numbers are automatically cross-checked against Steadfast and Pathao delivery histories. High-risk numbers are held for advance delivery fee confirmation before parcel booking.",
     proofBadge: "Automated Courier API + COD Fraud Shield",
     demoLink: demoAdminUrl("kapor"),
-    demoLabel: "Inspect Apparel Demo Admin ↗",
+    demoLabel: "Try the apparel dashboard ↗",
   },
   {
     tag: "Global Platform Migration",
@@ -38,7 +38,7 @@ const SCENARIOS: Scenario[] = [
       "Native BDT plans with zero sales commission. Direct bKash and Nagad payment forms, encrypted courier credentials for 1-click dispatch, and thermal shipping label printing.",
     proofBadge: "0% Sales Commission · Encrypted Courier Keys",
     demoLink: demoAdminUrl("gadgetstudio"),
-    demoLabel: "Inspect Gadgets Demo Admin ↗",
+    demoLabel: "Try the gadgets dashboard ↗",
   },
   {
     tag: "Local Service & Clinic Practice",
@@ -51,7 +51,7 @@ const SCENARIOS: Scenario[] = [
       "Fast bilingual website featuring verified BMDC registration, weekly chamber schedule tables, Google Maps integration, and a mobile-friendly appointment queue with SMS status alerts.",
     proofBadge: "Structured Lead Inbox · Bilingual SEO Ready",
     demoLink: demoAdminUrl("modern-clinic"),
-    demoLabel: "Inspect Clinic Demo Desk ↗",
+    demoLabel: "Try the clinic dashboard ↗",
   },
 ];
 
@@ -184,7 +184,7 @@ export function OperationalScenarios() {
             className="btn btn-secondary btn-sm"
             style={{ background: "#FFFFFF", color: "var(--ink-ledger)", fontWeight: 700 }}
           >
-            Verify in Live Demo →
+            See it in the live demo →
           </Link>
         </div>
       </div>

@@ -159,7 +159,7 @@ export function DualHero({
                 data-testid="hero-demo-commerce"
                 style={{ background: "#FFFFFF", color: "var(--ink-ledger)", border: "1.5px solid var(--line-strong)" }}
               >
-                Try store admin desk (no signup) ↗
+                See the merchant dashboard (no signup) ↗
               </a>
             </>
           ) : (

@@ -72,11 +72,13 @@ test.describe.serial("handling orders", () => {
     await page.goto("/orders?tab=new");
     await page.locator(`input[name="ids"][aria-label="Select ${a.orderNumber}"]:visible`).check();
     await page.getByTestId("bulk-cancel").click();
-    await expect(page.getByText(/Say briefly why you are cancelling/)).toBeVisible();
-    await page.locator(`input[name="ids"][aria-label="Select ${a.orderNumber}"]:visible`).check();
-    await page.getByTestId("bulk-reason").fill("Fake order");
+    await expect(page.getByText(/Choose why you are cancelling/)).toBeVisible();
+    await page.getByRole("button", { name: "OK" }).click();
+    await page.getByTestId("bulk-reason").selectOption({ label: "Duplicate / test order" });
     await page.getByTestId("bulk-cancel").click();
-    await expect(page.getByTestId("status-msg")).toContainText("1 cancelled");
+    await expect(page.getByRole("dialog", { name: /Cancel 1 order/ })).toBeVisible();
+    await page.getByRole("button", { name: "Cancel order", exact: true }).click();
+    await expect(page.getByTestId("status-msg")).toContainText("1 order cancelled");
     await page.goto("/orders?tab=cancelled");
     await expect(page.locator(`a:has-text("${a.orderNumber}"):visible`).first()).toBeVisible();
   });

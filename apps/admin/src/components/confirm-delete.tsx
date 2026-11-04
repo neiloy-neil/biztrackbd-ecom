@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { askConfirm } from "@biztrackbd/ui";
 
 /** A delete button that asks first. Executes a server action directly without an enclosing <form> to prevent invalid nested forms. */
 export function ConfirmDelete({
@@ -23,10 +24,10 @@ export function ConfirmDelete({
       type="button"
       className={className}
       disabled={isPending}
-      onClick={(e) => {
+      onClick={async (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (!window.confirm(message)) return;
+        if (!(await askConfirm({ message, confirmLabel: label, tone: "danger" }))) return;
         startTransition(async () => {
           await action();
         });

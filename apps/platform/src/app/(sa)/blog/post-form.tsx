@@ -1,4 +1,5 @@
 "use client";
+import { askConfirm } from "@biztrackbd/ui";
 
 import { useActionState, useRef, useState } from "react";
 import { saveBlogPostAction, type BlogFormState } from "./actions";
@@ -28,8 +29,10 @@ export function DeleteButton() {
       type="submit"
       className="btn btn-secondary"
       style={{ color: "var(--danger)" }}
-      onClick={(e) => {
-        if (!confirm("Delete this post for good? It disappears from the site.")) e.preventDefault();
+      onClick={async (e) => {
+        const btn = e.currentTarget;
+        e.preventDefault();
+        if (await askConfirm({ message: "Delete this post for good? It disappears from the site.", confirmLabel: "Delete post", tone: "danger" })) btn.form?.requestSubmit(btn);
       }}
     >
       Delete post

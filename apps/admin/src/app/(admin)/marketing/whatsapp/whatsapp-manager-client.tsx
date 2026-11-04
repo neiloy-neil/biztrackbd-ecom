@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { PageHeader } from "@biztrackbd/ui";
+import { PageHeader, askConfirm } from "@biztrackbd/ui";
 import { useRouter } from "next/navigation";
 import type {
   WhatsAppConfigView,
@@ -206,7 +206,7 @@ export function WhatsAppManagerClient({
 
   // Handle Disconnect
   const handleDisconnect = async () => {
-    if (!confirm("Are you sure you want to disconnect WhatsApp? Automated messages will stop or fallback to SMS.")) return;
+    if (!(await askConfirm({ message: "Are you sure you want to disconnect WhatsApp? Automated messages will stop or fallback to SMS.", confirmLabel: "Disconnect", tone: "danger" }))) return;
     setIsDisconnecting(true);
     try {
       await disconnectWhatsAppSessionAction();
@@ -339,7 +339,7 @@ export function WhatsAppManagerClient({
 
   // Handle Reset to Default Template
   const handleResetTemplate = async () => {
-    if (!confirm("Reset this template to the system default wording?")) return;
+    if (!(await askConfirm({ message: "Reset this template to the system default wording?", confirmLabel: "Reset", tone: "danger" }))) return;
     setIsSavingTemplate(true);
     try {
       await resetWhatsAppTemplateAction(selectedEvent);

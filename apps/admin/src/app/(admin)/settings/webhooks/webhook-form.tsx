@@ -1,4 +1,5 @@
 "use client";
+import { askConfirm } from "@biztrackbd/ui";
 
 import { useActionState, useEffect, useMemo, useState, useTransition } from "react";
 import type {
@@ -336,27 +337,15 @@ export function WebhookForm({
     });
   }
 
-  function handleDeleteEndpoint(subId: string, endpointName?: string) {
-    if (
-      !confirm(
-        `Are you sure you want to delete the endpoint "${endpointName || "Webhook"}"? All delivery history will be removed.`
-      )
-    ) {
-      return;
-    }
+  async function handleDeleteEndpoint(subId: string, endpointName?: string) {
+    if (!(await askConfirm({ message: `Are you sure you want to delete the endpoint "${endpointName || "Webhook"}"? All delivery history will be removed.`, confirmLabel: "Delete", tone: "danger" }))) return;
     startDelete(async () => {
       await deleteWebhookEndpointAction(subId);
     });
   }
 
-  function handleRotate(subId?: string) {
-    if (
-      !confirm(
-        "Are you sure you want to rotate this webhook signing secret? Any services verifying old signatures will fail until updated."
-      )
-    ) {
-      return;
-    }
+  async function handleRotate(subId?: string) {
+    if (!(await askConfirm({ message: "Are you sure you want to rotate this webhook signing secret? Any services verifying old signatures will fail until updated.", confirmLabel: "Rotate", tone: "danger" }))) return;
     setRotateNotice(null);
     startRotate(async () => {
       const res = await rotateWebhookSecretAction(subId);

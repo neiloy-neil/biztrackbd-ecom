@@ -6,6 +6,8 @@
   /* Floating buttons sit above the phone bottom bar; on desktop there is none. */
   --float-lift: calc(var(--nav-h) + 12px);
 }
+/* On a phone a sticky save bar or the selection bar sits just above the tab bar: lift the co-pilot launcher above them. */
+body:has(.savebar, .bulkbar) { --float-lift: calc(var(--nav-h) + 12px + 76px); }
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
@@ -17,7 +19,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .num { font-variant-numeric: tabular-nums; }
 .muted { color: var(--ink-3); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 50%, white); outline-offset: 2px; }
+:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
 .only-desktop { display: none; }
 .only-mobile { display: block; }
 /* Phones only: a page-level button that repeats one already in the top bar, and filters tucked behind a toggle (FilterDisclosure). */
@@ -58,6 +60,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 @media (min-width: 900px) {
   :root { --float-lift: 0px; }
+  /* A sticky save bar sits at the bottom right too: lift the co-pilot launcher clear of it. */
+  body:has(.bulkbar) { --float-lift: 0px; }
+  body:has(.savebar) { --float-lift: 76px; }
   .only-desktop { display: block; }
   .only-mobile { display: none; }
   .shell { display: grid; grid-template-columns: 248px 1fr; }
@@ -323,4 +328,12 @@ div.tabs[role="tablist"] { display: flex; border-bottom: 1px solid var(--line); 
 /* Phones: narrow buttons (steppers, icon buttons) are at least 40px wide, as they are tall. */
 @media (max-width: 899px) {
   button.btn { min-width: 40px; }
+}
+main:focus, main:focus-visible { outline: none; }
+
+/* Touch targets: row checkboxes are at least 24px (44px on a phone, through padding), and the order link in a card is a full-height tap area. */
+input.pick-checkbox, input.pick-checkbox-mobile { width: 24px; height: 24px; cursor: pointer; }
+@media (max-width: 899px) {
+  input.pick-checkbox-mobile { margin: 10px; }
+  .list-card .top > a { min-height: 44px; }
 }

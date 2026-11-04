@@ -384,7 +384,7 @@ details.faq p { margin-top: 10px; color: var(--ink-2); font-size: 15px; line-hei
   font-size: 16px;
   transition: border-color 0.15s ease;
 }
-.input:focus { border-color: var(--brand); outline: none; }
+.input:focus { border-color: var(--brand); }
 .input[aria-invalid="true"] { border-color: var(--danger); }
 .err { color: var(--danger); font-size: 13.5px; font-weight: 600; }
 .ok { color: var(--success); font-size: 13.5px; font-weight: 600; }

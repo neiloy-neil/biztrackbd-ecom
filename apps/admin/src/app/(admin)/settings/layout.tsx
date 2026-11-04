@@ -15,7 +15,7 @@ const ITEMS: { href: string; label: string; area: Area }[] = [
   { href: "/settings/apps", label: "Apps & Integrations", area: "billing" },
   { href: "/settings/webhooks", label: "Webhooks", area: "design" },
   { href: "/settings/developer", label: "Developer & API", area: "billing" },
-  { href: "/settings/staff", label: "Team", area: "team" },
+  { href: "/settings/staff", label: "Staff accounts", area: "team" },
   { href: "/settings/audit", label: "Audit log", area: "team" },
   { href: "/billing", label: "Plan and usage", area: "billing" },
 ];

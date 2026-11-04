@@ -105,7 +105,7 @@ html[data-sidebar="light"] { --sb-bg: #fff; --sb-line: var(--line); --sb-ink: va
 
 /* A table that is wider than a phone scrolls inside its own focusable box (see .table-scroll), never by changing how every table displays. */
 .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
-.table-scroll:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 50%, white); outline-offset: 2px; }
+.table-scroll:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
 
 /* ---- Lists: live filters, the bulk bar and the quick view (docs/40) */
 .toolbar .live-search { flex: 1 1 320px; min-width: 240px; }
