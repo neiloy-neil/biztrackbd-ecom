@@ -1,3 +1,4 @@
+import { notExpired } from "../modules/expiry";
 import { getPlatformPrisma, type PrismaClient } from "@biztrackbd/db";
 import { ForbiddenError, NotFoundError } from "../errors";
 import { APP_CATALOG, type AppCatalogItem } from "../modules/catalog";
@@ -35,7 +36,7 @@ export async function getAppCatalogWithTelemetry(
   // 1. Fetch active counts per module across tenants
   const moduleCounts = await db.tenantModule.groupBy({
     by: ["moduleKey"],
-    where: { isEnabled: true },
+    where: { isEnabled: true, ...notExpired() },
     _count: { id: true },
   });
 

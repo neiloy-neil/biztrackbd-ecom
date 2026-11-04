@@ -115,6 +115,7 @@ model Tenant {
   // Platform Relations
   subscription  Subscription?
   paymentProofs PaymentProof[]
+  modulePurchases ModulePurchase[]
   themePurchases ThemePurchase[]
   auditLogs     AuditLog[]
 
@@ -1476,11 +1477,51 @@ model TenantModule {
   moduleKey String // "bespoke" | "drops" | "baby_profiles" | "loyalty" | "booking" | "wholesale"
   isEnabled Boolean @default(true)
   settings  Json    @default("{}")
+  /// Set when the module was bought monthly: it counts as switched on only until this date. Null means no end (a plan's own, a free grant or a one-time purchase).
+  expiresAt DateTime?
+  /// Where the access came from: "PLAN" (the store's plan), "GRANT" (platform staff gave it) or "PURCHASE" (the store paid for it).
+  source    String  @default("PLAN")
 
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   enabledAt DateTime @default(now())
 
   @@unique([tenantId, moduleKey])
+}
+
+/// What an add-on module costs when a store below the plan that includes it wants it anyway. Edited by the platform admin; a module with no row,
+/// or one that is not "sellable", can only come with a plan or a staff grant. Stores read it, only the platform role writes.
+model ModulePrice {
+  moduleKey  String   @id
+  priceModel String   @default("FREE") // "FREE" | "ONE_TIME" | "MONTHLY"
+  priceBdt   Decimal  @default(0) @db.Decimal(12, 2)
+  sellable   Boolean  @default(false)
+  updatedAt  DateTime @updatedAt
+}
+
+/// An add-on module bought by a store with a mobile-money payment, checked by the platform like a plan payment (PaymentProof). Once APPROVED the
+/// module switches on for the store: for good, or for a month when its price is monthly. A store can insert its own claim; only the platform role decides it.
+model ModulePurchase {
+  id           String             @id @default(cuid())
+  tenantId     String
+  moduleKey    String
+  amount       Decimal            @db.Decimal(12, 2)
+  mfsProvider  MfsProvider
+  senderNumber String
+  trxId        String             @unique
+  status       PaymentProofStatus @default(PENDING)
+
+  approvedBy      String?
+  approvedAt      DateTime?
+  rejectionReason String?
+  /// For a monthly module: the date this purchase pays for, up to.
+  expiresAt       DateTime?
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, moduleKey])
+  @@index([status])
 }
 
 // ==========================================

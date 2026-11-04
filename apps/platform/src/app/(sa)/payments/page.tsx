@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { PAYMENTS_PAGE_SIZE, canPlatform, listPaymentsPage, listPendingThemePurchases } from "@biztrackbd/core";
+import { PAYMENTS_PAGE_SIZE, canPlatform, listPaymentsPage, listPendingModulePurchases, listPendingThemePurchases } from "@biztrackbd/core";
 import { Pager, SubmitButton } from "@/components/ui";
 import { dateTime, prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
-import { approveAction, approveThemeAction, rejectAction, rejectThemeAction } from "./actions";
+import { approveAction, approveModuleAction, approveThemeAction, rejectAction, rejectModuleAction, rejectThemeAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Payment Approvals" };
@@ -53,6 +53,7 @@ export default async function Payments({
   // Approving or rejecting the last row on the last page leaves that page empty while earlier ones still have rows.
   if (rows.length === 0 && total > 0) redirect(`/payments?tab=${tab}&page=${Math.ceil(total / PAYMENTS_PAGE_SIZE)}`);
   const themePurchases = await listPendingThemePurchases(s.actor);
+  const modulePurchases = await listPendingModulePurchases(s.actor);
   const canEdit = canPlatform(s.user.role, "payments", "edit");
   const err = one(sp.err);
   const done = one(sp.done);
@@ -115,7 +116,7 @@ export default async function Payments({
       {err && <div className="notice bad" role="alert" style={{ marginBottom: 4 }} data-testid="payment-error">{err}</div>}
       {done && (
         <div className="notice good" role="status" style={{ marginBottom: 4 }}>
-          {done === "approved" ? "Payment approved. Plan activated." : done === "theme-approved" ? "Theme payment approved. The theme is unlocked for the store." : done === "theme-rejected" ? "Theme payment rejected." : "Payment rejected."}
+          {done === "approved" ? "Payment approved. Plan activated." : done === "theme-approved" ? "Theme payment approved. The theme is unlocked for the store." : done === "theme-rejected" ? "Theme payment rejected." : done === "module-approved" ? "Module payment approved. The module is switched on for the store." : done === "module-rejected" ? "Module payment rejected." : "Payment rejected."}
         </div>
       )}
 
@@ -135,6 +136,30 @@ export default async function Payments({
                     <input name="reason" placeholder="Reason, if rejecting" aria-label={`Rejection reason for ${p.storeName}`} style={{ height: 44, flex: "1 1 180px", border: "1px solid #D5D5E4", borderRadius: 8, padding: "0 12px", fontSize: 14 }} />
                     <SubmitButton formAction={approveThemeAction.bind(null, p.id)} style={{ height: 44, padding: "0 20px", borderRadius: 8, background: "#15803D", color: "#fff", fontWeight: 700 }} pending="Approving…">Approve</SubmitButton>
                     <SubmitButton formAction={rejectThemeAction.bind(null, p.id)} style={{ height: 44, padding: "0 18px", border: "1px solid #F1C0C0", borderRadius: 8, color: "#DC2626", background: "#fff", fontWeight: 600 }} pending="Rejecting…">Reject</SubmitButton>
+                  </>
+                )}
+              </form>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Add-on module purchases: approved here, then the module switches on */}
+      {modulePurchases.length > 0 && (
+        <section className="card" aria-labelledby="module-purchases-h" data-testid="module-purchases" style={{ padding: 16 }}>
+          <h2 id="module-purchases-h" style={{ margin: "0 0 10px", fontSize: 17 }}>Module purchases waiting ({modulePurchases.length})</h2>
+          <div style={{ display: "grid", gap: 12 }}>
+            {modulePurchases.map((p) => (
+              <form key={p.id} style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", paddingTop: 10, borderTop: "1px solid #E5E5F0" }}>
+                <div style={{ flex: "1 1 260px", fontSize: 14 }}>
+                  <b>{p.storeName}</b> ({p.subdomain}) bought <b>{p.moduleLabel}</b> for ৳ {p.amount}<br />
+                  <span style={{ color: "#4B4B73" }}>{p.provider} from {p.senderNumber}, TrxID {p.trxId}</span>
+                </div>
+                {canEdit && (
+                  <>
+                    <input name="reason" placeholder="Reason, if rejecting" aria-label={`Rejection reason for ${p.storeName}`} style={{ height: 44, flex: "1 1 180px", border: "1px solid #D5D5E4", borderRadius: 8, padding: "0 12px", fontSize: 14 }} />
+                    <SubmitButton formAction={approveModuleAction.bind(null, p.id)} style={{ height: 44, padding: "0 20px", borderRadius: 8, background: "#15803D", color: "#fff", fontWeight: 700 }} pending="Approving…">Approve</SubmitButton>
+                    <SubmitButton formAction={rejectModuleAction.bind(null, p.id)} style={{ height: 44, padding: "0 18px", border: "1px solid #F1C0C0", borderRadius: 8, color: "#DC2626", background: "#fff", fontWeight: 600 }} pending="Rejecting…">Reject</SubmitButton>
                   </>
                 )}
               </form>

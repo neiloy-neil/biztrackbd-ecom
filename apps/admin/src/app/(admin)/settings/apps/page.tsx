@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { PageHeader } from "@biztrackbd/ui";
-import { can, listAppStoreCatalog, listIntegrations, loadCredentials, uddoktaPayUrls } from "@biztrackbd/core";
+import { can, listAppStoreCatalog, listModuleSales, listIntegrations, loadCredentials, uddoktaPayUrls } from "@biztrackbd/core";
 import { withTenant } from "@biztrackbd/db";
 import { DemoLocked } from "@/components/demo-locked";
 import { trialHref } from "@/lib/demo";
@@ -24,6 +24,7 @@ export default async function Apps({
 
   const canEdit = can(s.user.role, "billing", "edit");
   const overview = await listAppStoreCatalog(s.tenantId, s.actor);
+  const sales = await listModuleSales(s.tenantId, s.actor).catch(() => ({ items: [], payTo: [] }));
   const integrations = await listIntegrations(s.tenantId);
 
   const [storeSettings, tenant] = await withTenant(s.tenantId, async (tx) => {
@@ -114,6 +115,11 @@ export default async function Apps({
           {err}
         </div>
       )}
+      {one(sp.sent) && (
+        <div className="notice good mb-3" role="status" data-testid="module-purchase-sent">
+          Thank you. We will check your payment and switch the module on, usually within a few hours.
+        </div>
+      )}
       {one(sp.done) && (
         <div className="notice good mb-3" role="status">
           Saved successfully.
@@ -131,6 +137,7 @@ export default async function Apps({
 
       <AppStoreClient
         overview={overview}
+        sales={sales}
         canEdit={canEdit}
         storeSettings={safeStoreSettings}
         integrations={integrations}

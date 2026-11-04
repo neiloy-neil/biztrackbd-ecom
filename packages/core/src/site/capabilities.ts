@@ -1,3 +1,4 @@
+import { notExpired } from "../modules/expiry";
 import { withTenant } from "@biztrackbd/db";
 import { planFor } from "../platform/plan-source";
 import { usesPortfolioPlans } from "../platform/portfolio-plans";
@@ -148,7 +149,7 @@ export async function getTenantCapabilities(tenantId: string): Promise<TenantCap
       select: { siteMode: true, businessVertical: true, planTier: true },
     });
     const moduleRows = await tx.tenantModule.findMany({
-      where: { tenantId, isEnabled: true },
+      where: { tenantId, isEnabled: true, ...notExpired() },
       select: { moduleKey: true },
     });
     const activeModules = Object.fromEntries(moduleRows.map((m) => [m.moduleKey, true]));

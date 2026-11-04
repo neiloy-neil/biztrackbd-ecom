@@ -10,6 +10,8 @@ import {
   getAppCatalogWithTelemetry,
   type StaffTemplateRow,
   listThemeCatalogue,
+  listModulePricing,
+  type ModulePricingRow,
   type PlatformThemeRow,
   type ManagedAppCatalogItem,
 } from "@biztrackbd/core";
@@ -24,6 +26,7 @@ import {
   toggleModuleMaintenanceAction,
   setModulePlanOverrideAction,
   updateThemePricingAction,
+  updateModulePricingAction,
 } from "./actions";
 import { SubmitButton } from "@/components/ui";
 
@@ -47,11 +50,12 @@ export default async function ThemesPage({
   const canSee = canPlatform(s.actor.role, "plans", "view");
   const canEdit = canPlatform(s.actor.role, "plans", "edit");
 
-  const [templates, modules, workshops, themePricing]: [StaffTemplateRow[], ManagedAppCatalogItem[], WorkshopStore[], PlatformThemeRow[]] = await Promise.all([
+  const [templates, modules, workshops, themePricing, modulePricing]: [StaffTemplateRow[], ManagedAppCatalogItem[], WorkshopStore[], PlatformThemeRow[], ModulePricingRow[]] = await Promise.all([
     canSee ? listTemplatesForStaff(s.actor) : Promise.resolve([]),
     getAppCatalogWithTelemetry(s.actor),
     canSee ? listWorkshopStores(s.actor).catch(() => []) : Promise.resolve([]),
     canSee ? listThemeCatalogue(s.actor).catch(() => []) : Promise.resolve([]),
+    canSee ? listModulePricing(s.actor).catch(() => []) : Promise.resolve([]),
   ]);
 
   return (
@@ -86,6 +90,28 @@ export default async function ThemesPage({
                 <select name="status" defaultValue={t.status} aria-label={`${t.name} visibility`} disabled={!canEdit} style={{ minHeight: 40 }}>
                   <option value="PUBLISHED">Shown</option><option value="DRAFT">Draft</option><option value="ARCHIVED">Hidden</option>
                 </select>
+                {canEdit && <SubmitButton pending="Saving…">Save</SubmitButton>}
+              </form>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Add-on module pricing */}
+      {canSee && (
+        <div className="card" style={{ padding: 0, overflow: "hidden" }} data-testid="module-pricing">
+          <div style={{ padding: "18px 24px", fontSize: 16, fontWeight: 700, borderBottom: "1px solid var(--line)" }}>Add-on module pricing</div>
+          <p className="muted" style={{ margin: 0, padding: "12px 24px", fontSize: 13.5 }}>Let a store whose plan does not include an add-on buy it anyway. Free, one-time or monthly. A monthly module switches itself off when the month ends. Stores on a plan that includes add-ons never see a price.</p>
+          <div style={{ display: "grid" }}>
+            {modulePricing.map((m) => (
+              <form key={m.moduleKey} action={updateModulePricingAction} data-testid={`module-price-${m.moduleKey}`} style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", padding: "12px 24px", borderTop: "1px solid var(--line)" }}>
+                <input type="hidden" name="moduleKey" value={m.moduleKey} />
+                <div style={{ flex: "1 1 220px", minWidth: 160 }}><b>{m.label}</b><div className="muted" style={{ fontSize: 12 }}>{m.moduleKey}{(m as ModulePricingRow).saved ? "" : " · not priced"}</div></div>
+                <select name="priceModel" defaultValue={m.priceModel} aria-label={`${m.label} price type`} disabled={!canEdit} style={{ minHeight: 40 }}>
+                  <option value="FREE">Free</option><option value="ONE_TIME">One-time</option><option value="MONTHLY">Monthly</option>
+                </select>
+                <input name="priceBdt" type="number" min={0} step="1" defaultValue={m.price} aria-label={`${m.label} price in taka`} disabled={!canEdit} style={{ width: 90, minHeight: 40 }} />
+                <label style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 13, minHeight: 40 }}><input type="checkbox" name="sellable" defaultChecked={m.sellable} disabled={!canEdit} />For sale</label>
                 {canEdit && <SubmitButton pending="Saving…">Save</SubmitButton>}
               </form>
             ))}

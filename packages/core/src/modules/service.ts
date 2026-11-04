@@ -3,6 +3,7 @@ import { tenantPlanFeatures } from "../platform/plan-source";
 import { audit } from "../audit/service";
 import { ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
+import { notExpired } from "./expiry";
 
 /**
  * Optional modules a store can switch on (docs/06, AdmApps). The plan decides how many a store may use (`features.modules`:
@@ -45,7 +46,7 @@ export function isAddonModule(key: string): boolean {
 }
 
 /** How many modules the plan allows: a number, or Infinity for "all". */
-async function allowance(tx: TenantTx): Promise<number> {
+export async function allowance(tx: TenantTx): Promise<number> {
   const { tier, features } = await tenantPlanFeatures(tx);
   const v = features.modules;
   if (v === "all") return Infinity;
@@ -58,7 +59,7 @@ export async function isModuleOn(tx: TenantTx, key: string): Promise<boolean> {
   const modKey = key === "loyalty_vip" ? "loyalty" : key;
   const d = def(modKey);
   if (!d?.built) return false;
-  const row = await tx.tenantModule.findFirst({ where: { moduleKey: modKey } });
+  const row = await tx.tenantModule.findFirst({ where: { moduleKey: modKey, ...notExpired() } });
   if (row?.isEnabled === true) return true;
   if (row?.isEnabled === false) return false;
   if (isAddonModule(modKey)) {
@@ -80,7 +81,8 @@ export async function getModuleStatus(tenantId: string, key: string): Promise<{
   return withTenant(tenantId, async (tx) => {
     const t = await tx.tenant.findFirstOrThrow({ select: { planTier: true } });
     const cap = await allowance(tx);
-    const isPlanLocked = isAddonModule(key) && cap <= 0;
+    const bought = await tx.tenantModule.findFirst({ where: { moduleKey: key, isEnabled: true, source: { in: ["PURCHASE", "GRANT"] }, ...notExpired() }, select: { id: true } });
+    const isPlanLocked = isAddonModule(key) && cap <= 0 && !bought;
     const active = await isModuleOn(tx, key);
     return {
       active,
@@ -93,7 +95,7 @@ export async function getModuleStatus(tenantId: string, key: string): Promise<{
 export async function getTenantActiveModules(tenantId: string): Promise<Record<string, boolean>> {
   return withTenant(tenantId, async (tx) => {
     const cap = await allowance(tx);
-    const rows = await tx.tenantModule.findMany();
+    const rows = await tx.tenantModule.findMany({ where: notExpired() });
     const explicit = new Map(rows.map((r) => [r.moduleKey, r.isEnabled]));
     return {
       loyalty: explicit.get("loyalty") ?? (cap > 0),
@@ -121,14 +123,15 @@ export async function listModules(tenantId: string, actor: StaffActor): Promise<
   assertCan(actor, "billing", "view");
   return withTenant(tenantId, async (tx) => {
     const cap = await allowance(tx);
-    const rows = await tx.tenantModule.findMany();
+    const rows = await tx.tenantModule.findMany({ where: notExpired() });
     const on = new Map(rows.map((r) => [r.moduleKey, r.isEnabled]));
+    const bought = new Set(rows.filter((r) => r.source === "PURCHASE" || r.source === "GRANT").map((r) => r.moduleKey));
     let used = 0;
     const modules = MODULES.map((m) => {
       const isAddon = isAddonModule(m.key);
-      const enabled = m.built && (!isAddon || cap > 0) && (on.get(m.key) ?? true);
-      if (enabled && isAddon) used++;
-      const blocked = !m.built ? "Not available yet" : isAddon && cap <= 0 ? "Not included in your plan" : null;
+      const enabled = m.built && (!isAddon || cap > 0 || bought.has(m.key)) && (on.get(m.key) ?? true);
+      if (enabled && isAddon && !(cap <= 0 && bought.has(m.key))) used++;
+      const blocked = !m.built ? "Not available yet" : isAddon && cap <= 0 && !bought.has(m.key) ? "Not included in your plan" : null;
       return { ...m, enabled, blocked };
     });
     return { modules, allowance: cap === Infinity ? null : cap, used };
@@ -161,12 +164,14 @@ export async function listAppStoreCatalog(tenantId: string, actor: StaffActor): 
     const cap = await allowance(tx);
     const [integrations, modules, storeSettings] = await Promise.all([
       tx.tenantIntegration.findMany(),
-      tx.tenantModule.findMany(),
+      tx.tenantModule.findMany({ where: notExpired() }),
       tx.storeSettings.findFirst(),
     ]);
 
     const activeIntegrations = new Set(integrations.map((i: { provider: string }) => i.provider));
     const moduleOn = new Map(modules.map((m: { moduleKey: string; isEnabled: boolean }) => [m.moduleKey, m.isEnabled]));
+    // A module the store bought, or was given, works whatever the plan says (until it ends).
+    const bought = new Set((modules as { moduleKey: string; source?: string }[]).filter((m) => m.source === "PURCHASE" || m.source === "GRANT").map((m) => m.moduleKey));
 
     let usedAddons = 0;
     let totalActive = 0;
@@ -185,13 +190,14 @@ export async function listAppStoreCatalog(tenantId: string, actor: StaffActor): 
 
       // 1. Plan Addon Modules (WhatsApp Commerce, Bundles, Landing Funnels, POS Barcode, AI Suite, Fraud Shield, Campaigns, Loyalty)
       if (item.tier === "ADDON") {
-        const isPlanLocked = cap <= 0;
         const modKey = item.key === "loyalty_vip" ? "loyalty" : item.key;
+        const isPlanLocked = cap <= 0 && !bought.has(modKey);
         const explicitOn = moduleOn.get(modKey);
-        const enabled = cap > 0 && (explicitOn !== undefined ? explicitOn : true);
+        const enabled = (cap > 0 || bought.has(modKey)) && (explicitOn !== undefined ? explicitOn : true);
 
         if (enabled) {
-          usedAddons++;
+          // Bought modules do not use up the plan's allowance.
+          if (!bought.has(modKey)) usedAddons++;
           totalActive++;
         }
 
@@ -379,10 +385,13 @@ export async function setModule(tenantId: string, actor: StaffActor, key: string
     const isAddon = isAddonModule(modKey);
     if (isAddon) {
       const cap = await allowance(tx);
-      if (enabled && cap <= 0) throw new ValidationError("Modules are not included in your plan. Upgrade to switch this on.");
-      if (enabled && cap !== Infinity) {
-        const rows = await tx.tenantModule.findMany();
-        const on = new Set(rows.filter((r) => r.isEnabled && isAddonModule(r.moduleKey)).map((r) => r.moduleKey));
+      // A module the store bought (or was given) and that has not run out can be switched back on whatever the plan says.
+      const owned = enabled ? await tx.tenantModule.findFirst({ where: { moduleKey: modKey, source: { in: ["PURCHASE", "GRANT"] }, ...notExpired() }, select: { id: true } }) : null;
+      if (enabled && cap <= 0 && !owned) throw new ValidationError("Modules are not included in your plan. Upgrade to switch this on, or buy this module.");
+      if (enabled && cap !== Infinity && !owned) {
+        // Modules the store bought do not use up the plan's allowance.
+        const rows = await tx.tenantModule.findMany({ where: notExpired() });
+        const on = new Set(rows.filter((r) => r.isEnabled && r.source !== "PURCHASE" && isAddonModule(r.moduleKey)).map((r) => r.moduleKey));
         if (!rows.some((r) => r.moduleKey === "loyalty") && def("loyalty")?.built) on.add("loyalty");
         on.add(modKey);
         if (on.size > cap) throw new ValidationError(`Your plan includes ${cap} addon module${cap === 1 ? "" : "s"}. Switch another one off first.`);

@@ -15,6 +15,7 @@ import {
   MAX_TEMPLATE_BUNDLE_BYTES,
   setTemplateStatus,
   updateThemePricing,
+  updateModulePricing,
   toggleGlobalModuleMaintenance,
   setModulePlanOverride,
   type TemplateStatus,
@@ -155,6 +156,24 @@ export async function updateThemePricingAction(form: FormData): Promise<void> {
   }
   revalidatePath("/themes");
   back({ done: `${themeId} pricing saved.` });
+}
+
+/** Sets whether stores below the plan can buy an add-on module, and for how much. */
+export async function updateModulePricingAction(form: FormData): Promise<void> {
+  const s = await requireAction("plans", "edit");
+  const moduleKey = String(form.get("moduleKey") ?? "");
+  try {
+    await updateModulePricing(s.actor, moduleKey, {
+      priceModel: form.get("priceModel"),
+      priceBdt: form.get("priceBdt") || 0,
+      sellable: form.get("sellable") === "on",
+    });
+  } catch (e) {
+    if (e instanceof DomainError) back({ err: e.message });
+    throw e;
+  }
+  revalidatePath("/themes");
+  back({ done: `${moduleKey} pricing saved.` });
 }
 
 /** Global Module Maintenance Kill-Switch */

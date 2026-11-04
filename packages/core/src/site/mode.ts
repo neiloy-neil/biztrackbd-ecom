@@ -1,3 +1,4 @@
+import { notExpired } from "../modules/expiry";
 import { withTenant } from "@biztrackbd/db";
 
 export type SiteMode = "ECOMMERCE" | "PORTFOLIO" | "HYBRID";
@@ -250,7 +251,7 @@ export async function validateModeTransitionDryRun(
     const normTargetVertical = targetVertical ? normalizeBusinessVertical(targetVertical) : null;
 
     const moduleRows = await tx.tenantModule.findMany({
-      where: { tenantId, isEnabled: true },
+      where: { tenantId, isEnabled: true, ...notExpired() },
       select: { moduleKey: true },
     });
     const activeModules = Object.fromEntries(moduleRows.map((m) => [m.moduleKey, true]));

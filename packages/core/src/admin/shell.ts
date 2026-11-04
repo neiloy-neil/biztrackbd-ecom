@@ -1,3 +1,4 @@
+import { notExpired } from "../modules/expiry";
 import { withTenant } from "@biztrackbd/db";
 import { can, type StaffActor } from "../permissions";
 import { resolveTenantCapabilities, type TenantCapabilities } from "../site/capabilities";
@@ -199,7 +200,7 @@ export async function getAdminShellContext(tenantId: string, actor: StaffActor):
     const storeSettings = await tx.storeSettings.findFirst({ select: { storeName: true } }).catch(() => null);
     const storeName = storeSettings?.storeName || tenant?.name || tenant?.subdomain || "";
 
-    const moduleRows = await tx.tenantModule.findMany({ select: { moduleKey: true, isEnabled: true } });
+    const moduleRows = await tx.tenantModule.findMany({ where: notExpired(), select: { moduleKey: true, isEnabled: true } });
     const planTier = tenant?.planTier ?? "STARTER";
     const cap = (planTier === "PRO" || planTier === "BUSINESS") ? Infinity : 0;
     const explicit = new Map(moduleRows.map((r) => [r.moduleKey, r.isEnabled]));
