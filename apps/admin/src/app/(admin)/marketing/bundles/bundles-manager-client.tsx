@@ -12,7 +12,7 @@ import {
   updateOrderBumpAction,
   deleteOrderBumpAction,
 } from "./actions";
-import { useBusyAction, PageHeader } from "@biztrackbd/ui";
+import { useBusyAction, PageHeader, askConfirm } from "@biztrackbd/ui";
 
 interface ProductVariantOption {
   id: string;
@@ -274,7 +274,7 @@ export function BundlesManagerClient({
 
   function handleDeleteBundle(id: string) {
     return runDelete(`bundle-${id}`, async () => {
-      if (!confirm("Are you sure you want to delete this bundle?")) return;
+      if (!(await askConfirm({ message: "Are you sure you want to delete this bundle?", confirmLabel: "Delete", tone: "danger" }))) return;
       const res = await deleteBundleAction(id);
       if (res.ok) {
         setBundles((prev) => prev.filter((b) => b.id !== id));
@@ -371,7 +371,7 @@ export function BundlesManagerClient({
 
   function handleDeleteBump(id: string) {
     return runDelete(`bump-${id}`, async () => {
-      if (!confirm("Are you sure you want to delete this order bump?")) return;
+      if (!(await askConfirm({ message: "Are you sure you want to delete this order bump?", confirmLabel: "Delete", tone: "danger" }))) return;
       const res = await deleteOrderBumpAction(id);
       if (res.ok) {
         setBumps((prev) => prev.filter((b) => b.id !== id));

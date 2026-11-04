@@ -8,6 +8,7 @@ import { FilterDisclosure } from "@/components/filter-disclosure";
 import { ChipFilter, LiveSearch, SelectFilter } from "@/components/live-filters";
 import { QuickViewButton, QuickViewHost } from "@/components/quick-view";
 import { Pager, SubmitButton, Tabs } from "@/components/ui";
+import { BulkCancelButton } from "./bulk-cancel-button";
 import { friendlyDate, prettyPhone, taka } from "@/lib/format";
 import { one, pageOf, qs } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
@@ -73,7 +74,7 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
 
       {packedMsg && <div className="notice good mb-md" role="status">{packedMsg[1]} marked as packed{packedMsg[2] ? `. ${packedMsg[2]} could not be packed (they must be confirmed first).` : "."}</div>}
       {bookedMsg && <div className="notice good mb-md" role="status" data-testid="booked-msg">{bookedMsg[1]} booked with the courier{bookedMsg[2] ? `. ${bookedMsg[2]} could not be booked${why ? `: ${why}` : ""}.` : "."}</div>}
-      {statusMsg && <div className="notice good mb-md" role="status" data-testid="status-msg">{statusMsg[2]} {statusMsg[1]}{statusMsg[3] !== "0" ? `. ${statusMsg[3]} could not be changed (they are already past that step).` : "."}</div>}
+      {statusMsg && <div className="notice good mb-md" role="status" data-testid="status-msg">{statusMsg[2]} {Number(statusMsg[2]) === 1 ? "order" : "orders"} {statusMsg[1]}{statusMsg[3] !== "0" ? `. ${statusMsg[3]} could not be changed (they are already past that step).` : "."}</div>}
       {msg === "failed" && <div className="notice bad mb-md" role="alert">{why}</div>}
       {msg === "none" && <div className="notice mb-md" role="status">Select at least one order first.</div>}
 
@@ -114,7 +115,8 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
                   </>
                 )}
                 <SubmitButton formAction={bulkConfirmAction} className="btn btn-secondary btn-sm" pending="Confirming…" data-testid="bulk-confirm">Confirm selected</SubmitButton>
-                <select className="select input-sm select-reason" name="reason" data-testid="bulk-reason">
+                <select className="select input-sm select-reason" name="reason" data-testid="bulk-reason" aria-label="Reason for cancelling">
+                  <option value="">Cancel reason…</option>
                   <option value="Customer requested cancellation">Customer requested</option>
                   <option value="Customer unreachable / phone switched off">Phone unreachable / switched off</option>
                   <option value="Customer refused advance delivery charge">Refused advance fee</option>
@@ -122,7 +124,7 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
                   <option value="Duplicate or test order">Duplicate / test order</option>
                   <option value="Item out of stock or damaged">Out of stock</option>
                 </select>
-                <SubmitButton formAction={bulkCancelAction} className="btn btn-danger btn-sm" pending="Cancelling…" data-testid="bulk-cancel">Cancel selected</SubmitButton>
+                <BulkCancelButton formAction={bulkCancelAction} />
                 <button className="btn btn-secondary btn-sm" type="submit" formAction="/orders/print" formMethod="get" formTarget="_blank" name="doc" value="slip">Print packing slips</button>
                 <button className="btn btn-secondary btn-sm" type="submit" formAction="/orders/print" formMethod="get" formTarget="_blank" name="doc" value="invoice">Print invoices</button>
                 <button className="btn btn-secondary btn-sm" type="submit" formAction="/orders/print" formMethod="get" formTarget="_blank" name="doc" value="kitchen_slip">Print KOT</button>

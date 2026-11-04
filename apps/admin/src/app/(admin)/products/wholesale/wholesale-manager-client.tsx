@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { PageHeader } from "@biztrackbd/ui";
+import { PageHeader, askConfirm } from "@biztrackbd/ui";
 import { dateOnly, taka, prettyPhone } from "@/lib/format";
 import {
   approveApplicationAction,
@@ -172,8 +172,8 @@ export function WholesaleManagerClient({ initialData, registerUrl }: Props) {
     });
   };
 
-  const handleDeleteTier = (tierId: string) => {
-    if (!confirm("Are you sure you want to delete this tier? Assigned resellers will lose their discount.")) return;
+  const handleDeleteTier = async (tierId: string) => {
+    if (!(await askConfirm({ message: "Are you sure you want to delete this tier? Assigned resellers will lose their discount.", confirmLabel: "Delete", tone: "danger" }))) return;
     startTransition(async () => {
       await deleteTierAction(tierId);
     });
@@ -189,8 +189,8 @@ export function WholesaleManagerClient({ initialData, registerUrl }: Props) {
     });
   };
 
-  const handleDeletePrice = (priceId: string) => {
-    if (!confirm("Remove this volume pricing rule?")) return;
+  const handleDeletePrice = async (priceId: string) => {
+    if (!(await askConfirm({ message: "Remove this volume pricing rule?", confirmLabel: "Remove", tone: "danger" }))) return;
     startTransition(async () => {
       await deletePriceOverrideAction(priceId);
     });

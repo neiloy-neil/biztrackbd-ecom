@@ -13,6 +13,10 @@ const BN: Record<string, string> = {
   Notifications: "নোটিফিকেশন", "Nothing needs your attention": "আপনার মনোযোগ দরকার এমন কিছু নেই", "Go to": "যান", "No matches": "কিছু পাওয়া যায়নি", "Type to search": "খুঁজতে লিখুন",
   Appearance: "অ্যাপিয়ারেন্স", "Sign out": "সাইন আউট", "Free trial": "ফ্রি ট্রায়াল", "Choose a plan": "প্ল্যান বেছে নিন", Orders_: "অর্ডার",
   Leads: "লিডস", "Leads & Inquiries": "লিড ও অনুসন্ধান", Menu: "মেনু", "Restaurant Menu": "রেস্তোরাঁ মেনু",
+  "Team profiles": "টিম প্রোফাইল", "Staff accounts": "স্টাফ অ্যাকাউন্ট", Overview: "ওভারভিউ", "Overview & Sales": "ওভারভিউ ও বিক্রি", "Products & Stock": "পণ্য ও স্টক", "Courier Performance": "কুরিয়ার পারফরম্যান্স", "Customer Analytics": "কাস্টমার অ্যানালিটিক্স",
+  "Limited Drops & Pre-Orders": "লিমিটেড ড্রপ ও প্রি-অর্ডার", "Bundles & Upsells": "বান্ডেল ও আপসেল", "WhatsApp Automation": "হোয়াটসঅ্যাপ অটোমেশন", "Affiliates & Influencers": "অ্যাফিলিয়েট ও ইনফ্লুয়েনসার", Campaigns: "ক্যাম্পেইন", "Banner & Flash sale": "ব্যানার ও ফ্ল্যাশ সেল", "Pixels & CAPI": "পিক্সেল ও CAPI",
+  "Wholesale & B2B": "হোলসেল ও B2B", Categories: "ক্যাটেগরি", Inbox: "ইনবক্স", Themes: "থিম", Portfolio: "পোর্টফোলিও", Credentials: "যোগ্যতা ও সনদ", Publications: "প্রকাশনা", Events: "ইভেন্ট", Downloads: "ডাউনলোড",
+  "Pages built from sections": "সেকশন দিয়ে তৈরি পেজ", "Import content": "কনটেন্ট ইমপোর্ট", "Help and support": "সহায়তা", "Apps & Integrations": "অ্যাপ ও ইন্টিগ্রেশন",
   Chambers: "চেম্বার ও শিডিউল", Services: "সেবাসমূহ", Projects: "প্রজেক্টসমূহ", Website: "ওয়েবসাইট",
 };
 export const tr = (lang: Lang, s: string): string => (lang === "bn" ? BN[s] ?? s : s);

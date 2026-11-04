@@ -1,4 +1,5 @@
 "use client";
+import { askConfirm } from "@biztrackbd/ui";
 
 import { useState } from "react";
 import type { PlatformFraudConfigView } from "@biztrackbd/core";
@@ -29,7 +30,7 @@ export function FraudCheckerSettings({ initial }: { initial: PlatformFraudConfig
   }
 
   async function remove() {
-    if (!window.confirm("Remove the saved key? The fraud checker will use the server's FRAUD_CHECKER_API_KEY if there is one, and otherwise stop returning results.")) return;
+    if (!(await askConfirm({ message: "Remove the saved key? The fraud checker will use the server's FRAUD_CHECKER_API_KEY if there is one, and otherwise stop returning results.", confirmLabel: "Remove", tone: "danger" }))) return;
     setSaving(true); setNotice(null);
     const r = await savePlatformFraudConfigAction({ apiKey: "" });
     setSaving(false);

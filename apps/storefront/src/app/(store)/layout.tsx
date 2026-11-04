@@ -1,3 +1,4 @@
+import { SkipLink } from "@biztrackbd/ui";
 import type { Metadata } from "next";
 import {
   getLiveChrome,
@@ -160,11 +161,12 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaJson) }}
       />
+      <SkipLink label={lang === "bn" ? "মূল কনটেন্টে যান" : "Skip to main content"} />
       {info.ordersPaused && <PausedBanner t={t} />}
       <Announcement info={info} lang={lang} chrome={chrome} />
       <ReferralBanner tenantId={store.id} lang={lang} t={t} />
       <Header info={info} categories={categories} lang={lang} t={t} points={points} chrome={chrome} commerce={capabilities.commerce} />
-      <main id="main">{children}</main>
+      <main id="main" tabIndex={-1}>{children}</main>
       <Footer info={info} categories={categories} lang={lang} t={t} pages={footerPages} hasBlog={blog.total > 0} chrome={chrome} commerce={capabilities.commerce} />
       <WhatsAppFloatingButton whatsappNumber={info.whatsappNumber} />
       <MobileStickyActionBar phone={info.contactPhone} whatsapp={info.whatsappNumber} lang={lang} />

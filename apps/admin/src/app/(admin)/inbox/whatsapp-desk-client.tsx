@@ -16,7 +16,7 @@ import {
   sendOrderTrackingAction,
   sendOrderPaymentDetailsAction,
 } from "./actions";
-import { useBusyAction } from "@biztrackbd/ui";
+import { useBusyAction, askConfirm } from "@biztrackbd/ui";
 
 interface StaffUserItem {
   id: string;
@@ -286,7 +286,7 @@ export function WhatsAppDeskClient({
   // 1-Click Order Confirmation
   const handleQuickConfirmOrder = async (orderId: string) => {
     if (!selectedId) return;
-    if (!confirm("Confirm this order and notify the customer on WhatsApp?")) return;
+    if (!(await askConfirm({ message: "Confirm this order and notify the customer on WhatsApp?", confirmLabel: "Confirm" }))) return;
     try {
       const res = await quickConfirmOrderAction(selectedId, orderId);
       if (res.message) {
@@ -415,7 +415,7 @@ export function WhatsAppDeskClient({
   const { busy: snippetBusy, run: runSnippet } = useBusyAction();
 
   const handleDeleteSnippet = (id: string) => runSnippet(`delete-${id}`, async () => {
-    if (!confirm("Are you sure you want to delete this snippet?")) return;
+    if (!(await askConfirm({ message: "Are you sure you want to delete this snippet?", confirmLabel: "Delete", tone: "danger" }))) return;
     try {
       await deleteSupportQuickReplyAction(id);
       setQuickReplies((prev) => prev.filter((q) => q.id !== id));
@@ -426,7 +426,7 @@ export function WhatsAppDeskClient({
   });
 
   const handleResetSnippets = () => runSnippet("reset", async () => {
-    if (!confirm("Reset all canned quick replies to default presets?")) return;
+    if (!(await askConfirm({ message: "Reset all canned quick replies to default presets?", confirmLabel: "Reset", tone: "danger" }))) return;
     try {
       const res = await resetSupportQuickRepliesAction();
       if (res.list) setQuickReplies(res.list);

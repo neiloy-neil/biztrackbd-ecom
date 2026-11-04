@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BrandLockup, BrandSymbol } from "@biztrackbd/ui";
+import { BrandLockup, BrandSymbol, SkipLink } from "@biztrackbd/ui";
 import { canPlatform, getOverview, type PlatformArea } from "@biztrackbd/core";
 import { getPlatformPrisma } from "@biztrackbd/db";
 import { NavLink } from "@/components/nav";
@@ -42,6 +42,7 @@ export default async function SaLayout({ children }: { children: React.ReactNode
 
   return (
     <div className="shell">
+      <SkipLink />
       <header className="topbar">
         <span className="brand-symbol"><BrandSymbol size={30} title="BizTrackBD" /></span>
         <span className="store">BizTrackBD Platform</span>
@@ -87,7 +88,7 @@ export default async function SaLayout({ children }: { children: React.ReactNode
           )}
         </div>
       </aside>
-      <main className="content" id="main">
+      <main className="content" id="main" tabIndex={-1}>
         <nav className="only-mobile" aria-label="Sections" style={{ marginBottom: 12 }}>
           <div className="chips">{items.map((i) => <Link key={i.href} href={i.href} className="chip" prefetch={false}>{i.label}</Link>)}</div>
         </nav>

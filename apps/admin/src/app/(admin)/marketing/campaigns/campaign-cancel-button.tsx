@@ -1,13 +1,14 @@
 "use client";
 
+import { askConfirm } from "@biztrackbd/ui";
 import { useTransition } from "react";
 import { cancelCampaignAction } from "./actions";
 
 export function CampaignCancelButton({ campaignId }: { campaignId: string }) {
   const [isPending, startTransition] = useTransition();
 
-  const handleCancel = () => {
-    if (!confirm("Are you sure you want to cancel this scheduled campaign?")) return;
+  const handleCancel = async () => {
+    if (!(await askConfirm({ message: "Are you sure you want to cancel this scheduled campaign?", confirmLabel: "Yes, cancel it", tone: "danger" }))) return;
     startTransition(async () => {
       const res = await cancelCampaignAction(campaignId);
       if (!res.success) {

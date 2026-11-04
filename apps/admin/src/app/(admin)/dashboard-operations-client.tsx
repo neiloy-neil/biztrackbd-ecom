@@ -17,7 +17,7 @@ import {
   releaseDashboardOrderHoldAction,
 } from "./dashboard-actions";
 import { taka, prettyPhone } from "@/lib/format";
-import { useBusyAction } from "@biztrackbd/ui";
+import { useBusyAction, askConfirm } from "@biztrackbd/ui";
 
 interface ConnectedCourierItem {
   provider: string;
@@ -164,12 +164,7 @@ export function DashboardOperationsClient({
   // Execute Bulk Booking
   const handleExecuteBulkBooking = async () => {
     if (selectedOrderIds.length === 0) return;
-    if (
-      !confirm(
-        `Book ${selectedOrderIds.length} orders with ${chosenCourier.toUpperCase()} at ${chosenWeight} kg?`
-      )
-    )
-      return;
+    if (!(await askConfirm({ message: `Book ${selectedOrderIds.length} orders with ${chosenCourier.toUpperCase()} at ${chosenWeight} kg?`, confirmLabel: "Confirm" }))) return;
 
     setIsBulkBooking(true);
     setBulkBookingFeedback(null);

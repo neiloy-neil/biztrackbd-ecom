@@ -28,7 +28,7 @@ const en = {
   sortBy: "Sort by", sortNewest: "Newest", sortPriceAsc: "Price: low to high", sortPriceDesc: "Price: high to low",
   noProducts: "No products found.", resultsFor: "Results for “{q}”", previous: "Previous", next: "Next", page: "Page {n} of {total}",
   // cart
-  yourCart: "Your cart", cartEmpty: "Your cart is empty.", continueShopping: "Continue shopping", remove: "Remove", subtotal: "Subtotal",
+  yourCart: "Your cart", cartEmpty: "Your cart is empty. Add something you like and it will wait for you here.", continueShopping: "Continue shopping", remove: "Remove", subtotal: "Subtotal",
   deliveryFee: "Delivery", free: "Free", discount: "Discount", total: "Total", checkout: "Checkout", deliveryAtCheckout: "Added at checkout",
   freeDeliveryAway: "Add {amount} more for free delivery", freeDeliveryGot: "You get free delivery", itemUnavailable: "No longer available",
   itemLowStock: "Only {n} left", updatingPrices: "Updating prices…",
@@ -87,7 +87,7 @@ const bn: Record<Key, string> = {
   assureExchangeT: "৭ দিনে সাইজ বদল", assureExchangeS: "মাপ না মিললে বিনা খরচে বদল",
   sortBy: "সাজান", sortNewest: "নতুন আগে", sortPriceAsc: "দাম: কম থেকে বেশি", sortPriceDesc: "দাম: বেশি থেকে কম",
   noProducts: "কোনো পণ্য পাওয়া যায়নি।", resultsFor: "“{q}” এর ফলাফল", previous: "আগের", next: "পরের", page: "পৃষ্ঠা {n} / {total}",
-  yourCart: "আপনার কার্ট", cartEmpty: "আপনার কার্ট খালি।", continueShopping: "কেনাকাটা চালিয়ে যান", remove: "সরান", subtotal: "পণ্যের দাম",
+  yourCart: "আপনার কার্ট", cartEmpty: "আপনার কার্ট খালি। পছন্দের পণ্য যোগ করুন, এখানেই থাকবে।", continueShopping: "কেনাকাটা চালিয়ে যান", remove: "সরান", subtotal: "পণ্যের দাম",
   deliveryFee: "ডেলিভারি", free: "ফ্রি", discount: "ছাড়", total: "মোট", checkout: "চেকআউট", deliveryAtCheckout: "চেকআউটে যোগ হবে",
   freeDeliveryAway: "ফ্রি ডেলিভারির জন্য আরও {amount} যোগ করুন", freeDeliveryGot: "আপনি ফ্রি ডেলিভারি পাচ্ছেন", itemUnavailable: "আর পাওয়া যাচ্ছে না",
   itemLowStock: "মাত্র {n}টি আছে", updatingPrices: "দাম হালনাগাদ হচ্ছে…",

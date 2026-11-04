@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useFormStatus } from "react-dom";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import { Button, type ButtonProps } from "@biztrackbd/ui";
+import { Button, askConfirm, type ButtonProps, type ConfirmOptions } from "@biztrackbd/ui";
 import { qs } from "@/lib/query";
 
 /** A submit button that disables itself while its form is sending, so a double tap cannot send twice. */
@@ -13,6 +13,27 @@ export function SubmitButton({ children, pending, className = "btn btn-primary",
     <button {...rest} type="submit" className={className} disabled={busy || rest.disabled} aria-busy={busy}>
       {busy && pending !== false ? (pending ?? "Saving…") : children}
     </button>
+  );
+}
+
+/**
+ * A submit button that asks first. `confirm` receives the form (so it can count the selected rows) and returns the question to ask,
+ * or `{ notice }` to explain what is missing instead of submitting. Esc, Cancel and a click outside all mean no.
+ */
+export function ConfirmSubmitButton({ confirm, ...rest }: ButtonHTMLAttributes<HTMLButtonElement> & { pending?: ReactNode | false; confirm: (form: HTMLFormElement) => ConfirmOptions | { notice: string } }) {
+  return (
+    <SubmitButton
+      {...rest}
+      onClick={async (e) => {
+        const btn = e.currentTarget;
+        const form = btn.form;
+        if (!form) return;
+        e.preventDefault();
+        const q = confirm(form);
+        if ("notice" in q) { await askConfirm({ title: "One more thing", message: q.notice, confirmLabel: "OK", cancelLabel: null }); return; }
+        if (await askConfirm(q)) form.requestSubmit(btn);
+      }}
+    />
   );
 }
 
