@@ -73,6 +73,17 @@
         "platform"
       ],
       "port": 3003
+    },
+    {
+      "name": "qa-storefront",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "tools/qa-stack.mjs",
+        "storefront",
+        "storefront",
+        "10"
+      ],
+      "port": 3010
     }
   ]
 }
