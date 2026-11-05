@@ -1,4 +1,4 @@
-import { getPlatformPrisma, type PrismaClient } from "@biztrackbd/db";
+import { getPlatformPrisma, type PrismaClient, type TenantLeadStage } from "@biztrackbd/db";
 import { assertPlatformCan, type PlatformActor } from "./admin";
 import { accessState, type AccessInput } from "./lifecycle";
 
@@ -93,6 +93,8 @@ export interface StoreHealthRow extends HealthResult {
   smsLimit: number | null;
   hasPayment: boolean;
   hasCourier: boolean;
+  leadStage: TenantLeadStage;
+  assigneeId: string | null;
 }
 
 export interface StoreHealthView {
@@ -109,18 +111,13 @@ const RANK: Record<StoreHealth, number> = { CHURNING: 0, AT_RISK: 1, NEW: 2, HEA
 /** First day of this month in Dhaka, as the date the usage counters are keyed by. */
 const dhakaMonth = (now: Date) => new Date(`${new Date(now.getTime() + 6 * 3600_000).toISOString().slice(0, 7)}-01T00:00:00.000Z`);
 
-export async function listStoreHealth(
-  actor: PlatformActor,
-  opts: { health?: StoreHealth | "all"; plan?: string; q?: string; page?: number; pageSize?: number } = {},
-  db: PrismaClient = getPlatformPrisma(),
-  now: Date = new Date(),
-): Promise<StoreHealthView> {
-  assertPlatformCan(actor, "tenants", "view");
+/** Every live store with its health and numbers, unfiltered. The list screen and the saved segments both start from this. */
+export async function computeStoreHealth(db: PrismaClient = getPlatformPrisma(), now: Date = new Date()): Promise<StoreHealthRow[]> {
   const since30 = new Date(now.getTime() - 30 * DAY);
   const [tenants, plans, orders, lastOrders, logins, staff, sms, settings, couriers] = await Promise.all([
     db.tenant.findMany({
       where: { isDemo: false, status: { not: "CANCELLED" } },
-      select: { id: true, name: true, subdomain: true, planTier: true, status: true, createdAt: true, trialEndsAt: true, suspendedReason: true, isDemo: true, productCount: true, subscription: { select: { amount: true, currentPeriodEnd: true } } },
+      select: { id: true, name: true, subdomain: true, planTier: true, status: true, createdAt: true, trialEndsAt: true, suspendedReason: true, isDemo: true, productCount: true, leadStage: true, leadAssignedToId: true, subscription: { select: { amount: true, currentPeriodEnd: true } } },
     }),
     db.plan.findMany({ select: { tier: true, limits: true } }),
     db.order.groupBy({ by: ["tenantId"], where: { createdAt: { gte: since30 }, deletedAt: null }, _count: { _all: true } }),
@@ -153,10 +150,21 @@ export async function listStoreHealth(
     return {
       ...scoreStore(input, now), tenantId: t.id, name: t.name, subdomain: t.subdomain, planTier: t.planTier, status: t.status, createdAt: t.createdAt,
       lastLoginAt: input.lastLoginAt, lastOrderAt: lastOrder.get(t.id) ?? null, orders30d: input.orders30d, productCount: t.productCount,
-      staff: staffOf.get(t.id) ?? 0, smsUsed, smsLimit, hasPayment: payOf.get(t.id) ?? false, hasCourier: courierOf.get(t.id) ?? false,
+      staff: staffOf.get(t.id) ?? 0, smsUsed, smsLimit, hasPayment: payOf.get(t.id) ?? false, hasCourier: courierOf.get(t.id) ?? false, leadStage: t.leadStage, assigneeId: t.leadAssignedToId,
     };
   });
 
+  return all;
+}
+
+export async function listStoreHealth(
+  actor: PlatformActor,
+  opts: { health?: StoreHealth | "all"; plan?: string; q?: string; page?: number; pageSize?: number } = {},
+  db: PrismaClient = getPlatformPrisma(),
+  now: Date = new Date(),
+): Promise<StoreHealthView> {
+  assertPlatformCan(actor, "tenants", "view");
+  const all = await computeStoreHealth(db, now);
   const counts = { all: all.length, paying: all.filter((r) => r.paying).length, trial: all.filter((r) => !r.paying).length, CHURNING: 0, AT_RISK: 0, NEW: 0, HEALTHY: 0 };
   for (const r of all) counts[r.health]++;
 
@@ -165,9 +173,12 @@ export async function listStoreHealth(
     .filter((r) => !opts.health || opts.health === "all" || r.health === opts.health)
     .filter((r) => !opts.plan || opts.plan === "all" || r.planTier === opts.plan)
     .filter((r) => !q || r.name.toLowerCase().includes(q) || r.subdomain.toLowerCase().includes(q))
-    .sort((a, b) => RANK[a.health] - RANK[b.health] || b.reasons.length - a.reasons.length || b.createdAt.getTime() - a.createdAt.getTime());
+    .sort(byWorstFirst);
 
   const pageSize = opts.pageSize ?? STORE_HEALTH_PAGE_SIZE;
   const page = Math.max(1, Math.min(opts.page ?? 1, Math.max(1, Math.ceil(filtered.length / pageSize))));
   return { rows: filtered.slice((page - 1) * pageSize, page * pageSize), total: filtered.length, page, pageSize, counts };
 }
+
+/** Worst health first, then the store with the most reasons, then the newest. */
+export const byWorstFirst = (a: StoreHealthRow, b: StoreHealthRow) => RANK[a.health] - RANK[b.health] || b.reasons.length - a.reasons.length || b.createdAt.getTime() - a.createdAt.getTime();

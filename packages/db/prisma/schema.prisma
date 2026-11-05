@@ -117,6 +117,7 @@ model Tenant {
   paymentProofs PaymentProof[]
   modulePurchases ModulePurchase[]
   smsPurchases    SmsPurchase[]
+  followUps       TenantFollowUp[]
   themePurchases ThemePurchase[]
   auditLogs     AuditLog[]
 
@@ -1907,6 +1908,39 @@ model TenantCrmActivity {
 
   @@index([tenantId, createdAt])
   @@index([actorId, createdAt])
+}
+
+/// A follow-up the platform team owes a store: who does it, when it is due, and what for. Replaces the single follow-up date on the store.
+model TenantFollowUp {
+  id            String    @id @default(cuid())
+  tenantId      String
+  assigneeId    String? // PlatformUser id
+  dueAt         DateTime
+  note          String    @db.Text
+  status        String    @default("OPEN") // OPEN | DONE
+  createdById   String
+  createdByName String?
+  doneAt        DateTime?
+  doneById      String?
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, dueAt])
+  @@index([tenantId, status])
+  @@index([assigneeId, status, dueAt])
+}
+
+/// A saved group of stores the team works as a list: a filter over store health, plan, stage, trial days left and so on.
+model CrmSegment {
+  id            String   @id @default(cuid())
+  name          String
+  filter        Json
+  createdById   String
+  createdByName String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model PlatformCrmTemplate {

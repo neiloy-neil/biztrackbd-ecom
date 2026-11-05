@@ -24,6 +24,8 @@ const ITEMS: { href: string; label: string; area: PlatformArea; exact?: boolean;
   { href: "/notifications", label: "Notifications", area: "tenants", iconPath: "M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 003.4 0" },
   { href: "/announcements", label: "Announcements", area: "announcements", iconPath: "M4 10v4h3l8 4V6L7 10H4zM18 9a4 4 0 010 6" },
   { href: "/blog", label: "Blog", area: "blog", iconPath: "M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" },
+  { href: "/follow-ups", label: "Follow-ups", area: "tenants", iconPath: "M12 8v4l3 2M12 21a9 9 0 100-18 9 9 0 000 18z" },
+  { href: "/segments", label: "Segments", area: "tenants", iconPath: "M4 6h16M7 12h10M10 18h4" },
   { href: "/usage", label: "Store health and usage", area: "tenants", iconPath: "M12 3a9 9 0 100 18 9 9 0 000-18zM12 7v5l3 2" },
   { href: "/audit", label: "Team and audit log", area: "audit", iconPath: "M9 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM2.5 20c.5-3.5 3.2-5.5 6.5-5.5s6 2 6.5 5.5" },
   { href: "/settings", label: "Platform settings", area: "settings", iconPath: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" },

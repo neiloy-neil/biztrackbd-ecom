@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ACCESS_LABELS, canPlatform, getTenantDetail, listTenantQuotaAdjustments, APP_CATALOG, validateModeTransitionDryRun, listPlatformCrmTemplates } from "@biztrackbd/core";
+import { ACCESS_LABELS, canPlatform, getTenantDetail, listTenantQuotaAdjustments, APP_CATALOG, validateModeTransitionDryRun, listPlatformCrmTemplates, listCrmTeam, listStoreFollowUps, getStoreTimeline } from "@biztrackbd/core";
 import { TenantCrmDesk } from "./crm-desk";
+import { CrmWork } from "./crm-work";
 import { SubmitButton } from "@/components/ui";
 import { dateOnly, dateTime, prettyPhone, taka } from "@/lib/format";
 import { one } from "@/lib/query";
@@ -28,6 +29,10 @@ const DONE_MESSAGES: Record<string, string> = {
   reactivated: "Store switched back on.",
   extended: "Trial extended successfully.",
   plan: "Plan updated.",
+  "owner-saved": "Owner saved.",
+  "followup-added": "Follow-up added.",
+  "followup-done": "Follow-up marked done.",
+  "followup-removed": "Follow-up removed.",
   approved: "Store brand review approved.",
   noted: "Internal note saved.",
   quota_adjusted: "Quota adjustment applied successfully.",
@@ -56,10 +61,13 @@ export default async function TenantDetail({
 }) {
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   const s = await requireAccess("tenants");
-  const [t, quotaAdjustments, templates] = await Promise.all([
+  const [t, quotaAdjustments, templates, team, followUps, timeline] = await Promise.all([
     getTenantDetail(s.actor, id).catch(() => null),
     listTenantQuotaAdjustments(s.actor, id).catch(() => []),
     listPlatformCrmTemplates(),
+    listCrmTeam(s.actor).catch(() => []),
+    listStoreFollowUps(s.actor, id).catch(() => []),
+    getStoreTimeline(s.actor, id).catch(() => []),
   ]);
 
   if (!t) notFound();
@@ -1196,6 +1204,8 @@ export default async function TenantDetail({
             crmActivities={t.crmActivities}
             templates={templates}
           />
+
+          <CrmWork tenantId={t.id} ownerId={t.leadAssignedToId ?? null} team={team} followUps={followUps} timeline={timeline} canAssign={canPlatform(s.user.role, "tenants", "edit")} />
 
           {/* Internal Notes Card */}
           <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, padding: "20px 24px" }} data-testid="internal-notes-card">
