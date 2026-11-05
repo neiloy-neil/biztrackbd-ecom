@@ -126,6 +126,7 @@ export * from "./platform/theme-pricing";
 export * from "./platform/theme-catalogue";
 export * from "./modules/purchases";
 export * from "./messaging/sms-credits";
+export * from "./platform/store-health";
 export { getUsageMeters, meterState, type UsageMeters, type UsageMeterRow, type MeterKey } from "./limits/meters";
 export * from "./platform/revenue";
 export { notExpired } from "./modules/expiry";
