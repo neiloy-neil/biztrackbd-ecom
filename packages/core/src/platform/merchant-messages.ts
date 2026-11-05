@@ -40,6 +40,11 @@ const marketingOrigin = () => {
   if (process.env.NODE_ENV === "production") return "https://biztrack.bd";
   return "http://localhost:3002";
 };
+/** True when unsubscribe links can be signed here. Nothing marketing is sent without one. */
+export function unsubscribeReady(): boolean {
+  try { secret(); return true; } catch { return false; }
+}
+
 export const unsubscribeUrl = (tenantId: string): string => `${marketingOrigin()}/unsubscribe?t=${encodeURIComponent(signUnsubscribe(tenantId))}`;
 
 // ---- Campaign wording ----------------------------------------------------------------------------------------------------

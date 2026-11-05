@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Prisma, getPlatformPrisma, withTenant, type PrismaClient } from "@biztrackbd/db";
+import { Prisma, getBasePrisma, getPlatformPrisma, withTenant, type PrismaClient } from "@biztrackbd/db";
 import { currentSmsSender } from "../customers/auth";
 import { NotFoundError, ValidationError } from "../errors";
 import { sendPlatformEmail } from "../mail/send";
@@ -8,7 +8,7 @@ import { normalizeBdPhone } from "../phone";
 import { assertPlatformCan, type PlatformActor } from "./admin";
 import { applySegmentFilter, parseSegmentFilter, type SegmentFilterInput } from "./crm";
 import {
-  NUDGES, NUDGE_KEYS, campaignHash, nudgeEmail, renderCampaignEmail, renderCampaignSms, unsubscribeUrl, verifyUnsubscribe, type MessageVars, type NudgeKey,
+  NUDGES, NUDGE_KEYS, campaignHash, nudgeEmail, renderCampaignEmail, renderCampaignSms, unsubscribeReady, unsubscribeUrl, verifyUnsubscribe, type MessageVars, type NudgeKey,
 } from "./merchant-messages";
 import { computeStoreHealth, type StoreHealthRow } from "./store-health";
 
@@ -231,6 +231,7 @@ export async function sendMerchantCampaign(actor: PlatformActor, id: string, inp
   if (!row) throw new NotFoundError("Campaign");
   if (row.status === "SENT") throw new ValidationError("This campaign has already been sent.");
   const resuming = row.status === "SENDING";
+  if (row.channel === "EMAIL" && !unsubscribeReady()) throw new ValidationError("Unsubscribe links are not set up yet (UNSUBSCRIBE_SECRET is missing), so no email can be sent. Ask the platform owner to add it.");
   const hash = campaignHash({ channel: row.channel, subject: row.subject, body: row.body });
   if (!resuming && (!row.testedAt || row.testHash !== hash)) throw new ValidationError("Send a test of this exact message to yourself first.");
 
@@ -303,14 +304,16 @@ export async function getMarketingOptOut(tenantId: string, actor: StaffActor): P
   return withTenant(tenantId, async (tx) => (await tx.storeSettings.findFirst({ select: { marketingOptOut: true } }))?.marketingOptOut ?? false);
 }
 
-/** The unsubscribe link in an email. Proves the link is ours, then switches marketing off for that store. Returns the store's name, or null for a bad link. */
-export async function unsubscribeByToken(token: string | null | undefined, db: PrismaClient = getPlatformPrisma(), now: Date = new Date()): Promise<{ storeName: string } | null> {
+/**
+ * The unsubscribe link in an email. Proves the link is ours, then switches marketing off for that store through a narrow database function,
+ * so the public marketing site never needs the all-access login. Returns the store's name, or null for a bad link.
+ */
+export async function unsubscribeByToken(token: string | null | undefined, db: Pick<PrismaClient, "$queryRaw"> = getBasePrisma()): Promise<{ storeName: string } | null> {
   const tenantId = verifyUnsubscribe(token);
   if (!tenantId) return null;
-  const t = await db.tenant.findUnique({ where: { id: tenantId }, select: { name: true, storeSettings: { select: { id: true, storeName: true } } } });
-  if (!t) return null;
-  if (t.storeSettings) await db.storeSettings.update({ where: { id: t.storeSettings.id }, data: { marketingOptOut: true, marketingOptOutAt: now } });
-  return { storeName: t.storeSettings?.storeName ?? t.name };
+  const rows = await db.$queryRaw<{ name: string | null }[]>`SELECT marketing_opt_out(${tenantId}) AS name`;
+  const name = rows[0]?.name;
+  return name === null || name === undefined ? null : { storeName: name };
 }
 
 // ---- Automatic nudges ----------------------------------------------------------------------------------------------------
@@ -368,6 +371,10 @@ export async function runNudges(deps?: MerchantCampaignDeps & { cap?: number }):
   const cap = deps?.cap ?? 200;
   const on = (await db.platformAutomation.findMany({ where: { enabled: true } })).map((r) => r.key).filter((k): k is NudgeKey => (NUDGE_KEYS as readonly string[]).includes(k));
   if (on.length === 0) return [];
+  if (!unsubscribeReady()) {
+    console.error("[nudges] skipped: UNSUBSCRIBE_SECRET is not set, so emails cannot carry an unsubscribe link");
+    return on.map((key) => ({ key, eligible: 0, sent: 0, skipped: 0 }));
+  }
   const rows = await computeStoreHealth(db, now);
   const out: NudgeRunSummary[] = [];
   const email = emailOf(deps);
@@ -382,13 +389,14 @@ export async function runNudges(deps?: MerchantCampaignDeps & { cap?: number }):
         if (summary.sent >= cap) break;
         const o = owners.get(m.row.tenantId);
         if (!o || o.optedOut || !o.email) { summary.skipped++; continue; }
+        // Built before the store is claimed, so a problem making the email never uses up that store's one nudge.
+        const mail = nudgeEmail(key, o.lang, { ...varsOf(o), what: m.what }, unsubscribeUrl(o.tenantId));
         try {
           await db.platformMessage.create({ data: { tenantId: o.tenantId, kind, channel: "EMAIL", dedupeKey: m.period, status: "SENT" } });
         } catch (e) {
           if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") { summary.skipped++; continue; }
           throw e;
         }
-        const mail = nudgeEmail(key, o.lang, { ...varsOf(o), what: m.what }, unsubscribeUrl(o.tenantId));
         const res = await email(o.email, mail.subject, mail.html, mail.text);
         if (res === "sent") summary.sent++;
         else {

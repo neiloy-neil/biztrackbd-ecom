@@ -59,3 +59,18 @@ CREATE TABLE "PlatformAutomation" (
 );
 REVOKE ALL ON "PlatformAutomation" FROM PUBLIC, anon, authenticated, biztrack_app;
 GRANT SELECT, INSERT, UPDATE, DELETE ON "PlatformAutomation" TO biztrack_platform;
+
+-- The unsubscribe link is opened on the public marketing site, which has no store session and must not hold the all-access database login.
+-- This function does the one thing the link may do: switch marketing off for one store. It returns the store's name, or null for an unknown store.
+CREATE OR REPLACE FUNCTION marketing_opt_out(p_tenant text)
+RETURNS text AS $$
+DECLARE
+  v_name text;
+BEGIN
+  UPDATE "StoreSettings" SET "marketingOptOut" = true, "marketingOptOutAt" = timezone('utc', now()) WHERE "tenantId" = p_tenant RETURNING "storeName" INTO v_name;
+  IF NOT FOUND THEN RETURN NULL; END IF;
+  RETURN COALESCE(v_name, '');
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+REVOKE ALL ON FUNCTION marketing_opt_out(text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION marketing_opt_out(text) TO biztrack_app, biztrack_platform;

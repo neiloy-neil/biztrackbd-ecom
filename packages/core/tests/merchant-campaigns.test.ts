@@ -296,6 +296,16 @@ describe("campaigns, opt-out and nudges in the database", () => {
     expect(await failure(setMarketingOptOut(s.tenantId, { ...s.actor, role: "ORDER_PACKER" } as StaffActor, true))).toBeTruthy();
   });
 
+  it("switches marketing off from the unsubscribe link using only the restricted store login", async () => {
+    const s = await store("Restricted");
+    const res = await unsubscribeByToken(signUnsubscribe(s.tenantId, KEY), app);
+    expect(res?.storeName).toMatch(/^Restricted/);
+    expect((await owner.storeSettings.findFirstOrThrow({ where: { tenantId: s.tenantId } })).marketingOptOut).toBe(true);
+    expect(await unsubscribeByToken(signUnsubscribe("no-such-store", KEY), app)).toBeNull();
+    // That login still cannot change anything else about a store.
+    await expect(app.$executeRaw`UPDATE "StoreSettings" SET "marketingOptOut" = false WHERE "tenantId" = ${s.tenantId}`).resolves.toBe(0);
+  });
+
   it("lists nudges off until they are switched on, by someone with edit access", async () => {
     const before = await listAutomations(boss, { db: owner });
     expect(before.map((a) => a.key)).toEqual(["no_product", "no_order", "win_back", "near_limit"]);
@@ -334,6 +344,35 @@ describe("campaigns, opt-out and nudges in the database", () => {
     const later: string[] = [];
     await runNudges({ db: owner, sendEmail: async (to) => { later.push(to); return "sent"; } });
     expect(later).toContain(retry.email);
+  });
+
+  it("sends nothing marketing, and uses up no nudge, while unsubscribe links cannot be signed", async () => {
+    const g = await group("Nosecret", 1);
+    const { id } = await draft(g.segmentId);
+    const f = fakes();
+    await sendMerchantCampaignTest(boss, id, "me@example.test", { ...f.deps, db: owner });
+    await setAutomation(boss, "no_product", true, { db: owner });
+    const s = await store("Nosecretnudge");
+    await owner.tenant.update({ where: { id: s.tenantId }, data: { createdAt: new Date(Date.now() - 6 * day), productCount: 3 } });
+    const saved = process.env.UNSUBSCRIBE_SECRET;
+    delete process.env.UNSUBSCRIBE_SECRET;
+    const saved2 = process.env.CUSTOMER_AUTH_SECRET;
+    delete process.env.CUSTOMER_AUTH_SECRET;
+    try {
+      expect((await failure(sendMerchantCampaign(boss, id, { confirmCount: 1 }, { ...f.deps, db: owner })))!.message).toMatch(/UNSUBSCRIBE_SECRET/);
+      const sent: string[] = [];
+      const r = await runNudges({ db: owner, sendEmail: async (to) => { sent.push(to); return "sent"; } });
+      expect(sent).toEqual([]);
+      expect(r.every((x) => x.sent === 0)).toBe(true);
+      expect(await owner.platformMessage.count({ where: { tenantId: s.tenantId, kind: "NUDGE_NO_PRODUCT" } })).toBe(0);
+    } finally {
+      process.env.UNSUBSCRIBE_SECRET = saved;
+      if (saved2 !== undefined) process.env.CUSTOMER_AUTH_SECRET = saved2;
+    }
+    // With the secret back, the same store gets its nudge.
+    const later: string[] = [];
+    await runNudges({ db: owner, sendEmail: async (to) => { later.push(to); return "sent"; } });
+    expect(later).toContain(s.email);
   });
 
   it("limits how many nudges one run sends", async () => {
