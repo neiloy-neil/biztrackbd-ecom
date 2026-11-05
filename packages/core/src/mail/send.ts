@@ -91,6 +91,11 @@ async function deliver(to: string, subject: string, html: string, text: string):
   }
 }
 
+/** Sends one email through the platform's provider. Never throws: "skipped" means no provider is set up. */
+export async function sendPlatformEmail(to: string, subject: string, html: string, text: string): Promise<"sent" | "skipped" | "failed"> {
+  return deliver(to, subject, html, text);
+}
+
 /**
  * Tells a store's owner something. `dedupeKey` names the moment (a payment id, "trial-ends-2026-10-20"): the same key is sent only once.
  * Email always; the urgent kinds also send one short text message to the owner's mobile number. Demo stores are never written to.

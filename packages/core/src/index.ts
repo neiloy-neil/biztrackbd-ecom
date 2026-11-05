@@ -128,6 +128,8 @@ export * from "./modules/purchases";
 export * from "./messaging/sms-credits";
 export * from "./platform/store-health";
 export * from "./platform/crm";
+export * from "./platform/merchant-campaigns";
+export { CAMPAIGN_PLACEHOLDERS, NUDGES, NUDGE_KEYS, signUnsubscribe, verifyUnsubscribe, unsubscribeUrl, type NudgeKey } from "./platform/merchant-messages";
 export { getUsageMeters, meterState, type UsageMeters, type UsageMeterRow, type MeterKey } from "./limits/meters";
 export * from "./platform/revenue";
 export { notExpired } from "./modules/expiry";

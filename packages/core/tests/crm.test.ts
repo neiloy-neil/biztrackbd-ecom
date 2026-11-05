@@ -11,7 +11,7 @@ const NOW = new Date("2026-11-05T06:00:00Z"); // 12:00 in Dhaka
 
 const row = (over: Partial<StoreHealthRow>): StoreHealthRow => ({
   health: "HEALTHY", reasons: [], paying: false, daysLeft: 10, daysSinceLogin: 1, tenantId: "t", name: "Shop", subdomain: "shop", planTier: "STARTER", status: "TRIAL",
-  createdAt: NOW, lastLoginAt: NOW, lastOrderAt: null, orders30d: 5, productCount: 10, staff: 1, smsUsed: 0, smsLimit: 100, hasPayment: true, hasCourier: false, leadStage: "NEW", assigneeId: null, ...over,
+  createdAt: NOW, lastLoginAt: NOW, lastOrderAt: null, orders30d: 5, productCount: 10, staff: 1, smsUsed: 0, smsLimit: 100, hasPayment: true, hasCourier: false, leadStage: "NEW", assigneeId: null, productLimit: 300, ...over,
 });
 
 describe("segment filters (no database)", () => {

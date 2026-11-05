@@ -95,6 +95,8 @@ export interface StoreHealthRow extends HealthResult {
   hasCourier: boolean;
   leadStage: TenantLeadStage;
   assigneeId: string | null;
+  /** The plan's product limit, or null for none. */
+  productLimit: number | null;
 }
 
 export interface StoreHealthView {
@@ -129,6 +131,7 @@ export async function computeStoreHealth(db: PrismaClient = getPlatformPrisma(),
     db.tenantIntegration.groupBy({ by: ["tenantId"], where: { provider: { in: ["STEADFAST", "PATHAO", "REDX"] } }, _count: { _all: true } }),
   ]);
 
+  const productLimitOf = new Map(plans.map((p) => [p.tier as string, typeof (p.limits as Record<string, unknown> | null)?.products === "number" ? ((p.limits as Record<string, number>).products as number) : null]));
   const smsLimitOf = new Map(plans.map((p) => [p.tier as string, typeof (p.limits as Record<string, unknown> | null)?.smsCredits === "number" ? ((p.limits as Record<string, number>).smsCredits as number) : null]));
   const by = <T extends { tenantId: string }, V>(rows: T[], pick: (r: T) => V) => new Map(rows.map((r) => [r.tenantId, pick(r)]));
   const orders30 = by(orders, (r) => r._count._all);
@@ -150,7 +153,7 @@ export async function computeStoreHealth(db: PrismaClient = getPlatformPrisma(),
     return {
       ...scoreStore(input, now), tenantId: t.id, name: t.name, subdomain: t.subdomain, planTier: t.planTier, status: t.status, createdAt: t.createdAt,
       lastLoginAt: input.lastLoginAt, lastOrderAt: lastOrder.get(t.id) ?? null, orders30d: input.orders30d, productCount: t.productCount,
-      staff: staffOf.get(t.id) ?? 0, smsUsed, smsLimit, hasPayment: payOf.get(t.id) ?? false, hasCourier: courierOf.get(t.id) ?? false, leadStage: t.leadStage, assigneeId: t.leadAssignedToId,
+      staff: staffOf.get(t.id) ?? 0, smsUsed, smsLimit, hasPayment: payOf.get(t.id) ?? false, hasCourier: courierOf.get(t.id) ?? false, leadStage: t.leadStage, assigneeId: t.leadAssignedToId, productLimit: productLimitOf.get(t.planTier) ?? null,
     };
   });
 
