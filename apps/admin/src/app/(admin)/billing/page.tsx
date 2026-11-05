@@ -8,7 +8,7 @@ import { dateOnly, taka } from "@/lib/format";
 import { one } from "@/lib/query";
 import { requireAccess } from "@/lib/session";
 import { PageHeader } from "@biztrackbd/ui";
-import { Meter, limitNote } from "@/lib/usage";
+import { UsageMetersCard } from "@/components/usage-meters";
 import { cancelProofAction } from "./actions";
 import { PayForm, type SerializedQuote } from "./pay-form";
 
@@ -24,7 +24,6 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
   if (s.demo) return <DemoLocked what="Plan and billing" keepHref={trialHref(s.demo.keep)} />;
   const b = await getBillingOverview(s.tenantId, s.actor);
   const a = b.access;
-  const notes = [limitNote("products", b.usage.products), limitNote("orders", b.usage.orders)].filter(Boolean);
   const suggested = b.plans.find((p) => p.tier === b.tier)?.tier ?? b.plans[0]!.tier;
   const isUnlimited = a.daysLeft === null && a.paidThrough.getUTCFullYear() >= 2099;
   const status =
@@ -112,11 +111,7 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
         </div>
       </section>
 
-      {notes.map((n) => <div key={n} className="notice" style={{ marginTop: 12 }}>{n}</div>)}
-      <section className="card" style={{ marginTop: 14 }}>
-        <Meter label="Products" usage={b.usage.products} />
-        <Meter label="Orders this month" usage={b.usage.orders} />
-      </section>
+      <UsageMetersCard tenantId={s.tenantId} actor={s.actor} />
 
       <section className="card" style={{ marginTop: 14 }}>
         <h2>{a.state === "ACTIVE" ? "Renew or change your plan" : "Choose a plan and pay"}</h2>

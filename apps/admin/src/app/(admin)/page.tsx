@@ -1,3 +1,4 @@
+import { UsageWarnings } from "@/components/usage-meters";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -27,6 +28,8 @@ const SETUP: Record<SetupStep["key"], { label: string; href: string }> = {
   delivery: { label: "Set delivery charges", href: "/settings/shipping" },
   courier: { label: "Connect Pathao or Steadfast", href: "/settings/apps?open=steadfast_courier" },
   publish: { label: "Publish your store", href: "/settings/store" },
+  messages: { label: "Turn on order SMS for your customers", href: "/settings/notifications" },
+  firstOrder: { label: "Get your first order", href: "/settings/store" },
 };
 
 function greeting(now: Date) {
@@ -222,6 +225,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
               <b>Welcome to BizTrackBD!</b> Your store is open and ready. Complete the checklist below to connect your bKash/Nagad wallet and Steadfast/Pathao courier pickups.
             </div>
           )}
+
+          {can(s.user.role, "billing") && !s.demo && <UsageWarnings tenantId={s.tenantId} actor={s.actor} />}
 
       {/* Top Quick Command Strip */}
       <div className="dash-quick-strip" data-testid="quick-command-strip">
