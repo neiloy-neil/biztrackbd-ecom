@@ -10,7 +10,7 @@ import { requireAction } from "@/lib/session";
 type Actor = Awaited<ReturnType<typeof requireAction>>["actor"];
 
 /** Runs one step, then returns to the page with a message. A refused step comes back as a red message, not an error page. */
-async function step(path: string, fn: (a: Actor) => Promise<unknown>, done: string): Promise<never> {
+async function run(path: string, fn: (a: Actor) => Promise<unknown>, done: string): Promise<never> {
   const s = await requireAction("tenants", "edit");
   try {
     await fn(s.actor);
@@ -38,16 +38,16 @@ export async function createCampaignAction(form: FormData): Promise<void> {
 }
 
 export async function editCampaignAction(id: string, form: FormData): Promise<void> {
-  await step(`/campaigns/${id}`, (a) => editMerchantCampaign(a, id, { subject: text(form, "subject") || null, body: text(form, "body") }), "edited");
+  await run(`/campaigns/${id}`, (a) => editMerchantCampaign(a, id, { subject: text(form, "subject") || null, body: text(form, "body") }), "edited");
 }
 
 export async function testCampaignAction(id: string, form: FormData): Promise<void> {
-  await step(`/campaigns/${id}`, (a) => sendMerchantCampaignTest(a, id, text(form, "to")), "tested");
+  await run(`/campaigns/${id}`, (a) => sendMerchantCampaignTest(a, id, text(form, "to")), "tested");
 }
 
 export async function sendCampaignAction(id: string, form: FormData): Promise<void> {
   const raw = text(form, "confirmCount").trim();
-  await step(`/campaigns/${id}`, (a) => sendMerchantCampaign(a, id, { confirmCount: raw === "" ? undefined : Number(raw) }), "sent");
+  await run(`/campaigns/${id}`, (a) => sendMerchantCampaign(a, id, { confirmCount: raw === "" ? undefined : Number(raw) }), "sent");
 }
 
 export async function deleteCampaignAction(id: string): Promise<void> {
@@ -63,5 +63,5 @@ export async function deleteCampaignAction(id: string): Promise<void> {
 }
 
 export async function toggleAutomationAction(key: string, enabled: boolean): Promise<void> {
-  await step("/campaigns", (a) => setAutomation(a, key, enabled), enabled ? "automation-on" : "automation-off");
+  await run("/campaigns", (a) => setAutomation(a, key, enabled), enabled ? "automation-on" : "automation-off");
 }
