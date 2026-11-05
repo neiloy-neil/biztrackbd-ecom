@@ -59,7 +59,7 @@ export function CustomerQuickHost({ children }: { children: ReactNode }) {
               {data.orders.length === 0 ? <p className="muted" style={{ margin: 0 }}>No orders yet.</p> : (
                 <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 4 }}>
                   {data.orders.map((o) => (
-                    <li key={o.id}><Link href={`/orders/${o.id}`} prefetch={false} style={{ display: "flex", justifyContent: "space-between", gap: 10, minHeight: 40, alignItems: "center" }}><span><b>{o.orderNumber}</b> <span className="muted" style={{ fontSize: 12.5 }}>{day(o.createdAt)} · {words(o.status)}</span></span><span className="num">{taka(o.totalAmount)}</span></Link></li>
+                    <li key={o.id}><Link href={`/orders/${o.id}`} prefetch={false} style={{ display: "flex", justifyContent: "space-between", gap: 10, minHeight: 44, alignItems: "center" }}><span><b>{o.orderNumber}</b> <span className="muted" style={{ fontSize: 12.5 }}>{day(o.createdAt)} · {words(o.status)}</span></span><span className="num">{taka(o.totalAmount)}</span></Link></li>
                   ))}
                 </ul>
               )}

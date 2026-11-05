@@ -260,6 +260,7 @@ export function DashboardOperationsClient({
                     textDecoration: "underline",
                     cursor: "pointer",
                     padding: "8px 0",
+                    minHeight: 44,
                     fontSize: 12,
                     fontWeight: 600,
                   }}
@@ -374,7 +375,8 @@ export function DashboardOperationsClient({
                 style={{
                   fontSize: 12,
                   fontWeight: 700,
-                  padding: "4px 8px",
+                  padding: "4px 12px",
+                  minHeight: 44,
                   borderRadius: 6,
                   border: "none",
                   cursor: "pointer",
@@ -390,7 +392,8 @@ export function DashboardOperationsClient({
                 style={{
                   fontSize: 12,
                   fontWeight: 700,
-                  padding: "4px 8px",
+                  padding: "4px 12px",
+                  minHeight: 44,
                   borderRadius: 6,
                   border: "none",
                   cursor: "pointer",
@@ -740,7 +743,7 @@ export function DashboardOperationsClient({
                   <span>Select All ({dispatchQueue.length})</span>
                 </label>
 
-                <div style={{ display: "flex", gap: 6, alignItems: "center", marginLeft: "auto" }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", justifyContent: "flex-end", marginLeft: "auto", minWidth: 0, maxWidth: "100%" }}>
                   <select
                     className="input"
                     value={chosenCourier}

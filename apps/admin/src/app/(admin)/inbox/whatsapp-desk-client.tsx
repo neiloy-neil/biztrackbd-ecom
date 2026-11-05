@@ -514,6 +514,7 @@ export function WhatsAppDeskClient({
                     style={{
                       border: "none",
                       padding: "6px 4px",
+                      minHeight: 44,
                       borderRadius: 6,
                       fontSize: 12,
                       fontWeight: isActive ? 700 : 500,
@@ -551,6 +552,7 @@ export function WhatsAppDeskClient({
                     fontSize: 12,
                     fontWeight: 600,
                     padding: "3px 8px",
+                    minHeight: 44,
                     borderRadius: 6,
                     border: "none",
                     cursor: "pointer",

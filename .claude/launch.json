@@ -84,6 +84,17 @@
         "10"
       ],
       "port": 3010
+    },
+    {
+      "name": "qa-admin-alt",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "tools/qa-stack.mjs",
+        "admin",
+        "admin",
+        "10"
+      ],
+      "port": 3011
     }
   ]
 }

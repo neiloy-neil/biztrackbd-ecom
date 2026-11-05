@@ -32,7 +32,7 @@ export default async function ChooseStore({ searchParams }: { searchParams: Prom
           </form>
         ))}
       </div>
-      <form action={logoutAction} style={{ marginTop: 14 }}><SubmitButton className="link" style={{ background: "none", border: 0, cursor: "pointer", minHeight: 40 }} pending={false}>Sign out</SubmitButton></form>
+      <form action={logoutAction} style={{ marginTop: 14 }}><SubmitButton className="link" style={{ background: "none", border: 0, cursor: "pointer", minHeight: 44 }} pending={false}>Sign out</SubmitButton></form>
     </div>
   );
 }

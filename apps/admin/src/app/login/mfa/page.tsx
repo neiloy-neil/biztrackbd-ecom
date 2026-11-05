@@ -22,7 +22,7 @@ export default async function Mfa({ searchParams }: { searchParams: Promise<Reco
       <h1 style={{ marginTop: 0 }}>Enter your code</h1>
       <p className="muted">Open your authenticator app and type the 6-digit code for BizTrackBD.</p>
       <MfaForm next={next} />
-      <form action={logoutAction} style={{ marginTop: 14 }}><SubmitButton className="link" style={{ background: "none", border: 0, cursor: "pointer", minHeight: 40 }} pending={false}>Use a different account</SubmitButton></form>
+      <form action={logoutAction} style={{ marginTop: 14 }}><SubmitButton className="link" style={{ background: "none", border: 0, cursor: "pointer", minHeight: 44 }} pending={false}>Use a different account</SubmitButton></form>
     </div>
   );
 }

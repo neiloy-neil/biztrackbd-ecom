@@ -368,7 +368,7 @@ export function AppStoreClient({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 320px), 1fr))",
             gap: 16,
           }}
           data-testid="apps-grid"
@@ -424,7 +424,9 @@ export function AppStoreClient({
                             style={{
                               background: "none",
                               border: "none",
-                              padding: 0,
+                              // 44px tap area without moving the text: padding grows the button, the matching negative margin takes it back.
+                              padding: "13px 0",
+                              margin: "-13px 0",
                               font: "inherit",
                               fontWeight: 700,
                               color: "inherit",

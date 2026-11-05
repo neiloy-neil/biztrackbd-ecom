@@ -202,3 +202,24 @@ div.tabs[role="tablist"] { overflow-x: auto; margin: 0 0 14px; padding: 0; } div
 .desk-links { display: flex; gap: 8px; flex-wrap: wrap; }
 .desk-links .btn, .desk-skip { flex: 1; justify-content: center; min-height: 48px; }
 .mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
+
+/* ---- Touch screens: every control you press is 44px tall, and a field is 16px so iOS does not zoom in when it is tapped.
+   Earlier rules in this app and in the shared kit set 40px on phones; this block comes last so one place decides. Phones and tablets are
+   under 900px (the sidebar layout starts there); a touch laptop or an iPad in landscape gets it through pointer: coarse. */
+@media (max-width: 899px), (pointer: coarse) {
+  .btn-sm, .quick-btn, .chip, .tab-btn, .search-box-input, .filter-search-box input, .toolbar .chip, .view-toggle .chip, .msg-chips .chip, .seg button, .sl-nav a, .back, .ph-crumbs a,
+  a.link:not(p a), summary.link, .input-sm, .lang button, .tab-item, .demo-banner .btn, .pw-toggle, .check,
+  select, button[type="submit"], td button, td select { min-height: 44px; }
+  .icon-btn, .drawer-x, .bulk-x { width: 44px; height: 44px; }
+  .tsearch { height: 44px; }
+  .tact.compact .tsearch { width: 44px; }
+  button.btn { min-width: 44px; }
+}
+@media (max-width: 899px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="range"]), select, textarea { font-size: 16px !important; }
+}
+
+/* Ten admin pages wrap their table in .table-wrap, but nothing styled it, so a wide table (staff, audit, shipping) pushed the page sideways. It now scrolls inside its own box, like .table-scroll. */
+.table-wrap { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+/* A table in a scroll box keeps a readable width instead of squeezing every column until words break letter by letter. */
+.table-wrap > table.table { min-width: 560px; }
