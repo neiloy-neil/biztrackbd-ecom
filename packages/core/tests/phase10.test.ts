@@ -160,11 +160,18 @@ describe("points that expire", () => {
     expect(await expireInactivePoints(S.f.tenantId)).toMatchObject({ expired: 0 });
   });
 
-  it("are left alone when the plan does not include the module", async () => {
+  it("are left alone when the store has switched loyalty off", async () => {
     const S = await store("ex3", "STARTER", { loyaltyExpiryMonths: 1 });
+    await setModule(S.f.tenantId, S.owner, "loyalty", false);
     const ph = phone();
     await deliver(S.f, (await place(S.f, ph)).orderId);
     expect(await owner.customerLoyaltyAccount.count({ where: { tenantId: S.f.tenantId } })).toBe(0);
+  });
+
+  it("run for a Starter store too, because loyalty comes with every plan", async () => {
+    const S = await store("ex3b", "STARTER", { loyaltyExpiryMonths: 1 });
+    await deliver(S.f, (await place(S.f, phone())).orderId);
+    expect(await owner.customerLoyaltyAccount.count({ where: { tenantId: S.f.tenantId } })).toBe(1);
   });
 
   it("run for every store from the daily job, one failure not stopping the rest", async () => {
@@ -389,9 +396,11 @@ describe("optional modules", () => {
     const S = await store("md1", "STARTER");
     const l = await listModules(S.f.tenantId, S.owner);
     expect(l.allowance).toBe(0);
-    expect(l.modules.find((m) => m.key === "loyalty")).toMatchObject({ enabled: false, blocked: "Not included in your plan" });
+    // Loyalty comes with every plan; the POS module is a plan add-on, so it is the one the plan decides.
+    expect(l.modules.find((m) => m.key === "loyalty")).toMatchObject({ enabled: true, blocked: null });
+    expect(l.modules.find((m) => m.key === "pos_barcode")).toMatchObject({ enabled: false, blocked: "Not included in your plan" });
     expect(l.modules.find((m) => m.key === "booking")).toMatchObject({ enabled: false, blocked: "Not available yet" });
-    await fails(setModule(S.f.tenantId, S.owner, "loyalty", true), /not included in your plan/i);
+    await fails(setModule(S.f.tenantId, S.owner, "pos_barcode", true), /not included in your plan/i);
     await fails(setModule(S.f.tenantId, S.owner, "booking", true), /not available yet/);
     await fails(setModule(S.f.tenantId, S.owner, "nonsense", true), /Unknown/);
   });
@@ -416,8 +425,8 @@ describe("optional modules", () => {
     const S = await store("md3", "STARTER");
     const on = await app.$transaction(async (tx) => {
       await tx.$executeRaw`SELECT set_config('app.current_tenant_id', ${S.f.tenantId}, true)`;
-      return isModuleOn(tx as never, "loyalty");
+      return { pos: await isModuleOn(tx as never, "pos_barcode"), loyalty: await isModuleOn(tx as never, "loyalty") };
     });
-    expect(on).toBe(false);
+    expect(on).toEqual({ pos: false, loyalty: true });
   });
 });

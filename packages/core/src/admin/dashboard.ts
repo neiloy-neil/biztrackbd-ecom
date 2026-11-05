@@ -32,7 +32,7 @@ export interface DayTotals {
 }
 
 export interface SetupStep {
-  key: "products" | "details" | "payments" | "delivery" | "courier" | "publish";
+  key: "products" | "details" | "payments" | "delivery" | "courier" | "publish" | "messages" | "firstOrder";
   done: boolean;
 }
 
@@ -208,6 +208,8 @@ export async function getDashboard(tenantId: string, actor: StaffActor, now = ne
     const settings = await tx.storeSettings.findFirst();
     const zones = await tx.shippingZone.count();
     const courier = await tx.tenantIntegration.count({ where: { provider: { in: ["STEADFAST", "PATHAO", "REDX"] } } });
+    const smsOn = await tx.messageTemplate.count({ where: { channel: "SMS", isEnabled: true } });
+    const anyOrder = await tx.order.count({ where: { deletedAt: null } });
     const steps: SetupStep[] = [
       { key: "products", done: tenant.productCount > 0 },
       { key: "details", done: Boolean(settings?.contactPhone && settings.storeName) },
@@ -215,6 +217,8 @@ export async function getDashboard(tenantId: string, actor: StaffActor, now = ne
       { key: "delivery", done: zones > 0 },
       { key: "courier", done: courier > 0 },
       { key: "publish", done: tenant.productCount > 0 && !settings?.ordersPaused && (tenant.status === "ACTIVE" || tenant.status === "TRIAL") },
+      { key: "messages", done: smsOn > 0 },
+      { key: "firstOrder", done: anyOrder > 0 },
     ];
 
     // Compute Funnel, COD Ledger, and Courier Health metrics across active orders

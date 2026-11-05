@@ -3,6 +3,7 @@ import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:
 import { createReadStream, createWriteStream } from "node:fs";
 import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { createInterface } from "node:readline";
 import { pipeline } from "node:stream/promises";
 import { createGunzip, createGzip } from "node:zlib";
 import pg from "pg";
@@ -159,12 +160,34 @@ export async function dumpDatabase(url: string, outSql: string): Promise<void> {
   await run("pg_dump", ["-h", c.host, "-p", c.port, "-U", c.user, "--no-owner", "--format=plain", c.db], c.password, outSql);
 }
 
+/**
+ * A newer pg_dump writes `SET transaction_timeout = 0;` in its header, which an older server refuses ("unrecognized configuration parameter"),
+ * so a dump made by one version could not be restored by another. This copies the dump without that one setting. Only the header is looked at
+ * (the first lines, before any table is created), so row data is never touched.
+ */
+export async function withoutUnsupportedSettings(src: string, dest: string): Promise<void> {
+  const out = createWriteStream(dest);
+  const lines = createInterface({ input: createReadStream(src), crlfDelay: Infinity });
+  let n = 0;
+  for await (const line of lines) {
+    if (n++ < 80 && /^SET transaction_timeout\s*=/i.test(line)) continue;
+    if (!out.write(line + "\n")) await new Promise<void>((r) => out.once("drain", () => r()));
+  }
+  await new Promise<void>((res, rej) => { out.on("error", rej); out.end(() => res()); });
+}
+
 export async function restoreInto(adminUrl: string, scratchDb: string, sqlPath: string): Promise<void> {
   const c = parts(adminUrl);
   await run("psql", ["-h", c.host, "-p", c.port, "-U", c.user, "-d", c.db, "-v", "ON_ERROR_STOP=1", "-c", `DROP DATABASE IF EXISTS "${scratchDb}"`, "-c", `CREATE DATABASE "${scratchDb}"`], c.password);
-  await run("psql", ["-h", c.host, "-p", c.port, "-U", c.user, "-d", scratchDb, "-v", "ON_ERROR_STOP=1", "-q", "-f", sqlPath], c.password).catch((e) => {
-    throw new BackupError("RESTORE", `Loading the dump failed: ${(e as Error).message}`);
-  });
+  const loadable = `${sqlPath}.load.sql`;
+  await withoutUnsupportedSettings(sqlPath, loadable);
+  try {
+    await run("psql", ["-h", c.host, "-p", c.port, "-U", c.user, "-d", scratchDb, "-v", "ON_ERROR_STOP=1", "-q", "-f", loadable], c.password).catch((e) => {
+      throw new BackupError("RESTORE", `Loading the dump failed: ${(e as Error).message}`);
+    });
+  } finally {
+    await rm(loadable, { force: true });
+  }
 }
 
 export async function dropDatabase(adminUrl: string, db: string): Promise<void> {

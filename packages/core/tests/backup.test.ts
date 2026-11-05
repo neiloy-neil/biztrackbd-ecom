@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { randomBytes } from "node:crypto";
 import { afterAll, describe, expect, it } from "vitest";
 import { createOwnerClient, createTenantFixture, resetDatabase, seedPlans, testUrls } from "@biztrackbd/db/testing";
-import { BackupError, LocalDirStore, SupabaseBackupStore, decryptFile, encryptFile, runDrill } from "../src/backup";
+import { BackupError, LocalDirStore, SupabaseBackupStore, decryptFile, encryptFile, runDrill, withoutUnsupportedSettings } from "../src/backup";
 
 const dir = mkdtempSync(join(tmpdir(), "bt-backup-"));
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
@@ -131,4 +131,24 @@ describe.skipIf(!live || !hasPg)("the restore drill through real Supabase Storag
     expect(r).toMatchObject({ ok: true, isolationHolds: true, rlsForcedEverywhere: true, tamperRefused: true, wrongKeyRefused: true });
     console.log(`offsite drill: backup ${r.backup.ms} ms, restore (download, decrypt, load) ${r.restore.ms} ms, ${r.rows} rows`);
   }, 240_000);
+});
+
+describe("loading a dump made by a newer pg_dump", () => {
+  it("drops the header setting an older server does not know, and nothing else", async () => {
+    const src = join(dir, "newer.sql");
+    const dest = join(dir, "newer.load.sql");
+    const header = ["--", "-- PostgreSQL database dump", "--", "SET statement_timeout = 0;", "SET transaction_timeout = 0;", "SET client_encoding = 'UTF8';"];
+    const body = ["CREATE TABLE t (n text);", "COPY t (n) FROM stdin;", "SET transaction_timeout = 0;", "\\."];
+    // Fill past the header so the row-data line is far enough in to be left alone.
+    const filler = Array.from({ length: 100 }, (_, i) => `-- filler ${i}`);
+    writeFileSync(src, [...header, ...filler, ...body].join("\n") + "\n");
+    await withoutUnsupportedSettings(src, dest);
+    const out = readFileSync(dest, "utf8").split("\n");
+    expect(out.slice(0, 80)).not.toContain(header[4]);
+    expect(out).toContain("SET statement_timeout = 0;");
+    expect(out).toContain("SET client_encoding = 'UTF8';");
+    // The same text deep in the file is data, so it stays.
+    expect(out.filter((l) => l === "SET transaction_timeout = 0;")).toHaveLength(1);
+    expect(out.length).toBe(header.length - 1 + filler.length + body.length + 1);
+  });
 });

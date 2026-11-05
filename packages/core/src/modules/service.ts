@@ -42,7 +42,8 @@ const def = (key: string) => {
 
 export function isAddonModule(key: string): boolean {
   const modKey = key === "loyalty_vip" ? "loyalty" : key === "wholesale" ? "wholesale_b2b" : key;
-  return modKey !== "customer_returns" && modKey !== "product_reviews";
+  // These come with every plan: they are on by default, the owner can still switch them off, and they are never sold or counted against the allowance.
+  return modKey !== "customer_returns" && modKey !== "product_reviews" && modKey !== "loyalty";
 }
 
 /** How many modules the plan allows: a number, or Infinity for "all". */
@@ -98,7 +99,7 @@ export async function getTenantActiveModules(tenantId: string): Promise<Record<s
     const rows = await tx.tenantModule.findMany({ where: notExpired() });
     const explicit = new Map(rows.map((r) => [r.moduleKey, r.isEnabled]));
     return {
-      loyalty: explicit.get("loyalty") ?? (cap > 0),
+      loyalty: explicit.get("loyalty") ?? true,
       pos_barcode: explicit.get("pos_barcode") ?? (cap > 0),
       ai_suite: explicit.get("ai_suite") ?? (cap > 0),
       marketing_campaigns: explicit.get("marketing_campaigns") ?? (cap > 0),

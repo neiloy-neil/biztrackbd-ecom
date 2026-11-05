@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { DomainError, MESSAGE_EVENTS, MESSAGE_LOCALES, resetMessageTemplate, saveMessageTemplate, type MessageEvent, type MessageLocale } from "@biztrackbd/core";
+import { DomainError, MESSAGE_EVENTS, MESSAGE_LOCALES, resetMessageTemplate, saveMessageTemplate, setMarketingOptOut, type MessageEvent, type MessageLocale } from "@biztrackbd/core";
 import { requireAction } from "@/lib/session";
 
 export interface MessageState { ok?: boolean; error?: string }
@@ -28,5 +28,12 @@ export async function resetMessageAction(event: string, locale: string): Promise
   const s = await requireAction("design", "edit");
   if (!isEvent(event) || !isLocale(locale)) return;
   await resetMessageTemplate(s.tenantId, s.actor, event, locale);
+  revalidatePath("/settings/notifications");
+}
+
+/** The owner's switch for product tips and offers from the platform. Billing and account messages are not affected. */
+export async function saveMarketingChoiceAction(form: FormData): Promise<void> {
+  const s = await requireAction("billing", "edit", { allowReadOnly: true });
+  await setMarketingOptOut(s.tenantId, s.actor, form.get("tips") !== "on");
   revalidatePath("/settings/notifications");
 }

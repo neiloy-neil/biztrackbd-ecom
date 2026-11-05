@@ -797,6 +797,12 @@ export async function scheduleTenantFollowUp(
       },
     }),
   ]);
+  // The single date on a store is also a real follow-up in the team's list, so there is one place to look.
+  if (followUpAt) {
+    await db.tenantFollowUp.create({ data: { tenantId, assigneeId: actor.id, dueAt: followUpAt, note: notes?.trim() || "Follow up", createdById: actor.id, createdByName: actor.email } });
+  } else {
+    await db.tenantFollowUp.deleteMany({ where: { tenantId, status: "OPEN" } });
+  }
 }
 
 export async function listPlatformCrmTemplates(deps?: Deps) {

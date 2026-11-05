@@ -4,7 +4,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   DomainError,
+  addFollowUp,
   addTenantNote,
+  assignTenant,
+  cancelFollowUp,
+  completeFollowUp,
   changePlan,
   createImpersonationTicket,
   extendTrial,
@@ -125,4 +129,23 @@ export async function modeTransitionExecuteAction(id: string, form: FormData): P
     "mode_transitioned",
     "transition"
   );
+}
+
+export async function assignOwnerAction(id: string, form: FormData): Promise<void> {
+  await run(id, "tenants", (a) => assignTenant(a, id, String(form.get("assignee") ?? "") || null), "owner-saved");
+}
+
+/** The date box gives local time in Dhaka, with no offset; the follow-up is stored as that moment. */
+export async function addFollowUpTaskAction(id: string, form: FormData): Promise<void> {
+  const when = String(form.get("dueAt") ?? "");
+  const dueAt = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(when) ? `${when}:00+06:00` : when;
+  await run(id, "tenants", (a) => addFollowUp(a, id, { dueAt, note: String(form.get("note") ?? ""), assigneeId: String(form.get("assignee") ?? "") || null }), "followup-added");
+}
+
+export async function completeFollowUpTaskAction(id: string, followUpId: string, form: FormData): Promise<void> {
+  await run(id, "tenants", (a) => completeFollowUp(a, followUpId, String(form.get("outcome") ?? "")), "followup-done");
+}
+
+export async function cancelFollowUpTaskAction(id: string, followUpId: string): Promise<void> {
+  await run(id, "tenants", (a) => cancelFollowUp(a, followUpId), "followup-removed");
 }

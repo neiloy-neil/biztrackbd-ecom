@@ -125,13 +125,24 @@ describe("paid add-on modules", () => {
   });
 
   it("a one-time module stays on for good and cannot be bought twice", async () => {
-    await updateModulePricing(boss, "loyalty", { priceModel: "ONE_TIME", priceBdt: 499, sellable: true }, owner);
+    await updateModulePricing(boss, "pos_barcode", { priceModel: "ONE_TIME", priceBdt: 499, sellable: true }, owner);
     const s = await store();
-    await submitModulePurchase(s.tenantId, s.actor, pay("loyalty"));
+    await submitModulePurchase(s.tenantId, s.actor, pay("pos_barcode"));
     const done = await approveLatest(s.tenantId);
     expect(done.expiresAt).toBeNull();
+    expect(await isModuleActive(s.tenantId, "pos_barcode")).toBe(true);
+    expect((await failure(submitModulePurchase(s.tenantId, s.actor, pay("pos_barcode"))))!.message).toMatch(/already have/);
+  });
+
+  it("loyalty comes with every plan: on for a Starter store, never sold, and not counted against the allowance", async () => {
+    const s = await store("STARTER");
     expect(await isModuleActive(s.tenantId, "loyalty")).toBe(true);
-    expect((await failure(submitModulePurchase(s.tenantId, s.actor, pay("loyalty"))))!.message).toMatch(/already have/);
+    expect((await listModulePricing(boss, owner)).some((r) => r.moduleKey === "loyalty")).toBe(false);
+    expect((await listModuleSales(s.tenantId, s.actor)).items.some((i) => i.moduleKey === "loyalty")).toBe(false);
+    expect((await failure(submitModulePurchase(s.tenantId, s.actor, pay("loyalty"))))!.message).toMatch(/cannot be bought/);
+    // The owner can still switch it off.
+    await setModule(s.tenantId, s.actor, "loyalty", false);
+    expect(await isModuleActive(s.tenantId, "loyalty")).toBe(false);
   });
 
   it("the owner can switch a bought module off and on again on a plan that does not include it", async () => {

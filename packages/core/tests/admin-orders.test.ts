@@ -358,6 +358,8 @@ describe("dashboard", () => {
     expect(d.outOfStock.count).toBe(1);
     expect(d.setup.steps.find((s) => s.key === "products")!.done).toBe(true);
     expect(d.setup.steps.find((s) => s.key === "courier")!.done).toBe(false);
+    expect(d.setup.steps.find((s) => s.key === "firstOrder")).toBeTruthy();
+    expect(d.setup.steps.find((s) => s.key === "messages")!.done).toBe(false);
     expect(d.setup.done).toBeGreaterThanOrEqual(4);
   });
 

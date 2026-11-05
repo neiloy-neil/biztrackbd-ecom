@@ -117,6 +117,8 @@ model Tenant {
   paymentProofs PaymentProof[]
   modulePurchases ModulePurchase[]
   smsPurchases    SmsPurchase[]
+  followUps       TenantFollowUp[]
+  campaignSends   MerchantCampaignSend[]
   themePurchases ThemePurchase[]
   auditLogs     AuditLog[]
 
@@ -1909,6 +1911,92 @@ model TenantCrmActivity {
   @@index([actorId, createdAt])
 }
 
+/// A follow-up the platform team owes a store: who does it, when it is due, and what for. Replaces the single follow-up date on the store.
+model TenantFollowUp {
+  id            String    @id @default(cuid())
+  tenantId      String
+  assigneeId    String? // PlatformUser id
+  dueAt         DateTime
+  note          String    @db.Text
+  status        String    @default("OPEN") // OPEN | DONE
+  createdById   String
+  createdByName String?
+  doneAt        DateTime?
+  doneById      String?
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, dueAt])
+  @@index([tenantId, status])
+  @@index([assigneeId, status, dueAt])
+}
+
+/// A saved group of stores the team works as a list: a filter over store health, plan, stage, trial days left and so on.
+model CrmSegment {
+  id            String   @id @default(cuid())
+  name          String
+  filter        Json
+  createdById   String
+  createdByName String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+/// A one-off message from the platform team to the owners of a group of stores. Written as a draft, tested, then sent once.
+model MerchantCampaign {
+  id            String    @id @default(cuid())
+  name          String
+  channel       String // EMAIL | SMS
+  filter        Json // the store filter, frozen when the campaign was made
+  filterKey     String // the filter as stable text, so two campaigns to the same group on one day can be refused
+  segmentName   String?
+  subject       String?
+  body          String    @db.Text
+  status        String    @default("DRAFT") // DRAFT | SENDING | SENT
+  testedAt      DateTime?
+  testHash      String? // the wording that was tested; changing it means testing again
+  recipients    Int       @default(0)
+  sentCount     Int       @default(0)
+  failedCount   Int       @default(0)
+  skippedCount  Int       @default(0)
+  createdById   String
+  createdByName String?
+  sentById      String?
+  sentAt        DateTime?
+
+  sends     MerchantCampaignSend[]
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+
+  @@index([status, createdAt])
+  @@index([filterKey, sentAt])
+}
+
+/// One store's result in a campaign. The unique key is what stops a store getting the same campaign twice.
+model MerchantCampaignSend {
+  id         String   @id @default(cuid())
+  campaignId String
+  tenantId   String
+  status     String // SENT | FAILED | SKIPPED_OPTOUT | SKIPPED_NO_CONTACT
+  createdAt  DateTime @default(now())
+
+  campaign MerchantCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  tenant   Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, tenantId])
+  @@index([tenantId])
+}
+
+/// Which automatic nudges to stores are switched on. A nudge with no row is off.
+model PlatformAutomation {
+  key         String   @id
+  enabled     Boolean  @default(false)
+  updatedById String?
+  updatedAt   DateTime @updatedAt
+}
+
 model PlatformCrmTemplate {
   id        String   @id @default(cuid())
   key       String   @unique
@@ -2150,6 +2238,8 @@ model StoreSettings {
   courierAutoRestockOnReturn Boolean   @default(false) // Require physical warehouse check before restock
   reviewsAutoPublish         Boolean   @default(false) // off: a new review waits for the owner (AdmReviews)
   abandonedSmsEnabled        Boolean   @default(true) // send the 30-minute recovery SMS
+  marketingOptOut            Boolean   @default(false) // the owner does not want product tips and offers from the platform (billing and account messages still send)
+  marketingOptOutAt          DateTime?
   metaPixelId                String? // the public Meta (Facebook) Pixel id; the server-side token lives in the vault as META_CAPI
   googleAnalyticsId          String? // GA4 Measurement ID (e.g. G-XXXXXXXXXX)
   googleTagManagerId         String? // GTM Container ID (e.g. GTM-XXXXXXX)
