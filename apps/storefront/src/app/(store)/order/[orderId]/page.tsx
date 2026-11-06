@@ -17,6 +17,7 @@ import { OrderTrackingTimelineComponent } from "@/components/order-tracking-time
 import { ReturnStatusTrackerComponent } from "@/components/return-status-tracker";
 import { CustomerReturnFormComponent } from "@/components/customer-return-form";
 import { PaymentRecoveryCard } from "@/components/payment-recovery-card";
+import { AdvancePayButton } from "@/components/advance-pay-button";
 import { getLang, makeT, money, num, toBnDigits } from "@/lib/i18n";
 import { getCustomerSession } from "@/lib/session";
 import { getStore } from "@/lib/tenant";
@@ -85,6 +86,11 @@ export default async function OrderPlaced({
   const first = order.customerName.trim().split(/\s+/)[0] ?? "";
   const phone = lang === "bn" ? toBnDigits(order.customerPhone) : order.customerPhone;
   const isMfs = order.paymentMethod !== "COD";
+  // A cash-on-delivery order the store asked an advance for.
+  const advanceRequired = Number(order.advanceRequiredAmount);
+  const advancePaid = Number(order.advancePaidAmount);
+  const hasAdvance = advanceRequired > 0;
+  const advanceDue = order.advanceDueAt ? new Intl.DateTimeFormat(lang === "bn" ? "bn-BD" : "en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Dhaka" }).format(order.advanceDueAt) : null;
   const mfsName = order.paymentMethod === "MANUAL_BKASH" ? t("bkash") : t("nagad");
   const place = [order.shippingCity, order.shippingDistrict].filter(Boolean).join(", ");
 
@@ -193,6 +199,49 @@ export default async function OrderPlaced({
                 ? `${lang === "bn" ? "ট্রানজেকশন আইডি" : "TrxID"}: ${order.mfsTrxId} · ${money(Number(order.totalAmount), lang)}`
                 : money(Number(order.totalAmount), lang)}
             </p>
+          </div>
+        ) : hasAdvance ? (
+          <div className="card" data-testid="advance-status" style={{ borderColor: advancePaid >= advanceRequired ? "#16a34a" : "var(--line-2)" }}>
+            {order.status === "CANCELLED" && advancePaid < advanceRequired ? (
+              <>
+                <h2 style={{ marginBottom: 4, fontSize: 16 }}>{lang === "bn" ? "অগ্রিম না পাওয়ায় অর্ডারটি বাতিল হয়েছে" : "Cancelled: the advance was not paid in time"}</h2>
+                <p className="muted" style={{ fontSize: 14 }}>{lang === "bn" ? "আবার অর্ডার করতে পারেন।" : "You are welcome to place the order again."}</p>
+              </>
+            ) : advancePaid >= advanceRequired ? (
+              <>
+                <h2 style={{ marginBottom: 4, color: "#15803d", fontSize: 16 }}>{lang === "bn" ? "অগ্রিম পেমেন্ট পাওয়া গেছে" : "Advance received"}</h2>
+                <p className="muted" style={{ fontSize: 14 }}>
+                  {money(advancePaid, lang)}
+                  {Number(order.balanceDue) > 0
+                    ? ` · ${lang === "bn" ? "ডেলিভারিতে দিন" : "Pay on delivery"}: ${money(Number(order.balanceDue), lang)}`
+                    : ` · ${lang === "bn" ? "ডেলিভারিতে আর কিছু দিতে হবে না" : "nothing left to pay on delivery"}`}
+                </p>
+              </>
+            ) : order.paymentStatus === "PENDING_VERIFICATION" ? (
+              <>
+                <h2 style={{ marginBottom: 6, fontSize: 16 }}>{lang === "bn" ? "অগ্রিম পেমেন্ট যাচাই হচ্ছে" : "Checking your advance payment"}</h2>
+                <p className="muted" style={{ fontSize: 14 }}>
+                  {lang === "bn"
+                    ? `${money(advanceRequired, lang)} (TrxID ${order.mfsTrxId ?? ""}) স্টোর যাচাই করলে অর্ডার নিশ্চিত হবে।`
+                    : `Once the store confirms your ${money(advanceRequired, lang)} (TrxID ${order.mfsTrxId ?? ""}), your order is confirmed.`}
+                </p>
+              </>
+            ) : order.paymentStatus === "FAILED" ? (
+              <>
+                <h2 style={{ marginBottom: 6, fontSize: 16 }}>{lang === "bn" ? "অগ্রিম পেমেন্ট পাওয়া যায়নি" : "The store could not find your advance payment"}</h2>
+                <p className="muted" style={{ fontSize: 14 }}>{lang === "bn" ? "অনুগ্রহ করে স্টোরের সাথে যোগাযোগ করুন।" : "Please contact the store about your payment."}</p>
+              </>
+            ) : (
+              <>
+                <h2 style={{ marginBottom: 6, fontSize: 16 }}>{lang === "bn" ? `অর্ডার নিশ্চিত করতে ${money(advanceRequired, lang)} অগ্রিম দিন` : `Pay ${money(advanceRequired, lang)} in advance to confirm your order`}</h2>
+                <p className="muted" style={{ fontSize: 14, marginBottom: 12 }}>
+                  {advanceDue ? (lang === "bn" ? `${advanceDue}-এর মধ্যে দিন, না হলে অর্ডার বাতিল হবে।` : `Pay by ${advanceDue} or the order is cancelled.`) : ""}
+                </p>
+                {order.advanceMethod === "GATEWAY_UDDOKTAPAY" && order.status === "PENDING" && (
+                  <AdvancePayButton orderId={order.id} token={k} label={lang === "bn" ? "অগ্রিম দিন" : "Pay the advance"} />
+                )}
+              </>
+            )}
           </div>
         ) : isMfs && order.paymentStatus === "PENDING_VERIFICATION" ? (
           <div className="card" style={{ borderColor: "var(--bkash)", background: "#FFF9FC" }}>

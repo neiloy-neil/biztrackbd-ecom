@@ -8,7 +8,7 @@ import { BD_GEO } from "@biztrackbd/core/geo";
 import { quoteCartAction, fetchCheckoutBumpsAction } from "@/app/actions";
 import { placeOrderAction, parseAddressTextAction } from "@/app/(store)/checkout/actions";
 import { captureAction } from "@/app/growth-actions";
-import { fmt, money, productTitle, type Lang } from "@/lib/i18n-core";
+import { fmt, money, num, productTitle, type Lang } from "@/lib/i18n-core";
 import type { CHECKOUT_STRINGS, LOYALTY_STRINGS } from "@/lib/strings";
 import { useCart } from "./cart-provider";
 import { trackEvent } from "./tracker";
@@ -27,6 +27,8 @@ export interface PayInfo {
   nagadKind: string;
   paymentNote: string | null;
   uddoktapayEnabled?: boolean;
+  /** The store has its own UddoktaPay keys, so an advance can be paid online. */
+  advanceGatewayReady?: boolean;
   sslcommerzEnabled?: boolean;
   bkashDirectEnabled?: boolean;
 }
@@ -88,6 +90,7 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
   const [method, setMethod] = useState<Method>("COD");
   const [mfsSender, setMfsSender] = useState("");
   const [trx, setTrx] = useState("");
+  const [advMethod, setAdvMethod] = useState<"MANUAL_BKASH" | "MANUAL_NAGAD" | "GATEWAY_UDDOKTAPAY" | "">("");
   const [couponInput, setCouponInput] = useState("");
   const [coupon, setCoupon] = useState("");
   const [quote, setQuote] = useState<Quote | null>(null);
@@ -228,6 +231,22 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
     return list;
   }, [isDigitalOrder, pay]);
 
+  // Advance payment: the store asks for part of a cash-on-delivery order up front. The server worked out the amount; this only shows it.
+  const adv = quote?.advance;
+  const advanceOn = method === "COD" && !isDigitalOrder && (adv?.amount ?? 0) > 0;
+  const advMethods = useMemo(() => {
+    const l: ("MANUAL_BKASH" | "MANUAL_NAGAD" | "GATEWAY_UDDOKTAPAY")[] = [];
+    if (adv && adv.payVia !== "GATEWAY") {
+      if (adv.bkash && pay.bkashNumber?.trim()) l.push("MANUAL_BKASH");
+      if (adv.nagad && pay.nagadNumber?.trim()) l.push("MANUAL_NAGAD");
+    }
+    if (adv && adv.payVia !== "MANUAL" && pay.advanceGatewayReady) l.push("GATEWAY_UDDOKTAPAY");
+    return l;
+  }, [adv, pay]);
+  useEffect(() => {
+    if (advanceOn && advMethods.length > 0 && !advMethods.includes(advMethod as never)) setAdvMethod(advMethods[0]!);
+  }, [advanceOn, advMethods, advMethod]);
+
   // Auto-switch away from COD if digital order, or switch to first available method
   useEffect(() => {
     if (availableMethods.length > 0 && !availableMethods.includes(method)) {
@@ -260,7 +279,9 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
     );
   }
 
-  const total = quote?.total ?? null;
+  // The quote is worked out before a way to pay is chosen, so it leaves out the cash-on-delivery fee. Show what the order will really cost.
+  const codFeeShown = method === "COD" && quote && !quote.codFee && !isDigitalOrder ? (adv?.full ? 0 : quote.paymentOptions.cod.fee) : 0;
+  const total = quote?.total != null ? quote.total + codFeeShown : null;
   const itemCount = cart.count;
 
   function validate(): Errors {
@@ -283,6 +304,10 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
           (e as any)[df.id] = lang === "bn" ? `${df.label} পূরণ করুন` : `Please fill ${df.label}`;
         }
       }
+    }
+    if (advanceOn && (advMethod === "MANUAL_BKASH" || advMethod === "MANUAL_NAGAD")) {
+      if (!validLocal(cleanPhoneDigits(mfsSender))) e.mfsSender = errorsText.mfsSender!;
+      if (!/^[A-Za-z0-9]{8,12}$/.test(trx.trim())) e.trxId = errorsText.trxId!;
     }
     if (method === "MANUAL_BKASH" || method === "MANUAL_NAGAD") {
       const sender = cleanPhoneDigits(mfsSender);
@@ -334,6 +359,9 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
         ? { division: "Digital", district: "Digital", upazila: "Digital", address: "Digital Delivery", note: withDelivery(note) }
         : { division, district, upazila, address: address.trim(), note: withDelivery(note) },
       paymentMethod: method,
+      advance: advanceOn && advMethod
+        ? { method: advMethod, mfs: advMethod === "GATEWAY_UDDOKTAPAY" ? undefined : { senderNumber: full(cleanPhoneDigits(mfsSender)), trxId: trx.trim() } }
+        : undefined,
       isDigital: isDigitalOrder,
       mfs:
         method === "MANUAL_BKASH" || method === "MANUAL_NAGAD"
@@ -707,6 +735,67 @@ export function CheckoutForm({ lang, s, pay, errorsText, recover, loyalty }: { l
           ) : (
             <div style={{ padding: "8px 12px", background: "#fef3c7", borderRadius: 8, fontSize: 13, color: "#92400e", marginBottom: 12 }}>
               ℹ️ {lang === "bn" ? "ডিজিটাল সেবার ক্ষেত্রে ক্যাশ অন ডেলিভারি প্রযোজ্য নয়। অনুগ্রহ করে বিকাশ, নগদ অথবা অনলাইন পেমেন্ট সিলেক্ট করুন।" : "Cash on delivery is not applicable for digital services. Please choose bKash, Nagad or Online payment."}
+            </div>
+          )}
+          {advanceOn && adv && (
+            <div className="pay-box open" data-testid="advance-panel" style={{ marginTop: 8 }}>
+              <div className="pay-body">
+                <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                  {adv.full
+                    ? (lang === "bn" ? `অর্ডার নিশ্চিত করতে এখনই ${money(adv.amount, lang)} পরিশোধ করুন` : `Pay ${money(adv.amount, lang)} now to confirm your order`)
+                    : (lang === "bn" ? `অর্ডার নিশ্চিত করতে অগ্রিম ${money(adv.amount, lang)} পরিশোধ করুন` : `Pay an advance of ${money(adv.amount, lang)} to confirm your order`)}
+                </div>
+                <div className="help" style={{ marginBottom: 10 }}>
+                  {adv.full
+                    ? (lang === "bn" ? "পুরো টাকা এখন দিলে ডেলিভারিতে আর কিছু দিতে হবে না।" : "Nothing is left to pay on delivery.")
+                    : (lang === "bn" ? `বাকি ${money(adv.balance, lang)} ডেলিভারির সময় দিন।` : `The remaining ${money(adv.balance, lang)} is paid on delivery.`)}
+                  {" "}
+                  {lang === "bn" ? `${num(adv.windowHours, lang)} ঘণ্টার মধ্যে না দিলে অর্ডারটি বাতিল হবে।` : `The order is cancelled if the advance is not paid within ${adv.windowHours} hours.`}
+                </div>
+                {advMethods.length === 0 ? (
+                  <div className="help" role="alert">{lang === "bn" ? "এই স্টোরে অগ্রিম নেওয়ার কোনো মাধ্যম চালু নেই। অনুগ্রহ করে অন্য উপায়ে পেমেন্ট করুন।" : "This store has no way to take the advance right now. Please choose another way to pay."}</div>
+                ) : (
+                  <>
+                    <div className="label" id="advance-method-label" style={{ marginBottom: 6 }}>{lang === "bn" ? "অগ্রিম কীভাবে দেবেন" : "Pay the advance with"}</div>
+                    <div role="radiogroup" aria-labelledby="advance-method-label" style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
+                      {advMethods.map((m) => (
+                        <label key={m} className={`option${advMethod === m ? " selected" : ""}`} style={{ flex: "1 1 140px", margin: 0 }}>
+                          <input type="radio" name="advance-method" checked={advMethod === m} onChange={() => setAdvMethod(m)} data-testid={`advance-${m}`} />
+                          <div className="grow"><div className="t">{m === "MANUAL_BKASH" ? s.bkash : m === "MANUAL_NAGAD" ? s.nagad : (lang === "bn" ? "অনলাইনে পেমেন্ট" : "Pay online")}</div></div>
+                        </label>
+                      ))}
+                    </div>
+                    {(advMethod === "MANUAL_BKASH" || advMethod === "MANUAL_NAGAD") && (() => {
+                      const info = mfsInfo(advMethod);
+                      return (
+                        <>
+                          <div className="steps">
+                            <b>1.</b> {fmt(s.mfsStep1, { app: info.app })}<br />
+                            <b>2.</b> {fmt(s.mfsStep2, { amount: money(adv.amount, lang), number: info.n ?? "" })}<br />
+                            <b>3.</b> {s.mfsStep3}
+                            {info.kind === "AGENT" && <div style={{ marginTop: 6, color: "var(--warn)", fontWeight: 600 }}>{s.mfsAgent}</div>}
+                            {pay.paymentNote && <div style={{ marginTop: 6 }}>{pay.paymentNote}</div>}
+                          </div>
+                          <label className="field">
+                            <span className="label">{fmt(s.yourMfsNumber, { app: info.app })}</span>
+                            <input id="f-mfsSender" className="input" inputMode="tel" autoComplete="off" placeholder="01XXXXXXXXX" value={mfsSender} onChange={(e) => setMfsSender(e.target.value)} {...invalid("mfsSender")} />
+                            {err("mfsSender")}
+                          </label>
+                          <label className="field" style={{ marginBottom: 0 }}>
+                            <span className="label">{s.trxId}</span>
+                            <input id="f-trxId" className="input" autoComplete="off" autoCapitalize="characters" maxLength={12} style={{ letterSpacing: 0.5, textTransform: "uppercase" }} value={trx} onChange={(e) => setTrx(e.target.value)} {...invalid("trxId")} />
+                            {err("trxId")}
+                            <div className="help">{s.mfsConfirm}</div>
+                          </label>
+                        </>
+                      );
+                    })()}
+                    {advMethod === "GATEWAY_UDDOKTAPAY" && (
+                      <div className="help">{lang === "bn" ? "অর্ডার করার পর আপনাকে পেমেন্ট পেজে নিয়ে যাওয়া হবে।" : "After you place the order you are taken to the payment page."}</div>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           )}
           {pay.bkashDirectEnabled && (

@@ -76,6 +76,7 @@ export default async function Checkout({ searchParams }: { searchParams: Promise
           nagadKind: info.nagadKind,
           paymentNote: info.paymentNote,
           uddoktapayEnabled: Boolean(uddoktaConfig?.apiKey),
+          advanceGatewayReady: Boolean(uddoktaConfig?.isCustom),
           sslcommerzEnabled: Boolean(sslConfig?.storeId),
           bkashDirectEnabled: Boolean(bkashConfig?.appKey),
         }}
