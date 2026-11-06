@@ -12,7 +12,7 @@ export function AnalyticsConversionFunnel({ funnel }: { funnel: ConversionFunnel
 
   return (
     <div className="card" style={{ padding: "20px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 16 }}>
         <div>
           <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-3)", textTransform: "uppercase", letterSpacing: 0.5 }}>
             Signup Conversion Funnel
@@ -27,6 +27,7 @@ export function AnalyticsConversionFunnel({ funnel }: { funnel: ConversionFunnel
       </div>
 
       <div
+        className="funnel-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "1fr auto 1fr auto 1fr",
