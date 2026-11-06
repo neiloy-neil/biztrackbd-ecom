@@ -170,7 +170,7 @@ function FieldInput({ f, value, onChange, disabled, idPrefix, openSignal = 0 }: 
   if (f.type === "image") return <ImagePicker label={f.label} value={str} onChange={onChange} disabled={disabled} openSignal={openSignal} />;
   if (f.type === "checkbox") {
     return (
-      <label className="check" htmlFor={id} style={{ minHeight: 40, alignItems: "center" }}>
+      <label className="check" htmlFor={id} style={{ minHeight: 44, alignItems: "center" }}>
         <input id={id} type="checkbox" checked={value === true} disabled={disabled} onChange={(e) => onChange(e.target.checked)} />
         <span>{f.label}</span>
       </label>
@@ -1751,7 +1751,7 @@ function SeoInspector({
         </div>
 
         {/* Custom Social Title & Desc Checkbox */}
-        <label className="check" style={{ marginTop: 12, minHeight: 32, alignItems: "center" }}>
+        <label className="check" style={{ marginTop: 12, minHeight: 44, alignItems: "center" }}>
           <input
             type="checkbox"
             checked={useCustomOg}
@@ -1807,7 +1807,7 @@ function SeoInspector({
         <div className="stack" style={{ gap: 12, marginTop: 10 }}>
           {/* Indexing Switch */}
           <div className="field" style={{ margin: 0 }}>
-            <label className="check" style={{ minHeight: 36, alignItems: "center" }}>
+            <label className="check" style={{ minHeight: 44, alignItems: "center" }}>
               <input
                 type="checkbox"
                 checked={!noIndex}

@@ -135,7 +135,7 @@ export function ContactForm() {
         Fill out this quick form and an engineer from our Dhaka office will respond directly.
       </p>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginBottom: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))", gap: 16, marginBottom: 16 }}>
         <label className="field" style={{ margin: 0 }}>
           <span className="label">Your name *</span>
           <input
@@ -161,7 +161,7 @@ export function ContactForm() {
         </label>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginBottom: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))", gap: 16, marginBottom: 16 }}>
         <label className="field" style={{ margin: 0 }}>
           <span className="label">Email address *</span>
           <input

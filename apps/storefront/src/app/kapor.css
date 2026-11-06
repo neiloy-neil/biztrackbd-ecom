@@ -670,21 +670,27 @@ h1, h2, h3, p { margin: 0; }
 @keyframes sk-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
 @media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
 
-/* Phones: the links people tap (footer columns and legal row, the section "see all" link, the logo) are 44px tall. The credit line is inline text and keeps its size. */
-@media (max-width: 640px) {
+/* Touch screens, phones and tablets alike (up to 1024px): the links people tap (footer columns and legal row, the section "see all" link, the logo) are 44px tall, and
+   so is the quiet credit line's tap area, which grows with padding that a matching negative margin takes back, so the line looks the same. */
+@media (max-width: 1024px) {
   .footer .cols a, .footer .legal a { display: flex; align-items: center; min-height: 44px; line-height: 1.4; }
   .link-accent { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 6px; margin-inline: -6px; }
   .logo { display: flex; align-items: center; justify-content: center; min-height: 44px; }
   .footer .lang-btn { min-height: 44px; }
+  .footer .credit a { padding-block: 13px; margin-block: -13px; }
 }
 /* The fixed Call and WhatsApp bar (and the chat circle above it) would sit over the last lines of the footer, the credit and the language button. */
 @media (max-width: 768px) {
   body:not(:has(.stickybar)):has(.mobile-sticky-bar) .footer { padding-bottom: 104px; }
 }
 
-/* Phones: a field under 16px makes iOS zoom the page in when it is tapped. */
-@media (max-width: 640px) {
+/* A field under 16px makes iOS zoom the page in when it is tapped. That is every phone and tablet, so it is tied to touch, not to one width. */
+@media (max-width: 1024px) {
   .toolbar .select { font-size: 16px; }
+}
+@media (pointer: coarse) {
+  .search-pill { height: 44px; }
+  .search-pill input { font-size: 16px; }
 }
 
 /* Skip link: first tab stop, visible only when focused. */

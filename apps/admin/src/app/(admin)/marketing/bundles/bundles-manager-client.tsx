@@ -906,8 +906,8 @@ export function BundlesManagerClient({
                           gap: 8,
                           padding: 8,
                           borderRadius: 8,
-                          border: "1px solid var(--border, #e5e7eb)",
-                          backgroundColor: "#f9fafb",
+                          border: "1px solid var(--border, var(--line))",
+                          backgroundColor: "var(--bg)",
                         }}
                       >
                         <select
@@ -1025,7 +1025,7 @@ export function BundlesManagerClient({
                 style={{
                   padding: "12px 14px",
                   borderRadius: 8,
-                  border: "1px solid var(--border, #e5e7eb)",
+                  border: "1px solid var(--border, var(--line))",
                   backgroundColor: "color-mix(in srgb, var(--brand) 4%, transparent)",
                 }}
               >
@@ -1309,7 +1309,7 @@ export function BundlesManagerClient({
                           {taka(bumpPrice || 0)}
                         </span>
                         {selectedBumpVariant && Number(selectedBumpVariant.price) > bumpPrice && (
-                          <del style={{ fontSize: 12, color: "#9ca3af" }}>
+                          <del style={{ fontSize: 12, color: "var(--ink-3)" }}>
                             {taka(Number(selectedBumpVariant.price))}
                           </del>
                         )}
@@ -1326,13 +1326,13 @@ export function BundlesManagerClient({
                     marginTop: 16,
                     padding: 12,
                     borderRadius: 8,
-                    background: "#f8fafc",
-                    border: "1px solid #e2e8f0",
+                    background: "var(--bg)",
+                    border: "1px solid var(--line)",
                     fontSize: 12,
-                    color: "#475569",
+                    color: "var(--ink-2)",
                   }}
                 >
-                  <div style={{ fontWeight: 600, color: "#0f172a", marginBottom: 4 }}>
+                  <div style={{ fontWeight: 600, color: "var(--ink)", marginBottom: 4 }}>
                     Order Bump Performance
                   </div>
                   Customers don't have to fill out another form or re-enter payment details. When this box is checked, the order total updates immediately and component inventory is atomically locked on order submission.

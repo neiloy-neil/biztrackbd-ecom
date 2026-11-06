@@ -43,7 +43,7 @@ export function TotpPanel({ enabledFactorId }: { enabledFactorId: string | null 
       <Msg s={confirm} />
       <p>1. Scan this picture with your authenticator app, or type the key by hand.</p>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={setup.enrolled.qr} alt="QR code for your authenticator app" width={180} height={180} style={{ background: "#fff", padding: 8, borderRadius: 8 }} />
+      <img src={setup.enrolled.qr} alt="QR code for your authenticator app" width={180} height={180} style={{ background: "var(--surface)", padding: 8, borderRadius: 8 }} />
       <p style={{ overflowWrap: "anywhere" }}>Key: <code data-testid="totp-secret">{setup.enrolled.secret}</code></p>
       <p>2. Type the 6-digit code the app shows.</p>
       <input type="hidden" name="factorId" value={setup.enrolled.factorId} />

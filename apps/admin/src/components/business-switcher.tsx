@@ -166,10 +166,14 @@ export function BusinessSwitcher({
               {activeBiz.storeName || storeName}
             </b>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "12px", opacity: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "12px", opacity: 1, minWidth: 0 }}>
             <span
               style={{
                 display: "inline-block",
+                minWidth: 0,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
                 padding: "1px 5px",
                 borderRadius: "4px",
                 fontWeight: 600,
@@ -185,6 +189,9 @@ export function BusinessSwitcher({
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
+                minWidth: 0,
+                // The phone header has room for the store name and its type, not the address too.
+                display: compact ? "none" : undefined,
                 maxWidth: compact ? "110px" : "150px",
               }}
             >

@@ -783,3 +783,33 @@ a.link:hover {
 .prose h2 { font-size: 19px; margin: 24px 0 6px; color: var(--ink); }
 .prose p, .prose li { color: var(--ink-2); line-height: 1.65; }
 .prose a { color: var(--brand); text-decoration: underline; }
+
+/* ---- Touch: 44px targets and 16px fields on phones and tablets; badge text no smaller than 11px. */
+.status-stamp, .pill, .metric-pill { font-size: max(11px, 1em); }
+.status-stamp, .pill { font-size: 11px; }
+@media (max-width: 1024px), (pointer: coarse) {
+  .btn, .btn-sm, .btn-savings-white, .btn-savings-ghost, .goal-btn, .tco-tab-btn, .admin-action-btn-primary, .admin-action-btn-ghost,
+  a.link, main button, main a[class*="rounded-lg"], main a[class*="btn"], footer a[aria-label] { min-height: 44px; }
+  a.link, main a[class*="rounded-lg"], footer a[aria-label] { display: inline-flex; align-items: center; justify-content: center; }
+  a.link { justify-content: flex-start; }
+  footer a[aria-label] { min-width: 44px; }
+  .tco-range-input { box-sizing: content-box; padding-block: 18px; background-clip: content-box; }
+}
+@media (max-width: 899px) {
+  input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=range]), select, textarea { font-size: 16px !important; min-height: 44px; }
+}
+.btn { max-width: 100%; }
+@media (max-width: 640px) { .btn { white-space: normal; line-height: 1.25; } }
+@media (max-width: 1024px), (pointer: coarse) {
+  /* Block-level links (breadcrumbs, card footers, filter pills) get a 44px row; inline links inside sentences are unaffected. */
+  main a, .contact-pills a, footer a[aria-label] { min-height: 44px; align-content: center; }
+  .btn, .btn-sm, .goal-btn, .tco-tab-btn, .billing-toggle button, main button { min-height: 44px !important; }
+  .contact-pills a { min-height: 44px; }
+  input[type=range] { box-sizing: content-box; padding-block: 18px; background-clip: content-box; }
+}
+.status-stamp, .stamp, .pill, .pill.ok { font-size: 11px !important; }
+/* Inline two-column comparison grids (wallet matcher, CAPI simulator, fraud demo) stack on phones. */
+@media (max-width: 640px) {
+  [style*="grid-template-columns: 1fr 1fr"], [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: minmax(0, 1fr) !important; }
+  [style*="grid-template-columns: 1fr 1fr"] > *, [style*="grid-template-columns:1fr 1fr"] > * { min-width: 0; }
+}

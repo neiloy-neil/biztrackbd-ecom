@@ -23,7 +23,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .topbar .store { flex: 1; min-width: 0; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .topbar .brand-symbol { display: inline-flex; flex: none; }
 .side { display: none; }
-.content { padding: 16px 16px calc(var(--nav-h) + 24px); max-width: 1180px; margin: 0 auto; }
+.content { padding: 16px 16px calc(var(--nav-h) + 24px); max-width: 1180px; margin: 0 auto; min-width: 0; width: 100%; box-sizing: border-box; }
 /* Phones: forms and cards may shrink below their content instead of widening the page. */
 @media (max-width: 899px) {
   .content, .content .card, .content form, .content section { min-width: 0; max-width: 100%; }
@@ -38,7 +38,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 @media (min-width: 900px) {
   .only-desktop { display: block; }
   .only-mobile { display: none; }
-  .shell { display: grid; grid-template-columns: 248px 1fr; }
+  .shell { display: grid; grid-template-columns: 248px minmax(0, 1fr); }
   .topbar, .bottom-nav { display: none; }
   .side {
     display: flex;
@@ -331,3 +331,31 @@ nav.only-mobile .chip { flex: none; }
 .crm-tpl-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
 @media (min-width: 900px) { .crm-tpl-grid { grid-template-columns: 220px minmax(0, 1fr); } }
 main:focus, main:focus-visible { outline: none; }
+
+/* ---- Touch: 44px targets and 16px fields on phones and tablets. !important because many pages set minHeight / fontSize inline. */
+@media (max-width: 899px), (pointer: coarse) {
+  .btn, .btn-sm, .chip, .tabs a, .back, a.link:not(p a), summary.link, .input-sm, .check, select, button[type="submit"], td button, td select, .table td a { min-height: 44px !important; }
+  .table td a, a.link:not(p a) { display: inline-flex; align-items: center; }
+  .btn, .chip { min-width: 44px; }
+}
+@media (max-width: 899px) {
+  input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=range]), select, textarea { font-size: 16px !important; }
+  input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=range]) { min-height: 44px !important; }
+}
+@media (max-width: 899px), (pointer: coarse) {
+  /* Inline minHeight: 40 on buttons, links and fields across pages. */
+  .content [style*="min-height: 40px"], .content [style*="min-height:40px"], .content button { min-height: 44px !important; }
+  .content a[style*="min-height"] { display: inline-flex; align-items: center; }
+}
+@media (max-width: 899px), (pointer: coarse) {
+  /* Filter pills written as inline-styled links (tenants, payments, tickets, follow-ups, audit). */
+  .content a[style*="padding"][style*="border"] { min-height: 44px; display: inline-flex; align-items: center; }
+}
+/* Signup funnel: three stages and two arrows in a row only fit from tablet up; on phones they stack. */
+@media (max-width: 760px) {
+  .funnel-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .funnel-grid > div { min-width: 0 !important; }
+}
+/* Long button labels wrap on phones instead of running past the screen edge. */
+.btn { max-width: 100%; }
+@media (max-width: 640px) { .btn { white-space: normal; line-height: 1.25; padding-block: 8px; } }

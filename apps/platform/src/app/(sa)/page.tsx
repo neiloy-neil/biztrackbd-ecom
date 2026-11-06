@@ -315,7 +315,7 @@ export default async function Overview() {
                 ● {health.overall}
               </span>
             </div>
-            <Link href="/settings" style={{ fontSize: 12.5, fontWeight: 600, color: "var(--brand)", textDecoration: "none" }} prefetch={false}>
+            <Link href="/settings" style={{ fontSize: 12.5, fontWeight: 600, color: "var(--brand)", textDecoration: "none", display: "inline-flex", alignItems: "center", minHeight: 44 }} prefetch={false}>
               Configure Gateways →
             </Link>
           </div>
@@ -384,7 +384,7 @@ export default async function Overview() {
           <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 12, overflow: "hidden" }}>
             <div style={{ padding: "18px 24px", display: "flex", alignItems: "center", borderBottom: "1px solid var(--line)" }}>
               <div style={{ fontSize: 15, fontWeight: 700, flexGrow: 1 }}>Newest signups</div>
-              <Link href="/tenants" style={{ fontSize: 13, fontWeight: 600, color: "var(--brand)", textDecoration: "none", display: "inline-flex", alignItems: "center", minHeight: 40 }} prefetch={false}>
+              <Link href="/tenants" style={{ fontSize: 13, fontWeight: 600, color: "var(--brand)", textDecoration: "none", display: "inline-flex", alignItems: "center", minHeight: 44 }} prefetch={false}>
                 All tenants
               </Link>
             </div>

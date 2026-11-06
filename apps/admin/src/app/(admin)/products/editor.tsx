@@ -197,7 +197,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
         <div className="split">
           <div className="col stack">
             <section className="card">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, paddingBottom: 10, borderBottom: "1px solid var(--line, #E2E8F0)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, paddingBottom: 10, borderBottom: "1px solid var(--line, var(--line))" }}>
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 700, fontSize: 14 }}>
                     One-Click Product Generator
@@ -577,7 +577,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                   />
                   <span>📦 Physical Goods</span>
                 </label>
-                <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontWeight: p.isDigital ? 600 : 400, color: "#059669" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontWeight: p.isDigital ? 600 : 400, color: "var(--success)" }}>
                   <input
                     type="radio"
                     name="isDigital"
@@ -690,7 +690,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                           ))}
                         </div>
                       ) : (
-                        <p style={{ fontSize: 12.5, color: "#64748b", margin: "6px 0" }}>No custom fields added yet.</p>
+                        <p style={{ fontSize: 12.5, color: "var(--ink-3)", margin: "6px 0" }}>No custom fields added yet.</p>
                       )}
 
                       <button
@@ -717,6 +717,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
 
             <section className="card">
               <h2>Google preview</h2>
+              {/* Mimics a Google result, so it stays white in the dark theme too. */}
               <div style={{ background: "#fff", borderRadius: 8, padding: 12 }}>
                 <div style={{ fontSize: 13, color: "#4D5156", wordBreak: "break-all" }}>/products/{p.slug || "your-product"}</div>
                 <div style={{ color: "#1a0dab", fontSize: 17, margin: "2px 0" }}>{p.seoTitle || p.title || "Product name"}</div>
@@ -838,7 +839,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
           }}
           onClick={() => setEditingAltIndex(null)}
         >
-          <div className="card stack" style={{ maxWidth: 460, width: "100%", background: "#fff", borderRadius: 12, padding: 20 }} onClick={(e) => e.stopPropagation()}>
+          <div className="card stack" style={{ maxWidth: 460, width: "100%", background: "var(--surface)", borderRadius: 12, padding: 20 }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Image Alt Text (SEO &amp; Accessibility)</h3>
               <button type="button" style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", padding: "0 4px" }} onClick={() => setEditingAltIndex(null)}>×</button>
@@ -847,7 +848,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
               Descriptive text for visually impaired shoppers and Google Image indexing.
             </p>
             {editingAltIndex !== null && p.images[editingAltIndex] && (
-              <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12, padding: 8, background: "#F8FAFC", borderRadius: 8 }}>
+              <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12, padding: 8, background: "var(--bg)", borderRadius: 8 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={p.images[editingAltIndex]!.url} alt="" style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 6 }} />
                 <span className="muted" style={{ fontSize: 12 }}>Photo {editingAltIndex + 1} of {p.images.length}</span>
@@ -910,12 +911,12 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
               borderRadius: 14,
               padding: 24,
               boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)",
-              border: "1px solid #E2E8F0",
+              border: "1px solid var(--line)",
               transition: "max-width 0.2s ease",
             }}
           >
             {/* Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "1px solid #E2E8F0", paddingBottom: 14, marginBottom: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "1px solid var(--line)", paddingBottom: 14, marginBottom: 14 }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ fontSize: 20 }}>✨</span>
@@ -927,7 +928,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
               </div>
               <button
                 type="button"
-                style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", padding: "0 4px", color: "#64748B" }}
+                style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", padding: "0 4px", color: "var(--ink-3)" }}
                 onClick={() => setShowAiModal(false)}
                 disabled={aiBusy}
               >
@@ -1020,7 +1021,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
               /* SCREEN 2: Interactive Preview & Review Tabs */
               <div className="stack" style={{ gap: 16 }}>
                 {/* Tab Switcher */}
-                <div style={{ display: "flex", gap: 6, background: "#F1F5F9", padding: 4, borderRadius: 10 }}>
+                <div style={{ display: "flex", gap: 6, background: "var(--chip)", padding: 4, borderRadius: 10 }}>
                   {[
                     { id: "listing", label: "Product Copy", badge: null },
                     { id: "seo", label: "Google SERP Card", badge: "Live" },
@@ -1036,7 +1037,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                         padding: "8px 12px",
                         border: "none",
                         borderRadius: 8,
-                        background: aiPreviewTab === t.id ? "#fff" : "transparent",
+                        background: aiPreviewTab === t.id ? "var(--surface)" : "transparent",
                         fontWeight: aiPreviewTab === t.id ? 700 : 500,
                         fontSize: 13,
                         color: aiPreviewTab === t.id ? "#0F172A" : "#64748B",
@@ -1062,11 +1063,11 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                 {aiPreviewTab === "listing" && (
                   <div className="stack" style={{ gap: 12 }}>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                      <div style={{ padding: 10, background: "#F8FAFC", borderRadius: 8, border: "1px solid #E2E8F0" }}>
+                      <div style={{ padding: 10, background: "var(--bg)", borderRadius: 8, border: "1px solid var(--line)" }}>
                         <span className="muted" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>English Title</span>
                         <div style={{ fontWeight: 600, fontSize: 14, marginTop: 4 }}>{aiGeneratedData.titleEn || "N/A"}</div>
                       </div>
-                      <div style={{ padding: 10, background: "#F8FAFC", borderRadius: 8, border: "1px solid #E2E8F0" }}>
+                      <div style={{ padding: 10, background: "var(--bg)", borderRadius: 8, border: "1px solid var(--line)" }}>
                         <span className="muted" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>Bangla Title (বাংলা)</span>
                         <div style={{ fontWeight: 600, fontSize: 14, marginTop: 4 }} lang="bn">{aiGeneratedData.titleBn || "N/A"}</div>
                       </div>
@@ -1078,9 +1079,9 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                       </div>
                     )}
 
-                    <div style={{ border: "1px solid #E2E8F0", borderRadius: 8, overflow: "hidden" }}>
-                      <div style={{ background: "#F8FAFC", padding: "8px 12px", borderBottom: "1px solid #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ fontSize: 12.5, fontWeight: 700, color: "#334155" }}>Rich HTML Description Preview</span>
+                    <div style={{ border: "1px solid var(--line)", borderRadius: 8, overflow: "hidden" }}>
+                      <div style={{ background: "var(--bg)", padding: "8px 12px", borderBottom: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: 12.5, fontWeight: 700, color: "var(--ink)" }}>Rich HTML Description Preview</span>
                         <span className="muted" style={{ fontSize: 12 }}>Semantic HTML with lists</span>
                       </div>
                       <div
@@ -1109,7 +1110,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                       Live simulation of how this product snippet will appear in Google Search for Bangladeshi online shoppers:
                     </p>
 
-                    <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 10, padding: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+                    <div style={{ background: "#fff", border: "1px solid #dfe1e5", borderRadius: 10, padding: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
                       {/* Google URL Breadcrumb */}
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                         <span style={{ width: 18, height: 18, borderRadius: "50%", background: "#4285F4", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700 }}>G</span>
@@ -1127,7 +1128,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
 
                     {/* Character Count Gauges */}
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                      <div style={{ padding: 10, background: "#F8FAFC", borderRadius: 8, border: "1px solid #E2E8F0" }}>
+                      <div style={{ padding: 10, background: "var(--bg)", borderRadius: 8, border: "1px solid var(--line)" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <span style={{ fontSize: 12, fontWeight: 700 }}>Meta Title Length</span>
                           <span style={{ fontSize: 12, fontWeight: 700, color: (aiGeneratedData.seo.metaTitle?.length || 0) <= 60 ? "#16A34A" : "#DC2626" }}>
@@ -1136,7 +1137,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                         </div>
                         <span className="muted" style={{ fontSize: 12 }}>Recommended for Google Search in BD</span>
                       </div>
-                      <div style={{ padding: 10, background: "#F8FAFC", borderRadius: 8, border: "1px solid #E2E8F0" }}>
+                      <div style={{ padding: 10, background: "var(--bg)", borderRadius: 8, border: "1px solid var(--line)" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <span style={{ fontSize: 12, fontWeight: 700 }}>Meta Description Length</span>
                           <span style={{ fontSize: 12, fontWeight: 700, color: (aiGeneratedData.seo.metaDescription?.length || 0) <= 160 ? "#16A34A" : "#DC2626" }}>
@@ -1154,7 +1155,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                   <div className="stack" style={{ gap: 14 }}>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                       {/* Facebook / Instagram Card */}
-                      <div style={{ border: "1px solid #E2E8F0", borderRadius: 10, padding: 14, background: "#F8FAFC" }}>
+                      <div style={{ border: "1px solid var(--line)", borderRadius: 10, padding: 14, background: "var(--bg)" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                           <span style={{ fontSize: 13, fontWeight: 700, color: "#1877F2" }}>Facebook &amp; Instagram Post</span>
                           <button
@@ -1169,13 +1170,13 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                             {copiedField === "fb" ? "Copied!" : "Copy Post"}
                           </button>
                         </div>
-                        <div style={{ fontSize: 12.5, whiteSpace: "pre-wrap", maxHeight: 180, overflowY: "auto", background: "#fff", padding: 10, borderRadius: 6, border: "1px solid #E2E8F0" }}>
+                        <div style={{ fontSize: 12.5, whiteSpace: "pre-wrap", maxHeight: 180, overflowY: "auto", background: "var(--surface)", padding: 10, borderRadius: 6, border: "1px solid var(--line)" }}>
                           {aiGeneratedData.adCopy.facebookCaption || "No social copy available."}
                         </div>
                       </div>
 
                       {/* WhatsApp Broadcast Card */}
-                      <div style={{ border: "1px solid #E2E8F0", borderRadius: 10, padding: 14, background: "#F0FDF4" }}>
+                      <div style={{ border: "1px solid var(--line)", borderRadius: 10, padding: 14, background: "#F0FDF4" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                           <span style={{ fontSize: 13, fontWeight: 700, color: "#15803D" }}>WhatsApp Broadcast Script</span>
                           <button
@@ -1204,19 +1205,19 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                     <p className="muted" style={{ fontSize: 13, margin: 0 }}>
                       Proposed accessibility and SEO alt-tags for product images:
                     </p>
-                    <div style={{ maxHeight: 220, overflowY: "auto", border: "1px solid #E2E8F0", borderRadius: 8 }}>
+                    <div style={{ maxHeight: 220, overflowY: "auto", border: "1px solid var(--line)", borderRadius: 8 }}>
                       {aiGeneratedData.imageAltTexts && aiGeneratedData.imageAltTexts.length > 0 ? (
                         aiGeneratedData.imageAltTexts.map((altItem, idx) => (
                           <div key={idx} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderBottom: idx < aiGeneratedData.imageAltTexts.length - 1 ? "1px solid #E2E8F0" : "none" }}>
-                            <span style={{ fontWeight: 700, fontSize: 12, width: 65, color: "#64748B" }}>Photo {idx + 1}</span>
+                            <span style={{ fontWeight: 700, fontSize: 12, width: 65, color: "var(--ink-3)" }}>Photo {idx + 1}</span>
                             <div style={{ flex: 1 }}>
                               <div style={{ fontSize: 13, fontWeight: 600 }}>{altItem.altEn}</div>
-                              <div style={{ fontSize: 12, color: "#64748B" }} lang="bn">{altItem.altBn}</div>
+                              <div style={{ fontSize: 12, color: "var(--ink-3)" }} lang="bn">{altItem.altBn}</div>
                             </div>
                           </div>
                         ))
                       ) : (
-                        <div style={{ padding: 14, textAlign: "center", color: "#64748B", fontSize: 13 }}>
+                        <div style={{ padding: 14, textAlign: "center", color: "var(--ink-3)", fontSize: 13 }}>
                           No image alt tags generated. Upload product photos to auto-generate tags.
                         </div>
                       )}
@@ -1225,7 +1226,7 @@ export function ProductEditor({ initial, categories, canPublish }: { initial: Ed
                 )}
 
                 {/* ACTION FOOTER */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid #E2E8F0", paddingTop: 14, marginTop: 4, flexWrap: "wrap", gap: 8 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid var(--line)", paddingTop: 14, marginTop: 4, flexWrap: "wrap", gap: 8 }}>
                   <button
                     type="button"
                     className="btn btn-secondary btn-sm"

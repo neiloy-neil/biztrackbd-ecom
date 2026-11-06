@@ -99,6 +99,7 @@ export default async function More() {
                     justifyContent: "space-between",
                     alignItems: "center",
                     padding: "10px 0",
+                    minHeight: 44,
                     borderBottom: i < visibleItems.length - 1 ? "1px solid var(--line)" : "none",
                     color: "var(--ink)",
                     textDecoration: "none",

@@ -171,7 +171,7 @@ export default async function Home() {
             </p>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: 24 }}>
             {/* The Before Card */}
             <div
               className="card ledger-border"
@@ -318,7 +318,7 @@ export default async function Home() {
             </p>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 18 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 250px), 1fr))", gap: 18 }}>
             <div className="card ledger-border" style={{ padding: "22px 20px", background: "#FFFFFF" }}>
               <div style={{ fontSize: 12, fontWeight: 800, color: "var(--ink-3)", textTransform: "uppercase" }}>Global Benchmark</div>
               <h3 style={{ margin: "4px 0 8px", fontSize: 18, color: "var(--ink-ledger)" }}>Shopify</h3>

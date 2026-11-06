@@ -360,6 +360,9 @@ export function MenuDiningClient({
                 color: "var(--muted, #64748b)",
                 textDecoration: "none",
                 padding: "6px 12px",
+                minHeight: 44,
+                display: "inline-flex",
+                alignItems: "center",
                 borderRadius: 8,
                 border: "1px solid var(--border, #e2e8f0)",
               }}
@@ -438,6 +441,7 @@ export function MenuDiningClient({
                 color: "#0f172a",
                 border: "none",
                 padding: "8px 14px",
+                minHeight: 44,
                 borderRadius: 8,
                 fontSize: "0.82rem",
                 fontWeight: 700,
@@ -500,6 +504,7 @@ export function MenuDiningClient({
                     border: "1px solid rgba(16, 185, 129, 0.4)",
                     color: "#065f46",
                     padding: "6px 14px",
+                    minHeight: 44,
                     borderRadius: 8,
                     fontSize: "0.85rem",
                     fontWeight: 700,
@@ -522,6 +527,8 @@ export function MenuDiningClient({
                   fontSize: "0.8rem",
                   textDecoration: "underline",
                   cursor: "pointer",
+                  minHeight: 44,
+                  padding: "0 8px",
                 }}
               >
                 {lang === "bn" ? "টেবিল বদলান" : "Change"}
@@ -562,6 +569,7 @@ export function MenuDiningClient({
                 border: "1px solid var(--border, #cbd5e1)",
                 color: "var(--fg, #0f172a)",
                 padding: "6px 14px",
+                minHeight: 44,
                 borderRadius: 8,
                 fontSize: "0.85rem",
                 fontWeight: 600,
@@ -649,7 +657,8 @@ export function MenuDiningClient({
                 borderRadius: 12,
                 border: "1px solid var(--border, #cbd5e1)",
                 background: "var(--surface, #ffffff)",
-                fontSize: "0.95rem",
+                fontSize: 16,
+                minHeight: 44,
                 outline: "none",
                 boxShadow: "0 2px 6px rgba(0,0,0,0.02)",
               }}
@@ -697,6 +706,7 @@ export function MenuDiningClient({
                     background: active ? "var(--btn-bg, #0f172a)" : "var(--surface, #ffffff)",
                     color: active ? "var(--btn-fg, #ffffff)" : "var(--fg, #475569)",
                     padding: "6px 14px",
+                    minHeight: 44,
                     borderRadius: 9999,
                     fontSize: "0.82rem",
                     fontWeight: active ? 700 : 500,

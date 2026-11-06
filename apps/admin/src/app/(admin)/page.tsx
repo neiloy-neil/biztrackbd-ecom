@@ -617,7 +617,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                 </span>
                 <span className="muted">{shortDate(ser.days.at(-1)!.date)}</span>
               </div>
-              <Link href="/reports" className="link" prefetch={false} style={{ display: "inline-flex", alignItems: "center", minHeight: 40 }}>
+              <Link href="/reports" className="link" prefetch={false} style={{ display: "inline-flex", alignItems: "center", minHeight: 44 }}>
                 Full revenue report →
               </Link>
             </section>
@@ -774,7 +774,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
             {tips.slice(0, 3).map((t) => (
               <div key={t.text} style={{ padding: "8px 0", borderTop: "1px solid var(--line)" }}>
                 <p style={{ margin: "0 0 4px", fontSize: 13.5 }}>{t.text}</p>
-                <Link href={t.href} className="link" prefetch={false} style={{ display: "inline-flex", alignItems: "center", minHeight: 36, fontSize: 13 }}>
+                <Link href={t.href} className="link" prefetch={false} style={{ display: "inline-flex", alignItems: "center", minHeight: 44, fontSize: 13 }}>
                   {t.cta} →
                 </Link>
               </div>

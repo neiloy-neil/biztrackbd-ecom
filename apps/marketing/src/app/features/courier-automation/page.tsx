@@ -287,7 +287,7 @@ export default function CourierAutomationPage() {
             </h2>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))", gap: 20 }}>
             <div className="card ledger-border" style={{ padding: "24px 22px", background: "#FFFFFF" }}>
               <div style={{ fontSize: 26, marginBottom: 8 }}>⚡</div>
               <h3 style={{ margin: "0 0 6px", fontSize: 17, color: "var(--ink-ledger)" }}>Bulk Label Printing</h3>

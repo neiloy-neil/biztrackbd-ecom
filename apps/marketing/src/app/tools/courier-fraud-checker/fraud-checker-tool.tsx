@@ -363,7 +363,7 @@ export function FraudCheckerTool({ initialRemaining = 5 }: FraudCheckerToolProps
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))",
               gap: "16px",
               marginTop: "24px",
             }}
@@ -451,7 +451,7 @@ export function FraudCheckerTool({ initialRemaining = 5 }: FraudCheckerToolProps
               <span>📦</span> কুরিয়ার নেটওয়ার্ক ভিত্তিক পার্সেল রিপোর্ট
             </h3>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "14px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))", gap: "14px" }}>
               {couriers.map((c) => {
                 const s = c.stats;
                 const hasData = s && s.status && s.data.total > 0;

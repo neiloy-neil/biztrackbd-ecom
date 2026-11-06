@@ -8,6 +8,8 @@ import { fileURLToPath } from "node:url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const logs = resolve(root, "qa/logs");
 mkdirSync(logs, { recursive: true });
+// Optional 4th argument: shift every port by this much, for when 3000-3003 are taken by something else.
+const off = Number(process.argv[4] || 0);
 const DB = "127.0.0.1:54329/biztrack_qa_test";
 const blank = ["SMS_NET_BD_API_KEY", "BREVO_API_KEY", "META_APP_SECRET", "META_APP_ID", "SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "SUPABASE_DB_URL", "SUPABASE_APP_DB_URL", "SUPABASE_PLATFORM_DB_URL", "PLATFORM_VERCEL_PROJECT_ID", "PLATFORM_VERCEL_TEAM_ID", "NEXT_PUBLIC_PLATFORM_META_PIXEL_ID", "NEXT_PUBLIC_PLATFORM_GA4_ID", "NEXT_PUBLIC_PLATFORM_GTM_ID"];
 const env = {
@@ -22,8 +24,8 @@ const env = {
   MEDIA_DRIVER: "local",
   SMS_PROVIDER: "",
   DEV_SMS_OUTBOX: resolve(logs, "sms.jsonl"),
-  NEXT_PUBLIC_ROOT_DOMAIN: "localhost:3000",
-  NEXT_PUBLIC_ADMIN_URL: "http://localhost:3001",
+  NEXT_PUBLIC_ROOT_DOMAIN: `localhost:${3000 + off}`,
+  NEXT_PUBLIC_ADMIN_URL: `http://localhost:${3001 + off}`,
   CRON_SECRET: "qa-cron-secret-0123456789",
   CUSTOMER_AUTH_SECRET: process.env.CUSTOMER_AUTH_SECRET || "qa-customer-auth-secret-0123456789",
   // A throwaway key, only so the integrations pages (Settings, Apps) open against the private test database; nothing real is encrypted with it.
@@ -33,7 +35,7 @@ const only = process.argv[2] ? process.argv[2].split(",") : null;
 const kids = [["storefront", 3000], ["admin", 3001], ["marketing", 3002], ["platform", 3003]].filter(([n]) => !only || only.includes(n)).map(([name, port]) => {
   const out = createWriteStream(resolve(logs, `${name}.log`));
   const startApps = (process.argv[3] || "").split(",").filter(Boolean);
-  const c = spawn("pnpm", ["exec", "next", startApps.includes(name) ? "start" : "dev", "-p", String(port)], { cwd: resolve(root, "apps", name), env, shell: true });
+  const c = spawn("pnpm", ["exec", "next", startApps.includes(name) ? "start" : "dev", "-p", String(port + off)], { cwd: resolve(root, "apps", name), env, shell: true });
   c.stdout.pipe(out);
   c.stderr.pipe(out);
   return c;

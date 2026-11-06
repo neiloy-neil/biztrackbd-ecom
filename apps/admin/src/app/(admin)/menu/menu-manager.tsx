@@ -733,9 +733,9 @@ export function MenuManager({
                   alignItems: "center",
                   justifyContent: "center",
                   padding: 16,
-                  background: "#f8fafc",
+                  background: "var(--bg)",
                   borderRadius: 12,
-                  border: "1px solid #e2e8f0",
+                  border: "1px solid var(--line)",
                 }}
               >
                 {qrPreviewUrl ? (
@@ -743,10 +743,10 @@ export function MenuManager({
                   <img
                     src={qrPreviewUrl}
                     alt="Menu QR Code"
-                    style={{ width: 180, height: 180, borderRadius: 8, background: "#fff", padding: 8, border: "1px solid #e2e8f0" }}
+                    style={{ width: 180, height: 180, borderRadius: 8, background: "var(--surface)", padding: 8, border: "1px solid var(--line)" }}
                   />
                 ) : (
-                  <div style={{ width: 180, height: 180, display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: "0.85rem" }}>
+                  <div style={{ width: 180, height: 180, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--ink-3)", fontSize: "0.85rem" }}>
                     Generating QR...
                   </div>
                 )}
@@ -754,7 +754,7 @@ export function MenuManager({
                   <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--ink, #0f172a)" }}>
                     {tableNumber.trim() ? `Table ${tableNumber.trim()}` : "Universal Restaurant Menu"}
                   </span>
-                  <p style={{ fontSize: "0.75rem", color: "#64748b", margin: "2px 0 0", wordBreak: "break-all" }}>{qrTargetUrl}</p>
+                  <p style={{ fontSize: "0.75rem", color: "var(--ink-3)", margin: "2px 0 0", wordBreak: "break-all" }}>{qrTargetUrl}</p>
                 </div>
               </div>
 

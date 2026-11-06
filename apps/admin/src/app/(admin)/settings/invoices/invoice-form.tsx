@@ -34,7 +34,7 @@ function Preview({ doc, paper, showLogo, showSku, prices, footer }: { doc: Doc; 
   const h = HEIGHT[paper];
   return (
     <div ref={wrap} className="inv-frame" style={{ height: h * scale }} data-testid="invoice-preview">
-      {src && <iframe title="Preview of the printed page" src={src} style={{ width: WIDTH[paper], height: h, transform: `scale(${scale})`, transformOrigin: "top left", border: 0, background: "#fff" }} />}
+      {src && <iframe title="Preview of the printed page" src={src} style={{ width: WIDTH[paper], height: h, transform: `scale(${scale})`, transformOrigin: "top left", border: 0, background: "var(--surface)" }} />}
     </div>
   );
 }

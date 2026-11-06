@@ -5,7 +5,7 @@ import { useActionState, useState } from "react";
 import { Button } from "@biztrackbd/ui";
 import { joinAction, type JoinState } from "./actions";
 
-const field = { font: "inherit", padding: "9px 10px", border: "1px solid var(--line)", borderRadius: 8, minHeight: 40 } as const;
+const field = { font: "inherit", padding: "9px 10px", border: "1px solid var(--line)", borderRadius: 8, minHeight: 44 } as const;
 
 export function JoinForm({ token, needsPassword }: { token: string; needsPassword: boolean }) {
   const [state, action, pending] = useActionState<JoinState, FormData>(joinAction.bind(null, token), {});

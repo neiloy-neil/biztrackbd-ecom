@@ -159,7 +159,7 @@ export default async function MigratePage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 240px), 1fr))",
               gap: 20,
             }}
           >
@@ -208,7 +208,7 @@ export default async function MigratePage() {
               borderRadius: "var(--radius-lg)",
               padding: "48px 36px",
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))",
               gap: 36,
               alignItems: "center",
             }}

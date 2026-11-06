@@ -202,7 +202,7 @@ export function VerticalLandingLayout({
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
                 gap: 28,
               }}
             >
@@ -284,7 +284,7 @@ export function VerticalLandingLayout({
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
               gap: 20,
             }}
           >
@@ -322,7 +322,7 @@ export function VerticalLandingLayout({
               </span>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))", gap: 20 }}>
               <div style={{ background: "#FFFFFF", padding: "18px 20px", borderRadius: 10, border: "1px solid var(--line)" }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: "var(--brand)", marginBottom: 8, textTransform: "uppercase" }}>
                   English Version
@@ -357,7 +357,7 @@ export function VerticalLandingLayout({
             <h2 style={{ fontSize: "clamp(24px, 3.5vw, 34px)", letterSpacing: "-0.8px" }}>Explore other specialized industry blueprints</h2>
             <p className="sub" style={{ margin: "8px auto 0" }}>Tailored lead flows, bilingual menus, booking calendars, and credential displays for Bangladeshi businesses.</p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))", gap: 16 }}>
             <Link href="/business/company-website" className="card ledger-border" style={{ padding: 18, background: "#FFFFFF", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
                 <span className="status-stamp stamp-lead">Corporate</span>

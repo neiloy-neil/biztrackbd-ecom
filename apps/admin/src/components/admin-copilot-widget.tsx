@@ -148,7 +148,7 @@ export function AdminCopilotWidget({ lang = "en" }: { lang?: string }) {
             maxWidth: "calc(100vw - 32px)",
             height: "620px",
             maxHeight: "calc(100vh - 120px)",
-            background: "#FFFFFF",
+            background: "var(--surface)",
             borderRadius: "16px",
             boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.08)",
             display: "flex",
@@ -238,7 +238,7 @@ export function AdminCopilotWidget({ lang = "en" }: { lang?: string }) {
               display: "flex",
               flexDirection: "column",
               gap: "12px",
-              background: "#F8FAFC",
+              background: "var(--bg)",
             }}
           >
             {messages.map((m, idx) => (
@@ -305,13 +305,13 @@ export function AdminCopilotWidget({ lang = "en" }: { lang?: string }) {
                   alignSelf: "flex-start",
                   padding: "10px 14px",
                   borderRadius: "14px 14px 14px 2px",
-                  background: "#FFFFFF",
-                  color: "#64748B",
+                  background: "var(--surface)",
+                  color: "var(--ink-3)",
                   fontSize: "13px",
                   display: "flex",
                   alignItems: "center",
                   gap: "6px",
-                  border: "1px solid #E2E8F0",
+                  border: "1px solid var(--line)",
                 }}
               >
                 <span style={{ animation: "pulse 1.5s infinite" }}>✨ এআই হিসাব করছে…</span>
@@ -324,8 +324,8 @@ export function AdminCopilotWidget({ lang = "en" }: { lang?: string }) {
           <div
             style={{
               padding: "8px 12px",
-              background: "#FFFFFF",
-              borderTop: "1px solid #E2E8F0",
+              background: "var(--surface)",
+              borderTop: "1px solid var(--line)",
               display: "flex",
               gap: "6px",
               overflowX: "auto",
@@ -339,12 +339,12 @@ export function AdminCopilotWidget({ lang = "en" }: { lang?: string }) {
                 onClick={() => handleSend(pill)}
                 disabled={loading}
                 style={{
-                  background: "#F1F5F9",
-                  border: "1px solid #CBD5E1",
+                  background: "var(--chip)",
+                  border: "1px solid var(--line-2)",
                   borderRadius: "9999px",
                   padding: "5px 12px",
                   fontSize: "12px",
-                  color: "#334155",
+                  color: "var(--ink)",
                   cursor: "pointer",
                   fontWeight: 500,
                 }}
@@ -362,8 +362,8 @@ export function AdminCopilotWidget({ lang = "en" }: { lang?: string }) {
             }}
             style={{
               padding: "12px 16px",
-              background: "#FFFFFF",
-              borderTop: "1px solid #E2E8F0",
+              background: "var(--surface)",
+              borderTop: "1px solid var(--line)",
               display: "flex",
               gap: "8px",
             }}
@@ -377,7 +377,7 @@ export function AdminCopilotWidget({ lang = "en" }: { lang?: string }) {
               style={{
                 flex: 1,
                 padding: "10px 14px",
-                border: "1px solid #CBD5E1",
+                border: "1px solid var(--line-2)",
                 borderRadius: "8px",
                 fontSize: "13.5px",
                 outline: "none",

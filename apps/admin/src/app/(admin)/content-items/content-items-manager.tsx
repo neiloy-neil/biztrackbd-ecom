@@ -540,7 +540,7 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
                       backgroundColor: it.isPublished ? "transparent" : "var(--bg-muted, #fafafa)",
                     }}
                   >
-                    <td style={{ padding: "12px 14px", color: "#64748b", fontWeight: 600 }}>{idx + 1}</td>
+                    <td style={{ padding: "12px 14px", color: "var(--ink-3)", fontWeight: 600 }}>{idx + 1}</td>
                     <td style={{ padding: "12px 14px" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         {it.mediaUrl ? (
@@ -577,7 +577,7 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
                               {it.summary.length > 90 ? "..." : ""}
                             </div>
                           )}
-                          <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: 3 }}>
+                          <div style={{ fontSize: "0.75rem", color: "var(--ink-3)", marginTop: 3 }}>
                             <code>/{it.slug}</code>
                             {it.kind === "SERVICE" && data.priceStartingAt && (
                               <span style={{ marginLeft: 8, color: "#16a34a", fontWeight: 600 }}>
@@ -716,8 +716,8 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
           <div
             className="modal-card"
             style={{
-              background: "#ffffff",
-              color: "#0f172a",
+              background: "var(--surface)",
+              color: "var(--ink)",
               width: "100%",
               maxWidth: 620,
               maxHeight: "90vh",
@@ -880,8 +880,8 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
 
               {/* DYNAMIC KIND SECTIONS */}
               {formKind === "SERVICE" && (
-                <div style={{ padding: 14, background: "#f8fafc", borderRadius: 8, marginBottom: 14, border: "1px solid #e2e8f0" }}>
-                  <div style={{ fontWeight: 600, fontSize: "0.9rem", marginBottom: 10, color: "#1e293b" }}>
+                <div style={{ padding: 14, background: "var(--bg)", borderRadius: 8, marginBottom: 14, border: "1px solid var(--line)" }}>
+                  <div style={{ fontWeight: 600, fontSize: "0.9rem", marginBottom: 10, color: "var(--ink)" }}>
                     Service Details
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
@@ -951,7 +951,7 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
                           {f}{" "}
                           <button
                             type="button"
-                            style={{ background: "none", border: "none", cursor: "pointer", marginLeft: 4, color: "#64748b" }}
+                            style={{ background: "none", border: "none", cursor: "pointer", marginLeft: 4, color: "var(--ink-3)" }}
                             onClick={() => setServiceFeatures(serviceFeatures.filter((_, idx) => idx !== i))}
                           >
                             ×
@@ -989,8 +989,8 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
               )}
 
               {formKind === "PORTFOLIO" && (
-                <div style={{ padding: 14, background: "#f8fafc", borderRadius: 8, marginBottom: 14, border: "1px solid #e2e8f0" }}>
-                  <div style={{ fontWeight: 600, fontSize: "0.9rem", marginBottom: 10, color: "#1e293b" }}>
+                <div style={{ padding: 14, background: "var(--bg)", borderRadius: 8, marginBottom: 14, border: "1px solid var(--line)" }}>
+                  <div style={{ fontWeight: 600, fontSize: "0.9rem", marginBottom: 10, color: "var(--ink)" }}>
                     Portfolio Project Details
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
@@ -1060,7 +1060,7 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
                           {t}{" "}
                           <button
                             type="button"
-                            style={{ background: "none", border: "none", cursor: "pointer", marginLeft: 4, color: "#64748b" }}
+                            style={{ background: "none", border: "none", cursor: "pointer", marginLeft: 4, color: "var(--ink-3)" }}
                             onClick={() => setPortfolioTags(portfolioTags.filter((_, idx) => idx !== i))}
                           >
                             ×
@@ -1099,8 +1099,8 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
               )}
 
               {formKind === "TEAM" && (
-                <div style={{ padding: 14, background: "#f8fafc", borderRadius: 8, marginBottom: 14, border: "1px solid #e2e8f0" }}>
-                  <div style={{ fontWeight: 600, fontSize: "0.9rem", marginBottom: 10, color: "#1e293b" }}>
+                <div style={{ padding: 14, background: "var(--bg)", borderRadius: 8, marginBottom: 14, border: "1px solid var(--line)" }}>
+                  <div style={{ fontWeight: 600, fontSize: "0.9rem", marginBottom: 10, color: "var(--ink)" }}>
                     Team Member Profile
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
@@ -1195,7 +1195,7 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
                           {c}{" "}
                           <button
                             type="button"
-                            style={{ background: "none", border: "none", cursor: "pointer", marginLeft: 4, color: "#64748b" }}
+                            style={{ background: "none", border: "none", cursor: "pointer", marginLeft: 4, color: "var(--ink-3)" }}
                             onClick={() => setTeamCredentials(teamCredentials.filter((_, idx) => idx !== i))}
                           >
                             ×
@@ -1220,8 +1220,8 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
               )}
 
               {formKind === "CREDENTIAL" && (
-                <div style={{ padding: 14, background: "#f8fafc", borderRadius: 8, marginBottom: 14, border: "1px solid #e2e8f0" }}>
-                  <div style={{ fontWeight: 600, fontSize: "0.9rem", marginBottom: 10, color: "#1e293b" }}>
+                <div style={{ padding: 14, background: "var(--bg)", borderRadius: 8, marginBottom: 14, border: "1px solid var(--line)" }}>
+                  <div style={{ fontWeight: 600, fontSize: "0.9rem", marginBottom: 10, color: "var(--ink)" }}>
                     Credential Details
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 10, marginBottom: 10 }}>
@@ -1276,8 +1276,8 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
               )}
 
               {formKind === "PUBLICATION" && (
-                <div style={{ padding: 14, background: "#f8fafc", borderRadius: 8, marginBottom: 14, border: "1px solid #e2e8f0" }}>
-                  <div style={{ fontWeight: 600, fontSize: "0.9rem", marginBottom: 10, color: "#1e293b" }}>
+                <div style={{ padding: 14, background: "var(--bg)", borderRadius: 8, marginBottom: 14, border: "1px solid var(--line)" }}>
+                  <div style={{ fontWeight: 600, fontSize: "0.9rem", marginBottom: 10, color: "var(--ink)" }}>
                     Publication & Research Details
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 10, marginBottom: 10 }}>
@@ -1347,7 +1347,7 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
                           {a}{" "}
                           <button
                             type="button"
-                            style={{ background: "none", border: "none", cursor: "pointer", marginLeft: 4, color: "#64748b" }}
+                            style={{ background: "none", border: "none", cursor: "pointer", marginLeft: 4, color: "var(--ink-3)" }}
                             onClick={() => setPubAuthors(pubAuthors.filter((_, idx) => idx !== i))}
                           >
                             ×
@@ -1385,8 +1385,8 @@ export function ContentItemsManager({ initialItems, lockedKind, storeOrigin }: P
               )}
 
               {formKind === "EVENT" && (
-                <div style={{ padding: 14, background: "#f8fafc", borderRadius: 8, marginBottom: 14, border: "1px solid #e2e8f0" }}>
-                  <div style={{ fontWeight: 600, fontSize: "0.9rem", marginBottom: 10, color: "#1e293b" }}>
+                <div style={{ padding: 14, background: "var(--bg)", borderRadius: 8, marginBottom: 14, border: "1px solid var(--line)" }}>
+                  <div style={{ fontWeight: 600, fontSize: "0.9rem", marginBottom: 10, color: "var(--ink)" }}>
                     Event & Appearance Details
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>

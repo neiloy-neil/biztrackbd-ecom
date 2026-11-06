@@ -27,7 +27,7 @@ export function AppDisabledNotice({
         padding: "36px 32px",
         borderRadius: 16,
         background: "var(--card, #ffffff)",
-        border: "1px solid var(--border, #e5e7eb)",
+        border: "1px solid var(--border, var(--line))",
         boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05)",
         textAlign: "center",
       }}
