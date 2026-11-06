@@ -2,6 +2,7 @@ import { withTenant, getPlatformPrisma, type OrderStatus, type Prisma } from "@b
 import { NotFoundError, ValidationError } from "../errors";
 import { assertCan, type StaffActor } from "../permissions";
 import { sendServerPurchase } from "../growth/tracking";
+import { recordOrderEvent } from "../admin/order-events";
 import { handleDigitalOrderPaymentSuccess, dispatchDigitalOrderDeliveryNotifications } from "../orders/digital";
 import { loadCredentials } from "../vault/integrations";
 import { enqueueNotificationJob } from "../messaging/queue";
@@ -317,7 +318,51 @@ export async function processUddoktaPayOrderSuccess(
     const order = await tx.order.findFirst({ where: { id: orderId } });
     if (!order) throw new NotFoundError("Order");
 
-    if (order.paymentStatus !== "PAID") {
+    // An advance paid through the gateway on a cash-on-delivery order: credit the advance, leave the rest to the courier.
+    const advanceRequired = Number(order.advanceRequiredAmount);
+    if (advanceRequired > 0 && order.advanceMethod === "GATEWAY_UDDOKTAPAY") {
+      const alreadyCredited = Number(order.advancePaidAmount) + 0.005 >= advanceRequired;
+      if (!alreadyCredited) {
+        const paid = Number(verified.amount);
+        if (!Number.isFinite(paid) || paid < advanceRequired - AMOUNT_TOLERANCE) {
+          console.warn(`UddoktaPay advance mismatch for order ${orderId}: expected ${advanceRequired}, received ${verified.amount ?? "nothing"} (invoice ${invoiceId})`);
+          throw new ValidationError("The amount paid is less than the advance, so the order was not confirmed. Please contact the store.");
+        }
+        if (order.status === "CANCELLED") {
+          // The deadline passed and the order was cancelled before the payment arrived. Do not reopen it (its stock is gone); tell the owner.
+          await recordOrderEvent(tx, tenantId, orderId, {
+            type: "PAYMENT_SUBMITTED", message: `Advance of ৳${paid} arrived after the order was cancelled (UddoktaPay ${verified.transactionId ?? invoiceId}). Refund it or reopen the order.`,
+            actor: { name: "System" }, data: { trxId: verified.transactionId, amount: paid },
+          });
+          return;
+        }
+        const total = Number(order.totalAmount);
+        const credited = Math.min(paid, total);
+        const balance = Math.max(0, Math.round((total - credited) * 100) / 100);
+        await tx.order.update({
+          where: { id: orderId },
+          data: {
+            advancePaidAmount: credited,
+            balanceDue: balance,
+            paymentStatus: balance === 0 ? "PAID" : "PARTIALLY_PAID",
+            status: order.status === "PENDING" ? "CONFIRMED" : order.status,
+            mfsTrxId: verified.transactionId || invoiceId,
+            mfsSenderNumber: verified.senderNumber || null,
+            mfsVerifiedAt: new Date(),
+            mfsVerifiedBy: "uddoktapay",
+          },
+        });
+        await recordOrderEvent(tx, tenantId, orderId, {
+          type: "PAYMENT_VERIFIED", message: `Advance of ৳${credited} received online (UddoktaPay ${verified.transactionId ?? invoiceId}). ${balance === 0 ? "Nothing left to collect." : `Collect ৳${balance} on delivery.`}`,
+          actor: { name: "System" }, data: { trxId: verified.transactionId, advance: credited, balance },
+        });
+        if (order.status === "PENDING") {
+          await tx.orderStateLog.create({
+            data: { tenantId, orderId, fromStatus: order.status, toStatus: "CONFIRMED", actorType: "SYSTEM", actorId: "uddoktapay", reason: `Advance paid online (UddoktaPay - Trx: ${verified.transactionId})` },
+          });
+        }
+      }
+    } else if (order.paymentStatus !== "PAID") {
       // The gateway says COMPLETED, but for what amount? A customer who changes the amount on the payment page (or a mis-set invoice) must not
       // get the whole order. Paying more than the total is accepted; paying less, or an amount we cannot read, leaves the order unpaid.
       const paid = Number(verified.amount);

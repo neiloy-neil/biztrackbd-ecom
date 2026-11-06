@@ -613,6 +613,9 @@ model Order {
   isWholesale         Boolean @default(false)
   advancePaidAmount   Decimal @default(0.00) @db.Decimal(12, 2)
   balanceDue          Decimal @default(0.00) @db.Decimal(12, 2)
+  advanceRequiredAmount Decimal @default(0.00) @db.Decimal(12, 2) // the advance the store rule asked for at checkout; 0 when none
+  advanceDueAt          DateTime? // pay by then or the order is cancelled and the stock released
+  advanceMethod         PaymentMethodType? // how the customer pays the advance (the rest stays on the order's own method, usually COD)
   isPreOrder          Boolean @default(false)
   preOrderDropId      String?
   b2bCompanyName      String?
@@ -2223,6 +2226,11 @@ model StoreSettings {
   codEnabled                 Boolean   @default(true)
   codFee                     Decimal   @default(0.00) @db.Decimal(12, 2) // added to the total when the customer pays cash on delivery
   codMaxAmount               Decimal?  @db.Decimal(12, 2) // cash on delivery is not offered above this order total
+  advanceMode                String    @default("OFF") // advance payment before a cash-on-delivery order is accepted: "OFF" | "FIXED" | "PERCENT" | "FULL"
+  advanceValue               Decimal   @default(0.00) @db.Decimal(12, 2) // taka for FIXED, percent of the total for PERCENT
+  advanceMinOrder            Decimal   @default(0.00) @db.Decimal(12, 2) // the rule only applies to orders at or above this total
+  advancePayVia              String    @default("MANUAL") // how the customer pays it: "MANUAL" (bKash/Nagad + TrxID) | "GATEWAY" | "BOTH"
+  advanceWindowHours         Int       @default(24) // hours the customer has to pay it
   bkashEnabled               Boolean   @default(true)
   nagadEnabled               Boolean   @default(true)
   bkashInstruction           String?

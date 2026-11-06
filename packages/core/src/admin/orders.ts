@@ -78,6 +78,8 @@ export interface OrderRow {
   fraudRiskLevel: "LOW" | "MEDIUM" | "HIGH";
   fraudTrustScore: number;
   fraudReview: string | null;
+  /** The store's advance rule asked for an advance on this order and it is not confirmed yet. */
+  awaitingAdvance: boolean;
 }
 
 export async function listOrders(tenantId: string, actor: StaffActor, f: OrderFilters = {}): Promise<{ rows: OrderRow[]; total: number; page: number; pageSize: number }> {
@@ -121,6 +123,7 @@ export async function listOrders(tenantId: string, actor: StaffActor, f: OrderFi
         district: o.shippingDistrict, area: o.shippingCity, itemCount: o.items.reduce((n, i) => n + i.quantity, 0), paymentMethod: o.paymentMethod,
         paymentStatus: o.paymentStatus, status: o.status, totalAmount: Number(o.totalAmount), channel: o.channel, courierProvider: o.courierProvider, trackingCode: o.trackingCode, priority: o.priorityPacking, tags: o.tags,
         fraudRiskLevel: o.fraudRiskLevel as "LOW" | "MEDIUM" | "HIGH", fraudTrustScore: o.fraudTrustScore, fraudReview: o.fraudReview,
+        awaitingAdvance: Number(o.advanceRequiredAmount) > 0 && Number(o.advancePaidAmount) + 0.005 < Number(o.advanceRequiredAmount) && o.status !== "CANCELLED",
       })),
     };
   });
@@ -177,6 +180,8 @@ export interface OrderDetail {
   customer: { id: string | null; totalOrders: number; totalSpent: number; delivered: number; returned: number; cancelled: number; deliverySuccessPercent: number | null; isBlocked: boolean; since: Date | null } | null;
   nextStatuses: OrderStatus[];
   canEditAddress: boolean;
+  /** The advance the store rule asked for at checkout (0 required = none). */
+  advance: { required: number; paid: number; balance: number; dueAt: Date | null; method: string | null };
   wholesale?: {
     isWholesale: boolean;
     companyName: string | null;
@@ -258,6 +263,7 @@ export async function getOrderDetail(tenantId: string, actor: StaffActor, orderI
       customer,
       nextStatuses: TRANSITIONS[o.status] ?? [],
       canEditAddress: ["PENDING", "CONFIRMED", "PROCESSING"].includes(o.status),
+      advance: { required: Number(o.advanceRequiredAmount), paid: Number(o.advancePaidAmount), balance: Math.max(0, Number(o.totalAmount) - Number(o.advancePaidAmount)), dueAt: o.advanceDueAt, method: o.advanceMethod },
       wholesale: {
         isWholesale: o.isWholesale,
         companyName: o.b2bCompanyName,
@@ -287,7 +293,25 @@ export async function verifyPayment(tenantId: string, actor: StaffActor, orderId
     const o = await tx.order.findFirstOrThrow({ where: { id: orderId } });
     if (o.status === "CANCELLED" || o.status === "REFUNDED") throw new ValidationError("This order is closed");
     if (o.paymentStatus === "PAID") return; // double click
+    if (o.paymentStatus === "PARTIALLY_PAID" && Number(o.advancePaidAmount) + 0.005 >= Number(o.advanceRequiredAmount)) return; // advance already confirmed (double click)
     if (o.paymentStatus !== "PENDING_VERIFICATION" && o.paymentStatus !== "UNPAID" && o.paymentStatus !== "FAILED") throw new ValidationError("This payment cannot be confirmed");
+    const advance = Number(o.advanceRequiredAmount);
+    if (advance > 0 && Number(o.advancePaidAmount) + 0.005 < advance) {
+      // The customer paid the advance the store rule asked for; the rest of the order stays cash on delivery.
+      const total = Number(o.totalAmount);
+      const balance = Math.max(0, Math.round((total - advance) * 100) / 100);
+      await tx.order.update({
+        where: { id: orderId },
+        data: { advancePaidAmount: advance, balanceDue: balance, paymentStatus: balance === 0 ? "PAID" : "PARTIALLY_PAID", mfsVerifiedAt: new Date(), mfsVerifiedBy: actor.userId },
+      });
+      await recordOrderEvent(tx, tenantId, orderId, {
+        type: "PAYMENT_VERIFIED", message: `Advance of ৳${advance} confirmed${o.mfsTrxId ? ` (TrxID ${o.mfsTrxId})` : ""}. ${balance === 0 ? "Nothing left to collect." : `Collect ৳${balance} on delivery.`}`,
+        actor: { id: actor.userId, name: actorName(actor) }, data: { trxId: o.mfsTrxId, advance, balance },
+      });
+      await audit(tx, tenantId, actor, "order.advance_verified", { orderNumber: o.orderNumber, advance, balance, trxId: o.mfsTrxId });
+      shouldConfirm = o.status === "PENDING";
+      return;
+    }
     await tx.order.update({ where: { id: orderId }, data: { paymentStatus: "PAID", mfsVerifiedAt: new Date(), mfsVerifiedBy: actor.userId } });
     await recordOrderEvent(tx, tenantId, orderId, {
       type: "PAYMENT_VERIFIED", message: o.mfsTrxId ? `Payment confirmed (TrxID ${o.mfsTrxId})` : "Marked as paid",

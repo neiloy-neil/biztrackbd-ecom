@@ -1,3 +1,4 @@
+import { advanceRuleFrom, computeAdvance, isFullPrepayment } from "./advance";
 import { withTenant } from "@biztrackbd/db";
 import { z } from "zod";
 import { CouponError, ValidationError } from "../errors";
@@ -82,6 +83,11 @@ export interface Quote {
   discount: number;
   /** Extra charge for cash on delivery, only when COD is the chosen method. */
   codFee: number;
+  /**
+   * What the store's advance rule asks if the customer chooses cash on delivery: pay `amount` now, `balance` is collected on delivery.
+   * amount 0 means no advance. `full` means the whole total is asked up front (no cash-on-delivery fee then).
+   */
+  advance: { amount: number; balance: number; full: boolean; codTotal: number | null; windowHours: number; payVia: "MANUAL" | "GATEWAY" | "BOTH"; bkash: boolean; nagad: boolean };
   couponCode: string | null;
   /** Why the coupon was refused, in plain words. The quote is still returned without it. */
   couponError: string | null;
@@ -333,8 +339,10 @@ export async function quoteOrder(tenantId: string, rawInput: unknown): Promise<Q
 
     const settings = await tx.storeSettings.findFirst();
     const codFeeRule = settings ? Number(settings.codFee) : 0;
-    const codFee = input.paymentMethod === "COD" ? codFeeRule : 0;
     const beforeCod = deliveryCharge != null ? money(subtotal - discount - memberDiscount + deliveryCharge) : null;
+    const advanceRule = advanceRuleFrom(settings);
+    const advanceFull = beforeCod != null && isFullPrepayment(advanceRule, beforeCod);
+    const codFee = input.paymentMethod === "COD" && !advanceFull ? codFeeRule : 0;
     const codMax = settings?.codMaxAmount != null ? Number(settings.codMaxAmount) : null;
     const codTooBig = codMax != null && beforeCod != null && money(beforeCod + codFeeRule) > codMax;
     const bankDetails = (settings?.wholesaleBankDetails as any) ?? null;
@@ -355,12 +363,25 @@ export async function quoteOrder(tenantId: string, rawInput: unknown): Promise<Q
       ordersPaused: settings?.ordersPaused ?? false,
     };
 
+    const codTotalForAdvance = beforeCod != null ? money(beforeCod + (advanceFull ? 0 : codFeeRule)) : null;
+    const advanceAmount = codTotalForAdvance != null && !isDigitalOrder && paymentOptions.cod.available ? computeAdvance(advanceRule, codTotalForAdvance) : 0;
+    const advance = {
+      amount: advanceAmount,
+      balance: codTotalForAdvance != null ? money(codTotalForAdvance - advanceAmount) : 0,
+      full: advanceAmount > 0 && codTotalForAdvance != null && advanceAmount >= codTotalForAdvance,
+      codTotal: codTotalForAdvance,
+      windowHours: advanceRule.windowHours,
+      payVia: advanceRule.payVia,
+      bkash: paymentOptions.bkash.available,
+      nagad: paymentOptions.nagad.available,
+    };
+
     const freeOver = zone?.freeOverAmount != null ? Number(zone.freeOverAmount) : null;
     const wholesaleMin = settings?.wholesaleMinOrderAmount ? Number(settings.wholesaleMinOrderAmount) : 0;
 
     return {
       isDigitalOrder,
-      codFee, paymentOptions,
+      codFee, advance, paymentOptions,
       lines, subtotal, problems, discount, couponCode, couponError, loyalty, deliveryCharge,
       bundleSavings, bumpSavings, wholesaleSavings: totalWholesaleSavings,
       wholesale: {

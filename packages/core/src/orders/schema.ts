@@ -35,6 +35,8 @@ export const CreateOrderInput = z.object({
   bumpIds: z.array(z.string()).optional(),
   paymentMethod: z.enum(PAYMENT_METHODS).default("COD"),
   mfs: z.object({ senderNumber: z.string(), trxId: z.string() }).optional(),
+  /** How the customer pays the advance the store rule asks for on a cash-on-delivery order. Ignored when the rule does not apply. */
+  advance: z.object({ method: z.enum(["MANUAL_BKASH", "MANUAL_NAGAD", "GATEWAY_UDDOKTAPAY"]), mfs: z.object({ senderNumber: z.string(), trxId: z.string() }).optional() }).optional(),
   couponCode: z.string().trim().max(40).optional(),
   notes: z.string().max(500).optional(),
   channel: z.string().default("STOREFRONT"),
