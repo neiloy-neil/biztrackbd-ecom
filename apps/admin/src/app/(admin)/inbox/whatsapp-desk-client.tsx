@@ -461,8 +461,8 @@ export function WhatsAppDeskClient({
           gridTemplateColumns: "330px 1fr 310px",
           height: "calc(100vh - 210px)",
           minHeight: 620,
-          background: "#FFF",
-          border: "1px solid var(--line, #CBD5E1)",
+          background: "var(--surface)",
+          border: "1px solid var(--line, var(--line-2))",
           borderRadius: 12,
           overflow: "hidden",
           boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
@@ -473,25 +473,25 @@ export function WhatsAppDeskClient({
         {/* ========================================================= */}
         <div
           style={{
-            borderRight: "1px solid var(--line, #E2E8F0)",
+            borderRight: "1px solid var(--line, var(--line))",
             display: "flex",
             flexDirection: "column",
-            background: "#F8FAFC",
+            background: "var(--bg)",
           }}
         >
           {/* Assignment Filter Tabs */}
           <div
             style={{
               padding: "10px 12px 6px",
-              borderBottom: "1px solid #E2E8F0",
-              background: "#FFF",
+              borderBottom: "1px solid var(--line)",
+              background: "var(--surface)",
             }}
           >
             <div
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr 1fr",
-                background: "#F1F5F9",
+                background: "var(--chip)",
                 padding: 3,
                 borderRadius: 8,
                 marginBottom: 8,
@@ -518,8 +518,8 @@ export function WhatsAppDeskClient({
                       borderRadius: 6,
                       fontSize: 12,
                       fontWeight: isActive ? 700 : 500,
-                      background: isActive ? "#FFF" : "transparent",
-                      color: isActive ? "#0F172A" : "#64748B",
+                      background: isActive ? "var(--surface)" : "transparent",
+                      color: isActive ? "var(--ink)" : "var(--ink-3)",
                       cursor: "pointer",
                       boxShadow: isActive ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
                       transition: "all 0.15s ease",
@@ -556,8 +556,8 @@ export function WhatsAppDeskClient({
                     borderRadius: 6,
                     border: "none",
                     cursor: "pointer",
-                    background: statusFilter === st ? "#0F172A" : "#E2E8F0",
-                    color: statusFilter === st ? "#FFF" : "#475569",
+                    background: statusFilter === st ? "var(--brand)" : "var(--chip)",
+                    color: statusFilter === st ? "var(--brand-ink)" : "var(--ink-2)",
                   }}
                 >
                   {st === "ALL"
@@ -592,7 +592,7 @@ export function WhatsAppDeskClient({
                       padding: "10px 14px",
                       borderBottom: "1px solid #F1F5F9",
                       cursor: "pointer",
-                      background: isSelected ? "#EFF6FF" : "#FFF",
+                      background: isSelected ? "var(--tint-info)" : "var(--surface)",
                       borderLeft: isSelected ? "3px solid #2563EB" : "3px solid transparent",
                       transition: "background 0.15s ease",
                     }}
@@ -605,10 +605,10 @@ export function WhatsAppDeskClient({
                         marginBottom: 3,
                       }}
                     >
-                      <div style={{ fontWeight: 700, fontSize: 13.5, color: "#0F172A" }}>
+                      <div style={{ fontWeight: 700, fontSize: 13.5, color: "var(--ink)" }}>
                         {c.customerName || c.customerPhone}
                       </div>
-                      <span style={{ fontSize: 12, color: "#94A3B8" }}>
+                      <span style={{ fontSize: 12, color: "var(--ink-3)" }}>
                         {new Date(c.lastMessageAt).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -626,7 +626,7 @@ export function WhatsAppDeskClient({
                       <div
                         style={{
                           fontSize: 12,
-                          color: "#475569",
+                          color: "var(--ink-2)",
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
@@ -666,8 +666,8 @@ export function WhatsAppDeskClient({
                         <span
                           style={{
                             fontSize: 12,
-                            background: isAssignedToMe ? "#DCFCE7" : "#F1F5F9",
-                            color: isAssignedToMe ? "#15803D" : "#475569",
+                            background: isAssignedToMe ? "var(--success-bg)" : "var(--chip)",
+                            color: isAssignedToMe ? "var(--success)" : "var(--ink-2)",
                             padding: "1px 6px",
                             borderRadius: 4,
                             fontWeight: isAssignedToMe ? 700 : 500,
@@ -679,8 +679,8 @@ export function WhatsAppDeskClient({
                         <span
                           style={{
                             fontSize: 12,
-                            background: "#FEF3C7",
-                            color: "#B45309",
+                            background: "var(--warning-bg)",
+                            color: "var(--notice-ink)",
                             padding: "1px 6px",
                             borderRadius: 4,
                             fontWeight: 600,
@@ -700,25 +700,25 @@ export function WhatsAppDeskClient({
         {/* ========================================================= */}
         {/* MIDDLE PANE: CHAT TRANSCRIPT & INTERACTIVE COMPOSER       */}
         {/* ========================================================= */}
-        <div style={{ display: "flex", flexDirection: "column", background: "#ECE5DD", position: "relative" }}>
+        <div style={{ display: "flex", flexDirection: "column", background: "var(--tint)", position: "relative" }}>
           {selectedConv ? (
             <>
               {/* Chat Header */}
               <div
                 style={{
-                  background: "#F0F2F5",
+                  background: "var(--bg)",
                   padding: "10px 16px",
-                  borderBottom: "1px solid #CBD5E1",
+                  borderBottom: "1px solid var(--line-2)",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
                 }}
               >
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: 14.5, color: "#111827" }}>
+                  <div style={{ fontWeight: 700, fontSize: 14.5, color: "var(--ink)" }}>
                     {activeChat?.customer?.name || selectedConv.customerName || selectedConv.customerPhone}
                   </div>
-                  <div style={{ fontSize: 12, color: "#64748B" }}>
+                  <div style={{ fontSize: 12, color: "var(--ink-3)" }}>
                     WhatsApp: <code>{selectedConv.customerPhone}</code>
                   </div>
                 </div>
@@ -764,9 +764,9 @@ export function WhatsAppDeskClient({
                     style={{
                       fontSize: 12,
                       padding: "3px 8px",
-                      background: isBotPaused ? "#FEF3C7" : "#EFF6FF",
+                      background: isBotPaused ? "var(--warning-bg)" : "var(--tint-info)",
                       borderColor: isBotPaused ? "#F59E0B" : "#3B82F6",
-                      color: isBotPaused ? "#92400E" : "#1D4ED8",
+                      color: isBotPaused ? "var(--notice-ink)" : "var(--info)",
                       fontWeight: 600,
                     }}
                     title={isBotPaused ? "Bot is paused on this thread. Click to resume." : "Bot is active. Click to pause."}
@@ -811,11 +811,11 @@ export function WhatsAppDeskClient({
                 }}
               >
                 {isLoadingChat ? (
-                  <div style={{ textAlign: "center", margin: "auto", color: "#64748B" }}>
+                  <div style={{ textAlign: "center", margin: "auto", color: "var(--ink-3)" }}>
                     Loading conversation…
                   </div>
                 ) : activeChat?.messages?.length === 0 ? (
-                  <div style={{ textAlign: "center", margin: "auto", color: "#64748B" }}>
+                  <div style={{ textAlign: "center", margin: "auto", color: "var(--ink-3)" }}>
                     No messages yet.
                   </div>
                 ) : (
@@ -828,13 +828,13 @@ export function WhatsAppDeskClient({
                         style={{
                           alignSelf: isCustomer ? "flex-start" : "flex-end",
                           maxWidth: "75%",
-                          background: isCustomer ? "#FFFFFF" : isBot ? "#EFF6FF" : "#D9FDD3",
+                          background: isCustomer ? "var(--surface)" : isBot ? "var(--tint-info)" : "var(--success-bg)",
                           padding: "8px 12px",
                           borderRadius: isCustomer ? "8px 8px 8px 0px" : "8px 8px 0px 8px",
                           boxShadow: "0 1px 2px rgba(0,0,0,0.12)",
                           fontSize: 13,
                           lineHeight: 1.45,
-                          color: "#0F172A",
+                          color: "var(--ink)",
                         }}
                       >
                         {!isCustomer && (
@@ -842,7 +842,7 @@ export function WhatsAppDeskClient({
                             style={{
                               fontSize: 12,
                               fontWeight: 700,
-                              color: isBot ? "#2563EB" : "#15803D",
+                              color: isBot ? "var(--info)" : "var(--success)",
                               marginBottom: 2,
                             }}
                           >
@@ -855,7 +855,7 @@ export function WhatsAppDeskClient({
                         <div
                           style={{
                             fontSize: 9.5,
-                            color: "#94A3B8",
+                            color: "var(--ink-3)",
                             textAlign: "right",
                             marginTop: 3,
                           }}
@@ -882,8 +882,8 @@ export function WhatsAppDeskClient({
                     right: 14,
                     maxHeight: 220,
                     overflowY: "auto",
-                    background: "#FFF",
-                    border: "1px solid #CBD5E1",
+                    background: "var(--surface)",
+                    border: "1px solid var(--line-2)",
                     borderRadius: 8,
                     boxShadow: "0 -4px 16px rgba(0,0,0,0.12)",
                     zIndex: 20,
@@ -892,11 +892,11 @@ export function WhatsAppDeskClient({
                   <div
                     style={{
                       padding: "6px 12px",
-                      background: "#F8FAFC",
-                      borderBottom: "1px solid #E2E8F0",
+                      background: "var(--bg)",
+                      borderBottom: "1px solid var(--line)",
                       fontSize: 12,
                       fontWeight: 700,
-                      color: "#64748B",
+                      color: "var(--ink-3)",
                       display: "flex",
                       justifyContent: "space-between",
                     }}
@@ -912,7 +912,7 @@ export function WhatsAppDeskClient({
                         padding: "8px 12px",
                         cursor: "pointer",
                         borderBottom: "1px solid #F1F5F9",
-                        background: idx === selectedSlashIndex ? "#EFF6FF" : "#FFF",
+                        background: idx === selectedSlashIndex ? "var(--tint-info)" : "var(--surface)",
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
@@ -922,13 +922,13 @@ export function WhatsAppDeskClient({
                         <span style={{ fontWeight: 700, color: "#2563EB", fontSize: 12 }}>
                           /{qr.shortcut}
                         </span>{" "}
-                        <span style={{ fontWeight: 600, color: "#1E293B", fontSize: 12 }}>
+                        <span style={{ fontWeight: 600, color: "var(--ink)", fontSize: 12 }}>
                           {qr.title}
                         </span>
                         <div
                           style={{
                             fontSize: 12,
-                            color: "#64748B",
+                            color: "var(--ink-3)",
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -949,9 +949,9 @@ export function WhatsAppDeskClient({
               {/* Quick Replies Bar */}
               <div
                 style={{
-                  background: "#F0F2F5",
+                  background: "var(--bg)",
                   padding: "6px 12px",
-                  borderTop: "1px solid #CBD5E1",
+                  borderTop: "1px solid var(--line-2)",
                   display: "flex",
                   gap: 6,
                   alignItems: "center",
@@ -985,13 +985,13 @@ export function WhatsAppDeskClient({
                     type="button"
                     onClick={() => insertQuickReply(qr.body)}
                     style={{
-                      background: "#FFF",
-                      border: "1px solid #CBD5E1",
+                      background: "var(--surface)",
+                      border: "1px solid var(--line-2)",
                       borderRadius: 14,
                       padding: "3px 10px",
                       fontSize: 12,
                       cursor: "pointer",
-                      color: "#334155",
+                      color: "var(--ink)",
                     }}
                     title={qr.body}
                   >
@@ -1003,9 +1003,9 @@ export function WhatsAppDeskClient({
               {/* Composer Input Box */}
               <div
                 style={{
-                  background: "#F0F2F5",
+                  background: "var(--bg)",
                   padding: "10px 14px",
-                  borderTop: "1px solid #CBD5E1",
+                  borderTop: "1px solid var(--line-2)",
                   display: "flex",
                   gap: 10,
                   alignItems: "center",
@@ -1051,7 +1051,7 @@ export function WhatsAppDeskClient({
               </div>
             </>
           ) : (
-            <div style={{ textAlign: "center", margin: "auto", color: "#64748B" }}>
+            <div style={{ textAlign: "center", margin: "auto", color: "var(--ink-3)" }}>
               Select a conversation on the left to start chatting.
             </div>
           )}
@@ -1062,15 +1062,15 @@ export function WhatsAppDeskClient({
         {/* ========================================================= */}
         <div
           style={{
-            borderLeft: "1px solid var(--line, #E2E8F0)",
-            background: "#FFF",
+            borderLeft: "1px solid var(--line, var(--line))",
+            background: "var(--surface)",
             display: "flex",
             flexDirection: "column",
             overflowY: "auto",
             padding: 14,
           }}
         >
-          <h4 style={{ margin: "0 0 10px", fontSize: 13.5, fontWeight: 700, color: "#0F172A" }}>
+          <h4 style={{ margin: "0 0 10px", fontSize: 13.5, fontWeight: 700, color: "var(--ink)" }}>
             Customer Context
           </h4>
 
@@ -1079,8 +1079,8 @@ export function WhatsAppDeskClient({
               {/* Profile Card */}
               <div
                 style={{
-                  background: "#F8FAFC",
-                  border: "1px solid #E2E8F0",
+                  background: "var(--bg)",
+                  border: "1px solid var(--line)",
                   borderRadius: 8,
                   padding: 10,
                   marginBottom: 12,
@@ -1124,7 +1124,7 @@ export function WhatsAppDeskClient({
               </Link>
 
               {/* Recent Orders Action Cards */}
-              <h5 style={{ margin: "0 0 8px", fontSize: 12, fontWeight: 700, color: "#64748B" }}>
+              <h5 style={{ margin: "0 0 8px", fontSize: 12, fontWeight: 700, color: "var(--ink-3)" }}>
                 Recent Orders ({activeChat?.customer?.orders?.length ?? 0})
               </h5>
 
@@ -1134,10 +1134,10 @@ export function WhatsAppDeskClient({
                     <div
                       key={ord.id}
                       style={{
-                        border: "1px solid #E2E8F0",
+                        border: "1px solid var(--line)",
                         borderRadius: 8,
                         padding: 10,
-                        background: "#FAFAFA",
+                        background: "var(--bg)",
                       }}
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -1174,7 +1174,7 @@ export function WhatsAppDeskClient({
                           gap: 4,
                           marginTop: 8,
                           paddingTop: 6,
-                          borderTop: "1px solid #E2E8F0",
+                          borderTop: "1px solid var(--line)",
                         }}
                       >
                         {ord.status === "PENDING" && (
@@ -1256,7 +1256,7 @@ export function WhatsAppDeskClient({
         >
           <div
             style={{
-              background: "#FFF",
+              background: "var(--surface)",
               borderRadius: 12,
               width: "100%",
               maxWidth: 640,
@@ -1271,7 +1271,7 @@ export function WhatsAppDeskClient({
             <div
               style={{
                 padding: "14px 18px",
-                borderBottom: "1px solid #E2E8F0",
+                borderBottom: "1px solid var(--line)",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -1432,10 +1432,10 @@ export function WhatsAppDeskClient({
                   <div
                     key={qr.id}
                     style={{
-                      border: "1px solid #E2E8F0",
+                      border: "1px solid var(--line)",
                       borderRadius: 8,
                       padding: "10px 14px",
-                      background: "#FAFAFA",
+                      background: "var(--bg)",
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "flex-start",
@@ -1446,7 +1446,7 @@ export function WhatsAppDeskClient({
                         <span style={{ fontWeight: 700, color: "#2563EB", fontSize: 13 }}>
                           /{qr.shortcut}
                         </span>
-                        <span style={{ fontWeight: 600, color: "#0F172A", fontSize: 13 }}>
+                        <span style={{ fontWeight: 600, color: "var(--ink)", fontSize: 13 }}>
                           {qr.title}
                         </span>
                         <span className="pill info" style={{ fontSize: 9.5 }}>
@@ -1456,7 +1456,7 @@ export function WhatsAppDeskClient({
                       <div
                         style={{
                           fontSize: 12,
-                          color: "#475569",
+                          color: "var(--ink-2)",
                           marginTop: 4,
                           whiteSpace: "pre-wrap",
                         }}

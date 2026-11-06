@@ -118,11 +118,11 @@ export default async function MerchantTicketDetailPage({
                   <div
                     key={m.id}
                     style={{
-                      background: "#F1F5F9",
+                      background: "var(--chip)",
                       padding: "8px 14px",
                       borderRadius: 8,
                       fontSize: 12,
-                      color: "#475569",
+                      color: "var(--ink-2)",
                       textAlign: "center",
                       fontStyle: "italic",
                       alignSelf: "center",
@@ -148,8 +148,8 @@ export default async function MerchantTicketDetailPage({
                       maxWidth: "80%",
                       borderRadius: 12,
                       padding: "12px 16px",
-                      background: isMerchant ? "#0B4D3B" : "#ffffff",
-                      color: isMerchant ? "#ffffff" : "#0f172a",
+                      background: isMerchant ? "#0B4D3B" : "var(--surface)",
+                      color: isMerchant ? "#ffffff" : "var(--ink)",
                       border: isMerchant ? "none" : "1px solid var(--line, #e2e8f0)",
                       boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
                     }}
@@ -200,7 +200,7 @@ export default async function MerchantTicketDetailPage({
         </div>
 
         {/* Reply Composer Form */}
-        <form action={replyTicketAction} className="p-md border-top stack gap-md" style={{ background: "#ffffff" }}>
+        <form action={replyTicketAction} className="p-md border-top stack gap-md" style={{ background: "var(--surface)" }}>
           <input type="hidden" name="ticketId" value={ticket.id} />
 
           <div className="text-sm text-bold">Reply to Support Team</div>

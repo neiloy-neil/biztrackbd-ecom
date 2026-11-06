@@ -287,7 +287,7 @@ export function AppStoreClient({
           flexWrap: "wrap",
           gap: 16,
           background: "linear-gradient(135deg, var(--card-bg, #fff) 0%, color-mix(in srgb, var(--brand) 5%, transparent) 100%)",
-          border: "1px solid var(--border, #e5e7eb)",
+          border: "1px solid var(--border, var(--line))",
         }}
       >
         <div>
@@ -346,7 +346,7 @@ export function AppStoreClient({
                   cursor: "pointer",
                   fontWeight: active ? 700 : 500,
                   background: active ? "var(--brand)" : undefined,
-                  color: active ? "#fff" : undefined,
+                  color: active ? "var(--brand-ink)" : undefined,
                 }}
               >
                 {c.label} ({count})
@@ -406,7 +406,7 @@ export function AppStoreClient({
                           alignItems: "center",
                           justifyContent: "center",
                           background: "var(--bg-subtle, #f3f4f6)",
-                          border: "1px solid var(--border, #e5e7eb)",
+                          border: "1px solid var(--border, var(--line))",
                           flexShrink: 0,
                         }}
                       >
@@ -481,7 +481,7 @@ export function AppStoreClient({
                 {/* Bottom Actions */}
                 <div
                   style={{
-                    borderTop: "1px solid var(--border, #e5e7eb)",
+                    borderTop: "1px solid var(--border, var(--line))",
                     paddingTop: 12,
                     display: "flex",
                     justifyContent: "space-between",
@@ -578,7 +578,7 @@ export function AppStoreClient({
               maxHeight: "90vh",
               overflowY: "auto",
               boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
-              border: "1px solid var(--border, #e5e7eb)",
+              border: "1px solid var(--border, var(--line))",
               padding: 0,
               position: "relative",
             }}
@@ -587,7 +587,7 @@ export function AppStoreClient({
             <div
               style={{
                 padding: "20px 24px",
-                borderBottom: "1px solid var(--border, #e5e7eb)",
+                borderBottom: "1px solid var(--border, var(--line))",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -603,8 +603,8 @@ export function AppStoreClient({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    background: "#fff",
-                    border: "1px solid var(--border, #e5e7eb)",
+                    background: "var(--surface)",
+                    border: "1px solid var(--border, var(--line))",
                     flexShrink: 0,
                   }}
                 >
@@ -684,7 +684,7 @@ export function AppStoreClient({
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
                       <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 14 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                          <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "#1E293B" }}>
+                          <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--ink)" }}>
                             Dynamic XML Sitemap
                           </span>
                           <a
@@ -703,7 +703,7 @@ export function AppStoreClient({
                             readOnly
                             value={currentSitemapUrl}
                             className="input"
-                            style={{ flex: 1, fontFamily: "monospace", fontSize: 12, background: "#fff" }}
+                            style={{ flex: 1, fontFamily: "monospace", fontSize: 12, background: "var(--surface)" }}
                           />
                           <button
                             type="button"
@@ -724,7 +724,7 @@ export function AppStoreClient({
 
                       <div className="card" style={{ background: "var(--bg-subtle, #f9fafb)", padding: 14 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                          <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "#1E293B" }}>
+                          <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--ink)" }}>
                             Robots.txt Directives
                           </span>
                           <a
@@ -743,7 +743,7 @@ export function AppStoreClient({
                             readOnly
                             value={currentRobotsUrl}
                             className="input"
-                            style={{ flex: 1, fontFamily: "monospace", fontSize: 12, background: "#fff" }}
+                            style={{ flex: 1, fontFamily: "monospace", fontSize: 12, background: "var(--surface)" }}
                           />
                           <button
                             type="button"
@@ -829,7 +829,7 @@ export function AppStoreClient({
                       <h4 style={{ margin: "0 0 8px", fontSize: 14, fontWeight: 700, color: "#EA4335" }}>
                         Google Search Console Verification:
                       </h4>
-                      <p style={{ margin: "0 0 10px", fontSize: 12.5, color: "#475569", lineHeight: 1.5 }}>
+                      <p style={{ margin: "0 0 10px", fontSize: 12.5, color: "var(--ink-2)", lineHeight: 1.5 }}>
                         Paste your Google verification token or HTML tag below. We will automatically inject it into your storefront &lt;head&gt; tag for immediate 1-click verification.
                       </p>
                       <input
@@ -838,9 +838,9 @@ export function AppStoreClient({
                         defaultValue={storeSettings?.googleSiteVerification ?? ""}
                         placeholder='e.g. google0668054f248577b1 or <meta name="google-site-verification" content="..." />'
                         className="input"
-                        style={{ width: "100%", fontFamily: "monospace", fontSize: 13, background: "#fff" }}
+                        style={{ width: "100%", fontFamily: "monospace", fontSize: 13, background: "var(--surface)" }}
                       />
-                      <div style={{ marginTop: 10, fontSize: 12, color: "#475569" }}>
+                      <div style={{ marginTop: 10, fontSize: 12, color: "var(--ink-2)" }}>
                         <strong>Easy 3-Step Setup:</strong>
                         <ol style={{ margin: "4px 0 0", paddingLeft: 18, lineHeight: 1.5 }}>
                           <li>Go to <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer" style={{ color: "#2563EB" }}>Google Search Console</a> and add your store URL prefix.</li>
@@ -851,7 +851,7 @@ export function AppStoreClient({
                     </div>
 
                     {/* Schema.org Rich Snippets Toggle */}
-                    <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "12px 14px", background: "var(--bg-subtle, #f9fafb)", borderRadius: 8, border: "1px solid var(--border, #e5e7eb)" }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "12px 14px", background: "var(--bg-subtle, #f9fafb)", borderRadius: 8, border: "1px solid var(--border, var(--line))" }}>
                       <input
                         type="checkbox"
                         id="richSnippetsEnabled"
@@ -893,7 +893,7 @@ export function AppStoreClient({
                         readOnly
                         value={liveFeedUrl}
                         className="input"
-                        style={{ flex: 1, fontFamily: "monospace", fontSize: 13, background: "#fff" }}
+                        style={{ flex: 1, fontFamily: "monospace", fontSize: 13, background: "var(--surface)" }}
                       />
                       <button
                         type="button"
@@ -1002,7 +1002,7 @@ export function AppStoreClient({
                             readOnly
                             value={webhookUrl}
                             className="input"
-                            style={{ flex: 1, fontFamily: "monospace", fontSize: 12, background: "#fff" }}
+                            style={{ flex: 1, fontFamily: "monospace", fontSize: 12, background: "var(--surface)" }}
                           />
                           <button
                             type="button"
@@ -1141,7 +1141,7 @@ export function AppStoreClient({
                             readOnly
                             value={webhookUrl}
                             className="input"
-                            style={{ flex: 1, fontFamily: "monospace", fontSize: 12, background: "#fff" }}
+                            style={{ flex: 1, fontFamily: "monospace", fontSize: 12, background: "var(--surface)" }}
                           />
                           <button
                             type="button"
@@ -2538,7 +2538,7 @@ export function AppStoreClient({
                   )}
 
                   {currentApp.features && currentApp.features.length > 0 && (
-                    <div className="card" style={{ border: "1px solid var(--border, #e5e7eb)", background: "#fff", padding: 16 }}>
+                    <div className="card" style={{ border: "1px solid var(--border, var(--line))", background: "var(--surface)", padding: 16 }}>
                       <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700 }}>
                         Features Included:
                       </h4>

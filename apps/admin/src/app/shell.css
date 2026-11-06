@@ -223,3 +223,14 @@ div.tabs[role="tablist"] { overflow-x: auto; margin: 0 0 14px; padding: 0; } div
 .table-wrap { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 /* A table in a scroll box keeps a readable width instead of squeezing every column until words break letter by letter. */
 .table-wrap > table.table { min-width: 560px; }
+
+/* ---- Contrast: text on bright fixed brand colours, and on --brand (light in the dark theme). */
+.btn-whatsapp, .btn-whatsapp:hover { color: #06140F !important; }
+.provider-ga4 { color: #1F1300; }
+
+/* Names components already use (with light fallbacks) that no stylesheet defined: they stayed light in the dark theme. */
+:root {
+  --bg-subtle: var(--bg); --card-bg: var(--surface); --card: var(--surface); --card-subtle: var(--bg);
+  --surface-sunken: var(--bg); --bg-muted: var(--chip); --border: var(--line); --text: var(--ink); --text-muted: var(--ink-3);
+}
+.setup-step.done .dot { color: var(--brand-ink); }

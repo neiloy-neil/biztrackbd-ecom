@@ -117,7 +117,7 @@ export function PortfolioCommandCenter({
             <Link
               href={vertical === "RESTAURANT" ? "/menu" : "/services"}
               className="btn btn-sm"
-              style={{ background: "#ffffff", color: "#0B4D3B", fontWeight: 700, padding: "8px 14px", borderRadius: 8 }}
+              style={{ background: "var(--surface)", color: "#0B4D3B", fontWeight: 700, padding: "8px 14px", borderRadius: 8 }}
               prefetch={false}
             >
               + {vertical === "RESTAURANT" ? "Menu Items" : "Services"}
@@ -257,7 +257,7 @@ export function PortfolioCommandCenter({
           <div style={{ fontSize: "1.85rem", fontWeight: 800, marginTop: 6, color: "#16a34a" }}>
             {totalDownloads}
           </div>
-          <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: 4, fontWeight: 500 }}>
+          <div style={{ fontSize: "0.8rem", color: "var(--ink-3)", marginTop: 4, fontWeight: 500 }}>
             Lead magnet & brochure cards
           </div>
         </div>
@@ -272,7 +272,7 @@ export function PortfolioCommandCenter({
           <div style={{ fontSize: "1.85rem", fontWeight: 800, marginTop: 6, color: "var(--brand)" }}>
             {totalContentItems}
           </div>
-          <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: 4, fontWeight: 500 }}>
+          <div style={{ fontSize: "0.8rem", color: "var(--ink-3)", marginTop: 4, fontWeight: 500 }}>
             Services, portfolio, and profiles
           </div>
         </div>
@@ -306,7 +306,7 @@ export function PortfolioCommandCenter({
           </div>
 
           {leads.length === 0 ? (
-            <div style={{ padding: 42, textAlign: "center", color: "#64748b" }}>
+            <div style={{ padding: 42, textAlign: "center", color: "var(--ink-3)" }}>
               <div style={{ fontSize: "2.2rem", marginBottom: 10 }}>📭</div>
               <div style={{ fontWeight: 700, fontSize: "1rem", color: "var(--ink, #0f172a)" }}>Zero pending inquiries</div>
               <p style={{ margin: "4px 0 16px", fontSize: "0.85rem", maxWidth: 420, marginLeft: "auto", marginRight: "auto" }}>
@@ -326,11 +326,11 @@ export function PortfolioCommandCenter({
             <div style={{ overflowX: "auto" }}>
               <table className="table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
                 <thead>
-                  <tr style={{ textAlign: "left", borderBottom: "1px solid var(--border, #f1f5f9)", background: "#fafafa" }}>
-                    <th style={{ padding: "10px 14px", fontWeight: 700, color: "#64748b", fontSize: "0.78rem" }}>CUSTOMER</th>
-                    <th style={{ padding: "10px 14px", fontWeight: 700, color: "#64748b", fontSize: "0.78rem" }}>TYPE / DETAILS</th>
-                    <th style={{ padding: "10px 14px", width: 90, fontWeight: 700, color: "#64748b", fontSize: "0.78rem" }}>STATUS</th>
-                    <th style={{ padding: "10px 14px", width: 110, textAlign: "right", fontWeight: 700, color: "#64748b", fontSize: "0.78rem" }}>WHATSAPP</th>
+                  <tr style={{ textAlign: "left", borderBottom: "1px solid var(--border, #f1f5f9)", background: "var(--bg)" }}>
+                    <th style={{ padding: "10px 14px", fontWeight: 700, color: "var(--ink-3)", fontSize: "0.78rem" }}>CUSTOMER</th>
+                    <th style={{ padding: "10px 14px", fontWeight: 700, color: "var(--ink-3)", fontSize: "0.78rem" }}>TYPE / DETAILS</th>
+                    <th style={{ padding: "10px 14px", width: 90, fontWeight: 700, color: "var(--ink-3)", fontSize: "0.78rem" }}>STATUS</th>
+                    <th style={{ padding: "10px 14px", width: 110, textAlign: "right", fontWeight: 700, color: "var(--ink-3)", fontSize: "0.78rem" }}>WHATSAPP</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -363,7 +363,7 @@ export function PortfolioCommandCenter({
                           >
                             {l.type}
                           </span>
-                          <span style={{ color: "#475569" }}>
+                          <span style={{ color: "var(--ink-2)" }}>
                             {l.message ? l.message.slice(0, 55) + (l.message.length > 55 ? "..." : "") : "Inquiry submitted"}
                           </span>
                         </td>

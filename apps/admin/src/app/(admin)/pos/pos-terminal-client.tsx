@@ -712,7 +712,7 @@ export function PosTerminalClient({ initialData }: Props) {
             background: "var(--card-bg, #ffffff)",
             padding: "10px 16px",
             borderRadius: 10,
-            border: "1px solid var(--line-2, #e5e7eb)",
+            border: "1px solid var(--line-2, var(--line))",
             marginBottom: 14,
             flexWrap: "wrap",
             gap: 10,
@@ -872,11 +872,11 @@ export function PosTerminalClient({ initialData }: Props) {
                         {inCart.quantity}
                       </span>
                     )}
-                    <div style={{ width: "100%", height: 75, background: "#f3f4f6", borderRadius: 6, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
+                    <div style={{ width: "100%", height: 75, background: "var(--chip)", borderRadius: 6, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
                       {p.imageUrl ? (
                         <img src={p.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : (
-                        <span style={{ fontSize: 12, color: "#9ca3af" }}>No image</span>
+                        <span style={{ fontSize: 12, color: "var(--ink-3)" }}>No image</span>
                       )}
                     </div>
                     <div>
@@ -906,7 +906,7 @@ export function PosTerminalClient({ initialData }: Props) {
           {/* Right Side: Active Cart & Checkout Panel */}
           <div className="pos-cart-panel">
             {/* Customer CRM Header */}
-            <div style={{ padding: "12px 14px", borderBottom: "1px solid var(--line-2, #e5e7eb)", background: "#fafafa" }}>
+            <div style={{ padding: "12px 14px", borderBottom: "1px solid var(--line-2, var(--line))", background: "var(--bg)" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-2, #6b7280)" }}>CUSTOMER (ওয়াক-ইন)</span>
                 {customerLoyalty && (
@@ -950,7 +950,7 @@ export function PosTerminalClient({ initialData }: Props) {
                         alignItems: "center",
                         justifyContent: "space-between",
                         padding: "8px 10px",
-                        background: "#ffffff",
+                        background: "var(--surface)",
                         border: "1px solid var(--line-2, #f3f4f6)",
                         borderRadius: 8,
                       }}
@@ -1024,7 +1024,7 @@ export function PosTerminalClient({ initialData }: Props) {
             )}
 
             {/* Financial Summary & Checkout */}
-            <div style={{ padding: "12px 14px", borderTop: "1px solid var(--line-2, #e5e7eb)", background: "#fafafa" }}>
+            <div style={{ padding: "12px 14px", borderTop: "1px solid var(--line-2, var(--line))", background: "var(--bg)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
                 <span className="muted">Subtotal</span>
                 <span>{taka(subtotal)}</span>
@@ -1092,14 +1092,14 @@ export function PosTerminalClient({ initialData }: Props) {
               width: "100%",
               padding: 24,
               borderRadius: 12,
-              background: "#ffffff",
+              background: "var(--surface)",
               boxShadow: "0 20px 25px -5px rgba(0,0,0,0.2)",
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #f3f4f6", paddingBottom: 10 }}>
               <div>
                 <h2 style={{ margin: 0, fontSize: 18 }}>Checkout & Settle</h2>
-                <div style={{ fontSize: 12.5, color: "#6b7280" }}>
+                <div style={{ fontSize: 12.5, color: "var(--ink-2)" }}>
                   Payable: <strong style={{ color: "var(--brand)" }}>{taka(netPayable)}</strong>
                 </div>
               </div>
@@ -1190,7 +1190,7 @@ export function PosTerminalClient({ initialData }: Props) {
             {/* BKASH / NAGAD PAYMENT UI */}
             {(selectedPayMethod === "BKASH" || selectedPayMethod === "NAGAD") && (
               <div>
-                <div style={{ padding: "12px", background: "#f8fafc", borderRadius: 8, marginBottom: 12, fontSize: 13 }}>
+                <div style={{ padding: "12px", background: "var(--bg)", borderRadius: 8, marginBottom: 12, fontSize: 13 }}>
                   <div>Send Money / Merchant Payment to:</div>
                   <strong style={{ fontSize: 16 }}>
                     {selectedPayMethod === "BKASH" ? initialData.store.bkashNumber || "Store bKash" : initialData.store.nagadNumber || "Store Nagad"}
@@ -1210,9 +1210,9 @@ export function PosTerminalClient({ initialData }: Props) {
 
             {/* CARD PAYMENT UI */}
             {selectedPayMethod === "CARD" && (
-              <div style={{ padding: "16px", background: "#f8fafc", borderRadius: 8, textAlign: "center" }}>
+              <div style={{ padding: "16px", background: "var(--bg)", borderRadius: 8, textAlign: "center" }}>
                 <div style={{ fontWeight: 600, margin: "6px 0" }}>Swipe/Tap on Card Terminal</div>
-                <div style={{ fontSize: 12.5, color: "#6b7280" }}>
+                <div style={{ fontSize: 12.5, color: "var(--ink-2)" }}>
                   Collect {taka(netPayable)} via your physical bank POS terminal.
                 </div>
               </div>
@@ -1303,7 +1303,7 @@ export function PosTerminalClient({ initialData }: Props) {
               width: "100%",
               padding: 20,
               borderRadius: 12,
-              background: "#ffffff",
+              background: "var(--surface)",
               boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)",
             }}
           >
@@ -1322,7 +1322,7 @@ export function PosTerminalClient({ initialData }: Props) {
             <div
               className="receipt-print-area"
               style={{
-                background: "#f9fafb",
+                background: "var(--bg)",
                 border: "1px dashed #d1d5db",
                 padding: "16px",
                 borderRadius: 8,
@@ -1352,8 +1352,8 @@ export function PosTerminalClient({ initialData }: Props) {
                   <div key={idx} style={{ display: "flex", justifyContent: "space-between" }}>
                     <div style={{ flex: 1, paddingRight: 6 }}>
                       <div>{it.title}</div>
-                      {it.variantTitle && <div style={{ fontSize: 12, color: "#666" }}>{it.variantTitle}</div>}
-                      <div style={{ fontSize: 12, color: "#666" }}>
+                      {it.variantTitle && <div style={{ fontSize: 12, color: "var(--ink-2)" }}>{it.variantTitle}</div>}
+                      <div style={{ fontSize: 12, color: "var(--ink-2)" }}>
                         {it.quantity} × {it.unitPrice}
                       </div>
                     </div>
@@ -1399,7 +1399,7 @@ export function PosTerminalClient({ initialData }: Props) {
                   style={{ display: "flex", justifyContent: "center" }}
                   dangerouslySetInnerHTML={{ __html: safeHtml(activeReceipt.barcodeSvg) }}
                 />
-                <div style={{ fontSize: 12, color: "#666", marginTop: 4 }}>
+                <div style={{ fontSize: 12, color: "var(--ink-2)", marginTop: 4 }}>
                   Thank you for shopping with us!
                 </div>
               </div>
@@ -1436,7 +1436,7 @@ export function PosTerminalClient({ initialData }: Props) {
           style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
           onClick={(e) => { if (e.target === e.currentTarget) setShowDiscountModal(false); }}
         >
-          <div className="card stack" style={{ maxWidth: 360, width: "100%", padding: 20, borderRadius: 10, background: "#fff" }}>
+          <div className="card stack" style={{ maxWidth: 360, width: "100%", padding: 20, borderRadius: 10, background: "var(--surface)" }}>
             <h3 style={{ margin: 0, fontSize: 16 }}>Cart Discount</h3>
             <div style={{ display: "flex", gap: 8, margin: "10px 0" }}>
               <button
@@ -1492,7 +1492,7 @@ export function PosTerminalClient({ initialData }: Props) {
           style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
           onClick={(e) => { if (e.target === e.currentTarget) setShowParkedModal(false); }}
         >
-          <div className="card stack" style={{ maxWidth: 440, width: "100%", padding: 20, borderRadius: 10, background: "#fff" }}>
+          <div className="card stack" style={{ maxWidth: 440, width: "100%", padding: 20, borderRadius: 10, background: "var(--surface)" }}>
             <h3 style={{ margin: 0, fontSize: 16 }}>Parked / Held Sales ({parkedCarts.length})</h3>
             {parkedCarts.length === 0 ? (
               <p className="muted" style={{ padding: "20px 0", textAlign: "center" }}>No sales currently on hold.</p>
@@ -1504,11 +1504,11 @@ export function PosTerminalClient({ initialData }: Props) {
                   return (
                     <div
                       key={p.id}
-                      style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", border: "1px solid #e5e7eb", borderRadius: 8 }}
+                      style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", border: "1px solid var(--line)", borderRadius: 8 }}
                     >
                       <div>
                         <strong>{p.customerName}</strong>
-                        <div style={{ fontSize: 12, color: "#6b7280" }}>
+                        <div style={{ fontSize: 12, color: "var(--ink-2)" }}>
                           {itemsCount} items · {new Date(p.parkedAt).toLocaleTimeString()}
                         </div>
                       </div>
@@ -1542,7 +1542,7 @@ export function PosTerminalClient({ initialData }: Props) {
           style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
           onClick={(e) => { if (e.target === e.currentTarget) setShowMovementModal(false); }}
         >
-          <div className="card stack" style={{ maxWidth: 400, width: "100%", padding: 20, borderRadius: 10, background: "#fff" }}>
+          <div className="card stack" style={{ maxWidth: 400, width: "100%", padding: 20, borderRadius: 10, background: "var(--surface)" }}>
             <h3 style={{ margin: 0, fontSize: 16 }}>Cash Drawer Adjustment</h3>
             <div style={{ display: "flex", gap: 8, margin: "10px 0" }}>
               <button
@@ -1603,7 +1603,7 @@ export function PosTerminalClient({ initialData }: Props) {
           style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
           onClick={(e) => { if (e.target === e.currentTarget) setShowShiftCloseModal(false); }}
         >
-          <div className="card stack" style={{ maxWidth: 460, width: "100%", padding: 24, borderRadius: 12, background: "#fff" }}>
+          <div className="card stack" style={{ maxWidth: 460, width: "100%", padding: 24, borderRadius: 12, background: "var(--surface)" }}>
             <h2 style={{ margin: "0 0 6px", fontSize: 18 }}>Close POS Shift & Reconcile</h2>
             <p className="muted" style={{ fontSize: 13, margin: "0 0 14px" }}>
               Count physical cash in the drawer to calculate Over/Short variance.
@@ -1614,12 +1614,12 @@ export function PosTerminalClient({ initialData }: Props) {
                 <div className="notice good" style={{ marginBottom: 12 }}>
                   Shift closed successfully.
                 </div>
-                <div style={{ background: "#f8fafc", padding: 14, borderRadius: 8, fontSize: 13, display: "flex", flexDirection: "column", gap: 6 }}>
+                <div style={{ background: "var(--bg)", padding: 14, borderRadius: 8, fontSize: 13, display: "flex", flexDirection: "column", gap: 6 }}>
                   <div style={{ display: "flex", justifyContent: "space-between" }}><span>Total Orders:</span><strong>{shiftSummary.totalOrders}</strong></div>
                   <div style={{ display: "flex", justifyContent: "space-between" }}><span>Total Sales:</span><strong>{taka(shiftSummary.totalSales)}</strong></div>
                   <div style={{ display: "flex", justifyContent: "space-between" }}><span>Cash Sales:</span><span>{taka(shiftSummary.totalCashSales)}</span></div>
                   <div style={{ display: "flex", justifyContent: "space-between" }}><span>bKash/Nagad/Card:</span><span>{taka(shiftSummary.totalMfsSales + shiftSummary.totalCardSales)}</span></div>
-                  <div style={{ margin: "4px 0", borderTop: "1px dashed #cbd5e1" }} />
+                  <div style={{ margin: "4px 0", borderTop: "1px dashed var(--line-2)" }} />
                   <div style={{ display: "flex", justifyContent: "space-between" }}><span>Opening Float:</span><span>{taka(shiftSummary.openingFloat)}</span></div>
                   <div style={{ display: "flex", justifyContent: "space-between" }}><span>Expected Cash:</span><strong>{taka(shiftSummary.expectedCash)}</strong></div>
                   <div style={{ display: "flex", justifyContent: "space-between" }}><span>Counted Cash:</span><strong>{taka(shiftSummary.closingCounted)}</strong></div>
@@ -1646,7 +1646,7 @@ export function PosTerminalClient({ initialData }: Props) {
                     autoFocus
                   />
                 </label>
-                <div style={{ fontSize: 12.5, color: "#6b7280", margin: "6px 0 16px" }}>
+                <div style={{ fontSize: 12.5, color: "var(--ink-2)", margin: "6px 0 16px" }}>
                   System Expected Cash: <strong>{taka(session.expectedCashInDrawer)}</strong>
                 </div>
                 <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>

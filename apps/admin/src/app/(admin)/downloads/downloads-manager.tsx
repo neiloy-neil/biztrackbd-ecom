@@ -282,13 +282,13 @@ export function DownloadsManager({ initialDownloads, storeOrigin }: Props) {
                 const kindMeta = DOWNLOAD_KINDS.find((k) => k.value === it.kind);
                 return (
                   <tr key={it.id} style={{ borderBottom: "1px solid var(--border, #f1f5f9)" }}>
-                    <td style={{ padding: "12px 14px", color: "#64748b", fontWeight: 600 }}>{idx + 1}</td>
+                    <td style={{ padding: "12px 14px", color: "var(--ink-3)", fontWeight: 600 }}>{idx + 1}</td>
                     <td style={{ padding: "12px 14px" }}>
                       <div style={{ fontWeight: 600, color: "var(--text, #1e293b)" }}>
                         {it.label}
                         {it.labelBn && <span className="muted" style={{ marginLeft: 6, fontWeight: 400 }}>({it.labelBn})</span>}
                       </div>
-                      <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: 2 }}>
+                      <div style={{ fontSize: "0.8rem", color: "var(--ink-3)", marginTop: 2 }}>
                         <span>{it.fileName}</span>
                         <span style={{ marginLeft: 8 }}>({formatBytes(it.fileSize)})</span>
                       </div>
@@ -300,8 +300,8 @@ export function DownloadsManager({ initialDownloads, storeOrigin }: Props) {
                           padding: "3px 8px",
                           borderRadius: 12,
                           fontSize: "0.75rem",
-                          background: "#f1f5f9",
-                          color: "#334155",
+                          background: "var(--chip)",
+                          color: "var(--ink)",
                           fontWeight: 500,
                         }}
                       >
@@ -426,8 +426,8 @@ export function DownloadsManager({ initialDownloads, storeOrigin }: Props) {
           <div
             className="modal-card"
             style={{
-              background: "#ffffff",
-              color: "#0f172a",
+              background: "var(--surface)",
+              color: "var(--ink)",
               width: "100%",
               maxWidth: 580,
               maxHeight: "90vh",
@@ -571,7 +571,7 @@ export function DownloadsManager({ initialDownloads, storeOrigin }: Props) {
                   transition: "all 0.2s ease",
                 }}
               >
-                <div style={{ fontWeight: 600, fontSize: "0.95rem", marginBottom: 6, color: "#1e293b" }}>
+                <div style={{ fontWeight: 600, fontSize: "0.95rem", marginBottom: 6, color: "var(--ink)" }}>
                   Access Mode & Lead Gate
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>

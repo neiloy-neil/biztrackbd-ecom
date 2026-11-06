@@ -248,7 +248,7 @@ export function DashboardOperationsClient({
               <div style={{ fontWeight: 700, fontSize: 13.5, letterSpacing: "0.02em" }}>
                 LIVE OPERATIONS PULSE
               </div>
-              <div style={{ fontSize: 12, color: "#64748B" }} suppressHydrationWarning>
+              <div style={{ fontSize: 12, color: "var(--ink-3)" }} suppressHydrationWarning>
                 Updated {mounted ? formatBDTime(lastRefreshedAt) : "Just now"} ·{" "}
                 <button
                   type="button"
@@ -274,7 +274,7 @@ export function DashboardOperationsClient({
           {/* Right: Key Telemetry Metrics */}
           <div style={{ display: "flex", gap: 20, flexWrap: "wrap", alignItems: "center" }}>
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 12, color: "#64748B", textTransform: "uppercase" }}>
+              <div style={{ fontSize: 12, color: "var(--ink-3)", textTransform: "uppercase" }}>
                 Today's AOV
               </div>
               <div style={{ fontSize: 16, fontWeight: 800, color: "#F8FAFC" }}>
@@ -295,7 +295,7 @@ export function DashboardOperationsClient({
             </div>
 
             <div style={{ textAlign: "right", borderLeft: "1px solid #334155", paddingLeft: 16 }}>
-              <div style={{ fontSize: 12, color: "#64748B", textTransform: "uppercase" }}>
+              <div style={{ fontSize: 12, color: "var(--ink-3)", textTransform: "uppercase" }}>
                 COD Cash-at-Risk
               </div>
               <div
@@ -315,7 +315,7 @@ export function DashboardOperationsClient({
             </div>
 
             <div style={{ textAlign: "right", borderLeft: "1px solid #334155", paddingLeft: 16 }}>
-              <div style={{ fontSize: 12, color: "#64748B", textTransform: "uppercase" }}>
+              <div style={{ fontSize: 12, color: "var(--ink-3)", textTransform: "uppercase" }}>
                 Live Conversion
               </div>
               <div style={{ fontSize: 16, fontWeight: 800, color: "#38BDF8" }}>
@@ -380,8 +380,8 @@ export function DashboardOperationsClient({
                   borderRadius: 6,
                   border: "none",
                   cursor: "pointer",
-                  background: activeFraudTab === "WATCHLIST" ? "#0F172A" : "#F1F5F9",
-                  color: activeFraudTab === "WATCHLIST" ? "#FFF" : "#475569",
+                  background: activeFraudTab === "WATCHLIST" ? "var(--brand)" : "var(--chip)",
+                  color: activeFraudTab === "WATCHLIST" ? "var(--brand-ink)" : "var(--ink-2)",
                 }}
               >
                 Watchlist ({fraudRadar.length})
@@ -397,8 +397,8 @@ export function DashboardOperationsClient({
                   borderRadius: 6,
                   border: "none",
                   cursor: "pointer",
-                  background: activeFraudTab === "MANUAL_CHECK" ? "#0F172A" : "#F1F5F9",
-                  color: activeFraudTab === "MANUAL_CHECK" ? "#FFF" : "#475569",
+                  background: activeFraudTab === "MANUAL_CHECK" ? "var(--brand)" : "var(--chip)",
+                  color: activeFraudTab === "MANUAL_CHECK" ? "var(--brand-ink)" : "var(--ink-2)",
                 }}
               >
                 Check Number
@@ -424,7 +424,7 @@ export function DashboardOperationsClient({
                           border: `1px solid ${isHigh ? "#FCA5A5" : "#FED7AA"}`,
                           borderRadius: 8,
                           padding: "10px 12px",
-                          background: isHigh ? "#FEF2F2" : "#FFF7ED",
+                          background: isHigh ? "var(--danger-bg)" : "var(--warning-bg)",
                         }}
                       >
                         <div
@@ -440,7 +440,7 @@ export function DashboardOperationsClient({
                               style={{
                                 fontWeight: 700,
                                 fontSize: 13,
-                                color: "#2563EB",
+                                color: "var(--info)",
                                 textDecoration: "none",
                               }}
                             >
@@ -576,10 +576,10 @@ export function DashboardOperationsClient({
               {lookupResult && (
                 <div
                   style={{
-                    border: "1px solid #CBD5E1",
+                    border: "1px solid var(--line-2)",
                     borderRadius: 8,
                     padding: 12,
-                    background: "#F8FAFC",
+                    background: "var(--bg)",
                   }}
                 >
                   <div
@@ -620,7 +620,7 @@ export function DashboardOperationsClient({
                     </div>
                   )}
 
-                  <div style={{ fontSize: 12, color: "#475569", marginBottom: 10 }}>
+                  <div style={{ fontSize: 12, color: "var(--ink-2)", marginBottom: 10 }}>
                     <b>In your store:</b> {lookupResult.here.orders} orders (
                     {lookupResult.here.delivered} delivered, {lookupResult.here.returned} returned)
                   </div>
@@ -725,7 +725,7 @@ export function DashboardOperationsClient({
                   gap: 8,
                   alignItems: "center",
                   padding: "8px 10px",
-                  background: "#F8FAFC",
+                  background: "var(--bg)",
                   borderRadius: 8,
                   marginBottom: 10,
                   flexWrap: "wrap",
@@ -789,7 +789,7 @@ export function DashboardOperationsClient({
                 style={{
                   maxHeight: 280,
                   overflowY: "auto",
-                  border: "1px solid #E2E8F0",
+                  border: "1px solid var(--line)",
                   borderRadius: 8,
                 }}
               >
@@ -803,7 +803,7 @@ export function DashboardOperationsClient({
                         padding: "8px 12px",
                         borderBottom: "1px solid #F1F5F9",
                         cursor: "pointer",
-                        background: isChecked ? "#EFF6FF" : "#FFF",
+                        background: isChecked ? "var(--tint-info)" : "var(--surface)",
                         display: "flex",
                         alignItems: "center",
                         gap: 10,
@@ -817,14 +817,14 @@ export function DashboardOperationsClient({
                       />
                       <div style={{ flex: 1 }}>
                         <div style={{ display: "flex", justifyContent: "space-between" }}>
-                          <span style={{ fontWeight: 700, fontSize: 12.5, color: "#2563EB" }}>
+                          <span style={{ fontWeight: 700, fontSize: 12.5, color: "var(--info)" }}>
                             #{ord.orderNumber}
                           </span>
                           <span style={{ fontWeight: 600, fontSize: 12 }}>
                             ৳ {ord.totalAmount.toLocaleString("en-IN")}
                           </span>
                         </div>
-                        <div style={{ fontSize: 12, color: "#334155" }}>
+                        <div style={{ fontSize: 12, color: "var(--ink)" }}>
                           {ord.customerName} · {ord.shippingDistrict || "Dhaka"}
                         </div>
                         <div
@@ -858,8 +858,8 @@ export function DashboardOperationsClient({
           style={{
             padding: "10px 14px",
             marginBottom: 16,
-            background: "#F8FAFC",
-            border: "1px solid #E2E8F0",
+            background: "var(--bg)",
+            border: "1px solid var(--line)",
             borderRadius: 10,
           }}
         >
@@ -870,7 +870,7 @@ export function DashboardOperationsClient({
               gap: 8,
               fontSize: 12,
               fontWeight: 700,
-              color: "#475569",
+              color: "var(--ink-2)",
               marginBottom: 6,
             }}
           >
@@ -890,8 +890,8 @@ export function DashboardOperationsClient({
               <div
                 key={ev.id}
                 style={{
-                  background: "#FFF",
-                  border: "1px solid #CBD5E1",
+                  background: "var(--surface)",
+                  border: "1px solid var(--line-2)",
                   borderRadius: 6,
                   padding: "4px 8px",
                   fontSize: 12,
@@ -909,8 +909,8 @@ export function DashboardOperationsClient({
                   }}
                 />
                 <span style={{ fontWeight: 700 }}>#{ev.orderNumber}</span>
-                <span style={{ color: "#334155" }}>{ev.message}</span>
-                <span style={{ color: "#64748B", fontSize: 12 }} suppressHydrationWarning>
+                <span style={{ color: "var(--ink)" }}>{ev.message}</span>
+                <span style={{ color: "var(--ink-3)", fontSize: 12 }} suppressHydrationWarning>
                   {formatBDTime(ev.createdAt)}
                 </span>
               </div>

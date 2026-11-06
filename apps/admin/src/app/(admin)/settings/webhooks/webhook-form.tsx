@@ -609,11 +609,11 @@ export function WebhookForm({
                       display: "flex",
                       alignItems: "center",
                       gap: 6,
-                      background: "#f8fafc",
+                      background: "var(--bg)",
                       padding: "6px 10px",
                       borderRadius: 6,
                       marginBottom: 12,
-                      border: "1px solid #e2e8f0",
+                      border: "1px solid var(--line)",
                     }}
                   >
                     <span
@@ -621,7 +621,7 @@ export function WebhookForm({
                         flex: 1,
                         fontFamily: "monospace",
                         fontSize: 12,
-                        color: "#334155",
+                        color: "var(--ink)",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
@@ -635,7 +635,7 @@ export function WebhookForm({
 
                   {/* Subscribed Events Badges */}
                   <div style={{ marginBottom: 12 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: "#64748b", marginBottom: 4 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-3)", marginBottom: 4 }}>
                       SUBSCRIBED EVENTS ({subItem.events.length})
                     </div>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
@@ -646,8 +646,8 @@ export function WebhookForm({
                             fontSize: 12,
                             padding: "2px 6px",
                             borderRadius: 4,
-                            background: "#f1f5f9",
-                            color: "#334155",
+                            background: "var(--chip)",
+                            color: "var(--ink)",
                             fontFamily: "monospace",
                           }}
                         >
@@ -666,18 +666,18 @@ export function WebhookForm({
                       gap: 8,
                       fontSize: 12,
                       padding: "6px 8px",
-                      background: "#fafafa",
+                      background: "var(--bg)",
                       borderRadius: 6,
                       border: "1px solid #f1f5f9",
                       marginBottom: 14,
                     }}
                   >
-                    <span style={{ color: "#64748b" }}>Secret:</span>
+                    <span style={{ color: "var(--ink-3)" }}>Secret:</span>
                     <span
                       style={{
                         fontFamily: "monospace",
                         letterSpacing: isRevealed ? "normal" : "0.1em",
-                        color: "#475569",
+                        color: "var(--ink-2)",
                       }}
                     >
                       {isRevealed ? subItem.secretToken : "••••••••••••••••"}
@@ -726,8 +726,8 @@ export function WebhookForm({
                         fontSize: 12,
                         padding: "4px 8px",
                         borderRadius: 6,
-                        border: "1px solid #cbd5e1",
-                        background: "#ffffff",
+                        border: "1px solid var(--line-2)",
+                        background: "var(--surface)",
                       }}
                       data-testid={`test-ping-event-select-${subItem.id}`}
                     >
@@ -841,7 +841,7 @@ export function WebhookForm({
                   border: 0,
                   fontSize: 20,
                   cursor: "pointer",
-                  color: "#64748b",
+                  color: "var(--ink-3)",
                 }}
               >
                 ✕
@@ -874,7 +874,7 @@ export function WebhookForm({
                           border: isSelected
                             ? "1.5px solid var(--accent, #0066cc)"
                             : "1px solid var(--border, #cbd5e1)",
-                          backgroundColor: isSelected ? "rgba(0, 102, 204, 0.08)" : "#ffffff",
+                          backgroundColor: isSelected ? "rgba(0, 102, 204, 0.08)" : "var(--surface)",
                           color: isSelected ? "var(--accent, #0066cc)" : "inherit",
                         }}
                         data-testid={`preset-btn-${p.id}`}
@@ -946,8 +946,8 @@ export function WebhookForm({
                   <label htmlFor="targetUrl" style={{ fontWeight: 600, fontSize: 13, margin: 0 }}>
                     Target Webhook URL
                   </label>
-                  <span style={{ fontSize: 12, color: "#64748b" }}>
-                    Detected Adapter: <strong style={{ color: "#0f172a" }}>{effectiveAdapter.toUpperCase()}</strong>
+                  <span style={{ fontSize: 12, color: "var(--ink-3)" }}>
+                    Detected Adapter: <strong style={{ color: "var(--ink)" }}>{effectiveAdapter.toUpperCase()}</strong>
                   </span>
                 </div>
                 <input
@@ -986,7 +986,7 @@ export function WebhookForm({
                     <button
                       type="button"
                       onClick={deselectAllEvents}
-                      style={{ background: "transparent", border: 0, color: "#64748b", cursor: "pointer" }}
+                      style={{ background: "transparent", border: 0, color: "var(--ink-3)", cursor: "pointer" }}
                     >
                       Clear
                     </button>
@@ -1006,7 +1006,7 @@ export function WebhookForm({
                           padding: "8px 10px",
                           border: checked ? "1px solid var(--accent, #0066cc)" : "1px solid #e2e8f0",
                           borderRadius: 6,
-                          backgroundColor: checked ? "rgba(0, 102, 204, 0.04)" : "#ffffff",
+                          backgroundColor: checked ? "rgba(0, 102, 204, 0.04)" : "var(--surface)",
                           cursor: "pointer",
                           fontSize: 12,
                         }}
@@ -1022,7 +1022,7 @@ export function WebhookForm({
                         />
                         <div>
                           <div style={{ fontWeight: 600 }}>{evt.label}</div>
-                          <code style={{ fontSize: 12, color: "#64748b" }}>{evt.key}</code>
+                          <code style={{ fontSize: 12, color: "var(--ink-3)" }}>{evt.key}</code>
                         </div>
                       </label>
                     );
@@ -1050,10 +1050,10 @@ export function WebhookForm({
               <div
                 style={{
                   marginTop: 10,
-                  border: "1px solid #e2e8f0",
+                  border: "1px solid var(--line)",
                   borderRadius: 10,
                   overflow: "hidden",
-                  backgroundColor: "#f8fafc",
+                  backgroundColor: "var(--bg)",
                 }}
                 data-testid="live-chat-preview"
               >
@@ -1085,7 +1085,7 @@ export function WebhookForm({
 
                   {/* Event sample switcher */}
                   <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
-                    <span style={{ color: "#94a3b8" }}>Event:</span>
+                    <span style={{ color: "var(--ink-3)" }}>Event:</span>
                     <select
                       value={previewEvent}
                       onChange={(e) => setPreviewEvent(e.target.value as WebhookEventKey | "ping")}
@@ -1234,10 +1234,10 @@ export function WebhookForm({
                   {effectiveAdapter === "slack" && (
                     <div
                       style={{
-                        backgroundColor: "#ffffff",
+                        backgroundColor: "var(--surface)",
                         borderRadius: 8,
                         padding: 14,
-                        border: "1px solid #e2e8f0",
+                        border: "1px solid var(--line)",
                         fontSize: 13,
                         lineHeight: 1.45,
                         color: "#1d1c1d",
@@ -1292,7 +1292,7 @@ export function WebhookForm({
                           display: "grid",
                           gridTemplateColumns: "1fr 1fr",
                           gap: 8,
-                          background: "#f8fafc",
+                          background: "var(--bg)",
                           padding: "10px 12px",
                           borderRadius: 6,
                           marginBottom: 8,
@@ -1329,14 +1329,14 @@ export function WebhookForm({
                     >
                       <div
                         style={{
-                          backgroundColor: "#ffffff",
+                          backgroundColor: "var(--surface)",
                           borderRadius: "12px 12px 12px 2px",
                           padding: "10px 14px",
                           maxWidth: "85%",
                           boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
                           fontSize: 13,
                           lineHeight: 1.4,
-                          color: "#111827",
+                          color: "var(--ink)",
                         }}
                       >
                         <div style={{ fontWeight: 700, color: "#0284c7", marginBottom: 4 }}>
@@ -1354,7 +1354,7 @@ export function WebhookForm({
                         <div style={{ margin: "6px 0", fontSize: 12 }}>
                           <div><b>Total:</b> ৳{Number(sampleData.total || 2500).toLocaleString("en-BD")} (COD)</div>
                           <div><b>Customer:</b> {String(sampleData.customerName || sampleData.name || "Customer")} (Dhaka)</div>
-                          <div><b>Phone:</b> <code style={{ background: "#f1f5f9", padding: "1px 4px", borderRadius: 3 }}>{String(sampleData.phone || "01712345678")}</code></div>
+                          <div><b>Phone:</b> <code style={{ background: "var(--chip)", padding: "1px 4px", borderRadius: 3 }}>{String(sampleData.phone || "01712345678")}</code></div>
                         </div>
 
                         <div style={{ marginTop: 8, fontSize: 12 }}>
@@ -1363,7 +1363,7 @@ export function WebhookForm({
                           </a>
                         </div>
 
-                        <div style={{ textAlign: "right", fontSize: 12, color: "#9ca3af", marginTop: 4 }}>
+                        <div style={{ textAlign: "right", fontSize: 12, color: "var(--ink-3)", marginTop: 4 }}>
                           20:30 ✓✓
                         </div>
                       </div>

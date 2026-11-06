@@ -419,7 +419,7 @@ export function BarcodeLabelStudioClient({ initialItems, storeName }: Props) {
                     <div
                       key={idx}
                       style={{
-                        background: "#ffffff",
+                        background: "var(--surface)",
                         border: "1px solid #d1d5db",
                         borderRadius: 4,
                         padding: "8px 10px",
@@ -437,7 +437,7 @@ export function BarcodeLabelStudioClient({ initialItems, storeName }: Props) {
                           {storeName}
                         </div>
                       )}
-                      <div style={{ fontSize: 12, fontWeight: 600, color: "#111827", lineHeight: 1.2, margin: "2px 0" }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", lineHeight: 1.2, margin: "2px 0" }}>
                         {item.productTitle}
                       </div>
                       {(showVariant || showSku) && (
@@ -451,7 +451,7 @@ export function BarcodeLabelStudioClient({ initialItems, storeName }: Props) {
                         dangerouslySetInnerHTML={{ __html: safeHtml(svg) }}
                       />
                       {showPrice && (
-                        <div style={{ fontSize: 13, fontWeight: 700, color: "#111827" }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "var(--ink)" }}>
                           ৳ {item.price.toLocaleString("en-BD")}
                         </div>
                       )}

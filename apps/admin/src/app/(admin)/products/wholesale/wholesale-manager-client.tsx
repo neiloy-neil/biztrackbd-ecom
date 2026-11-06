@@ -269,7 +269,7 @@ export function WholesaleManagerClient({ initialData, registerUrl }: Props) {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="chips" style={{ borderBottom: "1px solid var(--line, #e5e7eb)", paddingBottom: 8, gap: 8 }}>
+      <div className="chips" style={{ borderBottom: "1px solid var(--line, var(--line))", paddingBottom: 8, gap: 8 }}>
         <button
           type="button"
           className={`chip ${tab === "applications" ? "active" : ""}`}
@@ -332,7 +332,7 @@ export function WholesaleManagerClient({ initialData, registerUrl }: Props) {
             <div className="card" style={{ padding: 0, overflow: "hidden" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
-                  <tr style={{ background: "var(--bg-subtle, #f9fafb)", borderBottom: "1px solid var(--line, #e5e7eb)" }}>
+                  <tr style={{ background: "var(--bg-subtle, #f9fafb)", borderBottom: "1px solid var(--line, var(--line))" }}>
                     <th style={{ padding: "10px 14px", textAlign: "left" }}>Business / Shop</th>
                     <th style={{ padding: "10px 14px", textAlign: "left" }}>Contact Person</th>
                     <th style={{ padding: "10px 14px", textAlign: "left" }}>Trade License / BIN</th>
@@ -342,7 +342,7 @@ export function WholesaleManagerClient({ initialData, registerUrl }: Props) {
                 </thead>
                 <tbody>
                   {filteredApps.map((a) => (
-                    <tr key={a.id} style={{ borderBottom: "1px solid var(--line, #e5e7eb)" }}>
+                    <tr key={a.id} style={{ borderBottom: "1px solid var(--line, var(--line))" }}>
                       <td style={{ padding: "12px 14px" }}>
                         <div style={{ fontWeight: 700 }}>{a.companyName}</div>
                         <div className="muted" style={{ fontSize: 12 }}>
@@ -358,7 +358,7 @@ export function WholesaleManagerClient({ initialData, registerUrl }: Props) {
                       </td>
                       <td style={{ padding: "12px 14px" }}>
                         {a.tradeLicense ? <div>TL: <b>{a.tradeLicense}</b></div> : <span className="muted">—</span>}
-                        {a.taxId && <div style={{ fontSize: 12, color: "#555" }}>BIN: {a.taxId}</div>}
+                        {a.taxId && <div style={{ fontSize: 12, color: "var(--ink-2)" }}>BIN: {a.taxId}</div>}
                       </td>
                       <td style={{ padding: "12px 14px" }}>
                         {a.status === "APPROVED" ? (
@@ -479,7 +479,7 @@ export function WholesaleManagerClient({ initialData, registerUrl }: Props) {
                       <span className="muted">Partial Deposit:</span>
                       <b>{t.partialDepositPercent ? `${t.partialDepositPercent}% Advance` : "Full Payment"}</b>
                     </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid var(--line, #e5e7eb)", paddingTop: 8 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid var(--line, var(--line))", paddingTop: 8 }}>
                       <span className="muted">Approved Accounts:</span>
                       <b>{t.customerCount} resellers</b>
                     </div>
@@ -565,7 +565,7 @@ export function WholesaleManagerClient({ initialData, registerUrl }: Props) {
             <div className="card" style={{ padding: 0, overflow: "hidden" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
-                  <tr style={{ background: "var(--bg-subtle, #f9fafb)", borderBottom: "1px solid var(--line, #e5e7eb)" }}>
+                  <tr style={{ background: "var(--bg-subtle, #f9fafb)", borderBottom: "1px solid var(--line, var(--line))" }}>
                     <th style={{ padding: "10px 14px", textAlign: "left" }}>Product & Variant</th>
                     <th style={{ padding: "10px 14px", textAlign: "left" }}>Target Group</th>
                     <th style={{ padding: "10px 14px", textAlign: "center" }}>Min Quantity</th>
@@ -576,7 +576,7 @@ export function WholesaleManagerClient({ initialData, registerUrl }: Props) {
                 </thead>
                 <tbody>
                   {initialData.prices.map((p) => (
-                    <tr key={p.id} style={{ borderBottom: "1px solid var(--line, #e5e7eb)" }}>
+                    <tr key={p.id} style={{ borderBottom: "1px solid var(--line, var(--line))" }}>
                       <td style={{ padding: "12px 14px" }}>
                         <div style={{ fontWeight: 600 }}>{p.variant.product.title}</div>
                         <div className="muted" style={{ fontSize: 12 }}>

@@ -52,8 +52,8 @@ export function AddCustomerModal() {
               boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
               borderRadius: 12,
               padding: "24px 28px",
-              background: "#fff",
-              border: "1px solid var(--line, #E2E8F0)",
+              background: "var(--surface)",
+              border: "1px solid var(--line, var(--line))",
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
@@ -106,7 +106,7 @@ export function AddCustomerModal() {
                 />
               </label>
 
-              <div style={{ borderTop: "1px solid var(--line, #E2E8F0)", paddingTop: 14, marginTop: 4 }}>
+              <div style={{ borderTop: "1px solid var(--line, var(--line))", paddingTop: 14, marginTop: 4 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                   <span style={{ fontSize: 13.5, fontWeight: 600 }}>Default Shipping Address <span className="opt">(optional)</span></span>
                   <div style={{ display: "flex", gap: 10, fontSize: 12.5 }}>

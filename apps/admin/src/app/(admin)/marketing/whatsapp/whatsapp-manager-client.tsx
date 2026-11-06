@@ -624,7 +624,7 @@ export function WhatsAppManagerClient({
                     display: "grid",
                     gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
                     gap: 10,
-                    background: "#FFF",
+                    background: "var(--surface)",
                     padding: 14,
                     borderRadius: 10,
                     border: "1px solid #DCFCE7",
@@ -681,8 +681,8 @@ export function WhatsAppManagerClient({
             ) : (
               <div
                 style={{
-                  background: "#F8FAFC",
-                  border: "1px dashed var(--line, #CBD5E1)",
+                  background: "var(--bg)",
+                  border: "1px dashed var(--line, var(--line-2))",
                   borderRadius: 12,
                   padding: 24,
                   textAlign: "center",
@@ -825,12 +825,12 @@ export function WhatsAppManagerClient({
                       <div>
                         <div
                           style={{
-                            background: "#FFF",
+                            background: "var(--surface)",
                             padding: 16,
                             borderRadius: 14,
                             display: "inline-block",
                             boxShadow: "0 6px 16px rgba(0,0,0,0.06)",
-                            border: "1px solid #E2E8F0",
+                            border: "1px solid var(--line)",
                             marginBottom: 12,
                           }}
                         >
@@ -843,7 +843,7 @@ export function WhatsAppManagerClient({
                               style={{ display: "block" }}
                             />
                           ) : (
-                            <div style={{ width: 240, height: 240, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#64748B", gap: 10 }}>
+                            <div style={{ width: 240, height: 240, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "var(--ink-3)", gap: 10 }}>
                               <span style={{ fontSize: 13 }}>Connecting to WhatsApp server…</span>
                               <button
                                 type="button"
@@ -930,8 +930,8 @@ export function WhatsAppManagerClient({
                         {pairingCode ? (
                           <div
                             style={{
-                              background: "#FFF",
-                              border: "1px solid #CBD5E1",
+                              background: "var(--surface)",
+                              border: "1px solid var(--line-2)",
                               borderRadius: 14,
                               padding: 22,
                               boxShadow: "0 6px 16px rgba(0,0,0,0.06)",
@@ -947,7 +947,7 @@ export function WhatsAppManagerClient({
                                 fontWeight: 900,
                                 fontFamily: "monospace",
                                 letterSpacing: 4,
-                                color: "#0F172A",
+                                color: "var(--ink)",
                                 margin: "14px 0",
                               }}
                             >
@@ -978,8 +978,8 @@ export function WhatsAppManagerClient({
                         ) : (
                           <div
                             style={{
-                              background: "#FFF",
-                              border: "1px solid #E2E8F0",
+                              background: "var(--surface)",
+                              border: "1px solid var(--line)",
                               borderRadius: 14,
                               padding: 20,
                               marginBottom: 16,
@@ -1007,12 +1007,12 @@ export function WhatsAppManagerClient({
                         <div
                           style={{
                             textAlign: "left",
-                            background: "#F8FAFC",
-                            border: "1px solid #E2E8F0",
+                            background: "var(--bg)",
+                            border: "1px solid var(--line)",
                             borderRadius: 10,
                             padding: "14px 18px",
                             fontSize: 13,
-                            color: "#334155",
+                            color: "var(--ink)",
                             lineHeight: 1.6,
                           }}
                         >
@@ -1034,7 +1034,7 @@ export function WhatsAppManagerClient({
                       style={{
                         marginTop: 20,
                         paddingTop: 16,
-                        borderTop: "1px solid #E2E8F0",
+                        borderTop: "1px solid var(--line)",
                         display: "flex",
                         gap: 10,
                         justifyContent: "center",
@@ -1075,8 +1075,8 @@ export function WhatsAppManagerClient({
 
                     <div
                       style={{
-                        background: "#FFF",
-                        border: "1px solid #E2E8F0",
+                        background: "var(--surface)",
+                        border: "1px solid var(--line)",
                         borderRadius: 12,
                         padding: 18,
                         boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
@@ -1092,13 +1092,13 @@ export function WhatsAppManagerClient({
                           style={{
                             display: "inline-flex",
                             alignItems: "center",
-                            background: "#F1F5F9",
-                            border: "1px solid var(--border, #CBD5E1)",
+                            background: "var(--chip)",
+                            border: "1px solid var(--border, var(--line-2))",
                             borderRadius: 8,
                             padding: "0 12px",
                             fontSize: 14,
                             fontWeight: 700,
-                            color: "#334155",
+                            color: "var(--ink)",
                           }}
                         >
                           +880
@@ -1297,8 +1297,8 @@ export function WhatsAppManagerClient({
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <div
                   style={{
-                    background: "#F8FAFC",
-                    border: "1px solid #E2E8F0",
+                    background: "var(--bg)",
+                    border: "1px solid var(--line)",
                     borderRadius: 8,
                     padding: 10,
                     fontSize: 12.5,
@@ -1308,8 +1308,8 @@ export function WhatsAppManagerClient({
                 </div>
                 <div
                   style={{
-                    background: "#F8FAFC",
-                    border: "1px solid #E2E8F0",
+                    background: "var(--bg)",
+                    border: "1px solid var(--line)",
                     borderRadius: 8,
                     padding: 10,
                     fontSize: 12.5,
@@ -1319,8 +1319,8 @@ export function WhatsAppManagerClient({
                 </div>
                 <div
                   style={{
-                    background: "#F8FAFC",
-                    border: "1px solid #E2E8F0",
+                    background: "var(--bg)",
+                    border: "1px solid var(--line)",
                     borderRadius: 8,
                     padding: 10,
                     fontSize: 12.5,
@@ -1394,9 +1394,9 @@ export function WhatsAppManagerClient({
                   alignItems: "flex-start",
                   gap: 12,
                   padding: 12,
-                  background: "#F8FAFC",
+                  background: "var(--bg)",
                   borderRadius: 8,
-                  border: "1px solid #E2E8F0",
+                  border: "1px solid var(--line)",
                   cursor: "pointer",
                 }}
               >
@@ -1422,9 +1422,9 @@ export function WhatsAppManagerClient({
                   alignItems: "flex-start",
                   gap: 12,
                   padding: 12,
-                  background: "#F8FAFC",
+                  background: "var(--bg)",
                   borderRadius: 8,
-                  border: "1px solid #E2E8F0",
+                  border: "1px solid var(--line)",
                   cursor: "pointer",
                 }}
               >
@@ -1450,9 +1450,9 @@ export function WhatsAppManagerClient({
                   alignItems: "flex-start",
                   gap: 12,
                   padding: 12,
-                  background: "#F8FAFC",
+                  background: "var(--bg)",
                   borderRadius: 8,
-                  border: "1px solid #E2E8F0",
+                  border: "1px solid var(--line)",
                   cursor: "pointer",
                 }}
               >
@@ -1478,9 +1478,9 @@ export function WhatsAppManagerClient({
                   alignItems: "flex-start",
                   gap: 12,
                   padding: 12,
-                  background: "#F8FAFC",
+                  background: "var(--bg)",
                   borderRadius: 8,
-                  border: "1px solid #E2E8F0",
+                  border: "1px solid var(--line)",
                   cursor: "pointer",
                 }}
               >
@@ -1506,9 +1506,9 @@ export function WhatsAppManagerClient({
                   alignItems: "flex-start",
                   gap: 12,
                   padding: 12,
-                  background: "#F8FAFC",
+                  background: "var(--bg)",
                   borderRadius: 8,
-                  border: "1px solid #E2E8F0",
+                  border: "1px solid var(--line)",
                   cursor: "pointer",
                 }}
               >
@@ -1551,7 +1551,7 @@ export function WhatsAppManagerClient({
                 gap: 6,
                 marginBottom: 16,
                 paddingBottom: 12,
-                borderBottom: "1px solid #E2E8F0",
+                borderBottom: "1px solid var(--line)",
               }}
             >
               {templates.map((t) => (
@@ -1610,7 +1610,7 @@ export function WhatsAppManagerClient({
               <div>
                 {/* Available Variables */}
                 <div style={{ marginBottom: 10 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: "#64748B", marginBottom: 6 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-3)", marginBottom: 6 }}>
                     Click token to insert:
                   </div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -1620,8 +1620,8 @@ export function WhatsAppManagerClient({
                         type="button"
                         onClick={() => handleInsertToken(v)}
                         style={{
-                          background: "#F1F5F9",
-                          border: "1px solid #CBD5E1",
+                          background: "var(--chip)",
+                          border: "1px solid var(--line-2)",
                           borderRadius: 6,
                           padding: "3px 8px",
                           fontSize: 12,
@@ -1662,7 +1662,7 @@ export function WhatsAppManagerClient({
 
               {/* Right Column: WhatsApp Live Message Bubble Preview */}
               <div>
-                <div style={{ fontSize: 12, fontWeight: 600, color: "#64748B", marginBottom: 8 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-3)", marginBottom: 8 }}>
                   WhatsApp Live Preview (Customer Screen):
                 </div>
 
@@ -1680,7 +1680,7 @@ export function WhatsAppManagerClient({
                 >
                   <div
                     style={{
-                      background: "#FFFFFF",
+                      background: "var(--surface)",
                       borderRadius: "8px 8px 8px 0px",
                       padding: "10px 14px",
                       maxWidth: "92%",
@@ -1690,7 +1690,7 @@ export function WhatsAppManagerClient({
                       lineHeight: 1.5,
                       whiteSpace: "pre-wrap",
                       wordBreak: "break-word",
-                      color: "#111827",
+                      color: "var(--ink)",
                     }}
                   >
                     {renderPreview(currentBody)}
@@ -1698,7 +1698,7 @@ export function WhatsAppManagerClient({
                       style={{
                         textAlign: "right",
                         fontSize: 12,
-                        color: "#9CA3AF",
+                        color: "var(--ink-3)",
                         marginTop: 4,
                         display: "flex",
                         alignItems: "center",
@@ -1764,7 +1764,7 @@ export function WhatsAppManagerClient({
             <div
               style={{
                 padding: "16px 20px",
-                borderBottom: "1px solid #E2E8F0",
+                borderBottom: "1px solid var(--line)",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -1786,7 +1786,7 @@ export function WhatsAppManagerClient({
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
                   <thead>
-                    <tr style={{ background: "#F8FAFC", borderBottom: "1px solid #E2E8F0", textAlign: "left" }}>
+                    <tr style={{ background: "var(--bg)", borderBottom: "1px solid var(--line)", textAlign: "left" }}>
                       <th style={{ padding: "10px 16px" }}>Time</th>
                       <th style={{ padding: "10px 16px" }}>Phone</th>
                       <th style={{ padding: "10px 16px" }}>Direction</th>
@@ -1804,7 +1804,7 @@ export function WhatsAppManagerClient({
 
                       return (
                         <tr key={log.id} style={{ borderBottom: "1px solid #F1F5F9" }}>
-                          <td style={{ padding: "10px 16px", whiteSpace: "nowrap", color: "#64748B", fontSize: 12.5 }}>
+                          <td style={{ padding: "10px 16px", whiteSpace: "nowrap", color: "var(--ink-3)", fontSize: 12.5 }}>
                             {new Date(log.createdAt).toLocaleString()}
                           </td>
                           <td style={{ padding: "10px 16px", fontWeight: 600 }}>
@@ -1834,7 +1834,7 @@ export function WhatsAppManagerClient({
                               {log.status}
                             </span>
                           </td>
-                          <td style={{ padding: "10px 16px", maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "#334155" }}>
+                          <td style={{ padding: "10px 16px", maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "var(--ink)" }}>
                             {log.messageBody}
                           </td>
                           <td style={{ padding: "10px 16px", whiteSpace: "nowrap" }}>
@@ -1916,16 +1916,16 @@ export function WhatsAppManagerClient({
             >
               <div
                 style={{
-                  background: "#fff",
+                  background: "var(--surface)",
                   padding: "12px 16px",
                   borderRadius: 10,
                   border: "1px solid #BBF7D0",
                 }}
               >
-                <div style={{ fontSize: 12, color: "#64748B", fontWeight: 600 }}>
+                <div style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>
                   Rate Limiting & Pacing
                 </div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginTop: 4 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "var(--ink)", marginTop: 4 }}>
                   4-12s Randomized Delay
                 </div>
                 <div style={{ fontSize: 12, color: "#10B981", marginTop: 2 }}>
@@ -1935,16 +1935,16 @@ export function WhatsAppManagerClient({
 
               <div
                 style={{
-                  background: "#fff",
+                  background: "var(--surface)",
                   padding: "12px 16px",
                   borderRadius: 10,
                   border: "1px solid #BBF7D0",
                 }}
               >
-                <div style={{ fontSize: 12, color: "#64748B", fontWeight: 600 }}>
+                <div style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>
                   Hourly Velocity Limit
                 </div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginTop: 4 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "var(--ink)", marginTop: 4 }}>
                   60 - 120 msgs / hr
                 </div>
                 <div style={{ fontSize: 12, color: "#10B981", marginTop: 2 }}>
@@ -1954,16 +1954,16 @@ export function WhatsAppManagerClient({
 
               <div
                 style={{
-                  background: "#fff",
+                  background: "var(--surface)",
                   padding: "12px 16px",
                   borderRadius: 10,
                   border: "1px solid #BBF7D0",
                 }}
               >
-                <div style={{ fontSize: 12, color: "#64748B", fontWeight: 600 }}>
+                <div style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>
                   Device Connection
                 </div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginTop: 4 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "var(--ink)", marginTop: 4 }}>
                   {config.status === "CONNECTED" ? (config.phoneNumber || "Connected") : "Disconnected"}
                 </div>
                 <div style={{ fontSize: 12, color: config.status === "CONNECTED" ? "#10B981" : "#EF4444", marginTop: 2 }}>
@@ -1975,7 +1975,7 @@ export function WhatsAppManagerClient({
 
           {/* Quick-Launch Playbooks */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
-            <div className="card" style={{ padding: 18, border: "1px solid var(--line, #E2E8F0)" }}>
+            <div className="card" style={{ padding: 18, border: "1px solid var(--line, var(--line))" }}>
               <div style={{ marginBottom: 8 }}>
                 <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>Abandoned Cart Recovery</h4>
               </div>
@@ -1991,7 +1991,7 @@ export function WhatsAppManagerClient({
               </Link>
             </div>
 
-            <div className="card" style={{ padding: 18, border: "1px solid var(--line, #E2E8F0)" }}>
+            <div className="card" style={{ padding: 18, border: "1px solid var(--line, var(--line))" }}>
               <div style={{ marginBottom: 8 }}>
                 <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>VIP Customer Campaign</h4>
               </div>
@@ -2007,7 +2007,7 @@ export function WhatsAppManagerClient({
               </Link>
             </div>
 
-            <div className="card" style={{ padding: 18, border: "1px solid var(--line, #E2E8F0)" }}>
+            <div className="card" style={{ padding: 18, border: "1px solid var(--line, var(--line))" }}>
               <div style={{ marginBottom: 8 }}>
                 <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>Storewide Announcement</h4>
               </div>
@@ -2026,7 +2026,7 @@ export function WhatsAppManagerClient({
 
           {/* WhatsApp Broadcast History Table */}
           <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-            <div style={{ padding: "16px 20px", borderBottom: "1px solid #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
                 <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>WhatsApp Broadcast History ({campaigns.length})</h4>
                 <p className="muted" style={{ margin: "2px 0 0", fontSize: 12.5 }}>
@@ -2052,7 +2052,7 @@ export function WhatsAppManagerClient({
               <div style={{ overflowX: "auto" }}>
                 <table className="table" style={{ margin: 0 }}>
                   <thead>
-                    <tr style={{ background: "#F8FAFC" }}>
+                    <tr style={{ background: "var(--bg)" }}>
                       <th style={{ padding: "10px 16px" }}>Campaign Name</th>
                       <th style={{ padding: "10px 16px" }}>Audience</th>
                       <th style={{ padding: "10px 16px" }} className="r">Progress</th>
@@ -2071,7 +2071,7 @@ export function WhatsAppManagerClient({
                             </span>
                           )}
                         </td>
-                        <td style={{ padding: "10px 16px", fontSize: 12.5, color: "#64748B" }}>
+                        <td style={{ padding: "10px 16px", fontSize: 12.5, color: "var(--ink-3)" }}>
                           {c.targetSegment === "ABANDONED_CART" ? "Abandoned Cart" : c.targetSegment}
                         </td>
                         <td style={{ padding: "10px 16px", fontSize: 13 }} className="r num">
@@ -2087,7 +2087,7 @@ export function WhatsAppManagerClient({
                             {c.status}
                           </span>
                         </td>
-                        <td style={{ padding: "10px 16px", fontSize: 12.5, color: "#64748B" }}>
+                        <td style={{ padding: "10px 16px", fontSize: 12.5, color: "var(--ink-3)" }}>
                           {new Date(c.sentAt || c.createdAt).toLocaleDateString()}
                         </td>
                       </tr>
