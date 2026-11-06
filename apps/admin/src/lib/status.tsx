@@ -14,7 +14,9 @@ const METHOD: Record<string, string> = { COD: "COD", CASH: "Cash", MANUAL_BKASH:
 export const methodName = (m: string) => METHOD[m] ?? m;
 
 /** What the owner needs to know about payment at a glance: "Check bKash" asks them to act, "Paid" and "COD" do not. */
-export function PaymentPill({ method, status }: { method: string; status: string }): ReactNode {
+export function PaymentPill({ method, status, awaitingAdvance }: { method: string; status: string; awaitingAdvance?: boolean }): ReactNode {
+  if (awaitingAdvance && status === "PENDING_VERIFICATION") return <span className="pill warn">Check advance</span>;
+  if (awaitingAdvance && status === "UNPAID") return <span className="pill warn">Advance due</span>;
   if (status === "PENDING_VERIFICATION") return <span className="pill warn">Check {methodName(method)}</span>;
   if (status === "PAID") return <span className="pill ok">Paid</span>;
   if (status === "PARTIALLY_PAID") return <span className="pill info">Partially Paid</span>;

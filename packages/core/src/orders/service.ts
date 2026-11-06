@@ -11,6 +11,7 @@ import { publishEvent } from "../events";
 import { notifyOrder } from "../messaging/templates";
 import { assertCan, type StaffActor } from "../permissions";
 import { assertCouponUsable, deliveryFor, discountFor, money, pickZone } from "./pricing";
+import { advanceMethodsAvailable, advanceRuleFrom, computeAdvance, isFullPrepayment, type AdvanceMethod } from "./advance";
 import { recordOrderUsage, type OrderThreshold } from "../limits/plan";
 import { assessOrderRisk } from "../fraud/assess";
 import { markRecoveredByOrder } from "../growth/abandoned";
@@ -38,6 +39,9 @@ export interface PlacedOrder {
   totalAmount: number;
   subtotalAmount?: number;
   deliveryCharge?: number;
+  /** Set when the store rule asked for an advance on this order. */
+  advanceRequired?: number;
+  advanceMethod?: AdvanceMethod;
   isNewCustomer?: boolean;
   customerId?: string;
   items?: Array<{ sku: string; title: string; quantity: number; unitPrice: number }>;
@@ -326,11 +330,32 @@ async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof Cr
   if (loyalty.freeDelivery) deliveryCharge = 0;
   const deliveryWaived = loyalty.freeDelivery || couponWaives;
   const memberDiscount = money(loyalty.tierDiscount + loyalty.referralDiscount + loyalty.pointsDiscount);
-  const codFee = input.paymentMethod === "COD" && settings ? Number(settings.codFee) : 0;
+  // Advance payment: only for a customer choosing cash on delivery. A whole-order prepayment is not charged the cash-on-delivery fee.
+  const advanceRule = customerFacing && input.paymentMethod === "COD" && settings ? advanceRuleFrom(settings) : null;
+  const totalBeforeCodFee = money(subtotal - discount - memberDiscount + deliveryCharge);
+  const prepaysInFull = advanceRule ? isFullPrepayment(advanceRule, totalBeforeCodFee) : false;
+  const codFee = input.paymentMethod === "COD" && settings && !prepaysInFull ? Number(settings.codFee) : 0;
   if (input.paymentMethod === "COD" && customerFacing && settings?.codMaxAmount != null && money(subtotal - discount - memberDiscount + deliveryCharge + codFee) > Number(settings.codMaxAmount)) {
     throw new PaymentMethodUnavailableError(`Cash on delivery is available up to ৳${Number(settings.codMaxAmount)}. Please pay with bKash or Nagad.`);
   }
   const total = money(subtotal - discount - memberDiscount + deliveryCharge + codFee);
+  const advanceRequired = advanceRule ? computeAdvance(advanceRule, total) : 0;
+  let advanceMethod: AdvanceMethod | null = null;
+  let advanceDueAt: Date | null = null;
+  if (advanceRule && advanceRequired > 0) {
+    const methods = advanceMethodsAvailable(advanceRule, {
+      bkashReady: Boolean(settings?.bkashEnabled && settings?.bkashNumber),
+      nagadReady: Boolean(settings?.nagadEnabled && settings?.nagadNumber),
+      // The storefront checks the store's own gateway keys before it gets here; the rule only needs to allow the gateway.
+      gatewayReady: true,
+    });
+    const chosen = input.advance?.method;
+    if (!chosen || !methods.includes(chosen)) {
+      throw new ValidationError(`Pay the advance of ৳${advanceRequired} to place this order`, { field: "advance", advanceRequired });
+    }
+    advanceMethod = chosen;
+    advanceDueAt = new Date(Date.now() + advanceRule.windowHours * 3_600_000);
+  }
 
   // Manual mobile-money payment: needs a TrxID, and a TrxID can only back one order. Staff recording money they
   // already received (quick order desk) may leave it out.
@@ -347,6 +372,17 @@ async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof Cr
       const sender = input.mfs.senderNumber?.trim() || "BANK_DEPOSIT";
       mfs = { sender, trx };
     }
+  } else if (advanceMethod === "MANUAL_BKASH" || advanceMethod === "MANUAL_NAGAD") {
+    // The advance goes to the store's own bKash/Nagad number; the customer sends the TrxID and the owner confirms it.
+    const a = input.advance?.mfs;
+    if (!a) throw new ValidationError("Enter the sender number and transaction ID of your advance payment", { field: "mfs" });
+    const trx = a.trxId.trim().toUpperCase();
+    if (!TRX_ID.test(trx)) throw new ValidationError("That transaction ID does not look right", { field: "trxId" });
+    const sender = normalizeBdPhone(a.senderNumber);
+    if (await tx.order.findFirst({ where: { mfsTrxId: trx } })) {
+      throw new ValidationError("That transaction ID has already been used", { field: "trxId" });
+    }
+    mfs = { sender, trx };
   } else if (input.paymentMethod !== "COD" && !isAutomatedGateway && !(staffPaid && !input.mfs)) {
     if (!input.mfs) throw new ValidationError("Enter the sender number and transaction ID", { field: "mfs" });
     const trx = input.mfs.trxId.trim().toUpperCase();
@@ -393,6 +429,7 @@ async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof Cr
       tierDiscountBdt: loyalty.tierDiscount, referralDiscountBdt: loyalty.referralDiscount, referralCode: loyalty.referral?.code,
       loyaltyPointsUsed: loyalty.pointsUsed, loyaltyDiscountBdt: loyalty.pointsDiscount, deliveryWaived, clientHash: input.clientHash,
       mfsSenderNumber: mfs?.sender, mfsTrxId: mfs?.trx,
+      ...(advanceRequired > 0 ? { advanceRequiredAmount: advanceRequired, advanceDueAt, advanceMethod } : {}),
       fraudRiskLevel: fraud.level, fraudTrustScore: fraud.score, fraudFlags: fraud.flags, fraudReview: fraud.hold ? "HELD" : null,
       channel: input.channel, createdByUserId: input.createdByUserId,
       utmSource: input.utmSource, utmCampaign: input.utmCampaign, utmMedium: input.utmMedium, landingPageId: input.landingPageId, notes: input.notes,
@@ -444,6 +481,12 @@ async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof Cr
     actor: byStaff ? { id: input.createdByUserId, name: input.createdByName ?? "Staff" } : { name: "Customer" },
     data: { channel: input.channel },
   });
+  if (advanceRequired > 0 && !mfs) {
+    await recordOrderEvent(tx, tenantId, order.id, {
+      type: "ADVANCE_REQUESTED", message: `Advance of ৳${advanceRequired} requested (online payment). The order is cancelled if it is not paid within ${advanceRule!.windowHours} hours.`,
+      actor: { name: "System" }, data: { advanceRequired, method: advanceMethod },
+    });
+  }
   if (fraud.hold) {
     await recordOrderEvent(tx, tenantId, order.id, {
       type: "FRAUD", message: `Held for review: this number has a low delivery success rate (score ${fraud.score}). Call the customer before packing.`,
@@ -453,7 +496,11 @@ async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof Cr
   if (mfs) {
     await recordOrderEvent(tx, tenantId, order.id, {
       type: staffPaid ? "PAYMENT_VERIFIED" : "PAYMENT_SUBMITTED",
-      message: staffPaid ? `${input.paymentMethod === "MANUAL_BKASH" ? "bKash" : "Nagad"} payment recorded, TrxID ${mfs.trx}` : `${input.paymentMethod === "MANUAL_BKASH" ? "bKash" : "Nagad"} TrxID submitted: ${mfs.trx}`,
+      message: staffPaid
+        ? `${input.paymentMethod === "MANUAL_BKASH" ? "bKash" : "Nagad"} payment recorded, TrxID ${mfs.trx}`
+        : advanceMethod
+          ? `Advance of ৳${advanceRequired} sent by ${advanceMethod === "MANUAL_BKASH" ? "bKash" : "Nagad"}, TrxID submitted: ${mfs.trx}. Balance on delivery: ৳${money(total - advanceRequired)}.`
+          : `${input.paymentMethod === "MANUAL_BKASH" ? "bKash" : "Nagad"} TrxID submitted: ${mfs.trx}`,
       actor: byStaff ? { id: input.createdByUserId, name: input.createdByName ?? "Staff" } : { name: "Customer" },
       data: { trxId: mfs.trx, sender: mfs.sender },
     });
@@ -474,6 +521,8 @@ async function place(tx: TenantTx, tenantId: string, input: ReturnType<typeof Cr
     totalAmount: total,
     subtotalAmount: subtotal,
     deliveryCharge,
+    advanceRequired: advanceRequired > 0 ? advanceRequired : undefined,
+    advanceMethod: advanceMethod ?? undefined,
     isNewCustomer: !existingCustomer,
     customerId: customer.id,
     items: lines.map((l) => ({

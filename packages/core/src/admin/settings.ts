@@ -5,6 +5,7 @@ import { NotFoundError, ValidationError } from "../errors";
 import { BD_GEO } from "../geo/bd-geo";
 import { assertCan, type StaffActor } from "../permissions";
 import { normalizeBdPhone } from "../phone";
+import { ADVANCE_DEFAULT_WINDOW_HOURS, ADVANCE_MAX_WINDOW_HOURS, ADVANCE_MODES, ADVANCE_PAY_VIA, advanceRuleFrom, type AdvanceMode, type AdvancePayVia, type AdvanceRule } from "../orders/advance";
 
 export interface StoreSettingsView {
   storeName: string;
@@ -26,6 +27,12 @@ export interface StoreSettingsView {
   codEnabled: boolean;
   codFee: number;
   codMaxAmount: number | null;
+  /** Advance payment before a cash-on-delivery order is accepted (see orders/advance.ts). */
+  advanceMode: string;
+  advanceValue: number;
+  advanceMinOrder: number;
+  advancePayVia: string;
+  advanceWindowHours: number;
   bkashEnabled: boolean;
   bkashNumber: string | null;
   bkashKind: string;
@@ -65,6 +72,7 @@ async function loadSettings(tenantId: string): Promise<StoreSettingsView> {
       instagramUrl: s?.instagramUrl ?? null, addressLine: s?.addressLine ?? null, pickupAddress: s?.pickupAddress ?? null, logoUrl: s?.logoUrl ?? null,
       announcement: s?.announcement ?? null, announcementBn: s?.announcementBn ?? null, ordersPaused: s?.ordersPaused ?? false, orderPrefix: t.orderPrefix,
       codEnabled: s?.codEnabled ?? true, codFee: s ? Number(s.codFee) : 0, codMaxAmount: s?.codMaxAmount != null ? Number(s.codMaxAmount) : null,
+      advanceMode: advanceRuleFrom(s).mode, advanceValue: advanceRuleFrom(s).value, advanceMinOrder: advanceRuleFrom(s).minOrder, advancePayVia: advanceRuleFrom(s).payVia, advanceWindowHours: advanceRuleFrom(s).windowHours,
       bkashEnabled: s?.bkashEnabled ?? true, bkashNumber: s?.bkashNumber ?? null, bkashKind: s?.bkashKind ?? "PERSONAL", bkashInstruction: s?.bkashInstruction ?? null,
       nagadEnabled: s?.nagadEnabled ?? true, nagadNumber: s?.nagadNumber ?? null, nagadKind: s?.nagadKind ?? "PERSONAL", nagadInstruction: s?.nagadInstruction ?? null,
       paymentNote: s?.paymentNote ?? null, invoiceFooter: s?.invoiceFooter ?? null, invoiceOptions: opts as StoreSettingsView["invoiceOptions"],
@@ -202,6 +210,25 @@ export interface PaymentSettingsInput {
   nagadKind?: "PERSONAL" | "AGENT" | "MERCHANT";
   nagadInstruction?: string | null;
   paymentNote?: string | null;
+  /** Left out, the store's current advance rule is kept. */
+  advance?: { mode: string; value: number; minOrder: number; payVia: string; windowHours: number };
+}
+
+/** Checks the advance rule from the settings form and returns it in clean form. Throws a plain-words error naming the field. */
+function validateAdvance(a: { mode: string; value: number; minOrder: number; payVia: string; windowHours: number }, ctx: { codEnabled: boolean; hasMfs: boolean }): AdvanceRule {
+  if (!ADVANCE_MODES.includes(a.mode as AdvanceMode)) throw new ValidationError("Choose how the advance is worked out", { field: "advanceMode" });
+  const mode = a.mode as AdvanceMode;
+  if (!ADVANCE_PAY_VIA.includes(a.payVia as AdvancePayVia)) throw new ValidationError("Choose how customers pay the advance", { field: "advancePayVia" });
+  const payVia = a.payVia as AdvancePayVia;
+  if (mode === "OFF") return { mode, value: 0, minOrder: 0, payVia, windowHours: ADVANCE_DEFAULT_WINDOW_HOURS };
+  if (!ctx.codEnabled) throw new ValidationError("The advance is for cash on delivery orders. Turn cash on delivery on, or set the advance to off.", { field: "advanceMode" });
+  if (mode === "FIXED" && !(Number.isFinite(a.value) && a.value >= 1 && a.value <= 1_000_000)) throw new ValidationError("Enter an advance of at least ৳1", { field: "advanceValue" });
+  if (mode === "PERCENT" && !(Number.isFinite(a.value) && a.value >= 1 && a.value <= 100)) throw new ValidationError("Enter a percentage between 1 and 100", { field: "advanceValue" });
+  if (!Number.isFinite(a.minOrder) || a.minOrder < 0 || a.minOrder > 10_000_000) throw new ValidationError("Enter a minimum order total of ৳0 or more", { field: "advanceMinOrder" });
+  const hours = Math.round(a.windowHours);
+  if (!Number.isFinite(hours) || hours < 1 || hours > ADVANCE_MAX_WINDOW_HOURS) throw new ValidationError(`Give customers between 1 and ${ADVANCE_MAX_WINDOW_HOURS} hours to pay`, { field: "advanceWindowHours" });
+  if (payVia === "MANUAL" && !ctx.hasMfs) throw new ValidationError("Turn on bKash or Nagad (with your number) so customers have a way to send the advance, or let them pay online", { field: "advancePayVia" });
+  return { mode, value: mode === "FULL" ? 0 : a.value, minOrder: a.minOrder, payVia, windowHours: hours };
 }
 
 /** Payments (AdmPayments). Owner only: these numbers are where customers send their money. */
@@ -214,14 +241,16 @@ export async function savePaymentSettings(tenantId: string, actor: StaffActor, i
   if (i.bkashEnabled && !bkash) throw new ValidationError("Enter your bKash number to turn bKash on", { field: "bkashNumber" });
   if (i.nagadEnabled && !nagad) throw new ValidationError("Enter your Nagad number to turn Nagad on", { field: "nagadNumber" });
   if (!i.codEnabled && !(i.bkashEnabled && bkash) && !(i.nagadEnabled && nagad)) throw new ValidationError("Keep at least one way for customers to pay");
+  const adv = i.advance ? validateAdvance(i.advance, { codEnabled: i.codEnabled, hasMfs: Boolean((i.bkashEnabled && bkash) || (i.nagadEnabled && nagad)) }) : null;
   await withTenant(tenantId, async (tx) => {
     await upsertSettings(tx, tenantId, {
       codEnabled: i.codEnabled, codFee: i.codFee, codMaxAmount: i.codMaxAmount, bkashEnabled: i.bkashEnabled, bkashNumber: bkash, bkashKind: i.bkashKind ?? "PERSONAL",
       bkashInstruction: blank(i.bkashInstruction)?.slice(0, 300), nagadEnabled: i.nagadEnabled, nagadNumber: nagad, nagadKind: i.nagadKind ?? "PERSONAL",
       nagadInstruction: blank(i.nagadInstruction)?.slice(0, 300), paymentNote: blank(i.paymentNote)?.slice(0, 200),
+      ...(adv ? { advanceMode: adv.mode, advanceValue: adv.value, advanceMinOrder: adv.minOrder, advancePayVia: adv.payVia, advanceWindowHours: adv.windowHours } : {}),
     });
     // The numbers are recorded because changing where customers send money is exactly what an account takeover would do.
-    await audit(tx, tenantId, actor, "settings.payments_changed", { codEnabled: i.codEnabled, codFee: i.codFee, bkashNumber: bkash, nagadNumber: nagad });
+    await audit(tx, tenantId, actor, "settings.payments_changed", { codEnabled: i.codEnabled, codFee: i.codFee, bkashNumber: bkash, nagadNumber: nagad, ...(adv ? { advance: adv } : {}) });
   });
 }
 

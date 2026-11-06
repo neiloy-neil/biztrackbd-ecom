@@ -142,7 +142,7 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
                   <Link href={`/orders/${o.id}`} prefetch={false}>
                     <div className="mt-xs">{o.customerName}</div>
                     <div className="muted text-sm">{o.area}, {o.district} · {o.itemCount} {o.itemCount === 1 ? "item" : "items"}</div>
-                    <div className="row gap-sm flex-wrap mt-sm"><PaymentPill method={o.paymentMethod} status={o.paymentStatus} /><OrderPill status={o.status} /><RiskPill o={o} />{o.tags.map((t) => <span key={t} className="pill grey" data-testid="order-tag">{t}</span>)}</div>
+                    <div className="row gap-sm flex-wrap mt-sm"><PaymentPill method={o.paymentMethod} status={o.paymentStatus} awaitingAdvance={o.awaitingAdvance} /><OrderPill status={o.status} /><RiskPill o={o} />{o.tags.map((t) => <span key={t} className="pill grey" data-testid="order-tag">{t}</span>)}</div>
                   </Link>
                   <div className="row gap-md mt-sm">
                     {o.paymentStatus === "PENDING_VERIFICATION" && canEdit && <Link href={`/orders/${o.id}`} className="btn btn-primary btn-sm flex-1" prefetch={false}>Verify payment</Link>}
@@ -165,7 +165,7 @@ export default async function Orders({ searchParams }: { searchParams: Promise<R
                     <td><Link href={`/orders/${o.id}`} className="link" prefetch={false}>{o.orderNumber}</Link>{o.priority && <span className="pill info ml-xs" data-testid="priority">Priority</span>}<div><QuickViewButton id={o.id} label={o.orderNumber} /></div></td>
                     <td className="muted">{friendlyDate(o.createdAt)}</td>
                     <td><div className="row gap-sm flex-wrap"><span>{o.customerName}</span><RiskPill o={o} /></div><div className="muted text-xs">{o.area}, {o.district} · {o.itemCount} {o.itemCount === 1 ? "item" : "items"} · {prettyPhone(o.customerPhone)}</div>{o.tags.length > 0 && <div className="row gap-xs mt-xs">{o.tags.map((t) => <span key={t} className="pill grey" data-testid="order-tag">{t}</span>)}</div>}</td>
-                    <td><PaymentPill method={o.paymentMethod} status={o.paymentStatus} /></td>
+                    <td><PaymentPill method={o.paymentMethod} status={o.paymentStatus} awaitingAdvance={o.awaitingAdvance} /></td>
                     <td><OrderPill status={o.status} /></td>
                     <td className="muted">{CHANNEL[o.channel] ?? o.channel}</td>
                     <td className="r num">{taka(o.totalAmount)}</td>

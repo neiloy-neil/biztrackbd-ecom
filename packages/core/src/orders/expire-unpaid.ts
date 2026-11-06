@@ -1,4 +1,5 @@
 import { getBasePrisma, withTenant } from "@biztrackbd/db";
+import { recordOrderEvent } from "../admin/order-events";
 import { transitionOrder } from "./service";
 
 /** How long an online-payment order may wait for its payment before it is cancelled and its stock goes back on the shelf. */
@@ -34,6 +35,47 @@ export async function expireUnpaidGatewayOrders(opts: { olderThanMinutes?: numbe
     } catch (e) {
       out.failed++;
       console.error("[expire-unpaid] store failed", s.tenantId, e instanceof Error ? e.name : "unknown");
+    }
+  }
+  return out;
+}
+
+/**
+ * Cancels cash-on-delivery orders whose advance was not paid by the deadline, so they stop holding stock. An order whose customer already
+ * sent a TrxID (PENDING_VERIFICATION) is never touched: that person has paid and is waiting for the owner to confirm. Safe to run often.
+ */
+export async function expireUnpaidAdvanceOrders(): Promise<{ stores: number; cancelled: number; failed: number }> {
+  const stores = await getBasePrisma().$queryRaw<{ tenantId: string }[]>`SELECT "tenantId" FROM tenants_with_expired_advance_orders()`;
+  const out = { stores: stores.length, cancelled: 0, failed: 0 };
+  for (const s of stores) {
+    try {
+      const now = new Date();
+      const due = await withTenant(s.tenantId, (tx) =>
+        tx.order.findMany({
+          where: { deletedAt: null, status: "PENDING", paymentStatus: { in: ["UNPAID", "FAILED"] }, advanceRequiredAmount: { gt: 0 }, advanceDueAt: { lt: now } },
+          select: { id: true, orderNumber: true, advanceRequiredAmount: true, advancePaidAmount: true },
+          take: 100,
+        }),
+      );
+      for (const o of due) {
+        if (Number(o.advancePaidAmount) >= Number(o.advanceRequiredAmount)) continue;
+        try {
+          await transitionOrder(s.tenantId, o.id, "CANCELLED", { type: "SYSTEM_CRON", id: "expire-advance", name: "Advance payment expiry" }, "Advance payment was not made in time");
+          await withTenant(s.tenantId, (tx) =>
+            recordOrderEvent(tx, s.tenantId, o.id, {
+              type: "ADVANCE_EXPIRED", message: `Cancelled: the advance of ৳${Number(o.advanceRequiredAmount)} was not paid before the deadline. Stock was released.`,
+              actor: { name: "System" },
+            }),
+          );
+          out.cancelled++;
+        } catch (e) {
+          out.failed++;
+          console.error("[expire-advance] order failed", o.id, e instanceof Error ? e.name : "unknown");
+        }
+      }
+    } catch (e) {
+      out.failed++;
+      console.error("[expire-advance] store failed", s.tenantId, e instanceof Error ? e.name : "unknown");
     }
   }
   return out;

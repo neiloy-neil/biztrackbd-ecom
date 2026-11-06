@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
-import { expireUnpaidGatewayOrders } from "@biztrackbd/core";
+import { expireUnpaidAdvanceOrders, expireUnpaidGatewayOrders } from "@biztrackbd/core";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -23,7 +23,9 @@ async function run(req: NextRequest) {
   if (!process.env.CRON_SECRET) return NextResponse.json({ ok: false, error: "CRON_SECRET is not set" }, { status: 503 });
   if (!authorised(req)) return NextResponse.json({ ok: false }, { status: 401 });
   const summary = await expireUnpaidGatewayOrders();
-  return NextResponse.json({ ok: true, ...summary });
+  // Cash-on-delivery orders whose advance was not paid in time (the store sets the deadline).
+  const advance = await expireUnpaidAdvanceOrders();
+  return NextResponse.json({ ok: true, ...summary, advance });
 }
 
 export const GET = run;

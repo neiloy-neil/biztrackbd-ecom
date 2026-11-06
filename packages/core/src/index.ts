@@ -23,6 +23,7 @@ export { addDomain, confirmDomainVerified, setPrimaryDomain, removeDomain, listD
 export { BD_GEO, divisionNames, districtsOf, upazilasOf, divisionOfDistrict, isValidAddress, type Division, type District } from "./geo/bd-geo";
 export { quoteOrder, QuoteInput, type Quote, type QuoteLine, type QuoteProblem } from "./orders/quote";
 export { pickZone, deliveryFor, discountFor, money } from "./orders/pricing";
+export { ADVANCE_MODES, ADVANCE_PAY_VIA, ADVANCE_METHODS, ADVANCE_DEFAULT_WINDOW_HOURS, ADVANCE_MAX_WINDOW_HOURS, advanceRuleFrom, computeAdvance, advanceMethodsAvailable, awaitingAdvance, isFullPrepayment, type AdvanceMode, type AdvancePayVia, type AdvanceMethod, type AdvanceRule } from "./orders/advance";
 export {
   getStoreInfo, getKaporSettings, getStorefrontSettings, KAPOR_DEFAULTS, listCategories, listProducts, getProductBySlug, listProductSlugs, listCategorySlugs,
   type StoreInfo, type KaporSettings, type StorefrontSettings, type CategoryCard, type ProductCard, type ProductDetail, type ProductSort,
