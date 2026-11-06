@@ -88,7 +88,7 @@ export function PlanRecommender({ onSelectFamily, onHighlightPlan }: PlanRecomme
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 18, marginBottom: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))", gap: 18, marginBottom: 20 }}>
         {/* Question 1: Goal */}
         <div>
           <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "var(--ink)", marginBottom: 6 }}>

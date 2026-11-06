@@ -185,7 +185,7 @@ export function WaterfallProfitLedger() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))",
             gap: 16,
             background: "#FBF7EC",
             borderRadius: 12,

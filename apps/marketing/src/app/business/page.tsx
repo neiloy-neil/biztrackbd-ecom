@@ -200,7 +200,7 @@ export default function BusinessPage() {
             </p>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))", gap: 16 }}>
             {[
               {
                 step: "01",
@@ -253,7 +253,7 @@ export default function BusinessPage() {
             </p>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: 24 }}>
             {VERTICALS.map((v) => (
               <div
                 key={v.id}
@@ -369,7 +369,7 @@ export default function BusinessPage() {
               border: "1.5px solid var(--line-strong)",
             }}
           >
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24, alignItems: "center" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))", gap: 24, alignItems: "center" }}>
               <div>
                 <span className="status-stamp stamp-review" style={{ marginBottom: 10 }}>
                   THE HYBRID ADVANTAGE
@@ -407,7 +407,7 @@ export default function BusinessPage() {
             Every plan includes custom domain connection, phone-first editor, and 14-day free trial.
           </p>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, marginTop: 32, textAlign: "left" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))", gap: 20, marginTop: 32, textAlign: "left" }}>
             <div className="card ledger-border" style={{ padding: "26px 22px", background: "#FFFFFF" }}>
               <span className="status-stamp stamp-lead">STARTER</span>
               <h3 style={{ margin: "8px 0 4px", fontSize: 20, color: "var(--ink-ledger)" }}>৳ 399 <span style={{ fontSize: 14, fontWeight: 500, color: "var(--ink-3)" }}>/ month</span></h3>

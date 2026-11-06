@@ -154,7 +154,7 @@ export function ArchitectureExplorer() {
         </div>
 
         <div style={{ padding: "28px 24px", background: "#FFFFFF" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))", gap: 20 }}>
             {/* Layer 1: Edge & Ingestion */}
             <div
               style={{

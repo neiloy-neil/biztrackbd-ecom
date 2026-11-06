@@ -143,7 +143,7 @@ export function CodCalculatorSimulator() {
             padding: "20px 24px",
             border: "1.5px solid #F2C9B3",
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))",
             gap: 16,
           }}
         >
