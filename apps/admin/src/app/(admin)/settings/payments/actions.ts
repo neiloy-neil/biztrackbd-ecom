@@ -19,6 +19,13 @@ export async function savePaymentsAction(_prev: PayState, f: FormData): Promise<
       bkashEnabled: f.get("bkashEnabled") === "on", bkashNumber: text(f, "bkashNumber"), bkashKind: kind(text(f, "bkashKind")), bkashInstruction: text(f, "bkashInstruction"),
       nagadEnabled: f.get("nagadEnabled") === "on", nagadNumber: text(f, "nagadNumber"), nagadKind: kind(text(f, "nagadKind")), nagadInstruction: text(f, "nagadInstruction"),
       paymentNote: text(f, "paymentNote"),
+      advance: {
+        mode: text(f, "advanceMode") || "OFF",
+        value: Number(text(f, "advanceValue").replace(/,/g, "") || 0),
+        minOrder: Number(text(f, "advanceMinOrder").replace(/,/g, "") || 0),
+        payVia: text(f, "advancePayVia") || "MANUAL",
+        windowHours: Number(text(f, "advanceWindowHours") || 24),
+      },
     });
   } catch (e) {
     if (e instanceof DomainError) return { error: e.message, field: typeof e.details?.field === "string" ? e.details.field : undefined };

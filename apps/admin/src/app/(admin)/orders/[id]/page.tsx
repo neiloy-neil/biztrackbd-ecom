@@ -47,6 +47,11 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
   const step = canEdit ? nextStep(o) : null;
   const err = one(sp.err);
   const isMfs = o.paymentMethod.startsWith("MANUAL_");
+  // A cash-on-delivery order the store asked an advance for: the TrxID on it belongs to the advance, not to the whole order.
+  const hasAdvance = o.advance.required > 0;
+  const advancePending = hasAdvance && o.advance.paid + 0.005 < o.advance.required;
+  const advanceMethodName = o.advance.method === "MANUAL_BKASH" ? "bKash" : o.advance.method === "MANUAL_NAGAD" ? "Nagad" : o.advance.method === "GATEWAY_UDDOKTAPAY" ? "online payment" : "mobile money";
+  const showTrx = Boolean(o.mfs.trxId) && (isMfs || hasAdvance);
   const canCancel = canEdit && ["PENDING", "CONFIRMED", "PROCESSING"].includes(o.status);
   const canBook = canEdit && (o.status === "CONFIRMED" || o.status === "PROCESSING") && !o.courier.consignmentId;
   const held = o.risk.review === "HELD";
@@ -99,7 +104,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
             <span data-testid="order-title">{o.orderNumber}</span>
             <div className="row gap-sm">
               {o.isDigital && <span className="pill green" style={{ fontWeight: 700 }}>⚡ DIGITAL ORDER</span>}
-              <PaymentPill method={o.paymentMethod} status={o.paymentStatus} />
+              <PaymentPill method={o.paymentMethod} status={o.paymentStatus} awaitingAdvance={advancePending && o.status !== "CANCELLED"} />
               <OrderPill status={o.status} />
             </div>
           </div>
@@ -173,28 +178,36 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
             <div className="card-head"><h2>Payment</h2></div>
             <dl className="kv">
               <dt>Method</dt><dd>{methodName(o.paymentMethod)}</dd>
-              <dt>Amount to receive</dt><dd className="num"><b>{taka(o.totals.total)}</b></dd>
-              {isMfs && o.mfs.trxId && (<><dt>TrxID</dt><dd><b data-testid="trxid">{o.mfs.trxId}</b></dd></>)}
-              {isMfs && o.mfs.sender && (<><dt>Sent from</dt><dd className="num">{prettyPhone(o.mfs.sender)}</dd></>)}
+              <dt>{hasAdvance ? "Order total" : "Amount to receive"}</dt><dd className="num"><b>{taka(o.totals.total)}</b></dd>
+              {hasAdvance && (<>
+                <dt>Advance</dt>
+                <dd className="num" data-testid="advance-row"><b>{taka(o.advance.required)}</b> via {advanceMethodName} · {advancePending ? (o.paymentStatus === "PENDING_VERIFICATION" ? "waiting for you to confirm" : o.status === "CANCELLED" ? "not paid, order cancelled" : "not paid yet") : "received"}</dd>
+                {advancePending && o.advance.dueAt && o.status !== "CANCELLED" && o.paymentStatus !== "PENDING_VERIFICATION" && (<><dt>Pay by</dt><dd>{dateTime(o.advance.dueAt)}</dd></>)}
+                {!advancePending && (<><dt>Balance on delivery</dt><dd className="num"><b>{taka(o.advance.balance)}</b></dd></>)}
+              </>)}
+              {showTrx && (<><dt>TrxID</dt><dd><b data-testid="trxid">{o.mfs.trxId}</b></dd></>)}
+              {showTrx && o.mfs.sender && (<><dt>Sent from</dt><dd className="num">{prettyPhone(o.mfs.sender)}</dd></>)}
               {o.mfs.verifiedAt && (<><dt>Confirmed</dt><dd>{dateTime(o.mfs.verifiedAt)}</dd></>)}
             </dl>
-            {isMfs && o.mfs.trxId && o.paymentStatus === "PENDING_VERIFICATION" && (
+            {showTrx && o.paymentStatus === "PENDING_VERIFICATION" && (
               <div className="stack mt-md">
-                <div className="row"><CopyButton text={o.mfs.trxId} label="Copy TrxID" /></div>
-                <div className="notice info">Open your {methodName(o.paymentMethod)} app and find this TrxID for {taka(o.totals.total)} before you confirm.</div>
+                <div className="row"><CopyButton text={o.mfs.trxId!} label="Copy TrxID" /></div>
+                <div className="notice info">Open your {hasAdvance ? advanceMethodName : methodName(o.paymentMethod)} app and find this TrxID for {taka(hasAdvance ? o.advance.required : o.totals.total)} before you confirm.</div>
                 {o.trxReuse.length > 0 && <div className="notice bad" role="alert">This TrxID is also on {o.trxReuse.map((r) => r.orderNumber).join(", ")}. Check carefully.</div>}
               </div>
             )}
             {canEdit && o.paymentStatus === "PENDING_VERIFICATION" && (
               <div className="stack only-desktop mt-md">
-                <form action={verifyAction.bind(null, o.id)}><SubmitButton className="btn btn-success btn-block btn-lg" pending="Confirming…">I received it. Mark as paid</SubmitButton></form>
+                <form action={verifyAction.bind(null, o.id)}><SubmitButton className="btn btn-success btn-block btn-lg" pending="Confirming…">{hasAdvance ? "I received the advance. Confirm order" : "I received it. Mark as paid"}</SubmitButton></form>
                 <RejectForm orderId={o.id} />
               </div>
             )}
             {canEdit && o.paymentStatus === "PENDING_VERIFICATION" && (
               <div className="only-mobile mt-md"><RejectForm orderId={o.id} /></div>
             )}
-            {!isMfs && o.paymentStatus === "UNPAID" && <p className="muted text-sm mt-sm">Customer pays the courier when it arrives.</p>}
+            {!isMfs && !hasAdvance && o.paymentStatus === "UNPAID" && <p className="muted text-sm mt-sm">Customer pays the courier when it arrives.</p>}
+            {hasAdvance && o.paymentStatus === "PARTIALLY_PAID" && <p className="muted text-sm mt-sm">Advance received. The courier collects the balance of {taka(o.advance.balance)}.</p>}
+            {advancePending && o.paymentStatus === "UNPAID" && o.status !== "CANCELLED" && <p className="muted text-sm mt-sm">Waiting for the customer to pay the advance. The order is cancelled and its stock released if they do not pay in time.</p>}
           </section>
 
           <section className="card" data-testid="items-card">
@@ -498,7 +511,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
                     <label className="field mb-0"><span className="label">Weight (kg)</span><input className="input" name="weight" type="number" inputMode="decimal" step="0.1" min="0.1" max="30" defaultValue="0.5" /></label>
                     <label className="field mb-0"><span className="label">Note to courier <span className="opt">(optional)</span></span><input className="input" name="note" maxLength={150} defaultValue={o.notes ?? ""} /></label>
                   </div>
-                  <p className="muted text-sm">{o.paymentMethod === "COD" && o.paymentStatus !== "PAID" ? `The courier will collect ${taka(o.totals.total)}.` : "Already paid. The courier collects nothing."}</p>
+                  <p className="muted text-sm">{o.paymentMethod === "COD" && o.paymentStatus !== "PAID" ? `The courier will collect ${taka(o.advance.paid > 0 ? o.advance.balance : o.totals.total)}.` : "Already paid. The courier collects nothing."}</p>
                   <SubmitButton className="btn btn-primary btn-block btn-lg" pending="Booking…" disabled={held}>Book courier</SubmitButton>
                   {held && <p className="err" role="alert">Release the hold above before booking.</p>}
                 </form>

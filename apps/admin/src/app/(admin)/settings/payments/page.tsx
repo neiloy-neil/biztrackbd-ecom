@@ -21,6 +21,7 @@ export default async function Payments() {
         codEnabled: st.codEnabled, codFee: st.codFee, codMaxAmount: st.codMaxAmount, bkashEnabled: st.bkashEnabled, bkashNumber: st.bkashNumber ?? "", bkashKind: st.bkashKind,
         bkashInstruction: st.bkashInstruction ?? "", nagadEnabled: st.nagadEnabled, nagadNumber: st.nagadNumber ?? "", nagadKind: st.nagadKind, nagadInstruction: st.nagadInstruction ?? "",
         paymentNote: st.paymentNote ?? "",
+        advanceMode: st.advanceMode, advanceValue: st.advanceValue, advanceMinOrder: st.advanceMinOrder, advancePayVia: st.advancePayVia, advanceWindowHours: st.advanceWindowHours,
       }} />
     </>
   );
